@@ -65,6 +65,9 @@ config :eroticat, ErotiCatWeb.Endpoint,
     ]
   ]
 
+config :eroticat, :pow,
+  mailer_backend: ErotiCatWeb.Pow.Mailer
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 

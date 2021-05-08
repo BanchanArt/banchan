@@ -1,23 +1,44 @@
 defmodule ErotiCatWeb.Router do
   use ErotiCatWeb, :router
+  use Pow.Phoenix.Router
+
+  use Pow.Extension.Phoenix.Router,
+    extensions: [PowResetPassword, PowEmailConfirmation]
 
   pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
-    plug :put_root_layout, {ErotiCatWeb.LayoutView, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    plug(:accepts, ["html"])
+    plug(:fetch_session)
+    plug(:fetch_live_flash)
+    plug(:put_root_layout, {ErotiCatWeb.LayoutView, :root})
+    plug(:protect_from_forgery)
+    plug(:put_secure_browser_headers)
   end
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug(:accepts, ["json"])
+  end
+
+  pipeline :protected do
+    plug(Pow.Plug.RequireAuthenticated,
+      error_handler: Pow.Phoenix.PlugErrorHandler
+    )
+  end
+
+  scope "/" do
+    pipe_through(:browser)
+
+    pow_routes()
+    pow_extension_routes()
   end
 
   scope "/", ErotiCatWeb do
-    pipe_through :browser
+    pipe_through(:browser)
 
-    live "/", PageLive, :index
+    live("/", PageLive, :index)
+  end
+
+  scope "/account", ErotiCatWeb do
+    pipe_through([:browser, :protected])
   end
 
   # Other scopes may use custom stacks.
@@ -36,8 +57,8 @@ defmodule ErotiCatWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/" do
-      pipe_through :browser
-      live_dashboard "/dashboard", metrics: ErotiCatWeb.Telemetry
+      pipe_through(:browser)
+      live_dashboard "/dashboard", [metrics: ErotiCatWeb.Telemetry, ecto_repos: ErotiCat.Repo]
     end
   end
 end

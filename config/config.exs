@@ -19,6 +19,13 @@ config :eroticat, ErotiCatWeb.Endpoint,
   pubsub_server: ErotiCat.PubSub,
   live_view: [signing_salt: "qB2PgmVY"]
 
+# Use pow for auth
+config :eroticat, :pow,
+  user: ErotiCat.Users.User,
+  repo: ErotiCat.Repo,
+  extensions: [PowResetPassword, PowEmailConfirmation, PowPersistentSession],
+  controller_callbacks: Pow.Extension.Phoenix.ControllerCallbacks
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
