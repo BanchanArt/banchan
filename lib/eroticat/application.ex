@@ -14,7 +14,9 @@ defmodule ErotiCat.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: ErotiCat.PubSub},
       # Start the Endpoint (http/https)
-      ErotiCatWeb.Endpoint
+      ErotiCatWeb.Endpoint,
+      # Cache sessions to Mnesia
+      Pow.Store.Backend.MnesiaCache
       # Start a worker by calling: ErotiCat.Worker.start_link(arg)
       # {ErotiCat.Worker, arg}
     ]
