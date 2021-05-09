@@ -1,5 +1,7 @@
 defmodule ErotiCatWeb.UserSocket do
   use Phoenix.Socket
+  alias ErotiCat.Repo
+  require Logger
 
   ## Channels
   # channel "room:*", ErotiCatWeb.RoomChannel
@@ -16,6 +18,16 @@ defmodule ErotiCatWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   @impl true
+  def connect(%{_auth: token}, socket, _connect_info) do
+    case Phoenix.Token.verify(socket, "user auth", token, max_age: 86400) do
+      {:ok, user_id} ->
+        socket = assign(socket, :user, Repo.get!(User, user_id))
+        {:ok, socket}
+      {:error, _} ->
+        :error
+    end
+  end
+
   def connect(_params, socket, _connect_info) do
     {:ok, socket}
   end
