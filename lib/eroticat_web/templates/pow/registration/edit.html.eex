@@ -23,6 +23,14 @@
   <%= text_input f, :display_name %>
   <%= error_tag f, :display_name %>
 
+  <%= label f, :bio, "About Me" %>
+  <%= textarea f, :bio %>
+  <%= error_tag f, :bio %>
+
+  <%= label f, :location %>
+  <%= text_input f, :location %>
+  <%= error_tag f, :location %>
+
   <%= label f, :password %>
   <%= password_input f, :password %>
   <%= error_tag f, :password %>
