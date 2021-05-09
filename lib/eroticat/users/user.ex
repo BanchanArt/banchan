@@ -1,4 +1,7 @@
 defmodule ErotiCat.Users.User do
+  @moduledoc """
+  Represents all user types in ErotiCat.
+  """
   use Ecto.Schema
   use Pow.Ecto.Schema
 
@@ -6,8 +9,9 @@ defmodule ErotiCat.Users.User do
     extensions: [PowResetPassword, PowEmailConfirmation]
 
   schema "users" do
-    pow_user_fields()
+    field :roles, {:array, :string}, null: false, default: []
 
+    pow_user_fields()
     timestamps()
   end
 
@@ -15,5 +19,7 @@ defmodule ErotiCat.Users.User do
     user_or_changeset
     |> pow_changeset(attrs)
     |> pow_extension_changeset(attrs)
+    |> Ecto.Changeset.cast(attrs, [:roles])
+    |> Ecto.Changeset.validate_subset(:roles, ~w(admin model))
   end
 end

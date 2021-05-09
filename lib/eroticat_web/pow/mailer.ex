@@ -1,4 +1,7 @@
 defmodule ErotiCatWeb.Pow.Mailer do
+  @moduledoc """
+  Mock mailer module for development. Logs to terminal.
+  """
   use Pow.Phoenix.Mailer
   require Logger
 
@@ -11,6 +14,6 @@ defmodule ErotiCatWeb.Pow.Mailer do
   def process(email) do
     # Send email
 
-    Logger.debug("E-mail sent: #{inspect email}")
+    Logger.debug("E-mail sent: #{inspect(email)}")
   end
 end

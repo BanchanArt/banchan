@@ -19,10 +19,11 @@ defmodule ErotiCatWeb.UserSocket do
   # performing token verification on connect.
   @impl true
   def connect(%{_auth: token}, socket, _connect_info) do
-    case Phoenix.Token.verify(socket, "user auth", token, max_age: 86400) do
+    case Phoenix.Token.verify(socket, "user auth", token, max_age: 86_400) do
       {:ok, user_id} ->
         socket = assign(socket, :user, Repo.get!(User, user_id))
         {:ok, socket}
+
       {:error, _} ->
         :error
     end

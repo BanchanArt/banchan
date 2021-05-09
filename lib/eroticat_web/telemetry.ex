@@ -1,4 +1,7 @@
 defmodule ErotiCatWeb.Telemetry do
+  @moduledoc """
+  It does telemetry for the app.
+  """
   use Supervisor
   import Telemetry.Metrics
 

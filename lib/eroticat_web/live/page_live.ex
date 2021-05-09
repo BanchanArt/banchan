@@ -1,4 +1,7 @@
 defmodule ErotiCatWeb.PageLive do
+  @moduledoc """
+  Main live page.
+  """
   use ErotiCatWeb, :live_view
 
   @impl true

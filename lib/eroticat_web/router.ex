@@ -58,7 +58,7 @@ defmodule ErotiCatWeb.Router do
 
     scope "/" do
       pipe_through(:browser)
-      live_dashboard "/admin/dashboard", [metrics: ErotiCatWeb.Telemetry, ecto_repos: ErotiCat.Repo]
+      live_dashboard "/admin/dashboard", metrics: ErotiCatWeb.Telemetry, ecto_repos: ErotiCat.Repo
     end
   end
 end
