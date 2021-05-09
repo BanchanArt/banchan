@@ -12,6 +12,13 @@ defmodule ErotiCat.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
       dialyzer: [
         plt_ignore_apps: [:mnesia],
         ignore_warnings: ".dialyzer_ignores.exs"
@@ -44,7 +51,6 @@ defmodule ErotiCat.MixProject do
       {:ecto_psql_extras, "~> 0.2"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_live_view, "~> 0.15.1"},
-      {:floki, ">= 0.27.0", only: :test},
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_dashboard, "~> 0.4"},
@@ -54,8 +60,12 @@ defmodule ErotiCat.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
+      # Testing and static analysis
+      {:floki, ">= 0.27.0", only: :test},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:sobelow, "~> 0.8", only: :dev},
+      {:excoveralls, "~> 0.13", only: :test}
     ]
   end
 
@@ -70,7 +80,23 @@ defmodule ErotiCat.MixProject do
       setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      quality: [
+        "compile --all-warnings --warnings-as-errors",
+        "test",
+        "format",
+        "credo --strict",
+        "sobelow --verbose",
+        "dialyzer --ignore-exit-status"
+      ],
+      "quality.ci": [
+        "compile --all-warnings --warnings-as-errors",
+        "test --slowest 10",
+        "format --check-formatted",
+        "credo --strict",
+        "sobelow --exit",
+        "dialyzer"
+      ]
     ]
   end
 end
