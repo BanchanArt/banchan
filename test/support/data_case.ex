@@ -14,6 +14,8 @@ defmodule ErotiCat.DataCase do
   this option is not recommended for other databases.
   """
 
+  alias Ecto.Adapters.SQL.Sandbox
+
   use ExUnit.CaseTemplate
 
   using do
@@ -28,10 +30,10 @@ defmodule ErotiCat.DataCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(ErotiCat.Repo)
+    :ok = Sandbox.checkout(ErotiCat.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(ErotiCat.Repo, {:shared, self()})
+      Sandbox.mode(ErotiCat.Repo, {:shared, self()})
     end
 
     :ok
