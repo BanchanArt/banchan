@@ -21,6 +21,6 @@ defmodule ErotiCat.Users.User do
     |> pow_changeset(attrs)
     |> pow_extension_changeset(attrs)
     |> Ecto.Changeset.cast(attrs, [:roles])
-    |> Ecto.Changeset.validate_subset(:roles, ~w(admin creator))
+    |> Ecto.Changeset.validate_subset(:roles, ~w(admin moderator creator))
   end
 end
