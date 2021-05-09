@@ -8,6 +8,7 @@ defmodule ErotiCat.Users.User do
   use Pow.Extension.Ecto.Schema,
     extensions: [PowResetPassword, PowEmailConfirmation]
 
+  @primary_key {:id, Ecto.UUID, autogenerate: true}
   schema "users" do
     field :roles, {:array, :string}, null: false, default: []
 
