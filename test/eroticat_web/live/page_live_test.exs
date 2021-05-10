@@ -8,7 +8,7 @@ defmodule ErotiCatWeb.PageLiveTest do
 
   test "disconnected and connected render", %{conn: conn} do
     {:ok, page_live, disconnected_html} = live(conn, "/")
-    assert disconnected_html =~ "Hello, world"
-    assert render(page_live) =~ "Hello, world"
+    assert disconnected_html =~ "no current_user"
+    assert render(page_live) =~ "no current_user"
   end
 end

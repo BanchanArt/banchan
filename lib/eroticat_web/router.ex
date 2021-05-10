@@ -1,6 +1,7 @@
 defmodule ErotiCatWeb.Router do
   use ErotiCatWeb, :router
   use Pow.Phoenix.Router
+  import Phoenix.LiveDashboard.Router
 
   use Pow.Extension.Phoenix.Router,
     extensions: [PowResetPassword, PowEmailConfirmation]
@@ -18,10 +19,54 @@ defmodule ErotiCatWeb.Router do
     plug(:accepts, ["json"])
   end
 
-  pipeline :protected do
+  pipeline :logged_in do
     plug(Pow.Plug.RequireAuthenticated,
       error_handler: Pow.Phoenix.PlugErrorHandler
     )
+  end
+
+  pipeline :admin do
+    plug(Pow.Plug.RequireAuthenticated,
+      error_handler: Pow.Phoenix.PlugErrorHandler
+    )
+
+    plug ErotiCatWeb.EnsureRolePlug, :admin
+  end
+
+  pipeline :mods do
+    plug(Pow.Plug.RequireAuthenticated,
+      error_handler: Pow.Phoenix.PlugErrorHandler
+    )
+
+    plug ErotiCatWeb.EnsureRolePlug, [:admin, :moderator]
+  end
+
+  pipeline :creator do
+    plug(Pow.Plug.RequireAuthenticated,
+      error_handler: Pow.Phoenix.PlugErrorHandler
+    )
+
+    plug ErotiCatWeb.EnsureRolePlug, :creator
+  end
+
+  scope "/", Pow.Phoenix, as: "pow" do
+    pipe_through :browser
+
+    get "/sign_up", RegistrationController, :new
+    post "/sign_up", RegistrationController, :create
+
+    get "/login", SessionController, :new
+    post "/login", SessionController, :create
+  end
+
+  scope "/", Pow.Phoenix, as: "pow" do
+    pipe_through [:browser, :logged_in]
+
+    get "/settings/profile", RegistrationController, :edit
+    patch "/settings/profile", RegistrationController, :update
+    put "/settings/profile", RegistrationController, :update
+
+    delete "/logout", SessionController, :delete
   end
 
   scope "/" do
@@ -37,28 +82,18 @@ defmodule ErotiCatWeb.Router do
     live("/", PageLive, :index)
   end
 
-  scope "/account", ErotiCatWeb do
-    pipe_through([:browser, :protected])
+  scope "/settings", ErotiCatWeb do
+    pipe_through([:browser, :logged_in])
   end
 
-  # Other scopes may use custom stacks.
+  scope "/admin" do
+    # Enable admin stuff dev/test side but restrict it in prod
+    pipe_through([:browser | if(Mix.env() in [:dev, :test], do: [], else: [:admin])])
+
+    live_dashboard "/dashboard", metrics: ErotiCatWeb.Telemetry, ecto_repos: ErotiCat.Repo
+  end
+
   # scope "/api", ErotiCatWeb do
   #   pipe_through :api
   # end
-
-  # Enables LiveDashboard only for development
-  #
-  # If you want to use the LiveDashboard in production, you should put
-  # it behind authentication and allow only admins to access it.
-  # If your application does not have an admins-only section yet,
-  # you can use Plug.BasicAuth to set up some basic authentication
-  # as long as you are also using SSL (which you should anyway).
-  if Mix.env() in [:dev, :test] do
-    import Phoenix.LiveDashboard.Router
-
-    scope "/" do
-      pipe_through(:browser)
-      live_dashboard "/admin/dashboard", metrics: ErotiCatWeb.Telemetry, ecto_repos: ErotiCat.Repo
-    end
-  end
 end

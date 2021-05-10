@@ -10,9 +10,9 @@ defmodule ErotiCatWeb.Endpoint do
     signing_salt: "sgxg5EhZ"
   ]
 
-  socket "/socket", ErotiCatWeb.UserSocket,
-    websocket: true,
-    longpoll: false
+  # socket "/socket", ErotiCatWeb.UserSocket,
+  #   websocket: [connect_info: [pow_config: @pow_config]],
+  #   longpoll: false
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 

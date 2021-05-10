@@ -33,4 +33,16 @@ defmodule ErotiCat.Users.User do
   def auto_username do
     "peep#{:rand.uniform(100_000_000)}"
   end
+
+  def create(attrs) do
+    %__MODULE__{}
+    |> changeset(attrs)
+    |> case do
+      changeset = %{valid?: true} ->
+        ErotiCat.Repo.insert(changeset)
+
+      %{valid?: false, errors: e} ->
+        {:error, e}
+    end
+  end
 end

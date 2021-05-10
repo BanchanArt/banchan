@@ -24,7 +24,7 @@ config :eroticat, :pow,
   user: ErotiCat.Users.User,
   repo: ErotiCat.Repo,
   extensions: [PowResetPassword, PowEmailConfirmation, PowPersistentSession],
-  controller_callbacks: Pow.Extension.Phoenix.ControllerCallbacks,
+  controller_callbacks: ErotiCatWeb.Pow.ControllerCallbacks,
   web_module: ErotiCatWeb
 
 # Configures Elixir's Logger

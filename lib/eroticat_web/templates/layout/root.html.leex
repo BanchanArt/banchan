@@ -6,27 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <%= csrf_meta_tag() %>
     <%= live_title_tag assigns[:page_title] || "ErotiCat" %>
-    <%= if @current_user do %>
-      <%= tag :meta, name: "channel_token", content: Phoenix.Token.sign(@conn, "user auth", @current_user.email) %>
-    <% end %>
     <link phx-track-static rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
     <script defer phx-track-static type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </head>
   <body>
-    <header>
-      <section class="container">
-        <nav role="navigation">
-          <ul>
-            <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
-              <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
+    <%# We only display the nav bar when we're actually logged in. Otherwise,
+    we'll be displaying a different, full-page thing. This should be fine
+    because login/logout/register etc are all proper, full reloads. %>
+    <%= if @current_user do %>
+      <header>
+        <section class="container">
+          <nav role="navigation">
+            <%= if ErotiCat.Users.has_role?(@current_user, :admin) || Mix.env() in [:test, :dev] do %>
+              <%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %>
             <% end %>
-            <%= if @current_user do %>
-              <li><%= link "Log Out", to: Routes.pow_session_path(@conn, :delete), method: :delete %></li>
-            <% end %>
-          </ul>
-        </nav>
-      </section>
-    </header>
+            <%= link "Log Out", to: Routes.pow_session_path(@conn, :delete), method: :delete %>
+          </nav>
+        </section>
+      </header>
+    <% end %>
     <%= @inner_content %>
   </body>
 </html>

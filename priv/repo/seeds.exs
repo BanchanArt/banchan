@@ -9,3 +9,12 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+{:ok, user} =
+  ErotiCat.Users.User.create(%{
+    email: "test@example.com",
+    display_name: "Test User",
+    password: "foobarbaz",
+    password_confirmation: "foobarbaz"
+  })
+
+PowEmailConfirmation.Ecto.Context.confirm_email(user, %{}, otp_app: :eroticat)
