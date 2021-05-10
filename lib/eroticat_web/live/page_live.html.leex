@@ -1,5 +1,6 @@
 <%= if @current_user do %>
-logged in!
+sexy things go here ;)))
 <% else %>
-no current_user?
+<%= link "Log In", to: Routes.pow_session_path(@socket, :new) %>
+<%= link "Register", to: Routes.pow_registration_path(@socket, :new) %>
 <% end %>
