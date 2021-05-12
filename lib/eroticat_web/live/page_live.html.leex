@@ -1,5 +1,15 @@
 <%= if @current_user do %>
-sexy things go here ;)))
+<header>
+    <section class="container">
+        <nav role="navigation">
+            <%= if ErotiCat.Users.has_role?(@current_user, :admin) || Mix.env() in [:test, :dev] do %>
+                <%= link "LiveDashboard", to: Routes.live_dashboard_path(@socket, :home) %>
+            <% end %>
+            <%= link "Log Out", to: Routes.pow_session_path(@socket, :delete), method: :delete %>
+        </nav>
+    </section>
+</header>
+sexy things go here ;)
 <% else %>
 <%= link "Log In", to: Routes.pow_session_path(@socket, :new) %>
 <%= link "Register", to: Routes.pow_registration_path(@socket, :new) %>

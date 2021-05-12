@@ -14,16 +14,6 @@
     we'll be displaying a different, full-page thing. This should be fine
     because login/logout/register etc are all proper, full reloads. %>
     <%= if @current_user do %>
-      <header>
-        <section class="container">
-          <nav role="navigation">
-            <%= if ErotiCat.Users.has_role?(@current_user, :admin) || Mix.env() in [:test, :dev] do %>
-              <%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %>
-            <% end %>
-            <%= link "Log Out", to: Routes.pow_session_path(@conn, :delete), method: :delete %>
-          </nav>
-        </section>
-      </header>
     <% end %>
     <%= @inner_content %>
   </body>
