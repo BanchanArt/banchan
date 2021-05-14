@@ -53,6 +53,7 @@ defmodule ErotiCatWeb.Endpoint do
 
   plug Pow.Plug.Session,
     otp_app: :eroticat,
+    credentials_cache_store: {Pow.Store.CredentialsCache, ttl: :timer.hours(30 * 24)},
     cache_store_backend: Pow.Store.Backend.MnesiaCache
 
   plug PowPersistentSession.Plug.Cookie
