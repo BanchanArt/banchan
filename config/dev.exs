@@ -1,10 +1,10 @@
 use Mix.Config
 
 # Configure your database
-config :eroticat, ErotiCat.Repo,
+config :bespoke, Bespoke.Repo,
   username: "postgres",
   password: "postgres",
-  database: "eroticat_dev",
+  database: "bespoke_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -15,7 +15,7 @@ config :eroticat, ErotiCat.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
-config :eroticat, ErotiCatWeb.Endpoint,
+config :bespoke, BespokeWeb.Endpoint,
   http: [port: 4000],
   debug_errors: true,
   code_reloader: true,
@@ -55,17 +55,17 @@ config :eroticat, ErotiCatWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :eroticat, ErotiCatWeb.Endpoint,
+config :bespoke, BespokeWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/eroticat_web/(live|views)/.*(ex)$",
-      ~r"lib/eroticat_web/templates/.*(eex)$"
+      ~r"lib/bespoke_web/(live|views)/.*(ex)$",
+      ~r"lib/bespoke_web/templates/.*(eex)$"
     ]
   ]
 
-config :eroticat, :pow, mailer_backend: ErotiCatWeb.Pow.Mailer
+config :bespoke, :pow, mailer_backend: BespokeWeb.Pow.Mailer
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

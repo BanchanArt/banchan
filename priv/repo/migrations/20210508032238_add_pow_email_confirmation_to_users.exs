@@ -1,4 +1,4 @@
-defmodule ErotiCat.Repo.Migrations.AddPowEmailConfirmationToUsers do
+defmodule Bespoke.Repo.Migrations.AddPowEmailConfirmationToUsers do
   use Ecto.Migration
 
   def change do

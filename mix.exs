@@ -1,9 +1,9 @@
-defmodule ErotiCat.MixProject do
+defmodule Bespoke.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :eroticat,
+      app: :bespoke,
       version: "0.1.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -32,7 +32,7 @@ defmodule ErotiCat.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {ErotiCat.Application, []},
+      mod: {Bespoke.Application, []},
       extra_applications: [:logger, :runtime_tools, :os_mon, :mnesia]
     ]
   end

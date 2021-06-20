@@ -7,25 +7,25 @@
 # General application configuration
 use Mix.Config
 
-config :eroticat,
-  namespace: ErotiCat,
-  ecto_repos: [ErotiCat.Repo]
+config :bespoke,
+  namespace: Bespoke,
+  ecto_repos: [Bespoke.Repo]
 
 # Configures the endpoint
-config :eroticat, ErotiCatWeb.Endpoint,
+config :bespoke, BespokeWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "wE/ZQmiSLP77ZAfprMlRRB1D+JP9p2/wMrLhjVXyB8U6/JpoxWfWCsoE4bm3IoY/",
-  render_errors: [view: ErotiCatWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: ErotiCat.PubSub,
+  render_errors: [view: BespokeWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: Bespoke.PubSub,
   live_view: [signing_salt: "qB2PgmVY"]
 
 # Use pow for auth
-config :eroticat, :pow,
-  user: ErotiCat.Users.User,
-  repo: ErotiCat.Repo,
+config :bespoke, :pow,
+  user: Bespoke.Users.User,
+  repo: Bespoke.Repo,
   extensions: [PowResetPassword, PowEmailConfirmation, PowPersistentSession],
-  controller_callbacks: ErotiCatWeb.Pow.ControllerCallbacks,
-  web_module: ErotiCatWeb
+  controller_callbacks: BespokeWeb.Pow.ControllerCallbacks,
+  web_module: BespokeWeb
 
 # Configures Elixir's Logger
 config :logger, :console,

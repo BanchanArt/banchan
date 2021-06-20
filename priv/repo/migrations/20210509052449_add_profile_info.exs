@@ -1,4 +1,4 @@
-defmodule ErotiCat.Repo.Migrations.AddProfileInfo do
+defmodule Bespoke.Repo.Migrations.AddProfileInfo do
   use Ecto.Migration
 
   def change do

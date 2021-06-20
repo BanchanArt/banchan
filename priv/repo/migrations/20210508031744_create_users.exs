@@ -1,4 +1,4 @@
-defmodule ErotiCat.Repo.Migrations.CreateUsers do
+defmodule Bespoke.Repo.Migrations.CreateUsers do
   use Ecto.Migration
 
   def change do

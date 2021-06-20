@@ -1,4 +1,4 @@
-defmodule ErotiCatWeb.ChannelCase do
+defmodule BespokeWeb.ChannelCase do
   @moduledoc """
   This module defines the test case to be used by
   channel tests.
@@ -11,7 +11,7 @@ defmodule ErotiCatWeb.ChannelCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use ErotiCatWeb.ChannelCase, async: true`, although
+  by setting `use BespokeWeb.ChannelCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -23,18 +23,18 @@ defmodule ErotiCatWeb.ChannelCase do
     quote do
       # Import conveniences for testing with channels
       import Phoenix.ChannelTest
-      import ErotiCatWeb.ChannelCase
+      import BespokeWeb.ChannelCase
 
       # The default endpoint for testing
-      @endpoint ErotiCatWeb.Endpoint
+      @endpoint BespokeWeb.Endpoint
     end
   end
 
   setup tags do
-    :ok = Sandbox.checkout(ErotiCat.Repo)
+    :ok = Sandbox.checkout(Bespoke.Repo)
 
     unless tags[:async] do
-      Sandbox.mode(ErotiCat.Repo, {:shared, self()})
+      Sandbox.mode(Bespoke.Repo, {:shared, self()})
     end
 
     :ok
