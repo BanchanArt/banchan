@@ -4,8 +4,9 @@ defmodule Bespoke.Accounts do
   """
 
   import Ecto.Query, warn: false
+
+  alias Bespoke.Accounts.{User, UserNotifier, UserToken}
   alias Bespoke.Repo
-  alias Bespoke.Accounts.{User, UserToken, UserNotifier}
 
   ## Database getters
 

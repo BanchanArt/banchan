@@ -66,7 +66,7 @@ defmodule Bespoke.MixProject do
       {:floki, ">= 0.27.0", only: :test},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.8", only: :dev},
+      {:sobelow, "~> 0.8", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.13", only: :test}
     ]
   end
@@ -96,8 +96,8 @@ defmodule Bespoke.MixProject do
         "test --slowest 10",
         "format --check-formatted",
         "credo --strict",
-        "sobelow --exit",
-        "dialyzer"
+        "sobelow --exit"
+        # "dialyzer"
       ]
     ]
   end

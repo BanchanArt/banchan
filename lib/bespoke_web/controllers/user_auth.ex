@@ -1,4 +1,6 @@
 defmodule BespokeWeb.UserAuth do
+  @moduledoc false
+
   import Plug.Conn
   import Phoenix.Controller
 
