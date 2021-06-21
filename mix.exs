@@ -46,6 +46,7 @@ defmodule Bespoke.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:pbkdf2_elixir, "~> 1.0"},
       {:phoenix, "~> 1.5.8"},
       {:phoenix_ecto, "~> 4.1"},
       {:ecto_sql, "~> 3.4"},
@@ -61,6 +62,7 @@ defmodule Bespoke.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       # Testing and static analysis
+      {:phx_gen_auth, "~> 0.7", only: [:dev], runtime: false},
       {:floki, ">= 0.27.0", only: :test},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
