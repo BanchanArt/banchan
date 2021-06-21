@@ -42,21 +42,10 @@ defmodule BespokeWeb do
     end
   end
 
-  def live_view do
+  def surface_view do
     quote do
-      use Phoenix.LiveView,
-        layout: {BespokeWeb.LayoutView, "live.html"}
-
-      unquote(view_helpers())
-
+      use Surface.LiveView
       import BespokeWeb.LiveHelpers
-    end
-  end
-
-  def live_component do
-    quote do
-      use Phoenix.LiveComponent
-
       unquote(view_helpers())
     end
   end
@@ -92,6 +81,8 @@ defmodule BespokeWeb do
       import BespokeWeb.ErrorHelpers
       import BespokeWeb.Gettext
       alias BespokeWeb.Router.Helpers, as: Routes
+
+      import Surface
     end
   end
 
