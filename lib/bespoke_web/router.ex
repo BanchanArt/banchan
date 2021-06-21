@@ -4,6 +4,8 @@ defmodule BespokeWeb.Router do
   import BespokeWeb.UserAuth
   import Phoenix.LiveDashboard.Router
 
+  alias BespokeWeb.EnsureRolePlug
+
   pipeline :browser do
     plug(:accepts, ["html"])
     plug(:fetch_session)
@@ -22,16 +24,16 @@ defmodule BespokeWeb.Router do
     plug(:accepts, ["json"])
   end
 
-  pipeline :logged_in do
-  end
-
   pipeline :admin do
+    plug EnsureRolePlug, :admin
   end
 
   pipeline :mod do
+    plug EnsureRolePlug, [:admin, :mod]
   end
 
   pipeline :creator do
+    plug EnsureRolePlug, [:admin, :mod, :creator]
   end
 
   scope "/", BespokeWeb do
