@@ -61,7 +61,8 @@ config :bespoke, BespokeWeb.Endpoint,
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
       ~r"lib/bespoke_web/(live|views)/.*(ex)$",
-      ~r"lib/bespoke_web/templates/.*(eex)$"
+      ~r"lib/bespoke_web/templates/.*(eex)$",
+      ~r"lib/bespoke_web/live/.*(sface)$"
     ]
   ]
 

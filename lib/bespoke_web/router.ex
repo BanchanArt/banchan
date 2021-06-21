@@ -39,7 +39,7 @@ defmodule BespokeWeb.Router do
   scope "/", BespokeWeb do
     pipe_through(:browser)
 
-    live "/", PageLive, :index
+    live "/", HomeLive, :index
   end
 
   scope "/settings", BespokeWeb do
