@@ -33,7 +33,7 @@ defmodule Bespoke.MixProject do
   def application do
     [
       mod: {Bespoke.Application, []},
-      extra_applications: [:logger, :runtime_tools, :os_mon, :mnesia]
+      extra_applications: [:logger, :runtime_tools, :os_mon]
     ]
   end
 
