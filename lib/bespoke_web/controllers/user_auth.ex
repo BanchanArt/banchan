@@ -155,5 +155,4 @@ defmodule BespokeWeb.UserAuth do
   Returns the pubsub topic name for receiving  notifications when a user updated
   """
   def pubsub_topic, do: @pubsub_topic
-
 end

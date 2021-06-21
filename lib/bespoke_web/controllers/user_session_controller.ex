@@ -27,8 +27,8 @@ defmodule BespokeWeb.UserSessionController do
   def force_logout(conn, _params) do
     conn
     |> put_flash(
-     :info,
-     "You were logged out. Please login again to continue using our application."
+      :info,
+      "You were logged out. Please login again to continue using our application."
     )
     |> UserAuth.log_out_user()
   end
