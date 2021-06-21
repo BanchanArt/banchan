@@ -12,6 +12,7 @@ defmodule Bespoke.Accounts.User do
     field :password, :string, virtual: true
     field :hashed_password, :string
     field :confirmed_at, :naive_datetime
+    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
 
     timestamps()
   end
@@ -139,5 +140,19 @@ defmodule Bespoke.Accounts.User do
     else
       add_error(changeset, :current_password, "is not valid")
     end
+  end
+
+  @doc """
+  A user changeset for registering admins.
+  """
+  def admin_registration_changeset(user, attrs) do
+    user
+    |> registration_changeset(attrs)
+    |> prepare_changes(&set_admin_role/1)
+  end
+
+  defp set_admin_role(changeset) do
+    changeset
+    |> put_change(:roles, [:admin])
   end
 end

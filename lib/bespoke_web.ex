@@ -48,6 +48,8 @@ defmodule BespokeWeb do
         layout: {BespokeWeb.LayoutView, "live.html"}
 
       unquote(view_helpers())
+
+      import BespokeWeb.LiveHelpers
     end
   end
 

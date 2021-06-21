@@ -9,6 +9,6 @@ defmodule BespokeWeb.PageLiveTest do
   test "disconnected and connected render", %{conn: conn} do
     {:ok, page_live, disconnected_html} = live(conn, "/")
     assert disconnected_html =~ "Log in"
-    # assert render(page_live) =~ "Log in"
+    assert render(page_live) =~ "Log in"
   end
 end

@@ -93,6 +93,18 @@ defmodule Bespoke.AccountsTest do
     end
   end
 
+  describe "register_admin/1" do
+    test "registers users with a hashed password and adds :admin role" do
+      email = unique_user_email()
+      {:ok, user} = Accounts.register_admin(%{email: email, password: valid_user_password()})
+      assert user.email == email
+      assert is_binary(user.hashed_password)
+      assert is_nil(user.confirmed_at)
+      assert is_nil(user.password)
+      assert user.roles == [:admin]
+    end
+  end
+
   describe "change_user_registration/2" do
     test "returns a changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_registration(%User{})

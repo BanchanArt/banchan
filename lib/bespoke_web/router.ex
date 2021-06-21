@@ -10,7 +10,11 @@ defmodule BespokeWeb.Router do
     plug(:fetch_live_flash)
     plug(:put_root_layout, {BespokeWeb.LayoutView, :root})
     plug(:protect_from_forgery)
-    plug(:put_secure_browser_headers, %{"content-security-policy" => "default-src 'self'"})
+    # NB(zkat): unsafe-eval has to be enabled because webpack does it for its internals.
+    plug(:put_secure_browser_headers, %{
+      "content-security-policy" => "default-src 'self' 'unsafe-eval'"
+    })
+
     plug(:fetch_current_user)
   end
 
@@ -33,7 +37,7 @@ defmodule BespokeWeb.Router do
   scope "/", BespokeWeb do
     pipe_through(:browser)
 
-    live("/", PageLive, :index)
+    live "/", PageLive, :index
   end
 
   scope "/settings", BespokeWeb do
