@@ -65,8 +65,6 @@ config :bespoke, BespokeWeb.Endpoint,
     ]
   ]
 
-config :bespoke, :pow, mailer_backend: BespokeWeb.Pow.Mailer
-
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 

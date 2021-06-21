@@ -19,14 +19,6 @@ config :bespoke, BespokeWeb.Endpoint,
   pubsub_server: Bespoke.PubSub,
   live_view: [signing_salt: "qB2PgmVY"]
 
-# Use pow for auth
-config :bespoke, :pow,
-  user: Bespoke.Users.User,
-  repo: Bespoke.Repo,
-  extensions: [PowResetPassword, PowEmailConfirmation, PowPersistentSession],
-  controller_callbacks: BespokeWeb.Pow.ControllerCallbacks,
-  web_module: BespokeWeb
-
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

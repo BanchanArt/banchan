@@ -15,8 +15,6 @@ defmodule Bespoke.Application do
       {Phoenix.PubSub, name: Bespoke.PubSub},
       # Start the Endpoint (http/https)
       BespokeWeb.Endpoint,
-      # Cache sessions to Mnesia
-      Pow.Store.Backend.MnesiaCache
       # Start a worker by calling: Bespoke.Worker.start_link(arg)
       # {Bespoke.Worker, arg}
     ]

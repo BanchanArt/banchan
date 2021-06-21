@@ -26,7 +26,5 @@ config :bespoke, BespokeWeb.Endpoint,
   http: [port: 4002],
   server: false
 
-config :pow, Pow.Ecto.Schema.Password, iterations: 1
-
 # Print only warnings and errors during test
 config :logger, level: :warn
