@@ -99,8 +99,9 @@ jobs:
       - name: Run Credo
         run: mix credo
 
-      - name: Run Dialyzer
-        run: mix dialyzer --no-check
+      # This thing is too slow and too flaky. Maybe some day.
+      # - name: Run Dialyzer
+      #   run: mix dialyzer --no-check
 
   unit_tests:
     name: Unit Tests
