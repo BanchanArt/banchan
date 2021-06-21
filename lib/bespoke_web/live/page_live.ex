@@ -3,5 +3,4 @@ defmodule BespokeWeb.PageLive do
   Bespoke Homepage
   """
   use BespokeWeb, :live_view
-
 end

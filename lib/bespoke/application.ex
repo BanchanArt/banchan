@@ -14,7 +14,7 @@ defmodule Bespoke.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Bespoke.PubSub},
       # Start the Endpoint (http/https)
-      BespokeWeb.Endpoint,
+      BespokeWeb.Endpoint
       # Start a worker by calling: Bespoke.Worker.start_link(arg)
       # {Bespoke.Worker, arg}
     ]
