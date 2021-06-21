@@ -46,7 +46,23 @@ defmodule BespokeWeb do
     quote do
       use Surface.LiveView
       import BespokeWeb.LiveHelpers
+
+      alias Bespoke.Accounts.User
+
       unquote(view_helpers())
+
+      @impl true
+      def handle_info(%{event: "logout_user", payload: %{user: %User{id: id}}}, socket) do
+        case socket.assigns.current_user do
+          %User{id: ^id} ->
+            {:noreply,
+             socket
+             |> redirect(to: Routes.user_session_path(socket, :force_logout))}
+
+          _ ->
+            {:noreply, socket}
+        end
+      end
     end
   end
 

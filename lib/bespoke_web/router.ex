@@ -40,6 +40,8 @@ defmodule BespokeWeb.Router do
     pipe_through(:browser)
 
     live "/", HomeLive, :index
+
+    get "/users/force_logout", UserSessionController, :force_logout
   end
 
   scope "/settings", BespokeWeb do

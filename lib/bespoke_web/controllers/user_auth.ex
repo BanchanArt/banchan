@@ -14,6 +14,8 @@ defmodule BespokeWeb.UserAuth do
   @remember_me_cookie "_bespoke_web_user_remember_me"
   @remember_me_options [sign: true, max_age: @max_age, same_site: "Lax"]
 
+  @pubsub_topic "user_updates"
+
   @doc """
   Logs the user in.
 
@@ -148,4 +150,9 @@ defmodule BespokeWeb.UserAuth do
   defp maybe_store_return_to(conn), do: conn
 
   defp signed_in_path(_conn), do: "/"
+
+  @doc """
+  Returns the pubsub topic name for receiving  notifications when a user updated
+  """
+  def pubsub_topic, do: @pubsub_topic
 end

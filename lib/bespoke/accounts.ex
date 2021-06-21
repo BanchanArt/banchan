@@ -7,6 +7,7 @@ defmodule Bespoke.Accounts do
 
   alias Bespoke.Accounts.{User, UserNotifier, UserToken}
   alias Bespoke.Repo
+  alias BespokeWeb.UserAuth
 
   ## Database getters
 
@@ -355,5 +356,20 @@ defmodule Bespoke.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  def logout_user(%User{} = user) do
+    # Delete all user tokens
+    Repo.delete_all(UserToken.user_and_contexts_query(user, :all))
+
+    # Broadcast to all LiveViews to immediately disconnect the user
+    BespokeWeb.Endpoint.broadcast_from(
+      self(),
+      UserAuth.pubsub_topic(),
+      "logout_user",
+      %{
+        user: user
+      }
+    )
   end
 end
