@@ -1,5 +1,8 @@
 use Mix.Config
 
+# Only in tests, remove the complexity from the password hashing algorithm
+config :pbkdf2_elixir, :rounds, 1
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
@@ -25,8 +28,6 @@ end
 config :bespoke, BespokeWeb.Endpoint,
   http: [port: 4002],
   server: false
-
-config :pow, Pow.Ecto.Schema.Password, iterations: 1
 
 # Print only warnings and errors during test
 config :logger, level: :warn

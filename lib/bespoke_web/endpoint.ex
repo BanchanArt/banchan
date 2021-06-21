@@ -10,10 +10,6 @@ defmodule BespokeWeb.Endpoint do
     signing_salt: "sgxg5EhZ"
   ]
 
-  # socket "/socket", BespokeWeb.UserSocket,
-  #   websocket: [connect_info: [pow_config: @pow_config]],
-  #   longpoll: false
-
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
@@ -51,11 +47,5 @@ defmodule BespokeWeb.Endpoint do
   plug Plug.Head
   plug Plug.Session, @session_options
 
-  plug Pow.Plug.Session,
-    otp_app: :bespoke,
-    credentials_cache_store: {Pow.Store.CredentialsCache, ttl: :timer.hours(30 * 24)},
-    cache_store_backend: Pow.Store.Backend.MnesiaCache
-
-  plug PowPersistentSession.Plug.Cookie
   plug BespokeWeb.Router
 end

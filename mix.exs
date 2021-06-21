@@ -33,7 +33,7 @@ defmodule Bespoke.MixProject do
   def application do
     [
       mod: {Bespoke.Application, []},
-      extra_applications: [:logger, :runtime_tools, :os_mon, :mnesia]
+      extra_applications: [:logger, :runtime_tools, :os_mon]
     ]
   end
 
@@ -46,6 +46,7 @@ defmodule Bespoke.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:pbkdf2_elixir, "~> 1.0"},
       {:phoenix, "~> 1.5.8"},
       {:phoenix_ecto, "~> 4.1"},
       {:ecto_sql, "~> 3.4"},
@@ -55,17 +56,17 @@ defmodule Bespoke.MixProject do
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_dashboard, "~> 0.4"},
-      {:pow, "~> 1.0.23"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       # Testing and static analysis
+      {:phx_gen_auth, "~> 0.7", only: [:dev], runtime: false},
       {:floki, ">= 0.27.0", only: :test},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.8", only: :dev},
+      {:sobelow, "~> 0.8", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.13", only: :test}
     ]
   end
@@ -95,8 +96,8 @@ defmodule Bespoke.MixProject do
         "test --slowest 10",
         "format --check-formatted",
         "credo --strict",
-        "sobelow --exit",
-        "dialyzer"
+        "sobelow --exit"
+        # "dialyzer"
       ]
     ]
   end

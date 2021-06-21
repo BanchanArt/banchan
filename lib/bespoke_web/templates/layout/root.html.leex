@@ -10,11 +10,6 @@
     <script defer phx-track-static type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </head>
   <body>
-    <%# We only display the nav bar when we're actually logged in. Otherwise,
-    we'll be displaying a different, full-page thing. This should be fine
-    because login/logout/register etc are all proper, full reloads. %>
-    <%= if @current_user do %>
-    <% end %>
     <%= @inner_content %>
   </body>
 </html>

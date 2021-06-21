@@ -3,11 +3,10 @@ defmodule BespokeWeb.PageLive do
   Bespoke Homepage
   """
   use BespokeWeb, :live_view
-  alias BespokeWeb.LiveHelpers
-  require Logger
 
   @impl true
   def mount(_params, session, socket) do
-    {:ok, LiveHelpers.assign_defaults(socket, session)}
+    socket = assign_defaults(session, socket)
+    {:ok, assign(socket, query: "", results: %{})}
   end
 end
