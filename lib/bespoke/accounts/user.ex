@@ -14,6 +14,8 @@ defmodule Bespoke.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
 
+    has_many :studios, Bespoke.Studios.Studio
+
     timestamps()
   end
 
