@@ -4,6 +4,7 @@ defmodule BanchanWeb.HomeLive do
   """
   use BanchanWeb, :surface_view
 
+  alias Banchan.Components.Empty
   alias Surface.Components.Link
 
   @impl true
@@ -35,7 +36,7 @@ defmodule BanchanWeb.HomeLive do
           :on-click="lv:clear-flash"
           :values={key: "error"}>{live_flash(@flash, :error)}</p>
     </main>
-    <div>and we're live!</div>
+    <Empty />
     """
   end
 end
