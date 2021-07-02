@@ -4,7 +4,7 @@ defmodule BanchanWeb.HomeLive do
   """
   use BanchanWeb, :surface_view
 
-  alias Banchan.Components.{Flash, Session}
+  alias Banchan.Components.Layout
 
   @impl true
   def mount(_params, session, socket) do
@@ -15,12 +15,9 @@ defmodule BanchanWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Session current_user={@current_user} />
-    <main role="main" class="container">
-      <Flash flashes={@flash} />
-
+    <Layout current_user={@current_user} flashes={@flash}>
       I guess I'm home?
-    </main>
+    </Layout>
     """
   end
 end
