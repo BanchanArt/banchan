@@ -1,6 +1,6 @@
 defmodule BanchanWeb do
   @moduledoc """
-  The entrypoint for defining your web interface, such
+  The entry point for defining your web interface, such
   as controllers, views, channels and so on.
 
   This can be used in your application as:
