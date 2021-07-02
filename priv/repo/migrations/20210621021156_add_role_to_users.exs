@@ -1,4 +1,4 @@
-defmodule Bespoke.Repo.Migrations.AddRoleToUsers do
+defmodule Banchan.Repo.Migrations.AddRoleToUsers do
   use Ecto.Migration
 
   def change do

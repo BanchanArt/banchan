@@ -1,4 +1,4 @@
-defmodule BespokeWeb.ChannelCase do
+defmodule BanchanWeb.ChannelCase do
   @moduledoc """
   This module defines the test case to be used by
   channel tests.
@@ -11,7 +11,7 @@ defmodule BespokeWeb.ChannelCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use BespokeWeb.ChannelCase, async: true`, although
+  by setting `use BanchanWeb.ChannelCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -23,18 +23,18 @@ defmodule BespokeWeb.ChannelCase do
     quote do
       # Import conveniences for testing with channels
       import Phoenix.ChannelTest
-      import BespokeWeb.ChannelCase
+      import BanchanWeb.ChannelCase
 
       # The default endpoint for testing
-      @endpoint BespokeWeb.Endpoint
+      @endpoint BanchanWeb.Endpoint
     end
   end
 
   setup tags do
-    :ok = Sandbox.checkout(Bespoke.Repo)
+    :ok = Sandbox.checkout(Banchan.Repo)
 
     unless tags[:async] do
-      Sandbox.mode(Bespoke.Repo, {:shared, self()})
+      Sandbox.mode(Banchan.Repo, {:shared, self()})
     end
 
     :ok

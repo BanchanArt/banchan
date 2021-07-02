@@ -1,9 +1,9 @@
-defmodule Bespoke.MixProject do
+defmodule Banchan.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :bespoke,
+      app: :banchan,
       version: "0.1.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -32,7 +32,7 @@ defmodule Bespoke.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {Bespoke.Application, []},
+      mod: {Banchan.Application, []},
       extra_applications: [:logger, :runtime_tools, :os_mon]
     ]
   end

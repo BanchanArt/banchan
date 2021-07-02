@@ -1,4 +1,4 @@
-defmodule BespokeWeb.ConnCase do
+defmodule BanchanWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule BespokeWeb.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use BespokeWeb.ConnCase, async: true`, although
+  by setting `use BanchanWeb.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -24,20 +24,20 @@ defmodule BespokeWeb.ConnCase do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import BespokeWeb.ConnCase
+      import BanchanWeb.ConnCase
 
-      alias BespokeWeb.Router.Helpers, as: Routes
+      alias BanchanWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
-      @endpoint BespokeWeb.Endpoint
+      @endpoint BanchanWeb.Endpoint
     end
   end
 
   setup tags do
-    :ok = Sandbox.checkout(Bespoke.Repo)
+    :ok = Sandbox.checkout(Banchan.Repo)
 
     unless tags[:async] do
-      Sandbox.mode(Bespoke.Repo, {:shared, self()})
+      Sandbox.mode(Banchan.Repo, {:shared, self()})
     end
 
     {:ok, conn: Phoenix.ConnTest.build_conn()}
@@ -52,7 +52,7 @@ defmodule BespokeWeb.ConnCase do
   test context.
   """
   def register_and_log_in_user(%{conn: conn}) do
-    user = Bespoke.AccountsFixtures.user_fixture()
+    user = Banchan.AccountsFixtures.user_fixture()
     %{conn: log_in_user(conn, user), user: user}
   end
 
@@ -62,7 +62,7 @@ defmodule BespokeWeb.ConnCase do
   It returns an updated `conn`.
   """
   def log_in_user(conn, user) do
-    token = Bespoke.Accounts.generate_user_session_token(user)
+    token = Banchan.Accounts.generate_user_session_token(user)
 
     conn
     |> Phoenix.ConnTest.init_test_session(%{})

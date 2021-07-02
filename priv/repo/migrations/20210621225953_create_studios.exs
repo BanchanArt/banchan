@@ -1,4 +1,4 @@
-defmodule Bespoke.Repo.Migrations.CreateStudios do
+defmodule Banchan.Repo.Migrations.CreateStudios do
   use Ecto.Migration
 
   def change do

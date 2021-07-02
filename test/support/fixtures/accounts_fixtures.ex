@@ -1,7 +1,7 @@
-defmodule Bespoke.AccountsFixtures do
+defmodule Banchan.AccountsFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Bespoke.Accounts` context.
+  entities via the `Banchan.Accounts` context.
   """
 
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
@@ -18,7 +18,7 @@ defmodule Bespoke.AccountsFixtures do
     {:ok, user} =
       attrs
       |> valid_user_attributes()
-      |> Bespoke.Accounts.register_user()
+      |> Banchan.Accounts.register_user()
 
     user
   end

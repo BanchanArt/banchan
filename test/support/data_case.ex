@@ -1,4 +1,4 @@
-defmodule Bespoke.DataCase do
+defmodule Banchan.DataCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -10,7 +10,7 @@ defmodule Bespoke.DataCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use Bespoke.DataCase, async: true`, although
+  by setting `use Banchan.DataCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -20,20 +20,20 @@ defmodule Bespoke.DataCase do
 
   using do
     quote do
-      alias Bespoke.Repo
+      alias Banchan.Repo
 
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import Bespoke.DataCase
+      import Banchan.DataCase
     end
   end
 
   setup tags do
-    :ok = Sandbox.checkout(Bespoke.Repo)
+    :ok = Sandbox.checkout(Banchan.Repo)
 
     unless tags[:async] do
-      Sandbox.mode(Bespoke.Repo, {:shared, self()})
+      Sandbox.mode(Banchan.Repo, {:shared, self()})
     end
 
     :ok

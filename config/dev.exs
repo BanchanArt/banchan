@@ -1,10 +1,10 @@
 use Mix.Config
 
 # Configure your database
-config :bespoke, Bespoke.Repo,
+config :banchan, Banchan.Repo,
   username: "postgres",
   password: "postgres",
-  database: "bespoke_dev",
+  database: "banchan_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -15,7 +15,7 @@ config :bespoke, Bespoke.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
-config :bespoke, BespokeWeb.Endpoint,
+config :banchan, BanchanWeb.Endpoint,
   http: [port: 4000],
   debug_errors: true,
   code_reloader: true,
@@ -55,14 +55,14 @@ config :bespoke, BespokeWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :bespoke, BespokeWeb.Endpoint,
+config :banchan, BanchanWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/bespoke_web/(live|views)/.*(ex)$",
-      ~r"lib/bespoke_web/templates/.*(eex)$",
-      ~r"lib/bespoke_web/live/.*(sface)$"
+      ~r"lib/banchan_web/(live|views)/.*(ex)$",
+      ~r"lib/banchan_web/templates/.*(eex)$",
+      ~r"lib/banchan_web/live/.*(sface)$"
     ]
   ]
 

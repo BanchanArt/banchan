@@ -1,4 +1,4 @@
-# Bespoke
+# Banchan
 
 To start your Phoenix server:
 

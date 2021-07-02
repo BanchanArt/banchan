@@ -1,4 +1,4 @@
-defmodule Bespoke.Repo.Migrations.CreateUsersAuthTables do
+defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
   use Ecto.Migration
 
   def change do

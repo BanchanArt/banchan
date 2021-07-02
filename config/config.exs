@@ -7,16 +7,16 @@
 # General application configuration
 use Mix.Config
 
-config :bespoke,
-  namespace: Bespoke,
-  ecto_repos: [Bespoke.Repo]
+config :banchan,
+  namespace: Banchan,
+  ecto_repos: [Banchan.Repo]
 
 # Configures the endpoint
-config :bespoke, BespokeWeb.Endpoint,
+config :banchan, BanchanWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "wE/ZQmiSLP77ZAfprMlRRB1D+JP9p2/wMrLhjVXyB8U6/JpoxWfWCsoE4bm3IoY/",
-  render_errors: [view: BespokeWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: Bespoke.PubSub,
+  render_errors: [view: BanchanWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: Banchan.PubSub,
   live_view: [signing_salt: "qB2PgmVY"]
 
 # Configures Elixir's Logger
