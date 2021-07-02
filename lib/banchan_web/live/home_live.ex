@@ -4,8 +4,7 @@ defmodule BanchanWeb.HomeLive do
   """
   use BanchanWeb, :surface_view
 
-  alias Banchan.Components.Empty
-  alias Surface.Components.Link
+  alias Banchan.Components.{Flash, Session}
 
   @impl true
   def mount(_params, session, socket) do
@@ -16,27 +15,12 @@ defmodule BanchanWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <ul>
-      {#if @current_user}
-        <li>{@current_user.email}</li>
-        <li><Link label="Settings" to={Routes.user_settings_path(BanchanWeb.Endpoint, :edit)} /></li>
-        <li><Link label="Log out" to={Routes.user_session_path(BanchanWeb.Endpoint, :delete)} method={:delete} /></li>
-      {#else}
-        <li><Link label="Register" to={Routes.user_registration_path(BanchanWeb.Endpoint, :new)} /></li>
-        <li><Link label="Log in" to={Routes.user_session_path(BanchanWeb.Endpoint, :new)} /></li>
-      {/if}
-    </ul>
-
+    <Session current_user={@current_user} />
     <main role="main" class="container">
-      <p class="alert alert-info" role="alert"
-          :on-click="lv:clear-flash"
-          :values={key: "info"}>{live_flash(@flash, :info)}</p>
+      <Flash flashes={@flash} />
 
-      <p class="alert alert-danger" role="alert"
-          :on-click="lv:clear-flash"
-          :values={key: "error"}>{live_flash(@flash, :error)}</p>
+      I guess I'm home?
     </main>
-    <Empty />
     """
   end
 end
