@@ -9,6 +9,7 @@ defmodule Banchan.Accounts.User do
   @foreign_key_type :binary_id
   schema "users" do
     field :email, :string
+    field :handle, :string
     field :password, :string, virtual: true
     field :hashed_password, :string
     field :confirmed_at, :naive_datetime

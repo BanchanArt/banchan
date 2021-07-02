@@ -6,6 +6,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
 
     create table(:users, primary_key: false) do
       add :id, :binary_id, primary_key: true
+      add :handle, :citext, null: false
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :confirmed_at, :naive_datetime
@@ -13,6 +14,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
     end
 
     create unique_index(:users, [:email])
+    create unique_index(:users, [:handle])
 
     create table(:users_tokens, primary_key: false) do
       add :id, :binary_id, primary_key: true
