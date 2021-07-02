@@ -27,5 +27,4 @@ defmodule BanchanWeb.Components.SessionTest do
 
     assert html =~ "Log out"
   end
-
 end

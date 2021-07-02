@@ -45,7 +45,7 @@ defmodule BanchanWeb.HomeLiveTest do
     # Assert our LiveView was redirected, following first to
     # /users/force_logout, then to "/", and then to "/users/log_in"
 
-    # TODO(zkat): is this really what we want? Should we just re-render in
+    # NB(zkat): is this really what we want? Should we just re-render in
     # this case instead? "/" isn't a login-only page.
     assert_redirect(page_live, "/force_logout")
     conn = get(conn, "/force_logout")
