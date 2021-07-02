@@ -39,7 +39,7 @@ defmodule Banchan.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:handle, :email, :password])
     |> validate_email()
     |> validate_password(opts)
   end

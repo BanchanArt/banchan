@@ -5,6 +5,17 @@ defmodule Banchan.AccountsTest do
   import Banchan.AccountsFixtures
   alias Banchan.Accounts.{User, UserToken}
 
+  describe "get_user_by_handle/1" do
+    test "does not return the user if the handle does not exist" do
+      catch_error(Accounts.get_user_by_handle!("unknown"))
+    end
+
+    test "returns the user if the email exists" do
+      %{id: id} = user = user_fixture()
+      assert %User{id: ^id} = Accounts.get_user_by_handle!(user.handle)
+    end
+  end
+
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
       refute Accounts.get_user_by_email("unknown@example.com")
@@ -96,7 +107,12 @@ defmodule Banchan.AccountsTest do
   describe "register_admin/1" do
     test "registers users with a hashed password and adds :admin role" do
       email = unique_user_email()
-      {:ok, user} = Accounts.register_admin(%{email: email, password: valid_user_password()})
+      handle = unique_user_handle()
+
+      {:ok, user} =
+        Accounts.register_admin(%{handle: handle, email: email, password: valid_user_password()})
+
+      assert user.handle == handle
       assert user.email == email
       assert is_binary(user.hashed_password)
       assert is_nil(user.confirmed_at)
