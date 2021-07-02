@@ -1,6 +1,6 @@
 defmodule Banchan.Components.Flash do
   @moduledoc """
-  This is the Banchan homepage.
+  Handles displaying flashes for a page.
   """
   use BanchanWeb, :component
 

@@ -1,5 +1,9 @@
 defmodule Banchan.Components.Layout do
-  @moduledoc false
+  @moduledoc """
+  Standard dynamic part of the layout used for Surface LiveViews.
+
+  We can't have these just in the layout itself because of the dynamic bits.
+  """
   use BanchanWeb, :component
 
   alias Banchan.Components.{Flash, Session}

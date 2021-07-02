@@ -1,6 +1,6 @@
 defmodule Banchan.Components.Session do
   @moduledoc """
-  This is the Banchan homepage.
+  Handles session-related top menu items.
   """
   use BanchanWeb, :component
 
