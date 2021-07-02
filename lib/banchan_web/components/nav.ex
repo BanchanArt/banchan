@@ -1,4 +1,4 @@
-defmodule BanchanWeb.Components.Session do
+defmodule BanchanWeb.Components.Nav do
   @moduledoc """
   Handles session-related top menu items.
   """
@@ -10,7 +10,7 @@ defmodule BanchanWeb.Components.Session do
 
   def render(assigns) do
     ~F"""
-    <ul>
+    <ul class="nav">
       {#if @current_user}
         <li>{@current_user.email}</li>
         <li><Link label="Settings" to={Routes.user_settings_path(BanchanWeb.Endpoint, :edit)} /></li>

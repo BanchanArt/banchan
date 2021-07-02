@@ -6,7 +6,7 @@ defmodule BanchanWeb.Components.Layout do
   """
   use BanchanWeb, :component
 
-  alias BanchanWeb.Components.{Flash, Session}
+  alias BanchanWeb.Components.{Flash, Nav}
 
   prop current_user, :any
   prop flashes, :string
@@ -15,7 +15,7 @@ defmodule BanchanWeb.Components.Layout do
 
   def render(assigns) do
     ~F"""
-    <Session current_user={@current_user} />
+    <Nav current_user={@current_user} />
     <main role="main" class="container">
       <Flash flashes={@flashes} />
       <#slot />
