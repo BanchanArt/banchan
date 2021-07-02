@@ -4,7 +4,7 @@ defmodule BanchanWeb.HomeLive do
   """
   use BanchanWeb, :surface_view
 
-  alias Banchan.Components.Layout
+  alias BanchanWeb.Components.Layout
 
   @impl true
   def mount(_params, session, socket) do

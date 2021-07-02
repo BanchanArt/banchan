@@ -1,4 +1,4 @@
-defmodule Banchan.Components.Session do
+defmodule BanchanWeb.Components.Session do
   @moduledoc """
   Handles session-related top menu items.
   """

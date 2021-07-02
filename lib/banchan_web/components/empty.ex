@@ -1,4 +1,4 @@
-defmodule Banchan.Components.Empty do
+defmodule BanchanWeb.Components.Empty do
   @moduledoc false
   use BanchanWeb, :component
 

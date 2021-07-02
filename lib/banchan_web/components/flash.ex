@@ -1,4 +1,4 @@
-defmodule Banchan.Components.Flash do
+defmodule BanchanWeb.Components.Flash do
   @moduledoc """
   Handles displaying flashes for a page.
   """
