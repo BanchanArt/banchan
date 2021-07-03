@@ -20,9 +20,9 @@ defmodule BanchanWeb.ProfileLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       {#if @live_action == :index}
-      Profile page for {@user}
+      Profile page for {@user.handle}
       {#else if @live_action == :edit && @user.id == @current_user.id}
-      Editing profile for {@user}
+      Editing profile for {@user.handle}
       {/if}
     </Layout>
     """

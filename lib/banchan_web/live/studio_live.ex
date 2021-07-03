@@ -20,9 +20,9 @@ defmodule BanchanWeb.StudioLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       {#if @live_action == :index}
-      Profile page for {@studio}
+      Studio page for {@studio.name}
       {#else if @live_action == :edit && @studio.user_id == @current_user.id}
-      Editing profile for {@studio}
+      Studio profile for {@studio.name}
       {/if}
     </Layout>
     """
