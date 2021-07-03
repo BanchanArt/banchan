@@ -13,6 +13,10 @@ defmodule Banchan.Accounts.User do
     field :password, :string, virtual: true
     field :hashed_password, :string
     field :confirmed_at, :naive_datetime
+    field :name, :string
+    field :bio, :string
+    field :header_img, :string
+    field :pfp_img, :string
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
 
     has_many :studios, Banchan.Studios.Studio
