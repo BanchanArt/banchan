@@ -5,7 +5,7 @@ defmodule Banchan.AccountsFixtures do
   """
 
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
-  def unique_user_handle, do: "user#{System.unique_integer()}"
+  def unique_user_handle, do: "user#{:rand.uniform(100_000)}"
   def valid_user_password, do: "hello world!"
 
   def valid_user_attributes(attrs \\ %{}) do

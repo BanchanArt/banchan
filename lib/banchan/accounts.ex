@@ -122,6 +122,47 @@ defmodule Banchan.Accounts do
   ## Settings
 
   @doc """
+  Returns an `%Ecto.Changeset{}` for changing the user handle.
+
+  ## Examples
+
+      iex> change_user_handle(user)
+      %Ecto.Changeset{data: %User{}}
+
+  """
+  def change_user_handle(user, attrs \\ %{}) do
+    User.handle_changeset(user, attrs)
+  end
+
+  @doc """
+  Updates the user handle.
+
+  ## Examples
+
+      iex> update_user_handle(user, "valid password", %{handle: ...})
+      {:ok, %User{}}
+
+      iex> update_user_handle(user, "invalid password", %{handle: ...})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_handle(user, password, attrs) do
+    changeset =
+      user
+      |> User.handle_changeset(attrs)
+      |> User.validate_current_password(password)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, changeset)
+    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} -> {:ok, user}
+      {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  @doc """
   Returns an `%Ecto.Changeset{}` for changing the user email.
 
   ## Examples

@@ -20,6 +20,37 @@ defmodule BanchanWeb.UserSettingsControllerTest do
     end
   end
 
+  describe "PUT /users/settings (change handle form)" do
+    test "updates the user handle and resets tokens", %{conn: conn} do
+      new_handle_conn =
+        put(conn, Routes.user_settings_path(conn, :update), %{
+          "action" => "update_handle",
+          "current_password" => valid_user_password(),
+          "user" => %{"handle" => "newhandle"}
+        })
+
+      assert redirected_to(new_handle_conn) == Routes.user_settings_path(conn, :edit)
+      assert get_session(new_handle_conn, :user_token) != get_session(conn, :user_token)
+      assert get_flash(new_handle_conn, :info) =~ "Handle updated successfully"
+      Accounts.get_user_by_handle!("newhandle")
+    end
+
+    test "does not update handle on invalid data", %{conn: conn} do
+      old_handle_conn =
+        put(conn, Routes.user_settings_path(conn, :update), %{
+          "action" => "update_handle",
+          "current_password" => valid_user_password(),
+          "user" => %{"handle" => "bad handle"}
+        })
+
+      response = html_response(old_handle_conn, 200)
+      assert response =~ "<h1>Settings</h1>"
+      assert response =~ "only letters, numbers, and underscores allowed"
+
+      assert get_session(old_handle_conn, :user_token) == get_session(conn, :user_token)
+    end
+  end
+
   describe "PUT /users/settings (change password form)" do
     test "updates the user password and resets tokens", %{conn: conn, user: user} do
       new_password_conn =

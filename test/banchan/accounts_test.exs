@@ -127,7 +127,7 @@ defmodule Banchan.AccountsTest do
   describe "change_user_registration/2" do
     test "returns a changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_registration(%User{})
-      assert changeset.required == [:password, :email]
+      assert changeset.required == [:password, :email, :handle]
     end
 
     test "allows fields to be set" do
@@ -144,6 +144,48 @@ defmodule Banchan.AccountsTest do
       assert get_change(changeset, :email) == email
       assert get_change(changeset, :password) == password
       assert is_nil(get_change(changeset, :hashed_password))
+    end
+  end
+
+  describe "change_user_handle/2" do
+    test "returns a user changeset" do
+      assert %Ecto.Changeset{} = Accounts.change_user_handle(%User{})
+    end
+
+    test "allows fields to be set" do
+      changeset =
+        Accounts.change_user_handle(%User{}, %{
+          "handle" => "newhandle"
+        })
+
+      assert changeset.valid?
+      assert get_change(changeset, :handle) == "newhandle"
+    end
+  end
+
+  describe "update_user_handle/3" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "validates handle", %{user: user} do
+      {:error, changeset} =
+        Accounts.update_user_handle(user, valid_user_password(), %{
+          handle: "b"
+        })
+
+      assert %{
+               handle: ["should be at least 3 character(s)"]
+             } = errors_on(changeset)
+
+      {:error, changeset} =
+        Accounts.update_user_handle(user, valid_user_password(), %{
+          handle: "bad handle"
+        })
+
+      assert %{
+               handle: ["only letters, numbers, and underscores allowed"]
+             } = errors_on(changeset)
     end
   end
 

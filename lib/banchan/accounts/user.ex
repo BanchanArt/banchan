@@ -9,7 +9,7 @@ defmodule Banchan.Accounts.User do
   @foreign_key_type :binary_id
   schema "users" do
     field :email, :string
-    field :handle, :string
+    field :handle, :string, autogenerate: {__MODULE__, :auto_username, []}
     field :password, :string, virtual: true
     field :hashed_password, :string
     field :confirmed_at, :naive_datetime
@@ -40,8 +40,24 @@ defmodule Banchan.Accounts.User do
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:handle, :email, :password])
+    |> validate_handle()
     |> validate_email()
     |> validate_password(opts)
+  end
+
+  defp validate_handle(changeset) do
+    changeset
+    |> validate_required([:handle])
+    |> validate_format(:handle, ~r/^[a-zA-Z0-9_]+$/,
+      message: "only letters, numbers, and underscores allowed"
+    )
+    |> validate_length(:handle, min: 3, max: 15)
+    |> unsafe_validate_unique(:handle, Banchan.Repo)
+    |> unique_constraint(:handle)
+  end
+
+  def auto_username do
+    "user#{:rand.uniform(100_000_000)}"
   end
 
   defp validate_email(changeset) do
@@ -88,6 +104,21 @@ defmodule Banchan.Accounts.User do
     |> case do
       %{changes: %{email: _}} = changeset -> changeset
       %{} = changeset -> add_error(changeset, :email, "did not change")
+    end
+  end
+
+  @doc """
+  A user changeset for changing the handle.
+
+  It requires the handle to change otherwise an error is added.
+  """
+  def handle_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:handle])
+    |> validate_handle()
+    |> case do
+      %{changes: %{handle: _}} = changeset -> changeset
+      %{} = changeset -> add_error(changeset, :handle, "did not change")
     end
   end
 
