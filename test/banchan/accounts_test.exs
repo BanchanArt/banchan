@@ -1,4 +1,7 @@
 defmodule Banchan.AccountsTest do
+  @moduledoc """
+  Tests for Accounts/User-related functionality.
+  """
   use Banchan.DataCase
 
   alias Banchan.Accounts

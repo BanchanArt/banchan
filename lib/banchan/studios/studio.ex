@@ -11,7 +11,6 @@ defmodule Banchan.Studios.Studio do
     field :slug, :string
     field :description, :string
     field :header_img, :string
-    field :pfp_img, :string
     field :card_img, :string
 
     belongs_to :user, Banchan.Accounts.User

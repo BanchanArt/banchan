@@ -8,7 +8,6 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :slug, :string, null: false
       add :description, :string
       add :header_img, :string
-      add :pfp_img, :string
       add :card_img, :string
 
       add :user_id, references(:users, type: :binary_id), null: false
