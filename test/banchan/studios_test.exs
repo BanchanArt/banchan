@@ -4,8 +4,7 @@ defmodule Banchan.StudiosTest do
   """
   use Banchan.DataCase
 
-  alias Banchan.Accounts
-  import Banchan.AccountsFixtures
-  alias Banchan.Accounts.User
-
+  # alias Banchan.Accounts
+  # import Banchan.AccountsFixtures
+  # alias Banchan.Accounts.User
 end
