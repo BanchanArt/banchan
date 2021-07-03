@@ -37,7 +37,7 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    pipe_through(:browser)
+    pipe_through :browser
 
     live "/", HomeLive, :index
     live "/users/:handle", ProfileLive, :index
@@ -46,8 +46,11 @@ defmodule BanchanWeb.Router do
     get "/force_logout", UserSessionController, :force_logout
   end
 
-  scope "/settings", BanchanWeb do
-    pipe_through([:browser, :logged_in])
+  scope "/", BanchanWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live "/users/:handle/edit", ProfileLive, :edit
+    live "/studios/:slug/edit", StudioLive, :edit
   end
 
   scope "/admin" do
@@ -57,12 +60,19 @@ defmodule BanchanWeb.Router do
     live_dashboard "/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo
   end
 
-  ## Authentication routes
+  ## Registration and Authentication routes
+
+  scope "/", BanchanWeb do
+    pipe_through [:browser]
+
+    delete "/log_out", UserSessionController, :delete
+    get "/confirm", UserConfirmationController, :new
+    post "/confirm", UserConfirmationController, :create
+    get "/confirm/:token", UserConfirmationController, :confirm
+  end
 
   scope "/", BanchanWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
-
-    live "/users/:handle/edit", ProfileLive, :edit
 
     get "/register", UserRegistrationController, :new
     post "/register", UserRegistrationController, :create
@@ -80,14 +90,5 @@ defmodule BanchanWeb.Router do
     get "/settings", UserSettingsController, :edit
     put "/settings", UserSettingsController, :update
     get "/settings/confirm_email/:token", UserSettingsController, :confirm_email
-  end
-
-  scope "/", BanchanWeb do
-    pipe_through [:browser]
-
-    delete "/log_out", UserSessionController, :delete
-    get "/confirm", UserConfirmationController, :new
-    post "/confirm", UserConfirmationController, :create
-    get "/confirm/:token", UserConfirmationController, :confirm
   end
 end
