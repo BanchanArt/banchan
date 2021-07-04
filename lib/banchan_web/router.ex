@@ -40,8 +40,12 @@ defmodule BanchanWeb.Router do
     pipe_through :browser
 
     live "/", HomeLive, :index
-    live "/users/:handle", ProfileLive, :index
-    live "/studios/:slug", StudioLive, :index
+
+    live "/users/:handle", ProfileLive, :show
+
+    live "/studios/:slug", StudioLive, :show
+    live "/studios", StudioLive, :index
+    live "/users/:handle/studios", StudioLive, :index
 
     get "/force_logout", UserSessionController, :force_logout
   end

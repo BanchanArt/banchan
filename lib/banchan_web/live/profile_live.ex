@@ -28,13 +28,13 @@ defmodule BanchanWeb.ProfileLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      {#if @live_action == :index}
+      {#if @live_action == :show}
       Profile page for {@user.handle}
       <div>
         <p>Name: {@user.name}</p>
         <p>Bio: {@user.bio}</p>
       </div>
-      {#else if @live_action == :edit && @user.id == @current_user.id}
+      {#elseif @live_action == :edit && @user.id == @current_user.id}
       Editing profile for {@user.handle}
       <Form for={@changeset} change="change" submit="submit" opts={autocomplete: "off"}>
         <Field name={:handle}>
@@ -54,6 +54,8 @@ defmodule BanchanWeb.ProfileLive do
         </Field>
         <Submit label="Save" opts={disabled: Enum.empty?(@changeset.changes) && !@changeset.valid?}/>
       </Form>
+      {#else if @live_action == :edit}
+      You can't edit someone else's profile.
       {/if}
     </Layout>
     """
