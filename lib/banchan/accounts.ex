@@ -135,6 +135,21 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  Updates the user profile fields.
+
+  ## Examples
+
+      iex> update_user_profile(user, %{handle: ..., bio: ..., ...})
+      {:ok, %User{}}
+
+  """
+  def update_user_profile(user, attrs) do
+    user
+    |> User.profile_changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
   Updates the user handle.
 
   ## Examples

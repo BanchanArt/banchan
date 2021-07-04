@@ -64,6 +64,16 @@ defmodule Banchan.Accounts.User do
     "user#{:rand.uniform(100_000_000)}"
   end
 
+  defp validate_name(changeset) do
+    changeset
+    |> validate_length(:name, max: 32)
+  end
+
+  defp validate_bio(changeset) do
+    changeset
+    |> validate_length(:bio, max: 160)
+  end
+
   defp validate_email(changeset) do
     changeset
     |> validate_required([:email])
@@ -94,6 +104,18 @@ defmodule Banchan.Accounts.User do
     else
       changeset
     end
+  end
+
+  @doc """
+  A user changeset meant for general editing forms.
+  """
+  def profile_changeset(user, attrs \\ %{}) do
+    user
+    |> cast(attrs, [:handle, :name, :bio, :header_img, :pfp_img])
+    |> validate_required([:handle])
+    |> validate_handle()
+    |> validate_name()
+    |> validate_bio()
   end
 
   @doc """
