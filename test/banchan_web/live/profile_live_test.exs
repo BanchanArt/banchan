@@ -17,7 +17,7 @@ defmodule BanchanWeb.ProfileLiveTest do
   describe "view profile page" do
     test "displays nav and main container", %{conn: conn, user: user} do
       {:ok, page_live, disconnected_html} =
-        live(conn, Routes.profile_path(conn, :index, user.handle))
+        live(conn, Routes.profile_path(conn, :show, user.handle))
 
       rendered_html = render(page_live)
 
@@ -34,7 +34,7 @@ defmodule BanchanWeb.ProfileLiveTest do
       conn = Plug.Conn.assign(conn, :user, user)
 
       {:ok, page_live, disconnected_html} =
-        live(conn, Routes.profile_path(conn, :index, user.handle))
+        live(conn, Routes.profile_path(conn, :show, user.handle))
 
       rendered_html = render(page_live)
 
@@ -89,6 +89,33 @@ defmodule BanchanWeb.ProfileLiveTest do
       assert rendered_html =~ user.handle
       assert rendered_html =~ user.bio
       assert rendered_html =~ user.name
+    end
+
+    test "disables submit button if there are no changes", %{conn: conn, user: user} do
+      {:ok, user} =
+        Accounts.update_user_profile(user, %{
+          name: "Name",
+          bio: "Bio"
+        })
+
+      conn = log_in_user(conn, user)
+
+      {:ok, page_live, disconnected_html} =
+        live(conn, Routes.profile_path(conn, :edit, user.handle))
+
+      rendered_html = render(page_live)
+
+      assert disconnected_html =~ "<button disabled=\"disabled\" type=\"submit\">"
+      assert rendered_html =~ "<button disabled=\"disabled\" type=\"submit\">"
+
+      rendered =
+        page_live
+        |> element("form")
+        |> render_change(%{
+          user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
+        })
+
+      assert rendered =~ "<button type=\"submit\">"
     end
 
     test "updates profile values on change, but does not change user in db", %{

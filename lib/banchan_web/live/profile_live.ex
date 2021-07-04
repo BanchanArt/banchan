@@ -52,7 +52,7 @@ defmodule BanchanWeb.ProfileLive do
           <TextInput />
           <ErrorTag />
         </Field>
-        <Submit label="Save" opts={disabled: Enum.empty?(@changeset.changes) && !@changeset.valid?}/>
+        <Submit label="Save" opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}/>
       </Form>
       {#else if @live_action == :edit}
       You can't edit someone else's profile.
