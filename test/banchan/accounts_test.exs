@@ -382,6 +382,38 @@ defmodule Banchan.AccountsTest do
     end
   end
 
+  describe "update_user_profile/2" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "validates profile", %{user: user} do
+      {:error, changeset} =
+        Accounts.update_user_profile(user, %{
+          handle: "12",
+          name: String.duplicate("b", 40),
+          bio: String.duplicate("a", 461)
+        })
+
+      assert %{
+               bio: ["should be at most 160 character(s)"],
+               handle: ["should be at least 3 character(s)"],
+               name: ["should be at most 32 character(s)"]
+             } = errors_on(changeset)
+    end
+
+    test "updates the user profile", %{user: user} do
+      {:ok, user} =
+        Accounts.update_user_profile(user, %{
+          handle: "newhandle",
+          name: "New Name",
+          bio: "New Bio"
+        })
+
+      assert Accounts.get_user_by_handle!(user.handle)
+    end
+  end
+
   describe "generate_user_session_token/1" do
     setup do
       %{user: user_fixture()}
