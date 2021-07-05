@@ -51,6 +51,7 @@ defmodule BanchanWeb.Router do
     live "/", HomeLive, :index
 
     live "/users/:handle", ProfileLive, :show
+    live "/studios/:slug", StudioViewLive, :show
 
     get "/force_logout", UserSessionController, :force_logout
   end
