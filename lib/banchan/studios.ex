@@ -23,4 +23,19 @@ defmodule Banchan.Studios do
   def get_studio_by_slug!(slug) when is_binary(slug) do
     Repo.get_by!(Studio, slug: slug)
   end
+
+  @doc """
+  Updates the studio profile fields.
+
+  ## Examples
+
+      iex> update_studio_profile(studio, %{slug: ..., name: ..., ...})
+      {:ok, %Studio{}}
+
+  """
+  def update_studio_profile(user, attrs) do
+    user
+    |> Studio.changeset(attrs)
+    |> Repo.update()
+  end
 end
