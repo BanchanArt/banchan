@@ -58,7 +58,9 @@ defmodule BanchanWeb.ProfileLive do
       {:ok, user} ->
         socket = assign(socket, changeset: User.profile_changeset(user), user: user)
         put_flash(socket, :info, "Profile updated")
-        {:noreply, push_patch(socket, to: Routes.profile_path(Endpoint, :edit, user.handle))}
+
+        {:noreply,
+         push_patch(socket, replace: true, to: Routes.profile_path(Endpoint, :edit, user.handle))}
 
       other ->
         other
