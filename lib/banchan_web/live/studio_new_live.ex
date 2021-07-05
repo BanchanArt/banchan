@@ -10,6 +10,7 @@ defmodule BanchanWeb.StudioNewLive do
 
   alias Banchan.Studios
   alias Banchan.Studios.Studio
+  alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -22,26 +23,28 @@ defmodule BanchanWeb.StudioNewLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <h1>New Studio</h1>
+    <Layout current_user={@current_user} flashes={@flash}>
+      <h1>New Studio</h1>
 
-    <Form for={@changeset} change="change" submit="submit" opts={autocomplete: "off"}>
-      <Field name={:name}>
-        <Label />
-        <TextInput />
-        <ErrorTag />
-      </Field>
-      <Field name={:slug}>
-        <Label />
-        <TextInput />
-        <ErrorTag />
-      </Field>
-      <Field name={:description}>
-        <Label />
-        <TextArea rows="3" />
-        <ErrorTag />
-      </Field>
-      <Submit label="Save" opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}/>
-    </Form>
+      <Form for={@changeset} change="change" submit="submit" opts={autocomplete: "off"}>
+        <Field name={:name}>
+          <Label />
+          <TextInput />
+          <ErrorTag />
+        </Field>
+        <Field name={:slug}>
+          <Label />
+          <TextInput />
+          <ErrorTag />
+        </Field>
+        <Field name={:description}>
+          <Label />
+          <TextArea rows="3" />
+          <ErrorTag />
+        </Field>
+        <Submit label="Save" opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}/>
+      </Form>
+    </Layout>
     """
   end
 

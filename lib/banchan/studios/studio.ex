@@ -20,7 +20,7 @@ defmodule Banchan.Studios.Studio do
   @doc false
   def changeset(studio, attrs) do
     studio
-    |> cast(attrs, [:name, :slug])
+    |> cast(attrs, [:name, :slug, :description])
     |> validate_required([:name, :slug])
   end
 end

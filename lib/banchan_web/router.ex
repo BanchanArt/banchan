@@ -37,6 +37,15 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live "/users/:handle/edit", ProfileLive, :edit
+    live "/studios/new", StudioNewLive, :new
+    live "/studios/:slug/edit", StudioEditLive, :edit
+    live "/dashboard", DashboardLive, :index
+  end
+
+  scope "/", BanchanWeb do
     pipe_through :browser
 
     live "/", HomeLive, :index
@@ -44,15 +53,6 @@ defmodule BanchanWeb.Router do
     live "/users/:handle", ProfileLive, :show
 
     get "/force_logout", UserSessionController, :force_logout
-  end
-
-  scope "/", BanchanWeb do
-    pipe_through [:browser, :require_authenticated_user]
-
-    live "/users/:handle/edit", ProfileLive, :edit
-    live "/studios/:slug/edit", StudioEditLive, :edit
-    live "/studios/new", StudioNewLive, :new
-    live "/dashboard", DashboardLive, :index
   end
 
   scope "/admin" do
