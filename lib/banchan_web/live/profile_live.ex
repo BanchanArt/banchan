@@ -4,11 +4,8 @@ defmodule BanchanWeb.ProfileLive do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Field, Label, Submit, TextInput}
-
   alias Banchan.Accounts
-  alias BanchanWeb.Components.Layout
+  alias BanchanWeb.Components.{Layout, ProfileEditor}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -36,24 +33,7 @@ defmodule BanchanWeb.ProfileLive do
       </div>
       {#elseif @live_action == :edit && @user.id == @current_user.id}
       Editing profile for {@user.handle}
-      <Form for={@changeset} change="change" submit="submit" opts={autocomplete: "off"}>
-        <Field name={:handle}>
-          <Label />
-          <TextInput />
-          <ErrorTag />
-        </Field>
-        <Field name={:name}>
-          <Label />
-          <TextInput />
-          <ErrorTag />
-        </Field>
-        <Field name={:bio}>
-          <Label />
-          <TextInput />
-          <ErrorTag />
-        </Field>
-        <Submit label="Save" opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}/>
-      </Form>
+      <ProfileEditor for={@changeset} fields={[:handle, :name, :bio]} change="change" submit="submit" />
       {#else if @live_action == :edit}
       You can't edit someone else's profile.
       {/if}
