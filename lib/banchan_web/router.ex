@@ -7,21 +7,21 @@ defmodule BanchanWeb.Router do
   alias BanchanWeb.EnsureRolePlug
 
   pipeline :browser do
-    plug(:accepts, ["html"])
-    plug(:fetch_session)
-    plug(:fetch_live_flash)
-    plug(:put_root_layout, {BanchanWeb.LayoutView, :root})
-    plug(:protect_from_forgery)
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, {BanchanWeb.LayoutView, :root}
+    plug :protect_from_forgery
     # NB(zkat): unsafe-eval has to be enabled because webpack does it for its internals.
-    plug(:put_secure_browser_headers, %{
+    plug :put_secure_browser_headers, %{
       "content-security-policy" => "default-src 'self' 'unsafe-eval'"
-    })
+    }
 
-    plug(:fetch_current_user)
+    plug :fetch_current_user
   end
 
   pipeline :api do
-    plug(:accepts, ["json"])
+    plug :accepts, ["json"]
   end
 
   pipeline :admin do
@@ -55,11 +55,12 @@ defmodule BanchanWeb.Router do
 
     live "/users/:handle/edit", ProfileLive, :edit
     live "/studios/:slug/edit", StudioLive, :edit
+    live "/dashboard", DashboardLive, :index
   end
 
   scope "/admin" do
     # Enable admin stuff dev/test side but restrict it in prod
-    pipe_through([:browser | if(Mix.env() in [:dev, :test], do: [], else: [:admin])])
+    pipe_through [:browser | if(Mix.env() in [:dev, :test], do: [], else: [:admin])]
 
     live_dashboard "/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo
   end
