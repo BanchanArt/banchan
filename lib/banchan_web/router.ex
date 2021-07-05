@@ -51,6 +51,7 @@ defmodule BanchanWeb.Router do
 
     live "/users/:handle/edit", ProfileLive, :edit
     live "/studios/:slug/edit", StudioEditLive, :edit
+    live "/studios/new", StudioNewLive, :new
     live "/dashboard", DashboardLive, :index
   end
 

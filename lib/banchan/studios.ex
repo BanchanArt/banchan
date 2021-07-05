@@ -38,4 +38,18 @@ defmodule Banchan.Studios do
     |> Studio.changeset(attrs)
     |> Repo.update()
   end
+
+  @doc """
+  Creates a new studio.
+
+  ## Examples
+
+      iex> new_studio(studio, %{slug: ..., name: ..., ...})
+      {:ok, %Studio{}}
+  """
+  def new_studio(user, attrs) do
+    user
+    |> Studio.changeset(attrs)
+    |> Repo.insert()
+  end
 end
