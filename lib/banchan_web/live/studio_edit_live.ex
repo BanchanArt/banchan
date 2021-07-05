@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive do
+defmodule BanchanWeb.StudioEditLive do
   @moduledoc """
   Banchan studio profile viewing and editing.
   """
@@ -18,21 +18,20 @@ defmodule BanchanWeb.StudioLive do
   def handle_params(%{"slug" => slug}, session, socket) do
     socket = assign_defaults(session, socket)
     studio = Studios.get_studio_by_slug!(slug)
-    {:noreply, assign(socket, studio: studio, changeset: Studio.changeset(studio, %{}))}
+    if studio.user_id == socket.assigns.current_user.id do
+      {:noreply, assign(socket, studio: studio, changeset: Studio.changeset(studio, %{}))}
+    else
+      put_flash(socket, :error, "Access denied")
+      {:noreply, push_patch(socket, to: Routes.home_path(Endpoint, :index))}
+    end
   end
 
   @impl true
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      {#if @live_action == :show}
-      Studio page for {@studio.name}
-      {#elseif @live_action == :edit && @studio.user_id == @current_user.id}
-      Studio profile for {@studio.name}
+      Editing Studio profile for {@studio.name}
       <ProfileEditor for={@changeset} fields={[:slug, :name, :description]} change="change" submit="submit" />
-      {#elseif @live_action == :edit}
-      no
-      {/if}
     </Layout>
     """
   end
@@ -54,7 +53,7 @@ defmodule BanchanWeb.StudioLive do
       {:ok, studio} ->
         socket = assign(socket, changeset: Studio.changeset(studio, %{}), studio: studio)
         put_flash(socket, :info, "Profile updated")
-        {:noreply, push_patch(socket, to: Routes.studio_path(Endpoint, :edit, studio.slug))}
+        {:noreply, push_patch(socket, to: Routes.studio_edit_path(Endpoint, :edit, studio.slug))}
 
       other ->
         other
