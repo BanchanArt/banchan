@@ -71,8 +71,7 @@ defmodule BanchanWeb.StudioNewLive do
     case Studios.new_studio(%Studio{user: socket.assigns.current_user}, val["studio"]) do
       {:ok, studio} ->
         put_flash(socket, :info, "Profile updated")
-        # TODO(zkat): Make this redirect to view_path instead once that exists.
-        {:noreply, redirect(socket, to: Routes.studio_edit_path(Endpoint, :edit, studio.slug))}
+        {:noreply, redirect(socket, to: Routes.studio_view_path(Endpoint, :show, studio.slug))}
 
       other ->
         other
