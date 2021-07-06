@@ -13,7 +13,8 @@ defmodule Banchan.Studios.Studio do
     field :header_img, :string
     field :card_img, :string
 
-    belongs_to :user, Banchan.Accounts.User
+    many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
+
     timestamps()
   end
 

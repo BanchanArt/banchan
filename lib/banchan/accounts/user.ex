@@ -19,7 +19,7 @@ defmodule Banchan.Accounts.User do
     field :pfp_img, :string
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
 
-    has_many :studios, Banchan.Studios.Studio
+    many_to_many :studios, Banchan.Studios.Studio, join_through: "users_studios"
 
     timestamps()
   end
