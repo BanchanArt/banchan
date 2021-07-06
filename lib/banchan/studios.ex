@@ -52,4 +52,16 @@ defmodule Banchan.Studios do
     |> Studio.changeset(attrs)
     |> Repo.insert()
   end
+
+  @doc """
+  List studios belonging to a user
+
+  ## Examples
+
+      iex> list_studios_for_user(user)
+      [%Studio{}, %Studio{}, %Studio{}]
+  """
+  def list_studios_for_user(user) do
+    Repo.all(Ecto.assoc(user, :studios))
+  end
 end
