@@ -1,6 +1,6 @@
 defmodule BanchanWeb.StudioIndexLive do
   @moduledoc """
-  Listing of studios belonging to the current user.
+  Listing of studios that can be commissioned.
   """
   use BanchanWeb, :surface_view
 
@@ -13,7 +13,7 @@ defmodule BanchanWeb.StudioIndexLive do
   @impl true
   def mount(_params, session, socket) do
     socket = assign_defaults(session, socket)
-    studios = Studios.list_studios_for_user(socket.assigns.current_user)
+    studios = Studios.list_studios()
     {:ok, assign(socket, studios: studios)}
   end
 
@@ -21,7 +21,7 @@ defmodule BanchanWeb.StudioIndexLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1>Your Studios</h1>
+      <h1>Commission a Studio</h1>
       <ul class="studios">
         {#for studio <- @studios}
         <li><Link to={Routes.studio_view_path(Endpoint, :show, studio.slug)}>{studio.name}</Link>: {studio.description}</li>

@@ -54,6 +54,18 @@ defmodule Banchan.Studios do
   end
 
   @doc """
+  List all studios
+
+  ## Examples
+
+      iex> list_studios()
+      [%Studio{}, %Studio{}, %Studio{}, ...]
+  """
+  def list_studios do
+    Repo.all(Studio)
+  end
+
+  @doc """
   List studios belonging to a user
 
   ## Examples
