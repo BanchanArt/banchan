@@ -78,6 +78,18 @@ defmodule Banchan.Studios do
   end
 
   @doc """
+  List members who are part of a studio
+
+  ## Examples
+
+      iex> list_studio_members(studio)
+      [%User{}, %User{}, %User{}]
+  """
+  def list_studio_members(studio) do
+    Repo.all(Ecto.assoc(studio, :artists))
+  end
+
+  @doc """
   Determine if a user is part of a studio. If the studio is omitted, returns
   true if the user is part of ANY studio.
 

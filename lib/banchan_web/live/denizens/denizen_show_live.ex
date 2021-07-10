@@ -4,9 +4,10 @@ defmodule BanchanWeb.DenizenShowLive do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.LivePatch
+  alias Surface.Components.LiveRedirect
 
   alias Banchan.Accounts
+  alias Banchan.Studios
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -14,7 +15,8 @@ defmodule BanchanWeb.DenizenShowLive do
   def mount(%{"handle" => handle}, session, socket) do
     socket = assign_defaults(session, socket)
     user = Accounts.get_user_by_handle!(handle)
-    {:ok, assign(socket, user: user)}
+    studios = Studios.list_studios_for_user(user)
+    {:ok, assign(socket, user: user, studios: studios)}
   end
 
   @impl true
@@ -26,7 +28,13 @@ defmodule BanchanWeb.DenizenShowLive do
         <p>Name: {@user.name}</p>
         <p>Bio: {@user.bio}</p>
       </div>
-      <LivePatch label="Edit" to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)} />
+      <LiveRedirect label="Edit" to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)} />
+      <h2>Studios</h2>
+      <ul class="denizen-studios">
+        {#for studio <- @studios}
+          <li><LiveRedirect label={studio.name} to={Routes.studio_show_path(Endpoint, :show, studio.slug)} /></li>
+        {/for}
+      </ul>
     </Layout>
     """
   end

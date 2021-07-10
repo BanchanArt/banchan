@@ -14,7 +14,8 @@ defmodule BanchanWeb.StudioShowLive do
   def mount(%{"slug" => slug}, session, socket) do
     socket = assign_defaults(session, socket)
     studio = Studios.get_studio_by_slug!(slug)
-    {:ok, assign(socket, studio: studio)}
+    members = Studios.list_studio_members(studio)
+    {:ok, assign(socket, studio: studio, members: members)}
   end
 
   @impl true
@@ -26,6 +27,12 @@ defmodule BanchanWeb.StudioShowLive do
         <p>{@studio.description}</p>
       </div>
       <LiveRedirect label="Edit" to={Routes.studio_edit_path(Endpoint, :edit, @studio.slug)} />
+      <h2>Members</h2>
+      <ul class="studio-members">
+        {#for member <- @members}
+          <li><LiveRedirect label={member.name} to={Routes.denizen_show_path(Endpoint, :show, member.handle)} /></li>
+        {/for}
+      </ul>
     </Layout>
     """
   end
