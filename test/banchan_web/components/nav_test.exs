@@ -21,7 +21,7 @@ defmodule BanchanWeb.Components.SessionTest do
     html =
       render_surface do
         ~F"""
-        <Nav current_user={%{email: "abc@example.com"}} />
+        <Nav current_user={%{email: "abc@example.com", handle: "abc"}} />
         """
       end
 

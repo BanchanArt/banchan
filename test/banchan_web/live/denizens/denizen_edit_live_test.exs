@@ -1,4 +1,4 @@
-defmodule BanchanWeb.ProfileLiveTest do
+defmodule BanchanWeb.DenizenEditLiveTest do
   @moduledoc """
   Tests for the user profile page.
   """
@@ -14,42 +14,9 @@ defmodule BanchanWeb.ProfileLiveTest do
     %{user: user_fixture()}
   end
 
-  describe "view profile page" do
-    test "displays nav and main container", %{conn: conn, user: user} do
-      {:ok, page_live, disconnected_html} =
-        live(conn, Routes.profile_path(conn, :show, user.handle))
-
-      rendered_html = render(page_live)
-
-      assert disconnected_html =~ "<ul class=\"nav\">"
-      assert rendered_html =~ "<ul class=\"nav\">"
-      assert disconnected_html =~ "<main role=\"main\" class=\"container\">"
-      assert rendered_html =~ "<main role=\"main\" class=\"container\">"
-    end
-
-    test "displays user data", %{conn: conn, user: user} do
-      {:ok, user} =
-        Banchan.Accounts.update_user_profile(user, %{bio: "This is my bio", name: "New User"})
-
-      conn = Plug.Conn.assign(conn, :user, user)
-
-      {:ok, page_live, disconnected_html} =
-        live(conn, Routes.profile_path(conn, :show, user.handle))
-
-      rendered_html = render(page_live)
-
-      assert disconnected_html =~ user.handle
-      assert rendered_html =~ user.handle
-      assert disconnected_html =~ user.bio
-      assert rendered_html =~ user.bio
-      assert disconnected_html =~ user.name
-      assert rendered_html =~ user.name
-    end
-  end
-
   describe "edit profile page" do
     test "redirects if logged out", %{conn: conn, user: user} do
-      {:error, {:redirect, info}} = live(conn, Routes.profile_path(conn, :edit, user.handle))
+      {:error, {:redirect, info}} = live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
 
       assert info.to =~ Routes.user_session_path(conn, :new)
     end
@@ -58,7 +25,7 @@ defmodule BanchanWeb.ProfileLiveTest do
       conn = conn |> log_in_user(user)
 
       {:ok, page_live, disconnected_html} =
-        live(conn, Routes.profile_path(conn, :edit, user.handle))
+        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
 
       rendered_html = render(page_live)
 
@@ -78,7 +45,7 @@ defmodule BanchanWeb.ProfileLiveTest do
       conn = log_in_user(conn, user)
 
       {:ok, page_live, disconnected_html} =
-        live(conn, Routes.profile_path(conn, :edit, user.handle))
+        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
 
       rendered_html = render(page_live)
 
@@ -101,7 +68,7 @@ defmodule BanchanWeb.ProfileLiveTest do
       conn = log_in_user(conn, user)
 
       {:ok, page_live, disconnected_html} =
-        live(conn, Routes.profile_path(conn, :edit, user.handle))
+        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
 
       rendered_html = render(page_live)
 
@@ -125,7 +92,7 @@ defmodule BanchanWeb.ProfileLiveTest do
       conn = conn |> log_in_user(user)
 
       {:ok, page_live, _disconnected_html} =
-        live(conn, Routes.profile_path(conn, :edit, user.handle))
+        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
 
       rendered =
         page_live
@@ -151,7 +118,7 @@ defmodule BanchanWeb.ProfileLiveTest do
       conn = conn |> log_in_user(user)
 
       {:ok, page_live, _disconnected_html} =
-        live(conn, Routes.profile_path(conn, :edit, user.handle))
+        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
 
       rendered =
         page_live
@@ -177,21 +144,15 @@ defmodule BanchanWeb.ProfileLiveTest do
       conn = conn |> log_in_user(user)
 
       {:ok, page_live, _disconnected_html} =
-        live(conn, Routes.profile_path(conn, :edit, user.handle))
+        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
 
-      rendered =
-        page_live
-        |> element("form")
-        |> render_submit(%{
-          user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
-        })
+      page_live
+      |> element("form")
+      |> render_submit(%{
+        user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
+      })
 
-      assert_patched(page_live, Routes.profile_path(conn, :edit, "newhandle"))
-
-      assert rendered =~ "newhandle"
-      assert rendered =~ "new bio"
-      assert rendered =~ "new name"
-      refute rendered =~ "new@email"
+      assert_redirected(page_live, Routes.denizen_show_path(conn, :show, "newhandle"))
 
       db_user = Accounts.get_user!(user.id)
 

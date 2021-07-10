@@ -14,7 +14,7 @@ defmodule BanchanWeb.Components.Nav do
     ~F"""
     <ul class="nav">
       {#if @current_user}
-        <li><LiveRedirect label={"@#{@current_user.handle}"} to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)} /></li>
+        <li><LiveRedirect label={@current_user.email} to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)} /></li>
         <li><Link label="Settings" to={Routes.user_settings_path(Endpoint, :edit)} /></li>
         <li><Link label="Log out" to={Routes.user_session_path(Endpoint, :delete)} method={:delete} /></li>
       {#else}

@@ -14,7 +14,7 @@ defmodule BanchanWeb.StudioEditLive do
     socket = assign_defaults(session, socket)
     studio = Studios.get_studio_by_slug!(slug)
 
-    if Studios.is_user_in_studio(socket.assigns.current_user, studio)  do
+    if Studios.is_user_in_studio(socket.assigns.current_user, studio) do
       {:ok, assign(socket, studio: studio, changeset: Studio.changeset(studio, %{}))}
     else
       socket = put_flash(socket, :error, "Access denied")
