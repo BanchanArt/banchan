@@ -39,7 +39,7 @@ defmodule BanchanWeb.Router do
   scope "/", BanchanWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    live "/users/:handle/edit", ProfileLive, :edit
+    live "/denizens/:handle/edit", DenizenEditLive, :edit
     live "/studios/new", StudioNewLive, :new
     live "/studios/:slug/edit", StudioEditLive, :edit
     live "/dashboard", DashboardLive, :index
@@ -50,7 +50,7 @@ defmodule BanchanWeb.Router do
 
     live "/", HomeLive, :index
 
-    live "/users/:handle", ProfileLive, :show
+    live "/denizens/:handle", DenizenShowLive, :show
     live "/studios", StudioIndexLive, :index
     live "/studios/:slug", StudioShowLive, :show
 
