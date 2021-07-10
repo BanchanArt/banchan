@@ -4,10 +4,11 @@ defmodule BanchanWeb.StudioShowLive do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.LivePatch
+  alias Surface.Components.LiveRedirect
 
   alias Banchan.Studios
   alias BanchanWeb.Components.Layout
+  alias BanchanWeb.Endpoint
 
   @impl true
   def mount(%{"slug" => slug}, session, socket) do
@@ -24,7 +25,7 @@ defmodule BanchanWeb.StudioShowLive do
         <h1>{@studio.name}</h1>
         <p>{@studio.description}</p>
       </div>
-      <LivePatch label="Edit" to={Routes.studio_edit_path(Endpoint, :edit, @studio.slug)} />
+      <LiveRedirect label="Edit" to={Routes.studio_edit_path(Endpoint, :edit, @studio.slug)} />
     </Layout>
     """
   end
