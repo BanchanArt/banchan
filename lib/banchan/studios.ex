@@ -76,4 +76,16 @@ defmodule Banchan.Studios do
   def list_studios_for_user(user) do
     Repo.all(Ecto.assoc(user, :studios))
   end
+
+  @doc """
+  Determine if a user is part of a studio
+
+  ## Examples
+
+      iex> is_user_in_studio(user, studio)
+      true
+  """
+  def is_user_in_studio(user, studio) do
+    Repo.exists?(from us in "users_studios", where: us.user_id == ^user.id and us.studio_id == ^studio.id)
+  end
 end

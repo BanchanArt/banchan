@@ -20,7 +20,7 @@ defmodule BanchanWeb.StudioEditLive do
     socket = assign_defaults(session, socket)
     studio = Studios.get_studio_by_slug!(slug)
 
-    if studio.user_id == socket.assigns.current_user.id do
+    if Studios.is_user_in_studio(socket.assigns.current_user, studio)  do
       {:noreply, assign(socket, studio: studio, changeset: Studio.changeset(studio, %{}))}
     else
       put_flash(socket, :error, "Access denied")
@@ -33,7 +33,7 @@ defmodule BanchanWeb.StudioEditLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       Editing Studio profile for {@studio.name}
-      <ProfileEditor for={@changeset} fields={[:slug, :name, :description]} change="change" submit="submit" />
+      <ProfileEditor for={@changeset} fields={[:name, :slug, :description]} change="change" submit="submit" />
     </Layout>
     """
   end
