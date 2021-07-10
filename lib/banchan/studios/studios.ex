@@ -78,16 +78,21 @@ defmodule Banchan.Studios do
   end
 
   @doc """
-  Determine if a user is part of a studio
+  Determine if a user is part of a studio. If the studio is omitted, returns
+  true if the user is part of ANY studio.
 
   ## Examples
 
       iex> is_user_in_studio(user, studio)
       true
   """
-  def is_user_in_studio(user, studio) do
-    Repo.exists?(
-      from us in "users_studios", where: us.user_id == ^user.id and us.studio_id == ^studio.id
-    )
+  def is_user_in_studio(user, studio \\ false) do
+    if studio do
+      Repo.exists?(
+        from us in "users_studios", where: us.user_id == ^user.id and us.studio_id == ^studio.id
+      )
+    else
+      Repo.exists?(from us in "users_studios", where: us.user_id == ^user.id)
+    end
   end
 end

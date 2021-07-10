@@ -5,6 +5,7 @@ defmodule BanchanWeb.UserAuth do
   import Phoenix.Controller
 
   alias Banchan.Accounts
+  alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
 
   # Make the remember me cookie valid for 60 days.
@@ -149,7 +150,7 @@ defmodule BanchanWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  defp signed_in_path(_conn), do: "/"
+  defp signed_in_path(_conn), do: Routes.home_path(Endpoint, :index)
 
   @doc """
   Returns the pubsub topic name for receiving  notifications when a user updated

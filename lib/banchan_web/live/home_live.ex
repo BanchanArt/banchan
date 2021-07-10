@@ -4,19 +4,27 @@ defmodule BanchanWeb.HomeLive do
   """
   use BanchanWeb, :surface_view
 
-  alias BanchanWeb.Components.Layout
+  alias Banchan.Studios
+  alias BanchanWeb.Components.{Layout, StudioCard}
 
   @impl true
   def mount(_params, session, socket) do
     socket = assign_defaults(session, socket)
-    {:ok, socket}
+    studios = Studios.list_studios()
+    {:ok, assign(socket, :studios, studios)}
   end
 
   @impl true
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      I guess I'm home?
+      <h1>Home</h1>
+      <h2>Commission Someone</h2>
+      <ul class="studio-list">
+        {#for studio <- @studios}
+        <StudioCard studio={studio} />
+        {/for}
+      </ul>
     </Layout>
     """
   end
