@@ -1,8 +1,10 @@
-defmodule BanchanWeb.StudioViewLive do
+defmodule BanchanWeb.StudioShowLive do
   @moduledoc """
   LiveView for viewing individual Studios
   """
   use BanchanWeb, :surface_view
+
+  alias Surface.Components.LivePatch
 
   alias Banchan.Studios
   alias BanchanWeb.Components.Layout
@@ -22,6 +24,7 @@ defmodule BanchanWeb.StudioViewLive do
         <h1>{@studio.name}</h1>
         <p>{@studio.description}</p>
       </div>
+      <LivePatch label="Edit" to={Routes.studio_edit_path(Endpoint, :edit, @studio.slug)} />
     </Layout>
     """
   end

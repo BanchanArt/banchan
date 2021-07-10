@@ -4,7 +4,7 @@ defmodule BanchanWeb.StudioIndexLive do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.Link
+  alias Surface.Components.LivePatch
 
   alias Banchan.Studios
   alias BanchanWeb.Components.Layout
@@ -24,9 +24,9 @@ defmodule BanchanWeb.StudioIndexLive do
       <h1>Commission a Studio</h1>
       <ul class="studios">
         {#for studio <- @studios}
-        <li><Link to={Routes.studio_view_path(Endpoint, :show, studio.slug)}>{studio.name}</Link>: {studio.description}</li>
+        <li><LivePatch to={Routes.studio_view_path(Endpoint, :show, studio.slug)}>{studio.name}</LivePatch>: {studio.description}</li>
         {#else}
-        You have no studios. <Link to={Routes.studio_new_path(Endpoint, :new)}>Create one</Link>.
+        You have no studios. <LivePatch to={Routes.studio_new_path(Endpoint, :new)}>Create one</LivePatch>.
         {/for}
       </ul>
     </Layout>
