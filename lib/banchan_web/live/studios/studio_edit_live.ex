@@ -10,21 +10,15 @@ defmodule BanchanWeb.StudioEditLive do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(params, session, socket) do
-    {:noreply, socket} = handle_params(params, session, socket)
-    {:ok, socket}
-  end
-
-  @impl true
-  def handle_params(%{"slug" => slug}, session, socket) do
+  def mount(%{"slug" => slug}, session, socket) do
     socket = assign_defaults(session, socket)
     studio = Studios.get_studio_by_slug!(slug)
 
     if Studios.is_user_in_studio(socket.assigns.current_user, studio)  do
-      {:noreply, assign(socket, studio: studio, changeset: Studio.changeset(studio, %{}))}
+      {:ok, assign(socket, studio: studio, changeset: Studio.changeset(studio, %{}))}
     else
-      put_flash(socket, :error, "Access denied")
-      {:noreply, push_redirect(socket, to: Routes.studio_show_path(Endpoint, :show, studio.slug))}
+      socket = put_flash(socket, :error, "Access denied")
+      {:ok, push_redirect(socket, to: Routes.studio_show_path(Endpoint, :show, studio.slug))}
     end
   end
 
@@ -54,12 +48,11 @@ defmodule BanchanWeb.StudioEditLive do
     case Studios.update_studio_profile(socket.assigns.studio, val["studio"]) do
       {:ok, studio} ->
         socket = assign(socket, changeset: Studio.changeset(studio, %{}), studio: studio)
-        put_flash(socket, :info, "Profile updated")
+        socket = put_flash(socket, :info, "Profile updated")
 
         {:noreply,
-         push_patch(socket,
-           replace: true,
-           to: Routes.studio_edit_path(Endpoint, :edit, studio.slug)
+         push_redirect(socket,
+           to: Routes.studio_show_path(Endpoint, :show, studio.slug)
          )}
 
       other ->
