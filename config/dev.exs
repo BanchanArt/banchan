@@ -66,8 +66,7 @@ config :banchan, BanchanWeb.Endpoint,
     ]
   ]
 
-config :banchan, Banchan.Mailer,
-  adapter: Bamboo.LocalAdapter
+config :banchan, Banchan.Mailer, adapter: Bamboo.LocalAdapter
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

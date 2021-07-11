@@ -13,6 +13,7 @@ defmodule Banchan.Accounts.UserNotifier do
       text_body: body
     )
     |> Mailer.deliver_later!()
+
     {:ok, %{to: to, body: body}}
   end
 
