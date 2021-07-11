@@ -10,18 +10,26 @@ use Mix.Config
 # which you should run after static files are built and
 # before starting your production server.
 config :banchan, BanchanWeb.Endpoint,
-  url: [host: "example.com", port: 443],
+  url: [host: System.get_env("APP_NAME") <> ".gigalixirapp.com", port: 443],
   cache_static_manifest: "priv/static/cache_manifest.json",
   force_ssl: [hsts: true],
-  https: [
-    port: 443,
-    cipher_suite: :strong,
-    keyfile: System.get_env("Banchan_SSL_KEY_PATH"),
-    certfile: System.get_env("Banchan_SSL_CERT_PATH")
-  ]
+  secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE"),
+  server: true
+  # https: [
+  #   port: 443,
+  #   cipher_suite: :strong,
+  #   keyfile: System.get_env("Banchan_SSL_KEY_PATH"),
+  #   certfile: System.get_env("Banchan_SSL_CERT_PATH")
+  # ]
 
 # Do not print debug messages in production
 config :logger, level: :info
+
+config :banchan, Banchan.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  url: System.get_env("DATABASE_URL"),
+  ssl: true,
+  pool_size: 2 # Free tier db only allows 4 connections. Rolling deploys need pool_size*(n+1) connections where n is the number of app replicas.
 
 # ## SSL Support
 #
