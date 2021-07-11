@@ -10,7 +10,7 @@ use Mix.Config
 # which you should run after static files are built and
 # before starting your production server.
 config :banchan, BanchanWeb.Endpoint,
-  url: [host: System.get_env("APP_NAME") <> ".gigalixirapp.com", port: 443],
+  url: [host: "banchan.art", port: 443],
   cache_static_manifest: "priv/static/cache_manifest.json",
   force_ssl: [hsts: true, rewrite_on: [:x_forwarded_proto]],
   secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE"),
