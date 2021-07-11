@@ -63,6 +63,7 @@ defmodule Banchan.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:surface, "~> 0.5"},
       {:slugify, "~> 1.3.1"},
+      {:bamboo, "~> 2.2.0"},
       # Testing and static analysis
       {:phx_gen_auth, "~> 0.7", only: [:dev], runtime: false},
       {:floki, ">= 0.27.0", only: :test},

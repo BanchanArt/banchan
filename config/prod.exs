@@ -34,6 +34,13 @@ config :banchan, Banchan.Repo,
   # Free tier db only allows 4 connections. Rolling deploys need pool_size*(n+1) connections where n is the number of app replicas.
   pool_size: 2
 
+config :banchan, Banchan.Mailer,
+  adapter: Bamboo.SendGridAdapter,
+  api_key: {:system, "SENDGRID_API_KEY"},
+  hackney_opts: [
+    recv_timeout: :timer.minutes(1)
+  ]
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key

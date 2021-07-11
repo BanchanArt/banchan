@@ -1,4 +1,5 @@
 %{
+  "bamboo": {:hex, :bamboo, "2.2.0", "f10a406d2b7f5123eb1f02edfa043c259db04b47ab956041f279eaac776ef5ce", [:mix], [{:hackney, ">= 1.15.2", [hex: :hackney, repo: "hexpm", optional: false]}, {:jason, "~> 1.0", [hex: :jason, repo: "hexpm", optional: true]}, {:mime, "~> 1.4", [hex: :mime, repo: "hexpm", optional: false]}, {:plug, "~> 1.0", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm", "8c3b14ba7d2f40cb4be04128ed1e2aff06d91d9413d38bafb4afccffa3ade4fc"},
   "bunt": {:hex, :bunt, "0.2.0", "951c6e801e8b1d2cbe58ebbd3e616a869061ddadcc4863d0a2182541acae9a38", [:mix], [], "hexpm", "7af5c7e09fe1d40f76c8e4f9dd2be7cebd83909f31fee7cd0e9eadc567da8353"},
   "certifi": {:hex, :certifi, "2.6.1", "dbab8e5e155a0763eea978c913ca280a6b544bfa115633fa20249c3d396d9493", [:rebar3], [], "hexpm", "524c97b4991b3849dd5c17a631223896272c6b0af446778ba4675a1dff53bb7e"},
   "comeonin": {:hex, :comeonin, "5.3.2", "5c2f893d05c56ae3f5e24c1b983c2d5dfb88c6d979c9287a76a7feb1e1d8d646", [:mix], [], "hexpm", "d0993402844c49539aeadb3fe46a3c9bd190f1ecf86b6f9ebd71957534c95f04"},

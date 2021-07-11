@@ -62,6 +62,7 @@ defmodule BanchanWeb.Router do
     pipe_through [:browser | if(Mix.env() in [:dev, :test], do: [], else: [:admin])]
 
     live_dashboard "/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo
+    forward "/sent_emails", Bamboo.SentEmailViewerPlug
   end
 
   ## Registration and Authentication routes

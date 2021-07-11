@@ -1,15 +1,18 @@
 defmodule Banchan.Accounts.UserNotifier do
   @moduledoc false
 
-  # For simplicity, this module simply logs messages to the terminal.
-  # You should replace it by a proper email or notification tool, such as:
-  #
-  #   * Swoosh - https://hexdocs.pm/swoosh
-  #   * Bamboo - https://hexdocs.pm/bamboo
-  #
-  defp deliver(to, body) do
-    require Logger
-    Logger.debug(body)
+  alias Bamboo.Email
+
+  alias Banchan.Mailer
+
+  defp deliver(to, subject, body) do
+    Email.new_email(
+      to: to,
+      from: "noreply@" <> (System.get_env("SENDGRID_DOMAIN") || "example.com"),
+      subject: subject,
+      text_body: body
+    )
+    |> Mailer.deliver_later!()
     {:ok, %{to: to, body: body}}
   end
 
@@ -17,7 +20,7 @@ defmodule Banchan.Accounts.UserNotifier do
   Deliver instructions to confirm account.
   """
   def deliver_confirmation_instructions(user, url) do
-    deliver(user.email, """
+    deliver(user.email, "Confirm Your Banchan Art Email", """
 
     ==============================
 
@@ -37,7 +40,7 @@ defmodule Banchan.Accounts.UserNotifier do
   Deliver instructions to reset a user password.
   """
   def deliver_reset_password_instructions(user, url) do
-    deliver(user.email, """
+    deliver(user.email, "Reset Your Banchan Art Email", """
 
     ==============================
 
@@ -57,7 +60,7 @@ defmodule Banchan.Accounts.UserNotifier do
   Deliver instructions to update a user email.
   """
   def deliver_update_email_instructions(user, url) do
-    deliver(user.email, """
+    deliver(user.email, "Update Your Banchan Art Email", """
 
     ==============================
 
