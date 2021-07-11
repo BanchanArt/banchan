@@ -12,7 +12,7 @@ use Mix.Config
 config :banchan, BanchanWeb.Endpoint,
   url: [host: System.get_env("APP_NAME") <> ".gigalixirapp.com", port: 443],
   cache_static_manifest: "priv/static/cache_manifest.json",
-  force_ssl: [hsts: true],
+  force_ssl: [hsts: true, rewrite_on: [:x_forwarded_proto]],
   secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE"),
   server: true
 
