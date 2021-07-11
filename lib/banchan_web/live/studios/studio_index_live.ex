@@ -1,6 +1,6 @@
 defmodule BanchanWeb.StudioIndexLive do
   @moduledoc """
-  Listing of studios that can be commissioned.
+  Listing of studios belonging to the current user
   """
   use BanchanWeb, :surface_view
 

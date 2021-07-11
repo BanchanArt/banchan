@@ -2,29 +2,28 @@ defmodule BanchanWeb.LiveHelpers do
   @moduledoc false
 
   import Phoenix.LiveView
+
   alias Banchan.Accounts
   alias Banchan.Accounts.User
+  alias BanchanWeb.Router.Helpers, as: Routes
   alias BanchanWeb.UserAuth
-  # alias BanchanWeb.Router.Helpers, as: Routes
 
-  def assign_defaults(session, socket) do
+  def assign_defaults(session, socket, auth \\ true) do
     # This is important so clients get booted when they log out elsewhere.
     BanchanWeb.Endpoint.subscribe(UserAuth.pubsub_topic())
 
-    assign_new(socket, :current_user, fn ->
-      find_current_user(session)
-    end)
+    socket =
+      assign_new(socket, :current_user, fn ->
+        find_current_user(session)
+      end)
 
-    # Use the following if you want to force redirect / for logged out folks
-    # case socket.assigns.current_user do
-    #   %User{} ->
-    #     socket
-
-    #   _other ->
-    #     socket
-    #     |> put_flash(:error, "You must log in to access this page.")
-    #     |> redirect(to: Routes.user_session_path(socket, :new))
-    # end
+    if auth && is_nil(socket.assigns.current_user) do
+      socket
+      |> put_flash(:error, "You must log in to access this page.")
+      |> redirect(to: Routes.user_session_path(socket, :new))
+    else
+      socket
+    end
   end
 
   defp find_current_user(session) do

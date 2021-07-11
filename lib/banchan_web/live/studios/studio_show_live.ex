@@ -12,7 +12,7 @@ defmodule BanchanWeb.StudioShowLive do
 
   @impl true
   def mount(%{"slug" => slug}, session, socket) do
-    socket = assign_defaults(session, socket)
+    socket = assign_defaults(session, socket, false)
     studio = Studios.get_studio_by_slug!(slug)
     members = Studios.list_studio_members(studio)
     {:ok, assign(socket, studio: studio, members: members)}
