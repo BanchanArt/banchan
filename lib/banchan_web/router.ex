@@ -46,7 +46,7 @@ defmodule BanchanWeb.Router do
 
     live "/settings", SettingsLive, :edit
     get "/settings/confirm_email/:token", UserSettingsController, :confirm_email
-    get "/settings/refresh_session", UserSettingsController, :refresh_session
+    get "/settings/refresh_session/:return_to", UserSessionController, :refresh_session
   end
 
   scope "/", BanchanWeb do
@@ -59,22 +59,8 @@ defmodule BanchanWeb.Router do
     live "/studios/:slug", StudioShowLive, :show
 
     get "/force_logout", UserSessionController, :force_logout
-  end
 
-  scope "/admin" do
-    # Enable admin stuff dev/test side but restrict it in prod
-    pipe_through [:browser | if(Mix.env() in [:dev, :test], do: [], else: [:admin])]
-
-    live_dashboard "/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo
-    forward "/sent_emails", Bamboo.SentEmailViewerPlug
-  end
-
-  ## Registration and Authentication routes
-
-  scope "/", BanchanWeb do
-    pipe_through [:browser]
-
-    delete "/log_out", UserSessionController, :delete
+    delete "/logout", UserSessionController, :delete
     get "/confirm", UserConfirmationController, :new
     post "/confirm", UserConfirmationController, :create
     get "/confirm/:token", UserConfirmationController, :confirm
@@ -83,13 +69,22 @@ defmodule BanchanWeb.Router do
   scope "/", BanchanWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
+    live "/login", LoginLive, :new
+
     get "/register", UserRegistrationController, :new
     post "/register", UserRegistrationController, :create
-    get "/log_in", UserSessionController, :new
-    post "/log_in", UserSessionController, :create
+    post "/login", UserSessionController, :create
     get "/reset_password", UserResetPasswordController, :new
     post "/reset_password", UserResetPasswordController, :create
     get "/reset_password/:token", UserResetPasswordController, :edit
     put "/reset_password/:token", UserResetPasswordController, :update
+  end
+
+  scope "/admin" do
+    # Enable admin stuff dev/test side but restrict it in prod
+    pipe_through [:browser | if(Mix.env() in [:dev, :test], do: [], else: [:admin])]
+
+    live_dashboard "/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo
+    forward "/sent_emails", Bamboo.SentEmailViewerPlug
   end
 end

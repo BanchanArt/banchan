@@ -22,7 +22,7 @@ defmodule BanchanWeb.Components.Nav do
         <li><Link label="Log out" to={Routes.user_session_path(Endpoint, :delete)} method={:delete} /></li>
       {#else}
         <li><Link label="Register" to={Routes.user_registration_path(Endpoint, :new)} /></li>
-        <li><Link label="Log in" to={Routes.user_session_path(Endpoint, :new)} /></li>
+        <li><Link label="Log in" to={Routes.login_path(Endpoint, :new)} /></li>
       {/if}
     </ul>
     """

@@ -47,6 +47,11 @@ defmodule Banchan.Accounts.User do
     |> validate_password(opts)
   end
 
+  def login_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email, :password])
+  end
+
   defp validate_handle(changeset) do
     changeset
     |> validate_required([:handle])

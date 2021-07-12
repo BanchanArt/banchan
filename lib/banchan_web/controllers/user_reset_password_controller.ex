@@ -37,7 +37,7 @@ defmodule BanchanWeb.UserResetPasswordController do
       {:ok, _} ->
         conn
         |> put_flash(:info, "Password reset successfully.")
-        |> redirect(to: Routes.user_session_path(conn, :new))
+        |> redirect(to: Routes.login_path(conn, :new))
 
       {:error, changeset} ->
         render(conn, "edit.html", changeset: changeset)

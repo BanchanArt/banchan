@@ -134,7 +134,14 @@ defmodule BanchanWeb.SettingsLive do
           )
 
         {:noreply,
-         push_redirect(socket, to: Routes.user_settings_path(Endpoint, :refresh_session))}
+         push_redirect(socket,
+           to:
+             Routes.user_session_path(
+               Endpoint,
+               :refresh_session,
+               Routes.settings_path(Endpoint, :edit)
+             )
+         )}
 
       {:error, changeset} ->
         {:noreply, assign(socket, password_changeset: changeset)}
