@@ -43,6 +43,10 @@ defmodule BanchanWeb.Router do
     live "/studios/new", StudioNewLive, :new
     live "/studios/:slug/edit", StudioEditLive, :edit
     live "/dashboard", DashboardLive, :index
+
+    live "/settings", SettingsLive, :edit
+    get "/settings/confirm_email/:token", UserSettingsController, :confirm_email
+    get "/settings/refresh_session", UserSettingsController, :refresh_session
   end
 
   scope "/", BanchanWeb do
@@ -87,13 +91,5 @@ defmodule BanchanWeb.Router do
     post "/reset_password", UserResetPasswordController, :create
     get "/reset_password/:token", UserResetPasswordController, :edit
     put "/reset_password/:token", UserResetPasswordController, :update
-  end
-
-  scope "/", BanchanWeb do
-    pipe_through [:browser, :require_authenticated_user]
-
-    get "/settings", UserSettingsController, :edit
-    put "/settings", UserSettingsController, :update
-    get "/settings/confirm_email/:token", UserSettingsController, :confirm_email
   end
 end

@@ -201,11 +201,6 @@ defmodule Banchan.AccountsTest do
       %{user: user_fixture()}
     end
 
-    test "requires email to change", %{user: user} do
-      {:error, changeset} = Accounts.apply_user_email(user, valid_user_password(), %{})
-      assert %{email: ["did not change"]} = errors_on(changeset)
-    end
-
     test "validates email", %{user: user} do
       {:error, changeset} =
         Accounts.apply_user_email(user, valid_user_password(), %{email: "not valid"})
