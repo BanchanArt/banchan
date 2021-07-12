@@ -44,6 +44,7 @@ defmodule Banchan.Accounts.User do
     |> cast(attrs, [:handle, :email, :password])
     |> unique_constraint(:handle)
     |> validate_email()
+    |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
   end
 

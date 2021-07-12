@@ -70,10 +70,11 @@ defmodule BanchanWeb.Router do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
     live "/login", LoginLive, :new
-
-    get "/register", UserRegistrationController, :new
-    post "/register", UserRegistrationController, :create
     post "/login", UserSessionController, :create
+
+    live "/register", RegisterLive, :new
+    post "/register", UserRegistrationController, :create
+
     get "/reset_password", UserResetPasswordController, :new
     post "/reset_password", UserResetPasswordController, :create
     get "/reset_password/:token", UserResetPasswordController, :edit

@@ -10,6 +10,6 @@
 <% end %>
 
 <p>
-  <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |
+  <%= link "Register", to: Routes.register_path(@conn, :new) %> |
   <%= link "Log in", to: Routes.login_path(@conn, :new) %>
 </p>
