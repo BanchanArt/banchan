@@ -12,8 +12,8 @@ defmodule BanchanWeb.StudioLive.Index do
 
   @impl true
   def mount(_params, session, socket) do
-    socket = assign_defaults(session, socket)
-    studios = Studios.list_studios_for_user(socket.assigns.current_user)
+    socket = assign_defaults(session, socket, false)
+    studios = Studios.list_studios()
     {:ok, assign(socket, studios: studios)}
   end
 
@@ -21,12 +21,10 @@ defmodule BanchanWeb.StudioLive.Index do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1>Your Studios</h1>
+      <h1>Studios</h1>
       <ul class="studios">
         {#for studio <- @studios}
           <li><LiveRedirect to={Routes.studio_show_path(Endpoint, :show, studio.slug)}>{studio.name}</LiveRedirect>: {studio.description}</li>
-        {#else}
-          You have no studios. <LiveRedirect to={Routes.studio_new_path(Endpoint, :new)}>Create one</LiveRedirect>.
         {/for}
       </ul>
     </Layout>

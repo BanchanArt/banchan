@@ -28,7 +28,9 @@ defmodule BanchanWeb.DenizenLive.Show do
         <p>Name: {@user.name}</p>
         <p>Bio: {@user.bio}</p>
       </div>
-      <LiveRedirect label="Edit" to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)} />
+      {#if @current_user && @current_user.id == @user.id}
+        <LiveRedirect label="Edit" to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)} />
+      {/if}
       <h2>Studios</h2>
       <ul class="denizen-studios">
         {#for studio <- @studios}

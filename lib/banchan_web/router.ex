@@ -41,7 +41,7 @@ defmodule BanchanWeb.Router do
 
     live "/denizens/:handle/edit", DenizenLive.Edit, :edit
     live "/studios/new", StudioLive.New, :new
-    live "/studio/:slug/edit", StudioLive.Edit, :edit
+    live "/studios/:slug/edit", StudioLive.Edit, :edit
     live "/dashboard", DashboardLive, :index
 
     live "/settings", SettingsLive, :edit
