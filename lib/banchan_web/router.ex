@@ -74,10 +74,9 @@ defmodule BanchanWeb.Router do
     live "/register", RegisterLive, :new
     post "/register", UserRegistrationController, :create
 
-    get "/reset_password", UserResetPasswordController, :new
-    post "/reset_password", UserResetPasswordController, :create
-    get "/reset_password/:token", UserResetPasswordController, :edit
-    put "/reset_password/:token", UserResetPasswordController, :update
+    live "/reset_password", ForgotPasswordLive, :edit
+
+    live "/reset_password/:token", ResetPasswordLive, :edit
   end
 
   scope "/admin" do
