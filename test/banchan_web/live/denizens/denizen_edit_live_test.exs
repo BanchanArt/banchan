@@ -18,7 +18,7 @@ defmodule BanchanWeb.DenizenEditLiveTest do
     test "redirects if logged out", %{conn: conn, user: user} do
       {:error, {:redirect, info}} = live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
 
-      assert info.to =~ Routes.user_session_path(conn, :new)
+      assert info.to =~ Routes.login_path(conn, :new)
     end
 
     test "displays nav and main container", %{conn: conn, user: user} do

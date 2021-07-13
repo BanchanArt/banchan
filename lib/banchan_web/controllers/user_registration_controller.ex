@@ -1,14 +1,10 @@
 defmodule BanchanWeb.UserRegistrationController do
   use BanchanWeb, :controller
 
-  alias Banchan.Accounts
-  alias Banchan.Accounts.User
-  alias BanchanWeb.UserAuth
+  alias Phoenix.LiveView
 
-  def new(conn, _params) do
-    changeset = Accounts.change_user_registration(%User{})
-    render(conn, "new.html", changeset: changeset)
-  end
+  alias Banchan.Accounts
+  alias BanchanWeb.UserAuth
 
   def create(conn, %{"user" => user_params}) do
     case Accounts.register_user(user_params) do
@@ -23,8 +19,10 @@ defmodule BanchanWeb.UserRegistrationController do
         |> put_flash(:info, "User created successfully.")
         |> UserAuth.log_in_user(user)
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, "new.html", changeset: changeset)
+      {:error, _} ->
+        conn
+        |> put_flash(:error, "Registration failed")
+        |> LiveView.Controller.live_render(BanchanWeb.RegisterLive, session: user_params)
     end
   end
 end

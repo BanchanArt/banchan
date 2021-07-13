@@ -43,6 +43,10 @@ defmodule BanchanWeb.Router do
     live "/studios/new", StudioNewLive, :new
     live "/studios/:slug/edit", StudioEditLive, :edit
     live "/dashboard", DashboardLive, :index
+
+    live "/settings", SettingsLive, :edit
+    get "/settings/confirm_email/:token", UserSettingsController, :confirm_email
+    get "/settings/refresh_session/:return_to", UserSessionController, :refresh_session
   end
 
   scope "/", BanchanWeb do
@@ -54,7 +58,25 @@ defmodule BanchanWeb.Router do
     live "/studios", StudioIndexLive, :index
     live "/studios/:slug", StudioShowLive, :show
 
+    live "/confirm", ConfirmationLive, :show
+    get "/confirm/:token", UserConfirmationController, :confirm
+
+    delete "/logout", UserSessionController, :delete
     get "/force_logout", UserSessionController, :force_logout
+  end
+
+  scope "/", BanchanWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    live "/login", LoginLive, :new
+    post "/login", UserSessionController, :create
+
+    live "/register", RegisterLive, :new
+    post "/register", UserRegistrationController, :create
+
+    live "/reset_password", ForgotPasswordLive, :edit
+
+    live "/reset_password/:token", ResetPasswordLive, :edit
   end
 
   scope "/admin" do
@@ -63,37 +85,5 @@ defmodule BanchanWeb.Router do
 
     live_dashboard "/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo
     forward "/sent_emails", Bamboo.SentEmailViewerPlug
-  end
-
-  ## Registration and Authentication routes
-
-  scope "/", BanchanWeb do
-    pipe_through [:browser]
-
-    delete "/log_out", UserSessionController, :delete
-    get "/confirm", UserConfirmationController, :new
-    post "/confirm", UserConfirmationController, :create
-    get "/confirm/:token", UserConfirmationController, :confirm
-  end
-
-  scope "/", BanchanWeb do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
-
-    get "/register", UserRegistrationController, :new
-    post "/register", UserRegistrationController, :create
-    get "/log_in", UserSessionController, :new
-    post "/log_in", UserSessionController, :create
-    get "/reset_password", UserResetPasswordController, :new
-    post "/reset_password", UserResetPasswordController, :create
-    get "/reset_password/:token", UserResetPasswordController, :edit
-    put "/reset_password/:token", UserResetPasswordController, :update
-  end
-
-  scope "/", BanchanWeb do
-    pipe_through [:browser, :require_authenticated_user]
-
-    get "/settings", UserSettingsController, :edit
-    put "/settings", UserSettingsController, :update
-    get "/settings/confirm_email/:token", UserSettingsController, :confirm_email
   end
 end

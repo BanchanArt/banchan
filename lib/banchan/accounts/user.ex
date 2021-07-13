@@ -44,7 +44,13 @@ defmodule Banchan.Accounts.User do
     |> cast(attrs, [:handle, :email, :password])
     |> unique_constraint(:handle)
     |> validate_email()
+    |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
+  end
+
+  def login_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email, :password])
   end
 
   defp validate_handle(changeset) do
@@ -118,32 +124,20 @@ defmodule Banchan.Accounts.User do
 
   @doc """
   A user changeset for changing the email.
-
-  It requires the email to change otherwise an error is added.
   """
   def email_changeset(user, attrs) do
     user
     |> cast(attrs, [:email])
     |> validate_email()
-    |> case do
-      %{changes: %{email: _}} = changeset -> changeset
-      %{} = changeset -> add_error(changeset, :email, "did not change")
-    end
   end
 
   @doc """
   A user changeset for changing the handle.
-
-  It requires the handle to change otherwise an error is added.
   """
   def handle_changeset(user, attrs) do
     user
     |> cast(attrs, [:handle])
     |> validate_handle()
-    |> case do
-      %{changes: %{handle: _}} = changeset -> changeset
-      %{} = changeset -> add_error(changeset, :handle, "did not change")
-    end
   end
 
   @doc """
