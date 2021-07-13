@@ -5,7 +5,7 @@ defmodule BanchanWeb.RegisterLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Field, Label, Submit, TextInput}
+  alias Surface.Components.Form.{EmailInput, ErrorTag, Field, Label, Submit, TextInput}
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
@@ -35,17 +35,17 @@ defmodule BanchanWeb.RegisterLive do
       <Form for={@changeset} action={Routes.user_registration_path(Endpoint, :create)} change="change" submit="submit" trigger_action={@trigger_submit}>
         <Field name={:email}>
           <Label />
-          <TextInput />
+          <EmailInput opts={required: true} />
           <ErrorTag />
         </Field>
         <Field name={:password}>
           <Label />
-          <TextInput opts={type: "password"} />
+          <TextInput opts={required: true, type: :password} />
           <ErrorTag />
         </Field>
         <Field name={:password_confirmation}>
           <Label />
-          <TextInput opts={type: "password"} />
+          <TextInput opts={required: true, type: :password} />
           <ErrorTag />
         </Field>
         <Submit label="Register" opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}/>

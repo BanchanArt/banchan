@@ -5,7 +5,7 @@ defmodule BanchanWeb.LoginLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{Checkbox, ErrorTag, Field, Label, Submit, TextInput}
+  alias Surface.Components.Form.{Checkbox, EmailInput, ErrorTag, Field, Label, Submit, TextInput}
 
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
@@ -29,7 +29,7 @@ defmodule BanchanWeb.LoginLive do
       <Form for={@changeset} action={Routes.user_session_path(Endpoint, :create)} change="change" submit="submit" trigger_action={@trigger_submit}>
         <Field name={:email}>
           <Label />
-          <TextInput opts={required: true}/>
+          <EmailInput opts={required: true}/>
           <ErrorTag />
         </Field>
         <Field name={:password}>

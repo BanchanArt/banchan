@@ -5,7 +5,16 @@ defmodule BanchanWeb.SettingsLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Field, Label, PasswordInput, Submit, TextInput}
+
+  alias Surface.Components.Form.{
+    EmailInput,
+    ErrorTag,
+    Field,
+    Label,
+    PasswordInput,
+    Submit,
+    TextInput
+  }
 
   alias Banchan.Accounts
   alias BanchanWeb.Components.Layout
@@ -35,7 +44,7 @@ defmodule BanchanWeb.SettingsLive do
       <Form for={@email_changeset} change="change_email" submit="submit_email" opts={autocomplete: "off"}>
       <Field name={:email}>
         <Label />
-        <TextInput />
+        <EmailInput />
         <ErrorTag />
       </Field>
       <Field name={:password}>
