@@ -15,8 +15,13 @@ defmodule BanchanWeb.StudioLive.Show do
     socket = assign_defaults(session, socket, false)
     studio = Studios.get_studio_by_slug!(slug)
     members = Studios.list_studio_members(studio)
-    current_user_member? = socket.assigns.current_user && Studios.is_user_in_studio(socket.assigns.current_user, studio)
-    {:ok, assign(socket, studio: studio, members: members, current_user_member?: current_user_member?)}
+
+    current_user_member? =
+      socket.assigns.current_user &&
+        Studios.is_user_in_studio(socket.assigns.current_user, studio)
+
+    {:ok,
+     assign(socket, studio: studio, members: members, current_user_member?: current_user_member?)}
   end
 
   @impl true
