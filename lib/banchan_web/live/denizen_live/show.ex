@@ -1,4 +1,4 @@
-defmodule BanchanWeb.DenizenShowLive do
+defmodule BanchanWeb.DenizenLive.Show do
   @moduledoc """
   Banchan denizen profile pages
   """

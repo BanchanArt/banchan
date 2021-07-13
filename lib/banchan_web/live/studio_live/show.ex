@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioShowLive do
+defmodule BanchanWeb.StudioLive.Show do
   @moduledoc """
   LiveView for viewing individual Studios
   """

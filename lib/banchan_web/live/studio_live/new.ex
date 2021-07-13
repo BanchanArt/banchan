@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioNewLive do
+defmodule BanchanWeb.StudioLive.New do
   @moduledoc """
   New studio creation page.
   """

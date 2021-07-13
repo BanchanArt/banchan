@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioIndexLive do
+defmodule BanchanWeb.StudioLive.Index do
   @moduledoc """
   Listing of studios belonging to the current user
   """

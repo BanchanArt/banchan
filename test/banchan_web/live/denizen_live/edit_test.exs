@@ -1,4 +1,4 @@
-defmodule BanchanWeb.DenizenEditLiveTest do
+defmodule BanchanWeb.DenizenLive.EditTest do
   @moduledoc """
   Tests for the user profile page.
   """

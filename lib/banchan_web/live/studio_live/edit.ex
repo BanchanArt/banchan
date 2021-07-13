@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioEditLive do
+defmodule BanchanWeb.StudioLive.Edit do
   @moduledoc """
   Banchan studio profile viewing and editing.
   """
