@@ -22,7 +22,7 @@ defmodule BanchanWeb.HomeLive do
       <h2>Commission Someone</h2>
       <ul class="studio-list">
         {#for studio <- @studios}
-        <StudioCard studio={studio} />
+          <StudioCard studio={studio} />
         {/for}
       </ul>
     </Layout>

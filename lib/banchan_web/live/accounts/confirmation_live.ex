@@ -26,7 +26,7 @@ defmodule BanchanWeb.ConfirmationLive do
       <Form for={:user} submit="submit">
         <Field name={:email}>
           <Label />
-          <EmailInput opts={required: true}/>
+          <EmailInput opts={required: true} />
           <ErrorTag />
         </Field>
         <Submit label="Resend confirmation information" />

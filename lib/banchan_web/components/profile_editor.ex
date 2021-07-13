@@ -17,13 +17,13 @@ defmodule BanchanWeb.Components.ProfileEditor do
     ~F"""
     <Form for={@for} change={@change} submit={@submit} opts={autocomplete: "off"}>
       {#for field <- @fields}
-      <Field name={field}>
-        <Label />
-        <TextInput />
-        <ErrorTag />
-      </Field>
+        <Field name={field}>
+          <Label />
+          <TextInput />
+          <ErrorTag />
+        </Field>
       {/for}
-      <Submit label="Save" opts={disabled: Enum.empty?(@for.changes) || !@for.valid?}/>
+      <Submit label="Save" opts={disabled: Enum.empty?(@for.changes) || !@for.valid?} />
     </Form>
     """
   end

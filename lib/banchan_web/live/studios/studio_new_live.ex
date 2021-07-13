@@ -42,7 +42,7 @@ defmodule BanchanWeb.StudioNewLive do
           <TextArea rows="3" />
           <ErrorTag />
         </Field>
-        <Submit label="Save" opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}/>
+        <Submit label="Save" opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?} />
       </Form>
     </Layout>
     """

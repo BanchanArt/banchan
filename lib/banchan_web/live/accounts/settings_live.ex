@@ -41,37 +41,53 @@ defmodule BanchanWeb.SettingsLive do
     <Layout current_user={@current_user} flashes={@flash}>
       <h1>Account Settings</h1>
       <h2>Update Email</h2>
-      <Form for={@email_changeset} change="change_email" submit="submit_email" opts={autocomplete: "off"}>
-      <Field name={:email}>
-        <Label />
-        <EmailInput />
-        <ErrorTag />
-      </Field>
-      <Field name={:password}>
-        <Label />
-        <PasswordInput />
-        <ErrorTag />
-      </Field>
-      <Submit label="Save" opts={disabled: Enum.empty?(@email_changeset.changes) || !@email_changeset.valid?}/>
+      <Form
+        for={@email_changeset}
+        change="change_email"
+        submit="submit_email"
+        opts={autocomplete: "off"}
+      >
+        <Field name={:email}>
+          <Label />
+          <EmailInput />
+          <ErrorTag />
+        </Field>
+        <Field name={:password}>
+          <Label />
+          <PasswordInput />
+          <ErrorTag />
+        </Field>
+        <Submit
+          label="Save"
+          opts={disabled: Enum.empty?(@email_changeset.changes) || !@email_changeset.valid?}
+        />
       </Form>
       <h2>Update Password</h2>
-      <Form for={@password_changeset} change="change_password" submit="submit_password" opts={autocomplete: "off"}>
-      <Field name={:password}>
-        <Label>New Password</Label>
-        <TextInput opts={type: "password"} />
-        <ErrorTag />
-      </Field>
-      <Field name={:password_confirmation}>
-        <Label>New Password Confirmation</Label>
-        <TextInput opts={type: "password"} />
-        <ErrorTag />
-      </Field>
-      <Field name={:current_password}>
-        <Label />
-        <TextInput opts={type: "password"} />
-        <ErrorTag />
-      </Field>
-      <Submit label="Save" opts={disabled: Enum.empty?(@password_changeset.changes) || !@password_changeset.valid?}/>
+      <Form
+        for={@password_changeset}
+        change="change_password"
+        submit="submit_password"
+        opts={autocomplete: "off"}
+      >
+        <Field name={:password}>
+          <Label>New Password</Label>
+          <TextInput opts={type: "password"} />
+          <ErrorTag />
+        </Field>
+        <Field name={:password_confirmation}>
+          <Label>New Password Confirmation</Label>
+          <TextInput opts={type: "password"} />
+          <ErrorTag />
+        </Field>
+        <Field name={:current_password}>
+          <Label />
+          <TextInput opts={type: "password"} />
+          <ErrorTag />
+        </Field>
+        <Submit
+          label="Save"
+          opts={disabled: Enum.empty?(@password_changeset.changes) || !@password_changeset.valid?}
+        />
       </Form>
     </Layout>
     """

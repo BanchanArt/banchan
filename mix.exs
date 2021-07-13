@@ -66,6 +66,7 @@ defmodule Banchan.MixProject do
       {:bamboo, "~> 2.2.0"},
       # Testing and static analysis
       {:phx_gen_auth, "~> 0.7", only: [:dev], runtime: false},
+      {:surface_formatter, "~> 0.5.1"},
       {:floki, ">= 0.27.0", only: :test},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
@@ -90,6 +91,7 @@ defmodule Banchan.MixProject do
         "compile --all-warnings --warnings-as-errors",
         "test",
         "format",
+        "surface.format",
         "credo --strict",
         "sobelow --verbose",
         "dialyzer --ignore-exit-status"
@@ -98,6 +100,7 @@ defmodule Banchan.MixProject do
         "compile --all-warnings --warnings-as-errors",
         "test --slowest 10",
         "format --check-formatted",
+        "surface.format --check-formatted",
         "credo --strict",
         "sobelow --exit"
         # "dialyzer"

@@ -27,7 +27,12 @@ defmodule BanchanWeb.StudioEditLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       Editing Studio profile for {@studio.name}
-      <ProfileEditor for={@changeset} fields={[:name, :slug, :description]} change="change" submit="submit" />
+      <ProfileEditor
+        for={@changeset}
+        fields={[:name, :slug, :description]}
+        change="change"
+        submit="submit"
+      />
     </Layout>
     """
   end

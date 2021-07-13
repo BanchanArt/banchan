@@ -26,15 +26,21 @@ defmodule BanchanWeb.LoginLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <h1>Log in</h1>
-      <Form for={@changeset} action={Routes.user_session_path(Endpoint, :create)} change="change" submit="submit" trigger_action={@trigger_submit}>
+      <Form
+        for={@changeset}
+        action={Routes.user_session_path(Endpoint, :create)}
+        change="change"
+        submit="submit"
+        trigger_action={@trigger_submit}
+      >
         <Field name={:email}>
           <Label />
-          <EmailInput opts={required: true}/>
+          <EmailInput opts={required: true} />
           <ErrorTag />
         </Field>
         <Field name={:password}>
           <Label />
-          <TextInput opts={required: true, type: :password}/>
+          <TextInput opts={required: true, type: :password} />
           <ErrorTag />
         </Field>
         <Field name={:remember_me}>
@@ -42,7 +48,7 @@ defmodule BanchanWeb.LoginLive do
           <Checkbox />
           <ErrorTag />
         </Field>
-        <Submit label="Log in" opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}/>
+        <Submit label="Log in" opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?} />
       </Form>
     </Layout>
     """

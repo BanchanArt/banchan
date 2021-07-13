@@ -24,9 +24,9 @@ defmodule BanchanWeb.StudioIndexLive do
       <h1>Your Studios</h1>
       <ul class="studios">
         {#for studio <- @studios}
-        <li><LiveRedirect to={Routes.studio_show_path(Endpoint, :show, studio.slug)}>{studio.name}</LiveRedirect>: {studio.description}</li>
+          <li><LiveRedirect to={Routes.studio_show_path(Endpoint, :show, studio.slug)}>{studio.name}</LiveRedirect>: {studio.description}</li>
         {#else}
-        You have no studios. <LiveRedirect to={Routes.studio_new_path(Endpoint, :new)}>Create one</LiveRedirect>.
+          You have no studios. <LiveRedirect to={Routes.studio_new_path(Endpoint, :new)}>Create one</LiveRedirect>.
         {/for}
       </ul>
     </Layout>

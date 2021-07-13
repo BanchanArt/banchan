@@ -32,7 +32,13 @@ defmodule BanchanWeb.RegisterLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <h1>Register</h1>
-      <Form for={@changeset} action={Routes.user_registration_path(Endpoint, :create)} change="change" submit="submit" trigger_action={@trigger_submit}>
+      <Form
+        for={@changeset}
+        action={Routes.user_registration_path(Endpoint, :create)}
+        change="change"
+        submit="submit"
+        trigger_action={@trigger_submit}
+      >
         <Field name={:email}>
           <Label />
           <EmailInput opts={required: true} />
@@ -48,7 +54,7 @@ defmodule BanchanWeb.RegisterLive do
           <TextInput opts={required: true, type: :password} />
           <ErrorTag />
         </Field>
-        <Submit label="Register" opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}/>
+        <Submit label="Register" opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?} />
       </Form>
     </Layout>
     """

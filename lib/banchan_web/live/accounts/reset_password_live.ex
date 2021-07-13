@@ -36,12 +36,12 @@ defmodule BanchanWeb.ResetPasswordLive do
       <Form for={@changeset} change="change" submit="submit">
         <Field name={:password}>
           <Label>New password</Label>
-          <TextInput opts={required: true, type: :password}/>
+          <TextInput opts={required: true, type: :password} />
           <ErrorTag />
         </Field>
         <Field name={:password_confirmation}>
           <Label>Confirm new password</Label>
-          <TextInput opts={required: true, type: :password}/>
+          <TextInput opts={required: true, type: :password} />
           <ErrorTag />
         </Field>
         <Submit label="Reset password" />
