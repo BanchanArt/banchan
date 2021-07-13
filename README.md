@@ -3,7 +3,7 @@
 
 Requirements:
 - [Elixir 1.6+](https://elixir-lang.org/install.html)
-- Erland 20+ (Typically auto-installs with Elixer)
+- Erlang 20+ (Typically auto-installs with Elixir)
 - [Phoenix](https://hexdocs.pm/phoenix/installation.html)
 - [Postgresql](https://wiki.postgresql.org/wiki/Detailed_installation_guides)
 
