@@ -1,4 +1,13 @@
 # Banchan
+## Setup
+
+Requirements:
+- [Elixer 1.6+](https://elixir-lang.org/install.html)
+- Erland 20+ (Typically auto-installs with Elixer)
+- [Phoenix](https://hexdocs.pm/phoenix/installation.html)
+- [Postgresql](https://wiki.postgresql.org/wiki/Detailed_installation_guides)
+
+Note: If postgresql installed via homebrew, make sure to run `/usr/local/opt/postgres/bin/createuser -s postgres`.
 
 To start your Phoenix server:
 
