@@ -58,12 +58,11 @@ defmodule BanchanWeb.Router do
     live "/studios", StudioIndexLive, :index
     live "/studios/:slug", StudioShowLive, :show
 
-    get "/force_logout", UserSessionController, :force_logout
+    live "/confirm", ConfirmationLive, :show
+    get "/confirm/:token", UserConfirmationController, :confirm
 
     delete "/logout", UserSessionController, :delete
-    get "/confirm", UserConfirmationController, :new
-    post "/confirm", UserConfirmationController, :create
-    get "/confirm/:token", UserConfirmationController, :confirm
+    get "/force_logout", UserSessionController, :force_logout
   end
 
   scope "/", BanchanWeb do
