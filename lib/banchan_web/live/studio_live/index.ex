@@ -4,11 +4,8 @@ defmodule BanchanWeb.StudioLive.Index do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.LiveRedirect
-
   alias Banchan.Studios
-  alias BanchanWeb.Components.Layout
-  alias BanchanWeb.Endpoint
+  alias BanchanWeb.Components.{Layout, StudioCard}
 
   @impl true
   def mount(_params, session, socket) do
@@ -21,12 +18,14 @@ defmodule BanchanWeb.StudioLive.Index do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1>Studios</h1>
-      <ul class="studios">
+      <h1 class="title">Studios</h1>
+      <div class="studios columns">
         {#for studio <- @studios}
-          <li><LiveRedirect to={Routes.studio_show_path(Endpoint, :show, studio.slug)}>{studio.name}</LiveRedirect>: {studio.description}</li>
+          <div class="column is-one-third">
+            <StudioCard studio={studio} />
+          </div>
         {/for}
-      </ul>
+      </div>
     </Layout>
     """
   end

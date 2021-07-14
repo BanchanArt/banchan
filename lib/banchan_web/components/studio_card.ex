@@ -12,9 +12,30 @@ defmodule BanchanWeb.Components.StudioCard do
 
   def render(assigns) do
     ~F"""
-    <li class="studio-card">
-      <LiveRedirect label={@studio.name} to={Routes.studio_show_path(Endpoint, :show, @studio.slug)} />
-    </li>
+    <LiveRedirect to={Routes.studio_show_path(Endpoint, :show, @studio.slug)}>
+      <div class="card">
+        <div class="card-image">
+          <figure class="image is-2by1">
+            <img src="#">
+          </figure>
+        </div>
+        <div class="card-content">
+          <div class="media">
+            <div class="media-left">
+              <figure class="image is-48x48">
+                <img src="#">
+              </figure>
+            </div>
+            <div class="media-content">
+              <p class="title is-4">{@studio.name}</p>
+            </div>
+          </div>
+          <div class="content">
+            {@studio.description}
+          </div>
+        </div>
+      </div>
+    </LiveRedirect>
     """
   end
 end
