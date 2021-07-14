@@ -19,7 +19,7 @@ defmodule BanchanWeb.StudioLive.Index do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <h1 class="title">Studios</h1>
-      <div class="studios columns">
+      <div class="studios columns is-multiline">
         {#for studio <- @studios}
           <div class="column is-one-third">
             <StudioCard studio={studio} />

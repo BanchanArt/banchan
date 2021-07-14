@@ -20,7 +20,7 @@ defmodule BanchanWeb.HomeLive do
     <Layout current_user={@current_user} flashes={@flash}>
       <h1 class="title">Home</h1>
       <h2 class="subtitle">Commission Someone</h2>
-      <div class="studio-list columns">
+      <div class="studio-list columns is-multiline">
         {#for studio <- @studios}
           <div class="column is-one-third">
             <StudioCard studio={studio} />
