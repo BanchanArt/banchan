@@ -59,7 +59,7 @@ defmodule Banchan.Accounts.User do
     |> validate_format(:handle, ~r/^[a-zA-Z0-9_]+$/,
       message: "only letters, numbers, and underscores allowed"
     )
-    |> validate_length(:handle, min: 3, max: 15)
+    |> validate_length(:handle, min: 3, max: 16)
     |> unsafe_validate_unique(:handle, Banchan.Repo)
     |> unique_constraint(:handle)
   end
