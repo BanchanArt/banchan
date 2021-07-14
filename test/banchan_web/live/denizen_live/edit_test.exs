@@ -21,20 +21,6 @@ defmodule BanchanWeb.DenizenLive.EditTest do
       assert info.to =~ Routes.login_path(conn, :new)
     end
 
-    test "displays nav and main container", %{conn: conn, user: user} do
-      conn = conn |> log_in_user(user)
-
-      {:ok, page_live, disconnected_html} =
-        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
-
-      rendered_html = render(page_live)
-
-      assert disconnected_html =~ "<ul class=\"nav\">"
-      assert rendered_html =~ "<ul class=\"nav\">"
-      assert disconnected_html =~ "<main role=\"main\" class=\"container\">"
-      assert rendered_html =~ "<main role=\"main\" class=\"container\">"
-    end
-
     test "preloads current profile values", %{conn: conn, user: user} do
       {:ok, user} =
         Accounts.update_user_profile(user, %{

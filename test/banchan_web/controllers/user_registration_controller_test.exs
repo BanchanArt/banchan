@@ -8,8 +8,8 @@ defmodule BanchanWeb.UserRegistrationControllerTest do
       conn = get(conn, Routes.register_path(conn, :new))
       response = html_response(conn, 200)
       assert response =~ "<h1>Register</h1>"
-      assert response =~ "Log in</a>"
-      assert response =~ "Register</button>"
+      assert response =~ "Log in"
+      assert response =~ "Register"
     end
 
     test "redirects if already logged in", %{conn: conn} do
@@ -34,9 +34,9 @@ defmodule BanchanWeb.UserRegistrationControllerTest do
       # Now do a logged in request and assert on the menu
       conn = get(conn, "/")
       response = html_response(conn, 200)
-      assert response =~ email
-      assert response =~ "Settings</a>"
-      assert response =~ "Log out</a>"
+      assert response =~ "@user"
+      assert response =~ "Settings"
+      assert response =~ "Log out"
     end
 
     # Skip this for now because I can't figure out how tf to get LiveView

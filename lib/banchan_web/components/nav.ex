@@ -12,22 +12,90 @@ defmodule BanchanWeb.Components.Nav do
 
   def render(assigns) do
     ~F"""
-    <ul class="nav">
-      {#if @current_user}
-        <li><LiveRedirect label="Home" to={Routes.home_path(Endpoint, :index)} /></li>
-        <li><LiveRedirect
-            label={@current_user.email}
-            to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}
-          /></li>
-        <li><LiveRedirect label="Dashboard" to={Routes.dashboard_path(Endpoint, :index)} /></li>
-        <li><LiveRedirect label="Your Studios" to={Routes.studio_index_path(Endpoint, :index)} /></li>
-        <li><LiveRedirect label="Settings" to={Routes.settings_path(Endpoint, :edit)} /></li>
-        <li><Link label="Log out" to={Routes.user_session_path(Endpoint, :delete)} method={:delete} /></li>
-      {#else}
-        <li><LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)} /></li>
-        <li><LiveRedirect label="Log in" to={Routes.login_path(Endpoint, :new)} /></li>
-      {/if}
-    </ul>
+    <nav
+      :hook="Nav"
+      id="nav"
+      class="navbar is-primary"
+      role="navigation"
+      aria-label="main navigation"
+    >
+      <div class="navbar-brand">
+        {!--
+        <a class="navbar-item" href="https://bulma.io">
+          <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28">
+        </a>
+        --}
+        <a
+          role="button"
+          class="navbar-burger"
+          aria-label="menu"
+          aria-expanded="false"
+          data-target="navbar-menu"
+        >
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+        </a>
+      </div>
+      <div id="navbar-menu" class="navbar-menu">
+        <div class="navbar-start">
+          {#if @current_user}
+            <LiveRedirect class="navbar-item" to={Routes.home_path(Endpoint, :index)}>
+              <span class="icon-text">
+                <span class="icon"><i class="fa fa-home" /></span>
+                <span>Home</span>
+              </span>
+            </LiveRedirect>
+            <LiveRedirect
+              class="navbar-item"
+              to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}
+            >
+              <span class="icon-text">
+                <span class="icon"><i class="fa fa-user" /></span>
+                <span>@{@current_user.handle}</span>
+              </span>
+            </LiveRedirect>
+            <LiveRedirect class="navbar-item" to={Routes.dashboard_path(Endpoint, :index)}>
+              <span class="icon-text">
+                <span class="icon"><i class="fa fa-palette" /></span>
+                <span>Dashboard</span>
+              </span>
+            </LiveRedirect>
+            <LiveRedirect class="navbar-item" to={Routes.studio_index_path(Endpoint, :index)}>
+              <span class="icon-text">
+                <span class="icon"><i class="fa fa-palette" /></span>
+                <span>Studios</span>
+              </span>
+            </LiveRedirect>
+            <LiveRedirect class="navbar-item" to={Routes.settings_path(Endpoint, :edit)}>
+              <span class="icon-text">
+                <span class="icon"><i class="fa fa-cog" /></span>
+                <span>Settings</span>
+              </span>
+            </LiveRedirect>
+            <Link class="navbar-item" to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
+              <span class="icon-text">
+                <span class="icon"><i class="fa fa-sign-out-alt" /></span>
+                <span>Log out</span>
+              </span>
+            </Link>
+          {#else}
+            <LiveRedirect class="navbar-item" label="Register" to={Routes.register_path(Endpoint, :new)}>
+              <span class="icon-text">
+                <span class="icon"><i class="fa fa-user" /></span>
+                <span>Register</span>
+              </span>
+            </LiveRedirect>
+            <LiveRedirect class="navbar-item" to={Routes.login_path(Endpoint, :new)}>
+              <span class="icon-text">
+                <span class="icon"><i class="fa fa-sign-in-alt" /></span>
+                <span>Log in</span>
+              </span>
+            </LiveRedirect>
+          {/if}
+        </div>
+      </div>
+    </nav>
     """
   end
 end

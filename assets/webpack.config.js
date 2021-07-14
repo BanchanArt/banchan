@@ -35,6 +35,12 @@ module.exports = (env, options) => {
           }
         },
         {
+          test: /\.(ttf|eot|svg|woff(2)?)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+          use: {
+            loader: "file-loader",
+          }
+        },
+        {
           test: /\.[s]?css$/,
           use: [
             MiniCssExtractPlugin.loader,
@@ -48,6 +54,6 @@ module.exports = (env, options) => {
       new MiniCssExtractPlugin({ filename: '../css/app.css' }),
       new CopyWebpackPlugin([{ from: 'static/', to: '../' }])
     ]
-    .concat(devMode ? [new HardSourceWebpackPlugin()] : [])
+      .concat(devMode ? [new HardSourceWebpackPlugin()] : [])
   }
 };

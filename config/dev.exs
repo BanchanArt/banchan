@@ -56,11 +56,12 @@ config :banchan, BanchanWeb.Endpoint,
 
 # Watch static and templates for browser reloading.
 config :banchan, BanchanWeb.Endpoint,
+  reloadable_compilers: [:phoenix, :elixir, :surface],
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/banchan_web/(live|views)/.*(ex)$",
+      ~r"lib/banchan_web/(live|views|components)/.*(ex|js)$",
       ~r"lib/banchan_web/templates/.*(eex)$",
       ~r"lib/banchan_web/live/.*(sface)$"
     ]

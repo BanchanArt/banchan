@@ -16,10 +16,10 @@ defmodule BanchanWeb.Components.Layout do
   def render(assigns) do
     ~F"""
     <Nav current_user={@current_user} />
-    <main role="main" class="container">
+    <section class="section">
       <Flash flashes={@flashes} />
       <#slot />
-    </main>
+    </section>
     """
   end
 end

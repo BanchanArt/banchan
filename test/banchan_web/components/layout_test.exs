@@ -27,8 +27,6 @@ defmodule BanchanWeb.Components.NavTest do
         """
       end
 
-    assert html =~ """
-           <ul class="nav">
-           """
+    assert html =~ "<nav "
   end
 end
