@@ -11,7 +11,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
     test "renders log in page", %{conn: conn} do
       conn = get(conn, Routes.login_path(conn, :new))
       response = html_response(conn, 200)
-      assert response =~ "<h1>Log in</h1>"
+      assert response =~ "Log in</h1>"
       assert response =~ "Log in"
       assert response =~ "Register"
     end
@@ -75,7 +75,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "<h1>Log in</h1>"
+      assert response =~ "Log in</h1>"
       assert response =~ "Invalid email or password"
     end
   end

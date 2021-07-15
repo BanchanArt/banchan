@@ -13,7 +13,7 @@ defmodule BanchanWeb.UserConfirmationControllerTest do
     test "renders the confirmation page", %{conn: conn} do
       conn = get(conn, Routes.confirmation_path(conn, :show))
       response = html_response(conn, 200)
-      assert response =~ "<h1>Resend confirmation instructions</h1>"
+      assert response =~ "Resend confirmation instructions</h1>"
     end
   end
 

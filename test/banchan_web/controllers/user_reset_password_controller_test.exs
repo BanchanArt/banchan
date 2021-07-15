@@ -13,7 +13,7 @@ defmodule BanchanWeb.UserResetPasswordControllerTest do
     test "renders the reset password page", %{conn: conn} do
       conn = get(conn, Routes.forgot_password_path(conn, :edit))
       response = html_response(conn, 200)
-      assert response =~ "<h1>Forgot your password?</h1>"
+      assert response =~ "Forgot your password?</h1>"
     end
   end
 
@@ -56,7 +56,7 @@ defmodule BanchanWeb.UserResetPasswordControllerTest do
 
     test "renders reset password", %{conn: conn, token: token} do
       conn = get(conn, Routes.reset_password_path(conn, :edit, token))
-      assert html_response(conn, 200) =~ "<h1>Reset password</h1>"
+      assert html_response(conn, 200) =~ "Reset password</h1>"
     end
 
     test "does not render reset password with invalid token", %{conn: conn} do
@@ -103,7 +103,7 @@ defmodule BanchanWeb.UserResetPasswordControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "<h1>Reset password</h1>"
+      assert response =~ "Reset password</h1>"
       assert response =~ "should be at least 12 character(s)"
       assert response =~ "does not match password"
     end
