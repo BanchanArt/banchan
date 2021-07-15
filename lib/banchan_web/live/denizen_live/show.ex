@@ -8,7 +8,7 @@ defmodule BanchanWeb.DenizenLive.Show do
 
   alias Banchan.Accounts
   alias Banchan.Studios
-  alias BanchanWeb.Components.Layout
+  alias BanchanWeb.Components.{Layout, StudioCard}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -31,12 +31,14 @@ defmodule BanchanWeb.DenizenLive.Show do
       {#if @current_user && @current_user.id == @user.id}
         <LiveRedirect label="Edit" to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)} />
       {/if}
-      <h2>Studios</h2>
-      <ul class="denizen-studios">
+      <h2 class="title">Studios</h2>
+      <div class="columns denizen-studios is-multiline">
         {#for studio <- @studios}
-          <li><LiveRedirect label={studio.name} to={Routes.studio_show_path(Endpoint, :show, studio.slug)} /></li>
+          <div class="column is-one-quarter">
+            <StudioCard studio={studio} />
+          </div>
         {/for}
-      </ul>
+      </div>
     </Layout>
     """
   end

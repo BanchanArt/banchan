@@ -16,8 +16,8 @@ defmodule BanchanWeb.DashboardLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1>Dashboard</h1>
-      <h2>Commissions</h2>
+      <h1 class="title">Dashboard</h1>
+      <h2 class="subtitle">Commissions</h2>
       <ul>
         <li>Thing 1</li>
         <li>Thing 2</li>

@@ -32,7 +32,7 @@ defmodule BanchanWeb.ResetPasswordLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1>Reset password</h1>
+      <h1 class="title">Reset password</h1>
       <Form for={@changeset} change="change" submit="submit">
         <Field name={:password}>
           <Label>New password</Label>

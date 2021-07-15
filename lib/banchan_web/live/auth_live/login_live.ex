@@ -25,7 +25,7 @@ defmodule BanchanWeb.LoginLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1>Log in</h1>
+      <h1 class="title">Log in</h1>
       <Form
         for={@changeset}
         action={Routes.user_session_path(Endpoint, :create)}

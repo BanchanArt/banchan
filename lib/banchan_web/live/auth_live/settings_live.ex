@@ -39,8 +39,8 @@ defmodule BanchanWeb.SettingsLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1>Account Settings</h1>
-      <h2>Update Email</h2>
+      <h1 class="title">Account Settings</h1>
+      <h2 class="subtitle">Update Email</h2>
       <Form
         for={@email_changeset}
         change="change_email"

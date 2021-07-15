@@ -31,7 +31,7 @@ defmodule BanchanWeb.RegisterLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1>Register</h1>
+      <h1 class="title">Register</h1>
       <Form
         for={@changeset}
         action={Routes.user_registration_path(Endpoint, :create)}

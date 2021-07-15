@@ -22,7 +22,7 @@ defmodule BanchanWeb.ForgotPasswordLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1>Forgot your password?</h1>
+      <h1 class="title">Forgot your password?</h1>
       <Form for={:user} submit="submit">
         <Field name={:email}>
           <Label />

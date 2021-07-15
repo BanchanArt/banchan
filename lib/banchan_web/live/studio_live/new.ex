@@ -24,7 +24,7 @@ defmodule BanchanWeb.StudioLive.New do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1>New Studio</h1>
+      <h1 class="title">New Studio</h1>
 
       <Form for={@changeset} change="change" submit="submit" opts={autocomplete: "off"}>
         <Field name={:name}>
