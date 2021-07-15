@@ -6,6 +6,7 @@ defmodule BanchanWeb.ForgotPasswordLive do
 
   alias Surface.Components.Form
   alias Surface.Components.Form.{EmailInput, ErrorTag, Field, Label, Submit}
+  alias Surface.Components.Form.Input.InputContext
 
   alias Banchan.Accounts
   alias BanchanWeb.Components.Layout
@@ -23,14 +24,30 @@ defmodule BanchanWeb.ForgotPasswordLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <h1 class="title">Forgot your password?</h1>
-      <Form for={:user} submit="submit">
-        <Field name={:email}>
-          <Label />
-          <EmailInput opts={required: true} />
-          <ErrorTag />
-        </Field>
-        <Submit label="Send instructions to reset password" />
-      </Form>
+      <div class="columns">
+        <Form class="column is-one-third" for={:user} submit="submit">
+          <Field class="field" name={:email}>
+            <Label class="label" />
+            <div class="control has-icons-left">
+              <InputContext :let={form: form, field: field}>
+                <EmailInput
+                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                  opts={required: true}
+                />
+              </InputContext>
+              <span class="icon is-small is-left">
+                <i class="fas fa-envelope" />
+              </span>
+            </div>
+            <ErrorTag class="help is-danger" />
+          </Field>
+          <div class="field">
+            <div class="control">
+              <Submit class="button is-link" label="Send instructions to reset password" />
+            </div>
+          </div>
+        </Form>
+      </div>
     </Layout>
     """
   end

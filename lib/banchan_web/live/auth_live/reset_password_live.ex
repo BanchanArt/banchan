@@ -6,6 +6,7 @@ defmodule BanchanWeb.ResetPasswordLive do
 
   alias Surface.Components.Form
   alias Surface.Components.Form.{ErrorTag, Field, Label, Submit, TextInput}
+  alias Surface.Components.Form.Input.InputContext
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
@@ -33,19 +34,49 @@ defmodule BanchanWeb.ResetPasswordLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <h1 class="title">Reset password</h1>
-      <Form for={@changeset} change="change" submit="submit">
-        <Field name={:password}>
-          <Label>New password</Label>
-          <TextInput opts={required: true, type: :password} />
-          <ErrorTag />
-        </Field>
-        <Field name={:password_confirmation}>
-          <Label>Confirm new password</Label>
-          <TextInput opts={required: true, type: :password} />
-          <ErrorTag />
-        </Field>
-        <Submit label="Reset password" />
-      </Form>
+      <div class="columns">
+        <Form class="column is-one-third" for={@changeset} change="change" submit="submit">
+          <Field class="field" name={:password}>
+            <Label class="label">New Password</Label>
+            <div class="control has-icons-left">
+              <InputContext :let={form: form, field: field}>
+                <TextInput
+                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                  opts={required: true, type: :password}
+                />
+              </InputContext>
+              <span class="icon is-small is-left">
+                <i class="fas fa-lock" />
+              </span>
+            </div>
+            <ErrorTag class="help is-danger" />
+          </Field>
+          <Field class="field" name={:password_confirmation}>
+            <Label class="label">Confirm New Password</Label>
+            <div class="control has-icons-left">
+              <InputContext :let={form: form, field: field}>
+                <TextInput
+                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                  opts={required: true, type: :password}
+                />
+              </InputContext>
+              <span class="icon is-small is-left">
+                <i class="fas fa-lock" />
+              </span>
+            </div>
+            <ErrorTag class="help is-danger" />
+          </Field>
+          <div class="field">
+            <div class="control">
+              <Submit
+                class="button is-link"
+                label="Reset password"
+                opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
+              />
+            </div>
+          </div>
+        </Form>
+      </div>
     </Layout>
     """
   end
