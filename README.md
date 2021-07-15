@@ -31,6 +31,18 @@ Other:
 - `assets/css/bulma.scss` for theme customization (overrides Bulma defaults)
 - `lib/banchan/accounts/user.ex` for user account setting defaults
 
+### Adding static files
+
+- Static files go in `assets/static/`.
+- Images go in `assets/static/images/`.
+
+Compilation Steps for static files
+- `npm run deploy --prefix ./assets`
+- `mix phx.digest`
+
+Location of images after compiling for live site: `/priv/static/images/`.
+Example of how to link images from that location: `<img src={Routes.static_path(Endpoint, "/images/shop_card_default.png")} />`
+
 ## Learn more about Elixir
 
 - Official website: https://www.phoenixframework.org/
