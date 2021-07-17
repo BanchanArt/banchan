@@ -129,6 +129,7 @@ defmodule BanchanWeb.CommissionLive.Show do
               </div>
             </div>
           </Form>
+          <p><small>Please remember that all interactions are covered by the artist's <a href="#">Terms of Service</a>.</small></p>
         </div>
         <div class="column is-one-quarter sidebar">
           <div class="sidebar-box content">
