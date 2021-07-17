@@ -16,14 +16,14 @@ defmodule BanchanWeb.Components.StudioCard do
       <div class="card">
         <div class="card-image">
           <figure class="image is-2by1">
-            <img src={Routes.static_path(Endpoint, "/images/shop_card_default.png")} />
+            <img src={Routes.static_path(Endpoint, "/images/shop_card_default.png")}>
           </figure>
         </div>
         <div class="card-content">
           <div class="media">
             <div class="media-left">
               <figure class="image is-48x48">
-                <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")} />
+                <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
               </figure>
             </div>
             <div class="media-content">

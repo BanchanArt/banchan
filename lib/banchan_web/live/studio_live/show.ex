@@ -29,13 +29,14 @@ defmodule BanchanWeb.StudioLive.Show do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <div class="studio">
-        <h1>{@studio.name}</h1>
-        <p>{@studio.description}</p>
+        <h1 class="title">{@studio.name}</h1>
+        <h2 class="subtitle">{@studio.description}</h2>
       </div>
       {#if @current_user_member?}
         <LiveRedirect label="Edit" to={Routes.studio_edit_path(Endpoint, :edit, @studio.slug)} />
       {/if}
-      <h2>Members</h2>
+
+      <h2 class="subtitle">Members</h2>
       <ul class="studio-members">
         {#for member <- @members}
           <li><LiveRedirect label={member.name} to={Routes.denizen_show_path(Endpoint, :show, member.handle)} /></li>
