@@ -100,3 +100,11 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 .commission .sidebar-box .image {
   overflow: hidden;
 }
+
+.commission p.timeline-item {
+  padding: 16px 0;
+}
+
+.commission article.timeline-item {
+  margin-bottom: 0;
+}
