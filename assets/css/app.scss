@@ -101,10 +101,14 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
   overflow: hidden;
 }
 
-.commission p.timeline-item {
-  padding: 16px 0;
+.commission .sidebar-box .dropdown .button {
+  border: none;
 }
 
-.commission article.timeline-item {
-  margin-bottom: 0;
+.commission p.timeline-item {
+  margin-left: 1.5rem;
 }
+
+// .commission article.timeline-item {
+//   margin-bottom: 0;
+// }
