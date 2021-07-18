@@ -72,10 +72,12 @@ defmodule BanchanWeb.Components.Commissions.Timeline do
 
       <article class="timeline-item block">
         <Card>
-          <figure class="image is-24x24">
-            <img class="is-rounded" src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
-          </figure>
-          skullbunnygalaxy commented 2 days ago.
+          <:header>
+            <figure class="image is-24x24">
+              <img class="is-rounded" src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
+            </figure>
+            skullbunnygalaxy commented 2 days ago.
+          </:header>
 
           <div class="content">
             Hey can you tell me more about this character? What's their favorite food?
