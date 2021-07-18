@@ -4,8 +4,18 @@ defmodule BanchanWeb.CommissionLive.Show do
   """
   use BanchanWeb, :surface_view
 
+  alias Banchan.Commissions
   alias Banchan.Commissions.Commission
-  alias BanchanWeb.Components.Commissions.{Attachments, MessageBox, Status, Summary, Timeline, Transactions}
+
+  alias BanchanWeb.Components.Commissions.{
+    Attachments,
+    MessageBox,
+    Status,
+    Summary,
+    Timeline,
+    Transactions
+  }
+
   alias BanchanWeb.Components.Layout
 
   @impl true
@@ -18,7 +28,7 @@ defmodule BanchanWeb.CommissionLive.Show do
   def handle_params(%{"id" => _id}, _, socket) do
     {:noreply,
      socket
-     |> assign(commission: %Commission{}, changeset: Commission.changeset(%Commission{}, %{}))}
+     |> assign(commission: %Commission{})}
   end
 
   @impl true
@@ -32,7 +42,7 @@ defmodule BanchanWeb.CommissionLive.Show do
         <div class="column is-three-quarters">
           <Timeline id="timeline" current_user={@current_user} commission={@commission} />
           <hr>
-          <MessageBox id="message-box" changeset={@changeset} />
+          <MessageBox commission={@commission} new_message="new_message" />
         </div>
         <div class="column is-one-quarter">
           <div id="sidebar">
@@ -43,7 +53,7 @@ defmodule BanchanWeb.CommissionLive.Show do
               <Transactions id="commission-transactions" />
             </div>
             <div class="block sidebar-box">
-              <Status id="commission-status" />
+              <Status commission={@commission} change="update-status" />
             </div>
             <div class="block sidebar-box">
               <Attachments id="commission-attachments" />
@@ -53,5 +63,12 @@ defmodule BanchanWeb.CommissionLive.Show do
       </div>
     </Layout>
     """
+  end
+
+  @impl true
+  def handle_event("update-status", %{"status" => [new_status]}, socket) do
+    comm = socket.assigns.commission
+    {:ok, commission} = Commissions.update_commission(comm, %{title: comm.title, status: new_status})
+    {:noreply, socket |> assign(commission: commission)}
   end
 end
