@@ -4,15 +4,16 @@ defmodule BanchanWeb.Components.Commissions.Attachments do
   """
   use BanchanWeb, :live_component
 
+  alias BanchanWeb.Components.Card
   alias BanchanWeb.Endpoint
 
   def render(assigns) do
     ~F"""
-    <div class="card block sidebar-box">
-      <header class="card-header">
-        <p class="card-header-title">Attachments</p>
-      </header>
-      <div class="card-content level">
+    <Card>
+      <:header>
+        Attachments
+      </:header>
+      <div class="level">
         <div class="level-left">
           <figure class="image is-96x96">
             <img src={Routes.static_path(Endpoint, "/images/penana-left.png")}>
@@ -25,10 +26,10 @@ defmodule BanchanWeb.Components.Commissions.Attachments do
           </figure>
         </div>
       </div>
-      <footer class="card-footer">
+      <:footer>
         <a class="card-footer-item button is-link" href="#">See All</a>
-      </footer>
-    </div>
+      </:footer>
+    </Card>
     """
   end
 end
