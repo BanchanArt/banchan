@@ -20,11 +20,9 @@ defmodule BanchanWeb.Components.Nav do
       x-data="{ open: false }"
     >
       <div class="navbar-brand">
-        {!--
-        <a class="navbar-item" href="https://bulma.io">
-          <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28">
+        <a class="navbar-item" href="/">
+          <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
         </a>
-        --}
         <a
           role="button"
           class="navbar-burger"
@@ -40,12 +38,6 @@ defmodule BanchanWeb.Components.Nav do
       <div :class="{ 'is-active': open }"  class="navbar-menu">
         <div class="navbar-start">
           {#if @current_user}
-            <LiveRedirect class="navbar-item" to={Routes.home_path(Endpoint, :index)}>
-              <span class="icon-text">
-                <span class="icon"><i class="fa fa-home" /></span>
-                <span>Home</span>
-              </span>
-            </LiveRedirect>
             <LiveRedirect
               class="navbar-item"
               to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}
