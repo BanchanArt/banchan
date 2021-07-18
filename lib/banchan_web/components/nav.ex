@@ -13,11 +13,11 @@ defmodule BanchanWeb.Components.Nav do
   def render(assigns) do
     ~F"""
     <nav
-      :hook="Nav"
       id="nav"
       class="navbar is-primary"
       role="navigation"
       aria-label="main navigation"
+      x-data="{ open: false }"
     >
       <div class="navbar-brand">
         {!--
@@ -30,14 +30,14 @@ defmodule BanchanWeb.Components.Nav do
           class="navbar-burger"
           aria-label="menu"
           aria-expanded="false"
-          data-target="navbar-menu"
+          @click="open = !open"
         >
           <span aria-hidden="true" />
           <span aria-hidden="true" />
           <span aria-hidden="true" />
         </a>
       </div>
-      <div id="navbar-menu" class="navbar-menu">
+      <div :class="{ 'is-active': open }"  class="navbar-menu">
         <div class="navbar-start">
           {#if @current_user}
             <LiveRedirect class="navbar-item" to={Routes.home_path(Endpoint, :index)}>
