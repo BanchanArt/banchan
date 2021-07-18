@@ -29,10 +29,7 @@ defmodule BanchanWeb.Components.Commissions.MessageBox do
         </Field>
         <div class="field">
           <div class="control">
-            <Submit
-              class="button is-link"
-              label="Send"
-            />
+            <Submit class="button is-link" label="Send" />
           </div>
         </div>
       </Form>

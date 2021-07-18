@@ -21,14 +21,17 @@ defmodule BanchanWeb.Components.Commissions.Status do
 
       <Form for={:status} change={@change}>
         <div class="select">
-          <Select selected={@commission.status} options={[
-            "Pending": :pending,
-            "Accepted": :accepted,
-            "Paused": :paused,
-            "In Progress": :in_progress,
-            "Waiting for Customer": :waiting,
-            "Closed": :closed
-            ]} />
+          <Select
+            selected={@commission.status}
+            options={[
+              Pending: :pending,
+              Accepted: :accepted,
+              Paused: :paused,
+              "In Progress": :in_progress,
+              "Waiting for Customer": :waiting,
+              Closed: :closed
+            ]}
+          />
         </div>
       </Form>
     </Card>
