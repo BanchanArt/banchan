@@ -16,17 +16,21 @@ defmodule BanchanWeb.Components.Card do
   def render(assigns) do
     ~F"""
     <div class="card">
-      <header class="card-header">
-        <p class="card-header-title">
-          <#slot name="header" />
-        </p>
-      </header>
+      {#if slot_assigned?(:header)}
+        <header class="card-header">
+          <p class="card-header-title">
+            <#slot name="header" />
+          </p>
+        </header>
+      {/if}
       <div class="card-content">
         <#slot />
       </div>
-      <footer class="card-footer">
-        <#slot name="footer" />
-      </footer>
+      {#if slot_assigned?(:footer)}
+        <footer class="card-footer">
+          <#slot name="footer" />
+        </footer>
+      {/if}
     </div>
     """
   end
