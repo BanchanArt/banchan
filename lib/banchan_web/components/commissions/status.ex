@@ -16,7 +16,7 @@ defmodule BanchanWeb.Components.Commissions.Status do
     ~F"""
     <Card>
       <:header>
-        <p class="card-header-title">Status</p>
+        Status
       </:header>
 
       <Form for={:status} change={@change}>
