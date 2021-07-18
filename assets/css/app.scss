@@ -92,3 +92,23 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
   display: block;
   margin: -1rem 0 2rem;
 }
+
+.commission .image {
+  overflow: hidden;
+}
+
+.commission .sidebar-box .image {
+  overflow: hidden;
+}
+
+.commission .sidebar-box .dropdown .button {
+  border: none;
+}
+
+.commission p.timeline-item {
+  margin-left: 1.5rem;
+}
+
+// .commission article.timeline-item {
+//   margin-bottom: 0;
+// }
