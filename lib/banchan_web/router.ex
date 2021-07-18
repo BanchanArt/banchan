@@ -40,10 +40,12 @@ defmodule BanchanWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     live "/denizens/:handle/edit", DenizenLive.Edit, :edit
+
     live "/studios/new", StudioLive.New, :new
     live "/studios/:slug/edit", StudioLive.Edit, :edit
     live "/studios/:slug/commission/new", CommissionLive.New, :new
     live "/studios/:slug/commission/:id", CommissionLive.Show, :show
+
     live "/dashboard", DashboardLive, :index
 
     live "/settings", SettingsLive, :edit
