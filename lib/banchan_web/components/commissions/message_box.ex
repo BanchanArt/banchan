@@ -2,19 +2,18 @@ defmodule BanchanWeb.Components.Commissions.MessageBox do
   @moduledoc """
   Message/Chat box for the Commission page.
   """
-  use BanchanWeb, :component
+  use BanchanWeb, :live_component
 
   alias Surface.Components.Form
   alias Surface.Components.Form.{ErrorTag, Field, Label, Submit, TextArea}
   alias Surface.Components.Form.Input.InputContext
 
-  prop commission, :any, required: true
   prop new_message, :event, required: true
 
   def render(assigns) do
     ~F"""
     <div class="message-box">
-      <Form for={:commission} submit={@new_message}>
+      <Form for={:message} submit={@new_message}>
         <Field class="field" name={:message}>
           <Label class="label">Send a Message</Label>
           <div class="control">
@@ -29,7 +28,7 @@ defmodule BanchanWeb.Components.Commissions.MessageBox do
         </Field>
         <div class="field">
           <div class="control">
-            <Submit class="button is-link" label="Send" />
+            <Submit class="button is-link" label="Reply" />
           </div>
         </div>
       </Form>

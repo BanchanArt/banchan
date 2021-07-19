@@ -35,7 +35,7 @@ defmodule BanchanWeb.Components.Nav do
           <span aria-hidden="true" />
         </a>
       </div>
-      <div :class="{ 'is-active': open }"  class="navbar-menu">
+      <div :class="{ 'is-active': open }" class="navbar-menu">
         <div class="navbar-start">
           {#if @current_user}
             <LiveRedirect

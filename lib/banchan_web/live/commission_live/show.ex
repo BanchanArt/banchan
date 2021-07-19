@@ -42,7 +42,7 @@ defmodule BanchanWeb.CommissionLive.Show do
         <div class="column is-three-quarters">
           <Timeline id="timeline" current_user={@current_user} commission={@commission} />
           <hr>
-          <MessageBox commission={@commission} new_message="new_message" />
+          <MessageBox id="reply-box" new_message="new-message" />
         </div>
         <div class="column is-one-quarter">
           <div id="sidebar">
@@ -70,5 +70,11 @@ defmodule BanchanWeb.CommissionLive.Show do
     comm = socket.assigns.commission
     {:ok, commission} = Commissions.update_commission(comm, %{title: comm.title, status: new_status})
     {:noreply, socket |> assign(commission: commission)}
+  end
+
+  @impl true
+  def handle_event("new-message", %{"message" => message}, socket) do
+    IO.inspect(message)
+    {:noreply, socket}
   end
 end
