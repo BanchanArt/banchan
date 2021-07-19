@@ -73,7 +73,7 @@ defmodule BanchanWeb.StudioLive.Show do
       <div class="studio columns">
         <div class="column is-two-thirds">
           <div class="offerings columns is-multiline">
-            <div class="column is-one-third">
+            <div class="column">
               <Card>
                 <:header>
                   Illustration
@@ -96,7 +96,7 @@ defmodule BanchanWeb.StudioLive.Show do
               </Card>
             </div>
 
-            <div class="column is-one-third">
+            <div class="column">
               <Card>
                 <:header>
                   Character
@@ -119,7 +119,7 @@ defmodule BanchanWeb.StudioLive.Show do
               </Card>
             </div>
 
-            <div class="column is-one-third">
+            <div class="column">
               <Card>
                 <:header>
                   Character Page
@@ -142,7 +142,7 @@ defmodule BanchanWeb.StudioLive.Show do
               </Card>
             </div>
 
-            <div class="column is-one-third">
+            <div class="column">
               <Card>
                 <:header>
                   Chibi Icon
@@ -163,7 +163,7 @@ defmodule BanchanWeb.StudioLive.Show do
               </Card>
             </div>
 
-            <div class="column is-one-third">
+            <div class="column">
               <Card>
                 <:header>
                   Character Bust
