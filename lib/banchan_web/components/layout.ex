@@ -11,11 +11,15 @@ defmodule BanchanWeb.Components.Layout do
   prop current_user, :any
   prop flashes, :string
 
+  slot hero
   slot default
 
   def render(assigns) do
     ~F"""
     <Nav current_user={@current_user} />
+    {#if slot_assigned?(:hero)}
+      <#slot name="hero" />
+    {/if}
     <section class="section">
       <Flash flashes={@flashes} />
       <#slot />

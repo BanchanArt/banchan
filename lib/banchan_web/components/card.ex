@@ -7,8 +7,14 @@ defmodule BanchanWeb.Components.Card do
   @doc "The header"
   slot header
 
+  @doc "Right-aligned extra header content"
+  slot header_aside
+
   @doc "The footer"
   slot footer
+
+  @doc "The image"
+  slot image
 
   @doc "The main content"
   slot default, required: true
@@ -21,7 +27,15 @@ defmodule BanchanWeb.Components.Card do
           <p class="card-header-title">
             <#slot name="header" />
           </p>
+          <p class="card-header-icon">
+            <#slot name="header_aside" />
+          </p>
         </header>
+      {/if}
+      {#if slot_assigned?(:image)}
+        <div class="card-image">
+          <#slot name="image" />
+        </div>
       {/if}
       <div class="card-content">
         <#slot />
