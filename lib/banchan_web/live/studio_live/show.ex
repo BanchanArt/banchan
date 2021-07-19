@@ -50,7 +50,7 @@ defmodule BanchanWeb.StudioLive.Show do
               <div class="container">
                 <ul>
                   <li class="is-active">
-                    <a>Commissions</a>
+                    <a>Shop</a>
                   </li>
                   <li>
                     <a>About</a>
