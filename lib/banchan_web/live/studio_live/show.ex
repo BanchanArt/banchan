@@ -176,12 +176,16 @@ defmodule BanchanWeb.StudioLive.Show do
                     <img src={Routes.static_path(Endpoint, "/images/640x360.png")}>
                   </figure>
                 </:image>
-                <p>A rendered bust of your character in a chibi/miniaturized style! Square composition for icon use.</p>
+                <p>A clean bust illustration of your character with NO background!</p>
                 <p>$75-$150</p>
                 <:footer>
                   <a class="button is-primary card-footer-item" href="#">Details</a>
                 </:footer>
               </Card>
+            </div>
+
+            <div class="column">
+              <button type="button" class="button is-light">Add a Tier</button>
             </div>
           </div>
         </div>
@@ -192,6 +196,9 @@ defmodule BanchanWeb.StudioLive.Show do
               <:header>
                 Summary
               </:header>
+              <:header_aside>
+                <button type="button" class="button is-light is-small">Edit</button>
+              </:header_aside>
               <div class="content">
                 <h3>These are all private commissions, meaning: <strong>non-commercial</strong></h3>
                 <p>You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
