@@ -45,6 +45,29 @@ defmodule BanchanWeb.StudioLive.Show do
               {/if}
             </p>
           </div>
+          <div class="hero-foot">
+            <nav class="tabs is-boxed">
+              <div class="container">
+                <ul>
+                  <li class="is-active">
+                    <a>Commissions</a>
+                  </li>
+                  <li>
+                    <a>About</a>
+                  </li>
+                  <li>
+                    <a>Terms of Service</a>
+                  </li>
+                  <li>
+                    <a>Portfolio</a>
+                  </li>
+                  <li>
+                    <a>Q&A</a>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+          </div>
         </section>
       </:hero>
       <div class="studio columns">
@@ -68,7 +91,7 @@ defmodule BanchanWeb.StudioLive.Show do
                   <p>$500-$1000</p>
                 </div>
                 <:footer>
-                  <a class="button is-primary card-footer-item" href="#">Get It</a>
+                  <a class="button is-primary card-footer-item" href="#">Details</a>
                 </:footer>
               </Card>
             </div>
@@ -91,7 +114,7 @@ defmodule BanchanWeb.StudioLive.Show do
                   <p>$225-$500+</p>
                 </div>
                 <:footer>
-                  <a class="button is-primary card-footer-item" href="#">Get It</a>
+                  <a class="button is-primary card-footer-item" href="#">Details</a>
                 </:footer>
               </Card>
             </div>
@@ -114,7 +137,7 @@ defmodule BanchanWeb.StudioLive.Show do
                   <p>$225-$600+</p>
                 </div>
                 <:footer>
-                  <a class="button is-primary card-footer-item" href="#">Get It</a>
+                  <a class="button is-primary card-footer-item" href="#">Details</a>
                 </:footer>
               </Card>
             </div>
@@ -135,7 +158,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 <p>A rendered bust of your character in a chibi/miniaturized style! Square composition for icon use.</p>
                 <p>$100-$200</p>
                 <:footer>
-                  <a class="button is-primary card-footer-item" href="#">Get It</a>
+                  <a class="button is-primary card-footer-item" href="#">Details</a>
                 </:footer>
               </Card>
             </div>
@@ -156,7 +179,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 <p>A rendered bust of your character in a chibi/miniaturized style! Square composition for icon use.</p>
                 <p>$75-$150</p>
                 <:footer>
-                  <a class="button is-primary card-footer-item" href="#">Get It</a>
+                  <a class="button is-primary card-footer-item" href="#">Details</a>
                 </:footer>
               </Card>
             </div>
@@ -164,6 +187,25 @@ defmodule BanchanWeb.StudioLive.Show do
         </div>
 
         <div class="column">
+          <div class="block">
+            <Card>
+              <:header>
+                Summary
+              </:header>
+              <div class="content">
+                <h3>These are all private commissions, meaning: <strong>non-commercial</strong></h3>
+                <p>You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
+                <h3>I will draw</h3>
+                <ul>
+                  <li>Humans/humanoids</li>
+                  <li>anthros+furries/creatures/monsters/animals</li>
+                  <li>mecha/robots/vehicles</li>
+                  <li>environments/any type of background</li>
+                </ul>
+              </div>
+            </Card>
+          </div>
+
           <div class="block">
             <h2 class="subtitle">Members</h2>
             <div class="studio-members columns is-multiline">
@@ -181,11 +223,6 @@ defmodule BanchanWeb.StudioLive.Show do
                 </div>
               {/for}
             </div>
-          </div>
-
-          <div class="block">
-            <h2 class="subtitle">Portfolio</h2>
-            portfolio tiles go here
           </div>
         </div>
       </div>
