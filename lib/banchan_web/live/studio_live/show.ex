@@ -206,6 +206,11 @@ defmodule BanchanWeb.StudioLive.Show do
                   <li>mecha/robots/vehicles</li>
                   <li>environments/any type of background</li>
                 </ul>
+                <h3>I will not draw</h3>
+                <ul>
+                  <li>NSFW</li>
+                  <li>Fanart</li>
+                </ul>
               </div>
             </Card>
           </div>
