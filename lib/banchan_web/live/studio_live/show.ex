@@ -80,7 +80,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 </:header_aside>
                 <:image>
                   <figure class="image is-16by9">
-                    <img src={Routes.static_path(Endpoint, "/images/640x360.png")}>
+                    <img src={Routes.static_path(Endpoint, "/images/hj-illustration.jpg")}>
                   </figure>
                 </:image>
                 <div class="content">
@@ -103,7 +103,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 </:header_aside>
                 <:image>
                   <figure class="image is-16by9">
-                    <img src={Routes.static_path(Endpoint, "/images/640x360.png")}>
+                    <img src={Routes.static_path(Endpoint, "/images/hj-character.jpg")}>
                   </figure>
                 </:image>
                 <div class="content">
@@ -126,7 +126,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 </:header_aside>
                 <:image>
                   <figure class="image is-16by9">
-                    <img src={Routes.static_path(Endpoint, "/images/640x360.png")}>
+                    <img src={Routes.static_path(Endpoint, "/images/hj-character-page.jpg")}>
                   </figure>
                 </:image>
                 <div class="content">
@@ -149,7 +149,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 </:header_aside>
                 <:image>
                   <figure class="image is-16by9">
-                    <img src={Routes.static_path(Endpoint, "/images/640x360.png")}>
+                    <img src={Routes.static_path(Endpoint, "/images/hj-chibi-icon.png")}>
                   </figure>
                 </:image>
                 <p>A rendered bust of your character in a chibi/miniaturized style! Square composition for icon use.</p>
@@ -170,7 +170,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 </:header_aside>
                 <:image>
                   <figure class="image is-16by9">
-                    <img src={Routes.static_path(Endpoint, "/images/640x360.png")}>
+                    <img src={Routes.static_path(Endpoint, "/images/hj-bust.jpg")}>
                   </figure>
                 </:image>
                 <p>A clean bust illustration of your character with NO background!</p>
