@@ -56,9 +56,6 @@ defmodule BanchanWeb.StudioLive.Show do
                     <a>About</a>
                   </li>
                   <li>
-                    <a>Terms of Service</a>
-                  </li>
-                  <li>
                     <a>Portfolio</a>
                   </li>
                   <li>
