@@ -20,10 +20,17 @@ defmodule BanchanWeb.Components.Layout do
     {#if slot_assigned?(:hero)}
       <#slot name="hero" />
     {/if}
-    <section class="section">
+    <section class="section container is-widescreen">
       <Flash flashes={@flashes} />
       <#slot />
     </section>
+    <footer class="footer">
+      <div class="container level">
+      <p class="level-item">
+        Generic copyright message 2021.
+      </p>
+      </div>
+    </footer>
     """
   end
 end

@@ -3,3 +3,33 @@
 
 // This needs to be at the _bottom_
 @import "~bulma";
+
+/* Custom CSS Variables */
+:root {
+    --background--global: #a5f2c9;
+    --background-secondary--global: #8df6c7;
+
+    --color--global:;
+    --color-contrast--global:;
+}
+
+/* CSS Proper */
+
+html {
+    height: 100%;
+    background-color: var(--background--global);
+}
+
+body {
+    background-color: white;
+    min-height: 100%;
+    
+}
+
+footer {
+
+}
+
+.card-image .image {
+    object-fit: cover !important;
+}

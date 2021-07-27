@@ -79,7 +79,7 @@ defmodule BanchanWeb.StudioLive.Show do
                   <span class="tag is-medium is-danger is-light">5/5 slots</span>
                 </:header_aside>
                 <:image>
-                  <figure class="image is-16by9">
+                  <figure class="image">
                     <img src={Routes.static_path(Endpoint, "/images/hj-illustration.jpg")}>
                   </figure>
                 </:image>
@@ -102,7 +102,7 @@ defmodule BanchanWeb.StudioLive.Show do
                   <span class="tag is-medium is-success is-light">2/5 slots</span>
                 </:header_aside>
                 <:image>
-                  <figure class="image is-16by9">
+                  <figure class="image">
                     <img src={Routes.static_path(Endpoint, "/images/hj-character.jpg")}>
                   </figure>
                 </:image>
@@ -125,7 +125,7 @@ defmodule BanchanWeb.StudioLive.Show do
                   <span class="tag is-medium is-warning is-light">2/3 slots</span>
                 </:header_aside>
                 <:image>
-                  <figure class="image is-16by9">
+                  <figure class="image">
                     <img src={Routes.static_path(Endpoint, "/images/hj-character-page.jpg")}>
                   </figure>
                 </:image>
@@ -148,7 +148,7 @@ defmodule BanchanWeb.StudioLive.Show do
                   <span class="tag is-medium is-success is-light">3/10 slots</span>
                 </:header_aside>
                 <:image>
-                  <figure class="image is-16by9">
+                  <figure class="image">
                     <img src={Routes.static_path(Endpoint, "/images/hj-chibi-icon.png")}>
                   </figure>
                 </:image>
@@ -169,7 +169,7 @@ defmodule BanchanWeb.StudioLive.Show do
                   <span class="tag is-medium is-danger is-light">5/5 slots</span>
                 </:header_aside>
                 <:image>
-                  <figure class="image is-16by9">
+                  <figure class="image">
                     <img src={Routes.static_path(Endpoint, "/images/hj-bust.jpg")}>
                   </figure>
                 </:image>
