@@ -23,22 +23,58 @@ defmodule BanchanWeb.DenizenLive.Show do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      Denizen Profile Page for {@user.handle}
-      <div>
-        <p>Name: {@user.name}</p>
-        <p>Bio: {@user.bio}</p>
-      </div>
-      {#if @current_user && @current_user.id == @user.id}
-        <LiveRedirect label="Edit" to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)} />
-      {/if}
-      <h2 class="title">Studios</h2>
-      <div class="columns denizen-studios is-multiline">
-        {#for studio <- @studios}
-          <div class="column is-one-quarter">
-            <StudioCard studio={studio} />
+      <section class="hero is-primary">
+        <div class="hero-body">
+          <h1 class = "title"> {@user.handle} </h1>
+          <p class = "subtitle"> Witty phrase here. </p>
+        </div>
+        <div class="hero-foot">
+          <nav class="tabs is-boxed is-right">
+            <div class="container">
+              <ul>
+                <li class="is-active">
+                  <a> Profile Home </a>
+                </li>
+                <li> <a>Featured</a> </li>
+                <li> <a>Showcases</a> </li>
+                <li> <a>Characters</a> </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </section>
+
+      <div class="tile is-ancester">
+        <div class="tile is-parent is-12">
+          <div class="tile is-child notification is-success">
+            <h2 class="title">Studios</h2>
+            <div class="columns denizen-studios is-multiline">
+              {#for studio <- @studios}
+                <div class="column">
+                  <StudioCard studio={studio} />
+                </div>
+              {/for}
+            </div>
           </div>
-        {/for}
+          <div class="tile is-child notification is-warning">
+            <p class="title"> About {@user.handle} </p>
+            <p>Name: {@user.name}</p>
+            <p>Bio: {@user.bio}</p>
+            <button>
+              {#if @current_user && @current_user.id == @user.id}
+                <LiveRedirect label="Edit" to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)} />
+              {/if}
+            </button>
+          </div>
+
+        </div>
+        <div class="tile">
+
+        </div>
+
       </div>
+
+
     </Layout>
     """
   end
