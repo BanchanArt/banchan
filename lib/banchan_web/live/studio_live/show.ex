@@ -88,7 +88,10 @@ defmodule BanchanWeb.StudioLive.Show do
                   <p>$500-$1000</p>
                 </div>
                 <:footer>
-                  <a class="button is-primary card-footer-item" href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}>Details</a>
+                  <a
+                    class="button is-primary card-footer-item"
+                    href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}
+                  >Details</a>
                 </:footer>
               </Card>
             </div>
@@ -111,7 +114,10 @@ defmodule BanchanWeb.StudioLive.Show do
                   <p>$225-$500+</p>
                 </div>
                 <:footer>
-                  <a class="button is-primary card-footer-item" href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}>Details</a>
+                  <a
+                    class="button is-primary card-footer-item"
+                    href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}
+                  >Details</a>
                 </:footer>
               </Card>
             </div>
@@ -134,7 +140,10 @@ defmodule BanchanWeb.StudioLive.Show do
                   <p>$225-$600+</p>
                 </div>
                 <:footer>
-                  <a class="button is-primary card-footer-item" href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}>Details</a>
+                  <a
+                    class="button is-primary card-footer-item"
+                    href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}
+                  >Details</a>
                 </:footer>
               </Card>
             </div>
@@ -155,7 +164,10 @@ defmodule BanchanWeb.StudioLive.Show do
                 <p>A rendered bust of your character in a chibi/miniaturized style! Square composition for icon use.</p>
                 <p>$100-$200</p>
                 <:footer>
-                  <a class="button is-primary card-footer-item" href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}>Details</a>
+                  <a
+                    class="button is-primary card-footer-item"
+                    href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}
+                  >Details</a>
                 </:footer>
               </Card>
             </div>
@@ -176,7 +188,10 @@ defmodule BanchanWeb.StudioLive.Show do
                 <p>A clean bust illustration of your character with NO background!</p>
                 <p>$75-$150</p>
                 <:footer>
-                  <a class="button is-primary card-footer-item" href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}>Details</a>
+                  <a
+                    class="button is-primary card-footer-item"
+                    href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}
+                  >Details</a>
                 </:footer>
               </Card>
             </div>

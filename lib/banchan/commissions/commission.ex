@@ -8,7 +8,10 @@ defmodule Banchan.Commissions.Commission do
   schema "commissions" do
     # TODO(zkat): we need some kind of ID here that we can expose to customers?
     field :title, :string
-    field :status, Ecto.Enum, values: [:pending, :accepted, :in_progress, :paused, :waiting, :closed], default: :pending
+
+    field :status, Ecto.Enum,
+      values: [:pending, :accepted, :in_progress, :paused, :waiting, :closed],
+      default: :pending
 
     belongs_to :studio, Banchan.Studios.Studio
     belongs_to :client, Banchan.Accounts.User
