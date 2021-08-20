@@ -1,6 +1,7 @@
 # Banchan.Art
+Created and maintained by [DWG](https://www.dwg.dev/).
 
-[View the Wiki here.](https://github.com/digitalworkersguild/banchan/wiki)
+[Repo Wiki](https://github.com/digitalworkersguild/banchan/wiki) | [Staging Server](https://dev.banchan.art/) 
 ## Setup
 
 Requirements:
