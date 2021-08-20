@@ -123,14 +123,14 @@ defmodule BanchanWeb.CommissionLive.New do
                   Choose Products
                 </:header>
                 <div class="content">
-                      <div class="tags has-addons">
-                        <span class="tag is-medium is-success">
-                          $150.00
-                        </span>
-                        <span class="tag is-medium">
-                          Base Price
-                        </span>
-                      </div>
+                  <div class="tags has-addons">
+                    <span class="tag is-medium is-success">
+                      $150.00
+                    </span>
+                    <span class="tag is-medium">
+                      Base Price
+                    </span>
+                  </div>
                   <ul>
                     <li>One Character</li>
                     <li>Full Color</li>

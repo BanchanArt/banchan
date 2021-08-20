@@ -26,9 +26,9 @@ defmodule BanchanWeb.Components.Layout do
     </section>
     <footer class="footer">
       <div class="container level">
-      <p class="level-item">
-        Generic copyright message 2021.
-      </p>
+        <p class="level-item">
+          Generic copyright message 2021.
+        </p>
       </div>
     </footer>
     """

@@ -25,7 +25,6 @@ defmodule BanchanWeb.DenizenLive.Show do
     <Layout current_user={@current_user} flashes={@flash}>
       <section class="hero is-primary">
         <div class="hero-head">
-
         </div>
         <div class="hero-body">
           <article class="media">
@@ -33,25 +32,33 @@ defmodule BanchanWeb.DenizenLive.Show do
               <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
             </figure>
             <div class="media-content">
-              <h1 class = "title"> {@user.handle} </h1>
-              <p class = "subtitle"> Witty phrase here. </p>
+              <h1 class="title">
+                {@user.handle}
+              </h1>
+              <p class="subtitle">
+                Witty phrase here.
+              </p>
             </div>
             <div class="media-right">
               <a class="button is-warning">Follow</a>
             </div>
           </article>
-
         </div>
         <div class="hero-foot">
-
           <nav class="tabs is-boxed is-right">
             <div class="container">
               <ul>
                 <li class="is-active">
-                  <a> Profile Home </a>
+                  <a>
+                    Profile Home
+                  </a>
                 </li>
-                <li> <a>Featured</a> </li>
-                <li> <a>Characters</a> </li>
+                <li>
+                  <a>Featured</a>
+                </li>
+                <li>
+                  <a>Characters</a>
+                </li>
               </ul>
             </div>
           </nav>
@@ -71,27 +78,28 @@ defmodule BanchanWeb.DenizenLive.Show do
             </div>
           </div>
           <div class="tile is-child notification is-warning block">
-            <h2 class="title"> About {@user.handle} </h2>
+            <h2 class="title">
+              About {@user.handle}
+            </h2>
             <figure class="image is-3by1" alt="denizen ID">
               <img src="https://bulma.io/images/placeholders/640x480.png">
             </figure>
             <div class="content">
               <p class="">Name: {@user.name}</p>
               <p class="">Bio: {@user.bio}</p>
-                {#if @current_user && @current_user.id == @user.id}
-                  <LiveRedirect label="Edit" to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)} class="button is-primary is-fullwidth"/>
-                {/if}
+              {#if @current_user && @current_user.id == @user.id}
+                <LiveRedirect
+                  label="Edit"
+                  to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)}
+                  class="button is-primary is-fullwidth"
+                />
+              {/if}
             </div>
           </div>
-
         </div>
         <div class="tile">
-
         </div>
-
       </div>
-
-
     </Layout>
     """
   end

@@ -68,7 +68,10 @@ defmodule BanchanWeb.CommissionLive.Show do
   @impl true
   def handle_event("update-status", %{"status" => [new_status]}, socket) do
     comm = socket.assigns.commission
-    {:ok, commission} = Commissions.update_commission(comm, %{title: comm.title, status: new_status})
+
+    {:ok, commission} =
+      Commissions.update_commission(comm, %{title: comm.title, status: new_status})
+
     {:noreply, socket |> assign(commission: commission)}
   end
 
