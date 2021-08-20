@@ -75,9 +75,9 @@ defmodule BanchanWeb.CommissionLive.Show do
     {:noreply, socket |> assign(commission: commission)}
   end
 
-  @impl true
-  def handle_event("new-message", %{"message" => message}, socket) do
-    IO.inspect(message)
-    {:noreply, socket}
-  end
+  # @impl true
+  # def handle_event("new-message", %{"message" => message}, socket) do
+  #   IO.inspect(message)
+  #   {:noreply, socket}
+  # end
 end

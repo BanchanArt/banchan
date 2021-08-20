@@ -22,11 +22,11 @@ defmodule BanchanWeb.CommissionLive.New do
     {:ok, assign(socket, studio: studio, changeset: changeset)}
   end
 
-  @impl true
-  def handle_event("submit", params, socket) do
-    IO.inspect(params)
-    {:noreply, socket}
-  end
+  # @impl true
+  # def handle_event("submit", params, socket) do
+  #   IO.inspect(params)
+  #   {:noreply, socket}
+  # end
 
   @impl true
   def render(assigns) do
