@@ -6,8 +6,8 @@ defmodule Banchan.CommissionsTest do
   describe "commissions" do
     alias Banchan.Commissions.Commission
 
-    @valid_attrs %{status: "some status", title: "some title"}
-    @update_attrs %{status: "some updated status", title: "some updated title"}
+    @valid_attrs %{status: "pending", title: "some title"}
+    @update_attrs %{status: "accepted", title: "some updated title"}
     @invalid_attrs %{status: nil, title: nil}
 
     def commission_fixture(attrs \\ %{}) do
@@ -19,8 +19,6 @@ defmodule Banchan.CommissionsTest do
       commission
     end
 
-    # adding skip flag for wip test
-    @tag :skip
     test "list_commissions/0 returns all commissions" do
       commission = commission_fixture()
       assert Commissions.list_commissions() == [commission]
