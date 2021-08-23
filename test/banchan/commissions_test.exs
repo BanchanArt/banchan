@@ -6,8 +6,8 @@ defmodule Banchan.CommissionsTest do
   describe "commissions" do
     alias Banchan.Commissions.Commission
 
-    @valid_attrs %{status: "some status", title: "some title"}
-    @update_attrs %{status: "some updated status", title: "some updated title"}
+    @valid_attrs %{status: "pending", title: "some title"}
+    @update_attrs %{status: "accepted", title: "some updated title"}
     @invalid_attrs %{status: nil, title: nil}
 
     def commission_fixture(attrs \\ %{}) do
@@ -19,25 +19,19 @@ defmodule Banchan.CommissionsTest do
       commission
     end
 
-    # adding skip flag for wip test
-    @tag :skip
     test "list_commissions/0 returns all commissions" do
       commission = commission_fixture()
       assert Commissions.list_commissions() == [commission]
     end
 
-    # adding skip flag for wip test
-    @tag :skip
     test "get_commission!/1 returns the commission with given id" do
       commission = commission_fixture()
       assert Commissions.get_commission!(commission.id) == commission
     end
 
-    # adding skip flag for wip test
-    @tag :skip
     test "create_commission/1 with valid data creates a commission" do
       assert {:ok, %Commission{} = commission} = Commissions.create_commission(@valid_attrs)
-      assert commission.status == "some status"
+      assert commission.status == :pending
       assert commission.title == "some title"
     end
 
@@ -45,20 +39,16 @@ defmodule Banchan.CommissionsTest do
       assert {:error, %Ecto.Changeset{}} = Commissions.create_commission(@invalid_attrs)
     end
 
-    # adding skip flag for wip test
-    @tag :skip
     test "update_commission/2 with valid data updates the commission" do
       commission = commission_fixture()
 
       assert {:ok, %Commission{} = commission} =
                Commissions.update_commission(commission, @update_attrs)
 
-      assert commission.status == "some updated status"
+      assert commission.status == :accepted
       assert commission.title == "some updated title"
     end
 
-    # adding skip flag for wip test
-    @tag :skip
     test "update_commission/2 with invalid data returns error changeset" do
       commission = commission_fixture()
 
@@ -68,16 +58,12 @@ defmodule Banchan.CommissionsTest do
       assert commission == Commissions.get_commission!(commission.id)
     end
 
-    # adding skip flag for wip test
-    @tag :skip
     test "delete_commission/1 deletes the commission" do
       commission = commission_fixture()
       assert {:ok, %Commission{}} = Commissions.delete_commission(commission)
       assert_raise Ecto.NoResultsError, fn -> Commissions.get_commission!(commission.id) end
     end
 
-    # adding skip flag for wip test
-    @tag :skip
     test "change_commission/1 returns a commission changeset" do
       commission = commission_fixture()
       assert %Ecto.Changeset{} = Commissions.change_commission(commission)
