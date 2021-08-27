@@ -62,12 +62,13 @@ defmodule BanchanWeb.ForgotPasswordLive do
     end
 
     # Regardless of the outcome, show an impartial success/error message.
-    socket
-    |> put_flash(
-      :info,
-      "If your email is in our system, you will receive instructions to reset your password shortly."
-    )
-    |> push_redirect(to: Routes.home_path(Endpoint, :index))
+    socket =
+      socket
+      |> put_flash(
+        :info,
+        "If your email is in our system, you will receive instructions to reset your password shortly."
+      )
+      |> push_redirect(to: Routes.home_path(Endpoint, :index))
 
     {:noreply, socket}
   end

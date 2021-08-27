@@ -96,9 +96,10 @@ defmodule BanchanWeb.ResetPasswordLive do
   def handle_event("submit", %{"user" => user_params}, socket) do
     case Accounts.reset_user_password(socket.assigns.user, user_params) do
       {:ok, _} ->
-        socket
-        |> put_flash(:info, "Password reset successfully.")
-        |> push_redirect(to: Routes.login_path(Endpoint, :new))
+        socket =
+          socket
+          |> put_flash(:info, "Password reset successfully.")
+          |> push_redirect(to: Routes.login_path(Endpoint, :new))
 
         {:noreply, socket}
 
