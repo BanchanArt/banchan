@@ -18,7 +18,7 @@ defmodule BanchanWeb.CommissionLive.New do
   def mount(%{"slug" => slug}, session, socket) do
     socket = assign_defaults(session, socket)
     changeset = Commission.changeset(%Commission{status: :pending}, %{})
-    studio = Studios.get_studio_by_slug!(slug)
+    studio = Studios.get_studio_by_at!(slug)
     {:ok, assign(socket, studio: studio, changeset: changeset)}
   end
 

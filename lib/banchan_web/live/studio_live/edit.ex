@@ -14,9 +14,9 @@ defmodule BanchanWeb.StudioLive.Edit do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(%{"slug" => slug}, session, socket) do
+  def mount(%{"at" => at}, session, socket) do
     socket = assign_defaults(session, socket)
-    studio = Studios.get_studio_by_slug!(slug)
+    studio = Studios.get_studio_by_at!(at)
 
     if Studios.is_user_in_studio(socket.assigns.current_user, studio) do
       {:ok, assign(socket, studio: studio, changeset: Studio.changeset(studio, %{}))}

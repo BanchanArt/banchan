@@ -4,10 +4,12 @@ defmodule Banchan.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @derive {Inspect, except: [:password]}
+  alias Banchan.Ats.At
+  alias Banchan.Studios.Studio
+
+  # @derive {Inspect, except: [:password]}
   schema "users" do
     field :email, :string
-    field :handle, :string, autogenerate: {__MODULE__, :auto_username, []}
     field :password, :string, virtual: true
     field :hashed_password, :string
     field :confirmed_at, :naive_datetime
@@ -17,7 +19,8 @@ defmodule Banchan.Accounts.User do
     field :pfp_img, :string
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
 
-    many_to_many :studios, Banchan.Studios.Studio, join_through: "users_studios"
+    has_one :at, At
+    many_to_many :studios, Studio, join_through: "users_studios"
 
     timestamps()
   end
@@ -41,8 +44,8 @@ defmodule Banchan.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:handle, :email, :password])
-    |> unique_constraint(:handle)
+    |> cast(attrs, [:email, :password])
+    |> cast_assoc(:at, with: &At.changeset/2)
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
@@ -51,17 +54,6 @@ defmodule Banchan.Accounts.User do
   def login_changeset(user, attrs) do
     user
     |> cast(attrs, [:email, :password])
-  end
-
-  defp validate_handle(changeset) do
-    changeset
-    |> validate_required([:handle])
-    |> validate_format(:handle, ~r/^[a-zA-Z0-9_]+$/,
-      message: "only letters, numbers, and underscores allowed"
-    )
-    |> validate_length(:handle, min: 3, max: 16)
-    |> unsafe_validate_unique(:handle, Banchan.Repo)
-    |> unique_constraint(:handle)
   end
 
   def auto_username do
@@ -115,9 +107,9 @@ defmodule Banchan.Accounts.User do
   """
   def profile_changeset(user, attrs \\ %{}) do
     user
-    |> cast(attrs, [:handle, :name, :bio, :header_img, :pfp_img])
-    |> validate_required([:handle])
-    |> validate_handle()
+    |> cast(attrs, [:at, :name, :bio, :header_img, :pfp_img])
+    |> validate_required([:at])
+    |> put_assoc(:at, At.changeset(user, attrs))
     |> validate_name()
     |> validate_bio()
   end
@@ -132,12 +124,12 @@ defmodule Banchan.Accounts.User do
   end
 
   @doc """
-  A user changeset for changing the handle.
+  A user changeset for changing the @.
   """
-  def handle_changeset(user, attrs) do
+  def at_changeset(user, attrs) do
     user
-    |> cast(attrs, [:handle])
-    |> validate_handle()
+    |> cast(attrs, [:at])
+    |> put_assoc(:at, At.changeset(user, attrs))
   end
 
   @doc """

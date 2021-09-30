@@ -39,12 +39,12 @@ defmodule BanchanWeb.Router do
   scope "/", BanchanWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    live "/denizens/:handle/edit", DenizenLive.Edit, :edit
+    live "/denizens/:at/edit", DenizenLive.Edit, :edit
 
     live "/studios/new", StudioLive.New, :new
-    live "/studios/:slug/edit", StudioLive.Edit, :edit
-    live "/studios/:slug/commissions/new", CommissionLive.New, :new
-    live "/studios/:slug/commissions/:id", CommissionLive.Show, :show
+    live "/studios/:at/edit", StudioLive.Edit, :edit
+    live "/studios/:at/commissions/new", CommissionLive.New, :new
+    live "/studios/:at/commissions/:id", CommissionLive.Show, :show
 
     live "/dashboard", DashboardLive, :index
 
@@ -59,9 +59,9 @@ defmodule BanchanWeb.Router do
 
     live "/", HomeLive, :index
 
-    live "/denizens/:handle", DenizenLive.Show, :show
+    live "/denizens/:at", DenizenLive.Show, :show
     live "/studios", StudioLive.Index, :index
-    live "/studios/:slug", StudioLive.Show, :show
+    live "/studios/:at", StudioLive.Show, :show
 
     live "/confirm", ConfirmationLive, :show
     get "/confirm/:token", UserConfirmationController, :confirm

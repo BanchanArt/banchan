@@ -11,9 +11,9 @@ defmodule BanchanWeb.StudioLive.Show do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(%{"slug" => slug}, session, socket) do
+  def mount(%{"at" => at}, session, socket) do
     socket = assign_defaults(session, socket, false)
-    studio = Studios.get_studio_by_slug!(slug)
+    studio = Studios.get_studio_by_at!(at)
     members = Studios.list_studio_members(studio)
 
     current_user_member? =

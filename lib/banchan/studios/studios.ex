@@ -5,23 +5,25 @@ defmodule Banchan.Studios do
 
   import Ecto.Query, warn: false
 
+  alias Banchan.Ats.At
   alias Banchan.Repo
   alias Banchan.Studios.Studio
 
   @doc """
-  Gets a studio by its slug.
+  Gets a studio by its @.
 
   ## Examples
 
-      iex> get_studio_by_slug!("foo")
+      iex> get_studio_by_at!("foo")
       %Studio{}
 
-      iex> get_studio_by_slug!("unknown")
+      iex> get_studio_by_at!("unknown")
       Exception Thrown
 
   """
-  def get_studio_by_slug!(slug) when is_binary(slug) do
-    Repo.get_by!(Studio, slug: slug)
+  def get_studio_by_at!(at) when is_binary(at) do
+    # TODO -- uuhhhh?
+    Repo.get_by!(At, name: at).studio
   end
 
   @doc """
@@ -29,7 +31,7 @@ defmodule Banchan.Studios do
 
   ## Examples
 
-      iex> update_studio_profile(studio, %{slug: ..., name: ..., ...})
+      iex> update_studio_profile(studio, %{at: ..., name: ..., ...})
       {:ok, %Studio{}}
 
   """
@@ -44,7 +46,7 @@ defmodule Banchan.Studios do
 
   ## Examples
 
-      iex> new_studio(studio, %{slug: ..., name: ..., ...})
+      iex> new_studio(studio, %{at: ..., name: ..., ...})
       {:ok, %Studio{}}
   """
   def new_studio(user, attrs) do

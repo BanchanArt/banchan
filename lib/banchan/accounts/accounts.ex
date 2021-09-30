@@ -75,7 +75,7 @@ defmodule Banchan.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id), do: Repo.get!(User, id, preload: [:at])
 
   ## User registration
 
@@ -130,8 +130,8 @@ defmodule Banchan.Accounts do
       %Ecto.Changeset{data: %User{}}
 
   """
-  def change_user_handle(user, attrs \\ %{}) do
-    User.handle_changeset(user, attrs)
+  def change_user_at(user, attrs \\ %{}) do
+    User.at_changeset(user, attrs)
   end
 
   @doc """
@@ -164,7 +164,7 @@ defmodule Banchan.Accounts do
   def update_user_handle(user, password, attrs) do
     changeset =
       user
-      |> User.handle_changeset(attrs)
+      |> User.at_changeset(attrs)
       |> User.validate_current_password(password)
 
     Ecto.Multi.new()
@@ -310,7 +310,10 @@ defmodule Banchan.Accounts do
   """
   def get_user_by_session_token(token) do
     {:ok, query} = UserToken.verify_session_token_query(token)
-    Repo.one(query)
+    case Repo.one(query) do
+      {user, _token} -> user
+      nil -> nil
+    end
   end
 
   @doc """

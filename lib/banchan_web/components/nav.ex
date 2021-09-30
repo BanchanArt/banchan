@@ -40,11 +40,11 @@ defmodule BanchanWeb.Components.Nav do
           {#if @current_user}
             <LiveRedirect
               class="navbar-item"
-              to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}
+              to={Routes.denizen_show_path(Endpoint, :show, @current_user.at.at)}
             >
               <span class="icon-text">
                 <span class="icon"><i class="fa fa-user" /></span>
-                <span>@{@current_user.handle}</span>
+                <span>@{@current_user.at.at}</span>
               </span>
             </LiveRedirect>
             <LiveRedirect class="navbar-item" to={Routes.dashboard_path(Endpoint, :index)}>
