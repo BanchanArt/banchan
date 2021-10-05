@@ -4,8 +4,11 @@ defmodule BanchanWeb.StudioLive.Index do
   """
   use BanchanWeb, :surface_view
 
+  alias Surface.Components.LiveRedirect
+
   alias Banchan.Studios
   alias BanchanWeb.Components.{Layout, StudioCard}
+  alias BanchanWeb.Endpoint
 
   @impl true
   def mount(_params, session, socket) do
@@ -26,6 +29,9 @@ defmodule BanchanWeb.StudioLive.Index do
           </div>
         {/for}
       </div>
+      <LiveRedirect to={Routes.studio_new_path(Endpoint, :new)}>
+        <h2>Create a new studio</h2>
+      </LiveRedirect>
     </Layout>
     """
   end
