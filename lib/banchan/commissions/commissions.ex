@@ -49,8 +49,8 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_commission(attrs \\ %{}) do
-    %Commission{}
+  def create_commission(offering, attrs \\ %{}) do
+    %Commission{offering_id: offering.id}
     |> Commission.changeset(attrs)
     |> Repo.insert()
   end

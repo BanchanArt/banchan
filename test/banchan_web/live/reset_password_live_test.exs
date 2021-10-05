@@ -4,7 +4,6 @@ defmodule BanchanWeb.ResetPasswordLiveTest do
   import Phoenix.LiveViewTest
   import Banchan.AccountsFixtures
   alias Banchan.Accounts
-  alias Banchan.Repo
 
   setup do
     user = user_fixture()

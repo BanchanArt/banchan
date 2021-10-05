@@ -15,10 +15,10 @@ defmodule BanchanWeb.CommissionLive.New do
   alias BanchanWeb.Components.{Card, Layout}
 
   @impl true
-  def mount(%{"slug" => slug, "type" => type}, session, socket) do
+  def mount(%{"handle" => handle, "type" => type}, session, socket) do
     socket = assign_defaults(session, socket)
     changeset = Commission.changeset(%Commission{status: :pending}, %{})
-    studio = Studios.get_studio_by_slug!(slug)
+    studio = Studios.get_studio_by_handle!(handle)
     offering = Studios.get_offering_by_type!(studio, type)
     {:ok, assign(socket, studio: studio, offering: offering, changeset: changeset)}
   end

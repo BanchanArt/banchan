@@ -12,9 +12,9 @@ defmodule BanchanWeb.StudioLive.Show do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(%{"slug" => slug}, session, socket) do
+  def mount(%{"handle" => handle}, session, socket) do
     socket = assign_defaults(session, socket, false)
-    studio = Studios.get_studio_by_slug!(slug)
+    studio = Studios.get_studio_by_handle!(handle)
     members = Studios.list_studio_members(studio)
     offerings = Studios.list_studio_offerings(studio)
 
@@ -47,7 +47,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 <LiveRedirect
                   class="button is-light is-small"
                   label="Edit Profile"
-                  to={Routes.studio_edit_path(Endpoint, :edit, @studio.slug)}
+                  to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}
                 />
               {/if}
             </p>

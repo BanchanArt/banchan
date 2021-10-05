@@ -14,15 +14,15 @@ defmodule BanchanWeb.StudioLive.Edit do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(%{"slug" => slug}, session, socket) do
+  def mount(%{"handle" => handle}, session, socket) do
     socket = assign_defaults(session, socket)
-    studio = Studios.get_studio_by_slug!(slug)
+    studio = Studios.get_studio_by_handle!(handle)
 
     if Studios.is_user_in_studio(socket.assigns.current_user, studio) do
       {:ok, assign(socket, studio: studio, changeset: Studio.changeset(studio, %{}))}
     else
       socket = put_flash(socket, :error, "Access denied")
-      {:ok, push_redirect(socket, to: Routes.studio_show_path(Endpoint, :show, studio.slug))}
+      {:ok, push_redirect(socket, to: Routes.studio_show_path(Endpoint, :show, studio.handle))}
     end
   end
 
@@ -49,7 +49,7 @@ defmodule BanchanWeb.StudioLive.Edit do
             </div>
             <ErrorTag class="help is-danger" />
           </Field>
-          <Field class="field" name={:slug}>
+          <Field class="field" name={:handle}>
             <Label class="label" />
             <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
@@ -111,7 +111,7 @@ defmodule BanchanWeb.StudioLive.Edit do
 
         {:noreply,
          push_redirect(socket,
-           to: Routes.studio_show_path(Endpoint, :show, studio.slug)
+           to: Routes.studio_show_path(Endpoint, :show, studio.handle)
          )}
 
       other ->

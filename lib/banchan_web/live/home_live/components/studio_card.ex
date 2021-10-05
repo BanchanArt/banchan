@@ -12,7 +12,7 @@ defmodule BanchanWeb.Components.StudioCard do
 
   def render(assigns) do
     ~F"""
-    <LiveRedirect to={Routes.studio_show_path(Endpoint, :show, @studio.slug)}>
+    <LiveRedirect to={Routes.studio_show_path(Endpoint, :show, @studio.handle)}>
       <div class="card">
         <div class="card-image">
           <figure class="image is-2by1">

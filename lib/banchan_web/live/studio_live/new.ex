@@ -50,7 +50,7 @@ defmodule BanchanWeb.StudioLive.New do
             </div>
             <ErrorTag class="help is-danger" />
           </Field>
-          <Field class="field" name={:slug}>
+          <Field class="field" name={:handle}>
             <Label class="label" />
             <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
@@ -96,7 +96,7 @@ defmodule BanchanWeb.StudioLive.New do
   def handle_event("change", %{"studio" => studio, "_target" => target}, socket) do
     studio =
       if target == ["studio", "name"] do
-        %{studio | "slug" => slugify(studio["name"])}
+        %{studio | "handle" => slugify(studio["name"])}
       else
         studio
       end
@@ -112,10 +112,10 @@ defmodule BanchanWeb.StudioLive.New do
 
   @impl true
   def handle_event("submit", val, socket) do
-    case Studios.new_studio(%Studio{artists: [socket.assigns.current_user]}, val["studio"]) do
+    case Studios.new_studio(socket.assigns.current_user, val["studio"]) do
       {:ok, studio} ->
         put_flash(socket, :info, "Profile updated")
-        {:noreply, redirect(socket, to: Routes.studio_show_path(Endpoint, :show, studio.slug))}
+        {:noreply, redirect(socket, to: Routes.studio_show_path(Endpoint, :show, studio.handle))}
 
       other ->
         other

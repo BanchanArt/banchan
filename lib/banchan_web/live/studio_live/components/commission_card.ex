@@ -47,7 +47,7 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
         {#if @open}
           <LiveRedirect
             class="button is-primary card-footer-item"
-            to={Routes.commission_new_path(Endpoint, :new, @studio.slug, @type_id)}
+            to={Routes.commission_new_path(Endpoint, :new, @studio.handle, @type_id)}
           >Request</LiveRedirect>
         {#else}
           <LiveRedirect

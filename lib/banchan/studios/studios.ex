@@ -9,19 +9,19 @@ defmodule Banchan.Studios do
   alias Banchan.Studios.{Offering, Studio}
 
   @doc """
-  Gets a studio by its slug.
+  Gets a studio by its handle.
 
   ## Examples
 
-      iex> get_studio_by_slug!("foo")
+      iex> get_studio_by_handle!("foo")
       %Studio{}
 
-      iex> get_studio_by_slug!("unknown")
+      iex> get_studio_by_handle!("unknown")
       Exception Thrown
 
   """
-  def get_studio_by_slug!(slug) when is_binary(slug) do
-    Repo.get_by!(Studio, slug: slug)
+  def get_studio_by_handle!(handle) when is_binary(handle) do
+    Repo.get_by!(Studio, handle: handle)
   end
 
   def get_offering_by_type!(studio, type) do
@@ -33,7 +33,7 @@ defmodule Banchan.Studios do
 
   ## Examples
 
-      iex> update_studio_profile(studio, %{slug: ..., name: ..., ...})
+      iex> update_studio_profile(studio, %{handle: ..., name: ..., ...})
       {:ok, %Studio{}}
 
   """
@@ -48,13 +48,12 @@ defmodule Banchan.Studios do
 
   ## Examples
 
-      iex> new_studio(studio, %{slug: ..., name: ..., ...})
+      iex> new_studio(studio, %{handle: ..., name: ..., ...})
       {:ok, %Studio{}}
   """
-  def new_studio(user, attrs) do
-    %Studio{artists: [user]}
+  def new_studio(studio, attrs) do
+    studio
     |> Studio.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:artists, [user])
     |> Repo.insert()
   end
 

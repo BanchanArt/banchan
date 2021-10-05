@@ -4,30 +4,21 @@ defmodule Banchan.StudiosFixtures do
   entities via the `Banchan.Studios` context.
   """
 
-  def unique_user_email, do: "user#{System.unique_integer()}@example.com"
-  def unique_user_handle, do: "user#{System.unique_integer()}"
-  def valid_user_password, do: "hello world!"
+  def unique_studio_name, do: "studio#{System.unique_integer()}"
+  def unique_studio_handle, do: "studio#{System.unique_integer()}"
 
-  def valid_user_attributes(attrs \\ %{}) do
+  def valid_studio_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
-      email: unique_user_email(),
-      handle: unique_user_handle(),
-      password: valid_user_password()
+      name: unique_studio_name(),
+      handle: unique_studio_handle()
     })
   end
 
-  def user_fixture(attrs \\ %{}) do
-    {:ok, user} =
-      attrs
-      |> valid_user_attributes()
-      |> Banchan.Accounts.register_user()
+  def studio_fixture(studio, attrs \\ %{}) do
+    {:ok, studio} =
+      studio
+      |> Banchan.Studios.new_studio(valid_studio_attributes(attrs))
 
-    user
-  end
-
-  def extract_user_token(fun) do
-    {:ok, captured} = fun.(&"[TOKEN]#{&1}[TOKEN]")
-    [_, token, _] = String.split(captured.body, "[TOKEN]")
-    token
+    studio
   end
 end

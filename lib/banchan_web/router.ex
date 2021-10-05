@@ -42,9 +42,9 @@ defmodule BanchanWeb.Router do
     live "/denizens/:handle/edit", DenizenLive.Edit, :edit
 
     live "/studios/new", StudioLive.New, :new
-    live "/studios/:slug/edit", StudioLive.Edit, :edit
-    live "/studios/:slug/commissions/new/:type", CommissionLive.New, :new
-    live "/studios/:slug/commissions/:id", CommissionLive.Show, :show
+    live "/studios/:handle/edit", StudioLive.Edit, :edit
+    live "/studios/:handle/commissions/new/:type", CommissionLive.New, :new
+    live "/studios/:handle/commissions/:id", CommissionLive.Show, :show
 
     live "/dashboard", DashboardLive, :index
 
@@ -61,13 +61,14 @@ defmodule BanchanWeb.Router do
 
     live "/denizens/:handle", DenizenLive.Show, :show
     live "/studios", StudioLive.Index, :index
-    live "/studios/:slug", StudioLive.Show, :show
+    live "/studios/:handle", StudioLive.Show, :show
 
     live "/confirm", ConfirmationLive, :show
     get "/confirm/:token", UserConfirmationController, :confirm
 
     delete "/logout", UserSessionController, :delete
     get "/force_logout", UserSessionController, :force_logout
+    get "/go/:handle", DispatchController, :dispatch
   end
 
   scope "/", BanchanWeb do

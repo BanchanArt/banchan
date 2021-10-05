@@ -3,6 +3,7 @@ defmodule Banchan.Accounts.User do
 
   use Ecto.Schema
   import Ecto.Changeset
+  alias Banchan.Identities
 
   @derive {Inspect, except: [:password]}
   schema "users" do
@@ -42,12 +43,21 @@ defmodule Banchan.Accounts.User do
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:handle, :email, :password])
+    |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
   end
 
+  @spec login_changeset(
+          {map, map}
+          | %{
+              :__struct__ => atom | %{:__changeset__ => map, optional(any) => any},
+              optional(atom) => any
+            },
+          :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
+        ) :: Ecto.Changeset.t()
   def login_changeset(user, attrs) do
     user
     |> cast(attrs, [:email, :password])
@@ -60,7 +70,7 @@ defmodule Banchan.Accounts.User do
       message: "only letters, numbers, and underscores allowed"
     )
     |> validate_length(:handle, min: 3, max: 16)
-    |> unsafe_validate_unique(:handle, Banchan.Repo)
+    |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
   end
 
@@ -206,5 +216,15 @@ defmodule Banchan.Accounts.User do
   defp set_admin_role(changeset) do
     changeset
     |> put_change(:roles, [:admin])
+  end
+
+  defp validate_handle_unique(changeset, field) when is_atom(field) do
+    validate_change(changeset, field, fn current_field, value ->
+      if Identities.validate_uniqueness_of_handle(value) do
+        []
+      else
+        [{current_field, "already exists"}]
+      end
+    end)
   end
 end
