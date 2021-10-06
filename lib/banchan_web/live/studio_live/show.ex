@@ -8,6 +8,7 @@ defmodule BanchanWeb.StudioLive.Show do
 
   alias Banchan.Studios
   alias BanchanWeb.Components.{Card, Layout}
+  alias BanchanWeb.StudioLive.Components.{CommissionCard}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -71,129 +72,68 @@ defmodule BanchanWeb.StudioLive.Show do
         <div class="column is-two-thirds">
           <div class="offerings columns is-multiline">
             <div class="column">
-              <Card>
-                <:header>
-                  Illustration
-                </:header>
-                <:header_aside>
-                  <span class="tag is-medium is-danger is-light">5/5 slots</span>
-                </:header_aside>
-                <:image>
-                  <figure class="image">
-                    <img src={Routes.static_path(Endpoint, "/images/hj-illustration.jpg")}>
-                  </figure>
-                </:image>
-                <div class="content">
-                  <p>A waist-up illustration of your character with background of choice!</p>
-                  <p>$500-$1000</p>
-                </div>
-                <:footer>
-                  <a
-                    class="button is-primary card-footer-item"
-                    href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}
-                  >Details</a>
-                </:footer>
-              </Card>
+              <CommissionCard
+                studio={@studio}
+                type_id="illustration"
+                name="Illustration"
+                description="A waist-up illustration of your character with background of choice!"
+                image={Routes.static_path(Endpoint, "/images/hj-illustration.jpg")}
+                price_range="$500-$1000"
+                total_slots={5}
+                available_slots={5}
+              />
             </div>
 
             <div class="column">
-              <Card>
-                <:header>
-                  Character
-                </:header>
-                <:header_aside>
-                  <span class="tag is-medium is-success is-light">2/5 slots</span>
-                </:header_aside>
-                <:image>
-                  <figure class="image">
-                    <img src={Routes.static_path(Endpoint, "/images/hj-character.jpg")}>
-                  </figure>
-                </:image>
-                <div class="content">
-                  <p>A clean full-body illustration of your character with NO background!</p>
-                  <p>$225-$500+</p>
-                </div>
-                <:footer>
-                  <a
-                    class="button is-primary card-footer-item"
-                    href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}
-                  >Details</a>
-                </:footer>
-              </Card>
+              <CommissionCard
+                studio={@studio}
+                type_id="character"
+                name="Character"
+                description="A clean full-body illustration of your character with NO background!"
+                image={Routes.static_path(Endpoint, "/images/hj-character.jpg")}
+                price_range="$225-$500+"
+                total_slots={5}
+                available_slots={2}
+              />
             </div>
 
             <div class="column">
-              <Card>
-                <:header>
-                  Character Page
-                </:header>
-                <:header_aside>
-                  <span class="tag is-medium is-warning is-light">2/3 slots</span>
-                </:header_aside>
-                <:image>
-                  <figure class="image">
-                    <img src={Routes.static_path(Endpoint, "/images/hj-character-page.jpg")}>
-                  </figure>
-                </:image>
-                <div class="content">
-                  <p>A page spread depicting your character in a variety of illustrations collaged together!</p>
-                  <p>$225-$600+</p>
-                </div>
-                <:footer>
-                  <a
-                    class="button is-primary card-footer-item"
-                    href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}
-                  >Details</a>
-                </:footer>
-              </Card>
+              <CommissionCard
+                studio={@studio}
+                type_id="character-page"
+                name="Character Page"
+                description="A page spread depicting your character in a variety of illustrations collaged together!"
+                image={Routes.static_path(Endpoint, "/images/hj-character-page.jpg")}
+                price_range="$225-$600+"
+                total_slots={3}
+                available_slots={2}
+              />
             </div>
 
             <div class="column">
-              <Card>
-                <:header>
-                  Chibi Icon
-                </:header>
-                <:header_aside>
-                  <span class="tag is-medium is-success is-light">3/10 slots</span>
-                </:header_aside>
-                <:image>
-                  <figure class="image">
-                    <img src={Routes.static_path(Endpoint, "/images/hj-chibi-icon.png")}>
-                  </figure>
-                </:image>
-                <p>A rendered bust of your character in a chibi/miniaturized style! Square composition for icon use.</p>
-                <p>$100-$200</p>
-                <:footer>
-                  <a
-                    class="button is-primary card-footer-item"
-                    href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}
-                  >Details</a>
-                </:footer>
-              </Card>
+              <CommissionCard
+                studio={@studio}
+                type_id="chibi-icon"
+                name="Chibi Icon"
+                description="A rendered bust of your character in a chibi/miniaturized style! Square composition for icon use."
+                image={Routes.static_path(Endpoint, "/images/hj-chibi-icon.png")}
+                price_range="$100-$200"
+                total_slots={10}
+                available_slots={3}
+              />
             </div>
 
             <div class="column">
-              <Card>
-                <:header>
-                  Character Bust
-                </:header>
-                <:header_aside>
-                  <span class="tag is-medium is-danger is-light">5/5 slots</span>
-                </:header_aside>
-                <:image>
-                  <figure class="image">
-                    <img src={Routes.static_path(Endpoint, "/images/hj-bust.jpg")}>
-                  </figure>
-                </:image>
-                <p>A clean bust illustration of your character with NO background!</p>
-                <p>$75-$150</p>
-                <:footer>
-                  <a
-                    class="button is-primary card-footer-item"
-                    href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}
-                  >Details</a>
-                </:footer>
-              </Card>
+              <CommissionCard
+                studio={@studio}
+                type_id="character-bust"
+                name="Character Bust"
+                description="A clean bust illustration of your character with NO background!"
+                price_range="$75-$150"
+                image={Routes.static_path(Endpoint, "/images/hj-bust.jpg")}
+                total_slots={5}
+                available_slots={5}
+              />
             </div>
 
             <div class="column">
