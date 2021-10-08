@@ -14,6 +14,7 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
   prop name, :string, required: true
   prop description, :string, required: true
   prop image, :uri, required: true
+  prop open, :boolean, required: true
   prop price_range, :string
 
   def render(assigns) do
@@ -22,8 +23,14 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
       <:header>
         {@name}
       </:header>
+      <:header_aside>
+        {#if @open}
+          <span class="tag is-medium is-success is-light">Open</span>
+        {#else}
+          <span class="tag is-medium is-danger is-light">Closed</span>
+        {/if}
+      </:header_aside>
       <:image>
-        {!-- TODO: I feel like we need to do something here if we're going to have these cards render right --}
         <figure class="commission-image image">
           <img src={@image}>
         </figure>
@@ -37,11 +44,17 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
         {/if}
       </div>
       <:footer>
-        {!-- TODO: hook up type_id --}
-        <LiveRedirect
-          class="button is-primary card-footer-item"
-          to={Routes.commission_new_path(Endpoint, :new, @studio.slug, type: @type_id)}
-        >Details</LiveRedirect>
+        {#if @open}
+          <LiveRedirect
+            class="button is-primary card-footer-item"
+            to={Routes.commission_new_path(Endpoint, :new, @studio.slug, type: @type_id)}
+          >Request</LiveRedirect>
+        {#else}
+          <LiveRedirect
+            class="button is-info card-footer-item"
+            to="#"
+          >Notify Me</LiveRedirect>
+        {/if}
       </:footer>
     </Card>
     """

@@ -78,6 +78,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 name="Illustration"
                 description="A waist-up illustration of your character with background of choice!"
                 image={Routes.static_path(Endpoint, "/images/hj-illustration.jpg")}
+                open={true}
                 price_range="$500-$1000"
               />
             </div>
@@ -89,6 +90,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 name="Character"
                 description="A clean full-body illustration of your character with NO background!"
                 image={Routes.static_path(Endpoint, "/images/hj-character.jpg")}
+                open={false}
                 price_range="$225-$500+"
               />
             </div>
@@ -100,6 +102,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 name="Character Page"
                 description="A page spread depicting your character in a variety of illustrations collaged together!"
                 image={Routes.static_path(Endpoint, "/images/hj-character-page.jpg")}
+                open={true}
                 price_range="$225-$600+"
               />
             </div>
@@ -111,6 +114,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 name="Chibi Icon"
                 description="A rendered bust of your character in a chibi/miniaturized style! Square composition for icon use."
                 image={Routes.static_path(Endpoint, "/images/hj-chibi-icon.png")}
+                open={true}
                 price_range="$100-$200"
               />
             </div>
@@ -122,6 +126,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 name="Character Bust"
                 description="A clean bust illustration of your character with NO background!"
                 price_range="$75-$150"
+                open={false}
                 image={Routes.static_path(Endpoint, "/images/hj-bust.jpg")}
               />
             </div>
