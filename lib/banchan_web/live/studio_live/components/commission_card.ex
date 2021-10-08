@@ -4,6 +4,8 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
   """
   use BanchanWeb, :component
 
+  alias Surface.Components.LiveRedirect
+
   alias BanchanWeb.Components.Card
   alias BanchanWeb.Endpoint
 
@@ -13,8 +15,6 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
   prop description, :string, required: true
   prop image, :uri, required: true
   prop price_range, :string
-  prop total_slots, :number
-  prop available_slots, :number
 
   def render(assigns) do
     ~F"""
@@ -22,13 +22,8 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
       <:header>
         {@name}
       </:header>
-      <:header_aside>
-        {!-- TODO: change display color based on available slots --}
-        {#if @total_slots}
-          <span class="commission-slots tag is-medium is-danger is-light">{@available_slots}/{@total_slots} slots</span>
-        {/if}
-      </:header_aside>
       <:image>
+        {!-- TODO: I feel like we need to do something here if we're going to have these cards render right --}
         <figure class="commission-image image">
           <img src={@image}>
         </figure>
@@ -36,17 +31,17 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
       <div class="content">
         <p class="commission-description">{@description}</p>
         {#if @price_range}
-          <p class="price-range defined">$500-$1000</p>
+          <p class="price-range defined">{@price_range}</p>
         {#else}
           <p class="price-range undefined">Inquire</p>
         {/if}
       </div>
       <:footer>
         {!-- TODO: hook up type_id --}
-        <a
+        <LiveRedirect
           class="button is-primary card-footer-item"
-          href={Routes.commission_new_path(Endpoint, :new, @studio.slug)}
-        >Details</a>
+          to={Routes.commission_new_path(Endpoint, :new, @studio.slug, type: @type_id)}
+        >Details</LiveRedirect>
       </:footer>
     </Card>
     """
