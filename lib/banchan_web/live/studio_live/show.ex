@@ -143,9 +143,6 @@ defmodule BanchanWeb.StudioLive.Show do
               <:header>
                 Summary
               </:header>
-              <:header_aside>
-                <button type="button" class="button is-light is-small">Edit</button>
-              </:header_aside>
               <div class="content">
                 <h3>These are all private commissions, meaning: <strong>non-commercial</strong></h3>
                 <p>You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
