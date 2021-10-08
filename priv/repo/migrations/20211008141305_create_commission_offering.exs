@@ -9,6 +9,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :open, :boolean, default: false, null: false
       add :price_range, :string
 
+      add :studio, references(:studios), null: false
       timestamps()
     end
 

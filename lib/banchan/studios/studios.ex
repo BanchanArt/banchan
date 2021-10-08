@@ -90,6 +90,18 @@ defmodule Banchan.Studios do
   end
 
   @doc """
+  List offerings offered by this studio
+
+  ## Examples
+
+      iex> list_studio_offerings(studio)
+      [%Offering{}, %Offering{}, %Offering{}]
+  """
+  def list_studio_offerings(studio) do
+    Repo.all(Ecto.assoc(studio, :offerings))
+  end
+
+  @doc """
   Determine if a user is part of a studio. If the studio is omitted, returns
   true if the user is part of ANY studio.
 

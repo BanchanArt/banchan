@@ -13,6 +13,8 @@ defmodule Banchan.Studios.Studio do
 
     many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
 
+    has_many :offerings, Banchan.Studios.Offering
+
     timestamps()
   end
 

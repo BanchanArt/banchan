@@ -1,13 +1,17 @@
-defmodule Banchan.Commissions.Offering do
+defmodule Banchan.Studios.Offering do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "commission_offering" do
+  alias Banchan.Studios.Studio
+
+  schema "offerings" do
     field :name, :string
     field :open, :boolean, default: false
     field :price_range, :string
     field :short_summary, :string
     field :summary, :string
+
+    belongs_to :studio, Studio
 
     timestamps()
   end
