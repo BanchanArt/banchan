@@ -9,3 +9,24 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
+{:ok, user} = Banchan.Accounts.register_admin(%{
+  handle: "zkat",
+  email: "kat@dwg.dev",
+  password: "foobarbazquux",
+  password_confirmation: "foobarbazquux"
+})
+
+{:ok, studio} = Banchan.Studios.new_studio(user, %{
+  slug: "kitteh-studio",
+  name: "Kitteh Studio",
+  description: "Kitteh-related stuff",
+})
+
+Banchan.Studios.new_offering(studio, %{
+  type: "illustration",
+  index: 0,
+  name: "Illustration",
+  description: "A detailed illustration with full rendering and background.",
+  open: true
+})

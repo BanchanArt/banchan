@@ -6,7 +6,7 @@ defmodule Banchan.Studios do
   import Ecto.Query, warn: false
 
   alias Banchan.Repo
-  alias Banchan.Studios.Studio
+  alias Banchan.Studios.{Offering, Studio}
 
   @doc """
   Gets a studio by its slug.
@@ -22,6 +22,10 @@ defmodule Banchan.Studios do
   """
   def get_studio_by_slug!(slug) when is_binary(slug) do
     Repo.get_by!(Studio, slug: slug)
+  end
+
+  def get_offering_by_type!(studio, type) do
+    Repo.get_by!(Offering, [type: type, studio_id: studio.id])
   end
 
   @doc """
@@ -48,8 +52,15 @@ defmodule Banchan.Studios do
       {:ok, %Studio{}}
   """
   def new_studio(user, attrs) do
-    user
+    %Studio{artists: [user]}
     |> Studio.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:artists, [user])
+    |> Repo.insert()
+  end
+
+  def new_offering(studio, attrs) do
+    %Offering{studio_id: studio.id}
+    |> Offering.changeset(attrs)
     |> Repo.insert()
   end
 
@@ -87,6 +98,18 @@ defmodule Banchan.Studios do
   """
   def list_studio_members(studio) do
     Repo.all(Ecto.assoc(studio, :artists))
+  end
+
+  @doc """
+  List offerings offered by this studio
+
+  ## Examples
+
+      iex> list_studio_offerings(studio)
+      [%Offering{}, %Offering{}, %Offering{}]
+  """
+  def list_studio_offerings(studio) do
+    Repo.all(from o in Ecto.assoc(studio, :offerings), order_by: o.index)
   end
 
   @doc """
