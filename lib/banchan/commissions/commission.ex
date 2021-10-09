@@ -13,7 +13,7 @@ defmodule Banchan.Commissions.Commission do
       values: [:pending, :accepted, :in_progress, :paused, :waiting, :closed],
       default: :pending
 
-    belongs_to :offering, Banchan.Commissions.Offering
+    belongs_to :offering, Banchan.Studios.Offering
     belongs_to :studio, Banchan.Studios.Studio
     belongs_to :client, Banchan.Accounts.User
 

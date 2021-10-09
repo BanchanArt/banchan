@@ -14,8 +14,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     end
 
     alter table(:commissions) do
-      remove :type,
-      add :offering, references(:offerings), null: false
+      add :offering_id, references(:offerings), null: false
     end
 
     create index(:commissions, [:offering_id])
