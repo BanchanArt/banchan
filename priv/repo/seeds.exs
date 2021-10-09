@@ -19,7 +19,7 @@
   })
 
 {:ok, studio} =
-  Banchan.Studios.new_studio(%Studio{artists: [user]}, %{
+  Banchan.Studios.new_studio(%Banchan.Studios.Studio{artists: [user]}, %{
     handle: "kitteh-studio",
     name: "Kitteh Studio",
     description: "Kitteh-related stuff"
