@@ -6,7 +6,7 @@ defmodule Banchan.Studios do
   import Ecto.Query, warn: false
 
   alias Banchan.Repo
-  alias Banchan.Studios.Studio
+  alias Banchan.Studios.{Offering, Studio}
 
   @doc """
   Gets a studio by its slug.
@@ -22,6 +22,10 @@ defmodule Banchan.Studios do
   """
   def get_studio_by_slug!(slug) when is_binary(slug) do
     Repo.get_by!(Studio, slug: slug)
+  end
+
+  def get_offering_by_type!(studio, type) do
+    Repo.get_by!(Offering, [type: type, studio_id: studio.id])
   end
 
   @doc """

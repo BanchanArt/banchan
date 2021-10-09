@@ -43,7 +43,7 @@ defmodule BanchanWeb.Router do
 
     live "/studios/new", StudioLive.New, :new
     live "/studios/:slug/edit", StudioLive.Edit, :edit
-    live "/studios/:slug/commissions/new", CommissionLive.New, :new
+    live "/studios/:slug/commissions/new/:type", CommissionLive.New, :new
     live "/studios/:slug/commissions/:id", CommissionLive.Show, :show
 
     live "/dashboard", DashboardLive, :index
