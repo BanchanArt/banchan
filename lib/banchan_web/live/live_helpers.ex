@@ -20,7 +20,7 @@ defmodule BanchanWeb.LiveHelpers do
     if auth && is_nil(socket.assigns.current_user) do
       socket
       |> put_flash(:error, "You must log in to access this page.")
-      |> redirect(to: Routes.user_session_path(socket, :new))
+      |> redirect(to: Routes.user_session_path(socket, :create))
     else
       socket
     end
