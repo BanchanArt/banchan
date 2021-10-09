@@ -91,15 +91,15 @@ defmodule BanchanWeb.StudioLive.Show do
                 />
               </div>
             {/for}
-    
+
             {#if @current_user_member?}
               <div class="column">
-                <button type="button" class="button is-light">Add a Tier</button>
+                <button type="button" class="button is-light">Add an Offering</button>
               </div>
             {/if}
           </div>
         </div>
-    
+
         <div class="column">
           <div class="block">
             <Card>
@@ -124,7 +124,7 @@ defmodule BanchanWeb.StudioLive.Show do
               </div>
             </Card>
           </div>
-    
+
           <div class="block">
             <h2 class="subtitle">Members</h2>
             <div class="studio-members columns is-multiline">
