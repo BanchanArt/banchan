@@ -6,6 +6,7 @@ defmodule Banchan.Studios.Offering do
 
   schema "offerings" do
     field :type, :string
+    field :index, :integer
     field :name, :string
     field :description, :string
     field :open, :boolean, default: false
@@ -19,8 +20,8 @@ defmodule Banchan.Studios.Offering do
   @doc false
   def changeset(offering, attrs) do
     offering
-    |> cast(attrs, [:type, :name, :description, :open, :price_range])
-    |> validate_required([:type, :name, :description, :open])
+    |> cast(attrs, [:type, :index, :name, :description, :open, :price_range])
+    |> validate_required([:type, :index, :name, :description, :open])
     |> unique_constraint([:type, :studio_id])
   end
 end

@@ -52,8 +52,15 @@ defmodule Banchan.Studios do
       {:ok, %Studio{}}
   """
   def new_studio(user, attrs) do
-    user
+    %Studio{artists: [user]}
     |> Studio.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:artists, [user])
+    |> Repo.insert()
+  end
+
+  def new_offering(studio, attrs) do
+    %Offering{studio_id: studio.id}
+    |> Offering.changeset(attrs)
     |> Repo.insert()
   end
 
