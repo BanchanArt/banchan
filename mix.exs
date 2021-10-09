@@ -64,6 +64,7 @@ defmodule Banchan.MixProject do
       {:slugify, "~> 1.3.1"},
       {:bamboo, "~> 2.2.0"},
       {:phoenix_live_reload, "~> 1.3", only: :dev},
+      {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       # Testing and static analysis
       {:surface_formatter, "~> 0.5.1"},
       {:floki, ">= 0.27.0", only: :test},
@@ -85,6 +86,7 @@ defmodule Banchan.MixProject do
       setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "assets.deploy": ["esbuild default --minify", "phx.digest"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       quality: [
         "compile --all-warnings --warnings-as-errors",

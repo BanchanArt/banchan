@@ -10,12 +10,12 @@ defmodule BanchanWeb.LayoutView do
         {Phoenix.HTML.Tag.csrf_meta_tag()}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         {live_title_tag(assigns[:page_title] || "Banchan Art")}
-        <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/css/app.css")}>
+        <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}>
         <script
           defer
           phx-track-static
           type="text/javascript"
-          src={Routes.static_path(@conn, "/js/app.js")}
+          src={Routes.static_path(@conn, "/assets/app.js")}
         />
       </head>
       <body>
