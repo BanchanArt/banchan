@@ -19,7 +19,7 @@ defmodule BanchanWeb.CommissionLive.New do
     socket = assign_defaults(session, socket)
     changeset = Commission.changeset(%Commission{status: :pending}, %{})
     studio = Studios.get_studio_by_slug!(slug)
-    offering = Studios.get_offering_by_type!(slug, type)
+    offering = Studios.get_offering_by_type!(studio, type)
     {:ok, assign(socket, studio: studio, offering: offering, changeset: changeset)}
   end
 
