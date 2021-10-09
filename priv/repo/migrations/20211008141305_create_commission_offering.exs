@@ -3,6 +3,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
 
   def change do
     create table(:offerings) do
+      add :type, :string
       add :name, :string
       add :summary, :string
       add :short_summary, :string

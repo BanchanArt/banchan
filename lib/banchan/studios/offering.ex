@@ -5,6 +5,7 @@ defmodule Banchan.Studios.Offering do
   alias Banchan.Studios.Studio
 
   schema "offerings" do
+    field :type, :string
     field :name, :string
     field :open, :boolean, default: false
     field :price_range, :string

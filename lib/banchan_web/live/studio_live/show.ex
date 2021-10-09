@@ -16,13 +16,19 @@ defmodule BanchanWeb.StudioLive.Show do
     socket = assign_defaults(session, socket, false)
     studio = Studios.get_studio_by_slug!(slug)
     members = Studios.list_studio_members(studio)
+    offerings = Studios.list_studio_offerings(studio)
 
     current_user_member? =
       socket.assigns.current_user &&
         Studios.is_user_in_studio(socket.assigns.current_user, studio)
 
     {:ok,
-     assign(socket, studio: studio, members: members, current_user_member?: current_user_member?)}
+     assign(socket,
+       studio: studio,
+       members: members,
+       offerings: offerings,
+       current_user_member?: current_user_member?
+     )}
   end
 
   @impl true
@@ -71,72 +77,29 @@ defmodule BanchanWeb.StudioLive.Show do
       <div class="studio columns">
         <div class="column is-two-thirds">
           <div class="offerings columns is-multiline">
-            <div class="column">
-              <CommissionCard
-                studio={@studio}
-                type_id="illustration"
-                name="Illustration"
-                description="A waist-up illustration of your character with background of choice!"
-                image={Routes.static_path(Endpoint, "/images/hj-illustration.jpg")}
-                open={true}
-                price_range="$500-$1000"
-              />
-            </div>
-
-            <div class="column">
-              <CommissionCard
-                studio={@studio}
-                type_id="character"
-                name="Character"
-                description="A clean full-body illustration of your character with NO background!"
-                image={Routes.static_path(Endpoint, "/images/hj-character.jpg")}
-                open={false}
-                price_range="$225-$500+"
-              />
-            </div>
-
-            <div class="column">
-              <CommissionCard
-                studio={@studio}
-                type_id="character-page"
-                name="Character Page"
-                description="A page spread depicting your character in a variety of illustrations collaged together!"
-                image={Routes.static_path(Endpoint, "/images/hj-character-page.jpg")}
-                open={true}
-                price_range="$225-$600+"
-              />
-            </div>
-
-            <div class="column">
-              <CommissionCard
-                studio={@studio}
-                type_id="chibi-icon"
-                name="Chibi Icon"
-                description="A rendered bust of your character in a chibi/miniaturized style! Square composition for icon use."
-                image={Routes.static_path(Endpoint, "/images/hj-chibi-icon.png")}
-                open={true}
-                price_range="$100-$200"
-              />
-            </div>
-
-            <div class="column">
-              <CommissionCard
-                studio={@studio}
-                type_id="character-bust"
-                name="Character Bust"
-                description="A clean bust illustration of your character with NO background!"
-                price_range="$75-$150"
-                open={false}
-                image={Routes.static_path(Endpoint, "/images/hj-bust.jpg")}
-              />
-            </div>
-
-            <div class="column">
-              <button type="button" class="button is-light">Add a Tier</button>
-            </div>
+            {#for offering <- @offerings}
+              <div class="column">
+                {!-- TODO: Add image --}
+                <CommissionCard
+                  studio={@studio}
+                  type_id={offering.type}
+                  name={offering.name}
+                  description={offering.description}
+                  image={Routes.static_path(Endpoint, "/images/640x360.png")}
+                  open={offering.open}
+                  price_range={offering.price_range}
+                />
+              </div>
+            {/for}
+    
+            {#if @current_user_member?}
+              <div class="column">
+                <button type="button" class="button is-light">Add a Tier</button>
+              </div>
+            {/if}
           </div>
         </div>
-
+    
         <div class="column">
           <div class="block">
             <Card>
@@ -161,7 +124,7 @@ defmodule BanchanWeb.StudioLive.Show do
               </div>
             </Card>
           </div>
-
+    
           <div class="block">
             <h2 class="subtitle">Members</h2>
             <div class="studio-members columns is-multiline">
