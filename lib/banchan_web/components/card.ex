@@ -44,7 +44,7 @@ defmodule BanchanWeb.Components.Card do
         <#slot />
       </div>
       {#if slot_assigned?(:footer)}
-        <footer class="card-footer bg-green-600">
+        <footer class="card-footer bg-primary-600">
           <#slot name="footer" />
         </footer>
       {/if}

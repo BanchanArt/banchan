@@ -14,13 +14,16 @@ defmodule BanchanWeb.Components.Nav do
     ~F"""
     <nav
       id="nav"
-      class="bg-gradient-to-r from-green-400 to-green-600 align-top w-full leading-snug m-0 p-0"
+      class="bg-gradient-to-r from-primary-300 to-primary-500 align-top w-full leading-snug m-0 p-0"
       role="navigation"
       aria-label="main navigation"
     >
       <div class="md:container md:mx-auto">
-        <a class="navbar-item text-white " href="/">
-          <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")} class="inline-block object-scale-down h-12 p-1"> Banchan Art
+        <a class="navbar-item text-white" href="/">
+          <img
+            src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
+            class="inline-block object-scale-down h-12 p-1"
+          /> Banchan Art
         </a>
         {#if @current_user}
           <LiveRedirect
@@ -38,7 +41,10 @@ defmodule BanchanWeb.Components.Nav do
               <span>Dashboard</span>
             </span>
           </LiveRedirect>
-          <LiveRedirect class="navbar-item md:mx-8 text-white" to={Routes.studio_index_path(Endpoint, :index)}>
+          <LiveRedirect
+            class="navbar-item md:mx-8 text-white"
+            to={Routes.studio_index_path(Endpoint, :index)}
+          >
             <span class="icon-text">
               <span class="icon"><i class="fa fa-palette" /></span>
               <span>Studios</span>
@@ -50,14 +56,22 @@ defmodule BanchanWeb.Components.Nav do
               <span>Settings</span>
             </span>
           </LiveRedirect>
-          <Link class="navbar-item md:mx-8 text-white" to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
+          <Link
+            class="navbar-item md:mx-8 text-white"
+            to={Routes.user_session_path(Endpoint, :delete)}
+            method={:delete}
+          >
             <span class="icon-text">
               <span class="icon"><i class="fa fa-sign-out-alt" /></span>
               <span>Log out</span>
             </span>
           </Link>
         {#else}
-          <LiveRedirect class="navbar-item md:mx-8 text-white" label="Register" to={Routes.register_path(Endpoint, :new)}>
+          <LiveRedirect
+            class="navbar-item md:mx-8 text-white"
+            label="Register"
+            to={Routes.register_path(Endpoint, :new)}
+          >
             <span class="icon-text">
               <span class="icon"><i class="fa fa-user" /></span>
               <span>Register</span>

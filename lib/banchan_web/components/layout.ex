@@ -24,8 +24,8 @@ defmodule BanchanWeb.Components.Layout do
       <Flash flashes={@flashes} />
       <#slot />
     </section>
-    <footer class="footer bg-gradient-to-r from-green-400 to-green-600 p-4 w-full fixed bottom-0">
-      <div class="md:container md:mx-auto px-4 ">
+    <footer class="footer bg-gradient-to-r from-primary-300 to-primary-500 p-4 w-full fixed bottom-0">
+      <div class="md:container md:mx-auto px-4">
         <p class="text-center">
           Generic copyright message 2021.
         </p>
