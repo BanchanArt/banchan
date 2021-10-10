@@ -4,7 +4,7 @@ defmodule BanchanWeb.LayoutView do
   def render(_, assigns) do
     ~F"""
     <!DOCTYPE html />
-    <html lang="en">
+    <html lang="en" class="h-full bg-green-50">
       <head>
         <meta charset="utf-8">
         {Phoenix.HTML.Tag.csrf_meta_tag()}
@@ -18,7 +18,7 @@ defmodule BanchanWeb.LayoutView do
           src={Routes.static_path(@conn, "/assets/app.js")}
         />
       </head>
-      <body>
+      <body class="flex flex-col h-full ">
         {@inner_content}
       </body>
     </html>

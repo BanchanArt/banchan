@@ -18,11 +18,11 @@ defmodule BanchanWeb.HomeLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="title">Home</h1>
+      <h1 class="title text-xl">Home</h1>
       <h2 class="subtitle">Commission Someone</h2>
-      <div class="studio-list columns is-multiline">
+      <div class="studio-list grid grid-cols-3 gap-3">
         {#for studio <- @studios}
-          <div class="column is-one-third">
+          <div class="md:inline-grid max-w-md bg-green-100 p-1 shadow-md">
             <StudioCard studio={studio} />
           </div>
         {/for}

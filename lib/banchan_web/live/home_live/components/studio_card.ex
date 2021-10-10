@@ -15,21 +15,21 @@ defmodule BanchanWeb.Components.StudioCard do
     <LiveRedirect to={Routes.studio_show_path(Endpoint, :show, @studio.handle)}>
       <div class="card">
         <div class="card-image">
-          <figure class="image is-2by1">
+          <figure class="image object-scale-down max-w-md">
             <img src={Routes.static_path(Endpoint, "/images/shop_card_default.png")}>
           </figure>
         </div>
-        <div class="card-content">
+        <div class="card-content m-3">
           <div class="media">
-            <div class="media-left">
-              <figure class="image is-48x48">
-                <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
+            <div class="float-left">
+              <figure class="image">
+                <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")} class="inline-block object-scale-down h-12 p-1">
               </figure>
             </div>
             <div class="media-content">
-              <p class="title is-4">{@studio.name}</p>
+              <p class="title text-xl font-medium md:leading-loose">{@studio.name}</p>
             </div>
-          </div>
+          </div> <br>
           <div class="content">
             {@studio.description}
           </div>
