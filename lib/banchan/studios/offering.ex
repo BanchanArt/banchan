@@ -1,4 +1,5 @@
 defmodule Banchan.Studios.Offering do
+  @moduledoc false
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -25,3 +26,5 @@ defmodule Banchan.Studios.Offering do
     |> unique_constraint([:type, :studio_id])
   end
 end
+
+# TODO: Complete moduledoc.

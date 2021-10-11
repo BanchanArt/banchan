@@ -8,8 +8,8 @@ defmodule BanchanWeb.StudioLive.Show do
 
   alias Banchan.Studios
   alias BanchanWeb.Components.{Card, Layout}
-  alias BanchanWeb.StudioLive.Components.{CommissionCard}
   alias BanchanWeb.Endpoint
+  alias BanchanWeb.StudioLive.Components.CommissionCard
 
   @impl true
   def mount(%{"handle" => handle}, session, socket) do
