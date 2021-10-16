@@ -87,8 +87,7 @@ defmodule Banchan.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       "assets.deploy": [
-        "cmd --cd assets npm run deploy",
-        "esbuild default --minify",
+        "cmd --cd assets npx cross-env NODE_ENV=production node scripts/build.js",
         "phx.digest"
       ],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
