@@ -34,10 +34,10 @@ config :surface, :components, [
 
 config :esbuild,
   version: "0.12.18",
-  node: [
-    "build.js",
-    cd: Path.expand("../assets/scripts/", __DIR__),
-    env: %{"ESBUILD_LOG_LEVEL" => "silent", "ESBUILD_WATCH" => "1", "NODE_ENV" => "development"}
+  default: [
+    args: ~w(js/app.js --bundle --target=es2016 --outdir=../priv/static/assets),
+    cd: Path.expand("../assets", __DIR__),
+    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 
 # Import environment specific config. This must remain at the bottom

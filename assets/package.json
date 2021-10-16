@@ -18,10 +18,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.3.7",
-    "chokidar": "^3.5.2",
     "cross-env": "^7.0.3",
-    "esbuild": "^0.13.7",
-    "esbuild-sass-plugin": "^1.6.1",
     "postcss": "^8.3.9",
     "postcss-cli": "^9.0.1",
     "postcss-import": "^14.0.2",

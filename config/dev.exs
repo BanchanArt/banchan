@@ -21,10 +21,14 @@ config :banchan, BanchanWeb.Endpoint,
   code_reloader: true,
   check_origin: false,
   watchers: [
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
     node: [
-      "build.js",
-      cd: Path.expand("../assets/scripts/", __DIR__),
-      env: %{"ESBUILD_LOG_LEVEL" => "silent", "ESBUILD_WATCH" => "1", "NODE_ENV" => "development"}
+      "node_modules/tailwindcss/lib/cli.js",
+      "--input=css/app.css",
+      "--output=../priv/static/assets/app.css",
+      "--postcss",
+      "--watch",
+      cd: Path.expand("../assets", __DIR__)
     ]
   ]
 

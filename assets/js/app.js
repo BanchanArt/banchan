@@ -1,5 +1,4 @@
 import "phoenix_html"
-import "../css/app.scss"
 import Alpine from "alpinejs"
 import { Socket } from "phoenix"
 import topbar from "topbar"
