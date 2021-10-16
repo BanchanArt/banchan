@@ -3,7 +3,7 @@
   "description": " ",
   "license": "MIT",
   "scripts": {
-    "deploy": "cross-env NODE_ENV=production postcss css/app.css -o ../priv/static/assets/app.css"
+    "deploy": "cross-env NODE_ENV=production postcss css/app.scss -o ../priv/static/assets/app.css"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.3",
@@ -21,7 +21,9 @@
     "cross-env": "^7.0.3",
     "postcss": "^8.3.9",
     "postcss-cli": "^9.0.1",
-    "postcss-import": "^14.0.2",
+    "postcss-dart-sass": "^1.0.0",
+    "postcss-scss": "^4.0.1",
+    "postcss-url": "^10.1.3",
     "tailwindcss": "^2.2.16"
   }
 }

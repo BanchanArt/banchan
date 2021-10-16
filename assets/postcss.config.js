@@ -1,7 +1,11 @@
 module.exports = {
+  syntax: 'postcss-scss',
   plugins: {
-    'postcss-import': {},
+    'postcss-dart-sass': {},
     tailwindcss: {},
     autoprefixer: {},
+    'postcss-url': {
+      url: 'inline',
+    }
   }
 }

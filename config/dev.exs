@@ -23,10 +23,9 @@ config :banchan, BanchanWeb.Endpoint,
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
     node: [
-      "node_modules/tailwindcss/lib/cli.js",
-      "--input=css/app.css",
+      "node_modules/postcss-cli/index.js",
+      "css/app.scss",
       "--output=../priv/static/assets/app.css",
-      "--postcss",
       "--watch",
       cd: Path.expand("../assets", __DIR__)
     ]
