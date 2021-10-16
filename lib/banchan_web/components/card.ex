@@ -24,27 +24,23 @@ defmodule BanchanWeb.Components.Card do
 
   def render(assigns) do
     ~F"""
-    <div class={"card inline-block max-w-md #{@class}"}>
+    <div class={"inline-block max-w-md #{@class}"}>
       {#if slot_assigned?(:header)}
-        <header class="card-header">
-          <p class="card-header-title">
+        <header class="">
             <#slot name="header" />
-          </p>
-          <p class="card-header-icon">
             <#slot name="header_aside" />
-          </p>
         </header>
       {/if}
       {#if slot_assigned?(:image)}
-        <div class="card-image object-scale-down max-w-md">
+        <div class="object-scale-down max-w-md">
           <#slot name="image" />
         </div>
       {/if}
-      <div class="card-content max-w-prose">
+      <div class="max-w-prose">
         <#slot />
       </div>
       {#if slot_assigned?(:footer)}
-        <footer class="card-footer bg-primary-600">
+        <footer class="bg-primary-600">
           <#slot name="footer" />
         </footer>
       {/if}
