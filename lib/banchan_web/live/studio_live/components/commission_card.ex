@@ -19,38 +19,36 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
 
   def render(assigns) do
     ~F"""
-    <Card class="commission-card">
+    <Card>
       <:header>
         {@name}
       </:header>
       <:header_aside>
         {#if @open}
-          <span class="tag is-medium is-success is-light">Open</span>
+          <span class="bg-green-500 p-1">Open</span>
         {#else}
-          <span class="tag is-medium is-danger is-light">Closed</span>
+          <span class="bg-red-500 p-1">Closed</span>
         {/if}
       </:header_aside>
       <:image>
-        <figure class="commission-image image">
-          <img src={@image}>
-        </figure>
+        <img class="object-cover" src={@image}>
       </:image>
       <div class="content">
-        <p class="commission-description">{@description}</p>
+        <p>{@description}</p>
+        Price:
         {#if @price_range}
-          <p class="price-range defined">{@price_range}</p>
+          <span class="float-right">{@price_range}</span>
         {#else}
-          <p class="price-range undefined">Inquire</p>
+          <span class="float-right">Inquire</span>
         {/if}
       </div>
       <:footer>
         {#if @open}
           <LiveRedirect
-            class="button is-primary card-footer-item"
             to={Routes.commission_new_path(Endpoint, :new, @studio.handle, @type_id)}
           >Request</LiveRedirect>
         {#else}
-          <LiveRedirect class="button is-info card-footer-item" to="#">Notify Me</LiveRedirect>
+          <LiveRedirect to="#">Notify Me</LiveRedirect>
         {/if}
       </:footer>
     </Card>
