@@ -41,11 +41,11 @@ defmodule BanchanWeb.SettingsLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="title">Account Settings</h1>
-      <h2 class="subtitle">Update Email</h2>
-      <div class="columns">
+      <h1 class="text-2xl">Account Settings</h1>
+      <h2 class="text-xl">Update Email</h2>
+      <div class="grid grid-cols-3 gap-4">
         <Form
-          class="column is-one-third"
+          class="col-span-1"
           for={@email_changeset}
           change="change_email"
           submit="submit_email"
@@ -78,7 +78,7 @@ defmodule BanchanWeb.SettingsLive do
           <div class="field">
             <div class="control">
               <Submit
-                class="button is-link"
+                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
                 label="Save"
                 opts={disabled: Enum.empty?(@email_changeset.changes) || !@email_changeset.valid?}
               />
@@ -87,10 +87,10 @@ defmodule BanchanWeb.SettingsLive do
         </Form>
       </div>
 
-      <h2>Update Password</h2>
-      <div class="columns">
+      <h2 class="text-xl">Update Password</h2>
+      <div class="grid grid-cols-3 gap-4">
         <Form
-          class="column is-one-third"
+          class="col-span-1"
           for={@password_changeset}
           change="change_password"
           submit="submit_password"
@@ -144,7 +144,7 @@ defmodule BanchanWeb.SettingsLive do
           <div class="field">
             <div class="control">
               <Submit
-                class="button is-link"
+                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
                 label="Save"
                 opts={disabled: Enum.empty?(@password_changeset.changes) || !@password_changeset.valid?}
               />

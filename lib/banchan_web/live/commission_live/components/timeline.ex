@@ -16,7 +16,7 @@ defmodule BanchanWeb.Components.Commissions.Timeline do
       <article class="timeline-item">
         <Card>
           <:header>
-            <img class="w-6" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
+            <img class="w-6 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
             {@current_user.handle} commented 3 days ago.
           </:header>
 
@@ -37,7 +37,10 @@ defmodule BanchanWeb.Components.Commissions.Timeline do
       <article class="timeline-item block">
         <Card>
           <:header>
-            <img class="w-6" src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
+            <img
+              class="w-6 inline-block"
+              src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
+            />
             skullbunnygalaxy commented 2 days ago.
           </:header>
 
@@ -59,7 +62,10 @@ defmodule BanchanWeb.Components.Commissions.Timeline do
       <article class="timeline-item">
         <Card>
           <:header>
-            <img class="w-6" src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
+            <img
+              class="w-6  inline-block"
+              src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
+            />
             skullbunnygalaxy commented 2 days ago.
           </:header>
 

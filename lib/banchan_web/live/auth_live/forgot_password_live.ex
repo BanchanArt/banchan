@@ -23,9 +23,9 @@ defmodule BanchanWeb.ForgotPasswordLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="title">Forgot your password?</h1>
-      <div class="columns">
-        <Form class="column is-one-third" for={:user} submit="submit">
+      <h1 class="text-2xl">Forgot your password?</h1>
+      <div class="grid grid-cols-3 gap-4">
+        <Form class="col-span-1" for={:user} submit="submit">
           <Field class="field" name={:email}>
             <Label class="label" />
             <div class="control has-icons-left">
@@ -43,7 +43,10 @@ defmodule BanchanWeb.ForgotPasswordLive do
           </Field>
           <div class="field">
             <div class="control">
-              <Submit class="button is-link" label="Send instructions to reset password" />
+              <Submit
+                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
+                label="Send instructions to reset password"
+              />
             </div>
           </div>
         </Form>

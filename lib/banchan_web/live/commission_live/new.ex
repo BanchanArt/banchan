@@ -36,10 +36,10 @@ defmodule BanchanWeb.CommissionLive.New do
       <:hero>
         <section class="hero is-primary">
           <div class="hero-body">
-            <p class="title">
+            <p class="text-2xl">
               {@studio.name}
             </p>
-            <p class="subtitle">
+            <p class="text-xl">
               {@studio.description}
             </p>
           </div>
@@ -65,10 +65,10 @@ defmodule BanchanWeb.CommissionLive.New do
           </div>
         </section>
       </:hero>
-      <div class="new-commission columns">
-        <div class="column is-three-fifths">
-          <h1 class="title">Illustration Commission</h1>
-          <h2 class="subtitle">waist-up of your character(s) with background environment of your choice!</h2>
+      <div class="grid grid-cols-5 gap-4">
+        <div class="col-span-3">
+          <h1 class="text-2xl">Illustration Commission</h1>
+          <h2 class="text-xl">waist-up of your character(s) with background environment of your choice!</h2>
           <div class="content">
             <strong>These are all private commissions, meaning: non-commercial</strong>
             <p>You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
@@ -91,7 +91,7 @@ defmodule BanchanWeb.CommissionLive.New do
             <div class="content block">
               <p>Please review the Terms of Service for this commission before submitting your request.</p>
               <p><strong>These Terms might vary between commission type</strong>.</p>
-              <button type="button" class="button is-link">
+              <button type="button" class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1">
                 <span>View Terms of Service</span>
                 <span class="icon is-small">
                   <i class="fas fa-external-link-alt" />
@@ -107,7 +107,7 @@ defmodule BanchanWeb.CommissionLive.New do
             <div class="field">
               <div class="control">
                 <Submit
-                  class="button is-link"
+                  class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
                   label="Submit"
                   opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
                 />
@@ -116,7 +116,7 @@ defmodule BanchanWeb.CommissionLive.New do
           </Form>
         </div>
 
-        <div class="column">
+        <div class="col-span-2">
           <div id="sidebar">
             <div class="block sidebar-box">
               <Card>

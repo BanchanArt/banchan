@@ -27,7 +27,7 @@ defmodule BanchanWeb.Components.StudioCard do
             </figure>
           </div>
           <div class="media-content">
-            <p class="title text-xl font-medium md:leading-loose">{@studio.name}</p>
+            <p class="text-xl font-medium md:leading-loose">{@studio.name}</p>
           </div>
         </div>
         <br>

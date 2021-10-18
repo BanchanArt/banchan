@@ -36,7 +36,7 @@ defmodule BanchanWeb.DenizenLive.Show do
             <p class="text-base text-white">
               Witty phrase here.
             </p>
-            <a class="bg-teal-400 text-center rounded-lg px-2 py-1 text-white">Follow</a>
+            <a class="rounded-full py-1 px-5 m-1 bg-info-400 text-center text-white">Follow</a>
           </article>
         </div>
         <nav class="col-start-2 grid-cols-3 inline-grid">
@@ -45,8 +45,8 @@ defmodule BanchanWeb.DenizenLive.Show do
           <div class="bg-teal-400 bg-opacity-60 text-center rounded-t-lg text-white"><a>Characters</a></div>
         </nav>
       </section>
-      <div class="grid grid-cols-2 justify-items-stretch gap-6">
-        <div class="p-4 bg-amber-200">
+      <div class="grid grid-cols-2 justify-items-stretch gap-6 mt-8">
+        <div class="bg-white p-4 shadow-lg">
           <h2 class="text-xl text-white font-bold">Studios</h2>
           <div class="denizen-studios">
             {#for studio <- @studios}
@@ -54,12 +54,12 @@ defmodule BanchanWeb.DenizenLive.Show do
             {/for}
           </div>
         </div>
-        <div class="bg-purple-600 bg-opacity-20 p-4">
+        <div class="bg-white p-4 shadow-lg">
           <h2 class="text-xl text-white font-bold flex-grow">
             About {@user.handle}
           </h2>
           <figure class="" alt="denizen ID">
-            <img src="https://bulma.io/images/placeholders/640x480.png">
+            <img src="/">
           </figure>
           <div class="content">
             <p class="">Name: {@user.name}</p>
@@ -68,7 +68,7 @@ defmodule BanchanWeb.DenizenLive.Show do
               <LiveRedirect
                 label="Edit"
                 to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)}
-                class="button is-primary is-fullwidth"
+                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
               />
             {/if}
           </div>

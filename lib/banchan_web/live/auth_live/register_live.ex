@@ -32,10 +32,10 @@ defmodule BanchanWeb.RegisterLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="title">Register</h1>
-      <div class="columns">
+      <h1 class="text-2xl">Register</h1>
+      <div class="grid grid-cols-3 gap-4">
         <Form
-          class="column is-one-third"
+          class="col-span-1"
           for={@changeset}
           action={Routes.user_registration_path(Endpoint, :create)}
           change="change"
@@ -90,7 +90,7 @@ defmodule BanchanWeb.RegisterLive do
           <div class="field">
             <div class="control">
               <Submit
-                class="button is-link"
+                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
                 label="Register"
                 opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
               />

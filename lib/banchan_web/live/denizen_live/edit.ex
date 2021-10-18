@@ -23,10 +23,10 @@ defmodule BanchanWeb.DenizenLive.Edit do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="title">Edit Profile</h1>
-      <h2 class="subtitle">@{@user.handle}</h2>
-      <div class="columns">
-        <Form class="column is-one-third" for={@changeset} change="change" submit="submit">
+      <h1 class="text-2xl">Edit Profile</h1>
+      <h2 class="text-xl">@{@user.handle}</h2>
+      <div class="grid grid-cols-3 gap-4">
+        <Form class="col-span-1" for={@changeset} change="change" submit="submit">
           <Field class="field" name={:handle}>
             <Label class="label" />
             <div class="control has-icons-left">
@@ -70,9 +70,9 @@ defmodule BanchanWeb.DenizenLive.Edit do
             <ErrorTag class="help is-danger" />
           </Field>
           <div class="field">
-            <div class="control">
+            <div class="control text-black m-1">
               <Submit
-                class="button is-link"
+                class="rounded-full bg-amber-200 py-1 px-5"
                 label="Save"
                 opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
               />
