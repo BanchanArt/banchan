@@ -25,9 +25,9 @@ defmodule BanchanWeb.Components.Commissions.Timeline do
           </div>
 
           <:footer>
-          <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-left.png")}>
-          <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-right.png")}>
-          <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-front.png")}>
+            <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-left.png")}>
+            <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-right.png")}>
+            <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-front.png")}>
           </:footer>
         </Card>
       </article>

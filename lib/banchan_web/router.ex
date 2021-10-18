@@ -14,7 +14,8 @@ defmodule BanchanWeb.Router do
     plug :protect_from_forgery
     # NB(zkat): unsafe-eval has to be enabled because webpack does it for its internals.
     plug :put_secure_browser_headers, %{
-      "content-security-policy" => "default-src 'self' 'unsafe-eval'; object-src data: 'unsafe-eval'; font-src data: 'unsafe-eval'"
+      "content-security-policy" =>
+        "default-src 'self' 'unsafe-eval'; object-src data: 'unsafe-eval'; font-src data: 'unsafe-eval'"
     }
 
     plug :fetch_current_user

@@ -50,7 +50,7 @@ defmodule BanchanWeb.DenizenLive.Show do
           <h2 class="text-xl text-white font-bold">Studios</h2>
           <div class="denizen-studios">
             {#for studio <- @studios}
-                <StudioCard studio={studio} />
+              <StudioCard studio={studio} />
             {/for}
           </div>
         </div>

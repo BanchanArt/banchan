@@ -27,12 +27,12 @@ defmodule BanchanWeb.Components.Card do
     <div class={"inline-block max-w-md #{@class}"}>
       {#if slot_assigned?(:header)}
         <header class="container">
-            <#slot name="header" />
-            {#if slot_assigned?(:header_aside)}
-              <span class="float-right">
-                <#slot name="header_aside" />
-              </span>
-            {/if}
+          <#slot name="header" />
+          {#if slot_assigned?(:header_aside)}
+            <span class="float-right">
+              <#slot name="header_aside" />
+            </span>
+          {/if}
         </header>
       {/if}
       {#if slot_assigned?(:image)}
