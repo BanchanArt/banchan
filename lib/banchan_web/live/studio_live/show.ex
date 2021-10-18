@@ -91,7 +91,7 @@ defmodule BanchanWeb.StudioLive.Show do
               </:header>
               <div class="content leading-loose">
                 <h3 class="text-2xl mt-4">These are all private commissions, meaning: <strong>non-commercial</strong></h3>
-                <p class=" mt-4">You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
+                <p class="mt-4">You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
                 <h3 class="text-xl mt-4">I will draw</h3>
                 <ul class="list-disc list-inside">
                   <li>Humans/humanoids</li>

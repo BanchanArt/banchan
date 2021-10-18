@@ -18,69 +18,55 @@ defmodule BanchanWeb.Components.Nav do
       role="navigation"
       aria-label="main navigation"
     >
-      <div class="md:container md:mx-auto">
-        <a class="navbar-item text-white" href="/">
+      <div class="md:container md:mx-auto text-white flex items-center gap-12 justify-start">
+        <a href="/">
           <img
             src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
-            class="inline-block object-scale-down h-12 p-1"
+            class="inline-block object-scale-down h-12 p-1 rounded-full"
           /> Banchan Art
         </a>
         {#if @current_user}
-          <LiveRedirect
-            class="navbar-item md:mx-8 text-white"
-            to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}
-          >
-            <span class="icon-text">
-              <span class="icon"><i class="fa fa-user" /></span>
-              <span>@{@current_user.handle}</span>
+          <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
+            <span>
+              <i class="fa fa-user" />
+              @{@current_user.handle}
             </span>
           </LiveRedirect>
-          <LiveRedirect class="navbar-item md:mx-8 text-white" to={Routes.dashboard_path(Endpoint, :index)}>
-            <span class="icon-text">
-              <span class="icon"><i class="fa fa-palette" /></span>
-              <span>Dashboard</span>
+          <LiveRedirect to={Routes.dashboard_path(Endpoint, :index)}>
+            <span>
+              <i class="fa fa-palette" />
+              Dashboard
             </span>
           </LiveRedirect>
-          <LiveRedirect
-            class="navbar-item md:mx-8 text-white"
-            to={Routes.studio_index_path(Endpoint, :index)}
-          >
-            <span class="icon-text">
-              <span class="icon"><i class="fa fa-palette" /></span>
-              <span>Studios</span>
+          <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
+            <span>
+              <i class="fa fa-palette" />
+              Studios
             </span>
           </LiveRedirect>
-          <LiveRedirect class="navbar-item md:mx-8 text-white" to={Routes.settings_path(Endpoint, :edit)}>
-            <span class="icon-text">
-              <span class="icon"><i class="fa fa-cog" /></span>
-              <span>Settings</span>
+          <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
+            <span>
+              <i class="fa fa-cog" />
+              Settings
             </span>
           </LiveRedirect>
-          <Link
-            class="navbar-item md:mx-8 text-white"
-            to={Routes.user_session_path(Endpoint, :delete)}
-            method={:delete}
-          >
-            <span class="icon-text">
-              <span class="icon"><i class="fa fa-sign-out-alt" /></span>
-              <span>Log out</span>
+          <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
+            <span>
+              <i class="fa fa-sign-out-alt" />
+              Log out
             </span>
           </Link>
         {#else}
-          <LiveRedirect
-            class="navbar-item md:mx-8 text-white"
-            label="Register"
-            to={Routes.register_path(Endpoint, :new)}
-          >
-            <span class="icon-text">
-              <span class="icon"><i class="fa fa-user" /></span>
-              <span>Register</span>
+          <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
+            <span>
+              <i class="fa fa-user" />
+              Register
             </span>
           </LiveRedirect>
-          <LiveRedirect class="navbar-item md:mx-8 text-white" to={Routes.login_path(Endpoint, :new)}>
-            <span class="icon-text">
-              <span class="icon"><i class="fa fa-sign-in-alt" /></span>
-              <span>Log in</span>
+          <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
+            <span>
+              <i class="fa fa-sign-in-alt" />
+              Log in
             </span>
           </LiveRedirect>
         {/if}
