@@ -8,8 +8,8 @@ defmodule BanchanWeb.StudioLive.Show do
 
   alias Banchan.Studios
   alias BanchanWeb.Components.{Card, Layout}
-  alias BanchanWeb.StudioLive.Components.{CommissionCard}
   alias BanchanWeb.Endpoint
+  alias BanchanWeb.StudioLive.Components.CommissionCard
 
   @impl true
   def mount(%{"handle" => handle}, session, socket) do
@@ -36,110 +36,90 @@ defmodule BanchanWeb.StudioLive.Show do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <:hero>
-        <section class="hero is-primary">
-          <div class="hero-body">
-            <p class="title">
+        <section class="grid grid-cols-2 bg-teal-300">
+          <div class="ml-8 col-span-12">
+            <p class="text-3xl text-white font-bold flex-grow">
               {@studio.name}
             </p>
-            <p class="subtitle">
+            <p class="text-base text-white flex-grow">
               {@studio.description}
               {#if @current_user_member?}
                 <LiveRedirect
-                  class="button is-light is-small"
+                  class="text-center rounded-full px-2 py-1 bg-amber-200 text-black"
                   label="Edit Profile"
                   to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}
                 />
               {/if}
             </p>
+            <br>
           </div>
-          <div class="hero-foot">
-            <nav class="tabs is-boxed">
-              <div class="container">
-                <ul>
-                  <li class="is-active">
-                    <a>Shop</a>
-                  </li>
-                  <li>
-                    <a>About</a>
-                  </li>
-                  <li>
-                    <a>Portfolio</a>
-                  </li>
-                  <li>
-                    <a>Q&A</a>
-                  </li>
-                </ul>
-              </div>
-            </nav>
-          </div>
+          <nav class="ml-8 col-span-1 grid-cols-4 inline-grid">
+            <div class="bg-teal-200 text-center rounded-t-lg text-violet-400"><a>Shop</a></div>
+            <div class="bg-teal-400 bg-opacity-60 text-center rounded-t-lg text-white"><a>About</a></div>
+            <div class="bg-teal-400 bg-opacity-60 text-center rounded-t-lg text-white"><a>Portfolio</a></div>
+            <div class="bg-teal-400 bg-opacity-60 text-center rounded-t-lg text-white"><a>Q&A</a></div>
+          </nav>
         </section>
       </:hero>
-      <div class="studio columns">
-        <div class="column is-two-thirds">
-          <div class="offerings columns is-multiline">
-            {#for offering <- @offerings}
-              <div class="column">
-                {!-- TODO: Add image --}
-                <CommissionCard
-                  studio={@studio}
-                  type_id={offering.type}
-                  name={offering.name}
-                  description={offering.description}
-                  image={Routes.static_path(Endpoint, "/images/640x360.png")}
-                  open={offering.open}
-                  price_range={offering.price_range}
-                />
-              </div>
-            {/for}
-
-            {#if @current_user_member?}
-              <div class="column">
-                <button type="button" class="button is-light">Add an Offering</button>
-              </div>
-            {/if}
-          </div>
+      <div class="grid grid-cols-3 justify-items-stretch gap-6">
+        <div class="offerings">
+          {#for offering <- @offerings}
+            <div class="shadow-lg bg-white p-2 my-4 rounded">
+              {!-- TODO: Add image --}
+              <CommissionCard
+                studio={@studio}
+                type_id={offering.type}
+                name={offering.name}
+                description={offering.description}
+                image={Routes.static_path(Endpoint, "/images/640x360.png")}
+                open={offering.open}
+                price_range={offering.price_range}
+              />
+            </div>
+          {/for}
+          {#if @current_user_member?}
+            <div class="">
+              <button type="button" class="text-center rounded-full px-2 py-1 bg-amber-200">Add an Offering</button>
+            </div>
+          {/if}
         </div>
-
-        <div class="column">
-          <div class="block">
+        <div class="col-start-3">
+          <div class="shadow-lg bg-white p-2 my-4 rounded">
             <Card>
               <:header>
                 Summary
               </:header>
-              <div class="content">
-                <h3>These are all private commissions, meaning: <strong>non-commercial</strong></h3>
-                <p>You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
-                <h3>I will draw</h3>
-                <ul>
+              <div class="content leading-loose">
+                <h3 class="text-2xl mt-4">These are all private commissions, meaning: <strong>non-commercial</strong></h3>
+                <p class="mt-4">You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
+                <h3 class="text-xl mt-4">I will draw</h3>
+                <ul class="list-disc list-inside">
                   <li>Humans/humanoids</li>
                   <li>anthros+furries/creatures/monsters/animals</li>
                   <li>mecha/robots/vehicles</li>
                   <li>environments/any type of background</li>
                 </ul>
-                <h3>I will not draw</h3>
-                <ul>
+                <h3 class="text-xl mt-4">I will not draw</h3>
+                <ul class="list-disc list-inside">
                   <li>NSFW</li>
                   <li>Fanart</li>
                 </ul>
               </div>
             </Card>
           </div>
-
-          <div class="block">
-            <h2 class="subtitle">Members</h2>
-            <div class="studio-members columns is-multiline">
+          <div class="shadow-lg bg-white p-2 my-4 rounded">
+            <h2 class="text-xl">Members</h2>
+            <div class="studio-members grid grid-cols-4 gap-1">
               {#for member <- @members}
-                <div class="column">
-                  <figure class="column image is-64x64">
-                    <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, member.handle)}>
-                      <img
-                        alt={member.name}
-                        class="is-rounded"
-                        src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
-                      />
-                    </LiveRedirect>
-                  </figure>
-                </div>
+                <figure class="col-span-1">
+                  <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, member.handle)}>
+                    <img
+                      alt={member.name}
+                      class="rounded-full h-24 w-24 flex items-center justify-center"
+                      src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
+                    />
+                  </LiveRedirect>
+                </figure>
               {/for}
             </div>
           </div>

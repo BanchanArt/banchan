@@ -25,11 +25,11 @@ defmodule BanchanWeb.StudioLive.New do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="title">New Studio</h1>
+      <h1 class="text-2xl">New Studio</h1>
 
-      <div class="columns">
+      <div class="grid grid-cols-3 gap-4">
         <Form
-          class="column is-one-third"
+          class="col-span-1"
           for={@changeset}
           change="change"
           submit="submit"
@@ -80,7 +80,7 @@ defmodule BanchanWeb.StudioLive.New do
           <div class="field">
             <div class="control">
               <Submit
-                class="button is-link"
+                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
                 label="Save"
                 opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
               />

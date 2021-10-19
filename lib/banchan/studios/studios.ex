@@ -25,7 +25,7 @@ defmodule Banchan.Studios do
   end
 
   def get_offering_by_type!(studio, type) do
-    Repo.get_by!(Offering, [type: type, studio_id: studio.id])
+    Repo.get_by!(Offering, type: type, studio_id: studio.id)
   end
 
   @doc """

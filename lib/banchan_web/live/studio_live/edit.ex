@@ -30,10 +30,10 @@ defmodule BanchanWeb.StudioLive.Edit do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="title">Edit Studio</h1>
-      <h2 class="subtitle">{@studio.name}</h2>
-      <div class="columns">
-        <Form class="column is-one-third" for={@changeset} change="change" submit="submit">
+      <h1 class="text-2xl">Edit Studio</h1>
+      <h2 class="text-xl">{@studio.name}</h2>
+      <div class="grid grid-cols-3 gap-4">
+        <Form class="col-span-one" for={@changeset} change="change" submit="submit">
           <Field class="field" name={:name}>
             <Label class="label" />
             <div class="control has-icons-left">
@@ -79,7 +79,7 @@ defmodule BanchanWeb.StudioLive.Edit do
           <div class="field">
             <div class="control">
               <Submit
-                class="button is-link"
+                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
                 label="Save"
                 opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
               />

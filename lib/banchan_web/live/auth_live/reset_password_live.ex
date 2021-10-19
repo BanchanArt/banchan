@@ -33,9 +33,9 @@ defmodule BanchanWeb.ResetPasswordLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="title">Reset password</h1>
-      <div class="columns">
-        <Form class="column is-one-third" for={@changeset} change="change" submit="submit">
+      <h1 class="text-2xl">Reset password</h1>
+      <div class="grid grid-cols-3 gap-4">
+        <Form class="col-span-1" for={@changeset} change="change" submit="submit">
           <Field class="field" name={:password}>
             <Label class="label">New Password</Label>
             <div class="control has-icons-left">
@@ -69,7 +69,7 @@ defmodule BanchanWeb.ResetPasswordLive do
           <div class="field">
             <div class="control">
               <Submit
-                class="button is-link"
+                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
                 label="Reset password"
                 opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
               />

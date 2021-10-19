@@ -20,13 +20,13 @@ defmodule BanchanWeb.Components.Layout do
     {#if slot_assigned?(:hero)}
       <#slot name="hero" />
     {/if}
-    <section class="section container is-widescreen">
+    <section class="section md:container md:mx-auto px-4 h-full">
       <Flash flashes={@flashes} />
       <#slot />
     </section>
-    <footer class="footer">
-      <div class="container level">
-        <p class="level-item">
+    <footer class="footer bg-gradient-to-r from-primary-300 to-primary-500 p-4 w-full fixed bottom-0">
+      <div class="md:container md:mx-auto px-4">
+        <p class="text-center">
           Generic copyright message 2021.
         </p>
       </div>

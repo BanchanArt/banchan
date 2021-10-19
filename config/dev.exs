@@ -21,11 +21,12 @@ config :banchan, BanchanWeb.Endpoint,
   code_reloader: true,
   check_origin: false,
   watchers: [
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
     node: [
-      "node_modules/webpack/bin/webpack.js",
-      "--mode",
-      "development",
-      "--watch-stdin",
+      "node_modules/postcss-cli/index.js",
+      "css/app.scss",
+      "--output=../priv/static/assets/app.css",
+      "--watch",
       cd: Path.expand("../assets", __DIR__)
     ]
   ]

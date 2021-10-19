@@ -13,46 +13,42 @@ defmodule BanchanWeb.Components.Commissions.Summary do
         Summary
       </:header>
 
-      <ul class="offering-list">
-        <li class="block offering">
-          <div class="tags has-addons">
-            <span class="tag is-medium">
-              2 Characters
-            </span>
-            <span class="tag is-medium is-success">
-              $150.00
-              <button class="delete is-small" />
-            </span>
+      <ul class="divide-y">
+        <li class="offering container p-4">
+          <div class="float-right">
+            $150.00 <i class="fas fa-times-circle" />
           </div>
+          <div class="offering-name">
+            <span class="offering-amount">2x</span> Character
+          </div>
+          <div>Full lineart for one or more characters.</div>
         </li>
-        <li class="block offering">
-          <div class="tags has-addons">
-            <span class="tag is-medium">
-              Full Color
-            </span>
-            <span class="tag is-medium is-success">
-              $50.00
-              <button class="delete is-small" />
-            </span>
+        <li class="offering container box-border p-4">
+          <div class="float-right">
+            $50.00 <i class="fas fa-times-circle" />
           </div>
+          <div class="offering-name">
+            Full Color
+          </div>
+          <div>Add full, shaded color to the illustration.</div>
         </li>
-        <li class="block offering">
-          <div class="tags has-addons">
-            <span class="tag is-medium">
-              Color Background
-            </span>
-            <span class="tag is-medium is-success">
-              $50.00
-              <button class="delete is-small" />
-            </span>
+        <li class="offering container box-border p-4">
+          <div class="float-right">
+            $50.00 <i class="fas fa-times-circle" />
           </div>
+          <div class="offering-name">
+            Color Background
+          </div>
+          <div>Add a full, color background.</div>
         </li>
       </ul>
       <hr>
-      <p>Estimate: <span class="tag is-medium is-success">$250.00</span></p>
+      <div class="container">
+        <p class="p-4">Estimate: <span class="float-right">$250.00</span></p>
+      </div>
 
       <:footer>
-        <a class="card-footer-item button is-primary" href="#">Add Offering</a>
+        <a class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1" href="#">Add Offering</a>
       </:footer>
     </Card>
     """

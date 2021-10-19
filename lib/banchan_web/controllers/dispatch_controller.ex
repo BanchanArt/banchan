@@ -1,8 +1,8 @@
 defmodule BanchanWeb.DispatchController do
   use BanchanWeb, :controller
 
-  alias Banchan.Identities
   alias Banchan.Accounts.User
+  alias Banchan.Identities
   alias Banchan.Studios.Studio
 
   def dispatch(conn, %{"handle" => handle}) do

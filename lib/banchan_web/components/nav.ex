@@ -14,78 +14,62 @@ defmodule BanchanWeb.Components.Nav do
     ~F"""
     <nav
       id="nav"
-      class="navbar is-primary"
+      class="bg-gradient-to-r from-primary-300 to-primary-500 align-top w-full leading-snug m-0 p-0"
       role="navigation"
       aria-label="main navigation"
-      x-data="{ open: false }"
     >
-      <div class="navbar-brand">
-        <a class="navbar-item" href="/">
-          <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
+      <div class="md:container md:mx-auto text-white flex items-center gap-12 justify-start">
+        <a href="/">
+          <img
+            src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
+            class="inline-block object-scale-down h-12 p-1 rounded-full"
+          /> Banchan Art
         </a>
-        <a
-          role="button"
-          class="navbar-burger"
-          aria-label="menu"
-          aria-expanded="false"
-          @click="open = !open"
-        >
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-        </a>
-      </div>
-      <div :class="{ 'is-active': open }" class="navbar-menu">
-        <div class="navbar-start">
-          {#if @current_user}
-            <LiveRedirect
-              class="navbar-item"
-              to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}
-            >
-              <span class="icon-text">
-                <span class="icon"><i class="fa fa-user" /></span>
-                <span>@{@current_user.handle}</span>
-              </span>
-            </LiveRedirect>
-            <LiveRedirect class="navbar-item" to={Routes.dashboard_path(Endpoint, :index)}>
-              <span class="icon-text">
-                <span class="icon"><i class="fa fa-palette" /></span>
-                <span>Dashboard</span>
-              </span>
-            </LiveRedirect>
-            <LiveRedirect class="navbar-item" to={Routes.studio_index_path(Endpoint, :index)}>
-              <span class="icon-text">
-                <span class="icon"><i class="fa fa-palette" /></span>
-                <span>Studios</span>
-              </span>
-            </LiveRedirect>
-            <LiveRedirect class="navbar-item" to={Routes.settings_path(Endpoint, :edit)}>
-              <span class="icon-text">
-                <span class="icon"><i class="fa fa-cog" /></span>
-                <span>Settings</span>
-              </span>
-            </LiveRedirect>
-            <Link class="navbar-item" to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
-              <span class="icon-text">
-                <span class="icon"><i class="fa fa-sign-out-alt" /></span>
-                <span>Log out</span>
-              </span>
-            </Link>
-          {#else}
-            <LiveRedirect class="navbar-item" label="Register" to={Routes.register_path(Endpoint, :new)}>
-              <span class="icon-text">
-                <span class="icon"><i class="fa fa-user" /></span>
-                <span>Register</span>
-              </span>
-            </LiveRedirect>
-            <LiveRedirect class="navbar-item" to={Routes.login_path(Endpoint, :new)}>
-              <span class="icon-text">
-                <span class="icon"><i class="fa fa-sign-in-alt" /></span>
-                <span>Log in</span>
-              </span>
-            </LiveRedirect>
-          {/if}
-        </div>
+        {#if @current_user}
+          <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
+            <span>
+              <i class="fa fa-user" />
+              @{@current_user.handle}
+            </span>
+          </LiveRedirect>
+          <LiveRedirect to={Routes.dashboard_path(Endpoint, :index)}>
+            <span>
+              <i class="fa fa-palette" />
+              Dashboard
+            </span>
+          </LiveRedirect>
+          <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
+            <span>
+              <i class="fa fa-palette" />
+              Studios
+            </span>
+          </LiveRedirect>
+          <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
+            <span>
+              <i class="fa fa-cog" />
+              Settings
+            </span>
+          </LiveRedirect>
+          <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
+            <span>
+              <i class="fa fa-sign-out-alt" />
+              Log out
+            </span>
+          </Link>
+        {#else}
+          <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
+            <span>
+              <i class="fa fa-user" />
+              Register
+            </span>
+          </LiveRedirect>
+          <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
+            <span>
+              <i class="fa fa-sign-in-alt" />
+              Log in
+            </span>
+          </LiveRedirect>
+        {/if}
       </div>
     </nav>
     """

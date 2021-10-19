@@ -3,8 +3,8 @@ defmodule Banchan.Identities do
   The Identities context.
   """
   alias Banchan.Accounts.User
-  alias Banchan.Studios.Studio
   alias Banchan.Repo
+  alias Banchan.Studios.Studio
 
   def get_user_or_studio_by_handle(handle) do
     cond do

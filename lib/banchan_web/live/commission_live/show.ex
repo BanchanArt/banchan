@@ -35,16 +35,16 @@ defmodule BanchanWeb.CommissionLive.Show do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="title">Two-character drawing of me and my gf's FFXIV OCs</h1>
-      <h2 class="subtitle"><strong>{@current_user.handle}</strong> requested this commission 3 days ago.</h2>
+      <h1 class="text-3xl">Two-character drawing of me and my gf's FFXIV OCs</h1>
+      <h2 class="text-lg"><strong>{@current_user.handle}</strong> requested this commission 3 days ago.</h2>
       <hr>
-      <div class="commission columns">
-        <div class="column is-three-quarters">
+      <div class="commission grid gap-4">
+        <div class="col-span-10">
           <Timeline id="timeline" current_user={@current_user} commission={@commission} />
           <hr>
           <MessageBox id="reply-box" new_message="new-message" />
         </div>
-        <div class="column is-one-quarter">
+        <div class="col-span-2 col-end-13 shadow-lg p-6">
           <div id="sidebar">
             <div class="block sidebar-box">
               <Summary id="commission-summary" />

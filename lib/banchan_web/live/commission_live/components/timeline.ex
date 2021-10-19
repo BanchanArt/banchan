@@ -13,12 +13,10 @@ defmodule BanchanWeb.Components.Commissions.Timeline do
   def render(assigns) do
     ~F"""
     <div class="timeline">
-      <article class="timeline-item block">
+      <article class="timeline-item">
         <Card>
           <:header>
-            <figure class="image is-24x24">
-              <img class="is-rounded" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
-            </figure>
+            <img class="w-6 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
             {@current_user.handle} commented 3 days ago.
           </:header>
 
@@ -27,19 +25,9 @@ defmodule BanchanWeb.Components.Commissions.Timeline do
           </div>
 
           <:footer>
-            <div class="card-footer-item level">
-              <div class="level-left">
-                <figure class="image block is-96x96">
-                  <img src={Routes.static_path(Endpoint, "/images/penana-left.png")}>
-                </figure>
-                <figure class="image block is-96x96">
-                  <img src={Routes.static_path(Endpoint, "/images/penana-right.png")}>
-                </figure>
-                <figure class="image block is-96x96">
-                  <img src={Routes.static_path(Endpoint, "/images/penana-front.png")}>
-                </figure>
-              </div>
-            </div>
+            <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-left.png")}>
+            <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-right.png")}>
+            <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-front.png")}>
           </:footer>
         </Card>
       </article>
@@ -49,9 +37,10 @@ defmodule BanchanWeb.Components.Commissions.Timeline do
       <article class="timeline-item block">
         <Card>
           <:header>
-            <figure class="image is-24x24">
-              <img class="is-rounded" src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
-            </figure>
+            <img
+              class="w-6 inline-block"
+              src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
+            />
             skullbunnygalaxy commented 2 days ago.
           </:header>
 
@@ -70,12 +59,13 @@ defmodule BanchanWeb.Components.Commissions.Timeline do
 
       <p class="timeline-item block"><i class="fas fa-palette" /> skullbunnygalaxy started working on this commission.</p>
 
-      <article class="timeline-item block">
+      <article class="timeline-item">
         <Card>
           <:header>
-            <figure class="image is-24x24">
-              <img class="is-rounded" src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
-            </figure>
+            <img
+              class="w-6  inline-block"
+              src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
+            />
             skullbunnygalaxy commented 2 days ago.
           </:header>
 
@@ -85,7 +75,7 @@ defmodule BanchanWeb.Components.Commissions.Timeline do
         </Card>
       </article>
 
-      <p class="timeline-item block"><small><i class="fas fa-hourglass-half" /> skullbunnygalaxy changed the status to Waiting for Customer.</small></p>
+      <p class="timeline-item"><small><i class="fas fa-hourglass-half" /> skullbunnygalaxy changed the status to Waiting for Customer.</small></p>
     </div>
     """
   end
