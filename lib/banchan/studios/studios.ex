@@ -10,15 +10,15 @@ defmodule Banchan.Studios do
 
   @doc """
   Gets a studio by its handle.
-  
+
   ## Examples
-  
+
       iex> get_studio_by_handle!("foo")
       %Studio{}
-  
+
       iex> get_studio_by_handle!("unknown")
       Exception Thrown
-  
+
   """
   def get_studio_by_handle!(handle) when is_binary(handle) do
     Repo.get_by!(Studio, handle: handle)
@@ -30,12 +30,12 @@ defmodule Banchan.Studios do
 
   @doc """
   Updates the studio profile fields.
-  
+
   ## Examples
-  
+
       iex> update_studio_profile(studio, %{handle: ..., name: ..., ...})
       {:ok, %Studio{}}
-  
+
   """
   def update_studio_profile(user, attrs) do
     user
@@ -45,9 +45,9 @@ defmodule Banchan.Studios do
 
   @doc """
   Creates a new studio.
-  
+
   ## Examples
-  
+
       iex> new_studio(studio, %{handle: ..., name: ..., ...})
       {:ok, %Studio{}}
   """
@@ -65,9 +65,9 @@ defmodule Banchan.Studios do
 
   @doc """
   List all studios
-  
+
   ## Examples
-  
+
       iex> list_studios()
       [%Studio{}, %Studio{}, %Studio{}, ...]
   """
@@ -77,9 +77,9 @@ defmodule Banchan.Studios do
 
   @doc """
   List studios belonging to a user
-  
+
   ## Examples
-  
+
       iex> list_studios_for_user(user)
       [%Studio{}, %Studio{}, %Studio{}]
   """
@@ -89,9 +89,9 @@ defmodule Banchan.Studios do
 
   @doc """
   List members who are part of a studio
-  
+
   ## Examples
-  
+
       iex> list_studio_members(studio)
       [%User{}, %User{}, %User{}]
   """
@@ -101,9 +101,9 @@ defmodule Banchan.Studios do
 
   @doc """
   List offerings offered by this studio
-  
+
   ## Examples
-  
+
       iex> list_studio_offerings(studio)
       [%Offering{}, %Offering{}, %Offering{}]
   """
@@ -114,9 +114,9 @@ defmodule Banchan.Studios do
   @doc """
   Determine if a user is part of a studio. If the studio is omitted, returns
   true if the user is part of ANY studio.
-  
+
   ## Examples
-  
+
       iex> is_user_in_studio(user, studio)
       true
   """

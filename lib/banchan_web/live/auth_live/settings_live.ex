@@ -41,7 +41,9 @@ defmodule BanchanWeb.SettingsLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Account Settings</h1> <h2 class="text-xl">Update Email</h2> <div class="grid grid-cols-3 gap-4">
+      <h1 class="text-2xl">Account Settings</h1>
+      <h2 class="text-xl">Update Email</h2>
+      <div class="grid grid-cols-3 gap-4">
         <Form
           class="col-span-1"
           for={@email_changeset}
@@ -50,7 +52,8 @@ defmodule BanchanWeb.SettingsLive do
           opts={autocomplete: "off"}
         >
           <Field class="field" name={:email}>
-            <Label class="label" /> <div class="control has-icons-left">
+            <Label class="label" />
+            <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <EmailInput class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} />
               </InputContext>
@@ -61,7 +64,8 @@ defmodule BanchanWeb.SettingsLive do
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:password}>
-            <Label class="label" /> <div class="control has-icons-left">
+            <Label class="label" />
+            <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <PasswordInput class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} />
               </InputContext>
@@ -82,7 +86,9 @@ defmodule BanchanWeb.SettingsLive do
           </div>
         </Form>
       </div>
-      <h2 class="text-xl">Update Password</h2> <div class="grid grid-cols-3 gap-4">
+
+      <h2 class="text-xl">Update Password</h2>
+      <div class="grid grid-cols-3 gap-4">
         <Form
           class="col-span-1"
           for={@password_changeset}
@@ -91,7 +97,8 @@ defmodule BanchanWeb.SettingsLive do
           opts={autocomplete: "off"}
         >
           <Field class="field" name={:password}>
-            <Label class="label">New Password</Label> <div class="control has-icons-left">
+            <Label class="label">New Password</Label>
+            <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <TextInput
                   class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
@@ -105,7 +112,8 @@ defmodule BanchanWeb.SettingsLive do
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:password_confirmation}>
-            <Label class="label">New Password Confirmation</Label> <div class="control has-icons-left">
+            <Label class="label">New Password Confirmation</Label>
+            <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <TextInput
                   class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
@@ -119,7 +127,8 @@ defmodule BanchanWeb.SettingsLive do
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:current_confirmation}>
-            <Label class="label" /> <div class="control has-icons-left">
+            <Label class="label" />
+            <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <TextInput
                   class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}

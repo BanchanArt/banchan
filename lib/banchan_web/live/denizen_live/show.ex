@@ -32,7 +32,8 @@ defmodule BanchanWeb.DenizenLive.Show do
             <h1 class="text-xl text-white font-bold">
               {@user.handle}
             </h1>
-            <br> <p class="text-base text-white">
+            <br>
+            <p class="text-base text-white">
               Witty phrase here.
             </p>
             <a class="rounded-full py-1 px-5 m-1 bg-info-400 text-center text-white">Follow</a>
@@ -46,7 +47,8 @@ defmodule BanchanWeb.DenizenLive.Show do
       </section>
       <div class="grid grid-cols-2 justify-items-stretch gap-6 mt-8">
         <div class="bg-white p-4 shadow-lg">
-          <h2 class="text-xl text-white font-bold">Studios</h2> <div class="denizen-studios">
+          <h2 class="text-xl text-white font-bold">Studios</h2>
+          <div class="denizen-studios">
             {#for studio <- @studios}
               <StudioCard studio={studio} />
             {/for}
@@ -60,7 +62,9 @@ defmodule BanchanWeb.DenizenLive.Show do
             <img src="/">
           </figure>
           <div class="content">
-            <p class="">Name: {@user.name}</p> <p class="">Bio: {@user.bio}</p> {#if @current_user && @current_user.id == @user.id}
+            <p class="">Name: {@user.name}</p>
+            <p class="">Bio: {@user.bio}</p>
+            {#if @current_user && @current_user.id == @user.id}
               <LiveRedirect
                 label="Edit"
                 to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)}

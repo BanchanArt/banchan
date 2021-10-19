@@ -25,7 +25,9 @@ defmodule BanchanWeb.StudioLive.New do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">New Studio</h1> <div class="grid grid-cols-3 gap-4">
+      <h1 class="text-2xl">New Studio</h1>
+
+      <div class="grid grid-cols-3 gap-4">
         <Form
           class="col-span-1"
           for={@changeset}
@@ -34,7 +36,8 @@ defmodule BanchanWeb.StudioLive.New do
           opts={autocomplete: "off"}
         >
           <Field class="field" name={:name}>
-            <Label class="label" /> <div class="control has-icons-left">
+            <Label class="label" />
+            <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <TextInput
                   class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
@@ -48,7 +51,8 @@ defmodule BanchanWeb.StudioLive.New do
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:handle}>
-            <Label class="label" /> <div class="control has-icons-left">
+            <Label class="label" />
+            <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <TextInput
                   class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
@@ -62,7 +66,8 @@ defmodule BanchanWeb.StudioLive.New do
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:description}>
-            <Label class="label" /> <div class="control">
+            <Label class="label" />
+            <div class="control">
               <InputContext :let={form: form, field: field}>
                 <TextArea
                   class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}

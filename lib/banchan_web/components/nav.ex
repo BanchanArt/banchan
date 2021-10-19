@@ -28,38 +28,45 @@ defmodule BanchanWeb.Components.Nav do
         {#if @current_user}
           <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
             <span>
-              <i class="fa fa-user" /> @{@current_user.handle}
+              <i class="fa fa-user" />
+              @{@current_user.handle}
             </span>
           </LiveRedirect>
           <LiveRedirect to={Routes.dashboard_path(Endpoint, :index)}>
             <span>
-              <i class="fa fa-palette" /> Dashboard
+              <i class="fa fa-palette" />
+              Dashboard
             </span>
           </LiveRedirect>
           <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
             <span>
-              <i class="fa fa-palette" /> Studios
+              <i class="fa fa-palette" />
+              Studios
             </span>
           </LiveRedirect>
           <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
             <span>
-              <i class="fa fa-cog" /> Settings
+              <i class="fa fa-cog" />
+              Settings
             </span>
           </LiveRedirect>
           <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
             <span>
-              <i class="fa fa-sign-out-alt" /> Log out
+              <i class="fa fa-sign-out-alt" />
+              Log out
             </span>
           </Link>
         {#else}
           <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
             <span>
-              <i class="fa fa-user" /> Register
+              <i class="fa fa-user" />
+              Register
             </span>
           </LiveRedirect>
           <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
             <span>
-              <i class="fa fa-sign-in-alt" /> Log in
+              <i class="fa fa-sign-in-alt" />
+              Log in
             </span>
           </LiveRedirect>
         {/if}

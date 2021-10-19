@@ -15,7 +15,8 @@ defmodule BanchanWeb.Components.Commissions.MessageBox do
     <div class="message-box">
       <Form for={:message} submit={@new_message}>
         <Field class="field" name={:message}>
-          <Label class="label">Send a Message</Label> <div class="control">
+          <Label class="label">Send a Message</Label>
+          <div class="control">
             <InputContext :let={form: form, field: field}>
               <TextArea
                 class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}

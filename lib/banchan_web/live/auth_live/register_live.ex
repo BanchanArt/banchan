@@ -32,7 +32,8 @@ defmodule BanchanWeb.RegisterLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Register</h1> <div class="grid grid-cols-3 gap-4">
+      <h1 class="text-2xl">Register</h1>
+      <div class="grid grid-cols-3 gap-4">
         <Form
           class="col-span-1"
           for={@changeset}
@@ -42,7 +43,8 @@ defmodule BanchanWeb.RegisterLive do
           trigger_action={@trigger_submit}
         >
           <Field class="field" name={:email}>
-            <Label class="label" /> <div class="control has-icons-left">
+            <Label class="label" />
+            <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <EmailInput
                   class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
@@ -56,7 +58,8 @@ defmodule BanchanWeb.RegisterLive do
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:password}>
-            <Label class="label" /> <div class="control has-icons-left">
+            <Label class="label" />
+            <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <TextInput
                   class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
@@ -70,7 +73,8 @@ defmodule BanchanWeb.RegisterLive do
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:password_confirmation}>
-            <Label class="label" /> <div class="control has-icons-left">
+            <Label class="label" />
+            <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <TextInput
                   class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}

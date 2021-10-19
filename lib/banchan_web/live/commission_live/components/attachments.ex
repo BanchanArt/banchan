@@ -13,7 +13,10 @@ defmodule BanchanWeb.Components.Commissions.Attachments do
       <:header>
         Attachments
       </:header>
-      <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-left.png")}> <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-right.png")}> <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-front.png")}> <:footer>
+      <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-left.png")}>
+      <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-right.png")}>
+      <img class="inline w-16" src={Routes.static_path(Endpoint, "/images/penana-front.png")}>
+      <:footer>
         <a href="#">See All</a>
       </:footer>
     </Card>

@@ -18,6 +18,7 @@ defmodule BanchanWeb.Components.Commissions.Status do
       <:header>
         Status
       </:header>
+
       <Form for={:status} change={@change}>
         <div class="select">
           <Select
