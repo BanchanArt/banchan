@@ -112,7 +112,7 @@ defmodule BanchanWeb.StudioLive.New do
 
   @impl true
   def handle_event("submit", val, socket) do
-    case Studios.new_studio(socket.assigns.current_user, val["studio"]) do
+    case Studios.new_studio(%Studio{artists: [socket.assigns.current_user]}, val["studio"]) do
       {:ok, studio} ->
         put_flash(socket, :info, "Profile updated")
         {:noreply, redirect(socket, to: Routes.studio_show_path(Endpoint, :show, studio.handle))}
