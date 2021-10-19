@@ -1,15 +1,15 @@
 defmodule BanchanWeb.EnsureRolePlug do
   @moduledoc """
   This plug ensures that a user has a particular role before accessing a given route.
-
+  
   ## Example
   Let's suppose we have three roles: :admin, :manager and :user.
   If you want a user to have at least manager role, so admins and managers are authorised to access a given route
-
+  
   plug BanchanWeb.EnsureRolePlug, [:admin, :manager]
-
+  
   If you want to give access only to an admin:
-
+  
   plug BanchanWeb.EnsureRolePlug, :admin
   """
 

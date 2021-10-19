@@ -67,17 +67,13 @@ defmodule BanchanWeb.CommissionLive.New do
       </:hero>
       <div class="grid grid-cols-5 gap-4">
         <div class="col-span-3">
-          <h1 class="text-2xl">Illustration Commission</h1>
-          <h2 class="text-xl">waist-up of your character(s) with background environment of your choice!</h2>
-          <div class="content">
-            <strong>These are all private commissions, meaning: non-commercial</strong>
-            <p>You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
+          <h1 class="text-2xl">Illustration Commission</h1> <h2 class="text-xl">waist-up of your character(s) with background environment of your choice!</h2> <div class="content">
+            <strong>These are all private commissions, meaning: non-commercial</strong> <p>You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
           </div>
           <Form for={@changeset} submit="submit">
             <div class="block">
               <Field class="field" name={:description}>
-                <Label class="label" />
-                <div class="control">
+                <Label class="label" /> <div class="control">
                   <InputContext :let={form: form, field: field}>
                     <TextArea
                       class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
@@ -89,19 +85,16 @@ defmodule BanchanWeb.CommissionLive.New do
               </Field>
             </div>
             <div class="content block">
-              <p>Please review the Terms of Service for this commission before submitting your request.</p>
-              <p><strong>These Terms might vary between commission type</strong>.</p>
+              <p>Please review the Terms of Service for this commission before submitting your request.</p> <p><strong>These Terms might vary between commission type</strong>.</p>
               <button type="button" class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1">
-                <span>View Terms of Service</span>
-                <span class="icon is-small">
+                <span>View Terms of Service</span> <span class="icon is-small">
                   <i class="fas fa-external-link-alt" />
                 </span>
               </button>
             </div>
             <Field class="field" name={:tos_ok}>
               <Label class="checkbox is-large">
-                <Checkbox class="is-large" name={:tos_ok} opts={required: true} />
-                I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
+                <Checkbox class="is-large" name={:tos_ok} opts={required: true} /> I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
               </Label>
             </Field>
             <div class="field">
@@ -115,7 +108,6 @@ defmodule BanchanWeb.CommissionLive.New do
             </div>
           </Form>
         </div>
-
         <div class="col-span-2">
           <div id="sidebar">
             <div class="block sidebar-box">
@@ -133,13 +125,9 @@ defmodule BanchanWeb.CommissionLive.New do
                     </span>
                   </div>
                   <ul>
-                    <li>One Character</li>
-                    <li>Full Color</li>
-                    <li>Color Background</li>
+                    <li>One Character</li> <li>Full Color</li> <li>Color Background</li>
                   </ul>
-                  <hr>
-                  <h5>Choose Add-ons</h5>
-                  <ul>
+                  <hr> <h5>Choose Add-ons</h5> <ul>
                     <li>
                       <div class="tags has-addons">
                         <span class="tag is-medium is-success">

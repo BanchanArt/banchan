@@ -12,7 +12,6 @@ defmodule BanchanWeb.Components.Commissions.Summary do
       <:header>
         Summary
       </:header>
-
       <ul class="divide-y">
         <li class="offering container p-4">
           <div class="float-right">
@@ -42,11 +41,9 @@ defmodule BanchanWeb.Components.Commissions.Summary do
           <div>Add a full, color background.</div>
         </li>
       </ul>
-      <hr>
-      <div class="container">
+      <hr> <div class="container">
         <p class="p-4">Estimate: <span class="float-right">$250.00</span></p>
       </div>
-
       <:footer>
         <a class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1" href="#">Add Offering</a>
       </:footer>

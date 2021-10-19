@@ -26,8 +26,7 @@ defmodule BanchanWeb.LoginLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Log in</h1>
-      <div class="grid grid-cols-3 gap-4">
+      <h1 class="text-2xl">Log in</h1> <div class="grid grid-cols-3 gap-4">
         <Form
           class="col-span-1"
           for={@changeset}
@@ -37,15 +36,13 @@ defmodule BanchanWeb.LoginLive do
           trigger_action={@trigger_submit}
         >
           <Field class="field" name={:email}>
-            <Label class="label" />
-            <div class="control has-icons-left">
+            <Label class="label" /> <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <EmailInput
                   class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
                   opts={required: true}
                 />
               </InputContext>
-
               <span class="icon is-small is-left">
                 <i class="fas fa-envelope" />
               </span>
@@ -53,8 +50,7 @@ defmodule BanchanWeb.LoginLive do
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:password}>
-            <Label class="label" />
-            <div class="control has-icons-left">
+            <Label class="label" /> <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <TextInput
                   class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
@@ -70,8 +66,7 @@ defmodule BanchanWeb.LoginLive do
           <Field class="field" name={:remember_me}>
             <div class="control">
               <Label class="checkbox">
-                <Checkbox />
-                Keep me logged in for 60 days
+                <Checkbox /> Keep me logged in for 60 days
               </Label>
             </div>
             <ErrorTag class="help is-danger" />

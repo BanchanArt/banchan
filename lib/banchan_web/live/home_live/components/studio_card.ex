@@ -30,8 +30,7 @@ defmodule BanchanWeb.Components.StudioCard do
             <p class="text-xl font-medium md:leading-loose">{@studio.name}</p>
           </div>
         </div>
-        <br>
-        <div class="content">
+        <br> <div class="content">
           {@studio.description}
         </div>
       </div>

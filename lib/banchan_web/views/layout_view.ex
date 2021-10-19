@@ -3,15 +3,9 @@ defmodule BanchanWeb.LayoutView do
 
   def render(_, assigns) do
     ~F"""
-    <!DOCTYPE html />
-    <html lang="en" class="h-full bg-secondary-50">
+    <!DOCTYPE html /> <html lang="en" class="h-full bg-secondary-50">
       <head>
-        <meta charset="utf-8">
-        {Phoenix.HTML.Tag.csrf_meta_tag()}
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        {live_title_tag(assigns[:page_title] || "Banchan Art")}
-        <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}>
-        <script
+        <meta charset="utf-8"> {Phoenix.HTML.Tag.csrf_meta_tag()} <meta name="viewport" content="width=device-width, initial-scale=1.0"> {live_title_tag(assigns[:page_title] || "Banchan Art")} <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}> <script
           defer
           phx-track-static
           type="text/javascript"

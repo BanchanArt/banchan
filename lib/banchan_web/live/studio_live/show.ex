@@ -42,8 +42,7 @@ defmodule BanchanWeb.StudioLive.Show do
               {@studio.name}
             </p>
             <p class="text-base text-white flex-grow">
-              {@studio.description}
-              {#if @current_user_member?}
+              {@studio.description} {#if @current_user_member?}
                 <LiveRedirect
                   class="text-center rounded-full px-2 py-1 bg-amber-200 text-black"
                   label="Edit Profile"
@@ -65,8 +64,7 @@ defmodule BanchanWeb.StudioLive.Show do
         <div class="offerings">
           {#for offering <- @offerings}
             <div class="shadow-lg bg-white p-2 my-4 rounded">
-              {!-- TODO: Add image --}
-              <CommissionCard
+              {!-- TODO: Add image --} <CommissionCard
                 studio={@studio}
                 type_id={offering.type}
                 name={offering.name}
@@ -76,8 +74,7 @@ defmodule BanchanWeb.StudioLive.Show do
                 price_range={offering.price_range}
               />
             </div>
-          {/for}
-          {#if @current_user_member?}
+          {/for} {#if @current_user_member?}
             <div class="">
               <button type="button" class="text-center rounded-full px-2 py-1 bg-amber-200">Add an Offering</button>
             </div>
@@ -91,25 +88,17 @@ defmodule BanchanWeb.StudioLive.Show do
               </:header>
               <div class="content leading-loose">
                 <h3 class="text-2xl mt-4">These are all private commissions, meaning: <strong>non-commercial</strong></h3>
-                <p class="mt-4">You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
-                <h3 class="text-xl mt-4">I will draw</h3>
-                <ul class="list-disc list-inside">
-                  <li>Humans/humanoids</li>
-                  <li>anthros+furries/creatures/monsters/animals</li>
-                  <li>mecha/robots/vehicles</li>
-                  <li>environments/any type of background</li>
+                <p class="mt-4">You're only paying for my service to create the work not copyrights or licensing of the work itself!</p> <h3 class="text-xl mt-4">I will draw</h3> <ul class="list-disc list-inside">
+                  <li>Humans/humanoids</li> <li>anthros+furries/creatures/monsters/animals</li> <li>mecha/robots/vehicles</li> <li>environments/any type of background</li>
                 </ul>
-                <h3 class="text-xl mt-4">I will not draw</h3>
-                <ul class="list-disc list-inside">
-                  <li>NSFW</li>
-                  <li>Fanart</li>
+                <h3 class="text-xl mt-4">I will not draw</h3> <ul class="list-disc list-inside">
+                  <li>NSFW</li> <li>Fanart</li>
                 </ul>
               </div>
             </Card>
           </div>
           <div class="shadow-lg bg-white p-2 my-4 rounded">
-            <h2 class="text-xl">Members</h2>
-            <div class="studio-members grid grid-cols-4 gap-1">
+            <h2 class="text-xl">Members</h2> <div class="studio-members grid grid-cols-4 gap-1">
               {#for member <- @members}
                 <figure class="col-span-1">
                   <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, member.handle)}>

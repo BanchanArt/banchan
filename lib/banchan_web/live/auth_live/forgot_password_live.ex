@@ -23,12 +23,10 @@ defmodule BanchanWeb.ForgotPasswordLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Forgot your password?</h1>
-      <div class="grid grid-cols-3 gap-4">
+      <h1 class="text-2xl">Forgot your password?</h1> <div class="grid grid-cols-3 gap-4">
         <Form class="col-span-1" for={:user} submit="submit">
           <Field class="field" name={:email}>
-            <Label class="label" />
-            <div class="control has-icons-left">
+            <Label class="label" /> <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <EmailInput
                   class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}

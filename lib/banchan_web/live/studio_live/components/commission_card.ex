@@ -34,9 +34,7 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
         <img class="object-cover" src={@image}>
       </:image>
       <div class="content">
-        <p>{@description}</p>
-        Price:
-        {#if @price_range}
+        <p>{@description}</p> Price: {#if @price_range}
           <span class="float-right">{@price_range}</span>
         {#else}
           <span class="float-right">Inquire</span>
