@@ -41,3 +41,6 @@ npm-debug.log
 
 # Ignore .vscode dir
 /.vscode
+
+# Ignore self-signed cert
+priv/cert/
