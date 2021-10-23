@@ -15,6 +15,9 @@ Note: If postgresql installed via homebrew, make sure to run `/usr/local/opt/pos
 To start your Phoenix server:
 
 - Install dependencies with `mix deps.get`
+- Set up your env vars file. Create `.env` (*NIX) or `.env.ps1` (Powershell)
+  - Add commands for your environment variables there
+  - This gets loaded automatically
 - Create and migrate your database with `mix ecto.setup`
 - Install Node.js dependencies with `npm install` inside the `assets` directory
 - To make sure everything is good, run `mix quality`
