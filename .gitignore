@@ -45,3 +45,6 @@ npm-debug.log
 # Ignore environment variable files
 .env
 .env.ps1
+
+# Ignore self-signed cert
+priv/cert/
