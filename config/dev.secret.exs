@@ -4,11 +4,9 @@
 # remember to add this file to your .gitignore.
 use Mix.Config
 
-database_username =
-  System.get_env("DATABASE_USERNAME") || "postgres"
+database_username = System.get_env("DATABASE_USERNAME") || "postgres"
 
-database_password =
-  System.get_env("DATABASE_PASSWORD") || "postgres"
+database_password = System.get_env("DATABASE_PASSWORD") || "postgres"
 
 # Configure your database
 config :banchan, Banchan.Repo,
