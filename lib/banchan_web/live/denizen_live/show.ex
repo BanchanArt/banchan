@@ -36,7 +36,7 @@ defmodule BanchanWeb.DenizenLive.Show do
             <p class="text-base text-white">
               Witty phrase here.
             </p>
-            <a class="rounded-full py-1 px-5 m-1 bg-info-400 text-center text-white">Follow</a>
+            <button type="button" class="btn-base btn-blue">Follow</button>
           </article>
         </div>
         <nav class="col-start-2 grid-cols-3 inline-grid">
@@ -64,11 +64,12 @@ defmodule BanchanWeb.DenizenLive.Show do
           <div class="content">
             <p class="">Name: {@user.name}</p>
             <p class="">Bio: {@user.bio}</p>
+            <br>
             {#if @current_user && @current_user.id == @user.id}
               <LiveRedirect
                 label="Edit"
                 to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)}
-                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
+                class="btn-base btn-amber"
               />
             {/if}
           </div>

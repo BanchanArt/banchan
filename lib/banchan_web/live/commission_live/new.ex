@@ -91,7 +91,7 @@ defmodule BanchanWeb.CommissionLive.New do
             <div class="content block">
               <p>Please review the Terms of Service for this commission before submitting your request.</p>
               <p><strong>These Terms might vary between commission type</strong>.</p>
-              <button type="button" class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1">
+              <button type="button" class="btn-base btn-amber">
                 <span>View Terms of Service</span>
                 <span class="icon is-small">
                   <i class="fas fa-external-link-alt" />
@@ -107,7 +107,7 @@ defmodule BanchanWeb.CommissionLive.New do
             <div class="field">
               <div class="control">
                 <Submit
-                  class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
+                  class="btn-base btn-amber"
                   label="Submit"
                   opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
                 />

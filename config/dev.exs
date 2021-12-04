@@ -21,15 +21,17 @@ config :banchan, BanchanWeb.Endpoint,
   code_reloader: true,
   check_origin: false,
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
-    node: [
-      "node_modules/postcss-cli/index.js",
-      "css/app.scss",
-      "--output=../priv/static/assets/app.css",
-      "--watch",
-      cd: Path.expand("../assets", __DIR__)
-    ]
+    # esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    # node: [
+    #   "node_modules/postcss-cli/index.js",
+    #   "css/app.scss",
+    #   "--output=../priv/static/assets/app.css",
+    #   "--watch",
+    #   cd: Path.expand("../assets", __DIR__)
+    # ]
   ]
+
+  # TODO: Need to figure out why the watcher above is spewing errors. Commented out for now.
 
 # ## SSL Support
 #

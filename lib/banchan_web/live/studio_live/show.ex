@@ -45,7 +45,7 @@ defmodule BanchanWeb.StudioLive.Show do
               {@studio.description}
               {#if @current_user_member?}
                 <LiveRedirect
-                  class="text-center rounded-full px-2 py-1 bg-amber-200 text-black"
+                  class="px-2 py-1 bg-amber-200 text-black btn-base btn-amber"
                   label="Edit Profile"
                   to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}
                 />
@@ -79,7 +79,7 @@ defmodule BanchanWeb.StudioLive.Show do
           {/for}
           {#if @current_user_member?}
             <div class="">
-              <button type="button" class="text-center rounded-full px-2 py-1 bg-amber-200">Add an Offering</button>
+              <button type="button" class="btn-base btn-amber">Add an Offering</button>
             </div>
           {/if}
         </div>

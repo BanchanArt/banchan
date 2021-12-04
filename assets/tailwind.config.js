@@ -2,7 +2,27 @@ const colors = require('tailwindcss/colors')
 
 module.exports = {
   mode: "jit",
-  purge: ["./js/**/*.js", "../lib/*_web/**/*.*ex"],
+  purge: {
+    content: ["./js/**/*.js", "../lib/*_web/**/*.*ex"],
+    options: {
+      // make sure to safelist these classes when using purge
+      safelist: [
+        'w-64',
+        'w-1/2',
+        'rounded-l-lg',
+        'rounded-r-lg',
+        'bg-gray-200',
+        'grid-cols-4',
+        'grid-cols-7',
+        'h-6',
+        'leading-6',
+        'h-9',
+        'leading-9',
+        'shadow-lg',
+        /data-.*/
+      ],
+    }
+  },
   theme: {
     extend: {},
     colors: {
@@ -22,6 +42,7 @@ module.exports = {
       blue: colors.blue,
       violet: colors.violet,
       purple: colors.purple,
+      gray: colors.coolGray,
       // abstract names
       primary: colors.emerald,
       secondary: colors.teal,
@@ -33,12 +54,16 @@ module.exports = {
       danger: colors.red,
     }
   },
+  darkMode: 'class',
   variants: {
-    extend: {},
+    extend: {
+      // apply variants like hover, focus, dark to components
+    }
   },
   plugins: [
     require('@tailwindcss/aspect-ratio'),
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
+    require('@themesberg/flowbite/plugin')
   ],
 };

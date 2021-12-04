@@ -43,10 +43,7 @@ defmodule BanchanWeb.ForgotPasswordLive do
           </Field>
           <div class="field">
             <div class="control">
-              <Submit
-                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
-                label="Send instructions to reset password"
-              />
+              <Submit class="btn-base btn-amber" label="Send instructions to reset password" />
             </div>
           </div>
         </Form>

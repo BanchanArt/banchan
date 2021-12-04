@@ -9,3 +9,24 @@ $fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
 @import "../node_modules/tailwindcss/base";
 @import "../node_modules/tailwindcss/components";
 @import "../node_modules/tailwindcss/utilities";
+
+@layer components {
+    .btn-base {
+        @apply my-3 text-center focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 mb-3;
+    }
+    .btn-amber {
+        @apply text-white bg-amber-400 hover:bg-amber-500 focus:ring-amber-300 dark:bg-amber-600 dark:hover:bg-amber-700 dark:focus:ring-amber-900;
+    }
+    .btn-blue {
+        @apply text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800;
+    }
+    .txt-light {
+        @apply text-sm font-medium text-gray-900 block mb-2 dark:text-gray-300;
+    }
+    .form-input {
+        @apply bg-gray-100 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500;
+    }
+    .form-checkbox {
+        @apply bg-gray-50 border border-gray-300 focus:ring-3 focus:ring-blue-300 h-4 w-4 rounded dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800;
+    }
+}
