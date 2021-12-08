@@ -25,44 +25,45 @@ defmodule BanchanWeb.DenizenLive.Edit do
     <Layout current_user={@current_user} flashes={@flash}>
       <h1 class="text-2xl">Edit Profile</h1>
       <h2 class="text-xl">@{@user.handle}</h2>
-      <div class="grid grid-cols-3 gap-4">
-        <Form class="col-span-1" for={@changeset} change="change" submit="submit">
+      <div class="grid grid-cols-2 gap-4 form-styling">
+        <Form class="col-span-2" for={@changeset} change="change" submit="submit">
           <Field class="field" name={:handle}>
-            <Label class="label" />
-            <div class="control has-icons-left">
+            <span class="icon is-small is-left">
+              <Label class="label form-label-100" />
+              <i class="fas fa-at" />
+            </span>
+            <div class="control">
               <InputContext :let={form: form, field: field}>
                 <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                  class={"input form-input-100", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
                   opts={required: true}
                 />
               </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-at" />
-              </span>
             </div>
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:name}>
-            <Label class="label" />
-            <div class="control has-icons-left">
+            <span class="icon is-small is-left">
+              <Label class="label form-label-100" />
+              <i class="fas fa-user" />
+            </span>
+
+            <div class="control">
               <InputContext :let={form: form, field: field}>
                 <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                  class={"input form-input-100", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
                   opts={required: true}
                 />
               </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-user" />
-              </span>
             </div>
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:bio}>
-            <Label class="label" />
+            <Label class="label form-label-100" />
             <div class="control">
               <InputContext :let={form: form, field: field}>
                 <TextArea
-                  class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                  class={"textarea form-textarea-100", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
                   opts={required: true}
                 />
               </InputContext>
@@ -72,7 +73,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
           <div class="field">
             <div class="control text-black m-1">
               <Submit
-                class="rounded-full bg-amber-200 py-1 px-5"
+                class="btn-base btn-amber"
                 label="Save"
                 opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
               />

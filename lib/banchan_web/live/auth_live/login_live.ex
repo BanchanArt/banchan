@@ -26,10 +26,10 @@ defmodule BanchanWeb.LoginLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Log in</h1>
-      <div class="grid grid-cols-3 gap-4">
+      <h1 class="text-2xl col-span-2">Log in</h1>
+      <div class="grid grid-cols-2 gap-4 form-styling">
         <Form
-          class="col-span-1"
+          class="col-span-2"
           for={@changeset}
           action={Routes.user_session_path(Endpoint, :create)}
           change="change"
@@ -37,40 +37,39 @@ defmodule BanchanWeb.LoginLive do
           trigger_action={@trigger_submit}
         >
           <Field class="field" name={:email}>
-            <Label class="label" />
-            <div class="control has-icons-left">
+            <span class="icon is-small is-left">
+              <Label class="label form-label-100" />
+              <i class="fas fa-envelope" />
+            </span>
+            <div class="control">
               <InputContext :let={form: form, field: field}>
                 <EmailInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                  class={"input form-input-100", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
                   opts={required: true}
                 />
               </InputContext>
-
-              <span class="icon is-small is-left">
-                <i class="fas fa-envelope" />
-              </span>
             </div>
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:password}>
-            <Label class="label" />
+            <span class="icon is-small is-left">
+              <Label class="label form-label" />
+              <i class="fas fa-lock" />
+            </span>
             <div class="control has-icons-left">
               <InputContext :let={form: form, field: field}>
                 <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                  class={"input form-input-100", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
                   opts={required: true, type: :password}
                 />
               </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
             </div>
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:remember_me}>
             <div class="control">
               <Label class="checkbox">
-                <Checkbox />
+                <Checkbox class="form-checkbox-100" />
                 Keep me logged in for 60 days
               </Label>
             </div>

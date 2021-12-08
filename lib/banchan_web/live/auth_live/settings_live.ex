@@ -43,35 +43,35 @@ defmodule BanchanWeb.SettingsLive do
     <Layout current_user={@current_user} flashes={@flash}>
       <h1 class="text-2xl">Account Settings</h1>
       <h2 class="text-xl">Update Email</h2>
-      <div class="grid grid-cols-3 gap-4">
+      <div class="grid grid-cols-2 gap-4 form-styling">
         <Form
-          class="col-span-1"
+          class="col-span-2"
           for={@email_changeset}
           change="change_email"
           submit="submit_email"
           opts={autocomplete: "off"}
         >
           <Field class="field" name={:email}>
-            <Label class="label" />
-            <div class="control has-icons-left">
+            <span class="icon is-small is-left">
+              <Label class="label form-label-100" />
+              <i class="fas fa-envelope" />
+            </span>
+            <div class="control">
               <InputContext :let={form: form, field: field}>
-                <EmailInput class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} />
+                <EmailInput class={"input form-input-100", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} />
               </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-envelope" />
-              </span>
             </div>
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:password}>
-            <Label class="label" />
-            <div class="control has-icons-left">
+            <span class="icon is-small is-left">
+              <Label class="label form-label-100" />
+              <i class="fas fa-lock" />
+            </span>
+            <div class="control">
               <InputContext :let={form: form, field: field}>
-                <PasswordInput class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} />
+                <PasswordInput class={"input form-input-100", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} />
               </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
             </div>
             <ErrorTag class="help is-danger" />
           </Field>
@@ -88,56 +88,56 @@ defmodule BanchanWeb.SettingsLive do
       </div>
 
       <h2 class="text-xl">Update Password</h2>
-      <div class="grid grid-cols-3 gap-4">
+      <div class="grid grid-cols-2 gap-4 form-styling">
         <Form
-          class="col-span-1"
+          class="col-span-2"
           for={@password_changeset}
           change="change_password"
           submit="submit_password"
           opts={autocomplete: "off"}
         >
           <Field class="field" name={:password}>
-            <Label class="label">New Password</Label>
-            <div class="control has-icons-left">
+            <span class="icon is-small is-left">
+              <Label class="label form-label">New Password</Label>
+              <i class="fas fa-lock" />
+            </span>
+            <div class="control">
               <InputContext :let={form: form, field: field}>
                 <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                  class={"input form-input-100", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
                   opts={required: true, type: :password}
                 />
               </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
             </div>
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:password_confirmation}>
-            <Label class="label">New Password Confirmation</Label>
-            <div class="control has-icons-left">
+            <span class="icon is-small is-left">
+              <Label class="label form-label">New Password Confirmation</Label>
+              <i class="fas fa-lock" />
+            </span>
+            <div class="control">
               <InputContext :let={form: form, field: field}>
                 <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                  class={"input form-input-100", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
                   opts={required: true, type: :password}
                 />
               </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
             </div>
             <ErrorTag class="help is-danger" />
           </Field>
           <Field class="field" name={:current_confirmation}>
-            <Label class="label" />
-            <div class="control has-icons-left">
+            <span class="icon is-small is-left">
+              <Label class="label form-label" />
+              <i class="fas fa-lock" />
+            </span>
+            <div class="control">
               <InputContext :let={form: form, field: field}>
                 <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                  class={"input form-input-100", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
                   opts={required: true, type: :password}
                 />
               </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
             </div>
             <ErrorTag class="help is-danger" />
           </Field>

@@ -31,7 +31,7 @@ config :banchan, BanchanWeb.Endpoint,
     # ]
   ]
 
-  # TODO: Need to figure out why the watcher above is spewing errors. Commented out for now.
+# TODO: Need to figure out why the watcher above is spewing errors. Commented out for now.
 
 # ## SSL Support
 #
