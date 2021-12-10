@@ -43,7 +43,7 @@ module.exports = {
       violet: colors.violet,
       purple: colors.purple,
       gray: colors.coolGray,
-      // abstract names
+      // default abstract names
       primary: colors.emerald,
       secondary: colors.teal,
       tertiary: colors.lime,
@@ -52,6 +52,10 @@ module.exports = {
       success: colors.blue,
       warning: colors.amber,
       danger: colors.red,
+      // dark abstract names
+      darkprimary: colors.coolGray,
+      darksecondary: colors.blueGray,
+      darktertiary: colors.lime,
     }
   },
   darkMode: 'class',

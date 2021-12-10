@@ -4,7 +4,13 @@ defmodule BanchanWeb.LayoutView do
   def render(_, assigns) do
     ~F"""
     <!DOCTYPE html />
-    <html lang="en" class="h-full bg-secondary-50">
+    <html
+      lang="en"
+      class="h-full bg-secondary-50 dark:bg-darksecondary-900 dark:text-white"
+      x-data="{ darkMode: localStorage.getItem('dark') === 'true'}"
+      x-init="$watch('darkMode', val => localStorage.setItem('dark', val))"
+      x-bind:class="{ 'dark': darkMode }"
+    >
       <head>
         <meta charset="utf-8">
         {Phoenix.HTML.Tag.csrf_meta_tag()}

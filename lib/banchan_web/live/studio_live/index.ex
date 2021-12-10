@@ -24,7 +24,7 @@ defmodule BanchanWeb.StudioLive.Index do
       <h1 class="text-2xl">Studios</h1>
       <div class="studio-list grid grid-cols-3 gap-3">
         {#for studio <- @studios}
-          <div class="md:inline-grid max-w-md bg-primary-100 p-1 shadow-md">
+          <div class="md:inline-grid max-w-md bg-primary-100 p-1 shadow-md dark:bg-darkprimary-600 dark:text-white">
             <StudioCard studio={studio} />
           </div>
         {/for}

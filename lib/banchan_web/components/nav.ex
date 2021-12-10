@@ -14,7 +14,7 @@ defmodule BanchanWeb.Components.Nav do
     ~F"""
     <nav
       id="nav"
-      class="bg-gradient-to-r from-primary-300 to-primary-500 align-top w-full leading-snug m-0 p-0"
+      class="bg-gradient-to-r from-primary-300 to-primary-500 align-top w-full leading-snug m-0 p-0 dark:from-darkprimary-700 dark:to-darkprimary-800"
       role="navigation"
       aria-label="main navigation"
     >
@@ -70,6 +70,11 @@ defmodule BanchanWeb.Components.Nav do
             </span>
           </LiveRedirect>
         {/if}
+        <label for="toggle-example" class="flex items-center cursor-pointer relative mb-4">
+          <input type="checkbox" id="toggle-example" class="sr-only" @click="darkMode = !darkMode">
+          <div class="toggle-bg bg-gray-200 border border-gray-200 h-6 w-11 rounded-full dark:bg-gray-700 dark:border-gray-600"></div>
+          <span class="ml-3 text-gray-900 text-sm font-medium dark:text-gray-300">Toggle me</span>
+        </label>
       </div>
     </nav>
     """

@@ -6,6 +6,7 @@
     "deploy": "cross-env NODE_ENV=production postcss css/app.scss -o ../priv/static/assets/app.css"
   },
   "dependencies": {
+    "@alpinejs/persist": "^3.7.0",
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@tailwindcss/aspect-ratio": "^0.3.0",
     "@tailwindcss/forms": "^0.3.4",
