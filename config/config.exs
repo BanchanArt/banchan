@@ -43,6 +43,9 @@ config :surface, :components, [
    default_translator: {BanchanWeb.ErrorHelpers, :translate_error}}
 ]
 
+config :ex_aws,
+  region: {:system, "AWS_REGION"}
+
 config :esbuild,
   version: "0.12.18",
   default: [
