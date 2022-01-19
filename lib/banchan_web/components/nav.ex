@@ -28,7 +28,7 @@ defmodule BanchanWeb.Components.Nav do
           </a>
         </div>
 
-        <div class="navbar-end flex gap-4">
+        <div class="navbar-end flex gap-4 items-center">
           {#if @current_user}
             <LiveRedirect to={Routes.dashboard_path(Endpoint, :index)}>
               <span>
@@ -91,6 +91,17 @@ defmodule BanchanWeb.Components.Nav do
               </span>
             </LiveRedirect>
           {/if}
+          <select data-choose-theme class="select select-bordered select-secondary select-sm bg-primary-content text-primary outline-offset-0">
+            <option disabled="disabled" selected="selected">Theme</option>
+            <option value="emerald">Emerald</option>
+            <option value="halloween">Halloween</option>
+            <option value="garden">Garden</option>
+            <option value="forest">Forest</option>
+            <option value="synthwave">Synthwave</option>
+            <option value="cupcake">Cupcake</option>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+          </select>
         </div>
       </div>
     </nav>
