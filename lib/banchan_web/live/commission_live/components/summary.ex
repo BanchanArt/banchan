@@ -48,7 +48,7 @@ defmodule BanchanWeb.Components.Commissions.Summary do
       </div>
 
       <:footer>
-        <a class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1" href="#">Add Offering</a>
+        <a class="text-center rounded-full py-1 px-5 btn btn-secondary m-1" href="#">Add Offering</a>
       </:footer>
     </Card>
     """

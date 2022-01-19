@@ -22,7 +22,7 @@ defmodule BanchanWeb.HomeLive do
       <h2 class="text-lg">Commission Someone</h2>
       <div class="studio-list grid grid-cols-3 gap-3">
         {#for studio <- @studios}
-          <div class="md:inline-grid max-w-md bg-primary-100 p-1 shadow-md">
+          <div class="md:inline-grid max-w-md bg-base-200 p-1 shadow-md">
             <StudioCard studio={studio} />
           </div>
         {/for}

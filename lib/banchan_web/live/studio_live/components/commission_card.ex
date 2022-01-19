@@ -25,9 +25,9 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
       </:header>
       <:header_aside>
         {#if @open}
-          <span class="bg-green-500 p-1">Open</span>
+          <span class="bg-primary p-1">Open</span>
         {#else}
-          <span class="bg-red-500 p-1">Closed</span>
+          <span class="bg-secondary p-1">Closed</span>
         {/if}
       </:header_aside>
       <:image>

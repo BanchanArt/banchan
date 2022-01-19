@@ -72,7 +72,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
           <div class="field">
             <div class="control text-black m-1">
               <Submit
-                class="rounded-full bg-amber-200 py-1 px-5"
+                class="btn btn-secondary rounded-full py-1 px-5"
                 label="Save"
                 opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
               />

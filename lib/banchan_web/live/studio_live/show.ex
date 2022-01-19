@@ -36,7 +36,7 @@ defmodule BanchanWeb.StudioLive.Show do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <:hero>
-        <section class="grid grid-cols-2 bg-teal-300">
+        <section class="grid grid-cols-2 bg-secondary">
           <div class="ml-8 col-span-12">
             <p class="text-3xl text-white font-bold flex-grow">
               {@studio.name}
@@ -45,26 +45,37 @@ defmodule BanchanWeb.StudioLive.Show do
               {@studio.description}
               {#if @current_user_member?}
                 <LiveRedirect
-                  class="text-center rounded-full px-2 py-1 bg-amber-200 text-black"
+                  class="btn glass btn-sm text-center rounded-full px-2 py-0"
                   label="Edit Profile"
                   to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}
                 />
+              {#else}
+                <a
+                  href="/"
+                  #TODO:
+                  add
+                  in
+                  follow
+                  functionality
+                  class="btn glass btn-sm text-center rounded-full px-2 py-0"
+                  label="Follow"
+                >Follow</a>
               {/if}
             </p>
             <br>
           </div>
-          <nav class="ml-8 col-span-1 grid-cols-4 inline-grid">
-            <div class="bg-teal-200 text-center rounded-t-lg text-violet-400"><a>Shop</a></div>
-            <div class="bg-teal-400 bg-opacity-60 text-center rounded-t-lg text-white"><a>About</a></div>
-            <div class="bg-teal-400 bg-opacity-60 text-center rounded-t-lg text-white"><a>Portfolio</a></div>
-            <div class="bg-teal-400 bg-opacity-60 text-center rounded-t-lg text-white"><a>Q&A</a></div>
+          <nav class="tabs ml-8 col-span-1 grid-cols-4 inline-grid">
+            <div class="tab tab-bordered tab-active bg-primary-focus text-center rounded-t-lg text-white"><a>Shop</a></div>
+            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-white"><a>About</a></div>
+            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-white"><a>Portfolio</a></div>
+            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-white"><a>Q&A</a></div>
           </nav>
         </section>
       </:hero>
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
         <div class="offerings">
           {#for offering <- @offerings}
-            <div class="shadow-lg bg-white p-2 my-4 rounded">
+            <div class="shadow-lg bg-base-100 p-2 my-4 rounded">
               {!-- TODO: Add image --}
               <CommissionCard
                 studio={@studio}
@@ -79,12 +90,12 @@ defmodule BanchanWeb.StudioLive.Show do
           {/for}
           {#if @current_user_member?}
             <div class="">
-              <button type="button" class="text-center rounded-full px-2 py-1 bg-amber-200">Add an Offering</button>
+              <button type="button" class="btn btn-sm text-center rounded-full px-2 py-1 btn-accent">Add an Offering</button>
             </div>
           {/if}
         </div>
         <div class="col-start-3">
-          <div class="shadow-lg bg-white p-2 my-4 rounded">
+          <div class="shadow-lg bg-base-100 p-2 my-4 rounded">
             <Card>
               <:header>
                 Summary
@@ -107,7 +118,7 @@ defmodule BanchanWeb.StudioLive.Show do
               </div>
             </Card>
           </div>
-          <div class="shadow-lg bg-white p-2 my-4 rounded">
+          <div class="shadow-lg bg-base-100 p-2 my-4 rounded">
             <h2 class="text-xl">Members</h2>
             <div class="studio-members grid grid-cols-4 gap-1">
               {#for member <- @members}
