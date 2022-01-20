@@ -91,7 +91,10 @@ defmodule BanchanWeb.Components.Nav do
               </span>
             </LiveRedirect>
           {/if}
-          <select data-choose-theme class="select select-bordered select-secondary select-sm bg-primary-content text-primary outline-offset-0">
+          <select
+            data-choose-theme
+            class="select select-bordered select-secondary select-sm bg-primary-content text-primary outline-offset-0"
+          >
             <option disabled="disabled" selected="selected">Theme</option>
             <option value="emerald">Emerald</option>
             <option value="halloween">Halloween</option>
