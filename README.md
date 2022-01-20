@@ -1,29 +1,18 @@
-# Banchan.Art
-Created and maintained by [DWG](https://www.dwg.dev/).
+# Banchan.Art 🎨
 
-[Repo Wiki](https://github.com/digitalworkersguild/banchan/wiki) | [Staging Server](https://dev.banchan.art/) 
-## Setup
+[Repo Wiki](https://github.com/digitalworkersguild/banchan/wiki) | [Staging Server](https://dev.banchan.art/)
 
-Requirements:
-- [Elixir 1.6+](https://elixir-lang.org/install.html)
-- Erlang 20+ (Typically auto-installs with Elixir)
-- [Phoenix](https://hexdocs.pm/phoenix/installation.html)
-- [Postgresql](https://wiki.postgresql.org/wiki/Detailed_installation_guides)
+banchan.art is an open platform where patrons and artists can find each other
+and safely commission art without getting exploited.
 
-Note: If postgresql installed via homebrew, make sure to run `/usr/local/opt/postgres/bin/createuser -s postgres`.
+## Contributing
 
-To start your Phoenix server:
+See our [CONTRIBUTING.md](CONTRIBUTING.md) guide for more information.
 
-- Install dependencies with `mix deps.get`
-- Set up your env vars file. Create `.env` (*NIX) or `.env.ps1` (Powershell)
-  - Add commands for your environment variables there
-  - This gets loaded automatically
-- Create and migrate your database with `mix ecto.setup`
-- Install Node.js dependencies with `npm install` inside the `assets` directory
-- To make sure everything is good, run `mix quality`
-- Start Phoenix endpoint with `mix phx.server`
-- Stop by typing Ctrl+C twice.
+## License
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+Banchan is licensed under the [Parity 7.0 License](LICENSE.md).
 
-For additional details on working with this repo, [view the wiki article here.](https://github.com/digitalworkersguild/banchan/wiki/Getting-Started#useful-commands-reference)
+It's created, owned, and maintained with love and solidarity by the [Digital
+Workers Guild](https://www.dwg.dev/) ("DWG"), a worker co-operative making
+stuff for communities that need them.
