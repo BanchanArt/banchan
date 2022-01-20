@@ -3,7 +3,8 @@
   "description": " ",
   "license": "MIT",
   "scripts": {
-    "deploy": "cross-env NODE_ENV=production postcss css/app.scss -o ../priv/static/assets/app.css"
+    "deploy:css": "cross-env NODE_ENV=production postcss css/app.scss -o ../priv/static/assets/app.css",
+    "deploy": "cd .. && mix assets.deploy && rm -rf _build/esbuild"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.3",
