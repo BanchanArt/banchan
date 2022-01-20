@@ -83,3 +83,4 @@ This CLA is based on [Single CLA](https://singlecla.com/) ([github](https://gith
 The undersigned have all agreed to this CLA:
 
 * Kat Marchán (@zkat)
+* Atrian Wagner (@skullbunnygalaxy)
