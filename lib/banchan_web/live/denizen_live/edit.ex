@@ -23,62 +23,81 @@ defmodule BanchanWeb.DenizenLive.Edit do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Edit Profile</h1>
-      <h2 class="text-xl">@{@user.handle}</h2>
-      <div class="grid grid-cols-3 gap-4">
-        <Form class="col-span-1" for={@changeset} change="change" submit="submit">
-          <Field class="field" name={:handle}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true}
+      <div class="card shadow bg-base-200 card-bordered text-base-content">
+        <div class="card-body">
+          <h1 class="text-2xl card-title">Edit Profile for @{@user.handle}</h1>
+          <Form for={@changeset} change="change" submit="submit">
+            <Field class="field" name={:handle}>
+              <Label class="label" />
+              <div class="control has-icons-left">
+                <InputContext :let={form: form, field: field}>
+                  <TextInput
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
+                    opts={required: true}
+                  />
+                </InputContext>
+                <span class="icon is-small is-left">
+                  <i class="fas fa-at" />
+                </span>
+              </div>
+              <ErrorTag class="help is-danger" />
+            </Field>
+            <Field class="field" name={:name}>
+              <Label class="label" />
+              <div class="control has-icons-left">
+                <InputContext :let={form: form, field: field}>
+                  <TextInput
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
+                    opts={required: true}
+                  />
+                </InputContext>
+                <span class="icon is-small is-left">
+                  <i class="fas fa-user" />
+                </span>
+              </div>
+              <ErrorTag class="help is-danger" />
+            </Field>
+            <Field class="field" name={:bio}>
+              <Label class="label" />
+              <div class="control">
+                <InputContext :let={form: form, field: field}>
+                  <TextArea
+                    class={
+                      "textarea",
+                      "textarea-bordered",
+                      "textarea-primary",
+                      "h-24",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
+                    opts={required: true}
+                  />
+                </InputContext>
+              </div>
+              <ErrorTag class="help is-danger" />
+            </Field>
+            <div class="field">
+              <div class="control text-base-content m-1">
+                <Submit
+                  class="btn btn-secondary rounded-full py-1 px-5"
+                  label="Save"
+                  opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
                 />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-at" />
-              </span>
+              </div>
             </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:name}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true}
-                />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-user" />
-              </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:bio}>
-            <Label class="label" />
-            <div class="control">
-              <InputContext :let={form: form, field: field}>
-                <TextArea
-                  class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true}
-                />
-              </InputContext>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <div class="field">
-            <div class="control text-black m-1">
-              <Submit
-                class="rounded-full bg-amber-200 py-1 px-5"
-                label="Save"
-                opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-              />
-            </div>
-          </div>
-        </Form>
+          </Form>
+        </div>
       </div>
     </Layout>
     """

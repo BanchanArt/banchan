@@ -23,39 +23,48 @@ defmodule BanchanWeb.DenizenLive.Show do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <section class="grid grid-cols-2 bg-teal-300">
+      <section class="grid grid-cols-2 bg-secondary">
         <div class="col-span-12">
           <article class="ml-8">
             <figure class="">
               <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
             </figure>
-            <h1 class="text-xl text-white font-bold">
+            <h1 class="text-xl text-base-content font-bold">
               {@user.handle}
             </h1>
             <br>
-            <p class="text-base text-white">
+            <p class="text-base text-secondary-content">
               Witty phrase here.
             </p>
-            <a class="rounded-full py-1 px-5 m-1 bg-info-400 text-center text-white">Follow</a>
+            <a
+              href="/"
+              #TODO:
+              add
+              in
+              follow
+              functionality
+              class="btn glass btn-sm text-center rounded-full px-4 py-0"
+              label="Follow"
+            >Follow</a>
           </article>
         </div>
-        <nav class="col-start-2 grid-cols-3 inline-grid">
-          <div class="bg-teal-200 text-center rounded-t-lg border-t-6 border-solid border-green-300 text-violet-400"><a>Profile Home</a></div>
-          <div class="bg-teal-400 bg-opacity-60 text-center rounded-t-lg text-white"><a>Featured</a></div>
-          <div class="bg-teal-400 bg-opacity-60 text-center rounded-t-lg text-white"><a>Characters</a></div>
+        <nav class="tabs col-start-2 grid-cols-3 inline-grid">
+          <div class="tab tab-bordered tab-active bg-primary-focus text-center rounded-t-lg border-t-6 border-solid border-green-300"><a>Profile Home</a></div>
+          <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Featured</a></div>
+          <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Characters</a></div>
         </nav>
       </section>
       <div class="grid grid-cols-2 justify-items-stretch gap-6 mt-8">
-        <div class="bg-white p-4 shadow-lg">
-          <h2 class="text-xl text-white font-bold">Studios</h2>
+        <div class="bg-base-200 p-4 shadow-lg">
+          <h2 class="text-xl text-secondary-content font-bold">Studios</h2>
           <div class="denizen-studios">
             {#for studio <- @studios}
               <StudioCard studio={studio} />
             {/for}
           </div>
         </div>
-        <div class="bg-white p-4 shadow-lg">
-          <h2 class="text-xl text-white font-bold flex-grow">
+        <div class="bg-base-200 p-4 shadow-lg">
+          <h2 class="text-xl text-secondary-content font-bold flex-grow">
             About {@user.handle}
           </h2>
           <figure class="" alt="denizen ID">

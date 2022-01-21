@@ -16,8 +16,8 @@ defmodule BanchanWeb.Components.FlashTest do
 
     assert html =~ """
            <div class="flash-container">
-             <p phx-value-key="info" phx-click="lv:clear-flash" class="alert alert-info" role="alert"></p>
-             <p phx-value-key="error" phx-click="lv:clear-flash" class="alert alert-danger" role="alert"></p>
+             <p phx-value-key="info" phx-click="lv:clear-flash" class="alert alert-info py-0" role="alert"></p>
+             <p phx-value-key="error" phx-click="lv:clear-flash" class="alert alert-danger py-0" role="alert"></p>
            </div>
            """
   end
@@ -32,8 +32,8 @@ defmodule BanchanWeb.Components.FlashTest do
 
     assert html =~ """
            <div class="flash-container">
-             <p phx-value-key="info" phx-click="lv:clear-flash" class="alert alert-info" role="alert">womp</p>
-             <p phx-value-key="error" phx-click="lv:clear-flash" class="alert alert-danger" role="alert"></p>
+             <p phx-value-key="info" phx-click="lv:clear-flash" class="alert alert-info py-0" role="alert">womp</p>
+             <p phx-value-key="error" phx-click="lv:clear-flash" class="alert alert-danger py-0" role="alert"></p>
            </div>
            """
   end
@@ -48,8 +48,8 @@ defmodule BanchanWeb.Components.FlashTest do
 
     assert html =~ """
            <div class="flash-container">
-             <p phx-value-key="info" phx-click="lv:clear-flash" class="alert alert-info" role="alert"></p>
-             <p phx-value-key="error" phx-click="lv:clear-flash" class="alert alert-danger" role="alert">womp</p>
+             <p phx-value-key="info" phx-click="lv:clear-flash" class="alert alert-info py-0" role="alert"></p>
+             <p phx-value-key="error" phx-click="lv:clear-flash" class="alert alert-danger py-0" role="alert">womp</p>
            </div>
            """
   end

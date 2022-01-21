@@ -14,62 +14,107 @@ defmodule BanchanWeb.Components.Nav do
     ~F"""
     <nav
       id="nav"
-      class="bg-gradient-to-r from-primary-300 to-primary-500 align-top w-full leading-snug m-0 p-0"
+      class="navbar bg-primary text-primary-content align-top w-full leading-snug m-0 p-0"
       role="navigation"
       aria-label="main navigation"
     >
-      <div class="md:container md:mx-auto text-white flex items-center gap-12 justify-start">
-        <a href="/">
-          <img
-            src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
-            class="inline-block object-scale-down h-12 p-1 rounded-full"
-          /> Banchan Art
-        </a>
-        {#if @current_user}
-          <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
-            <span>
-              <i class="fa fa-user" />
-              @{@current_user.handle}
-            </span>
-          </LiveRedirect>
-          <LiveRedirect to={Routes.dashboard_path(Endpoint, :index)}>
-            <span>
-              <i class="fa fa-palette" />
-              Dashboard
-            </span>
-          </LiveRedirect>
-          <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
-            <span>
-              <i class="fa fa-palette" />
-              Studios
-            </span>
-          </LiveRedirect>
-          <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
-            <span>
-              <i class="fa fa-cog" />
-              Settings
-            </span>
-          </LiveRedirect>
-          <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
-            <span>
-              <i class="fa fa-sign-out-alt" />
-              Log out
-            </span>
-          </Link>
-        {#else}
-          <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
-            <span>
-              <i class="fa fa-user" />
-              Register
-            </span>
-          </LiveRedirect>
-          <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
-            <span>
-              <i class="fa fa-sign-in-alt" />
-              Log in
-            </span>
-          </LiveRedirect>
-        {/if}
+      <div class="md:container md:mx-auto flex items-center gap-12 justify-start">
+        <div class="navbar-start">
+          <a href="/">
+            <img
+              src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
+              class="inline-block object-scale-down h-12 p-1 rounded-full"
+            /> Banchan Art
+          </a>
+        </div>
+
+        <div class="navbar-end flex gap-4 items-center">
+          {#if @current_user}
+            <LiveRedirect to={Routes.dashboard_path(Endpoint, :index)}>
+              <span>
+                <i class="fa fa-palette" />
+                Dashboard
+              </span>
+            </LiveRedirect>
+            <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
+              <span>
+                <i class="fa fa-palette" />
+                Studios
+              </span>
+            </LiveRedirect>
+            <div>
+              <div class="dropdown dropdown-end">
+                <div tabindex="0" class="">
+                  <span>
+                    <i class="fa fa-user" />
+                    @{@current_user.handle}
+                  </span>
+                </div>
+                <ul tabindex="0" class="p-2 shadow menu dropdown-content bg-primary rounded-box w-52">
+                  <li>
+                    <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
+                      <span>
+                        Your Profile
+                      </span>
+                    </LiveRedirect>
+                  </li>
+                  <li>
+                    <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
+                      <span>
+                        <i class="fa fa-cog" />
+                        Settings
+                      </span>
+                    </LiveRedirect>
+                  </li>
+                  <li>
+                    <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
+                      <span>
+                        <i class="fa fa-sign-out-alt" />
+                        Log out
+                      </span>
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          {#else}
+            <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
+              <span>
+                <i class="fa fa-user" />
+                Register
+              </span>
+            </LiveRedirect>
+            <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
+              <span>
+                <i class="fa fa-sign-in-alt" />
+                Log in
+              </span>
+            </LiveRedirect>
+          {/if}
+          <select
+            data-choose-theme
+            class="select select-bordered select-secondary select-sm bg-primary-content text-primary outline-offset-0"
+            :hook="Theme"
+            id="themeChange"
+          >
+            <option disabled="disabled" selected="selected">Theme</option>
+            <option value="emerald">Emerald</option>
+            <option value="halloween">Halloween</option>
+            <option value="garden">Garden</option>
+            <option value="forest">Forest</option>
+            <option value="synthwave">Synthwave</option>
+            <option value="cupcake">Cupcake</option>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+            <option value="cmyk">cmyk</option>
+            <option value="wireframe">wireframe</option>
+            <option value="dracula">dracula</option>
+            <option value="lofi">lofi</option>
+            <option value="pastel">pastel</option>
+            <option value="black">black</option>
+            <option value="luxury">luxury</option>
+          </select>
+        </div>
       </div>
     </nav>
     """

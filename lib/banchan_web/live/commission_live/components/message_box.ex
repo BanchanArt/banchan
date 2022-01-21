@@ -28,7 +28,7 @@ defmodule BanchanWeb.Components.Commissions.MessageBox do
         </Field>
         <div class="field">
           <div class="control">
-            <Submit class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1" label="Reply" />
+            <Submit class="btn btn-secondary text-center rounded-full py-1 px-5 m-1" label="Reply" />
           </div>
         </div>
       </Form>

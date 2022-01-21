@@ -90,7 +90,7 @@ defmodule BanchanWeb.RegisterLive do
           <div class="field">
             <div class="control">
               <Submit
-                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
+                class="btn text-center rounded-full py-1 px-5 btn-secondary m-1"
                 label="Register"
                 opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
               />

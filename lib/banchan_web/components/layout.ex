@@ -24,10 +24,16 @@ defmodule BanchanWeb.Components.Layout do
       <Flash flashes={@flashes} />
       <#slot />
     </section>
-    <footer class="footer bg-gradient-to-r from-primary-300 to-primary-500 p-4 w-full fixed bottom-0">
-      <div class="md:container md:mx-auto px-4">
-        <p class="text-center">
-          Generic copyright message 2021.
+    <footer class="footer bg-base-300 p-4 w-full fixed bottom-0 footer-center">
+      <div class="md:container md:mx-auto px-4 text-accent">
+        <h1
+          x-data="{ message: '❤️ Alpine + TailwindCSS + DaisyUI + Phoenix + SurfaceUI' }"
+          x-text="message"
+          phx-update="ignore"
+          id="supportFooter"
+        />
+        <p class="text-primary">
+          Copyright © 2021 - All right reserved by DWG LLC
         </p>
       </div>
     </footer>

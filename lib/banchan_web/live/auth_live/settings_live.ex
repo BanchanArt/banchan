@@ -42,115 +42,150 @@ defmodule BanchanWeb.SettingsLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <h1 class="text-2xl">Account Settings</h1>
-      <h2 class="text-xl">Update Email</h2>
-      <div class="grid grid-cols-3 gap-4">
-        <Form
-          class="col-span-1"
-          for={@email_changeset}
-          change="change_email"
-          submit="submit_email"
-          opts={autocomplete: "off"}
-        >
-          <Field class="field" name={:email}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <EmailInput class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-envelope" />
-              </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:password}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <PasswordInput class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <div class="field">
-            <div class="control">
-              <Submit
-                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
-                label="Save"
-                opts={disabled: Enum.empty?(@email_changeset.changes) || !@email_changeset.valid?}
-              />
-            </div>
-          </div>
-        </Form>
-      </div>
-
-      <h2 class="text-xl">Update Password</h2>
-      <div class="grid grid-cols-3 gap-4">
-        <Form
-          class="col-span-1"
-          for={@password_changeset}
-          change="change_password"
-          submit="submit_password"
-          opts={autocomplete: "off"}
-        >
-          <Field class="field" name={:password}>
-            <Label class="label">New Password</Label>
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true, type: :password}
+      <div class="card shadow bg-neutral card-bordered text-neutral-content">
+        <div class="card-body">
+          <h2 class="text-xl card-title">Update Email</h2>
+          <Form
+            class="col-span-1"
+            for={@email_changeset}
+            change="change_email"
+            submit="submit_email"
+            opts={autocomplete: "off"}
+          >
+            <Field class="field" name={:email}>
+              <Label class="label" />
+              <div class="control has-icons-left">
+                <InputContext :let={form: form, field: field}>
+                  <EmailInput class={
+                    "input",
+                    "input-primary",
+                    "input-bordered",
+                    "input-sm",
+                    "text-base-content",
+                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                  } />
+                </InputContext>
+                <span class="icon is-small is-left">
+                  <i class="fas fa-envelope" />
+                </span>
+              </div>
+              <ErrorTag class="help is-danger" />
+            </Field>
+            <Field class="field" name={:password}>
+              <Label class="label" />
+              <div class="control has-icons-left">
+                <InputContext :let={form: form, field: field}>
+                  <PasswordInput class={
+                    "input",
+                    "input-primary",
+                    "input-bordered",
+                    "input-sm",
+                    "text-base-content",
+                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                  } />
+                </InputContext>
+                <span class="icon is-small is-left">
+                  <i class="fas fa-lock" />
+                </span>
+              </div>
+              <ErrorTag class="help is-danger" />
+            </Field>
+            <div class="field">
+              <div class="control">
+                <Submit
+                  class="text-center rounded-full py-1 px-5 btn-secondary m-1"
+                  label="Save"
+                  opts={disabled: Enum.empty?(@email_changeset.changes) || !@email_changeset.valid?}
                 />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
+              </div>
             </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:password_confirmation}>
-            <Label class="label">New Password Confirmation</Label>
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true, type: :password}
+          </Form>
+          <div class="divider" />
+          <h2 class="text-xl card-title">Update Password</h2>
+          <Form
+            class="col-span-1"
+            for={@password_changeset}
+            change="change_password"
+            submit="submit_password"
+            opts={autocomplete: "off"}
+          >
+            <Field class="field" name={:password}>
+              <Label class="label">New Password</Label>
+              <div class="control has-icons-left">
+                <InputContext :let={form: form, field: field}>
+                  <TextInput
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "text-base-content",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
+                    opts={required: true, type: :password}
+                  />
+                </InputContext>
+                <span class="icon is-small is-left">
+                  <i class="fas fa-lock" />
+                </span>
+              </div>
+              <ErrorTag class="help is-danger" />
+            </Field>
+            <Field class="field" name={:password_confirmation}>
+              <Label class="label">New Password Confirmation</Label>
+              <div class="control has-icons-left">
+                <InputContext :let={form: form, field: field}>
+                  <TextInput
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "text-base-content",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
+                    opts={required: true, type: :password}
+                  />
+                </InputContext>
+                <span class="icon is-small is-left">
+                  <i class="fas fa-lock" />
+                </span>
+              </div>
+              <ErrorTag class="help is-danger" />
+            </Field>
+            <Field class="field" name={:current_confirmation}>
+              <Label class="label" />
+              <div class="control has-icons-left">
+                <InputContext :let={form: form, field: field}>
+                  <TextInput
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "text-base-content",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
+                    opts={required: true, type: :password}
+                  />
+                </InputContext>
+                <span class="icon is-small is-left">
+                  <i class="fas fa-lock" />
+                </span>
+              </div>
+              <ErrorTag class="help is-danger" />
+            </Field>
+            <div class="field">
+              <div class="control">
+                <Submit
+                  class="text-center rounded-full py-1 px-5 btn-secondary m-1"
+                  label="Save"
+                  opts={disabled: Enum.empty?(@password_changeset.changes) || !@password_changeset.valid?}
                 />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
+              </div>
             </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:current_confirmation}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true, type: :password}
-                />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <div class="field">
-            <div class="control">
-              <Submit
-                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
-                label="Save"
-                opts={disabled: Enum.empty?(@password_changeset.changes) || !@password_changeset.valid?}
-              />
-            </div>
-          </div>
-        </Form>
+          </Form>
+        </div>
       </div>
     </Layout>
     """

@@ -4,7 +4,7 @@ defmodule BanchanWeb.LayoutView do
   def render(_, assigns) do
     ~F"""
     <!DOCTYPE html />
-    <html lang="en" class="h-full bg-secondary-50">
+    <html lang="en" class="h-full bg-base-100" data-theme="">
       <head>
         <meta charset="utf-8">
         {Phoenix.HTML.Tag.csrf_meta_tag()}
