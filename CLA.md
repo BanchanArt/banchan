@@ -84,3 +84,4 @@ The undersigned have all agreed to this CLA:
 
 * Kat Marchán (@zkat)
 * Atrian Wagner (@skullbunnygalaxy)
+* Maria Mora (@riamaria)
