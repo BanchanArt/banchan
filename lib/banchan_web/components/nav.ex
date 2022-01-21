@@ -106,6 +106,13 @@ defmodule BanchanWeb.Components.Nav do
             <option value="cupcake">Cupcake</option>
             <option value="dark">Dark</option>
             <option value="light">Light</option>
+            <option value="cmyk">cmyk</option>
+            <option value="wireframe">wireframe</option>
+            <option value="dracula">dracula</option>
+            <option value="lofi">lofi</option>
+            <option value="pastel">pastel</option>
+            <option value="black">black</option>
+            <option value="luxury">luxury</option>
           </select>
         </div>
       </div>

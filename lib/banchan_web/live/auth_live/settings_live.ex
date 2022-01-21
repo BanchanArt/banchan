@@ -100,10 +100,7 @@ defmodule BanchanWeb.SettingsLive do
               </div>
             </div>
           </Form>
-        </div>
-      </div>
-      <div class="card shadow bg-neutral card-bordered text-primary-content border-2">
-        <div class="card-body">
+          <div class="divider" />
           <h2 class="text-xl card-title">Update Password</h2>
           <Form
             class="col-span-1"

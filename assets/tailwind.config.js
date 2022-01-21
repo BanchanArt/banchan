@@ -1,13 +1,17 @@
 module.exports = {
   content: 
-    ["./js/**/*.js", "../lib/*_web/**/*.*ex"],
-  },
+    ["./js/**/*.js", "../lib/*_web.ex", "../lib/*_web/**/*.*ex"],
   plugins: [
     require('@tailwindcss/aspect-ratio'),
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
     require('daisyui')
   ],
+  theme: {
+    extend: {
+      colors: require('daisyui/colors')
+    },
+  },
   daisyui: {
     styled: true,
     base: true,
@@ -16,8 +20,27 @@ module.exports = {
     rtl: false,
     themes: [
       'dark',
+      'light',
       'forest',
       'synthwave',
+      'cupcake',
+      'bumblebee',
+      'emerald',
+      'corporate',
+      'retro',
+      'cyberpunk',
+      'valentine',
+      'halloween',
+      'garden',
+      'aqua',
+      'lofi',
+      'pastel',
+      'fantasy',
+      'wireframe',
+      'black',
+      'luxury',
+      'dracula',
+      'cmyk',
       {
         'mytheme': {                          /* your theme name */
           'primary': '#a991f7',           /* Primary color */
