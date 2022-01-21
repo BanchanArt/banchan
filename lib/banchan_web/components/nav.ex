@@ -14,11 +14,11 @@ defmodule BanchanWeb.Components.Nav do
     ~F"""
     <nav
       id="nav"
-      class="navbar bg-primary align-top w-full leading-snug m-0 p-0"
+      class="navbar bg-primary text-primary-content align-top w-full leading-snug m-0 p-0"
       role="navigation"
       aria-label="main navigation"
     >
-      <div class="md:container md:mx-auto text-white flex items-center gap-12 justify-start">
+      <div class="md:container md:mx-auto flex items-center gap-12 justify-start">
         <div class="navbar-start">
           <a href="/">
             <img
@@ -94,6 +94,8 @@ defmodule BanchanWeb.Components.Nav do
           <select
             data-choose-theme
             class="select select-bordered select-secondary select-sm bg-primary-content text-primary outline-offset-0"
+            :hook="Theme"
+            id="themeChange"
           >
             <option disabled="disabled" selected="selected">Theme</option>
             <option value="emerald">Emerald</option>

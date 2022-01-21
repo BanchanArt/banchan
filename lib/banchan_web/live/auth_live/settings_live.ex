@@ -42,7 +42,7 @@ defmodule BanchanWeb.SettingsLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <h1 class="text-2xl">Account Settings</h1>
-      <div class="card shadow bg-neutral card-bordered text-primary-content border-2">
+      <div class="card shadow bg-neutral card-bordered text-neutral-content">
         <div class="card-body">
           <h2 class="text-xl card-title">Update Email</h2>
           <Form
@@ -56,7 +56,14 @@ defmodule BanchanWeb.SettingsLive do
               <Label class="label" />
               <div class="control has-icons-left">
                 <InputContext :let={form: form, field: field}>
-                  <EmailInput class={"input", "input-primary", "input-bordered", "input-sm", "text-base-content", "border-2", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} />
+                  <EmailInput class={
+                    "input",
+                    "input-primary",
+                    "input-bordered",
+                    "input-sm",
+                    "text-base-content",
+                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                  } />
                 </InputContext>
                 <span class="icon is-small is-left">
                   <i class="fas fa-envelope" />
@@ -68,7 +75,14 @@ defmodule BanchanWeb.SettingsLive do
               <Label class="label" />
               <div class="control has-icons-left">
                 <InputContext :let={form: form, field: field}>
-                  <PasswordInput class={"input", "input-primary", "input-bordered", "input-sm", "text-base-content", "border-2", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} />
+                  <PasswordInput class={
+                    "input",
+                    "input-primary",
+                    "input-bordered",
+                    "input-sm",
+                    "text-base-content",
+                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                  } />
                 </InputContext>
                 <span class="icon is-small is-left">
                   <i class="fas fa-lock" />
@@ -103,7 +117,14 @@ defmodule BanchanWeb.SettingsLive do
               <div class="control has-icons-left">
                 <InputContext :let={form: form, field: field}>
                   <TextInput
-                    class={"input", "input-primary", "input-bordered", "input-sm", "text-base-content", "border-2", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "text-base-content",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
                     opts={required: true, type: :password}
                   />
                 </InputContext>
@@ -118,7 +139,14 @@ defmodule BanchanWeb.SettingsLive do
               <div class="control has-icons-left">
                 <InputContext :let={form: form, field: field}>
                   <TextInput
-                    class={"input", "input-primary", "input-bordered", "input-sm", "text-base-content", "border-2", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "text-base-content",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
                     opts={required: true, type: :password}
                   />
                 </InputContext>
@@ -133,7 +161,14 @@ defmodule BanchanWeb.SettingsLive do
               <div class="control has-icons-left">
                 <InputContext :let={form: form, field: field}>
                   <TextInput
-                    class={"input", "input-primary", "input-bordered", "input-sm", "text-base-content", "border-2", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "text-base-content",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
                     opts={required: true, type: :password}
                   />
                 </InputContext>

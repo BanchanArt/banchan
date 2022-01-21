@@ -25,7 +25,7 @@ config :banchan, BanchanWeb.Endpoint,
     node: [
       "node_modules/postcss-cli/index.js",
       "css/app.scss",
-      "--output=../priv/static/assets/app.css",
+      "--output=../priv/static/css/app.css",
       "--watch",
       cd: Path.expand("../assets", __DIR__)
     ]

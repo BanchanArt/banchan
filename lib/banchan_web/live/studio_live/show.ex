@@ -38,10 +38,10 @@ defmodule BanchanWeb.StudioLive.Show do
       <:hero>
         <section class="grid grid-cols-2 bg-secondary">
           <div class="ml-8 col-span-12">
-            <p class="text-3xl text-white font-bold flex-grow">
+            <p class="text-3xl text-secondary-content font-bold flex-grow">
               {@studio.name}
             </p>
-            <p class="text-base text-white flex-grow">
+            <p class="text-base text-secondary-content flex-grow">
               {@studio.description}
               {#if @current_user_member?}
                 <LiveRedirect
@@ -65,17 +65,17 @@ defmodule BanchanWeb.StudioLive.Show do
             <br>
           </div>
           <nav class="tabs ml-8 col-span-1 grid-cols-4 inline-grid">
-            <div class="tab tab-bordered tab-active bg-primary-focus text-center rounded-t-lg text-white"><a>Shop</a></div>
-            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-white"><a>About</a></div>
-            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-white"><a>Portfolio</a></div>
-            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-white"><a>Q&A</a></div>
+            <div class="tab tab-bordered tab-active bg-primary-focus text-center rounded-t-lg text-secondary-content"><a>Shop</a></div>
+            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>About</a></div>
+            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Portfolio</a></div>
+            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Q&A</a></div>
           </nav>
         </section>
       </:hero>
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
         <div class="offerings">
           {#for offering <- @offerings}
-            <div class="shadow-lg bg-base-100 p-2 my-4 rounded">
+            <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
               {!-- TODO: Add image --}
               <CommissionCard
                 studio={@studio}
@@ -95,7 +95,7 @@ defmodule BanchanWeb.StudioLive.Show do
           {/if}
         </div>
         <div class="col-start-3">
-          <div class="shadow-lg bg-base-100 p-2 my-4 rounded">
+          <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
             <Card>
               <:header>
                 Summary
@@ -118,7 +118,7 @@ defmodule BanchanWeb.StudioLive.Show do
               </div>
             </Card>
           </div>
-          <div class="shadow-lg bg-base-100 p-2 my-4 rounded">
+          <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
             <h2 class="text-xl">Members</h2>
             <div class="studio-members grid grid-cols-4 gap-1">
               {#for member <- @members}

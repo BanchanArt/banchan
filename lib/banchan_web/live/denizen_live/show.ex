@@ -29,11 +29,11 @@ defmodule BanchanWeb.DenizenLive.Show do
             <figure class="">
               <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
             </figure>
-            <h1 class="text-xl text-white font-bold">
+            <h1 class="text-xl text-base-content font-bold">
               {@user.handle}
             </h1>
             <br>
-            <p class="text-base text-white">
+            <p class="text-base text-secondary-content">
               Witty phrase here.
             </p>
             <a
@@ -50,21 +50,21 @@ defmodule BanchanWeb.DenizenLive.Show do
         </div>
         <nav class="tabs col-start-2 grid-cols-3 inline-grid">
           <div class="tab tab-bordered tab-active bg-primary-focus text-center rounded-t-lg border-t-6 border-solid border-green-300"><a>Profile Home</a></div>
-          <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-white"><a>Featured</a></div>
-          <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-white"><a>Characters</a></div>
+          <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Featured</a></div>
+          <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Characters</a></div>
         </nav>
       </section>
       <div class="grid grid-cols-2 justify-items-stretch gap-6 mt-8">
-        <div class="bg-base-100 p-4 shadow-lg">
-          <h2 class="text-xl text-white font-bold">Studios</h2>
+        <div class="bg-base-200 p-4 shadow-lg">
+          <h2 class="text-xl text-secondary-content font-bold">Studios</h2>
           <div class="denizen-studios">
             {#for studio <- @studios}
               <StudioCard studio={studio} />
             {/for}
           </div>
         </div>
-        <div class="bg-base-100 p-4 shadow-lg">
-          <h2 class="text-xl text-white font-bold flex-grow">
+        <div class="bg-base-200 p-4 shadow-lg">
+          <h2 class="text-xl text-secondary-content font-bold flex-grow">
             About {@user.handle}
           </h2>
           <figure class="" alt="denizen ID">

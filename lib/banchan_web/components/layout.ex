@@ -24,10 +24,17 @@ defmodule BanchanWeb.Components.Layout do
       <Flash flashes={@flashes} />
       <#slot />
     </section>
-    <footer class="footer bg-primary p-4 w-full fixed bottom-0 text-neutral-content footer-center">
-      <div class="md:container md:mx-auto px-4">
-        <h1 x-data="{ message: '❤️ Alpine + TailwindCSS + DaisyUI + Phoenix + SurfaceUI' }" x-text="message" phx-update="ignore"/>
-        <p class="text-center">  Copyright © 2021 - All right reserved by DWG LLC </p>
+    <footer class="footer bg-base-300 p-4 w-full fixed bottom-0 footer-center">
+      <div class="md:container md:mx-auto px-4 text-accent">
+        <h1
+          x-data="{ message: '❤️ Alpine + TailwindCSS + DaisyUI + Phoenix + SurfaceUI' }"
+          x-text="message"
+          phx-update="ignore"
+          id="supportFooter"
+        />
+        <p class="text-primary">
+          Copyright © 2021 - All right reserved by DWG LLC
+        </p>
       </div>
     </footer>
     """
