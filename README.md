@@ -1,29 +1,38 @@
-# Banchan.Art
-Created and maintained by [DWG](https://www.dwg.dev/).
+# Banchan.Art 🎨
 
-[Repo Wiki](https://github.com/digitalworkersguild/banchan/wiki) | [Staging Server](https://dev.banchan.art/) 
-## Setup
+[Repo Wiki](https://github.com/digitalworkersguild/banchan/wiki) | [Staging Server](https://dev.banchan.art/)
 
-Requirements:
-- [Elixir 1.6+](https://elixir-lang.org/install.html)
-- Erlang 20+ (Typically auto-installs with Elixir)
-- [Phoenix](https://hexdocs.pm/phoenix/installation.html)
-- [Postgresql](https://wiki.postgresql.org/wiki/Detailed_installation_guides)
+Banchan Art is a website focused on providing a user-friendly space for
+artists for managing their clients, commissions, and invoices, and for patrons
+to discover artists to commission art from.
 
-Note: If postgresql installed via homebrew, make sure to run `/usr/local/opt/postgres/bin/createuser -s postgres`.
+It's created, owned, and maintained with love and solidarity by the [Digital
+Workers Guild](https://www.dwg.dev/) ("DWG"), a worker co-operative making
+stuff for communities that need them.
 
-To start your Phoenix server:
+## Contributing
 
-- Install dependencies with `mix deps.get`
-- Set up your env vars file. Create `.env` (*NIX) or `.env.ps1` (Powershell)
-  - Add commands for your environment variables there
-  - This gets loaded automatically
-- Create and migrate your database with `mix ecto.setup`
-- Install Node.js dependencies with `npm install` inside the `assets` directory
-- To make sure everything is good, run `mix quality`
-- Start Phoenix endpoint with `mix phx.server`
-- Stop by typing Ctrl+C twice.
+See our [CONTRIBUTING.md](CONTRIBUTING.md) guide for more information.
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+## License
 
-For additional details on working with this repo, [view the wiki article here.](https://github.com/digitalworkersguild/banchan/wiki/Getting-Started#useful-commands-reference)
+Banchan is licensed under the [Parity 7.0 License](LICENSE.md).
+
+## Behind the Name
+
+Banchan Art is named for the Korean culinary tradition of shared side dishes.
+
+Banchan includes a variety of dishes with different flavors and meanings. Each
+meal is a unique experience due to the constantly rotating selection of dishes
+and your ability to cater your meal by how much of each dish you select for
+yourself. You are able to satiate your palate for different tastes as you
+please.
+
+The idea behind Banchan Art is to build a platform that provides a meeting
+point for artists and their supporters. This is a place where both artists and
+their patrons can customize their experience in a mutually beneficial and
+harmonious way. Our ideal for the platform is to make it easy and enjoyable to
+commission a custom piece of art for both sides. Similar to choosing different
+amounts of banchan to cater a meal to your taste, supporters can choose from
+different options set up by artists to commission the art piece that they will
+treasure.
