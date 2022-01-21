@@ -4,7 +4,6 @@ defmodule Banchan.Uploads.S3Upload do
 
   schema "s3_uploads" do
     field :bucket, :string
-    field :path, :string
     field :key, :string
 
     timestamps()

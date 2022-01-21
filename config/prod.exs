@@ -41,9 +41,6 @@ config :banchan, Banchan.Mailer,
     recv_timeout: :timer.minutes(1)
   ]
 
-config :ex_aws,
-  bucket: "banchan.art"
-
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key

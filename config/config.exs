@@ -44,7 +44,8 @@ config :surface, :components, [
 ]
 
 config :ex_aws,
-  region: {:system, "AWS_REGION"}
+  region: {:system, "AWS_REGION"},
+  bucket: {:system, "S3_BUCKET_NAME"}
 
 config :esbuild,
   version: "0.12.18",

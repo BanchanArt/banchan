@@ -3,8 +3,8 @@ defmodule Banchan.Repo.Migrations.CreateS3Uploads do
 
   def change do
     create table(:s3_uploads) do
-      add :key, :string
       add :bucket, :string
+      add :key, :string
 
       timestamps()
     end
