@@ -28,10 +28,10 @@ defmodule BanchanWeb.StudioLive.Index do
             <StudioCard studio={studio} />
           </div>
         {/for}
+        <LiveRedirect to={Routes.studio_new_path(Endpoint, :new)}>
+          <h2 class="text-center rounded-full py-1 px-5 btn-secondary m-1">Create a new studio</h2>
+        </LiveRedirect>
       </div>
-      <LiveRedirect to={Routes.studio_new_path(Endpoint, :new)}>
-        <h2>Create a new studio</h2>
-      </LiveRedirect>
     </Layout>
     """
   end

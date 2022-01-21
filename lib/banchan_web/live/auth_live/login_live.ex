@@ -42,11 +42,13 @@ defmodule BanchanWeb.LoginLive do
               <div class="control has-icons-left">
                 <InputContext :let={form: form, field: field}>
                   <EmailInput
-                    class={"input",
-                    "input-primary",
-                    "input-bordered",
-                    "input-sm",
-                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
                     opts={required: true}
                   />
                 </InputContext>
@@ -62,11 +64,13 @@ defmodule BanchanWeb.LoginLive do
               <div class="control has-icons-left">
                 <InputContext :let={form: form, field: field}>
                   <TextInput
-                    class={"input",
-                    "input-primary",
-                    "input-bordered",
-                    "input-sm",
-                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
                     opts={required: true, type: :password}
                   />
                 </InputContext>
@@ -79,7 +83,7 @@ defmodule BanchanWeb.LoginLive do
             <Field class="field" name={:remember_me}>
               <div class="control">
                 <Label class="checkbox">
-                  <Checkbox class="checkbox checkbox-secondary checkbox-sm"/>
+                  <Checkbox class="checkbox checkbox-secondary checkbox-sm" />
                   Keep me logged in for 60 days
                 </Label>
               </div>

@@ -32,11 +32,13 @@ defmodule BanchanWeb.DenizenLive.Edit do
               <div class="control has-icons-left">
                 <InputContext :let={form: form, field: field}>
                   <TextInput
-                    class={"input",
-                    "input-primary",
-                    "input-bordered",
-                    "input-sm",
-                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
                     opts={required: true}
                   />
                 </InputContext>
@@ -51,11 +53,13 @@ defmodule BanchanWeb.DenizenLive.Edit do
               <div class="control has-icons-left">
                 <InputContext :let={form: form, field: field}>
                   <TextInput
-                    class={"input",
-                    "input-primary",
-                    "input-bordered",
-                    "input-sm",
-                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                    class={
+                      "input",
+                      "input-primary",
+                      "input-bordered",
+                      "input-sm",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
                     opts={required: true}
                   />
                 </InputContext>
@@ -70,11 +74,13 @@ defmodule BanchanWeb.DenizenLive.Edit do
               <div class="control">
                 <InputContext :let={form: form, field: field}>
                   <TextArea
-                    class={"textarea",
-                    "textarea-bordered",
-                    "textarea-primary",
-                    "h-24",
-                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                    class={
+                      "textarea",
+                      "textarea-bordered",
+                      "textarea-primary",
+                      "h-24",
+                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    }
                     opts={required: true}
                   />
                 </InputContext>
