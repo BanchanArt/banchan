@@ -1,4 +1,7 @@
 defmodule Banchan.Uploads.Upload do
+  @moduledoc """
+  Main module for upload data.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 

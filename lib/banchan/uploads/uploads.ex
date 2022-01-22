@@ -11,7 +11,7 @@ defmodule Banchan.Uploads do
   @doc """
   Generates a unique path for an upload.
   """
-  def gen_path() do
+  def gen_path do
     UUID.uuid4(:hex)
   end
 
@@ -60,7 +60,7 @@ defmodule Banchan.Uploads do
       [%Upload{}, ...]
 
   """
-  def list_uploads() do
+  def list_uploads do
     Repo.all(Upload)
   end
 
