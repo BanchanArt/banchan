@@ -34,6 +34,11 @@ defmodule BanchanWeb.StudioLive.Show do
   end
 
   @impl true
+  def handle_params(%{"offering_type" => offering_type}, _, socket) do
+    offering = Studios.get_offering_by_type!(socket.assigns.studio, offering_type)
+    {:noreply, assign(socket, offering: offering)}
+  end
+
   def handle_params(_, _, socket) do
     {:noreply, socket}
   end
@@ -75,7 +80,6 @@ defmodule BanchanWeb.StudioLive.Show do
           </nav>
         </section>
       </:hero>
-      <div class="grid grid-cols-3 justify-items-stretch gap-6">
       {#case @live_action}
         {#match :shop}
           <Pages.Shop
@@ -90,8 +94,13 @@ defmodule BanchanWeb.StudioLive.Show do
           Portfolio Tab
         {#match :qa}
           Q&A Tab
+        {#match :new_commission}
+        <Pages.Commissions.New
+          id="new_commission"
+          studio={@studio}
+          offering={@offering}
+        />
       {/case}
-      </div>
     </Layout>
     """
   end
