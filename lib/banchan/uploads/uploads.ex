@@ -116,7 +116,7 @@ defmodule Banchan.Uploads do
     |> Map.get(:headers)
     |> List.keyfind("Content-Length", 0)
     |> elem(1)
-    |> Integer.parse
+    |> Integer.parse()
     |> elem(0)
   end
 
@@ -151,6 +151,7 @@ defmodule Banchan.Uploads do
     if delete_from_s3 do
       ExAws.S3.delete_object(bucket, key) |> ExAws.request!()
     end
+
     Repo.delete(upload)
   end
 end
