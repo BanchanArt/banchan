@@ -62,7 +62,10 @@ defmodule BanchanWeb.Router do
 
     live "/denizens/:handle", DenizenLive.Show, :show
     live "/studios", StudioLive.Index, :index
-    live "/studios/:handle", StudioLive.Show, :show
+    live "/studios/:handle", StudioLive.Show, :shop
+    live "/studios/:handle/about", StudioLive.Show, :about
+    live "/studios/:handle/portfolio", StudioLive.Show, :portfolio
+    live "/studios/:handle/qa", StudioLive.Show, :qa
 
     live "/confirm", ConfirmationLive, :show
     get "/confirm/:token", UserConfirmationController, :confirm
