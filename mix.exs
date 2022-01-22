@@ -33,7 +33,7 @@ defmodule Banchan.MixProject do
   def application do
     [
       mod: {Banchan.Application, []},
-      extra_applications: [:logger, :runtime_tools, :os_mon]
+      extra_applications: [:logger, :runtime_tools, :os_mon, :crypto]
     ]
   end
 
@@ -63,6 +63,11 @@ defmodule Banchan.MixProject do
       {:surface, "~> 0.7"},
       {:slugify, "~> 1.3.1"},
       {:bamboo, "~> 2.2.0"},
+      {:ex_aws, "~> 2.1"},
+      {:ex_aws_s3, "~> 2.0"},
+      {:hackney, "~> 1.9"},
+      {:sweet_xml, "~> 0.6"},
+      {:uuid, "~> 1.1"},
       {:phoenix_live_reload, "~> 1.3", only: :dev},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       # Testing and static analysis
