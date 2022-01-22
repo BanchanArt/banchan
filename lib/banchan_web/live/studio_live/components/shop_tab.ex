@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Shop do
+defmodule BanchanWeb.StudioLive.Components.ShopTab do
   @moduledoc """
   Component for the Shop tab in the Studio page.
   """

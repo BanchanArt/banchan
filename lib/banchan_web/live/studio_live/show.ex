@@ -10,7 +10,7 @@ defmodule BanchanWeb.StudioLive.Show do
 
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.{Shop, Tab}
+  alias BanchanWeb.StudioLive.Components.{ShopTab, TabButton}
 
 
   @impl true
@@ -68,17 +68,17 @@ defmodule BanchanWeb.StudioLive.Show do
             <br>
           </div>
           <nav class="tabs ml-8 col-span-1 grid-cols-4 inline-grid">
-            <Tab studio={@studio} label="Shop" tab={:shop} live_action={@live_action} />
-            <Tab studio={@studio} label="About" tab={:about} live_action={@live_action} />
-            <Tab studio={@studio} label="Portfolio" tab={:portfolio} live_action={@live_action} />
-            <Tab studio={@studio} label="Q&A" tab={:qa} live_action={@live_action} />
+            <TabButton studio={@studio} label="Shop" tab={:shop} live_action={@live_action} />
+            <TabButton studio={@studio} label="About" tab={:about} live_action={@live_action} />
+            <TabButton studio={@studio} label="Portfolio" tab={:portfolio} live_action={@live_action} />
+            <TabButton studio={@studio} label="Q&A" tab={:qa} live_action={@live_action} />
           </nav>
         </section>
       </:hero>
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
       {#case @live_action}
         {#match :shop}
-          <Shop
+          <ShopTab
             studio={@studio}
             members={@members}
             offerings={@offerings}

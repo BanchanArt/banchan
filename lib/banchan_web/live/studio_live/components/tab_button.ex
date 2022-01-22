@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Tab do
+defmodule BanchanWeb.StudioLive.Components.TabButton do
   @moduledoc """
   Component for the tab links in the Studio page.
   """
