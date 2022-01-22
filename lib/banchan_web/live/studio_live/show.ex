@@ -11,7 +11,7 @@ defmodule BanchanWeb.StudioLive.Show do
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.TabButton
-  alias BanchanWeb.StudioLive.Tabs
+  alias BanchanWeb.StudioLive.Pages
 
   @impl true
   def mount(%{"handle" => handle}, session, socket) do
@@ -78,7 +78,7 @@ defmodule BanchanWeb.StudioLive.Show do
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
       {#case @live_action}
         {#match :shop}
-          <Tabs.Shop
+          <Pages.Shop
             studio={@studio}
             members={@members}
             offerings={@offerings}
