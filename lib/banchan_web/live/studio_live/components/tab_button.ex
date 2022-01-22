@@ -9,8 +9,8 @@ defmodule BanchanWeb.StudioLive.Components.TabButton do
   alias BanchanWeb.Endpoint
 
   prop studio, :struct, required: true
-  prop tab, :any, required: true
-  prop live_action, :any, required: true
+  prop tab, :atom, required: true
+  prop live_action, :atom, required: true
   prop label, :string, required: true
 
   def render(assigns) do
