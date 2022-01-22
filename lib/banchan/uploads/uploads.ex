@@ -30,7 +30,6 @@ defmodule Banchan.Uploads do
     config = ExAws.Config.new(:s3)
     bucket = Application.fetch_env!(:ex_aws, :bucket)
 
-    # TODO: Do I need to write to the db here? When do I write to db?
     {:ok, fields} =
       SimpleS3Upload.sign_form_upload(
         config,
