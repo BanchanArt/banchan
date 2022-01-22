@@ -11,8 +11,8 @@ defmodule Banchan.Uploads do
   @doc """
   Generates a unique path for an upload.
   """
-  def gen_path(scope) do
-    "#{scope}/#{UUID.uuid4(:hex)}"
+  def gen_path() do
+    UUID.uuid4(:hex)
   end
 
   @doc """
@@ -20,7 +20,7 @@ defmodule Banchan.Uploads do
 
   def presign_upload(entry, socket) do
     {:ok, meta} = Banchan.Uploads.presign_upload(
-      Banchan.Uploads.gen_path("commission_uploads"),
+      Banchan.Uploads.gen_path(),
       content_type: entry.content_type,
       max_file_size: socket.assigns.uploads.commission_uploads.max_file_size)
     {:ok, meta, socket}
