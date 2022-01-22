@@ -11,7 +11,7 @@ defmodule BanchanWeb.StudioLive.Pages.Commissions.New do
   alias Banchan.Commissions.Commission
 
   alias BanchanWeb.Components.Card
-  alias BanchanWeb.Components.Commissions.Attachments
+  alias BanchanWeb.StudioLive.Components.Commissions.Attachments
 
   prop studio, :struct, required: true
   prop offering, :struct, required: true

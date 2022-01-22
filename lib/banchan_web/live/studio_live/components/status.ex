@@ -1,4 +1,4 @@
-defmodule BanchanWeb.Components.Commissions.Status do
+defmodule BanchanWeb.StudioLive.Components.Commissions.Status do
   @moduledoc """
   Status box with dropdown, for Commissions page.
   """

@@ -1,4 +1,4 @@
-defmodule BanchanWeb.Components.Commissions.Transactions do
+defmodule BanchanWeb.StudioLive.Components.Commissions.Transactions do
   @moduledoc """
   Displays transactions for a commission.
   """

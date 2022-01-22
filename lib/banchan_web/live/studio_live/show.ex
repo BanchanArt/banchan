@@ -4,6 +4,7 @@ defmodule BanchanWeb.StudioLive.Show do
   """
   use BanchanWeb, :surface_view
 
+  alias Banchan.Commissions
   alias Banchan.Studios
 
   alias Surface.Components.LiveRedirect
@@ -37,6 +38,14 @@ defmodule BanchanWeb.StudioLive.Show do
   def handle_params(%{"offering_type" => offering_type}, _, socket) do
     offering = Studios.get_offering_by_type!(socket.assigns.studio, offering_type)
     {:noreply, assign(socket, offering: offering)}
+  end
+
+  def handle_params(%{"commission_id" => commission_id}, _, socket) do
+    # TODO: do this with real commissions.
+    # commission = Commissions.get_commission!(commission_id)
+    # {:noreply, assign(socket, commission: commission)}
+    commission = %Commissions.Commission{ id: commission_id }
+    {:noreply, assign(socket, commission: commission)}
   end
 
   def handle_params(_, _, socket) do
@@ -99,6 +108,12 @@ defmodule BanchanWeb.StudioLive.Show do
           id="new_commission"
           studio={@studio}
           offering={@offering}
+        />
+        {#match :show_commission}
+        <Pages.Commissions.Show
+          id="show_commission"
+          current_user={@current_user}
+          commission={@commission}
         />
       {/case}
     </Layout>
