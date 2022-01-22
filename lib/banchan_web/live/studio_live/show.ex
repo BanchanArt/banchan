@@ -4,12 +4,14 @@ defmodule BanchanWeb.StudioLive.Show do
   """
   use BanchanWeb, :surface_view
 
+  alias Banchan.Studios
+
   alias Surface.Components.LiveRedirect
 
-  alias Banchan.Studios
-  alias BanchanWeb.Components.{Card, Layout}
+  alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.CommissionCard
+  alias BanchanWeb.StudioLive.Components.{Shop, Tab}
+
 
   @impl true
   def mount(%{"handle" => handle}, session, socket) do
@@ -50,13 +52,9 @@ defmodule BanchanWeb.StudioLive.Show do
                   to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}
                 />
               {#else}
+                {!-- TODO: add in follow functionality --}
                 <a
                   href="/"
-                  #TODO:
-                  add
-                  in
-                  follow
-                  functionality
                   class="btn glass btn-sm text-center rounded-full px-2 py-0"
                   label="Follow"
                 >Follow</a>
@@ -65,76 +63,29 @@ defmodule BanchanWeb.StudioLive.Show do
             <br>
           </div>
           <nav class="tabs ml-8 col-span-1 grid-cols-4 inline-grid">
-            <div class="tab tab-bordered tab-active bg-primary-focus text-center rounded-t-lg text-secondary-content"><a>Shop</a></div>
-            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>About</a></div>
-            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Portfolio</a></div>
-            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Q&A</a></div>
+            <Tab studio={@studio} label="Shop" tab={:shop} live_action={@live_action} />
+            <Tab studio={@studio} label="About" tab={:about} live_action={@live_action} />
+            <Tab studio={@studio} label="Portfolio" tab={:portfolio} live_action={@live_action} />
+            <Tab studio={@studio} label="Q&A" tab={:qa} live_action={@live_action} />
           </nav>
         </section>
       </:hero>
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
-        <div class="offerings">
-          {#for offering <- @offerings}
-            <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
-              {!-- TODO: Add image --}
-              <CommissionCard
-                studio={@studio}
-                type_id={offering.type}
-                name={offering.name}
-                description={offering.description}
-                image={Routes.static_path(Endpoint, "/images/640x360.png")}
-                open={offering.open}
-                price_range={offering.price_range}
-              />
-            </div>
-          {/for}
-          {#if @current_user_member?}
-            <div class="">
-              <button type="button" class="btn btn-sm text-center rounded-full px-2 py-1 btn-accent">Add an Offering</button>
-            </div>
-          {/if}
-        </div>
-        <div class="col-start-3">
-          <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
-            <Card>
-              <:header>
-                Summary
-              </:header>
-              <div class="content leading-loose">
-                <h3 class="text-2xl mt-4">These are all private commissions, meaning: <strong>non-commercial</strong></h3>
-                <p class="mt-4">You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
-                <h3 class="text-xl mt-4">I will draw</h3>
-                <ul class="list-disc list-inside">
-                  <li>Humans/humanoids</li>
-                  <li>anthros+furries/creatures/monsters/animals</li>
-                  <li>mecha/robots/vehicles</li>
-                  <li>environments/any type of background</li>
-                </ul>
-                <h3 class="text-xl mt-4">I will not draw</h3>
-                <ul class="list-disc list-inside">
-                  <li>NSFW</li>
-                  <li>Fanart</li>
-                </ul>
-              </div>
-            </Card>
-          </div>
-          <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
-            <h2 class="text-xl">Members</h2>
-            <div class="studio-members grid grid-cols-4 gap-1">
-              {#for member <- @members}
-                <figure class="col-span-1">
-                  <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, member.handle)}>
-                    <img
-                      alt={member.name}
-                      class="rounded-full h-24 w-24 flex items-center justify-center"
-                      src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
-                    />
-                  </LiveRedirect>
-                </figure>
-              {/for}
-            </div>
-          </div>
-        </div>
+      {#case @live_action}
+        {#match :shop}
+          <Shop
+            studio={@studio}
+            members={@members}
+            offerings={@offerings}
+            current_user_member?={@current_user_member?}
+          />
+        {#match :about}
+          About Tab
+        {#match :portfolio}
+          Portfolio Tab
+        {#match :qa}
+          Q&A Tab
+      {/case}
       </div>
     </Layout>
     """
