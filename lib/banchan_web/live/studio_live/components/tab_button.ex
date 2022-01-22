@@ -25,5 +25,4 @@ defmodule BanchanWeb.StudioLive.Components.TabButton do
         to={Routes.studio_show_path(Endpoint, @tab, @studio.handle)} />
     """
   end
-
 end

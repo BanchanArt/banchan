@@ -12,7 +12,6 @@ defmodule BanchanWeb.StudioLive.Show do
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{ShopTab, TabButton}
 
-
   @impl true
   def mount(%{"handle" => handle}, session, socket) do
     socket = assign_defaults(session, socket, false)
