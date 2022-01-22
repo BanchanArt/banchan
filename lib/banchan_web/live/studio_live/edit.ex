@@ -22,7 +22,7 @@ defmodule BanchanWeb.StudioLive.Edit do
       {:ok, assign(socket, studio: studio, changeset: Studio.changeset(studio, %{}))}
     else
       socket = put_flash(socket, :error, "Access denied")
-      {:ok, push_redirect(socket, to: Routes.studio_show_path(Endpoint, :show, studio.handle))}
+      {:ok, push_redirect(socket, to: Routes.studio_show_path(Endpoint, :shop, studio.handle))}
     end
   end
 
@@ -111,7 +111,7 @@ defmodule BanchanWeb.StudioLive.Edit do
 
         {:noreply,
          push_redirect(socket,
-           to: Routes.studio_show_path(Endpoint, :show, studio.handle)
+           to: Routes.studio_show_path(Endpoint, :shop, studio.handle)
          )}
 
       other ->

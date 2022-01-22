@@ -12,7 +12,7 @@ defmodule BanchanWeb.Components.StudioCard do
 
   def render(assigns) do
     ~F"""
-    <LiveRedirect to={Routes.studio_show_path(Endpoint, :show, @studio.handle)}>
+    <LiveRedirect to={Routes.studio_show_path(Endpoint, :shop, @studio.handle)}>
       <figure class="image object-scale-down max-w-md">
         <img src={Routes.static_path(Endpoint, "/images/shop_card_default.png")}>
       </figure>
