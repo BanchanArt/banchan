@@ -5,6 +5,7 @@ defmodule Banchan.Repo.Migrations.CreateS3Uploads do
     create table(:s3_uploads) do
       add :bucket, :string
       add :key, :string
+      add :content_type, :string
 
       timestamps()
     end
