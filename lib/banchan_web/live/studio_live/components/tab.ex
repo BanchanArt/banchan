@@ -4,7 +4,7 @@ defmodule BanchanWeb.StudioLive.Components.Tab do
   """
   use BanchanWeb, :component
 
-  alias Surface.Components.LiveRedirect
+  alias Surface.Components.LivePatch
 
   alias BanchanWeb.Endpoint
 
@@ -15,7 +15,7 @@ defmodule BanchanWeb.StudioLive.Components.Tab do
 
   def render(assigns) do
     ~F"""
-      <LiveRedirect
+      <LivePatch
         label={@label}
         class={"tab", "tab-bordered", "bg-opacity-60",
                "text-center", "rounded-t-lg", "text-secondary-content",

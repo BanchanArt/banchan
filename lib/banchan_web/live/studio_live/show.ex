@@ -34,6 +34,11 @@ defmodule BanchanWeb.StudioLive.Show do
   end
 
   @impl true
+  def handle_params(_, _, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
