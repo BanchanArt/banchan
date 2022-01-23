@@ -16,7 +16,7 @@ if File.exists?(".env") and System.find_executable("source") do
 end
 
 # General application configuration
-use Mix.Config
+import Config
 
 config :banchan,
   namespace: Banchan,
