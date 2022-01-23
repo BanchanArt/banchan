@@ -1,4 +1,4 @@
-defmodule BanchanWeb.Components.Commissions.Attachments do
+defmodule BanchanWeb.StudioLive.Components.Commissions.Attachments do
   @moduledoc """
   Box for displaying a preview of all attachments in a commission, on the Commission page.
   """

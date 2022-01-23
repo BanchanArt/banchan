@@ -1,13 +1,12 @@
-defmodule BanchanWeb.CommissionLive.Show do
+defmodule BanchanWeb.StudioLive.Pages.Commissions.Show do
   @moduledoc """
-  Main page for viewing and interacting with a Commission
+  Subpage for commissions themselves. This is where the good stuff happens.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_component
 
   alias Banchan.Commissions
-  alias Banchan.Commissions.Commission
 
-  alias BanchanWeb.Components.Commissions.{
+  alias BanchanWeb.StudioLive.Components.Commissions.{
     Attachments,
     MessageBox,
     Status,
@@ -16,25 +15,13 @@ defmodule BanchanWeb.CommissionLive.Show do
     Transactions
   }
 
-  alias BanchanWeb.Components.Layout
-
-  @impl true
-  def mount(_params, session, socket) do
-    socket = assign_defaults(session, socket)
-    {:ok, socket}
-  end
-
-  @impl true
-  def handle_params(%{"id" => _id}, _, socket) do
-    {:noreply,
-     socket
-     |> assign(commission: %Commission{})}
-  end
+  prop current_user, :struct, required: true
+  prop commission, :struct
 
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout current_user={@current_user} flashes={@flash}>
+    <div>
       <h1 class="text-3xl">Two-character drawing of me and my gf's FFXIV OCs</h1>
       <h2 class="text-lg"><strong>{@current_user.handle}</strong> requested this commission 3 days ago.</h2>
       <hr>
@@ -61,7 +48,7 @@ defmodule BanchanWeb.CommissionLive.Show do
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
     """
   end
 
@@ -74,10 +61,4 @@ defmodule BanchanWeb.CommissionLive.Show do
 
     {:noreply, socket |> assign(commission: commission)}
   end
-
-  # @impl true
-  # def handle_event("new-message", %{"message" => message}, socket) do
-  #   IO.inspect(message)
-  #   {:noreply, socket}
-  # end
 end

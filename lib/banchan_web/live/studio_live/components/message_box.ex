@@ -1,4 +1,4 @@
-defmodule BanchanWeb.Components.Commissions.MessageBox do
+defmodule BanchanWeb.StudioLive.Components.Commissions.MessageBox do
   @moduledoc """
   Message/Chat box for the Commission page.
   """

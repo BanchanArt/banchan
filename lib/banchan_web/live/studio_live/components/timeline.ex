@@ -1,4 +1,4 @@
-defmodule BanchanWeb.Components.Commissions.Timeline do
+defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   @moduledoc """
   Main component for the Commission Page's timeline.
   """

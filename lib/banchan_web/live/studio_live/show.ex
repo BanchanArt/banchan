@@ -4,6 +4,7 @@ defmodule BanchanWeb.StudioLive.Show do
   """
   use BanchanWeb, :surface_view
 
+  alias Banchan.Commissions
   alias Banchan.Studios
 
   alias Surface.Components.LiveRedirect
@@ -11,7 +12,7 @@ defmodule BanchanWeb.StudioLive.Show do
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.TabButton
-  alias BanchanWeb.StudioLive.Tabs
+  alias BanchanWeb.StudioLive.Pages
 
   @impl true
   def mount(%{"handle" => handle}, session, socket) do
@@ -34,6 +35,19 @@ defmodule BanchanWeb.StudioLive.Show do
   end
 
   @impl true
+  def handle_params(%{"offering_type" => offering_type}, _, socket) do
+    offering = Studios.get_offering_by_type!(socket.assigns.studio, offering_type)
+    {:noreply, assign(socket, offering: offering)}
+  end
+
+  def handle_params(%{"commission_id" => commission_id}, _, socket) do
+    # TODO: do this with real commissions.
+    # commission = Commissions.get_commission!(commission_id)
+    # {:noreply, assign(socket, commission: commission)}
+    commission = %Commissions.Commission{id: commission_id}
+    {:noreply, assign(socket, commission: commission)}
+  end
+
   def handle_params(_, _, socket) do
     {:noreply, socket}
   end
@@ -75,10 +89,9 @@ defmodule BanchanWeb.StudioLive.Show do
           </nav>
         </section>
       </:hero>
-      <div class="grid grid-cols-3 justify-items-stretch gap-6">
       {#case @live_action}
         {#match :shop}
-          <Tabs.Shop
+          <Pages.Shop
             studio={@studio}
             members={@members}
             offerings={@offerings}
@@ -90,8 +103,19 @@ defmodule BanchanWeb.StudioLive.Show do
           Portfolio Tab
         {#match :qa}
           Q&A Tab
+        {#match :new_commission}
+        <Pages.Commissions.New
+          id="new_commission"
+          studio={@studio}
+          offering={@offering}
+        />
+        {#match :show_commission}
+        <Pages.Commissions.Show
+          id="show_commission"
+          current_user={@current_user}
+          commission={@commission}
+        />
       {/case}
-      </div>
     </Layout>
     """
   end
