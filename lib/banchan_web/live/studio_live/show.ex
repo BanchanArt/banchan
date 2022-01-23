@@ -44,7 +44,7 @@ defmodule BanchanWeb.StudioLive.Show do
     # TODO: do this with real commissions.
     # commission = Commissions.get_commission!(commission_id)
     # {:noreply, assign(socket, commission: commission)}
-    commission = %Commissions.Commission{ id: commission_id }
+    commission = %Commissions.Commission{id: commission_id}
     {:noreply, assign(socket, commission: commission)}
   end
 
