@@ -25,10 +25,11 @@
     description: "Kitteh-related stuff"
   })
 
-Banchan.Studios.new_offering(studio, %{
+Banchan.Offerings.new_offering(studio, %{
   type: "illustration",
   index: 0,
   name: "Illustration",
   description: "A detailed illustration with full rendering and background.",
-  open: true
+  open: true,
+  terms: "You break it, you **buy** it."
 })

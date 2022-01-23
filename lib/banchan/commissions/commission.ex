@@ -5,25 +5,42 @@ defmodule Banchan.Commissions.Commission do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @status_values [:pending, :accepted, :in_progress, :paused, :waiting, :closed]
+
   schema "commissions" do
     # TODO(zkat): we need some kind of ID here that we can expose to customers?
     field :title, :string
+    field :description, :string
+    field :tos_ok, :boolean, virtual: true
 
     field :status, Ecto.Enum,
-      values: [:pending, :accepted, :in_progress, :paused, :waiting, :closed],
+      values: @status_values,
       default: :pending
 
-    belongs_to :offering, Banchan.Studios.Offering
+    has_many :events, Banchan.Commissions.Event
+    belongs_to :offering, Banchan.Offerings.Offering
     belongs_to :studio, Banchan.Studios.Studio
     belongs_to :client, Banchan.Accounts.User
 
     timestamps()
   end
 
+  def status_values do
+    @status_values
+  end
+
   @doc false
   def changeset(commission, attrs) do
     commission
-    |> cast(attrs, [:title, :status])
-    |> validate_required([:title, :status])
+    |> cast(attrs, [:title, :description, :tos_ok, :status])
+    |> cast_assoc(:events)
+    |> validate_change(:tos_ok, fn field, tos_ok ->
+      if tos_ok do
+        []
+      else
+        [{field, "You must agree to the Terms and Conditions"}]
+      end
+    end)
+    |> validate_required([:title, :description, :tos_ok])
   end
 end

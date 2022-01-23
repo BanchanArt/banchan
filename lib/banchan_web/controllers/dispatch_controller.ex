@@ -15,7 +15,7 @@ defmodule BanchanWeb.DispatchController do
 
       %Studio{} ->
         conn
-        |> redirect(to: Routes.studio_show_path(conn, :show, handle))
+        |> redirect(to: Routes.studio_shop_path(conn, :show, handle))
     end
   end
 end

@@ -43,9 +43,12 @@ defmodule BanchanWeb.Router do
     live "/denizens/:handle/edit", DenizenLive.Edit, :edit
 
     live "/studios/new", StudioLive.New, :new
-    live "/studios/:handle/edit", StudioLive.Edit, :edit
-    live "/studios/:handle/commissions/new/:offering_type", StudioLive.Show, :new_commission
-    live "/studios/:handle/commissions/:commission_id", StudioLive.Show, :show_commission
+    live "/studios/:handle/settings", StudioLive.Settings, :show
+    live "/studios/:handle/offerings", StudioLive.Offerings.Index, :index
+    live "/studios/:handle/offerings/new", StudioLive.Offerings.New, :new
+    live "/studios/:handle/offerings/edit/:offering_type", StudioLive.Offerings.Edit, :edit
+    live "/studios/:handle/commissions/new/:offering_type", StudioLive.Proposal, :show
+    live "/studios/:handle/commissions/:commission_id", StudioLive.Commission, :show
 
     live "/dashboard", DashboardLive, :index
 
@@ -62,10 +65,10 @@ defmodule BanchanWeb.Router do
 
     live "/denizens/:handle", DenizenLive.Show, :show
     live "/studios", StudioLive.Index, :index
-    live "/studios/:handle", StudioLive.Show, :shop
-    live "/studios/:handle/about", StudioLive.Show, :about
-    live "/studios/:handle/portfolio", StudioLive.Show, :portfolio
-    live "/studios/:handle/qa", StudioLive.Show, :qa
+    live "/studios/:handle", StudioLive.Shop, :show
+    live "/studios/:handle/about", StudioLive.About, :show
+    live "/studios/:handle/portfolio", StudioLive.Portfolio, :show
+    live "/studios/:handle/qa", StudioLive.Qa, :show
 
     live "/confirm", ConfirmationLive, :show
     get "/confirm/:token", UserConfirmationController, :confirm
