@@ -7,11 +7,13 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   import Slug
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Inputs, Field, Label, Submit, TextArea, TextInput}
+  alias Surface.Components.Form.{InputContext, Inputs, Submit}
   alias Surface.Components.Form.Input.InputContext
 
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
+
+  alias BanchanWeb.Components.Form.{TextArea, TextInput}
 
   prop changeset, :struct, required: true
 
@@ -94,105 +96,18 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         submit="submit"
         opts={autocomplete: "off"}
       >
-        <Field class="field" name={:name}>
-          <Label class="label" />
-          <div class="control has-icons-left">
-            <InputContext :let={form: form, field: field}>
-              <TextInput
-                class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                opts={required: true}
-              />
-            </InputContext>
-            <span class="icon is-small is-left">
-              <i class="fas fa-user" />
-            </span>
-          </div>
-          <ErrorTag class="help is-danger" />
-        </Field>
-        <Field class="field" name={:type}>
-          <Label class="label" />
-          <div class="control has-icons-left">
-            <InputContext :let={form: form, field: field}>
-              <TextInput
-                class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                opts={required: true}
-              />
-            </InputContext>
-          </div>
-          <ErrorTag class="help is-danger" />
-        </Field>
-        <Field class="field" name={:description}>
-          <Label class="label" />
-          <div class="control">
-            <InputContext :let={form: form, field: field}>
-              <TextArea
-                class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                opts={required: true}
-              />
-            </InputContext>
-          </div>
-          <ErrorTag class="help is-danger" />
-        </Field>
-        <Field class="field" name={:terms}>
-          <Label class="label" />
-          <div class="control">
-            <InputContext :let={form: form, field: field}>
-              <TextArea
-                class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-              />
-            </InputContext>
-          </div>
-          <ErrorTag class="help is-danger" />
-        </Field>
-        <Field class="field" name={:base_price}>
-          <Label class="label" />
-          <div class="control">
-            <InputContext :let={form: form, field: field}>
-              <TextInput
-                class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-              />
-            </InputContext>
-          </div>
-          <ErrorTag class="help is-danger" />
-        </Field>
+        <TextInput name={:name} opts={required: true} />
+        <TextInput name={:type} opts={required: true} />
+        <TextArea name={:description} opts={required: true} />
+        <TextArea name={:terms} />
+        <TextInput name={:base_price} opts={required: true} />
         <h3>Options</h3>
         <InputContext :let={form: form}>
           <Inputs form={form} for={:options}>
             <h4>Option</h4>
-            <Field class="field" name={:name}>
-              <Label class="label" />
-              <div class="control">
-                <InputContext :let={form: form, field: field}>
-                  <TextInput
-                    class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  />
-                </InputContext>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:description}>
-              <Label class="label" />
-              <div class="control">
-                <InputContext :let={form: form, field: field}>
-                  <TextArea
-                    class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                    opts={required: true}
-                  />
-                </InputContext>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:price}>
-              <Label class="label" />
-              <div class="control">
-                <InputContext :let={form: form, field: field}>
-                  <TextInput
-                    class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  />
-                </InputContext>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
+            <TextInput name={:name} opts={required: true} />
+            <TextArea name={:description} opts={required: true} />
+            <TextInput name={:price} opts={required: true} />
           </Inputs>
         </InputContext>
         <div class="field">
