@@ -5,8 +5,9 @@ defmodule Banchan.Studios do
 
   import Ecto.Query, warn: false
 
+  alias Banchan.Offerings.Offering
   alias Banchan.Repo
-  alias Banchan.Studios.{Offering, Studio}
+  alias Banchan.Studios.Studio
 
   @doc """
   Gets a studio by its handle.
@@ -54,12 +55,6 @@ defmodule Banchan.Studios do
   def new_studio(studio, attrs) do
     studio
     |> Studio.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  def new_offering(studio, attrs) do
-    %Offering{studio_id: studio.id}
-    |> Offering.changeset(attrs)
     |> Repo.insert()
   end
 

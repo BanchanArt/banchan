@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Edit do
+defmodule BanchanWeb.StudioLive.Settings do
   @moduledoc """
   Banchan studio profile viewing and editing.
   """
@@ -10,26 +10,21 @@ defmodule BanchanWeb.StudioLive.Edit do
 
   alias Banchan.Studios
   alias Banchan.Studios.Studio
-  alias BanchanWeb.Components.Layout
+  alias BanchanWeb.StudioLive.Components.StudioLayout
   alias BanchanWeb.Endpoint
+  import BanchanWeb.StudioLive.Helpers
 
   @impl true
-  def mount(%{"handle" => handle}, session, socket) do
-    socket = assign_defaults(session, socket)
-    studio = Studios.get_studio_by_handle!(handle)
-
-    if Studios.is_user_in_studio(socket.assigns.current_user, studio) do
-      {:ok, assign(socket, studio: studio, changeset: Studio.changeset(studio, %{}))}
-    else
-      socket = put_flash(socket, :error, "Access denied")
-      {:ok, push_redirect(socket, to: Routes.studio_show_path(Endpoint, :shop, studio.handle))}
-    end
+  def mount(params, session, socket) do
+    socket = assign_defaults(session, socket, true)
+    socket = assign_studio_defaults(params, socket, true)
+    {:ok, assign(socket, changeset: Studio.changeset(socket.assigns.studio, %{}))}
   end
 
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout current_user={@current_user} flashes={@flash}>
+    <StudioLayout current_user={@current_user} flashes={@flash} studio={@studio} current_user_member?={@current_user_member?} tab={:settings}>
       <h1 class="text-2xl">Edit Studio</h1>
       <h2 class="text-xl">{@studio.name}</h2>
       <div class="grid grid-cols-3 gap-4">
@@ -87,7 +82,7 @@ defmodule BanchanWeb.StudioLive.Edit do
           </div>
         </Form>
       </div>
-    </Layout>
+    </StudioLayout>
     """
   end
 
@@ -111,7 +106,7 @@ defmodule BanchanWeb.StudioLive.Edit do
 
         {:noreply,
          push_redirect(socket,
-           to: Routes.studio_show_path(Endpoint, :shop, studio.handle)
+           to: Routes.studio_shop_path(Endpoint, :show, studio.handle)
          )}
 
       other ->

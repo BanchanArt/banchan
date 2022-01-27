@@ -96,4 +96,68 @@ defmodule Banchan.CommissionsTest do
       assert %Ecto.Changeset{} = Commissions.change_commission(commission)
     end
   end
+
+  describe "commission_events" do
+    alias Banchan.Commissions.Event
+
+    import Banchan.CommissionsFixtures
+
+    @invalid_attrs %{data: nil, type: nil}
+
+    @tag :skip
+    test "list_commission_events/0 returns all commission_events" do
+      event = event_fixture()
+      assert Commissions.list_commission_events() == [event]
+    end
+
+    @tag :skip
+    test "get_event!/1 returns the event with given id" do
+      event = event_fixture()
+      assert Commissions.get_event!(event.id) == event
+    end
+
+    @tag :skip
+    test "create_event/1 with valid data creates a event" do
+      valid_attrs = %{data: %{}, type: "some type"}
+
+      assert {:ok, %Event{} = event} = Commissions.create_event(valid_attrs)
+      assert event.data == %{}
+      assert event.type == "some type"
+    end
+
+    @tag :skip
+    test "create_event/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Commissions.create_event(@invalid_attrs)
+    end
+
+    @tag :skip
+    test "update_event/2 with valid data updates the event" do
+      event = event_fixture()
+      update_attrs = %{data: %{}, type: "some updated type"}
+
+      assert {:ok, %Event{} = event} = Commissions.update_event(event, update_attrs)
+      assert event.data == %{}
+      assert event.type == "some updated type"
+    end
+
+    @tag :skip
+    test "update_event/2 with invalid data returns error changeset" do
+      event = event_fixture()
+      assert {:error, %Ecto.Changeset{}} = Commissions.update_event(event, @invalid_attrs)
+      assert event == Commissions.get_event!(event.id)
+    end
+
+    @tag :skip
+    test "delete_event/1 deletes the event" do
+      event = event_fixture()
+      assert {:ok, %Event{}} = Commissions.delete_event(event)
+      assert_raise Ecto.NoResultsError, fn -> Commissions.get_event!(event.id) end
+    end
+
+    @tag :skip
+    test "change_event/1 returns a event changeset" do
+      event = event_fixture()
+      assert %Ecto.Changeset{} = Commissions.change_event(event)
+    end
+  end
 end

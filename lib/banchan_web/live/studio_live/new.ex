@@ -115,7 +115,7 @@ defmodule BanchanWeb.StudioLive.New do
     case Studios.new_studio(%Studio{artists: [socket.assigns.current_user]}, val["studio"]) do
       {:ok, studio} ->
         put_flash(socket, :info, "Profile updated")
-        {:noreply, redirect(socket, to: Routes.studio_show_path(Endpoint, :shop, studio.handle))}
+        {:noreply, redirect(socket, to: Routes.studio_shop_path(Endpoint, :show, studio.handle))}
 
       other ->
         other

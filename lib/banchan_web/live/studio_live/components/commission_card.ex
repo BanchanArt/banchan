@@ -10,41 +10,36 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
   alias BanchanWeb.Endpoint
 
   prop studio, :struct, required: true
-  prop type_id, :string, required: true
-  prop name, :string, required: true
-  prop description, :string, required: true
-  prop image, :uri, required: true
-  prop open, :boolean, required: true
-  prop price_range, :string
+  prop offering, :struct, required: true
 
   def render(assigns) do
     ~F"""
     <Card>
       <:header>
-        {@name}
+        {@offering.name}
       </:header>
       <:header_aside>
-        {#if @open}
+        {#if @offering.open}
           <span class="bg-primary p-1">Open</span>
         {#else}
           <span class="bg-secondary p-1">Closed</span>
         {/if}
       </:header_aside>
       <:image>
-        <img class="object-cover" src={@image}>
+        <img class="object-cover" src={Routes.static_path(Endpoint, "/images/640x360.png")}>
       </:image>
       <div class="content">
-        <p>{@description}</p>
-        Price:
-        {#if @price_range}
-          <span class="float-right">{@price_range}</span>
+        <p>{@offering.description}</p>
+        Base Price:
+        {#if @offering.base_price}
+          <span class="float-right">{@offering.base_price}</span>
         {#else}
           <span class="float-right">Inquire</span>
         {/if}
       </div>
       <:footer>
-        {#if @open}
-          <LiveRedirect to={Routes.studio_show_path(Endpoint, :new_commission, @studio.handle, @type_id)}>Request</LiveRedirect>
+        {#if @offering.open}
+          <LiveRedirect to={Routes.studio_proposal_path(Endpoint, :show, @studio.handle, @offering.type)}>Request</LiveRedirect>
         {#else}
           <LiveRedirect to="#">Notify Me</LiveRedirect>
         {/if}

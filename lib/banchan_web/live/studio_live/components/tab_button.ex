@@ -4,25 +4,24 @@ defmodule BanchanWeb.StudioLive.Components.TabButton do
   """
   use BanchanWeb, :component
 
-  alias Surface.Components.LivePatch
-
-  alias BanchanWeb.Endpoint
+  alias Surface.Components.LiveRedirect
 
   prop studio, :struct, required: true
-  prop tab, :atom, required: true
-  prop live_action, :atom, required: true
+  prop tab_name, :atom, required: true
+  prop current_tab, :atom, required: true
   prop label, :string, required: true
+  prop to, :string, required: true
 
   def render(assigns) do
     ~F"""
-      <LivePatch
+      <LiveRedirect
         label={@label}
         class={"tab", "tab-bordered", "bg-opacity-60",
                "text-center", "rounded-t-lg", "text-secondary-content",
-               "tab-active": @live_action == @tab,
-               "bg-primary": @live_action != @tab,
-               "bg-primary-focus": @live_action == @tab}
-        to={Routes.studio_show_path(Endpoint, @tab, @studio.handle)} />
+               "tab-active": @current_tab == @tab_name,
+               "bg-primary": @current_tab != @tab_name,
+               "bg-primary-focus": @current_tab == @tab_name}
+        to={@to} />
     """
   end
 end
