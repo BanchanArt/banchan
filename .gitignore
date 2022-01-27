@@ -42,6 +42,9 @@ npm-debug.log
 # Ignore .vscode dir
 /.vscode
 
+# Elixir LS
+/.elixir_ls
+
 # Ignore environment variable files
 .env
 .env.ps1
