@@ -27,7 +27,7 @@ defmodule Banchan.CommissionsTest do
         })
 
       {:ok, offering} =
-        Banchan.Studios.new_offering(studio, %{
+        Banchan.Offerings.new_offering(studio, %{
           type: "illustration",
           index: 0,
           name: "Illustration",
