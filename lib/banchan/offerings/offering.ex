@@ -34,6 +34,7 @@ defmodule Banchan.Offerings.Offering do
     |> validate_format(:type, ~r/^[0-9a-z-]+$/,
       message: "Only lowercase alphanumerics and - are allowed."
     )
+    |> validate_markdown(:terms)
     |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])
   end
@@ -42,6 +43,16 @@ defmodule Banchan.Offerings.Offering do
     validate_change(changeset, field, fn
       _, %Money{amount: amount} when amount > 0 -> []
       _, _ -> [{field, "must be greater than 0"}]
+    end)
+  end
+
+  defp validate_markdown(changeset, field) do
+    validate_change(changeset, field, fn(_, data) ->
+      if data == HtmlSanitizeEx.markdown_html(data) do
+        []
+      else
+        [{field, "Disallowed HTML detected. Some tags, like <script>, are not allowed."}]
+      end
     end)
   end
 end
