@@ -27,13 +27,7 @@ defmodule BanchanWeb.ForgotPasswordLive do
       <h1 class="text-2xl">Forgot your password?</h1>
       <div class="grid grid-cols-3 gap-4">
         <Form class="col-span-1" for={:user} submit="submit">
-          <EmailInput name={:email} wrapper_class="has-icons.left" opts={required: true}>
-            <:right>
-              <span class="icon is-small is-left">
-                <i class="fas fa-envelope" />
-              </span>
-            </:right>
-          </EmailInput>
+          <EmailInput name={:email} icon="envelope" opts={required: true} />
           <div class="field">
             <div class="control">
               <Submit

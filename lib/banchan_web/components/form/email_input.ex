@@ -12,9 +12,7 @@ defmodule BanchanWeb.Components.Form.EmailInput do
   prop wrapper_class, :css_class
   prop class, :css_class
   prop label, :string
-
-  slot left
-  slot right
+  prop icon, :string
 
   def render(assigns) do
     ~F"""
@@ -27,7 +25,6 @@ defmodule BanchanWeb.Components.Form.EmailInput do
         <Label class="label" />
       {/if}
       <div class={"control", @wrapper_class}>
-        <#slot name="left" />
         <InputContext :let={form: form, field: field}>
           <EmailInput
             class={
@@ -36,12 +33,17 @@ defmodule BanchanWeb.Components.Form.EmailInput do
               "input-bordered",
               "input-sm",
               @class,
+              "has-icon-left": @icon,
               "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
             }
             opts={@opts}
           />
         </InputContext>
-        <#slot name="right" />
+        {#if @icon}
+          <span class="icon is-small is-left">
+            <i class={"fas", "fa-#{@icon}"} />
+          </span>
+        {/if}
       </div>
       <ErrorTag class="help is-danger" />
     </Field>

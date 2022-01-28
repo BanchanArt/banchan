@@ -40,27 +40,15 @@ defmodule BanchanWeb.ResetPasswordLive do
           <TextInput
             name={:password}
             label="New Password"
-            wrapper_class="has-icons-left"
+            icon="lock"
             opts={required: true, type: :password}
-          >
-            <:right>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
-            </:right>
-          </TextInput>
+          />
           <TextInput
             name={:password_confirmation}
-            wrapper_class="has-icons-left"
+            icon="lock"
             label="Confirm New Password"
             opts={required: true, type: :password}
-          >
-            <:right>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
-            </:right>
-          </TextInput>
+          />
           <div class="field">
             <div class="control">
               <Submit

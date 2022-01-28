@@ -44,20 +44,8 @@ defmodule BanchanWeb.SettingsLive do
             submit="submit_email"
             opts={autocomplete: "off"}
           >
-            <EmailInput name={:email} wrapper_class="has-icons-left" opts={required: true}>
-              <:right>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-envelope" />
-                </span>
-              </:right>
-            </EmailInput>
-            <TextInput name={:password} wrapper_class="has-icons-left" opts={required: true, type: :password}>
-              <:right>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock" />
-                </span>
-              </:right>
-            </TextInput>
+            <EmailInput name={:email} icon="envelope" opts={required: true} />
+            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
             <div class="field">
               <div class="control">
                 <Submit
@@ -77,27 +65,19 @@ defmodule BanchanWeb.SettingsLive do
             submit="submit_password"
             opts={autocomplete: "off"}
           >
-            <TextInput name={:password} wrapper_class="has-icons-left" opts={required: true, type: :password}>
-              <:right>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock" />
-                </span>
-              </:right>
-            </TextInput>
-            <TextInput name={:password_confirmation} wrapper_class="has-icons-left" label="New Password Confirmation" opts={required: true, type: :password}>
-              <:right>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock" />
-                </span>
-              </:right>
-            </TextInput>
-            <TextInput name={:current_confirmation} wrapper_class="has-icons-left" label="New Password Confirmation" opts={required: true, type: :password}>
-              <:right>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock" />
-                </span>
-              </:right>
-            </TextInput>
+            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+            <TextInput
+              name={:password_confirmation}
+              icon="lock"
+              label="New Password Confirmation"
+              opts={required: true, type: :password}
+            />
+            <TextInput
+              name={:current_confirmation}
+              icon="lock"
+              label="New Password Confirmation"
+              opts={required: true, type: :password}
+            />
             <div class="field">
               <div class="control">
                 <Submit

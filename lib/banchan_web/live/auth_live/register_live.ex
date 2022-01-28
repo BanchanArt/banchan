@@ -43,31 +43,13 @@ defmodule BanchanWeb.RegisterLive do
           submit="submit"
           trigger_action={@trigger_submit}
         >
-          <EmailInput name={:email} wrapper_class="has-icons-left" opts={required: true}>
-            <:right>
-              <span class="icon is-small is-left">
-                <i class="fas fa-envelope" />
-              </span>
-            </:right>
-          </EmailInput>
-          <TextInput name={:password} wrapper_class="has-icons-left" opts={required: true, type: :password}>
-            <:right>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
-            </:right>
-          </TextInput>
+          <EmailInput name={:email} icon="envelope" opts={required: true} />
+          <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
           <TextInput
             name={:password_confirmation}
-            wrapper_class="has-icons-left"
+            icon="lock"
             opts={required: true, type: :password}
-          >
-            <:right>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
-            </:right>
-          </TextInput>
+          />
           <div class="field">
             <div class="control">
               <Submit

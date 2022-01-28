@@ -36,20 +36,8 @@ defmodule BanchanWeb.StudioLive.Settings do
       <h2 class="text-xl">{@studio.name}</h2>
       <div class="grid grid-cols-3 gap-4">
         <Form class="col-span-one" for={@changeset} change="change" submit="submit">
-          <TextInput wrapper_class="has-icons-left" name={:name} opts={required: true}>
-            <:left>
-              <span class="icon is-small is-left">
-                <i class="fas fa-user" />
-              </span>
-            </:left>
-          </TextInput>
-          <TextInput wrapper_class="has-icons-left" name={:handle} opts={required: true}>
-            <:left>
-              <span class="icon is-small is-left">
-                <i class="fas fa-at" />
-              </span>
-            </:left>
-          </TextInput>
+          <TextInput name={:name} icon="user" opts={required: true} />
+          <TextInput name={:handle} icon="at" opts={required: true} />
           <TextArea name={:description} opts={required: true} />
           <div class="field">
             <div class="control">

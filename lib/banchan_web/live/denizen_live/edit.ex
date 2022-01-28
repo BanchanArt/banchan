@@ -28,20 +28,8 @@ defmodule BanchanWeb.DenizenLive.Edit do
         <div class="card-body">
           <h1 class="text-2xl card-title">Edit Profile for @{@user.handle}</h1>
           <Form for={@changeset} change="change" submit="submit">
-            <TextInput name={:name} wrapper_class="has-icons-left" opts={required: true}>
-              <:right>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-user" />
-                </span>
-              </:right>
-            </TextInput>
-            <TextInput name={:handle} wrapper_class="has-icons-left" opts={required: true}>
-              <:right>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-at" />
-                </span>
-              </:right>
-            </TextInput>
+            <TextInput name={:name} icon="user" opts={required: true} />
+            <TextInput name={:handle} icon="at" opts={required: true} />
             <TextArea name={:bio} opts={required: true} />
             <div class="field">
               <div class="control text-base-content m-1">

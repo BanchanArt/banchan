@@ -9,11 +9,8 @@ defmodule BanchanWeb.Components.Form.TextInput do
 
   prop name, :any, required: true
   prop opts, :keyword, default: []
-  prop wrapper_class, :css_class
   prop label, :string
-
-  slot left
-  slot right
+  prop icon, :string
 
   def render(assigns) do
     ~F"""
@@ -25,8 +22,7 @@ defmodule BanchanWeb.Components.Form.TextInput do
       {#else}
         <Label class="label" />
       {/if}
-      <div class={"control", @wrapper_class}>
-        <#slot name="left" />
+      <div class="control">
         <InputContext :let={form: form, field: field}>
           <TextInput
             class={
@@ -34,12 +30,17 @@ defmodule BanchanWeb.Components.Form.TextInput do
               "input-primary",
               "input-bordered",
               "input-sm",
+              "has-icon-left": @icon,
               "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
             }
             opts={@opts}
           />
         </InputContext>
-        <#slot name="right" />
+        {#if @icon}
+          <span class="icon is-small is-left">
+            <i class={"fas", "fa-#{@icon}"} />
+          </span>
+        {/if}
       </div>
       <ErrorTag class="help is-danger" />
     </Field>
