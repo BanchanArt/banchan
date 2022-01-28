@@ -6,12 +6,11 @@ defmodule BanchanWeb.StudioLive.New do
 
   import Slug
   alias Surface.Components.Form
-  alias Surface.Components.Form.Submit
 
   alias Banchan.Studios
   alias Banchan.Studios.Studio
 
-  alias BanchanWeb.Components.Form.{TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -39,15 +38,7 @@ defmodule BanchanWeb.StudioLive.New do
           <TextInput name={:name} icon="user" opts={required: true} />
           <TextInput name={:handle} icon="at" opts={required: true} />
           <TextArea name={:description} opts={required: true} />
-          <div class="field">
-            <div class="control">
-              <Submit
-                class="btn btn-secondary text-center rounded-full py-1 px-5 m-1"
-                label="Save"
-                opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-              />
-            </div>
-          </div>
+          <Submit changeset={@changeset} label="Save" />
         </Form>
       </div>
     </Layout>

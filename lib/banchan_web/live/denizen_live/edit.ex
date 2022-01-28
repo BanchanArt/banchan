@@ -5,11 +5,10 @@ defmodule BanchanWeb.DenizenLive.Edit do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.Submit
 
   alias Banchan.Accounts
 
-  alias BanchanWeb.Components.Form.{TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -31,15 +30,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
             <TextInput name={:name} icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />
             <TextArea name={:bio} opts={required: true} />
-            <div class="field">
-              <div class="control text-base-content m-1">
-                <Submit
-                  class="btn btn-secondary rounded-full py-1 px-5"
-                  label="Save"
-                  opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-                />
-              </div>
-            </div>
+            <Submit changeset={@changeset} label="Save" />
           </Form>
         </div>
       </div>

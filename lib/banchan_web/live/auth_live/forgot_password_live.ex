@@ -5,11 +5,10 @@ defmodule BanchanWeb.ForgotPasswordLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.Submit
 
   alias Banchan.Accounts
 
-  alias BanchanWeb.Components.Form.EmailInput
+  alias BanchanWeb.Components.Form.{EmailInput, Submit}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -28,14 +27,7 @@ defmodule BanchanWeb.ForgotPasswordLive do
       <div class="grid grid-cols-3 gap-4">
         <Form class="col-span-1" for={:user} submit="submit">
           <EmailInput name={:email} icon="envelope" opts={required: true} />
-          <div class="field">
-            <div class="control">
-              <Submit
-                class="btn text-center rounded-full py-1 px-5 btn-secondary m-1"
-                label="Send instructions to reset password"
-              />
-            </div>
-          </div>
+          <Submit label="Send instructions to reset password" />
         </Form>
       </div>
     </Layout>

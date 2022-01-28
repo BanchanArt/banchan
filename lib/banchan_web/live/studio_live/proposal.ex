@@ -11,10 +11,9 @@ defmodule BanchanWeb.StudioLive.Proposal do
   alias BanchanWeb.StudioLive.Components.StudioLayout
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.Submit
 
   alias BanchanWeb.Components.Card
-  alias BanchanWeb.Components.Form.{Checkbox, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.Commissions.Attachments
   import BanchanWeb.StudioLive.Helpers
@@ -80,15 +79,7 @@ defmodule BanchanWeb.StudioLive.Proposal do
             <Checkbox name={:tos_ok} opts={required: true}>
               I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
             </Checkbox>
-            <div class="field">
-              <div class="control">
-                <Submit
-                  class="btn btn-secondary text-center rounded-full py-1 px-5 m-1"
-                  label="Submit"
-                  opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-                />
-              </div>
-            </div>
+            <Submit changeset={@changeset} />
           </Form>
         </div>
 

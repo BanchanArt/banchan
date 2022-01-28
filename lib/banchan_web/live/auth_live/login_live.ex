@@ -5,9 +5,8 @@ defmodule BanchanWeb.LoginLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.Submit
 
-  alias BanchanWeb.Components.Form.{Checkbox, EmailInput, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -40,15 +39,7 @@ defmodule BanchanWeb.LoginLive do
             <EmailInput name={:email} icon="envelope" opts={required: true} />
             <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
             <Checkbox name={:remember_me}>Keep me logged in for 60 days.</Checkbox>
-            <div class="field">
-              <div class="control">
-                <Submit
-                  class="btn text-center rounded-full py-1 px-5 btn-secondary m-1"
-                  label="Log in"
-                  opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-                />
-              </div>
-            </div>
+            <Submit changeset={@changeset} label="Log in" />
           </Form>
         </div>
       </div>

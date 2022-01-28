@@ -6,11 +6,9 @@ defmodule BanchanWeb.SettingsLive do
 
   alias Surface.Components.Form
 
-  alias Surface.Components.Form.Submit
-
   alias Banchan.Accounts
 
-  alias BanchanWeb.Components.Form.{EmailInput, TextInput}
+  alias BanchanWeb.Components.Form.{EmailInput, Submit, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -46,15 +44,7 @@ defmodule BanchanWeb.SettingsLive do
           >
             <EmailInput name={:email} icon="envelope" opts={required: true} />
             <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-            <div class="field">
-              <div class="control">
-                <Submit
-                  class="text-center rounded-full py-1 px-5 btn-secondary m-1"
-                  label="Save"
-                  opts={disabled: Enum.empty?(@email_changeset.changes) || !@email_changeset.valid?}
-                />
-              </div>
-            </div>
+            <Submit changeset={@email_changeset} label="Save" />
           </Form>
           <div class="divider" />
           <h2 class="text-xl card-title">Update Password</h2>
@@ -78,15 +68,7 @@ defmodule BanchanWeb.SettingsLive do
               label="New Password Confirmation"
               opts={required: true, type: :password}
             />
-            <div class="field">
-              <div class="control">
-                <Submit
-                  class="text-center rounded-full py-1 px-5 btn-secondary m-1"
-                  label="Save"
-                  opts={disabled: Enum.empty?(@password_changeset.changes) || !@password_changeset.valid?}
-                />
-              </div>
-            </div>
+            <Submit changeset={@password_changeset} label="Save" />
           </Form>
         </div>
       </div>

@@ -7,13 +7,13 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   import Slug
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{InputContext, Inputs, Submit}
+  alias Surface.Components.Form.{InputContext, Inputs}
   alias Surface.Components.Form.Input.InputContext
 
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
 
-  alias BanchanWeb.Components.Form.{TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
 
   prop changeset, :struct, required: true
 
@@ -119,15 +119,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             >Add Option</button>
           </div>
         </div>
-        <div class="field">
-          <div class="control">
-            <Submit
-              class="btn btn-secondary text-center rounded-full py-1 px-5 m-1"
-              label="Save"
-              opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-            />
-          </div>
-        </div>
+        <Submit changeset={@changeset} label="Save" />
       </Form>
     </div>
     """

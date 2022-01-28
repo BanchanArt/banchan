@@ -5,11 +5,10 @@ defmodule BanchanWeb.ConfirmationLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.Submit
 
   alias Banchan.Accounts
 
-  alias BanchanWeb.Components.Form.EmailInput
+  alias BanchanWeb.Components.Form.{EmailInput, Submit}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 

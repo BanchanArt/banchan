@@ -5,12 +5,11 @@ defmodule BanchanWeb.StudioLive.Settings do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.Submit
 
   alias Banchan.Studios
   alias Banchan.Studios.Studio
 
-  alias BanchanWeb.Components.Form.{TextInput, TextArea}
+  alias BanchanWeb.Components.Form.{TextInput, TextArea, Submit}
   alias BanchanWeb.StudioLive.Components.StudioLayout
   alias BanchanWeb.Endpoint
   import BanchanWeb.StudioLive.Helpers
@@ -39,15 +38,7 @@ defmodule BanchanWeb.StudioLive.Settings do
           <TextInput name={:name} icon="user" opts={required: true} />
           <TextInput name={:handle} icon="at" opts={required: true} />
           <TextArea name={:description} opts={required: true} />
-          <div class="field">
-            <div class="control">
-              <Submit
-                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
-                label="Save"
-                opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-              />
-            </div>
-          </div>
+          <Submit changeset={@changeset} label="Save" />
         </Form>
       </div>
     </StudioLayout>

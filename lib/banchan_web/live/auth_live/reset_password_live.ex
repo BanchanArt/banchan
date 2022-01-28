@@ -5,12 +5,11 @@ defmodule BanchanWeb.ResetPasswordLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.Submit
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
 
-  alias BanchanWeb.Components.Form.TextInput
+  alias BanchanWeb.Components.Form.{Submit, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -49,15 +48,7 @@ defmodule BanchanWeb.ResetPasswordLive do
             label="Confirm New Password"
             opts={required: true, type: :password}
           />
-          <div class="field">
-            <div class="control">
-              <Submit
-                class="btn text-center rounded-full py-1 px-5 btn-secondary m-1"
-                label="Reset password"
-                opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-              />
-            </div>
-          </div>
+          <Submit changeset={@changeset} label="Reset Password" />
         </Form>
       </div>
     </Layout>

@@ -5,12 +5,11 @@ defmodule BanchanWeb.RegisterLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.Submit
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
 
-  alias BanchanWeb.Components.Form.{EmailInput, TextInput}
+  alias BanchanWeb.Components.Form.{EmailInput, TextInput, Submit}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -45,20 +44,8 @@ defmodule BanchanWeb.RegisterLive do
         >
           <EmailInput name={:email} icon="envelope" opts={required: true} />
           <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-          <TextInput
-            name={:password_confirmation}
-            icon="lock"
-            opts={required: true, type: :password}
-          />
-          <div class="field">
-            <div class="control">
-              <Submit
-                class="btn text-center rounded-full py-1 px-5 btn-secondary m-1"
-                label="Register"
-                opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-              />
-            </div>
-          </div>
+          <TextInput name={:password_confirmation} icon="lock" opts={required: true, type: :password} />
+          <Submit changeset={@changeset} label="Register" />
         </Form>
       </div>
     </Layout>
