@@ -78,9 +78,7 @@ defmodule BanchanWeb.StudioLive.Proposal do
               <div>{raw(@terms)}</div>
             </div>
             <Checkbox name={:tos_ok} opts={required: true}>
-              <:right>
-                I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
-              </:right>
+              I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
             </Checkbox>
             <div class="field">
               <div class="control">

@@ -1,20 +1,21 @@
-defmodule BanchanWeb.Components.Form.TextArea do
+defmodule BanchanWeb.Components.Form.EmailInput do
   @moduledoc """
-  Banchan-specific TextArea.
+  Canonical email input for Banchan
   """
   use BanchanWeb, :component
 
-  alias Surface.Components.Form.{ErrorTag, Field, Label, TextArea}
+  alias Surface.Components.Form.{ErrorTag, Field, Label, EmailInput}
   alias Surface.Components.Form.Input.InputContext
 
   prop name, :any, required: true
   prop opts, :keyword, default: []
-  prop label, :string
   prop wrapper_class, :css_class
   prop class, :css_class
+  prop label, :string
 
   slot left
   slot right
+
   def render(assigns) do
     ~F"""
     <Field class="field" name={@name}>
@@ -28,12 +29,12 @@ defmodule BanchanWeb.Components.Form.TextArea do
       <div class={"control", @wrapper_class}>
         <#slot name="left" />
         <InputContext :let={form: form, field: field}>
-          <TextArea
+          <EmailInput
             class={
-              "textarea",
-              "textarea-bordered",
-              "textarea-primary",
-              "h-24",
+              "input",
+              "input-primary",
+              "input-bordered",
+              "input-sm",
               @class,
               "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
             }

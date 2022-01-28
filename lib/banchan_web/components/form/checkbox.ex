@@ -8,32 +8,30 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   alias Surface.Components.Form.Input.InputContext
 
   prop name, :any, required: true
-  prop opts, :any
+  prop opts, :keyword, default: []
   prop wrapper_class, :css_class
   prop class, :css_class
 
-  slot left
-  slot right
   slot default
 
   def render(assigns) do
     ~F"""
     <Field class="field" name={@name}>
-      <Label class="label" />
-      <div class={"control", "is-large", @wrapper_class}>
-        <#slot name="left" />
-        <InputContext :let={form: form, field: field}>
-          <Checkbox
-            class={
-              @class,
-              "is-large",
-              "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-            }
-            opts={@opts}
-          />
-        </InputContext>
-        <#slot name="right" />
-      </div>
+      <Label class="checkbox is-large">
+        <div class={"control", @wrapper_class}>
+          <InputContext :let={form: form, field: field}>
+            <Checkbox
+              class={
+                @class,
+                "is-large",
+                "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+              }
+              opts={@opts}
+            />
+          </InputContext>
+        </div>
+        <#slot />
+      </Label>
       <ErrorTag class="help is-danger" />
     </Field>
     """

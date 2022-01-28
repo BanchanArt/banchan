@@ -5,11 +5,12 @@ defmodule BanchanWeb.ResetPasswordLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Field, Label, Submit, TextInput}
-  alias Surface.Components.Form.Input.InputContext
+  alias Surface.Components.Form.Submit
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
+
+  alias BanchanWeb.Components.Form.TextInput
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -36,36 +37,30 @@ defmodule BanchanWeb.ResetPasswordLive do
       <h1 class="text-2xl">Reset password</h1>
       <div class="grid grid-cols-3 gap-4">
         <Form class="col-span-1" for={@changeset} change="change" submit="submit">
-          <Field class="field" name={:password}>
-            <Label class="label">New Password</Label>
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true, type: :password}
-                />
-              </InputContext>
+          <TextInput
+            name={:password}
+            label="New Password"
+            wrapper_class="has-icons-left"
+            opts={required: true, type: :password}
+          >
+            <:right>
               <span class="icon is-small is-left">
                 <i class="fas fa-lock" />
               </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:password_confirmation}>
-            <Label class="label">Confirm New Password</Label>
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true, type: :password}
-                />
-              </InputContext>
+            </:right>
+          </TextInput>
+          <TextInput
+            name={:password_confirmation}
+            wrapper_class="has-icons-left"
+            label="Confirm New Password"
+            opts={required: true, type: :password}
+          >
+            <:right>
               <span class="icon is-small is-left">
                 <i class="fas fa-lock" />
               </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
+            </:right>
+          </TextInput>
           <div class="field">
             <div class="control">
               <Submit

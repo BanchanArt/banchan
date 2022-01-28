@@ -6,19 +6,11 @@ defmodule BanchanWeb.SettingsLive do
 
   alias Surface.Components.Form
 
-  alias Surface.Components.Form.{
-    EmailInput,
-    ErrorTag,
-    Field,
-    Label,
-    PasswordInput,
-    Submit,
-    TextInput
-  }
-
-  alias Surface.Components.Form.Input.InputContext
+  alias Surface.Components.Form.Submit
 
   alias Banchan.Accounts
+
+  alias BanchanWeb.Components.Form.{EmailInput, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -52,44 +44,20 @@ defmodule BanchanWeb.SettingsLive do
             submit="submit_email"
             opts={autocomplete: "off"}
           >
-            <Field class="field" name={:email}>
-              <Label class="label" />
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <EmailInput class={
-                    "input",
-                    "input-primary",
-                    "input-bordered",
-                    "input-sm",
-                    "text-base-content",
-                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                  } />
-                </InputContext>
+            <EmailInput name={:email} wrapper_class="has-icons-left" opts={required: true}>
+              <:right>
                 <span class="icon is-small is-left">
                   <i class="fas fa-envelope" />
                 </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:password}>
-              <Label class="label" />
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <PasswordInput class={
-                    "input",
-                    "input-primary",
-                    "input-bordered",
-                    "input-sm",
-                    "text-base-content",
-                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                  } />
-                </InputContext>
+              </:right>
+            </EmailInput>
+            <TextInput name={:password} wrapper_class="has-icons-left" opts={required: true, type: :password}>
+              <:right>
                 <span class="icon is-small is-left">
                   <i class="fas fa-lock" />
                 </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
+              </:right>
+            </TextInput>
             <div class="field">
               <div class="control">
                 <Submit
@@ -109,72 +77,27 @@ defmodule BanchanWeb.SettingsLive do
             submit="submit_password"
             opts={autocomplete: "off"}
           >
-            <Field class="field" name={:password}>
-              <Label class="label">New Password</Label>
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <TextInput
-                    class={
-                      "input",
-                      "input-primary",
-                      "input-bordered",
-                      "input-sm",
-                      "text-base-content",
-                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                    }
-                    opts={required: true, type: :password}
-                  />
-                </InputContext>
+            <TextInput name={:password} wrapper_class="has-icons-left" opts={required: true, type: :password}>
+              <:right>
                 <span class="icon is-small is-left">
                   <i class="fas fa-lock" />
                 </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:password_confirmation}>
-              <Label class="label">New Password Confirmation</Label>
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <TextInput
-                    class={
-                      "input",
-                      "input-primary",
-                      "input-bordered",
-                      "input-sm",
-                      "text-base-content",
-                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                    }
-                    opts={required: true, type: :password}
-                  />
-                </InputContext>
+              </:right>
+            </TextInput>
+            <TextInput name={:password_confirmation} wrapper_class="has-icons-left" label="New Password Confirmation" opts={required: true, type: :password}>
+              <:right>
                 <span class="icon is-small is-left">
                   <i class="fas fa-lock" />
                 </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:current_confirmation}>
-              <Label class="label" />
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <TextInput
-                    class={
-                      "input",
-                      "input-primary",
-                      "input-bordered",
-                      "input-sm",
-                      "text-base-content",
-                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                    }
-                    opts={required: true, type: :password}
-                  />
-                </InputContext>
+              </:right>
+            </TextInput>
+            <TextInput name={:current_confirmation} wrapper_class="has-icons-left" label="New Password Confirmation" opts={required: true, type: :password}>
+              <:right>
                 <span class="icon is-small is-left">
                   <i class="fas fa-lock" />
                 </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
+              </:right>
+            </TextInput>
             <div class="field">
               <div class="control">
                 <Submit
