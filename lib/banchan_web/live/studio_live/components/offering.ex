@@ -7,8 +7,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   import Slug
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{InputContext, Inputs}
   alias Surface.Components.Form.Input.InputContext
+  alias Surface.Components.Form.Inputs
 
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}

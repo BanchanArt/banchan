@@ -4,7 +4,7 @@ defmodule BanchanWeb.Components.Form.EmailInput do
   """
   use BanchanWeb, :component
 
-  alias Surface.Components.Form.{ErrorTag, Field, Label, EmailInput}
+  alias Surface.Components.Form.{EmailInput, ErrorTag, Field, Label}
   alias Surface.Components.Form.Input.InputContext
 
   prop name, :any, required: true

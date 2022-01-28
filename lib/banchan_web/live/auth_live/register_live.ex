@@ -9,7 +9,7 @@ defmodule BanchanWeb.RegisterLive do
   alias Banchan.Accounts
   alias Banchan.Accounts.User
 
-  alias BanchanWeb.Components.Form.{EmailInput, TextInput, Submit}
+  alias BanchanWeb.Components.Form.{EmailInput, Submit, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 

@@ -4,7 +4,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   """
   use BanchanWeb, :component
 
-  alias Surface.Components.Form.{ErrorTag, Field, Label, Checkbox}
+  alias Surface.Components.Form.{Checkbox, ErrorTag, Field, Label}
   alias Surface.Components.Form.Input.InputContext
 
   prop name, :any, required: true
