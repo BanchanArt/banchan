@@ -11,10 +11,10 @@ defmodule BanchanWeb.StudioLive.Proposal do
   alias BanchanWeb.StudioLive.Components.StudioLayout
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{Checkbox, ErrorTag, Field, Label, Submit, TextArea, TextInput}
-  alias Surface.Components.Form.Input.InputContext
+  alias Surface.Components.Form.Submit
 
   alias BanchanWeb.Components.Card
+  alias BanchanWeb.Components.Form.{Checkbox, TextArea, TextInput}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.Commissions.Attachments
   import BanchanWeb.StudioLive.Helpers
@@ -69,50 +69,19 @@ defmodule BanchanWeb.StudioLive.Proposal do
           <h2 class="text-xl">{@offering.description}</h2>
           <Form for={@changeset} change="change" submit="submit">
             <div class="block">
-              <Field class="field" name={:title}>
-                <Label class="label" />
-                <div class="control">
-                  <InputContext :let={form: form, field: field}>
-                    <TextInput
-                      class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                      opts={required: true, placeholder: "Brief Title"}
-                    />
-                  </InputContext>
-                </div>
-                <ErrorTag class="help is-danger" />
-              </Field>
-              <Field class="field" name={:description}>
-                <Label class="label" />
-                <div class="control">
-                  <InputContext :let={form: form, field: field}>
-                    <TextArea
-                      class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                      opts={required: true, placeholder: "Here's what I'd like..."}
-                    />
-                  </InputContext>
-                </div>
-                <ErrorTag class="help is-danger" />
-              </Field>
+              <TextInput name={:title} opts={required: true, placeholder: "A Brief Title"} />
+              <TextArea name={:description} opts={required: true, placeholder: "Here's what I'd like..."} />
             </div>
             <div class="content block">
               <h3>Terms and Conditions</h3>
               <p><strong>These Terms might vary between commission type.</strong></p>
               <div>{raw(@terms)}</div>
             </div>
-            <Field class="field" name={:tos_ok}>
-              <Label class="checkbox is-large">
-                <div class="control">
-                  <InputContext :let={form: form, field: field}>
-                    <Checkbox
-                      class={"is-large", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                      opts={required: true}
-                    />
-                  </InputContext>
-                  I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
-                </div>
-              </Label>
-              <ErrorTag class="help is-danger" />
-            </Field>
+            <Checkbox name={:tos_ok} opts={required: true}>
+              <:right>
+                I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
+              </:right>
+            </Checkbox>
             <div class="field">
               <div class="control">
                 <Submit

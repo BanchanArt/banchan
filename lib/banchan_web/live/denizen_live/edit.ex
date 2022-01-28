@@ -5,10 +5,11 @@ defmodule BanchanWeb.DenizenLive.Edit do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Field, Label, Submit, TextArea, TextInput}
-  alias Surface.Components.Form.Input.InputContext
+  alias Surface.Components.Form.Submit
 
   alias Banchan.Accounts
+
+  alias BanchanWeb.Components.Form.{TextArea, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -27,66 +28,21 @@ defmodule BanchanWeb.DenizenLive.Edit do
         <div class="card-body">
           <h1 class="text-2xl card-title">Edit Profile for @{@user.handle}</h1>
           <Form for={@changeset} change="change" submit="submit">
-            <Field class="field" name={:handle}>
-              <Label class="label" />
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <TextInput
-                    class={
-                      "input",
-                      "input-primary",
-                      "input-bordered",
-                      "input-sm",
-                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                    }
-                    opts={required: true}
-                  />
-                </InputContext>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-at" />
-                </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:name}>
-              <Label class="label" />
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <TextInput
-                    class={
-                      "input",
-                      "input-primary",
-                      "input-bordered",
-                      "input-sm",
-                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                    }
-                    opts={required: true}
-                  />
-                </InputContext>
+            <TextInput name={:name} wrapper_class="has-icons-left" opts={required: true}>
+              <:right>
                 <span class="icon is-small is-left">
                   <i class="fas fa-user" />
                 </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:bio}>
-              <Label class="label" />
-              <div class="control">
-                <InputContext :let={form: form, field: field}>
-                  <TextArea
-                    class={
-                      "textarea",
-                      "textarea-bordered",
-                      "textarea-primary",
-                      "h-24",
-                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                    }
-                    opts={required: true}
-                  />
-                </InputContext>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
+              </:right>
+            </TextInput>
+            <TextInput name={:handle} wrapper_class="has-icons-left" opts={required: true}>
+              <:right>
+                <span class="icon is-small is-left">
+                  <i class="fas fa-at" />
+                </span>
+              </:right>
+            </TextInput>
+            <TextArea name={:bio} opts={required: true} />
             <div class="field">
               <div class="control text-base-content m-1">
                 <Submit

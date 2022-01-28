@@ -5,8 +5,9 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.MessageBox do
   use BanchanWeb, :live_component
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Field, Label, Submit, TextArea}
-  alias Surface.Components.Form.Input.InputContext
+  alias Surface.Components.Form.Submit
+
+  alias BanchanWeb.Components.Form.TextArea
 
   prop new_message, :event, required: true
 
@@ -14,18 +15,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.MessageBox do
     ~F"""
     <div class="message-box">
       <Form for={:message} submit={@new_message}>
-        <Field class="field" name={:message}>
-          <Label class="label">Send a Message</Label>
-          <div class="control">
-            <InputContext :let={form: form, field: field}>
-              <TextArea
-                class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                opts={required: true}
-              />
-            </InputContext>
-          </div>
-          <ErrorTag class="help is-danger" />
-        </Field>
+        <TextArea name={:message} label="Send a Message" opts={required: true} />
         <div class="field">
           <div class="control">
             <Submit class="btn btn-secondary text-center rounded-full py-1 px-5 m-1" label="Reply" />

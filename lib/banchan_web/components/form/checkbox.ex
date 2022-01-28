@@ -1,39 +1,32 @@
-defmodule BanchanWeb.Components.Form.TextArea do
+defmodule BanchanWeb.Components.Form.Checkbox do
   @moduledoc """
-  Banchan-specific TextArea.
+  Standard BanchanWeb checkbox input.
   """
   use BanchanWeb, :component
 
-  alias Surface.Components.Form.{ErrorTag, Field, Label, TextArea}
+  alias Surface.Components.Form.{ErrorTag, Field, Label, Checkbox}
   alias Surface.Components.Form.Input.InputContext
 
   prop name, :any, required: true
-  prop opts, :any, default: []
-  prop label, :string
+  prop opts, :any
   prop wrapper_class, :css_class
   prop class, :css_class
 
   slot left
   slot right
+  slot default
+
   def render(assigns) do
     ~F"""
     <Field class="field" name={@name}>
-      {#if @label}
-      <Label class="label">
-      </Label>
-      {#else}
       <Label class="label" />
-      {/if}
-      <div class={"control", @wrapper_class}>
+      <div class={"control", "is-large", @wrapper_class}>
         <#slot name="left" />
         <InputContext :let={form: form, field: field}>
-          <TextArea
+          <Checkbox
             class={
-              "textarea",
-              "textarea-bordered",
-              "textarea-primary",
-              "h-24",
               @class,
+              "is-large",
               "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
             }
             opts={@opts}

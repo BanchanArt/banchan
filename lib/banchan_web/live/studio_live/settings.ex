@@ -5,11 +5,12 @@ defmodule BanchanWeb.StudioLive.Settings do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Field, Label, Submit, TextArea, TextInput}
-  alias Surface.Components.Form.Input.InputContext
+  alias Surface.Components.Form.Submit
 
   alias Banchan.Studios
   alias Banchan.Studios.Studio
+
+  alias BanchanWeb.Components.Form.{TextInput, TextArea}
   alias BanchanWeb.StudioLive.Components.StudioLayout
   alias BanchanWeb.Endpoint
   import BanchanWeb.StudioLive.Helpers
@@ -35,48 +36,21 @@ defmodule BanchanWeb.StudioLive.Settings do
       <h2 class="text-xl">{@studio.name}</h2>
       <div class="grid grid-cols-3 gap-4">
         <Form class="col-span-one" for={@changeset} change="change" submit="submit">
-          <Field class="field" name={:name}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true}
-                />
-              </InputContext>
+          <TextInput wrapper_class="has-icons-left" name={:name} opts={required: true}>
+            <:left>
               <span class="icon is-small is-left">
                 <i class="fas fa-user" />
               </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:handle}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true}
-                />
-              </InputContext>
+            </:left>
+          </TextInput>
+          <TextInput wrapper_class="has-icons-left" name={:handle} opts={required: true}>
+            <:left>
               <span class="icon is-small is-left">
                 <i class="fas fa-at" />
               </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:description}>
-            <Label class="label" />
-            <div class="control">
-              <InputContext :let={form: form, field: field}>
-                <TextArea
-                  class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true}
-                />
-              </InputContext>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
+            </:left>
+          </TextInput>
+          <TextArea name={:description} opts={required: true} />
           <div class="field">
             <div class="control">
               <Submit

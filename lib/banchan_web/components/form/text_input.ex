@@ -9,13 +9,18 @@ defmodule BanchanWeb.Components.Form.TextInput do
 
   prop name, :any, required: true
   prop opts, :any
-  prop class, :any
+  prop wrapper_class, :css_class
+
+  slot left
+  slot right
+  slot default
 
   def render(assigns) do
     ~F"""
     <Field class="field" name={@name}>
       <Label class="label" />
-      <div class="control">
+      <div class={"control", @wrapper_class}>
+        <#slot name="left" />
         <InputContext :let={form: form, field: field}>
           <TextInput
             class={
@@ -28,6 +33,7 @@ defmodule BanchanWeb.Components.Form.TextInput do
             opts={@opts}
           />
         </InputContext>
+        <#slot name="right" />
       </div>
       <ErrorTag class="help is-danger" />
     </Field>
