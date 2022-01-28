@@ -6,24 +6,24 @@ defmodule Banchan.CommissionsTest do
   describe "commissions" do
     alias Banchan.Commissions.Commission
 
-    @valid_attrs %{status: "pending", title: "some title"}
-    @update_attrs %{status: "accepted", title: "some updated title"}
+    @valid_attrs %{status: "pending", title: "some title", description: "Some Description", tos_ok: true}
+    @update_attrs %{status: "accepted", title: "some updated title", description: "Some updated description", tos_ok: true}
     @invalid_attrs %{status: nil, title: nil}
 
     def commission_fixture(attrs \\ %{}) do
       {:ok, user} =
         Banchan.Accounts.register_admin(%{
-          handle: "zkat",
-          email: "kat@dwg.dev",
+          handle: "test-admin",
+          email: "test@example.com",
           password: "foobarbazquux",
           password_confirmation: "foobarbazquux"
         })
 
       {:ok, studio} =
         Banchan.Studios.new_studio(%Banchan.Studios.Studio{artists: [user]}, %{
-          handle: "kitteh-studio",
-          name: "Kitteh Studio",
-          description: "Kitteh-related stuff"
+          handle: "test-studio",
+          name: "Test Studio",
+          description: "stuff for testing"
         })
 
       {:ok, offering} =
