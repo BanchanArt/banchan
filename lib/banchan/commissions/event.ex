@@ -9,6 +9,7 @@ defmodule Banchan.Commissions.Event do
     field :type, Ecto.Enum, values: [:comment, :line_item, :payment_request, :status, :attachment]
     field :text, :string
     field :amount, Money.Ecto.Composite.Type
+
     field :status, Ecto.Enum,
       values: Banchan.Commissions.Commission.status_values(),
       default: :pending

@@ -15,6 +15,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
 
   slot left
   slot right
+
   def render(assigns) do
     ~F"""
     <Field class="field" name={@name}>

@@ -47,7 +47,7 @@ defmodule Banchan.Offerings.Offering do
   end
 
   defp validate_markdown(changeset, field) do
-    validate_change(changeset, field, fn(_, data) ->
+    validate_change(changeset, field, fn _, data ->
       if data == HtmlSanitizeEx.markdown_html(data) do
         []
       else

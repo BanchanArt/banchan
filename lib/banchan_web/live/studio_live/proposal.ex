@@ -27,17 +27,24 @@ defmodule BanchanWeb.StudioLive.Proposal do
 
     if offering.open do
       {:ok,
-      assign(socket,
-        changeset: Commission.changeset(%Commission{}, %{}),
-        offering: offering,
-        terms: terms
-      )}
+       assign(socket,
+         changeset: Commission.changeset(%Commission{}, %{}),
+         offering: offering,
+         terms: terms
+       )}
     else
       # TODO: Maybe show this on this page itself?
-      socket = put_flash(socket, :error, "This commission offering is currently closed. Please try signing up for notifications for when it opens instead.")
+      socket =
+        put_flash(
+          socket,
+          :error,
+          "This commission offering is currently closed. Please try signing up for notifications for when it opens instead."
+        )
+
       {:ok,
-        push_redirect(socket, to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle))
-      }
+       push_redirect(socket,
+         to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+       )}
     end
   end
 
