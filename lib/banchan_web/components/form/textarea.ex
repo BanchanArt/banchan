@@ -8,7 +8,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
   alias Surface.Components.Form.Input.InputContext
 
   prop name, :any, required: true
-  prop opts, :any
+  prop opts, :any, default: []
 
   def render(assigns) do
     ~F"""
@@ -17,7 +17,11 @@ defmodule BanchanWeb.Components.Form.TextArea do
       <div class="control">
         <InputContext :let={form: form, field: field}>
           <TextArea
-            class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+            class={"textarea",
+            "textarea-bordered",
+            "textarea-primary",
+            "h-24",
+            "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
             opts={@opts}
           />
         </InputContext>
