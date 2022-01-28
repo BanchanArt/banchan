@@ -56,7 +56,13 @@ defmodule BanchanWeb.StudioLive.Proposal do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout current_user={@current_user} flashes={@flash} studio={@studio} current_user_member?={@current_user_member?} tab={:shop}>
+    <StudioLayout
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      current_user_member?={@current_user_member?}
+      tab={:shop}
+    >
       <div class="grid grid-cols-5 gap-4">
         <div class="col-span-3">
           <h1 class="text-2xl">{@offering.name}</h1>
@@ -97,7 +103,10 @@ defmodule BanchanWeb.StudioLive.Proposal do
               <Label class="checkbox is-large">
                 <div class="control">
                   <InputContext :let={form: form, field: field}>
-                    <Checkbox class={"is-large", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} opts={required: true} />
+                    <Checkbox
+                      class={"is-large", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+                      opts={required: true}
+                    />
                   </InputContext>
                   I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
                 </div>

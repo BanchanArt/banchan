@@ -24,7 +24,13 @@ defmodule BanchanWeb.StudioLive.Settings do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout current_user={@current_user} flashes={@flash} studio={@studio} current_user_member?={@current_user_member?} tab={:settings}>
+    <StudioLayout
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      current_user_member?={@current_user_member?}
+      tab={:settings}
+    >
       <h1 class="text-2xl">Edit Studio</h1>
       <h2 class="text-xl">{@studio.name}</h2>
       <div class="grid grid-cols-3 gap-4">

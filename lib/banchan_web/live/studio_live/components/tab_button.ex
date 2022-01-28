@@ -14,14 +14,21 @@ defmodule BanchanWeb.StudioLive.Components.TabButton do
 
   def render(assigns) do
     ~F"""
-      <LiveRedirect
-        label={@label}
-        class={"tab", "tab-bordered", "bg-opacity-60",
-               "text-center", "rounded-t-lg", "text-secondary-content",
-               "tab-active": @current_tab == @tab_name,
-               "bg-primary": @current_tab != @tab_name,
-               "bg-primary-focus": @current_tab == @tab_name}
-        to={@to} />
+    <LiveRedirect
+      label={@label}
+      class={
+        "tab",
+        "tab-bordered",
+        "bg-opacity-60",
+        "text-center",
+        "rounded-t-lg",
+        "text-secondary-content",
+        "tab-active": @current_tab == @tab_name,
+        "bg-primary": @current_tab != @tab_name,
+        "bg-primary-focus": @current_tab == @tab_name
+      }
+      to={@to}
+    />
     """
   end
 end

@@ -17,7 +17,13 @@ defmodule BanchanWeb.StudioLive.About do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout current_user={@current_user} flashes={@flash} studio={@studio} current_user_member?={@current_user_member?} tab={:about}>
+    <StudioLayout
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      current_user_member?={@current_user_member?}
+      tab={:about}
+    >
       About page goes here
     </StudioLayout>
     """

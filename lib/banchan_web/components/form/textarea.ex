@@ -17,11 +17,13 @@ defmodule BanchanWeb.Components.Form.TextArea do
       <div class="control">
         <InputContext :let={form: form, field: field}>
           <TextArea
-            class={"textarea",
-            "textarea-bordered",
-            "textarea-primary",
-            "h-24",
-            "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+            class={
+              "textarea",
+              "textarea-bordered",
+              "textarea-primary",
+              "h-24",
+              "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+            }
             opts={@opts}
           />
         </InputContext>

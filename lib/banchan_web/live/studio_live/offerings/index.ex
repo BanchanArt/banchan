@@ -24,10 +24,19 @@ defmodule BanchanWeb.StudioLive.Offerings.Index do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout current_user={@current_user} flashes={@flash} studio={@studio} current_user_member?={@current_user_member?} tab={:settings}>
+    <StudioLayout
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      current_user_member?={@current_user_member?}
+      tab={:settings}
+    >
       <h1>Offerings</h1>
       <h2>Add/remove/edit offerings for your studio here</h2>
-      <LiveRedirect label="New Offering" to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)} />
+      <LiveRedirect
+        label="New Offering"
+        to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}
+      />
       <table class="table w-full table-compact">
         <thead>
           <tr>
@@ -45,26 +54,29 @@ defmodule BanchanWeb.StudioLive.Offerings.Index do
         </thead>
         <tbody>
           {#for offering <- @offerings}
-          <tr>
-            <th>
-              <label>
-                <input type="checkbox" class="checkbox">
-              </label>
-            </th>
-            <td>{offering.name}</td>
-            <td>{offering.description}</td>
-            <td>
-            {#if offering.open}
-            Open
-            {#else}
-            Closed
-            {/if}
-            </td>
-            <td>{offering.base_price || "Inquire"}</td>
-            <th>
-              <button class="btn btn-secondary btn-xs"><a href={Routes.studio_offerings_edit_path(Endpoint, :edit, @studio.handle, offering.type)} class="link">Edit</a></button>
-            </th>
-          </tr>
+            <tr>
+              <th>
+                <label>
+                  <input type="checkbox" class="checkbox">
+                </label>
+              </th>
+              <td>{offering.name}</td>
+              <td>{offering.description}</td>
+              <td>
+                {#if offering.open}
+                  Open
+                {#else}
+                  Closed
+                {/if}
+              </td>
+              <td>{offering.base_price || "Inquire"}</td>
+              <th>
+                <button class="btn btn-secondary btn-xs"><a
+                    href={Routes.studio_offerings_edit_path(Endpoint, :edit, @studio.handle, offering.type)}
+                    class="link"
+                  >Edit</a></button>
+              </th>
+            </tr>
           {/for}
         </tbody>
         <tfoot>

@@ -18,11 +18,13 @@ defmodule BanchanWeb.Components.Form.TextInput do
       <div class="control">
         <InputContext :let={form: form, field: field}>
           <TextInput
-            class={"input",
-            "input-primary",
-            "input-bordered",
-            "input-sm",
-            "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
+            class={
+              "input",
+              "input-primary",
+              "input-bordered",
+              "input-sm",
+              "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+            }
             opts={@opts}
           />
         </InputContext>

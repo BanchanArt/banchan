@@ -27,7 +27,13 @@ defmodule BanchanWeb.StudioLive.Shop do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout current_user={@current_user} flashes={@flash} studio={@studio} current_user_member?={@current_user_member?} tab={:shop}>
+    <StudioLayout
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      current_user_member?={@current_user_member?}
+      tab={:shop}
+    >
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
         <div class="offerings">
           {#for offering <- @offerings}
@@ -37,7 +43,10 @@ defmodule BanchanWeb.StudioLive.Shop do
           {/for}
           {#if @current_user_member?}
             <div class="">
-              <LiveRedirect to={Routes.studio_offerings_index_path(Endpoint, :index, @studio.handle)} class="btn btn-sm text-center rounded-full px-2 py-1 btn-accent">Manage Offerings</LiveRedirect>
+              <LiveRedirect
+                to={Routes.studio_offerings_index_path(Endpoint, :index, @studio.handle)}
+                class="btn btn-sm text-center rounded-full px-2 py-1 btn-accent"
+              >Manage Offerings</LiveRedirect>
             </div>
           {/if}
         </div>
