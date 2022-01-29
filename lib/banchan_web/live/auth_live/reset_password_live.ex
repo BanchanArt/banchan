@@ -37,20 +37,20 @@ defmodule BanchanWeb.ResetPasswordLive do
         <div class="card-body">
           <h1 class="text-2xl">Reset password</h1>
           <Form class="col-span-1" for={@changeset} change="change" submit="submit">
-          <TextInput
-            name={:password}
-            label="New Password"
-            icon="lock"
-            opts={required: true, type: :password}
-          />
-          <TextInput
-            name={:password_confirmation}
-            icon="lock"
-            label="Confirm New Password"
-            opts={required: true, type: :password}
-          />
-          <Submit changeset={@changeset} label="Reset Password" />
-        </Form>
+            <TextInput
+              name={:password}
+              label="New Password"
+              icon="lock"
+              opts={required: true, type: :password}
+            />
+            <TextInput
+              name={:password_confirmation}
+              icon="lock"
+              label="Confirm New Password"
+              opts={required: true, type: :password}
+            />
+            <Submit changeset={@changeset} label="Reset Password" />
+          </Form>
         </div>
       </div>
     </Layout>

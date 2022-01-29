@@ -54,12 +54,15 @@ defmodule BanchanWeb.SettingsLive do
             <option value="dracula">dracula</option>
           </select>
 
-          <div tabindex="0" class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open">
+          <div
+            tabindex="0"
+            class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open"
+          >
             <div class="collapse-title text-xl font-medium">
               Update Email
             </div>
             <div class="collapse-content">
-                            <Form
+              <Form
                 class="col-span-auto"
                 for={@email_changeset}
                 change="change_email"
@@ -72,7 +75,10 @@ defmodule BanchanWeb.SettingsLive do
               </Form>
             </div>
           </div>
-          <div tabindex="0" class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open">
+          <div
+            tabindex="0"
+            class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open"
+          >
             <div class="collapse-title text-xl font-medium">
               Update Password
             </div>

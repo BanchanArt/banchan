@@ -43,11 +43,11 @@ defmodule BanchanWeb.RegisterLive do
             submit="submit"
             trigger_action={@trigger_submit}
           >
-          <EmailInput name={:email} icon="envelope" opts={required: true} />
-          <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-          <TextInput name={:password_confirmation} icon="lock" opts={required: true, type: :password} />
-          <Submit changeset={@changeset} label="Register" />
-        </Form>
+            <EmailInput name={:email} icon="envelope" opts={required: true} />
+            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+            <TextInput name={:password_confirmation} icon="lock" opts={required: true, type: :password} />
+            <Submit changeset={@changeset} label="Register" />
+          </Form>
         </div>
       </div>
     </Layout>

@@ -25,7 +25,6 @@ defmodule BanchanWeb.StudioLive.New do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-
       <div class="card shadow bg-base-200 card-bordered text-base-content">
         <div class="card-body">
           <h1 class="text-2xl">New Studio</h1>
