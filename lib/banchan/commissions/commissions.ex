@@ -13,44 +13,52 @@ defmodule Banchan.Commissions do
 
   ## Examples
 
-      iex> list_commissions()
+      iex> list_commissions(studio)
       [%Commission{}, ...]
 
   """
-  def list_commissions do
-    Repo.all(Commission)
+  def list_commissions(studio) do
+    Repo.all(
+      from c in Commission,
+        where: c.studio_id == ^studio.id
+    )
   end
 
   @doc """
-  Gets a single commission.
+  Gets a single commission for a studio.
 
   Raises `Ecto.NoResultsError` if the Commission does not exist.
 
   ## Examples
 
-      iex> get_commission!(123)
+      iex> get_commission!(studio, "lkajweirj0")
       %Commission{}
 
-      iex> get_commission!(456)
+      iex> get_commission!(studio, "oiwejoa13d")
       ** (Ecto.NoResultsError)
 
   """
-  def get_commission!(id), do: Repo.get!(Commission, id)
+  def get_commission!(studio, public_id) do
+    Repo.one!(
+      from c in Commission,
+        where: c.studio_id == ^studio.id and c.public_id == ^public_id
+    )
+  end
 
   @doc """
   Creates a commission.
 
   ## Examples
 
-      iex> create_commission(%{field: value})
+      iex> create_commission(offering, %{field: value})
       {:ok, %Commission{}}
 
-      iex> create_commission(%{field: bad_value})
+      iex> create_commission(offering, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_commission(offering, attrs \\ %{}) do
-    %Commission{offering_id: offering.id}
+  def create_commission(studio, offering, attrs \\ %{}) do
+    %Commission{public_id: Commission.gen_public_id, studio: studio, offering: offering}
     |> Commission.changeset(attrs)
     |> Repo.insert()
   end

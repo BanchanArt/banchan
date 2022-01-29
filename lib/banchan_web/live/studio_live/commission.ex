@@ -5,7 +5,6 @@ defmodule BanchanWeb.StudioLive.Commission do
   use BanchanWeb, :surface_view
 
   alias Banchan.Commissions
-  alias Banchan.Commissions.Commission
 
   alias BanchanWeb.StudioLive.Components.StudioLayout
 
@@ -21,10 +20,11 @@ defmodule BanchanWeb.StudioLive.Commission do
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
-  def mount(params, session, socket) do
+  def mount(%{"commission_id" => commission_id} = params, session, socket) do
     socket = assign_defaults(session, socket, true)
     socket = assign_studio_defaults(params, socket, false)
-    {:ok, assign(socket, commission: %Commission{})}
+    commission = Commissions.get_commission!(socket.assigns.studio, commission_id)
+    {:ok, assign(socket, commission: commission)}
   end
 
   @impl true

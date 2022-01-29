@@ -60,6 +60,20 @@ defmodule BanchanWeb.StudioLive.Proposal do
   end
 
   @impl true
+  def handle_event("submit", %{"commission" => commission}, socket) do
+    case Commissions.create_commission(socket.assigns.studio, socket.assigns.offering, commission) do
+      {:ok, commission} ->
+        {:noreply,
+         redirect(socket,
+           to: Routes.studio_commission_path(Endpoint, :show, socket.assigns.studio.handle, commission.public_id)
+         )}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
+    end
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <StudioLayout
