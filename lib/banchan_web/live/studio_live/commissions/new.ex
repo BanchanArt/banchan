@@ -110,43 +110,49 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
           </Form>
         </div>
 
-        <div class="col-span-2">
+        <div class="col-span-2 col-end-13 shadow-lg p-6">
           <div id="sidebar">
             <div class="block sidebar-box">
               <Card>
-                <:header>
-                  Selected
-                </:header>
-                <div class="content">
-                  <div class="tags has-addons">
-                    <span class="tag is-medium is-success">
-                      {to_string(@offering.base_price || "No")}
-                    </span>
-                    <span class="tag is-medium">
-                      Base Price
-                    </span>
-                  </div>
+                <:header>Summary</:header>
+                <ul class="divide-y">
+                  <li class="container p-4">
+                    <div class="float-right">
+                      <span class="tag is-medium is-success">
+                        {to_string(@offering.base_price || "No")}
+                      </span>
+                      <span class="tag is-medium">
+                        Base Price
+                      </span>
+                    </div>
+                    <div class="offering-name">
+                      {@offering.name}
+                    </div>
+                    <div>{@offering.description}</div>
+                  </li>
+                  {#for line_item <- Map.get(@changeset.changes, "line_items", [])}
+                    <li class="container p-4">
+                      <div class="float-right">
+                        {to_string(line_item.amount)}
+                      </div>
+                      <div class="line-item-name">
+                        {line_item.name}
+                      </div>
+                    </li>
+                  {/for}
+                </ul>
+                {#if Enum.any?(@offering.options)}
+                  <hr>
+                  <h5>Additional Options</h5>
                   <ul>
-                    {#for line_item <- Map.get(@changeset.changes, "line_items", [])}
+                    {#for option <- @offering.options}
                       <li>
-                        <span>{to_string(line_item.amount)}</span>
-                        <span>{line_item.name}</span>
+                        <span>{to_string(option.price)}</span>
+                        <span>{option.name}</span>
                       </li>
                     {/for}
                   </ul>
-                  {#if Enum.any?(@offering.options)}
-                    <hr>
-                    <h5>Additional Options</h5>
-                    <ul>
-                      {#for option <- @offering.options}
-                        <li>
-                          <span>{to_string(option.price)}</span>
-                          <span>{option.name}</span>
-                        </li>
-                      {/for}
-                    </ul>
-                  {/if}
-                </div>
+                {/if}
               </Card>
             </div>
             <div class="block sidebar-box">
