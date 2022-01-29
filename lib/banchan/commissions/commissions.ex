@@ -41,7 +41,8 @@ defmodule Banchan.Commissions do
   def get_commission!(studio, public_id) do
     Repo.one!(
       from c in Commission,
-        where: c.studio_id == ^studio.id and c.public_id == ^public_id
+        where: c.studio_id == ^studio.id and c.public_id == ^public_id,
+        preload: [:events, :line_items]
     )
   end
 

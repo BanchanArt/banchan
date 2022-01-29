@@ -3,7 +3,7 @@ defmodule Banchan.Repo.Migrations.CreateLineItems do
 
   def change do
     create table(:line_items) do
-      add :amount, :string
+      add :amount, :money_with_currency
       add :name, :string
       add :description, :string
       add :commission_id, references(:commissions, on_delete: :nothing)

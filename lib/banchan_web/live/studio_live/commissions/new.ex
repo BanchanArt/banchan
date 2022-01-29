@@ -53,6 +53,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     changeset =
       %Commission{}
       |> Commissions.change_commission(commission)
+      |> Map.put(:changes, %{line_items: Map.get(socket.assigns.changeset.changes, :line_items, [])})
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)
@@ -98,6 +99,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   @impl true
   def handle_event("submit", %{"commission" => commission}, socket) do
+    commission = Map.put(commission, "line_items", Enum.map(Map.get(socket.assigns.changeset.changes, :line_items, []), &(&1.changes)))
     case Commissions.create_commission(socket.assigns.studio, socket.assigns.offering, commission) do
       {:ok, commission} ->
         {:noreply,
@@ -180,7 +182,8 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 <p>{Money.to_string(
                     Enum.reduce(
                       Map.get(@changeset.changes, :line_items, []),
-                      @offering.base_price,
+                      # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
+                      @offering.base_price || Money.new(0, :USD),
                       fn item, acc -> Money.add(acc, item.changes.amount) end
                     )
                   )}</p>

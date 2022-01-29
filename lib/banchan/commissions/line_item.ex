@@ -11,7 +11,7 @@ defmodule Banchan.Commissions.LineItem do
     field :name, :string
 
     belongs_to :commission, Banchan.Commissions.Commission
-    belongs_to :option, Banchan.Offerings.OfferingOption
+    belongs_to :option, Banchan.Offerings.OfferingOption, foreign_key: :offering_option_id
 
     timestamps()
   end
