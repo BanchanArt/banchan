@@ -17,6 +17,7 @@ defmodule Banchan.Commissions.Commission do
       values: @status_values,
       default: :pending
 
+    has_many :line_items, Banchan.Commissions.LineItem
     has_many :events, Banchan.Commissions.Event
     belongs_to :offering, Banchan.Offerings.Offering
     belongs_to :studio, Banchan.Studios.Studio
@@ -34,6 +35,7 @@ defmodule Banchan.Commissions.Commission do
     commission
     |> cast(attrs, [:title, :description, :tos_ok, :status])
     |> cast_assoc(:events)
+    |> cast_assoc(:line_items)
     |> validate_change(:tos_ok, fn field, tos_ok ->
       if tos_ok do
         []

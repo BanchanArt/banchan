@@ -95,65 +95,19 @@ defmodule BanchanWeb.StudioLive.Proposal do
             <div class="block sidebar-box">
               <Card>
                 <:header>
-                  Choose Offerings
+                  Items
                 </:header>
                 <div class="content">
                   <div class="tags has-addons">
                     <span class="tag is-medium is-success">
-                      $150.00
+                      {to_string(@offering.base_price || "No")}
                     </span>
                     <span class="tag is-medium">
                       Base Price
                     </span>
                   </div>
                   <ul>
-                    <li>One Character</li>
-                    <li>Full Color</li>
-                    <li>Color Background</li>
-                  </ul>
-                  <hr>
-                  <h5>Choose Add-ons</h5>
-                  <ul>
-                    <li>
-                      <div class="tags has-addons">
-                        <span class="tag is-medium is-success">
-                          +$50.00
-                        </span>
-                        <span class="tag is-medium">
-                          Extra Character
-                        </span>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="tags has-addons">
-                        <span class="tag is-medium is-success">
-                          +$50.00
-                        </span>
-                        <span class="tag is-medium">
-                          Extra Character
-                        </span>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="tags has-addons">
-                        <span class="tag is-medium is-success">
-                          +$50.00
-                        </span>
-                        <span class="tag is-medium">
-                          Mecha
-                        </span>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="tags has-addons">
-                        <span class="tag is-medium is-success">
-                          +$TBD
-                        </span>
-                        <span class="tag is-medium">
-                          Custom Request
-                        </span>
-                      </div>
-                    </li>
+                    {IO.inspect(@changeset)}
                   </ul>
                 </div>
               </Card>
