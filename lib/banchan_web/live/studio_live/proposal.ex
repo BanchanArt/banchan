@@ -11,10 +11,9 @@ defmodule BanchanWeb.StudioLive.Proposal do
   alias BanchanWeb.StudioLive.Components.StudioLayout
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{Checkbox, ErrorTag, Field, Label, Submit, TextArea, TextInput}
-  alias Surface.Components.Form.Input.InputContext
 
   alias BanchanWeb.Components.Card
+  alias BanchanWeb.Components.Form.{Checkbox, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.Commissions.Attachments
   import BanchanWeb.StudioLive.Helpers
@@ -28,17 +27,24 @@ defmodule BanchanWeb.StudioLive.Proposal do
 
     if offering.open do
       {:ok,
-      assign(socket,
-        changeset: Commission.changeset(%Commission{}, %{}),
-        offering: offering,
-        terms: terms
-      )}
+       assign(socket,
+         changeset: Commission.changeset(%Commission{}, %{}),
+         offering: offering,
+         terms: terms
+       )}
     else
       # TODO: Maybe show this on this page itself?
-      socket = put_flash(socket, :error, "This commission offering is currently closed. Please try signing up for notifications for when it opens instead.")
+      socket =
+        put_flash(
+          socket,
+          :error,
+          "This commission offering is currently closed. Please try signing up for notifications for when it opens instead."
+        )
+
       {:ok,
-        push_redirect(socket, to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle))
-      }
+       push_redirect(socket,
+         to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+       )}
     end
   end
 
@@ -56,63 +62,31 @@ defmodule BanchanWeb.StudioLive.Proposal do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout current_user={@current_user} flashes={@flash} studio={@studio} current_user_member?={@current_user_member?} tab={:shop}>
+    <StudioLayout
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      current_user_member?={@current_user_member?}
+      tab={:shop}
+    >
       <div class="grid grid-cols-5 gap-4">
         <div class="col-span-3">
           <h1 class="text-2xl">{@offering.name}</h1>
           <h2 class="text-xl">{@offering.description}</h2>
           <Form for={@changeset} change="change" submit="submit">
             <div class="block">
-              <Field class="field" name={:title}>
-                <Label class="label" />
-                <div class="control">
-                  <InputContext :let={form: form, field: field}>
-                    <TextInput
-                      class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                      opts={required: true, placeholder: "Brief Title"}
-                    />
-                  </InputContext>
-                </div>
-                <ErrorTag class="help is-danger" />
-              </Field>
-              <Field class="field" name={:description}>
-                <Label class="label" />
-                <div class="control">
-                  <InputContext :let={form: form, field: field}>
-                    <TextArea
-                      class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                      opts={required: true, placeholder: "Here's what I'd like..."}
-                    />
-                  </InputContext>
-                </div>
-                <ErrorTag class="help is-danger" />
-              </Field>
+              <TextInput name={:title} opts={required: true, placeholder: "A Brief Title"} />
+              <TextArea name={:description} opts={required: true, placeholder: "Here's what I'd like..."} />
             </div>
             <div class="content block">
               <h3>Terms and Conditions</h3>
               <p><strong>These Terms might vary between commission type.</strong></p>
               <div>{raw(@terms)}</div>
             </div>
-            <Field class="field" name={:tos_ok}>
-              <Label class="checkbox is-large">
-                <div class="control">
-                  <InputContext :let={form: form, field: field}>
-                    <Checkbox class={"is-large", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))} opts={required: true} />
-                  </InputContext>
-                  I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
-                </div>
-              </Label>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <div class="field">
-              <div class="control">
-                <Submit
-                  class="btn btn-secondary text-center rounded-full py-1 px-5 m-1"
-                  label="Submit"
-                  opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-                />
-              </div>
-            </div>
+            <Checkbox name={:tos_ok} opts={required: true}>
+              I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
+            </Checkbox>
+            <Submit changeset={@changeset} />
           </Form>
         </div>
 

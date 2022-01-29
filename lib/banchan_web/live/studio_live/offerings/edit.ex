@@ -24,7 +24,13 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
   @impl true
   def render(assigns) do
     ~F"""
-    <Components.StudioLayout current_user={@current_user} flashes={@flash} studio={@studio} current_user_member?={@current_user_member?} tab={:settings}>
+    <Components.StudioLayout
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      current_user_member?={@current_user_member?}
+      tab={:settings}
+    >
       <h1>Edit Offering</h1>
       <Components.Offering id="edit-offering" changeset={@changeset} submit="save" />
     </Components.StudioLayout>

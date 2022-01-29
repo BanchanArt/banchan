@@ -1,4 +1,7 @@
 defmodule Banchan.CommissionsTest do
+  @moduledoc """
+  Tests for Commissions-related functionality.
+  """
   use Banchan.DataCase
 
   alias Banchan.Commissions
@@ -6,28 +9,38 @@ defmodule Banchan.CommissionsTest do
   describe "commissions" do
     alias Banchan.Commissions.Commission
 
-    @valid_attrs %{status: "pending", title: "some title"}
-    @update_attrs %{status: "accepted", title: "some updated title"}
+    @valid_attrs %{
+      status: "pending",
+      title: "some title",
+      description: "Some Description",
+      tos_ok: true
+    }
+    @update_attrs %{
+      status: "accepted",
+      title: "some updated title",
+      description: "Some updated description",
+      tos_ok: true
+    }
     @invalid_attrs %{status: nil, title: nil}
 
     def commission_fixture(attrs \\ %{}) do
       {:ok, user} =
         Banchan.Accounts.register_admin(%{
-          handle: "zkat",
-          email: "kat@dwg.dev",
+          handle: "test-admin",
+          email: "test@example.com",
           password: "foobarbazquux",
           password_confirmation: "foobarbazquux"
         })
 
       {:ok, studio} =
         Banchan.Studios.new_studio(%Banchan.Studios.Studio{artists: [user]}, %{
-          handle: "kitteh-studio",
-          name: "Kitteh Studio",
-          description: "Kitteh-related stuff"
+          handle: "test-studio",
+          name: "Test Studio",
+          description: "stuff for testing"
         })
 
       {:ok, offering} =
-        Banchan.Studios.new_offering(studio, %{
+        Banchan.Offerings.new_offering(studio, %{
           type: "illustration",
           index: 0,
           name: "Illustration",
@@ -41,11 +54,13 @@ defmodule Banchan.CommissionsTest do
       commission
     end
 
+    @tag :skip
     test "list_commissions/0 returns all commissions" do
       commission = commission_fixture()
       assert Commissions.list_commissions() == [commission]
     end
 
+    @tag :skip
     test "get_commission!/1 returns the commission with given id" do
       commission = commission_fixture()
       assert Commissions.get_commission!(commission.id) == commission

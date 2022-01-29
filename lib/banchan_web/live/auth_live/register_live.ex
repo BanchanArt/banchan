@@ -5,11 +5,11 @@ defmodule BanchanWeb.RegisterLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{EmailInput, ErrorTag, Field, Label, Submit, TextInput}
-  alias Surface.Components.Form.Input.InputContext
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
+
+  alias BanchanWeb.Components.Form.{EmailInput, Submit, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -42,60 +42,10 @@ defmodule BanchanWeb.RegisterLive do
           submit="submit"
           trigger_action={@trigger_submit}
         >
-          <Field class="field" name={:email}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <EmailInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true}
-                />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-envelope" />
-              </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:password}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true, type: :password}
-                />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:password_confirmation}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true, type: :password}
-                />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <div class="field">
-            <div class="control">
-              <Submit
-                class="btn text-center rounded-full py-1 px-5 btn-secondary m-1"
-                label="Register"
-                opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-              />
-            </div>
-          </div>
+          <EmailInput name={:email} icon="envelope" opts={required: true} />
+          <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+          <TextInput name={:password_confirmation} icon="lock" opts={required: true, type: :password} />
+          <Submit changeset={@changeset} label="Register" />
         </Form>
       </div>
     </Layout>

@@ -5,9 +5,10 @@ defmodule BanchanWeb.ConfirmationLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{EmailInput, ErrorTag, Field, Label, Submit}
 
   alias Banchan.Accounts
+
+  alias BanchanWeb.Components.Form.{EmailInput, Submit}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -24,13 +25,7 @@ defmodule BanchanWeb.ConfirmationLive do
     <Layout current_user={@current_user} flashes={@flash}>
       <h1 class="text-2xl">Resend confirmation instructions</h1>
       <Form for={:user} submit="submit">
-        <Field class="field" name={:email}>
-          <Label class="label" />
-          <div class="control">
-            <EmailInput opts={required: true} />
-          </div>
-          <ErrorTag class="help is-danger" />
-        </Field>
+        <EmailInput name={:email} opts={required: true} />
         <Submit label="Resend confirmation information" />
       </Form>
     </Layout>

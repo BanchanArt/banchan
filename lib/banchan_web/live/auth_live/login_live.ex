@@ -5,9 +5,8 @@ defmodule BanchanWeb.LoginLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{Checkbox, EmailInput, ErrorTag, Field, Label, Submit, TextInput}
-  alias Surface.Components.Form.Input.InputContext
 
+  alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -37,67 +36,10 @@ defmodule BanchanWeb.LoginLive do
             submit="submit"
             trigger_action={@trigger_submit}
           >
-            <Field class="field" name={:email}>
-              <Label class="label" />
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <EmailInput
-                    class={
-                      "input",
-                      "input-primary",
-                      "input-bordered",
-                      "input-sm",
-                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                    }
-                    opts={required: true}
-                  />
-                </InputContext>
-
-                <span class="icon is-small is-left">
-                  <i class="fas fa-envelope" />
-                </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:password}>
-              <Label class="label" />
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <TextInput
-                    class={
-                      "input",
-                      "input-primary",
-                      "input-bordered",
-                      "input-sm",
-                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                    }
-                    opts={required: true, type: :password}
-                  />
-                </InputContext>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock" />
-                </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:remember_me}>
-              <div class="control">
-                <Label class="checkbox">
-                  <Checkbox class="checkbox checkbox-secondary checkbox-sm" />
-                  Keep me logged in for 60 days
-                </Label>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <div class="field">
-              <div class="control">
-                <Submit
-                  class="btn text-center rounded-full py-1 px-5 btn-secondary m-1"
-                  label="Log in"
-                  opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-                />
-              </div>
-            </div>
+            <EmailInput name={:email} icon="envelope" opts={required: true} />
+            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+            <Checkbox name={:remember_me}>Keep me logged in for 60 days.</Checkbox>
+            <Submit changeset={@changeset} label="Log in" />
           </Form>
         </div>
       </div>

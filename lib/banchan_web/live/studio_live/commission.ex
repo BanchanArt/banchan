@@ -30,7 +30,13 @@ defmodule BanchanWeb.StudioLive.Commission do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout current_user={@current_user} flashes={@flash} studio={@studio} current_user_member?={@current_user_member?} tab={:shop}>
+    <StudioLayout
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      current_user_member?={@current_user_member?}
+      tab={:shop}
+    >
       <div>
         <h1 class="text-3xl">Two-character drawing of me and my gf's FFXIV OCs</h1>
         <h2 class="text-lg"><strong>{@current_user.handle}</strong> requested this commission 3 days ago.</h2>

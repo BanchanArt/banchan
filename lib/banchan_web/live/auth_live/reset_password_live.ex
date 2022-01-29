@@ -5,11 +5,11 @@ defmodule BanchanWeb.ResetPasswordLive do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Field, Label, Submit, TextInput}
-  alias Surface.Components.Form.Input.InputContext
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
+
+  alias BanchanWeb.Components.Form.{Submit, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -36,45 +36,19 @@ defmodule BanchanWeb.ResetPasswordLive do
       <h1 class="text-2xl">Reset password</h1>
       <div class="grid grid-cols-3 gap-4">
         <Form class="col-span-1" for={@changeset} change="change" submit="submit">
-          <Field class="field" name={:password}>
-            <Label class="label">New Password</Label>
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true, type: :password}
-                />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:password_confirmation}>
-            <Label class="label">Confirm New Password</Label>
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true, type: :password}
-                />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock" />
-              </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <div class="field">
-            <div class="control">
-              <Submit
-                class="btn text-center rounded-full py-1 px-5 btn-secondary m-1"
-                label="Reset password"
-                opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-              />
-            </div>
-          </div>
+          <TextInput
+            name={:password}
+            label="New Password"
+            icon="lock"
+            opts={required: true, type: :password}
+          />
+          <TextInput
+            name={:password_confirmation}
+            icon="lock"
+            label="Confirm New Password"
+            opts={required: true, type: :password}
+          />
+          <Submit changeset={@changeset} label="Reset Password" />
         </Form>
       </div>
     </Layout>

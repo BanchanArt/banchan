@@ -6,19 +6,9 @@ defmodule BanchanWeb.SettingsLive do
 
   alias Surface.Components.Form
 
-  alias Surface.Components.Form.{
-    EmailInput,
-    ErrorTag,
-    Field,
-    Label,
-    PasswordInput,
-    Submit,
-    TextInput
-  }
-
-  alias Surface.Components.Form.Input.InputContext
-
   alias Banchan.Accounts
+
+  alias BanchanWeb.Components.Form.{EmailInput, Submit, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -52,53 +42,9 @@ defmodule BanchanWeb.SettingsLive do
             submit="submit_email"
             opts={autocomplete: "off"}
           >
-            <Field class="field" name={:email}>
-              <Label class="label" />
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <EmailInput class={
-                    "input",
-                    "input-primary",
-                    "input-bordered",
-                    "input-sm",
-                    "text-base-content",
-                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                  } />
-                </InputContext>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-envelope" />
-                </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:password}>
-              <Label class="label" />
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <PasswordInput class={
-                    "input",
-                    "input-primary",
-                    "input-bordered",
-                    "input-sm",
-                    "text-base-content",
-                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                  } />
-                </InputContext>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock" />
-                </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <div class="field">
-              <div class="control">
-                <Submit
-                  class="text-center rounded-full py-1 px-5 btn-secondary m-1"
-                  label="Save"
-                  opts={disabled: Enum.empty?(@email_changeset.changes) || !@email_changeset.valid?}
-                />
-              </div>
-            </div>
+            <EmailInput name={:email} icon="envelope" opts={required: true} />
+            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+            <Submit changeset={@email_changeset} label="Save" />
           </Form>
           <div class="divider" />
           <h2 class="text-xl card-title">Update Password</h2>
@@ -109,81 +55,20 @@ defmodule BanchanWeb.SettingsLive do
             submit="submit_password"
             opts={autocomplete: "off"}
           >
-            <Field class="field" name={:password}>
-              <Label class="label">New Password</Label>
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <TextInput
-                    class={
-                      "input",
-                      "input-primary",
-                      "input-bordered",
-                      "input-sm",
-                      "text-base-content",
-                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                    }
-                    opts={required: true, type: :password}
-                  />
-                </InputContext>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock" />
-                </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:password_confirmation}>
-              <Label class="label">New Password Confirmation</Label>
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <TextInput
-                    class={
-                      "input",
-                      "input-primary",
-                      "input-bordered",
-                      "input-sm",
-                      "text-base-content",
-                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                    }
-                    opts={required: true, type: :password}
-                  />
-                </InputContext>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock" />
-                </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <Field class="field" name={:current_confirmation}>
-              <Label class="label" />
-              <div class="control has-icons-left">
-                <InputContext :let={form: form, field: field}>
-                  <TextInput
-                    class={
-                      "input",
-                      "input-primary",
-                      "input-bordered",
-                      "input-sm",
-                      "text-base-content",
-                      "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-                    }
-                    opts={required: true, type: :password}
-                  />
-                </InputContext>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock" />
-                </span>
-              </div>
-              <ErrorTag class="help is-danger" />
-            </Field>
-            <div class="field">
-              <div class="control">
-                <Submit
-                  class="text-center rounded-full py-1 px-5 btn-secondary m-1"
-                  label="Save"
-                  opts={disabled: Enum.empty?(@password_changeset.changes) || !@password_changeset.valid?}
-                />
-              </div>
-            </div>
+            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+            <TextInput
+              name={:password_confirmation}
+              icon="lock"
+              label="New Password Confirmation"
+              opts={required: true, type: :password}
+            />
+            <TextInput
+              name={:current_confirmation}
+              icon="lock"
+              label="New Password Confirmation"
+              opts={required: true, type: :password}
+            />
+            <Submit changeset={@password_changeset} label="Save" />
           </Form>
         </div>
       </div>

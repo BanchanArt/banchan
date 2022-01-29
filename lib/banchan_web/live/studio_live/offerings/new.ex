@@ -23,7 +23,13 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   @impl true
   def render(assigns) do
     ~F"""
-    <Components.StudioLayout current_user={@current_user} flashes={@flash} studio={@studio} current_user_member?={@current_user_member?} tab={:settings}>
+    <Components.StudioLayout
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      current_user_member?={@current_user_member?}
+      tab={:settings}
+    >
       <h1>New Offering</h1>
       <h2>Make a new offering to the gods</h2>
       <Components.Offering id="new-offering" changeset={@changeset} submit="save" />

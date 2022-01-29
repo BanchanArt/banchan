@@ -6,11 +6,11 @@ defmodule BanchanWeb.StudioLive.New do
 
   import Slug
   alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Field, Label, Submit, TextArea, TextInput}
-  alias Surface.Components.Form.Input.InputContext
 
   alias Banchan.Studios
   alias Banchan.Studios.Studio
+
+  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -35,57 +35,10 @@ defmodule BanchanWeb.StudioLive.New do
           submit="submit"
           opts={autocomplete: "off"}
         >
-          <Field class="field" name={:name}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true}
-                />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-user" />
-              </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:handle}>
-            <Label class="label" />
-            <div class="control has-icons-left">
-              <InputContext :let={form: form, field: field}>
-                <TextInput
-                  class={"input", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true}
-                />
-              </InputContext>
-              <span class="icon is-small is-left">
-                <i class="fas fa-at" />
-              </span>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <Field class="field" name={:description}>
-            <Label class="label" />
-            <div class="control">
-              <InputContext :let={form: form, field: field}>
-                <TextArea
-                  class={"textarea", "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))}
-                  opts={required: true}
-                />
-              </InputContext>
-            </div>
-            <ErrorTag class="help is-danger" />
-          </Field>
-          <div class="field">
-            <div class="control">
-              <Submit
-                class="btn btn-secondary text-center rounded-full py-1 px-5 m-1"
-                label="Save"
-                opts={disabled: Enum.empty?(@changeset.changes) || !@changeset.valid?}
-              />
-            </div>
-          </div>
+          <TextInput name={:name} icon="user" opts={required: true} />
+          <TextInput name={:handle} icon="at" opts={required: true} />
+          <TextArea name={:description} opts={required: true} />
+          <Submit changeset={@changeset} label="Save" />
         </Form>
       </div>
     </Layout>

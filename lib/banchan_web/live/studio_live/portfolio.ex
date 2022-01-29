@@ -17,7 +17,13 @@ defmodule BanchanWeb.StudioLive.Portfolio do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout current_user={@current_user} flashes={@flash} studio={@studio} current_user_member?={@current_user_member?} tab={:portfolio}>
+    <StudioLayout
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      current_user_member?={@current_user_member?}
+      tab={:portfolio}
+    >
       Portfolio goes here
     </StudioLayout>
     """
