@@ -47,7 +47,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   @impl true
   def handle_event("remove_option", %{"value" => index}, socket) do
     {index, ""} = Integer.parse(index)
-    options = Map.get(socket.assigns.changeset.changes, :options, [])
+    options = Ecto.Changeset.fetch_field!(socket.assigns.changeset, :options)
     options = List.delete_at(options, index)
 
     offering_changeset =
