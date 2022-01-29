@@ -58,7 +58,7 @@ defmodule Banchan.Commissions do
 
   """
   def create_commission(studio, offering, attrs \\ %{}) do
-    %Commission{public_id: Commission.gen_public_id, studio: studio, offering: offering}
+    %Commission{public_id: Commission.gen_public_id(), studio: studio, offering: offering}
     |> Commission.changeset(attrs)
     |> Repo.insert()
   end

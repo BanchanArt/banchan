@@ -65,7 +65,13 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
       {:ok, commission} ->
         {:noreply,
          redirect(socket,
-           to: Routes.studio_commissions_show_path(Endpoint, :show, socket.assigns.studio.handle, commission.public_id)
+           to:
+             Routes.studio_commissions_show_path(
+               Endpoint,
+               :show,
+               socket.assigns.studio.handle,
+               commission.public_id
+             )
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -122,23 +128,23 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                   </div>
                   <ul>
                     {#for line_item <- Map.get(@changeset.changes, "line_items", [])}
-                    <li>
-                      <span>{to_string(line_item.amount)}</span>
-                      <span>{line_item.name}</span>
-                    </li>
+                      <li>
+                        <span>{to_string(line_item.amount)}</span>
+                        <span>{line_item.name}</span>
+                      </li>
                     {/for}
                   </ul>
                   {#if Enum.any?(@offering.options)}
-                  <hr />
-                  <h5>Additional Options</h5>
-                  <ul>
-                    {#for option <- @offering.options}
-                    <li>
-                      <span>{to_string(option.price)}</span>
-                      <span>{option.name}</span>
-                    </li>
-                    {/for}
-                  </ul>
+                    <hr>
+                    <h5>Additional Options</h5>
+                    <ul>
+                      {#for option <- @offering.options}
+                        <li>
+                          <span>{to_string(option.price)}</span>
+                          <span>{option.name}</span>
+                        </li>
+                      {/for}
+                    </ul>
                   {/if}
                 </div>
               </Card>

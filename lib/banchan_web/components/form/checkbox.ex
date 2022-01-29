@@ -18,19 +18,19 @@ defmodule BanchanWeb.Components.Form.Checkbox do
     ~F"""
     <Field class="field" name={@name}>
       <Label class={"checkbox is-large control", @wrapper_class}>
-          <InputContext :let={form: form, field: field}>
-            <Checkbox
-              class={
-                @class,
-                "checkbox",
-                "checkbox-primary",
-                "is-large",
-                "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-              }
-              opts={@opts}
-            />
-          </InputContext>
-          <#slot />
+        <InputContext :let={form: form, field: field}>
+          <Checkbox
+            class={
+              @class,
+              "checkbox",
+              "checkbox-primary",
+              "is-large",
+              "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+            }
+            opts={@opts}
+          />
+        </InputContext>
+        <#slot />
       </Label>
       <ErrorTag class="help is-danger" />
     </Field>
