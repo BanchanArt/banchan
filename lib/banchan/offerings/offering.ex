@@ -18,7 +18,7 @@ defmodule Banchan.Offerings.Offering do
     field :terms, :string
 
     belongs_to :studio, Studio
-    has_many :options, OfferingOption
+    has_many :options, OfferingOption, on_replace: :delete_if_exists
 
     timestamps()
   end
