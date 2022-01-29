@@ -32,15 +32,17 @@ defmodule BanchanWeb.StudioLive.Settings do
       current_user_member?={@current_user_member?}
       tab={:settings}
     >
-      <h1 class="text-2xl">Edit Studio</h1>
-      <h2 class="text-xl">{@studio.name}</h2>
-      <div class="grid grid-cols-3 gap-4">
-        <Form class="col-span-one" for={@changeset} change="change" submit="submit">
-          <TextInput name={:name} icon="user" opts={required: true} />
-          <TextInput name={:handle} icon="at" opts={required: true} />
-          <TextArea name={:description} opts={required: true} />
-          <Submit changeset={@changeset} label="Save" />
-        </Form>
+      <div class="card shadow bg-base-200 card-bordered text-base-content">
+        <div class="card-body">
+          <h1 class="text-2xl">Edit Studio</h1>
+          <h2 class="text-xl">{@studio.name}</h2>
+          <Form class="col-span-one" for={@changeset} change="change" submit="submit">
+            <TextInput name={:name} icon="user" opts={required: true} />
+            <TextInput name={:handle} icon="at" opts={required: true} />
+            <TextArea name={:description} opts={required: true} />
+            <Submit changeset={@changeset} label="Save" />
+          </Form>
+        </div>
       </div>
     </StudioLayout>
     """

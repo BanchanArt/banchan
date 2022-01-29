@@ -91,29 +91,6 @@ defmodule BanchanWeb.Components.Nav do
               </span>
             </LiveRedirect>
           {/if}
-          <select
-            data-choose-theme
-            class="select select-bordered select-secondary select-sm bg-primary-content text-primary outline-offset-0"
-            :hook="Theme"
-            id="themeChange"
-          >
-            <option disabled="disabled" selected="selected">Theme</option>
-            <option value="emerald">Emerald</option>
-            <option value="halloween">Halloween</option>
-            <option value="garden">Garden</option>
-            <option value="forest">Forest</option>
-            <option value="synthwave">Synthwave</option>
-            <option value="cupcake">Cupcake</option>
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
-            <option value="cmyk">cmyk</option>
-            <option value="wireframe">wireframe</option>
-            <option value="dracula">dracula</option>
-            <option value="lofi">lofi</option>
-            <option value="pastel">pastel</option>
-            <option value="black">black</option>
-            <option value="luxury">luxury</option>
-          </select>
         </div>
       </div>
     </nav>

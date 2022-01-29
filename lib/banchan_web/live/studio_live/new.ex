@@ -25,21 +25,23 @@ defmodule BanchanWeb.StudioLive.New do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">New Studio</h1>
 
-      <div class="grid grid-cols-3 gap-4">
-        <Form
-          class="col-span-1"
-          for={@changeset}
-          change="change"
-          submit="submit"
-          opts={autocomplete: "off"}
-        >
-          <TextInput name={:name} icon="user" opts={required: true} />
-          <TextInput name={:handle} icon="at" opts={required: true} />
-          <TextArea name={:description} opts={required: true} />
-          <Submit changeset={@changeset} label="Save" />
-        </Form>
+      <div class="card shadow bg-base-200 card-bordered text-base-content">
+        <div class="card-body">
+          <h1 class="text-2xl">New Studio</h1>
+          <Form
+            class="col-span-1 card-body"
+            for={@changeset}
+            change="change"
+            submit="submit"
+            opts={autocomplete: "off"}
+          >
+            <TextInput name={:name} icon="user" opts={required: true} />
+            <TextInput name={:handle} icon="at" opts={required: true} />
+            <TextArea name={:description} opts={required: true} />
+            <Submit changeset={@changeset} label="Save" />
+          </Form>
+        </div>
       </div>
     </Layout>
     """
