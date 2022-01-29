@@ -45,7 +45,7 @@ defmodule BanchanWeb.StudioLive.Shop do
             <div class="">
               <LiveRedirect
                 to={Routes.studio_offerings_index_path(Endpoint, :index, @studio.handle)}
-                class="btn btn-sm text-center rounded-full px-2 py-1 btn-accent"
+                class="btn btn-sm text-center rounded-full m-5 btn-warning"
               >Manage Offerings</LiveRedirect>
             </div>
           {/if}

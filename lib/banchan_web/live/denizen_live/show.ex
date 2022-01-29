@@ -77,7 +77,7 @@ defmodule BanchanWeb.DenizenLive.Show do
               <LiveRedirect
                 label="Edit"
                 to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)}
-                class="text-center rounded-full py-1 px-5 bg-amber-200 text-black m-1"
+                class="text-center  btn btn-sm btn-primary m-3"
               />
             {/if}
           </div>
