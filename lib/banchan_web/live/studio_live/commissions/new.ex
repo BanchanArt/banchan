@@ -5,14 +5,14 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   use BanchanWeb, :surface_view
 
   alias Banchan.Commissions
-  alias Banchan.Commissions.Commission
+  alias Banchan.Commissions.{Commission, LineItem}
   alias Banchan.Offerings
 
   alias BanchanWeb.StudioLive.Components.StudioLayout
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Card
+  alias BanchanWeb.Components.{Button, Card}
   alias BanchanWeb.Components.Form.{Checkbox, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.Commissions.Attachments
@@ -57,6 +57,43 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
     socket = assign(socket, changeset: changeset)
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("add_option", %{"value" => idx}, socket) do
+    {idx, ""} = Integer.parse(idx)
+    {:ok, option} = Enum.fetch(socket.assigns.offering.options, idx)
+
+    line_item =
+      %LineItem{option: option}
+      |> LineItem.changeset(%{
+        amount: option.price,
+        name: option.name,
+        description: option.description
+      })
+
+    line_items = Map.get(socket.assigns.changeset.changes, :line_items, []) ++ [line_item]
+
+    changeset =
+      socket.assigns.changeset
+      |> Map.put(:changes, %{line_items: line_items})
+
+    {:noreply, assign(socket, changeset: changeset)}
+  end
+
+  @impl true
+  def handle_event("remove_option", %{"value" => idx}, socket) do
+    {idx, ""} = Integer.parse(idx)
+
+    line_items =
+      Map.get(socket.assigns.changeset.changes, :line_items, [])
+      |> List.delete_at(idx)
+
+    changeset =
+      socket.assigns.changeset
+      |> Map.put(:changes, %{line_items: line_items})
+
+    {:noreply, assign(socket, changeset: changeset)}
   end
 
   @impl true
@@ -130,25 +167,32 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                     </div>
                     <div>{@offering.description}</div>
                   </li>
-                  {#for line_item <- Map.get(@changeset.changes, "line_items", [])}
-                    <li class="container p-4">
-                      <div class="float-right">
-                        {to_string(line_item.amount)}
-                      </div>
-                      <div class="line-item-name">
-                        {line_item.name}
-                      </div>
+                  {#for {line_item, idx} <- Enum.with_index(Map.get(@changeset.changes, :line_items, []))}
+                    <li>
+                      <span>{to_string(line_item.changes.amount)}</span>
+                      <span>{line_item.changes.name}</span>
+                      <Button click="remove_option" value={idx}>Remove</Button>
                     </li>
                   {/for}
                 </ul>
+                <hr>
+                <h5>Estimated Total</h5>
+                <p>{Money.to_string(
+                    Enum.reduce(
+                      Map.get(@changeset.changes, :line_items, []),
+                      @offering.base_price,
+                      fn item, acc -> Money.add(acc, item.changes.amount) end
+                    )
+                  )}</p>
                 {#if Enum.any?(@offering.options)}
                   <hr>
                   <h5>Additional Options</h5>
                   <ul>
-                    {#for option <- @offering.options}
+                    {#for {option, idx} <- Enum.with_index(@offering.options)}
                       <li>
                         <span>{to_string(option.price)}</span>
                         <span>{option.name}</span>
+                        <Button click="add_option" value={idx}>Add</Button>
                       </li>
                     {/for}
                   </ul>
