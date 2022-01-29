@@ -33,9 +33,10 @@ defmodule BanchanWeb.ResetPasswordLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Reset password</h1>
-      <div class="grid grid-cols-3 gap-4">
-        <Form class="col-span-1" for={@changeset} change="change" submit="submit">
+      <div class="card shadow bg-base-200 card-bordered text-base-content">
+        <div class="card-body">
+          <h1 class="text-2xl">Reset password</h1>
+          <Form class="col-span-1" for={@changeset} change="change" submit="submit">
           <TextInput
             name={:password}
             label="New Password"
@@ -50,6 +51,7 @@ defmodule BanchanWeb.ResetPasswordLive do
           />
           <Submit changeset={@changeset} label="Reset Password" />
         </Form>
+        </div>
       </div>
     </Layout>
     """
