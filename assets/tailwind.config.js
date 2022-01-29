@@ -1,5 +1,5 @@
 module.exports = {
-  content: 
+  content:
     ["./js/**/*.js", "../lib/*_web.ex", "../lib/*_web/**/*.*ex"],
   plugins: [
     require('@tailwindcss/aspect-ratio'),
@@ -34,7 +34,6 @@ module.exports = {
       'fantasy',
       'dracula',
       'cmyk'
-      },
     ],
   },
 };
