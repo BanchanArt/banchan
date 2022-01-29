@@ -17,20 +17,20 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   def render(assigns) do
     ~F"""
     <Field class="field" name={@name}>
-      <Label class="checkbox is-large">
-        <div class={"control", @wrapper_class}>
+      <Label class={"checkbox is-large control", @wrapper_class}>
           <InputContext :let={form: form, field: field}>
             <Checkbox
               class={
                 @class,
+                "checkbox",
+                "checkbox-primary",
                 "is-large",
                 "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
               }
               opts={@opts}
             />
           </InputContext>
-        </div>
-        <#slot />
+          <#slot />
       </Label>
       <ErrorTag class="help is-danger" />
     </Field>

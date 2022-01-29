@@ -59,10 +59,10 @@ defmodule BanchanWeb.DenizenLive.EditTest do
       rendered_html = render(page_live)
 
       assert disconnected_html =~
-               "<button class=\"btn btn-secondary rounded-full py-1 px-5\" disabled=\"disabled\" type=\"submit\">"
+               "<button class=\"btn text-center rounded-full py-1 px-5 btn-secondary m-1\" disabled=\"disabled\" type=\"submit\">"
 
       assert rendered_html =~
-               "<button class=\"btn btn-secondary rounded-full py-1 px-5\" disabled=\"disabled\" type=\"submit\">"
+               "<button class=\"btn text-center rounded-full py-1 px-5 btn-secondary m-1\" disabled=\"disabled\" type=\"submit\">"
 
       rendered =
         page_live
@@ -72,7 +72,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
         })
 
       assert rendered =~
-               "<button class=\"btn btn-secondary rounded-full py-1 px-5\" type=\"submit\">"
+               "<button class=\"btn text-center rounded-full py-1 px-5 btn-secondary m-1\" type=\"submit\">"
     end
 
     test "updates profile values on change, but does not change user in db", %{

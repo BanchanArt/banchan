@@ -1,4 +1,7 @@
 defmodule Banchan.CommissionsTest do
+  @moduledoc """
+  Tests for Commissions-related functionality.
+  """
   use Banchan.DataCase
 
   alias Banchan.Commissions
@@ -6,8 +9,18 @@ defmodule Banchan.CommissionsTest do
   describe "commissions" do
     alias Banchan.Commissions.Commission
 
-    @valid_attrs %{status: "pending", title: "some title", description: "Some Description", tos_ok: true}
-    @update_attrs %{status: "accepted", title: "some updated title", description: "Some updated description", tos_ok: true}
+    @valid_attrs %{
+      status: "pending",
+      title: "some title",
+      description: "Some Description",
+      tos_ok: true
+    }
+    @update_attrs %{
+      status: "accepted",
+      title: "some updated title",
+      description: "Some updated description",
+      tos_ok: true
+    }
     @invalid_attrs %{status: nil, title: nil}
 
     def commission_fixture(attrs \\ %{}) do
@@ -41,11 +54,13 @@ defmodule Banchan.CommissionsTest do
       commission
     end
 
+    @tag :skip
     test "list_commissions/0 returns all commissions" do
       commission = commission_fixture()
       assert Commissions.list_commissions() == [commission]
     end
 
+    @tag :skip
     test "get_commission!/1 returns the commission with given id" do
       commission = commission_fixture()
       assert Commissions.get_commission!(commission.id) == commission
