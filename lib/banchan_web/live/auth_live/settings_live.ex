@@ -32,44 +32,75 @@ defmodule BanchanWeb.SettingsLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <h1 class="text-2xl">Account Settings</h1>
-      <div class="card shadow bg-neutral card-bordered text-neutral-content">
+      <div class="card shadow bg-base-200 card-bordered text-base-content">
         <div class="card-body">
-          <h2 class="text-xl card-title">Update Email</h2>
-          <Form
-            class="col-span-1"
-            for={@email_changeset}
-            change="change_email"
-            submit="submit_email"
-            opts={autocomplete: "off"}
+          <h2 class="text-xl card-title">Appearance</h2>
+          <select
+            data-choose-theme
+            class="select select-bordered select-secondary select-sm bg-primary-content text-primary outline-offset-0 w-96"
+            :hook="Theme"
+            id="themeChange"
           >
-            <EmailInput name={:email} icon="envelope" opts={required: true} />
-            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-            <Submit changeset={@email_changeset} label="Save" />
-          </Form>
-          <div class="divider" />
-          <h2 class="text-xl card-title">Update Password</h2>
-          <Form
-            class="col-span-1"
-            for={@password_changeset}
-            change="change_password"
-            submit="submit_password"
-            opts={autocomplete: "off"}
-          >
-            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-            <TextInput
-              name={:password_confirmation}
-              icon="lock"
-              label="New Password Confirmation"
-              opts={required: true, type: :password}
-            />
-            <TextInput
-              name={:current_confirmation}
-              icon="lock"
-              label="New Password Confirmation"
-              opts={required: true, type: :password}
-            />
-            <Submit changeset={@password_changeset} label="Save" />
-          </Form>
+            <option disabled="disabled" selected="selected">Theme</option>
+            <option value="emerald">Emerald</option>
+            <option value="halloween">Halloween</option>
+            <option value="garden">Garden</option>
+            <option value="forest">Forest</option>
+            <option value="synthwave">Synthwave</option>
+            <option value="cupcake">Cupcake</option>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+            <option value="cmyk">cmyk</option>
+            <option value="dracula">dracula</option>
+          </select>
+
+          <div tabindex="0" class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open">
+            <div class="collapse-title text-xl font-medium">
+              Update Email
+            </div>
+            <div class="collapse-content">
+                            <Form
+                class="col-span-auto"
+                for={@email_changeset}
+                change="change_email"
+                submit="submit_email"
+                opts={autocomplete: "off"}
+              >
+                <EmailInput name={:email} icon="envelope" opts={required: true} />
+                <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+                <Submit changeset={@email_changeset} label="Save" />
+              </Form>
+            </div>
+          </div>
+          <div tabindex="0" class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open">
+            <div class="collapse-title text-xl font-medium">
+              Update Password
+            </div>
+            <div class="collapse-content">
+              <Form
+                class="col-span-auto"
+                for={@password_changeset}
+                change="change_password"
+                submit="submit_password"
+                opts={autocomplete: "off"}
+              >
+                <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+                <TextInput
+                  name={:password_confirmation}
+                  icon="lock"
+                  label="New Password Confirmation"
+                  opts={required: true, type: :password}
+                />
+                <TextInput
+                  name={:current_confirmation}
+                  icon="lock"
+                  label="New Password Confirmation"
+                  opts={required: true, type: :password}
+                />
+                <Submit changeset={@password_changeset} label="Save" />
+              </Form>
+            </div>
+          </div>
         </div>
       </div>
     </Layout>
