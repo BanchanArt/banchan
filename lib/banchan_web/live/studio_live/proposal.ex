@@ -95,7 +95,7 @@ defmodule BanchanWeb.StudioLive.Proposal do
             <div class="block sidebar-box">
               <Card>
                 <:header>
-                  Items
+                  Selected
                 </:header>
                 <div class="content">
                   <div class="tags has-addons">
@@ -107,8 +107,25 @@ defmodule BanchanWeb.StudioLive.Proposal do
                     </span>
                   </div>
                   <ul>
-                    {IO.inspect(@changeset)}
+                    {#for line_item <- Map.get(@changeset.changes, "line_items", [])}
+                    <li>
+                      <span>{to_string(line_item.amount)}</span>
+                      <span>{line_item.name}</span>
+                    </li>
+                    {/for}
                   </ul>
+                  {#if Enum.any?(@offering.options)}
+                  <hr />
+                  <h5>Additional Options</h5>
+                  <ul>
+                    {#for option <- @offering.options}
+                    <li>
+                      <span>{to_string(option.price)}</span>
+                      <span>{option.name}</span>
+                    </li>
+                    {/for}
+                  </ul>
+                  {/if}
                 </div>
               </Card>
             </div>
