@@ -47,8 +47,8 @@ defmodule BanchanWeb.Router do
     live "/studios/:handle/offerings", StudioLive.Offerings.Index, :index
     live "/studios/:handle/offerings/new", StudioLive.Offerings.New, :new
     live "/studios/:handle/offerings/edit/:offering_type", StudioLive.Offerings.Edit, :edit
-    live "/studios/:handle/commissions/new/:offering_type", StudioLive.Proposal, :show
-    live "/studios/:handle/commissions/:commission_id", StudioLive.Commission, :show
+    live "/studios/:handle/commissions/new/:offering_type", StudioLive.Commissions.New, :new
+    live "/studios/:handle/commissions/:commission_id", StudioLive.Commissions.Show, :show
 
     live "/dashboard", DashboardLive, :index
 

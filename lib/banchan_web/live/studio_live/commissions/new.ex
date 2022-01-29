@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Proposal do
+defmodule BanchanWeb.StudioLive.Commissions.New do
   @moduledoc """
   Subpage for creating a new commission based on an offering type.
   """
@@ -65,7 +65,7 @@ defmodule BanchanWeb.StudioLive.Proposal do
       {:ok, commission} ->
         {:noreply,
          redirect(socket,
-           to: Routes.studio_commission_path(Endpoint, :show, socket.assigns.studio.handle, commission.public_id)
+           to: Routes.studio_commissions_show_path(Endpoint, :show, socket.assigns.studio.handle, commission.public_id)
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
