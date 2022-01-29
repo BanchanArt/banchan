@@ -1,4 +1,7 @@
 defmodule Banchan.Commissions.LineItem do
+  @moduledoc """
+  Main module for Commission line item data.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 
