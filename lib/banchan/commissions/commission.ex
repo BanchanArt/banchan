@@ -5,10 +5,10 @@ defmodule Banchan.Commissions.Commission do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @status_values [:pending, :accepted, :in_progress, :paused, :waiting, :closed]
+  @status_values [:submitted, :pending, :accepted, :in_progress, :paused, :waiting, :closed]
 
   schema "commissions" do
-    # TODO(zkat): we need some kind of ID here that we can expose to customers?
+    field :public_id, :string
     field :title, :string
     field :description, :string
     field :tos_ok, :boolean, virtual: true
@@ -17,6 +17,7 @@ defmodule Banchan.Commissions.Commission do
       values: @status_values,
       default: :pending
 
+    has_many :line_items, Banchan.Commissions.LineItem
     has_many :events, Banchan.Commissions.Event
     belongs_to :offering, Banchan.Offerings.Offering
     belongs_to :studio, Banchan.Studios.Studio
@@ -29,11 +30,20 @@ defmodule Banchan.Commissions.Commission do
     @status_values
   end
 
+  def gen_public_id do
+    random_string(10)
+  end
+
+  def random_string(length) do
+    :crypto.strong_rand_bytes(length) |> Base.url_encode64() |> binary_part(0, length)
+  end
+
   @doc false
   def changeset(commission, attrs) do
     commission
     |> cast(attrs, [:title, :description, :tos_ok, :status])
     |> cast_assoc(:events)
+    |> cast_assoc(:line_items)
     |> validate_change(:tos_ok, fn field, tos_ok ->
       if tos_ok do
         []

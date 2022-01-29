@@ -13,6 +13,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
 
+  alias BanchanWeb.Components.Button
   alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
 
   prop changeset, :struct, required: true
@@ -35,6 +36,19 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   def handle_event("add_option", _, socket) do
     changeset = %OfferingOption{} |> OfferingOption.changeset(%{})
     options = Map.get(socket.assigns.changeset.changes, :options, []) ++ [changeset]
+
+    offering_changeset =
+      socket.assigns.changeset
+      |> Map.put(:changes, %{options: options})
+
+    {:noreply, assign(socket, changeset: offering_changeset)}
+  end
+
+  @impl true
+  def handle_event("remove_option", %{"value" => index}, socket) do
+    {index, ""} = Integer.parse(index)
+    options = Map.get(socket.assigns.changeset.changes, :options, [])
+    options = List.delete_at(options, index)
 
     offering_changeset =
       socket.assigns.changeset
@@ -103,20 +117,20 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <TextInput name={:base_price} opts={required: true} />
         <h3>Options</h3>
         <InputContext :let={form: form}>
-          <Inputs form={form} for={:options}>
-            <h4>Option</h4>
-            <TextInput name={:name} opts={required: true} />
-            <TextArea name={:description} opts={required: true} />
-            <TextInput name={:price} opts={required: true} />
+          <Inputs form={form} for={:options} :let={index: index}>
+            <div>
+              <h4>Option
+                <Button is_primary={false} value={index} click="remove_option">Remove</Button>
+              </h4>
+              <TextInput name={:name} opts={required: true} />
+              <TextArea name={:description} opts={required: true} />
+              <TextInput name={:price} opts={required: true} />
+            </div>
           </Inputs>
         </InputContext>
         <div class="field">
           <div class="control">
-            <button
-              class="btn btn-secondary text-center rounded-full py-1 px-5 m-1"
-              type="button"
-              :on-click="add_option"
-            >Add Option</button>
+            <Button click="add_option" label="Add Option" />
           </div>
         </div>
         <Submit changeset={@changeset} label="Save" />

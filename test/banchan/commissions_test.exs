@@ -99,6 +99,7 @@ defmodule Banchan.CommissionsTest do
       assert commission == Commissions.get_commission!(commission.id)
     end
 
+    @tag :skip
     test "delete_commission/1 deletes the commission" do
       commission = commission_fixture()
       assert {:ok, %Commission{}} = Commissions.delete_commission(commission)

@@ -31,5 +31,17 @@ Banchan.Offerings.new_offering(studio, %{
   name: "Illustration",
   description: "A detailed illustration with full rendering and background.",
   open: true,
-  terms: "You break it, you **buy** it."
+  terms: "You break it, you **buy** it.",
+  options: [
+    %{
+      name: "option1",
+      description: "Option 1",
+      price: Money.new(500, :USD)
+    },
+    %{
+      name: "option2",
+      description: "Option 2",
+      price: Money.new(4500, :USD)
+    }
+  ]
 })
