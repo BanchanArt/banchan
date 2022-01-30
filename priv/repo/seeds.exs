@@ -62,3 +62,19 @@ Banchan.Offerings.new_offering(studio, %{
     }
   ]
 })
+
+Banchan.Offerings.new_offering(studio, %{
+  type: "chibi",
+  index: 1,
+  name: "Chibi",
+  description: "Big eyes, small mouth, tiny body, big heart.",
+  open: true,
+  base_price: Money.new(5000, :USD),
+  options: [
+    %{
+      name: "Extra Character",
+      description: "Add an extra characte to the commission.",
+      price: Money.new(2500, :USD)
+    }
+  ]
+})
