@@ -4,6 +4,8 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   """
   use BanchanWeb, :surface_view
 
+  import Ecto.Changeset
+
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, LineItem}
   alias Banchan.Offerings
@@ -34,7 +36,8 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                %{
                  "amount" => offering.base_price || Money.new(0, :USD),
                  "name" => offering.name,
-                 "description" => offering.description
+                 "description" => offering.description,
+                 "sticky" => true
                }
              ]
            }),
@@ -96,16 +99,18 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   @impl true
   def handle_event("remove_option", %{"value" => idx}, socket) do
     {idx, ""} = Integer.parse(idx)
+    line_items = Map.get(socket.assigns.changeset.changes, :line_items, [])
+    line_item = Enum.at(line_items, idx)
 
-    line_items =
-      Map.get(socket.assigns.changeset.changes, :line_items, [])
-      |> List.delete_at(idx)
+    if line_item && !fetch_field!(line_item, :sticky) do
+      changeset =
+        socket.assigns.changeset
+        |> Map.put(:changes, %{line_items: List.delete_at(line_items, idx)})
 
-    changeset =
-      socket.assigns.changeset
-      |> Map.put(:changes, %{line_items: line_items})
-
-    {:noreply, assign(socket, changeset: changeset)}
+      {:noreply, assign(socket, changeset: changeset)}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
@@ -179,9 +184,11 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 <ul class="divide-y">
                   {#for {line_item, idx} <- Enum.with_index(Map.get(@changeset.changes, :line_items, []))}
                     <li>
-                      <span>{to_string(line_item.changes.amount)}</span>
-                      <span>{line_item.changes.name}</span>
-                      <Button click="remove_option" value={idx}>Remove</Button>
+                      <span>{to_string(fetch_field!(line_item, :amount))}</span>
+                      <span>{fetch_field!(line_item, :name)}</span>
+                      {#if !IO.inspect(fetch_field!(line_item, :sticky))}
+                        <Button click="remove_option" value={idx}>Remove</Button>
+                      {/if}
                     </li>
                   {/for}
                 </ul>
