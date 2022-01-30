@@ -42,7 +42,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
         <hr />
         <div class="commission grid gap-4">
           <div class="col-span-10">
-            <Timeline id="timeline" current_user={@current_user} commission={@commission} />
+            <Timeline id="timeline" commission={@commission} />
             <hr />
             <MessageBox id="reply-box" new_message="new-message" />
           </div>

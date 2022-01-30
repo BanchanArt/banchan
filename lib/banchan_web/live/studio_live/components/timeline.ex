@@ -7,7 +7,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   alias BanchanWeb.Components.Card
   alias BanchanWeb.Endpoint
 
-  prop current_user, :any, required: true
   prop commission, :any, required: true
 
   def fmt_time(time) do
