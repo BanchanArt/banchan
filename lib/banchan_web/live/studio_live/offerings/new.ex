@@ -30,8 +30,8 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
       current_user_member?={@current_user_member?}
       tab={:settings}
     >
-      <div class="card shadow bg-base-200 card-bordered text-base-content lg:card-side">
-        <div class="card-body">
+      <div class="shadow bg-base-200 text-base-content">
+        <div class="p-6">
           <div
             data-tip="Make a new offering to the gods"
             class="tooltip tooltip-open tooltip-bottom tooltip-primary"

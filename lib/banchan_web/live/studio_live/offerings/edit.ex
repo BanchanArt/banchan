@@ -31,8 +31,8 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
       current_user_member?={@current_user_member?}
       tab={:settings}
     >
-      <div class="card shadow bg-base-200 card-bordered text-base-content lg:card-side">
-        <div class="card-body">
+      <div class="shadow bg-base-200 text-base-content">
+        <div class="p-6">
           <h1>Edit Offering</h1>
           <Components.Offering id="edit-offering" changeset={@changeset} submit="save" />
         </div>

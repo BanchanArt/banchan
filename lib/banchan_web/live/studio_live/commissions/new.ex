@@ -158,7 +158,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
             </Form>
           </div>
         </div>
-        <div class="col-span-2 col-end-13 shadow-lg p-6">
+        <div class="col-span-2 col-end-13 p-6">
           <div id="sidebar">
             <div class="block sidebar-box">
               <Card>
@@ -211,7 +211,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 {/if}
               </Card>
             </div>
-            <div class="block sidebar-box">
+            <div class="block sidebar-box pt-6">
               <Attachments id="commission-attachments" />
             </div>
           </div>

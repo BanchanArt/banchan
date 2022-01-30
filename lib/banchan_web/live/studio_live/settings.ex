@@ -32,8 +32,8 @@ defmodule BanchanWeb.StudioLive.Settings do
       current_user_member?={@current_user_member?}
       tab={:settings}
     >
-      <div class="card shadow bg-base-200 card-bordered text-base-content">
-        <div class="card-body">
+      <div class="shadow bg-base-200 text-base-content">
+        <div class="p-6">
           <h1 class="text-2xl">Edit Studio</h1>
           <h2 class="text-xl">{@studio.name}</h2>
           <Form class="col-span-one" for={@changeset} change="change" submit="submit">

@@ -25,11 +25,11 @@ defmodule BanchanWeb.StudioLive.New do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <div class="card shadow bg-base-200 card-bordered text-base-content">
-        <div class="card-body">
+      <div class="shadow bg-base-200 text-base-content">
+        <div class="p-6">
           <h1 class="text-2xl">New Studio</h1>
           <Form
-            class="col-span-1 card-body"
+            class="col-span-1"
             for={@changeset}
             change="change"
             submit="submit"

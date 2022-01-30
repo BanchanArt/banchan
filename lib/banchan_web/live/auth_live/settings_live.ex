@@ -31,10 +31,11 @@ defmodule BanchanWeb.SettingsLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Account Settings</h1>
-      <div class="card shadow bg-base-200 card-bordered text-base-content">
-        <div class="card-body">
-          <h2 class="text-xl card-title">Appearance</h2>
+      <div class="shadow bg-base-200 text-base-content">
+        <div class="p-6">
+          <h1 class="text-2xl">Account Settings</h1>
+          <br>
+          <h2 class="text-xl">Appearance</h2>
           <select
             data-choose-theme
             class="select select-bordered select-secondary select-sm bg-primary-content text-primary outline-offset-0 w-96"

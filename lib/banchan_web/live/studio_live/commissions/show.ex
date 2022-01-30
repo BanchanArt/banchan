@@ -47,7 +47,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
             <hr>
             <MessageBox id="reply-box" new_message="new-message" />
           </div>
-          <div class="col-span-2 col-end-13 shadow-lg p-6">
+          <div class="col-span-2 col-end-13 p-6">
             <div id="sidebar">
               <div class="block sidebar-box">
                 <Summary id="commission-summary" />
