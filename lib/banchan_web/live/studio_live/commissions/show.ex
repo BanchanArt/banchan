@@ -13,8 +13,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     MessageBox,
     Status,
     Summary,
-    Timeline,
-    Transactions
+    Timeline
   }
 
   import BanchanWeb.StudioLive.Helpers
@@ -49,10 +48,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
           <div class="col-span-2 col-end-13 shadow-lg p-6">
             <div id="sidebar">
               <div class="block sidebar-box">
-                <Summary id="commission-summary" />
-              </div>
-              <div class="block sidebar-box">
-                <Transactions id="commission-transactions" />
+                <Summary id="commission-summary" commission={@commission} />
               </div>
               <div class="block sidebar-box">
                 <Status commission={@commission} change="update-status" />
