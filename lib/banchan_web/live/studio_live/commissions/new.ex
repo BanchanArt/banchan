@@ -4,6 +4,8 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   """
   use BanchanWeb, :surface_view
 
+  import Ecto.Changeset
+
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, LineItem}
   alias Banchan.Offerings
@@ -28,7 +30,17 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     if offering.open do
       {:ok,
        assign(socket,
-         changeset: Commission.changeset(%Commission{}, %{}),
+         changeset:
+           Commission.changeset(%Commission{}, %{
+             "line_items" => [
+               %{
+                 "amount" => offering.base_price || Money.new(0, :USD),
+                 "name" => offering.name,
+                 "description" => offering.description,
+                 "sticky" => true
+               }
+             ]
+           }),
          offering: offering,
          terms: terms
        )}
@@ -87,16 +99,18 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   @impl true
   def handle_event("remove_option", %{"value" => idx}, socket) do
     {idx, ""} = Integer.parse(idx)
+    line_items = Map.get(socket.assigns.changeset.changes, :line_items, [])
+    line_item = Enum.at(line_items, idx)
 
-    line_items =
-      Map.get(socket.assigns.changeset.changes, :line_items, [])
-      |> List.delete_at(idx)
+    if line_item && !fetch_field!(line_item, :sticky) do
+      changeset =
+        socket.assigns.changeset
+        |> Map.put(:changes, %{line_items: List.delete_at(line_items, idx)})
 
-    changeset =
-      socket.assigns.changeset
-      |> Map.put(:changes, %{line_items: line_items})
-
-    {:noreply, assign(socket, changeset: changeset)}
+      {:noreply, assign(socket, changeset: changeset)}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
@@ -108,7 +122,12 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
         Enum.map(Map.get(socket.assigns.changeset.changes, :line_items, []), & &1.changes)
       )
 
-    case Commissions.create_commission(socket.assigns.studio, socket.assigns.offering, commission) do
+    case Commissions.create_commission(
+           socket.assigns.current_user,
+           socket.assigns.studio,
+           socket.assigns.offering,
+           commission
+         ) do
       {:ok, commission} ->
         {:noreply,
          redirect(socket,
@@ -163,25 +182,13 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
               <Card>
                 <:header>Summary</:header>
                 <ul class="divide-y">
-                  <li class="container p-4">
-                    <div class="float-right">
-                      <span class="tag is-medium is-success">
-                        {to_string(@offering.base_price || "No")}
-                      </span>
-                      <span class="tag is-medium">
-                        Base Price
-                      </span>
-                    </div>
-                    <div class="offering-name">
-                      {@offering.name}
-                    </div>
-                    <div>{@offering.description}</div>
-                  </li>
                   {#for {line_item, idx} <- Enum.with_index(Map.get(@changeset.changes, :line_items, []))}
                     <li>
-                      <span>{to_string(line_item.changes.amount)}</span>
-                      <span>{line_item.changes.name}</span>
-                      <Button click="remove_option" value={idx}>Remove</Button>
+                      <span>{to_string(fetch_field!(line_item, :amount))}</span>
+                      <span>{fetch_field!(line_item, :name)}</span>
+                      {#if !IO.inspect(fetch_field!(line_item, :sticky))}
+                        <Button click="remove_option" value={idx}>Remove</Button>
+                      {/if}
                     </li>
                   {/for}
                 </ul>
@@ -191,7 +198,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                     Enum.reduce(
                       Map.get(@changeset.changes, :line_items, []),
                       # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-                      @offering.base_price || Money.new(0, :USD),
+                      Money.new(0, :USD),
                       fn item, acc -> Money.add(acc, item.changes.amount) end
                     )
                   )}</p>

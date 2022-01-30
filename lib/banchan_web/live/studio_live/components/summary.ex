@@ -6,6 +6,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
 
   alias BanchanWeb.Components.Card
 
+  prop commission, :struct, required: true
+
   def render(assigns) do
     ~F"""
     <Card>
@@ -14,37 +16,30 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
       </:header>
 
       <ul class="divide-y">
-        <li class="offering container p-4">
-          <div class="float-right">
-            $150.00 <i class="fas fa-times-circle" />
-          </div>
-          <div class="offering-name">
-            <span class="offering-amount">2x</span> Character
-          </div>
-          <div>Full lineart for one or more characters.</div>
-        </li>
-        <li class="offering container box-border p-4">
-          <div class="float-right">
-            $50.00 <i class="fas fa-times-circle" />
-          </div>
-          <div class="offering-name">
-            Full Color
-          </div>
-          <div>Add full, shaded color to the illustration.</div>
-        </li>
-        <li class="offering container box-border p-4">
-          <div class="float-right">
-            $50.00 <i class="fas fa-times-circle" />
-          </div>
-          <div class="offering-name">
-            Color Background
-          </div>
-          <div>Add a full, color background.</div>
-        </li>
+        {#for item <- @commission.line_items}
+          <li class="line-item container p-4">
+            {#if !item.sticky}
+              <div class="float-right">
+                {Money.to_string(item.amount)} <i class="fas fa-times-circle" />
+              </div>
+            {/if}
+            <div>{item.name}</div>
+            <div>{item.description}</div>
+          </li>
+        {/for}
       </ul>
       <hr>
       <div class="container">
-        <p class="p-4">Estimate: <span class="float-right">$250.00</span></p>
+        <p class="p-4">Estimate: <span class="float-right">
+            {Money.to_string(
+              Enum.reduce(
+                @commission.line_items,
+                # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
+                Money.new(0, :USD),
+                fn item, acc -> Money.add(acc, item.amount) end
+              )
+            )}
+          </span></p>
       </div>
 
       <:footer>
