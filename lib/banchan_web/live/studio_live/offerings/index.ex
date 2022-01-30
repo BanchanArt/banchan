@@ -31,11 +31,17 @@ defmodule BanchanWeb.StudioLive.Offerings.Index do
       current_user_member?={@current_user_member?}
       tab={:settings}
     >
-      <h1>Offerings</h1>
-      <h2>Add/remove/edit offerings for your studio here</h2>
+      <div
+        data-tip="Add/remove/edit offerings for your studio here"
+        class="tooltip tooltip-open tooltip-right tooltip-info"
+      >
+        <h1 class="text-xl">Offerings</h1>
+      </div>
+      <br>
       <LiveRedirect
         label="New Offering"
         to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}
+        class="text-center btn btn-sm btn-primary m-5"
       />
       <table class="table w-full table-compact">
         <thead>

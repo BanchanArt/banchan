@@ -30,9 +30,17 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
       current_user_member?={@current_user_member?}
       tab={:settings}
     >
-      <h1>New Offering</h1>
-      <h2>Make a new offering to the gods</h2>
-      <Components.Offering id="new-offering" changeset={@changeset} submit="save" />
+      <div class="shadow bg-base-200 text-base-content">
+        <div class="p-6">
+          <div
+            data-tip="Make a new offering to the gods"
+            class="tooltip tooltip-open tooltip-bottom tooltip-primary"
+          >
+            <h1 class="text-xl">New Offering</h1>
+          </div>
+          <Components.Offering id="new-offering" changeset={@changeset} submit="save" />
+        </div>
+      </div>
     </Components.StudioLayout>
     """
   end

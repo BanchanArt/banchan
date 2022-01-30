@@ -38,22 +38,20 @@ defmodule BanchanWeb.StudioLive.Shop do
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
         <div class="offerings">
           {#for offering <- @offerings}
-            <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
-              <CommissionCard studio={@studio} offering={offering} />
-            </div>
+            <CommissionCard studio={@studio} offering={offering} />
           {/for}
           {#if @current_user_member?}
             <div class="">
               <LiveRedirect
                 to={Routes.studio_offerings_index_path(Endpoint, :index, @studio.handle)}
-                class="btn btn-sm text-center rounded-full px-2 py-1 btn-accent"
+                class="btn btn-sm text-center rounded-full m-5 btn-warning"
               >Manage Offerings</LiveRedirect>
             </div>
           {/if}
         </div>
         <div class="col-start-3">
           {#if @summary}
-            <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
+            <div class="bg-base-200 text-base-content">
               <Card>
                 <:header>
                   Summary
@@ -62,7 +60,7 @@ defmodule BanchanWeb.StudioLive.Shop do
               </Card>
             </div>
           {/if}
-          <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
+          <div class="shadow bg-base-200 text-base-content p-6">
             <h2 class="text-xl">Members</h2>
             <div class="studio-members grid grid-cols-4 gap-1">
               {#for member <- @members}

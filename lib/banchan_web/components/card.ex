@@ -1,6 +1,6 @@
 defmodule BanchanWeb.Components.Card do
   @moduledoc """
-  Generic (Bulma) card component.
+  Generic card component.
   """
   use BanchanWeb, :component
 
@@ -24,30 +24,32 @@ defmodule BanchanWeb.Components.Card do
 
   def render(assigns) do
     ~F"""
-    <div class={"inline-block max-w-md #{@class}"}>
-      {#if slot_assigned?(:header)}
-        <header class="container">
-          <#slot name="header" />
-          {#if slot_assigned?(:header_aside)}
-            <span class="float-right">
-              <#slot name="header_aside" />
-            </span>
-          {/if}
-        </header>
-      {/if}
-      {#if slot_assigned?(:image)}
-        <div class="object-scale-down max-w-md">
-          <#slot name="image" />
+    <div class="shadow-lg bg-base-200 card card-bordered">
+      <div class={"inline-block max-w-md card-body #{@class}"}>
+        {#if slot_assigned?(:header)}
+          <header class="container card-title text-lg">
+            <#slot name="header" />
+            {#if slot_assigned?(:header_aside)}
+              <span class="float-right">
+                <#slot name="header_aside" />
+              </span>
+            {/if}
+          </header>
+        {/if}
+        {#if slot_assigned?(:image)}
+          <div class="object-scale-down max-w-md">
+            <#slot name="image" />
+          </div>
+        {/if}
+        <div class="max-w-prose">
+          <#slot />
         </div>
-      {/if}
-      <div class="max-w-prose">
-        <#slot />
+        {#if slot_assigned?(:footer)}
+          <footer>
+            <#slot name="footer" />
+          </footer>
+        {/if}
       </div>
-      {#if slot_assigned?(:footer)}
-        <footer>
-          <#slot name="footer" />
-        </footer>
-      {/if}
     </div>
     """
   end

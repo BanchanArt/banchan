@@ -31,8 +31,12 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
       current_user_member?={@current_user_member?}
       tab={:settings}
     >
-      <h1>Edit Offering</h1>
-      <Components.Offering id="edit-offering" changeset={@changeset} submit="save" />
+      <div class="shadow bg-base-200 text-base-content">
+        <div class="p-6">
+          <h1>Edit Offering</h1>
+          <Components.Offering id="edit-offering" changeset={@changeset} submit="save" />
+        </div>
+      </div>
     </Components.StudioLayout>
     """
   end

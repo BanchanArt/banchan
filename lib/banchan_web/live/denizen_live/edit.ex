@@ -23,9 +23,9 @@ defmodule BanchanWeb.DenizenLive.Edit do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <div class="card shadow bg-base-200 card-bordered text-base-content">
-        <div class="card-body">
-          <h1 class="text-2xl card-title">Edit Profile for @{@user.handle}</h1>
+      <div class="shadow bg-base-200 text-base-content">
+        <div class="p-6">
+          <h1 class="text-2xl">Edit Profile for @{@user.handle}</h1>
           <Form for={@changeset} change="change" submit="submit">
             <TextInput name={:name} icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />

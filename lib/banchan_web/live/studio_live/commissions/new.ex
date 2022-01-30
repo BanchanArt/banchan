@@ -155,28 +155,29 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
       current_user_member?={@current_user_member?}
       tab={:shop}
     >
-      <div class="grid grid-cols-5 gap-4">
-        <div class="col-span-3">
-          <h1 class="text-2xl">{@offering.name}</h1>
-          <h2 class="text-xl">{@offering.description}</h2>
-          <Form for={@changeset} change="change" submit="submit">
-            <div class="block">
-              <TextInput name={:title} opts={required: true, placeholder: "A Brief Title"} />
-              <TextArea name={:description} opts={required: true, placeholder: "Here's what I'd like..."} />
-            </div>
-            <div class="content block">
-              <h3>Terms and Conditions</h3>
-              <p><strong>These Terms might vary between commission type.</strong></p>
-              <div>{raw(@terms)}</div>
-            </div>
-            <Checkbox name={:tos_ok} opts={required: true}>
-              I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
-            </Checkbox>
-            <Submit changeset={@changeset} />
-          </Form>
+      <div class="grid grid-cols-13 gap-4">
+        <div class="col-span-10 shadow bg-base-200 text-base-content">
+          <div class="p-6">
+            <h1 class="text-2xl">{@offering.name}</h1>
+            <h2 class="text-xl">{@offering.description}</h2>
+            <Form for={@changeset} change="change" submit="submit">
+              <div class="block">
+                <TextInput name={:title} opts={required: true, placeholder: "A Brief Title"} />
+                <TextArea name={:description} opts={required: true, placeholder: "Here's what I'd like..."} />
+              </div>
+              <div class="content block">
+                <h3>Terms and Conditions</h3>
+                <p><strong>These Terms might vary between commission type.</strong></p>
+                <div>{raw(@terms)}</div>
+              </div>
+              <Checkbox name={:tos_ok} opts={required: true}>
+                I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
+              </Checkbox>
+              <Submit changeset={@changeset} />
+            </Form>
+          </div>
         </div>
-
-        <div class="col-span-2 col-end-13 shadow-lg p-6">
+        <div class="col-span-2 col-end-13 p-6">
           <div id="sidebar">
             <div class="block sidebar-box">
               <Card>
@@ -217,7 +218,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 {/if}
               </Card>
             </div>
-            <div class="block sidebar-box">
+            <div class="block sidebar-box pt-6">
               <Attachments id="commission-attachments" />
             </div>
           </div>
