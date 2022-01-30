@@ -42,8 +42,9 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
       <:footer>
         <div class="justify-end card-actions">
           {#if @offering.open}
-            <LiveRedirect to={Routes.studio_commissions_new_path(Endpoint, :new, @studio.handle, @offering.type)}
-            class="btn btn-sm text-center btn-info"
+            <LiveRedirect
+              to={Routes.studio_commissions_new_path(Endpoint, :new, @studio.handle, @offering.type)}
+              class="btn btn-sm text-center btn-info"
             >Request</LiveRedirect>
           {#else}
             <LiveRedirect to="#" class="btn btn-sm text-center btn-info">Notify Me</LiveRedirect>

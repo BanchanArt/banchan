@@ -32,13 +32,15 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
     >
       <div class="card shadow bg-base-200 card-bordered text-base-content lg:card-side">
         <div class="card-body">
-          <div data-tip="Make a new offering to the gods" class="tooltip tooltip-open tooltip-bottom tooltip-primary">
+          <div
+            data-tip="Make a new offering to the gods"
+            class="tooltip tooltip-open tooltip-bottom tooltip-primary"
+          >
             <h1 class="text-xl">New Offering</h1>
           </div>
           <Components.Offering id="new-offering" changeset={@changeset} submit="save" />
         </div>
       </div>
-
     </Components.StudioLayout>
     """
   end
