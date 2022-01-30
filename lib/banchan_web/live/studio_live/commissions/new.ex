@@ -187,7 +187,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                     <li>
                       <span>{to_string(fetch_field!(line_item, :amount))}</span>
                       <span>{fetch_field!(line_item, :name)}</span>
-                      {#if !IO.inspect(fetch_field!(line_item, :sticky))}
+                      {#if !fetch_field!(line_item, :sticky)}
                         <Button click="remove_option" value={idx}>Remove</Button>
                       {/if}
                     </li>
