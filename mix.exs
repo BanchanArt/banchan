@@ -71,13 +71,14 @@ defmodule Banchan.MixProject do
       {:earmark, "~> 1.4.20"},
       {:html_sanitize_ex, "~> 1.4.2"},
       {:uuid, "~> 1.1"},
+      {:timex, "~> 3.7.6"},
       {:phoenix_live_reload, "~> 1.3", only: :dev},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       # Testing and static analysis
       {:surface_formatter, "~> 0.7.4"},
       {:floki, ">= 0.27.0", only: :test},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.5", only: [:dev, :test], runime: false},
       {:sobelow, "~> 0.8", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.13", only: :test}
     ]

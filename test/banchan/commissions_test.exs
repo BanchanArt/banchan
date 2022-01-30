@@ -49,7 +49,7 @@ defmodule Banchan.CommissionsTest do
         })
 
       {:ok, commission} =
-        Banchan.Commissions.create_commission(offering, attrs |> Enum.into(@valid_attrs))
+        Banchan.Commissions.create_commission(user, offering, attrs |> Enum.into(@valid_attrs))
 
       commission
     end

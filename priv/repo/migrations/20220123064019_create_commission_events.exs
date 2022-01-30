@@ -3,8 +3,8 @@ defmodule Banchan.Repo.Migrations.CreateCommissionEvents do
 
   def change do
     create table(:commission_events) do
-      add :type, :string, null: false
-      add :text, :string
+      add :type, :citext, null: false
+      add :text, :text
       add :amount, :money_with_currency
       add :status, :string
 
