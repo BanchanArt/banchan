@@ -39,11 +39,11 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     >
       <div>
         <h1 class="text-3xl">{@commission.title}</h1>
-        <hr />
+        <hr>
         <div class="commission grid gap-4">
           <div class="col-span-10">
             <Timeline id="timeline" commission={@commission} />
-            <hr />
+            <hr>
             <MessageBox id="reply-box" new_message="new-message" />
           </div>
           <div class="col-span-2 col-end-13 shadow-lg p-6">

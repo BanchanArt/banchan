@@ -63,11 +63,13 @@ defmodule Banchan.Commissions do
       public_id: Commission.gen_public_id(),
       studio: studio,
       offering: offering,
-      events: [%{
-        actor: actor,
-        type: :comment,
-        text: Map.get(attrs, "description", "")
-      }]
+      events: [
+        %{
+          actor: actor,
+          type: :comment,
+          text: Map.get(attrs, "description", "")
+        }
+      ]
     }
     |> Commission.changeset(attrs)
     |> Repo.insert()

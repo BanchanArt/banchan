@@ -108,7 +108,12 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
         Enum.map(Map.get(socket.assigns.changeset.changes, :line_items, []), & &1.changes)
       )
 
-    case Commissions.create_commission(socket.assigns.current_user, socket.assigns.studio, socket.assigns.offering, commission) do
+    case Commissions.create_commission(
+           socket.assigns.current_user,
+           socket.assigns.studio,
+           socket.assigns.offering,
+           commission
+         ) do
       {:ok, commission} ->
         {:noreply,
          redirect(socket,
