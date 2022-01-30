@@ -37,7 +37,7 @@ defmodule BanchanWeb.StudioLive.Shop do
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
         <div class="offerings">
           {#for offering <- @offerings}
-            <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
+            <div class="shadow-lg bg-base-200 card card-bordered">
               <CommissionCard studio={@studio} offering={offering} />
             </div>
           {/for}
@@ -51,7 +51,7 @@ defmodule BanchanWeb.StudioLive.Shop do
           {/if}
         </div>
         <div class="col-start-3">
-          <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
+          <div class="shadow-lg bg-base-200 card card-bordered">
             <Card>
               <:header>
                 Summary
@@ -74,7 +74,7 @@ defmodule BanchanWeb.StudioLive.Shop do
               </div>
             </Card>
           </div>
-          <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
+          <div class="shadow-lg bg-base-200 card card-bordered card-compact">
             <h2 class="text-xl">Members</h2>
             <div class="studio-members grid grid-cols-4 gap-1">
               {#for member <- @members}

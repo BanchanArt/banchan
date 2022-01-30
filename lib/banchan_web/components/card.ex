@@ -24,9 +24,9 @@ defmodule BanchanWeb.Components.Card do
 
   def render(assigns) do
     ~F"""
-    <div class={"inline-block max-w-md #{@class}"}>
+    <div class={"inline-block max-w-md card-body #{@class}"}>
       {#if slot_assigned?(:header)}
-        <header class="container">
+        <header class="container card-title text-lg">
           <#slot name="header" />
           {#if slot_assigned?(:header_aside)}
             <span class="float-right">
