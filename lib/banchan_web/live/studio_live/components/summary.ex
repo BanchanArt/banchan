@@ -18,11 +18,12 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
       <ul class="divide-y">
         {#for item <- @commission.line_items}
           <li class="line-item container p-4">
-            {#if !item.sticky}
-              <div class="float-right">
-                {Money.to_string(item.amount)} <i class="fas fa-times-circle" />
-              </div>
-            {/if}
+            <div class="float-right">
+              {Money.to_string(item.amount)}
+              {#if !item.sticky}
+                <i class="fas fa-times-circle" />
+              {/if}
+            </div>
             <div>{item.name}</div>
             <div>{item.description}</div>
           </li>
