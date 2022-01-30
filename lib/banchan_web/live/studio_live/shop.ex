@@ -20,8 +20,9 @@ defmodule BanchanWeb.StudioLive.Shop do
     studio = socket.assigns.studio
     members = Studios.list_studio_members(studio)
     offerings = Studios.list_studio_offerings(studio)
+    summary = studio.summary && HtmlSanitizeEx.markdown_html(Earmark.as_html!(studio.summary))
 
-    {:ok, assign(socket, members: members, offerings: offerings)}
+    {:ok, assign(socket, members: members, offerings: offerings, summary: summary)}
   end
 
   @impl true
@@ -51,29 +52,16 @@ defmodule BanchanWeb.StudioLive.Shop do
           {/if}
         </div>
         <div class="col-start-3">
-          <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
-            <Card>
-              <:header>
-                Summary
-              </:header>
-              <div class="content leading-loose">
-                <h3 class="text-2xl mt-4">These are all private commissions, meaning: <strong>non-commercial</strong></h3>
-                <p class="mt-4">You're only paying for my service to create the work not copyrights or licensing of the work itself!</p>
-                <h3 class="text-xl mt-4">I will draw</h3>
-                <ul class="list-disc list-inside">
-                  <li>Humans/humanoids</li>
-                  <li>anthros+furries/creatures/monsters/animals</li>
-                  <li>mecha/robots/vehicles</li>
-                  <li>environments/any type of background</li>
-                </ul>
-                <h3 class="text-xl mt-4">I will not draw</h3>
-                <ul class="list-disc list-inside">
-                  <li>NSFW</li>
-                  <li>Fanart</li>
-                </ul>
-              </div>
-            </Card>
-          </div>
+          {#if @summary}
+            <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
+              <Card>
+                <:header>
+                  Summary
+                </:header>
+                <div class="content leading-loose">{raw(@summary)}</div>
+              </Card>
+            </div>
+          {/if}
           <div class="shadow-lg bg-base-200 p-2 my-4 rounded">
             <h2 class="text-xl">Members</h2>
             <div class="studio-members grid grid-cols-4 gap-1">

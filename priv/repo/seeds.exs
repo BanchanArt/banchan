@@ -22,7 +22,24 @@
   Banchan.Studios.new_studio(%Banchan.Studios.Studio{artists: [user]}, %{
     handle: "kitteh-studio",
     name: "Kitteh Studio",
-    description: "Kitteh-related stuff"
+    description: "Kitteh-related stuff",
+    summary: """
+    ### These are all private commissions, meaning: **non-commercial**
+
+    You're only paying for my service to create the work not copyrights or licensing of the work itself!
+
+    #### I will draw
+
+    * Humans/humanoids
+    * anthros+furries/creatures/monsters/animals
+    * mecha/robots/vehicles
+    * environments/any type of background
+
+    #### I will not draw
+
+    * NSFW
+    * Fanart
+    """
   })
 
 Banchan.Offerings.new_offering(studio, %{
