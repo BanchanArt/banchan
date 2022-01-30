@@ -41,7 +41,7 @@ defmodule Banchan.Commissions.Commission do
   @doc false
   def changeset(commission, attrs) do
     commission
-    |> cast(attrs, [:title, :description, :tos_ok, :status])
+    |> cast(attrs, [:title, :description, :tos_ok])
     |> cast_assoc(:events)
     |> cast_assoc(:line_items)
     |> validate_change(:tos_ok, fn field, tos_ok ->
