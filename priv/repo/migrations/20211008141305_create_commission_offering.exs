@@ -3,9 +3,9 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
 
   def change do
     create table(:offerings) do
-      add :type, :string, null: false
+      add :type, :citext, null: false
       add :name, :string, null: false
-      add :description, :string, null: false
+      add :description, :text, null: false
       add :open, :boolean, default: false, null: false
       add :price_range, :string
       add :index, :integer, null: false
