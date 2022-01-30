@@ -4,7 +4,7 @@ defmodule Banchan.Repo.Migrations.CreateOfferingOptions do
   def change do
     create table(:offering_options) do
       add :name, :string
-      add :description, :string
+      add :description, :text
       add :price, :money_with_currency
       add :offering_id, references(:offerings, on_delete: :delete_all), null: false
 
