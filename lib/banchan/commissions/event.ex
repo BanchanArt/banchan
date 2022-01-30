@@ -26,8 +26,8 @@ defmodule Banchan.Commissions.Event do
   def changeset(event, attrs) do
     event
     |> cast(attrs, [:type, :text, :amount, :status])
-    |> cast_assoc(:actor)
+    |> cast_assoc(:actor, required: true)
     |> cast_assoc(:commission)
-    |> validate_required([:type, :actor, :commission])
+    |> validate_required([:type])
   end
 end

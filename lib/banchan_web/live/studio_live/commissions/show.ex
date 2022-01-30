@@ -38,13 +38,12 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       tab={:shop}
     >
       <div>
-        <h1 class="text-3xl">Two-character drawing of me and my gf's FFXIV OCs</h1>
-        <h2 class="text-lg"><strong>{@current_user.handle}</strong> requested this commission 3 days ago.</h2>
-        <hr>
+        <h1 class="text-3xl">{@commission.title}</h1>
+        <hr />
         <div class="commission grid gap-4">
           <div class="col-span-10">
             <Timeline id="timeline" current_user={@current_user} commission={@commission} />
-            <hr>
+            <hr />
             <MessageBox id="reply-box" new_message="new-message" />
           </div>
           <div class="col-span-2 col-end-13 shadow-lg p-6">

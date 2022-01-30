@@ -42,7 +42,7 @@ defmodule Banchan.Commissions do
     Repo.one!(
       from c in Commission,
         where: c.studio_id == ^studio.id and c.public_id == ^public_id,
-        preload: [:events, :line_items]
+        preload: [events: [:actor], line_items: []]
     )
   end
 
@@ -51,15 +51,24 @@ defmodule Banchan.Commissions do
 
   ## Examples
 
-      iex> create_commission(offering, %{field: value})
+      iex> create_commission(actor, studio, offering, %{field: value})
       {:ok, %Commission{}}
 
-      iex> create_commission(offering, %{field: bad_value})
+      iex> create_commission(actor, studio, offering, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_commission(studio, offering, attrs \\ %{}) do
-    %Commission{public_id: Commission.gen_public_id(), studio: studio, offering: offering}
+  def create_commission(actor, studio, offering, attrs \\ %{}) do
+    %Commission{
+      public_id: Commission.gen_public_id(),
+      studio: studio,
+      offering: offering,
+      events: [%{
+        actor: actor,
+        type: :comment,
+        text: Map.get(attrs, "description", "")
+      }]
+    }
     |> Commission.changeset(attrs)
     |> Repo.insert()
   end
