@@ -170,14 +170,20 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     >
       <div class="grid grid-cols-13 gap-4">
         <div class="col-span-10 shadow bg-base-200 text-base-content">
-          <div class="p-6">
+          <div class="p-6 space-y-2">
             <h1 class="text-2xl">{@offering.name}</h1>
             <h2 class="text-xl">{@offering.description}</h2>
             <Form for={@changeset} change="change" submit="submit">
-              <div class="block">
-                <TextInput name={:title} class="w-full" opts={required: true, placeholder: "A Brief Title"} />
+              <div class="block space-y-4">
+                <TextInput
+                  name={:title}
+                  show_label={false}
+                  class="w-full"
+                  opts={required: true, placeholder: "A Brief Title"}
+                />
                 <TextArea
                   name={:description}
+                  show_label={false}
                   class="w-full"
                   opts={required: true, placeholder: "Here's what I'd like..."}
                 />

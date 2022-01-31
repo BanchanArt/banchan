@@ -10,6 +10,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
   prop name, :any, required: true
   prop opts, :keyword, default: []
   prop label, :string
+  prop show_label, :boolean, default: true
   prop wrapper_class, :css_class
   prop rows, :number
   prop class, :css_class
@@ -20,12 +21,14 @@ defmodule BanchanWeb.Components.Form.TextArea do
   def render(assigns) do
     ~F"""
     <Field class="field" name={@name}>
-      {#if @label}
-        <Label class="label">
-          {@label}
-        </Label>
-      {#else}
-        <Label class="label" />
+      {#if @show_label}
+        {#if @label}
+          <Label class="label">
+            {@label}
+          </Label>
+        {#else}
+          <Label class="label" />
+        {/if}
       {/if}
       <div class={"control", @wrapper_class}>
         <#slot name="left" />
