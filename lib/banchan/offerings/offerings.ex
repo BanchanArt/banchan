@@ -4,8 +4,8 @@ defmodule Banchan.Offerings do
   """
   import Ecto.Query, warn: false
 
-  alias Banchan.Repo
   alias Banchan.Offerings.Offering
+  alias Banchan.Repo
 
   def new_offering(studio, attrs) do
     %Offering{studio_id: studio.id}
