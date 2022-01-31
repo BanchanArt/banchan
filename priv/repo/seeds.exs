@@ -53,8 +53,8 @@
     terms: "You break it, you **buy** it.",
     options: [
       %{
-        name: "Illustration",
-        description: "A detailed illustration with full rendering and background.",
+        name: "Base Price",
+        description: "The commission itself.",
         price: Money.new(0, :USD),
         default: true,
         sticky: true
@@ -62,7 +62,8 @@
       %{
         name: "Extra Character",
         description: "Add another character to the illustration.",
-        price: Money.new(500, :USD)
+        price: Money.new(500, :USD),
+        multiple: true
       },
       %{
         name: "Full background",
@@ -82,8 +83,8 @@
     hidden: true,
     options: [
       %{
-        name: "Chibi",
-        description: "Big eyes, small mouth, tiny body, big heart.",
+        name: "Base Price",
+        description: "One chibi character, to order.",
         price: Money.new(5000, :USD),
         default: true,
         sticky: true
@@ -91,7 +92,8 @@
       %{
         name: "Extra Character",
         description: "Add an extra characte to the commission.",
-        price: Money.new(2500, :USD)
+        price: Money.new(2500, :USD),
+        multiple: true
       }
     ]
   })

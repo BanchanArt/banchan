@@ -125,6 +125,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
               <TextInput name={:name} opts={required: true} />
               <TextArea name={:description} opts={required: true} />
               <TextInput name={:price} opts={required: true} />
+              <Checkbox name={:multiple} label="Allow clients to select this option multiple times." />
               <Checkbox name={:sticky} label="Sticky" />
               <Checkbox name={:default} label="Default" />
             </div>

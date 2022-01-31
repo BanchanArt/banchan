@@ -32,20 +32,20 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
         offering.options
         |> Enum.filter(& &1.default)
         |> Enum.map(fn option ->
-          %{
-            "amount" => option.price,
-            "name" => option.name,
-            "description" => option.description,
-            "sticky" => option.sticky
-          }
+          %LineItem{option: option}
+          |> LineItem.changeset(%{
+            amount: option.price,
+            name: option.name,
+            description: option.description,
+            sticky: option.sticky
+          })
         end)
 
       {:ok,
        assign(socket,
          changeset:
-           Commission.changeset(%Commission{}, %{
-             "line_items" => default_items
-           }),
+           Commission.changeset(%Commission{}, %{})
+           |> put_assoc(:line_items, default_items),
          offering: offering,
          terms: terms
        )}
@@ -84,21 +84,29 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     {idx, ""} = Integer.parse(idx)
     {:ok, option} = Enum.fetch(socket.assigns.offering.options, idx)
 
-    line_item =
-      %LineItem{option: option}
-      |> LineItem.changeset(%{
-        amount: option.price,
-        name: option.name,
-        description: option.description
-      })
+    current_line_items = fetch_field!(socket.assigns.changeset, :line_items)
 
-    line_items = Map.get(socket.assigns.changeset.changes, :line_items, []) ++ [line_item]
+    if !option.multiple && Enum.any?(current_line_items, &(&1.option.id == option.id)) do
+      # Deny the change. This shouldn't happen unless there's a bug, or
+      # someone is trying to send us Shenanigans data.
+      {:noreply, socket}
+    else
+      line_item =
+        %LineItem{option: option}
+        |> LineItem.changeset(%{
+          amount: option.price,
+          name: option.name,
+          description: option.description
+        })
 
-    changeset =
-      socket.assigns.changeset
-      |> Map.put(:changes, %{line_items: line_items})
+      line_items = current_line_items ++ [line_item]
 
-    {:noreply, assign(socket, changeset: changeset)}
+      changeset =
+        socket.assigns.changeset
+        |> put_assoc(:line_items, line_items)
+
+      {:noreply, assign(socket, changeset: changeset)}
+    end
   end
 
   @impl true
@@ -202,10 +210,10 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 <h5>Estimated Total</h5>
                 <p>{Money.to_string(
                     Enum.reduce(
-                      Map.get(@changeset.changes, :line_items, []),
+                      fetch_field!(@changeset, :line_items),
                       # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
                       Money.new(0, :USD),
-                      fn item, acc -> Money.add(acc, item.changes.amount) end
+                      fn item, acc -> Money.add(acc, item.amount) end
                     )
                   )}</p>
                 {#if Enum.any?(@offering.options)}
@@ -213,11 +221,13 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                   <h5>Additional Options</h5>
                   <ul>
                     {#for {option, idx} <- Enum.with_index(@offering.options)}
-                      <li>
-                        <span>{to_string(option.price)}</span>
-                        <span>{option.name}</span>
-                        <Button click="add_option" value={idx}>Add</Button>
-                      </li>
+                      {#if option.multiple || !Enum.any?(fetch_field!(@changeset, :line_items), &(&1.option.id == option.id))}
+                        <li>
+                          <span>{to_string(option.price)}</span>
+                          <span>{option.name}</span>
+                          <Button click="add_option" value={idx}>Add</Button>
+                        </li>
+                      {/if}
                     {/for}
                   </ul>
                 {/if}

@@ -25,6 +25,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :offering_id, references(:offerings, on_delete: :delete_all), null: false
       add :default, :boolean, default: false, null: false
       add :sticky, :boolean, default: false, null: false
+      add :multiple, :boolean, default: false, null: false
 
       timestamps()
     end

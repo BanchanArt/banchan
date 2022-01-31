@@ -13,6 +13,7 @@ defmodule Banchan.Offerings.OfferingOption do
     field :price, Money.Ecto.Composite.Type
     field :default, :boolean, default: false
     field :sticky, :boolean, default: false
+    field :multiple, :boolean, default: false
 
     belongs_to :offering, Offering
 
@@ -22,7 +23,7 @@ defmodule Banchan.Offerings.OfferingOption do
   @doc false
   def changeset(offering_option, attrs) do
     offering_option
-    |> cast(attrs, [:name, :description, :price, :default, :sticky])
+    |> cast(attrs, [:name, :description, :price, :default, :sticky, :multiple])
     |> validate_money(:price)
     |> validate_sticky_also_default()
     |> validate_required([:name, :description, :price])
