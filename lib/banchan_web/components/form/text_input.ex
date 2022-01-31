@@ -9,6 +9,7 @@ defmodule BanchanWeb.Components.Form.TextInput do
 
   prop name, :any, required: true
   prop opts, :keyword, default: []
+  prop class, :css_class
   prop label, :string
   prop icon, :string
 
@@ -30,6 +31,7 @@ defmodule BanchanWeb.Components.Form.TextInput do
               "input-primary",
               "input-bordered",
               "input-sm",
+              @class,
               "has-icon-left": @icon,
               "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
             }

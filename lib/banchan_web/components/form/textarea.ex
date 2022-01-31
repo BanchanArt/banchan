@@ -11,6 +11,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
   prop opts, :keyword, default: []
   prop label, :string
   prop wrapper_class, :css_class
+  prop rows, :number
   prop class, :css_class
 
   slot left
@@ -34,7 +35,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
               "textarea",
               "textarea-bordered",
               "textarea-primary",
-              "h-24",
+              "h-40",
               @class,
               "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
             }
