@@ -38,9 +38,9 @@ defmodule BanchanWeb.StudioLive.Shop do
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
         <div class="offerings">
           {#for offering <- @offerings}
-            {#if @current_user_member? || offering.show}
-              <CommissionCard studio={@studio} offering={offering} />
-            {/if}
+            <CommissionCard studio={@studio} offering={offering} />
+          {#else}
+            This shop has no offerings currently available. Check back in later!
           {/for}
           {#if @current_user_member?}
             <div class="">

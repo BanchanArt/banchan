@@ -13,8 +13,12 @@ defmodule Banchan.Offerings do
     |> Repo.insert()
   end
 
-  def get_offering_by_type!(type) do
-    Repo.one!(from o in Offering, where: o.type == ^type) |> Repo.preload(:options)
+  def get_offering_by_type!(type, current_user_member?) do
+    Repo.one!(
+      from o in Offering,
+        where: o.type == ^type and (^current_user_member? or not o.hidden)
+    )
+    |> Repo.preload(:options)
   end
 
   def change_offering(%Offering{} = offering, attrs \\ %{}) do

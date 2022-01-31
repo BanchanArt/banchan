@@ -7,7 +7,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :name, :string, null: false
       add :description, :text, null: false
       add :open, :boolean, default: false, null: false
-      add :show, :boolean, default: true, null: false
+      add :hidden, :boolean, default: true, null: false
       add :index, :integer
       add :terms, :text
 

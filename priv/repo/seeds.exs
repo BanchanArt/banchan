@@ -49,6 +49,7 @@
     name: "Illustration",
     description: "A detailed illustration with full rendering and background.",
     open: true,
+    hidden: false,
     terms: "You break it, you **buy** it.",
     options: [
       %{
@@ -78,6 +79,7 @@
     name: "Chibi",
     description: "Big eyes, small mouth, tiny body, big heart.",
     open: true,
+    hidden: true,
     options: [
       %{
         name: "Chibi",

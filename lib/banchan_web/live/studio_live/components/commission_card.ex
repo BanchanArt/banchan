@@ -28,7 +28,7 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
         {#else}
           <div class="badge badge-error badge-outline">Closed</div>
         {/if}
-        {#if !@offering.show}
+        {#if @offering.hidden}
           <div class="badge badge-error badge-outline">Hidden</div>
         {/if}
       </:header_aside>
