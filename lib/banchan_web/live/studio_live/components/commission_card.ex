@@ -16,6 +16,7 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
 
   def render(assigns) do
     base_price = Offerings.offering_base_price(assigns.offering)
+
     ~F"""
     <Card>
       <:header>

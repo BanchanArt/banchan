@@ -30,7 +30,7 @@ defmodule Banchan.Offerings do
       nil
     else
       offering.options
-      |> Enum.filter(&(&1.default))
+      |> Enum.filter(& &1.default)
       |> Enum.map(&(&1.price || Money.new(0, :USD)))
       |> Enum.reduce(Money.new(0, :USD), &Money.add(&1, &2))
     end

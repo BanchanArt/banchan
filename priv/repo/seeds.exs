@@ -42,52 +42,54 @@
     """
   })
 
-{:ok, _} = Banchan.Offerings.new_offering(studio, %{
-  type: "illustration",
-  index: 0,
-  name: "Illustration",
-  description: "A detailed illustration with full rendering and background.",
-  open: true,
-  terms: "You break it, you **buy** it.",
-  options: [
-    %{
-      name: "Illustration",
-      description: "A detailed illustration with full rendering and background.",
-      price: Money.new(0, :USD),
-      default: true,
-      sticky: true
-    },
-    %{
-      name: "Extra Character",
-      description: "Add another character to the illustration.",
-      price: Money.new(500, :USD)
-    },
-    %{
-      name: "Full background",
-      description: "Add full background.",
-      price: Money.new(4500, :USD)
-    }
-  ]
-})
+{:ok, _} =
+  Banchan.Offerings.new_offering(studio, %{
+    type: "illustration",
+    index: 0,
+    name: "Illustration",
+    description: "A detailed illustration with full rendering and background.",
+    open: true,
+    terms: "You break it, you **buy** it.",
+    options: [
+      %{
+        name: "Illustration",
+        description: "A detailed illustration with full rendering and background.",
+        price: Money.new(0, :USD),
+        default: true,
+        sticky: true
+      },
+      %{
+        name: "Extra Character",
+        description: "Add another character to the illustration.",
+        price: Money.new(500, :USD)
+      },
+      %{
+        name: "Full background",
+        description: "Add full background.",
+        price: Money.new(4500, :USD)
+      }
+    ]
+  })
 
-{:ok, _} = Banchan.Offerings.new_offering(studio, %{
-  type: "chibi",
-  index: 1,
-  name: "Chibi",
-  description: "Big eyes, small mouth, tiny body, big heart.",
-  open: true,
-  options: [
-    %{
-      name: "Chibi",
-      description: "Big eyes, small mouth, tiny body, big heart.",
-      price: Money.new(5000, :USD),
-      default: true,
-      sticky: true
-    },
-    %{
-      name: "Extra Character",
-      description: "Add an extra characte to the commission.",
-      price: Money.new(2500, :USD)
-    }
-  ]
-})
+{:ok, _} =
+  Banchan.Offerings.new_offering(studio, %{
+    type: "chibi",
+    index: 1,
+    name: "Chibi",
+    description: "Big eyes, small mouth, tiny body, big heart.",
+    open: true,
+    options: [
+      %{
+        name: "Chibi",
+        description: "Big eyes, small mouth, tiny body, big heart.",
+        price: Money.new(5000, :USD),
+        default: true,
+        sticky: true
+      },
+      %{
+        name: "Extra Character",
+        description: "Add an extra characte to the commission.",
+        price: Money.new(2500, :USD)
+      }
+    ]
+  })
