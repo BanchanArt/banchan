@@ -4,7 +4,8 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
   def change do
     create table(:studios) do
       add :name, :string, null: false
-      add :slug, :citext, null: false
+      add :summary, :text
+      add :handle, :citext, null: false
       add :description, :text
       add :header_img, :string
       add :card_img, :string
