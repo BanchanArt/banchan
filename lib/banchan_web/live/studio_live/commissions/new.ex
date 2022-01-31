@@ -14,7 +14,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.{Button, Card}
+  alias BanchanWeb.Components.Card
   alias BanchanWeb.Components.Form.{Checkbox, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.Commissions.Attachments
@@ -198,24 +198,28 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 <ul class="divide-y">
                   {#for {line_item, idx} <- Enum.with_index(Map.get(@changeset.changes, :line_items, []))}
                     <li>
-                      <span>{to_string(fetch_field!(line_item, :amount))}</span>
+                      <div class="float-right">
+                        <span>{to_string(fetch_field!(line_item, :amount))}</span>
+                        {#if !fetch_field!(line_item, :sticky)}
+                          <button :on-click="remove_option" value={idx} class="fas fa-times-circle" />
+                        {/if}
+                      </div>
                       <span>{fetch_field!(line_item, :name)}</span>
-                      {#if !fetch_field!(line_item, :sticky)}
-                        <Button click="remove_option" value={idx}>Remove</Button>
-                      {/if}
                     </li>
                   {/for}
                 </ul>
                 <hr>
-                <h5>Estimated Total</h5>
-                <p>{Money.to_string(
-                    Enum.reduce(
-                      fetch_field!(@changeset, :line_items),
-                      # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-                      Money.new(0, :USD),
-                      fn item, acc -> Money.add(acc, item.amount) end
-                    )
-                  )}</p>
+                <div>
+                  <p class="float-right">{Money.to_string(
+                      Enum.reduce(
+                        fetch_field!(@changeset, :line_items),
+                        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
+                        Money.new(0, :USD),
+                        fn item, acc -> Money.add(acc, item.amount) end
+                      )
+                    )}</p>
+                  <h5>Estimated Total</h5>
+                </div>
                 {#if Enum.any?(@offering.options)}
                   <hr>
                   <h5>Additional Options</h5>
@@ -225,7 +229,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                         <li>
                           <span>{to_string(option.price)}</span>
                           <span>{option.name}</span>
-                          <Button click="add_option" value={idx}>Add</Button>
+                          <button :on-click="add_option" value={idx} class="fas fa-plus-circle" />
                         </li>
                       {/if}
                     {/for}
