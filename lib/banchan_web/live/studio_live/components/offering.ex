@@ -114,7 +114,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <TextInput name={:type} opts={required: true} />
         <TextArea name={:description} opts={required: true} />
         <TextArea name={:terms} />
-        <TextInput name={:base_price} opts={required: true} />
         <h3>Options</h3>
         <InputContext :let={form: form}>
           <Inputs form={form} for={:options} :let={index: index}>
