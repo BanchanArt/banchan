@@ -39,7 +39,8 @@
 
     * NSFW
     * Fanart
-    """
+    """,
+    default_terms: "I agree that this can **never be used for NFTs** in any way, shape, or form."
   })
 
 {:ok, _} =
@@ -50,7 +51,6 @@
     description: "A detailed illustration with full rendering and background.",
     open: true,
     hidden: false,
-    terms: "You break it, you **buy** it.",
     options: [
       %{
         name: "Base Price",
@@ -95,5 +95,6 @@
         price: Money.new(2500, :USD),
         multiple: true
       }
-    ]
+    ],
+    default_terms: "**No NFTs**. But also no derivative works."
   })

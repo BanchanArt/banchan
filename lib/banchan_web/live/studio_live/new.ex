@@ -39,6 +39,7 @@ defmodule BanchanWeb.StudioLive.New do
             <TextInput name={:handle} icon="at" opts={required: true} />
             <TextArea name={:description} opts={required: true} />
             <TextArea name={:summary} />
+            <TextArea name={:default_terms} />
             <Submit changeset={@changeset} label="Save" />
           </Form>
         </div>

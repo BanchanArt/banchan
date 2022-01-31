@@ -25,7 +25,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     socket = assign_defaults(session, socket, true)
     socket = assign_studio_defaults(params, socket, false)
     offering = Offerings.get_offering_by_type!(offering_type, socket.assigns.current_user_member?)
-    terms = HtmlSanitizeEx.markdown_html(Earmark.as_html!(offering.terms || ""))
+    terms = HtmlSanitizeEx.markdown_html(Earmark.as_html!(offering.terms || socket.assigns.studio.default_terms || ""))
 
     if offering.open do
       default_items =
