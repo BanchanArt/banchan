@@ -95,33 +95,35 @@ defmodule Banchan.Studios do
   end
 
   @doc """
-  List offerings offered by this studio
+  List offerings offered by this studio. Will take into account visibility
+  based on whether the current user is a member of the studio and whether the
+  offering is published.
 
   ## Examples
 
-      iex> list_studio_offerings(studio)
+      iex> list_studio_offerings(studio, current_studio_member?)
       [%Offering{}, %Offering{}, %Offering{}]
   """
-  def list_studio_offerings(studio) do
-    Repo.all(from o in Ecto.assoc(studio, :offerings), order_by: o.index)
+  def list_studio_offerings(studio, current_user_member?) do
+    Repo.all(
+      from o in Ecto.assoc(studio, :offerings),
+        where: ^current_user_member? or o.hidden == false,
+        order_by: o.index,
+        preload: [:options]
+    )
   end
 
   @doc """
-  Determine if a user is part of a studio. If the studio is omitted, returns
-  true if the user is part of ANY studio.
+  Determine if a user is part of a studio.
 
   ## Examples
 
       iex> is_user_in_studio(user, studio)
       true
   """
-  def is_user_in_studio(user, studio \\ false) do
-    if studio do
-      Repo.exists?(
-        from us in "users_studios", where: us.user_id == ^user.id and us.studio_id == ^studio.id
-      )
-    else
-      Repo.exists?(from us in "users_studios", where: us.user_id == ^user.id)
-    end
+  def is_user_in_studio(user, studio) do
+    Repo.exists?(
+      from us in "users_studios", where: us.user_id == ^user.id and us.studio_id == ^studio.id
+    )
   end
 end

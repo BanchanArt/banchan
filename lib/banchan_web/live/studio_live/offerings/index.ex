@@ -8,6 +8,8 @@ defmodule BanchanWeb.StudioLive.Offerings.Index do
 
   alias Surface.Components.LiveRedirect
 
+  alias Banchan.Offerings
+
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.StudioLayout
   import BanchanWeb.StudioLive.Helpers
@@ -16,7 +18,9 @@ defmodule BanchanWeb.StudioLive.Offerings.Index do
   def mount(params, session, socket) do
     socket = assign_defaults(session, socket, true)
     socket = assign_studio_defaults(params, socket, true)
-    offerings = Studios.list_studio_offerings(socket.assigns.studio)
+
+    offerings =
+      Studios.list_studio_offerings(socket.assigns.studio, socket.assigns.current_user_member?)
 
     {:ok, assign(socket, offerings: offerings)}
   end
@@ -75,7 +79,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Index do
                   Closed
                 {/if}
               </td>
-              <td>{offering.base_price || "Inquire"}</td>
+              <td>{Offerings.offering_base_price(offering) || "Inquire"}</td>
               <th>
                 <button class="btn btn-secondary btn-xs"><a
                     href={Routes.studio_offerings_edit_path(Endpoint, :edit, @studio.handle, offering.type)}

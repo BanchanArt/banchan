@@ -14,7 +14,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias Banchan.Offerings.{Offering, OfferingOption}
 
   alias BanchanWeb.Components.Button
-  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, Submit, TextArea, TextInput}
 
   prop changeset, :struct, required: true
 
@@ -35,11 +35,11 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   @impl true
   def handle_event("add_option", _, socket) do
     changeset = %OfferingOption{} |> OfferingOption.changeset(%{})
-    options = Map.get(socket.assigns.changeset.changes, :options, []) ++ [changeset]
+    options = Ecto.Changeset.fetch_field!(socket.assigns.changeset, :options) ++ [changeset]
 
     offering_changeset =
       socket.assigns.changeset
-      |> Map.put(:changes, %{options: options})
+      |> Ecto.Changeset.put_assoc(:options, options)
 
     {:noreply, assign(socket, changeset: offering_changeset)}
   end
@@ -52,7 +52,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
     offering_changeset =
       socket.assigns.changeset
-      |> Map.put(:changes, %{options: options})
+      |> Ecto.Changeset.put_assoc(:options, options)
 
     {:noreply, assign(socket, changeset: offering_changeset)}
   end
@@ -78,7 +78,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   end
 
   defp moneyfy_offering(offering) do
-    offering = Map.update(offering, "base_price", "", &moneyfy/1)
     # *sigh*
     Map.update(offering, "options", [], fn options ->
       Map.new(
@@ -114,7 +113,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <TextInput name={:type} opts={required: true} />
         <TextArea name={:description} opts={required: true} />
         <TextArea name={:terms} />
-        <TextInput name={:base_price} opts={required: true} />
+        <Checkbox name={:open} label="Show as Open" />
+        <Checkbox name={:hidden} label="Hide from Shop" />
         <h3>Options</h3>
         <InputContext :let={form: form}>
           <Inputs form={form} for={:options} :let={index: index}>
@@ -125,6 +125,9 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
               <TextInput name={:name} opts={required: true} />
               <TextArea name={:description} opts={required: true} />
               <TextInput name={:price} opts={required: true} />
+              <Checkbox name={:multiple} label="Allow clients to select this option multiple times." />
+              <Checkbox name={:sticky} label="Sticky" />
+              <Checkbox name={:default} label="Default" />
             </div>
           </Inputs>
         </InputContext>

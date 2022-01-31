@@ -12,10 +12,11 @@ defmodule Banchan.Studios.Studio do
     field :header_img, :string
     field :card_img, :string
     field :summary, :string
+    field :default_terms, :string
 
     many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
 
-    has_many :offerings, Banchan.Offerings.Offering
+    has_many :offerings, Banchan.Offerings.Offering, preload_order: [:asc, :index]
 
     timestamps()
   end
@@ -23,7 +24,7 @@ defmodule Banchan.Studios.Studio do
   @doc false
   def changeset(studio, attrs) do
     studio
-    |> cast(attrs, [:name, :handle, :description, :summary])
+    |> cast(attrs, [:name, :handle, :description, :summary, :default_terms])
     |> validate_required([:name, :handle])
     |> validate_handle_unique(:handle)
   end

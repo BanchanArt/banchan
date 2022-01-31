@@ -14,7 +14,7 @@ defmodule Banchan.Offerings.Offering do
     field :name, :string
     field :description, :string
     field :open, :boolean, default: false
-    field :base_price, Money.Ecto.Composite.Type
+    field :hidden, :boolean, default: true
     field :terms, :string
 
     belongs_to :studio, Studio
@@ -26,24 +26,14 @@ defmodule Banchan.Offerings.Offering do
   @doc false
   def changeset(offering, attrs) do
     offering
-    |> cast(attrs, [:type, :index, :name, :description, :open, :base_price, :terms])
+    |> cast(attrs, [:type, :index, :name, :description, :open, :hidden, :terms])
     |> cast_assoc(:options)
-    # TODO: Upper limit?
-    |> validate_money(:base_price)
-    # TODO: validate terms and that they parse.
     |> validate_format(:type, ~r/^[0-9a-z-]+$/,
       message: "Only lowercase alphanumerics and - are allowed."
     )
     |> validate_markdown(:terms)
     |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])
-  end
-
-  defp validate_money(changeset, field) do
-    validate_change(changeset, field, fn
-      _, %Money{amount: amount} when amount > 0 -> []
-      _, _ -> [{field, "must be greater than 0"}]
-    end)
   end
 
   defp validate_markdown(changeset, field) do

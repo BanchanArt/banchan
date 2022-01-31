@@ -39,42 +39,62 @@
 
     * NSFW
     * Fanart
-    """
+    """,
+    default_terms: "I agree that this can **never be used for NFTs** in any way, shape, or form."
   })
 
-Banchan.Offerings.new_offering(studio, %{
-  type: "illustration",
-  index: 0,
-  name: "Illustration",
-  description: "A detailed illustration with full rendering and background.",
-  open: true,
-  terms: "You break it, you **buy** it.",
-  options: [
-    %{
-      name: "option1",
-      description: "Option 1",
-      price: Money.new(500, :USD)
-    },
-    %{
-      name: "option2",
-      description: "Option 2",
-      price: Money.new(4500, :USD)
-    }
-  ]
-})
+{:ok, _} =
+  Banchan.Offerings.new_offering(studio, %{
+    type: "illustration",
+    index: 0,
+    name: "Illustration",
+    description: "A detailed illustration with full rendering and background.",
+    open: true,
+    hidden: false,
+    options: [
+      %{
+        name: "Base Price",
+        description: "The commission itself.",
+        price: Money.new(0, :USD),
+        default: true,
+        sticky: true
+      },
+      %{
+        name: "Extra Character",
+        description: "Add another character to the illustration.",
+        price: Money.new(500, :USD),
+        multiple: true
+      },
+      %{
+        name: "Full background",
+        description: "Add full background.",
+        price: Money.new(4500, :USD)
+      }
+    ]
+  })
 
-Banchan.Offerings.new_offering(studio, %{
-  type: "chibi",
-  index: 1,
-  name: "Chibi",
-  description: "Big eyes, small mouth, tiny body, big heart.",
-  open: true,
-  base_price: Money.new(5000, :USD),
-  options: [
-    %{
-      name: "Extra Character",
-      description: "Add an extra characte to the commission.",
-      price: Money.new(2500, :USD)
-    }
-  ]
-})
+{:ok, _} =
+  Banchan.Offerings.new_offering(studio, %{
+    type: "chibi",
+    index: 1,
+    name: "Chibi",
+    description: "Big eyes, small mouth, tiny body, big heart.",
+    open: true,
+    hidden: true,
+    options: [
+      %{
+        name: "Base Price",
+        description: "One chibi character, to order.",
+        price: Money.new(5000, :USD),
+        default: true,
+        sticky: true
+      },
+      %{
+        name: "Extra Character",
+        description: "Add an extra characte to the commission.",
+        price: Money.new(2500, :USD),
+        multiple: true
+      }
+    ],
+    default_terms: "**No NFTs**. But also no derivative works."
+  })

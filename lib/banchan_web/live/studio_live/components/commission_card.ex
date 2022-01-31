@@ -6,6 +6,8 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
 
   alias Surface.Components.LiveRedirect
 
+  alias Banchan.Offerings
+
   alias BanchanWeb.Components.Card
   alias BanchanWeb.Endpoint
 
@@ -13,6 +15,8 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
   prop offering, :struct, required: true
 
   def render(assigns) do
+    base_price = Offerings.offering_base_price(assigns.offering)
+
     ~F"""
     <Card>
       <:header>
@@ -24,6 +28,9 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
         {#else}
           <div class="badge badge-error badge-outline">Closed</div>
         {/if}
+        {#if @offering.hidden}
+          <div class="badge badge-error badge-outline">Hidden</div>
+        {/if}
       </:header_aside>
       <:image>
         <img class="object-cover" src={Routes.static_path(Endpoint, "/images/640x360.png")}>
@@ -32,8 +39,8 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
         <p class="mt-2">{@offering.description}</p>
         <p class="text-success mt-2">
           Base Price:
-          {#if @offering.base_price}
-            <span class="float-right">{@offering.base_price}</span>
+          {#if base_price}
+            <span class="float-right">{base_price}</span>
           {#else}
             <span class="float-right">Inquire</span>
           {/if}

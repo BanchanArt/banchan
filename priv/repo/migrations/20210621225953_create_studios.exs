@@ -9,6 +9,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :description, :text
       add :header_img, :string
       add :card_img, :string
+      add :default_terms, :text
       timestamps()
     end
 

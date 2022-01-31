@@ -11,6 +11,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   prop opts, :keyword, default: []
   prop wrapper_class, :css_class
   prop class, :css_class
+  prop label, :string
 
   slot default
 
@@ -30,7 +31,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
             opts={@opts}
           />
         </InputContext>
-        <#slot />
+        <#slot>{@label}</#slot>
       </Label>
       <ErrorTag class="help is-danger" />
     </Field>
