@@ -6,8 +6,8 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :type, :citext, null: false
       add :name, :string, null: false
       add :description, :text, null: false
-      add :base_price, :money_with_currency
       add :open, :boolean, default: false, null: false
+      add :show, :boolean, default: true, null: false
       add :index, :integer
       add :terms, :text
 
@@ -18,14 +18,27 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
 
     create unique_index(:offerings, [:type, :studio_id])
 
+    create table(:offering_options) do
+      add :name, :string, null: false
+      add :description, :text, null: false
+      add :price, :money_with_currency, null: false
+      add :offering_id, references(:offerings, on_delete: :delete_all), null: false
+      add :default, :boolean, default: false, null: false
+      add :sticky, :boolean, default: false, null: false
+
+      timestamps()
+    end
+
+    create index(:offering_options, [:offering_id])
+
     create table(:commissions) do
       add :public_id, :string, null: false
-      add :title, :string
+      add :title, :string, null: false
       add :description, :text
-      add :status, :string
+      add :status, :string, null: false
       add :studio_id, references(:studios, on_delete: :nothing)
       add :client_id, references(:users, on_delete: :nothing)
-      add :offering_id, references(:offerings), null: false
+      add :offering_id, references(:offerings, on_delete: :nothing)
 
       timestamps()
     end
@@ -50,22 +63,11 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     create index(:commission_events, [:commission_id])
     create index(:commission_events, [:actor_id])
 
-    create table(:offering_options) do
-      add :name, :string
-      add :description, :text
-      add :price, :money_with_currency
-      add :offering_id, references(:offerings, on_delete: :delete_all), null: false
-
-      timestamps()
-    end
-
-    create index(:offering_options, [:offering_id])
-
     create table(:line_items) do
-      add :amount, :money_with_currency
-      add :name, :string
-      add :description, :text
-      add :commission_id, references(:commissions, on_delete: :nothing)
+      add :amount, :money_with_currency, null: false
+      add :name, :string, null: false
+      add :description, :text, null: false
+      add :commission_id, references(:commissions, on_delete: :delete_all), null: false
       add :offering_option_id, references(:offering_options, on_delete: :nothing)
       add :sticky, :boolean
 

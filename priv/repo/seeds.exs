@@ -42,7 +42,7 @@
     """
   })
 
-Banchan.Offerings.new_offering(studio, %{
+{:ok, _} = Banchan.Offerings.new_offering(studio, %{
   type: "illustration",
   index: 0,
   name: "Illustration",
@@ -51,26 +51,39 @@ Banchan.Offerings.new_offering(studio, %{
   terms: "You break it, you **buy** it.",
   options: [
     %{
-      name: "option1",
-      description: "Option 1",
+      name: "Illustration",
+      description: "A detailed illustration with full rendering and background.",
+      price: Money.new(0, :USD),
+      default: true,
+      sticky: true
+    },
+    %{
+      name: "Extra Character",
+      description: "Add another character to the illustration.",
       price: Money.new(500, :USD)
     },
     %{
-      name: "option2",
-      description: "Option 2",
+      name: "Full background",
+      description: "Add full background.",
       price: Money.new(4500, :USD)
     }
   ]
 })
 
-Banchan.Offerings.new_offering(studio, %{
+{:ok, _} = Banchan.Offerings.new_offering(studio, %{
   type: "chibi",
   index: 1,
   name: "Chibi",
   description: "Big eyes, small mouth, tiny body, big heart.",
   open: true,
-  base_price: Money.new(5000, :USD),
   options: [
+    %{
+      name: "Chibi",
+      description: "Big eyes, small mouth, tiny body, big heart.",
+      price: Money.new(5000, :USD),
+      default: true,
+      sticky: true
+    },
     %{
       name: "Extra Character",
       description: "Add an extra characte to the commission.",

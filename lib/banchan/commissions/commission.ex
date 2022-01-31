@@ -17,8 +17,8 @@ defmodule Banchan.Commissions.Commission do
       values: @status_values,
       default: :pending
 
-    has_many :line_items, Banchan.Commissions.LineItem
-    has_many :events, Banchan.Commissions.Event
+    has_many :line_items, Banchan.Commissions.LineItem, preload_order: [asc: :inserted_at]
+    has_many :events, Banchan.Commissions.Event, preload_order: [asc: :inserted_at]
     belongs_to :offering, Banchan.Offerings.Offering
     belongs_to :studio, Banchan.Studios.Studio
     belongs_to :client, Banchan.Accounts.User

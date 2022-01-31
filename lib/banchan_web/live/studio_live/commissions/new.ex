@@ -28,18 +28,23 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     terms = HtmlSanitizeEx.markdown_html(Earmark.as_html!(offering.terms || ""))
 
     if offering.open do
+      default_items =
+        offering.options
+        |> Enum.filter(& &1.default)
+        |> Enum.map(fn option ->
+          %{
+            "amount" => option.price,
+            "name" => option.name,
+            "description" => option.description,
+            "sticky" => true
+          }
+        end)
+
       {:ok,
        assign(socket,
          changeset:
            Commission.changeset(%Commission{}, %{
-             "line_items" => [
-               %{
-                 "amount" => offering.base_price || Money.new(0, :USD),
-                 "name" => offering.name,
-                 "description" => offering.description,
-                 "sticky" => true
-               }
-             ]
+             "line_items" => default_items
            }),
          offering: offering,
          terms: terms

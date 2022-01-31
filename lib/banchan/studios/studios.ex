@@ -103,7 +103,7 @@ defmodule Banchan.Studios do
       [%Offering{}, %Offering{}, %Offering{}]
   """
   def list_studio_offerings(studio) do
-    Repo.all(from o in Ecto.assoc(studio, :offerings), order_by: o.index)
+    Repo.all(from o in Ecto.assoc(studio, :offerings), order_by: o.index, preload: [:options])
   end
 
   @doc """
