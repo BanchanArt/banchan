@@ -24,6 +24,7 @@ defmodule Banchan.Offerings.OfferingOption do
     offering_option
     |> cast(attrs, [:name, :description, :price, :default, :sticky])
     |> validate_money(:price)
+    |> validate_sticky_also_default()
     |> validate_required([:name, :description, :price])
   end
 
@@ -32,5 +33,30 @@ defmodule Banchan.Offerings.OfferingOption do
       _, %Money{amount: amount} when amount >= 0 -> []
       _, _ -> [{field, "can't be negative"}]
     end)
+  end
+
+  defp validate_sticky_also_default(%{params: params} = changeset) when is_map(params) do
+    {:ok, sticky} = Ecto.Type.cast(:boolean, Map.get(params, "sticky", "false"))
+    {:ok, default} = Ecto.Type.cast(:boolean, Map.get(params, "default", "false"))
+
+    errors =
+      case {sticky, default} do
+        {true, false} ->
+          [{:sticky, {"can't be sticky if it's not a default offering", [validation: :sticky]}}]
+
+        _ ->
+          []
+      end
+
+    %{
+      changeset
+      | validations: [{:sticky, {:sticky, []}} | changeset.validations],
+        errors: errors ++ changeset.errors,
+        valid?: changeset.valid? and errors == []
+    }
+  end
+
+  defp validate_sticky_also_default(%{params: nil} = changeset) do
+    changeset
   end
 end

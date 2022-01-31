@@ -36,7 +36,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
             "amount" => option.price,
             "name" => option.name,
             "description" => option.description,
-            "sticky" => true
+            "sticky" => option.sticky
           }
         end)
 
