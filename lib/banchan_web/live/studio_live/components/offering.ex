@@ -35,11 +35,11 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   @impl true
   def handle_event("add_option", _, socket) do
     changeset = %OfferingOption{} |> OfferingOption.changeset(%{})
-    options = Map.get(socket.assigns.changeset.changes, :options, []) ++ [changeset]
+    options = Ecto.Changeset.fetch_field!(socket.assigns.changeset, :options) ++ [changeset]
 
     offering_changeset =
       socket.assigns.changeset
-      |> Map.put(:changes, %{options: options})
+      |> Ecto.Changeset.put_assoc(:options, options)
 
     {:noreply, assign(socket, changeset: offering_changeset)}
   end
@@ -52,7 +52,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
     offering_changeset =
       socket.assigns.changeset
-      |> Map.put(:changes, %{options: options})
+      |> Ecto.Changeset.put_assoc(:options, options)
 
     {:noreply, assign(socket, changeset: offering_changeset)}
   end
