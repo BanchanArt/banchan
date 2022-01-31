@@ -19,7 +19,7 @@ defmodule BanchanWeb.StudioLive.Shop do
     socket = assign_studio_defaults(params, socket, false)
     studio = socket.assigns.studio
     members = Studios.list_studio_members(studio)
-    offerings = Studios.list_studio_offerings(studio)
+    offerings = Studios.list_studio_offerings(studio, socket.assigns.current_user_member?)
     summary = studio.summary && HtmlSanitizeEx.markdown_html(Earmark.as_html!(studio.summary))
 
     {:ok, assign(socket, members: members, offerings: offerings, summary: summary)}
@@ -38,7 +38,9 @@ defmodule BanchanWeb.StudioLive.Shop do
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
         <div class="offerings">
           {#for offering <- @offerings}
-            <CommissionCard studio={@studio} offering={offering} />
+            {#if @current_user_member? || offering.show}
+              <CommissionCard studio={@studio} offering={offering} />
+            {/if}
           {/for}
           {#if @current_user_member?}
             <div class="">

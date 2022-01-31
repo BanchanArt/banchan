@@ -102,8 +102,13 @@ defmodule Banchan.Studios do
       iex> list_studio_offerings(studio)
       [%Offering{}, %Offering{}, %Offering{}]
   """
-  def list_studio_offerings(studio) do
-    Repo.all(from o in Ecto.assoc(studio, :offerings), order_by: o.index, preload: [:options])
+  def list_studio_offerings(studio, current_user_member?) do
+    Repo.all(
+      from o in Ecto.assoc(studio, :offerings),
+        where: ^current_user_member? or o.show,
+        order_by: o.index,
+        preload: [:options]
+    )
   end
 
   @doc """

@@ -27,41 +27,47 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     offering = Offerings.get_offering_by_type!(offering_type)
     terms = HtmlSanitizeEx.markdown_html(Earmark.as_html!(offering.terms || ""))
 
-    if offering.open do
-      default_items =
-        offering.options
-        |> Enum.filter(& &1.default)
-        |> Enum.map(fn option ->
-          %{
-            "amount" => option.price,
-            "name" => option.name,
-            "description" => option.description,
-            "sticky" => option.sticky
-          }
-        end)
+    cond do
+      !offering.show && !socket.assigns.current_user_member? ->
+        # We do it this way to avoid leaking whether a commission type exists.
+        throw(Ecto.NoResultsError)
 
-      {:ok,
-       assign(socket,
-         changeset:
-           Commission.changeset(%Commission{}, %{
-             "line_items" => default_items
-           }),
-         offering: offering,
-         terms: terms
-       )}
-    else
-      # TODO: Maybe show this on this page itself?
-      socket =
-        put_flash(
-          socket,
-          :error,
-          "This commission offering is currently closed. Please try signing up for notifications for when it opens instead."
-        )
+      offering.open ->
+        default_items =
+          offering.options
+          |> Enum.filter(& &1.default)
+          |> Enum.map(fn option ->
+            %{
+              "amount" => option.price,
+              "name" => option.name,
+              "description" => option.description,
+              "sticky" => option.sticky
+            }
+          end)
 
-      {:ok,
-       push_redirect(socket,
-         to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
-       )}
+        {:ok,
+         assign(socket,
+           changeset:
+             Commission.changeset(%Commission{}, %{
+               "line_items" => default_items
+             }),
+           offering: offering,
+           terms: terms
+         )}
+
+      true ->
+        # TODO: Maybe show this on this page itself?
+        socket =
+          put_flash(
+            socket,
+            :error,
+            "This commission offering is currently unavailable."
+          )
+
+        {:ok,
+         push_redirect(socket,
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
     end
   end
 

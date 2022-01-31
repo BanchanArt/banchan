@@ -28,6 +28,9 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
         {#else}
           <div class="badge badge-error badge-outline">Closed</div>
         {/if}
+        {#if !@offering.show}
+          <div class="badge badge-error badge-outline">Hidden</div>
+        {/if}
       </:header_aside>
       <:image>
         <img class="object-cover" src={Routes.static_path(Endpoint, "/images/640x360.png")}>
