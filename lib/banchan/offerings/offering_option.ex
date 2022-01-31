@@ -42,7 +42,7 @@ defmodule Banchan.Offerings.OfferingOption do
     errors =
       case {sticky, default} do
         {true, false} ->
-          [{:sticky, {"can't be sticky if it's not a default offering", [validation: :sticky]}}]
+          [{:sticky, {"only options marked as default can be sticky", [validation: :sticky]}}]
 
         _ ->
           []
