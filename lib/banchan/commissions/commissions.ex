@@ -38,10 +38,10 @@ defmodule Banchan.Commissions do
       ** (Ecto.NoResultsError)
 
   """
-  def get_commission!(studio, public_id) do
+  def get_commission!(studio, public_id, current_user, current_user_member?) do
     Repo.one!(
       from c in Commission,
-        where: c.studio_id == ^studio.id and c.public_id == ^public_id,
+        where: c.studio_id == ^studio.id and c.public_id == ^public_id and (^current_user_member? or c.client_id == ^current_user.id),
         preload: [events: [:actor], line_items: []]
     )
   end

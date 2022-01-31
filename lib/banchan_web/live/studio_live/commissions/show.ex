@@ -22,7 +22,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   def mount(%{"commission_id" => commission_id} = params, session, socket) do
     socket = assign_defaults(session, socket, true)
     socket = assign_studio_defaults(params, socket, false)
-    commission = Commissions.get_commission!(socket.assigns.studio, commission_id)
+    commission = Commissions.get_commission!(socket.assigns.studio, commission_id, socket.assigns.current_user, socket.assigns.current_user_member?)
     {:ok, assign(socket, commission: commission)}
   end
 
