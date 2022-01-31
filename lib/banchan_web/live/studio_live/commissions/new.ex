@@ -198,7 +198,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 <div>{raw(@terms)}</div>
               </div>
               <Checkbox name={:tos_ok} opts={required: true}>
-                I have read and agree to {@studio.name}'s <a href="#">Terms of Service</a>.
+                I have read and agree to these Terms and Conditions.
               </Checkbox>
               <Submit changeset={@changeset} />
             </Form>
