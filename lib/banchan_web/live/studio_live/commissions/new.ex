@@ -176,7 +176,11 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
             <Form for={@changeset} change="change" submit="submit">
               <div class="block">
                 <TextInput name={:title} class="w-full" opts={required: true, placeholder: "A Brief Title"} />
-                <TextArea name={:description} class="w-full" opts={required: true, placeholder: "Here's what I'd like..."} />
+                <TextArea
+                  name={:description}
+                  class="w-full"
+                  opts={required: true, placeholder: "Here's what I'd like..."}
+                />
               </div>
               <div class="content block">
                 <h3>Terms and Conditions</h3>
