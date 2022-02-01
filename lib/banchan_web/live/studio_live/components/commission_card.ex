@@ -24,13 +24,8 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
         {@offering.name}
       </:header>
       <:header_aside>
-        {#if !is_nil(@offering.slots)}
-          <div class={
-            "badge",
-            "badge-outline",
-            "badge-success": @offering.open,
-            "badge-error": !@offering.open
-          }>{available_slots}/{@offering.slots} Slots</div>
+        {#if @offering.open && !is_nil(@offering.slots)}
+          <div class="badge badge-outline badge-error">{available_slots}/{@offering.slots} Slots</div>
         {#elseif !@offering.open && !is_nil(@offering.slots)}
           <div class="badge badge-error badge-outline">0/{@offering.slots} Slots</div>
         {#elseif @offering.open}
