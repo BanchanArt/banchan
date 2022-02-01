@@ -51,6 +51,7 @@
     description: "A detailed illustration with full rendering and background.",
     open: true,
     hidden: false,
+    max_proposals: 3,
     options: [
       %{
         name: "Base Price",
@@ -81,6 +82,7 @@
     description: "Big eyes, small mouth, tiny body, big heart.",
     open: true,
     hidden: true,
+    slots: 3,
     options: [
       %{
         name: "Base Price",

@@ -8,6 +8,8 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :description, :text, null: false
       add :open, :boolean, default: false, null: false
       add :hidden, :boolean, default: true, null: false
+      add :slots, :integer
+      add :max_proposals, :integer
       add :index, :integer
       add :terms, :text
 

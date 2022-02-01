@@ -7,6 +7,7 @@ defmodule Banchan.Commissions do
   alias Banchan.Repo
 
   alias Banchan.Commissions.{Commission, Event}
+  alias Banchan.Offerings
 
   @doc """
   Returns the list of commissions.
@@ -61,6 +62,40 @@ defmodule Banchan.Commissions do
 
   """
   def create_commission(actor, studio, offering, attrs \\ %{}) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        available_slot_count = Offerings.offering_available_slots(offering)
+        available_proposal_count = Offerings.offering_available_proposals(offering)
+
+        maybe_close_offering(offering, available_slot_count, available_proposal_count)
+
+        cond do
+          !is_nil(available_slot_count) && available_slot_count <= 0 ->
+            {:error, :no_slots_available}
+
+          !is_nil(available_proposal_count) && available_proposal_count <= 0 ->
+            {:error, :no_proposals_available}
+
+          true ->
+            insert_commission(actor, studio, offering, attrs)
+        end
+      end)
+
+    ret
+  end
+
+  defp maybe_close_offering(offering, available_slot_count, available_proposal_count) do
+    # Make sure we close the offering if we're out of slots or proposals.
+    close_slots = !is_nil(available_slot_count) && available_slot_count <= 1
+    close_proposals = !is_nil(available_proposal_count) && available_proposal_count <= 1
+    close = close_slots || close_proposals
+
+    if close do
+      {:ok, _} = Offerings.update_offering(offering, %{open: false})
+    end
+  end
+
+  defp insert_commission(actor, studio, offering, attrs) do
     %Commission{
       public_id: Commission.gen_public_id(),
       studio: studio,

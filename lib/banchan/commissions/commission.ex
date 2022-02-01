@@ -5,7 +5,7 @@ defmodule Banchan.Commissions.Commission do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @status_values [:submitted, :pending, :accepted, :in_progress, :paused, :waiting, :closed]
+  @status_values [:pending, :accepted, :in_progress, :paused, :waiting, :closed]
 
   schema "commissions" do
     field :public_id, :string
