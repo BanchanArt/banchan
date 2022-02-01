@@ -61,21 +61,13 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def create_commission(actor, studio, offering, attrs \\ %{}) do
     {:ok, ret} =
       Repo.transaction(fn ->
         available_slot_count = Offerings.offering_available_slots(offering)
         available_proposal_count = Offerings.offering_available_proposals(offering)
 
-        # Make sure we close the offering if we're out of slots or proposals.
-        close_slots = !is_nil(available_slot_count) && available_slot_count <= 1
-        close_proposals = !is_nil(available_proposal_count) && available_proposal_count <= 1
-        close = close_slots || close_proposals
-
-        if close do
-          {:ok, _} = Offerings.update_offering(offering, %{open: false})
-        end
+        maybe_close_offering(offering, available_slot_count, available_proposal_count)
 
         cond do
           !is_nil(available_slot_count) && available_slot_count <= 0 ->
@@ -90,6 +82,17 @@ defmodule Banchan.Commissions do
       end)
 
     ret
+  end
+
+  defp maybe_close_offering(offering, available_slot_count, available_proposal_count) do
+      # Make sure we close the offering if we're out of slots or proposals.
+      close_slots = !is_nil(available_slot_count) && available_slot_count <= 1
+      close_proposals = !is_nil(available_proposal_count) && available_proposal_count <= 1
+      close = close_slots || close_proposals
+
+      if close do
+        {:ok, _} = Offerings.update_offering(offering, %{open: false})
+      end
   end
 
   defp insert_commission(actor, studio, offering, attrs) do
