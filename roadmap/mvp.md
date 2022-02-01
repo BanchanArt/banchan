@@ -3,11 +3,10 @@ This is a rough draft of features we want to include in MVP.
 ## Major MVP features
 1. Basic profile pages for denizens
 2. Basic profile pages for studios
-3. Merge denizen/studio namespace so you can just go to banchan.art/someusername and it'll go to either a studio or a username, just fine.
-4. Some basic styling beyond default bulma styles
-5. Full end-to-end experience for commissioning 
-6. Explore existing studios by topic
-7. Way for studios to manage their gallery/portfolio and link pieces as examples for specific commission options
+3. Clean styling including responsive design for mobile devices
+4. Full end-to-end experience for commissioning 
+5. Explore existing studios by topic
+6. Way for studios to manage their gallery/portfolio and link pieces as examples for specific commission options
 
 ## Commissions Experience
 1. Studios, and studios managing their offerings that will be displayed on their studio page.
@@ -27,7 +26,6 @@ This is a rough draft of features we want to include in MVP.
 - way to limit sign ups starting out
 - mailing list for those wanting to sign up
 - email verification for new accounts
-
 
 ## Waiting till after MVP
 - showcases
