@@ -64,24 +64,26 @@ defmodule Banchan.Commissions do
   def create_commission(actor, studio, offering, attrs \\ %{}) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        slot_available =
-          if is_nil(offering.slots) do
-            true
-          else
-            # TODO: move to shared location
-            used_slots =
-              Repo.one(
-                from c in Banchan.Commissions.Commission,
-                  where: c.offering_id == ^offering.id,
-                  # where: c.status != :closed and c.status != :pending,
-                  select: count(c)
-              )
+        available_slot_count = Offerings.offering_available_slots(offering)
+        available_proposal_count = Offerings.offering_available_proposals(offering)
 
-            used_slots < offering.slots
-          end
+        # Make sure we close the offering if we're out of slots or proposals.
+        close_slots = !is_nil(available_slot_count) && available_slot_count <= 1
+        close_proposals = !is_nil(available_proposal_count) && available_proposal_count <= 1
+        close = close_slots || close_proposals
 
-        if slot_available do
-          insertion =
+        if close do
+          {:ok, _} = Offerings.update_offering(offering, %{open: false})
+        end
+
+        cond do
+          !is_nil(available_slot_count) && available_slot_count <= 0 ->
+            {:error, :no_slots_available}
+
+          !is_nil(available_proposal_count) && available_proposal_count <= 0 ->
+            {:error, :no_proposals_available}
+
+          true ->
             %Commission{
               public_id: Commission.gen_public_id(),
               studio: studio,
@@ -97,24 +99,6 @@ defmodule Banchan.Commissions do
             }
             |> Commission.changeset(attrs)
             |> Repo.insert()
-
-          case insertion do
-            {:error, err} ->
-              {:error, err}
-
-            {:ok, val} ->
-              count = Offerings.offering_available_slots(offering)
-
-              # Close the offering if this was the last slot available.
-              if !is_nil(count) && count <= 0 do
-                {:ok, _} = Offerings.update_offering(offering, %{open: false})
-              end
-
-              {:ok, val}
-          end
-        else
-          Offerings.update_offering(offering, %{open: false})
-          {:error, :no_slots_available}
         end
       end)
 

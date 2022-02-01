@@ -15,6 +15,7 @@ defmodule Banchan.Offerings.Offering do
     field :description, :string
     field :open, :boolean, default: false
     field :slots, :integer
+    field :max_proposals, :integer
     field :hidden, :boolean, default: true
     field :terms, :string
 
@@ -27,12 +28,23 @@ defmodule Banchan.Offerings.Offering do
   @doc false
   def changeset(offering, attrs) do
     offering
-    |> cast(attrs, [:type, :index, :name, :description, :open, :slots, :hidden, :terms])
+    |> cast(attrs, [
+      :type,
+      :index,
+      :name,
+      :description,
+      :open,
+      :slots,
+      :max_proposals,
+      :hidden,
+      :terms
+    ])
     |> cast_assoc(:options)
     |> validate_format(:type, ~r/^[0-9a-z-]+$/,
       message: "Only lowercase alphanumerics and - are allowed."
     )
     |> validate_number(:slots, greater_than: 0)
+    |> validate_number(:max_proposals, greater_than: 0)
     |> validate_markdown(:terms)
     |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])

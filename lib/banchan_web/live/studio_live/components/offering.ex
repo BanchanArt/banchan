@@ -114,6 +114,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <TextArea name={:description} opts={required: true} />
         <TextArea name={:terms} />
         <TextInput name={:slots} />
+        <TextInput name={:max_proposals} />
         <Checkbox name={:open} label="Show as Open" />
         <Checkbox name={:hidden} label="Hide from Shop" />
         <h3>Options</h3>

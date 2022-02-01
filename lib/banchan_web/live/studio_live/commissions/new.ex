@@ -167,6 +167,15 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
          push_redirect(socket,
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
+
+      {:error, :no_proposals_available} ->
+        socket =
+          put_flash(socket, :error, "New commissions of this kind are temporarily unavailable.")
+
+        {:noreply,
+         push_redirect(socket,
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
     end
   end
 
