@@ -7,6 +7,7 @@ defmodule Banchan.Commissions do
   alias Banchan.Repo
 
   alias Banchan.Commissions.{Commission, Event}
+  alias Banchan.Offerings
 
   @doc """
   Returns the list of commissions.
@@ -61,21 +62,63 @@ defmodule Banchan.Commissions do
 
   """
   def create_commission(actor, studio, offering, attrs \\ %{}) do
-    %Commission{
-      public_id: Commission.gen_public_id(),
-      studio: studio,
-      offering: offering,
-      client: actor,
-      events: [
-        %{
-          actor: actor,
-          type: :comment,
-          text: Map.get(attrs, "description", "")
-        }
-      ]
-    }
-    |> Commission.changeset(attrs)
-    |> Repo.insert()
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        slot_available =
+          if is_nil(offering.slots) do
+            true
+          else
+            # TODO: move to shared location
+            used_slots =
+              Repo.one(
+                from c in Banchan.Commissions.Commission,
+                  where: c.offering_id == ^offering.id,
+                  # where: c.status != :closed and c.status != :pending,
+                  select: count(c)
+              )
+
+            used_slots < offering.slots
+          end
+
+        if slot_available do
+          insertion =
+            %Commission{
+              public_id: Commission.gen_public_id(),
+              studio: studio,
+              offering: offering,
+              client: actor,
+              events: [
+                %{
+                  actor: actor,
+                  type: :comment,
+                  text: Map.get(attrs, "description", "")
+                }
+              ]
+            }
+            |> Commission.changeset(attrs)
+            |> Repo.insert()
+
+          case insertion do
+            {:error, err} ->
+              {:error, err}
+
+            {:ok, val} ->
+              count = Offerings.offering_available_slots(offering)
+
+              # Close the offering if this was the last slot available.
+              if !is_nil(count) && count <= 0 do
+                {:ok, _} = Offerings.update_offering(offering, %{open: false})
+              end
+
+              {:ok, val}
+          end
+        else
+          Offerings.update_offering(offering, %{open: false})
+          {:error, :no_slots_available}
+        end
+      end)
+
+    ret
   end
 
   @doc """

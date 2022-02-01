@@ -81,6 +81,7 @@
     description: "Big eyes, small mouth, tiny body, big heart.",
     open: true,
     hidden: true,
+    slots: 3,
     options: [
       %{
         name: "Base Price",

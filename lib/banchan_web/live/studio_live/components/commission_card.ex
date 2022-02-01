@@ -16,6 +16,7 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
 
   def render(assigns) do
     base_price = Offerings.offering_base_price(assigns.offering)
+    available_slots = Offerings.offering_available_slots(assigns.offering)
 
     ~F"""
     <Card>
@@ -23,7 +24,9 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
         {@offering.name}
       </:header>
       <:header_aside>
-        {#if @offering.open}
+        {#if @offering.open && !is_nil(@offering.slots)}
+          <div class="badge badge-success badge-outline">{available_slots}/{@offering.slots} Slots Open</div>
+        {#elseif @offering.open}
           <div class="badge badge-success badge-outline">Open</div>
         {#else}
           <div class="badge badge-error badge-outline">Closed</div>

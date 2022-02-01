@@ -132,7 +132,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   @impl true
   def handle_event("submit", %{"commission" => commission}, socket) do
-    commission =
+    new_commission =
       Map.put(
         commission,
         "line_items",
@@ -143,9 +143,9 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
            socket.assigns.current_user,
            socket.assigns.studio,
            socket.assigns.offering,
-           commission
+           new_commission
          ) do
-      {:ok, commission} ->
+      {:ok, created_commission} ->
         {:noreply,
          redirect(socket,
            to:
@@ -153,12 +153,20 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                Endpoint,
                :show,
                socket.assigns.studio.handle,
-               commission.public_id
+               created_commission.public_id
              )
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
+
+      {:error, :no_slots_available} ->
+        socket = put_flash(socket, :error, "No more slots are available for this commission.")
+
+        {:noreply,
+         push_redirect(socket,
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
     end
   end
 
