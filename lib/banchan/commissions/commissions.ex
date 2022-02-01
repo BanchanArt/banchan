@@ -61,6 +61,7 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def create_commission(actor, studio, offering, attrs \\ %{}) do
     {:ok, ret} =
       Repo.transaction(fn ->
@@ -84,25 +85,29 @@ defmodule Banchan.Commissions do
             {:error, :no_proposals_available}
 
           true ->
-            %Commission{
-              public_id: Commission.gen_public_id(),
-              studio: studio,
-              offering: offering,
-              client: actor,
-              events: [
-                %{
-                  actor: actor,
-                  type: :comment,
-                  text: Map.get(attrs, "description", "")
-                }
-              ]
-            }
-            |> Commission.changeset(attrs)
-            |> Repo.insert()
+            insert_commission(actor, studio, offering, attrs)
         end
       end)
 
     ret
+  end
+
+  defp insert_commission(actor, studio, offering, attrs) do
+    %Commission{
+      public_id: Commission.gen_public_id(),
+      studio: studio,
+      offering: offering,
+      client: actor,
+      events: [
+        %{
+          actor: actor,
+          type: :comment,
+          text: Map.get(attrs, "description", "")
+        }
+      ]
+    }
+    |> Commission.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
