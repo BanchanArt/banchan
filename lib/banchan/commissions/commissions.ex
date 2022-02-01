@@ -85,14 +85,14 @@ defmodule Banchan.Commissions do
   end
 
   defp maybe_close_offering(offering, available_slot_count, available_proposal_count) do
-      # Make sure we close the offering if we're out of slots or proposals.
-      close_slots = !is_nil(available_slot_count) && available_slot_count <= 1
-      close_proposals = !is_nil(available_proposal_count) && available_proposal_count <= 1
-      close = close_slots || close_proposals
+    # Make sure we close the offering if we're out of slots or proposals.
+    close_slots = !is_nil(available_slot_count) && available_slot_count <= 1
+    close_proposals = !is_nil(available_proposal_count) && available_proposal_count <= 1
+    close = close_slots || close_proposals
 
-      if close do
-        {:ok, _} = Offerings.update_offering(offering, %{open: false})
-      end
+    if close do
+      {:ok, _} = Offerings.update_offering(offering, %{open: false})
+    end
   end
 
   defp insert_commission(actor, studio, offering, attrs) do
