@@ -10,7 +10,7 @@ defmodule Banchan.CommissionsTest do
     alias Banchan.Commissions.Commission
 
     @valid_attrs %{
-      status: "pending",
+      status: "submitted",
       title: "some title",
       description: "Some Description",
       tos_ok: true
@@ -69,7 +69,7 @@ defmodule Banchan.CommissionsTest do
     @tag :skip
     test "create_commission/1 with valid data creates a commission" do
       assert {:ok, %Commission{} = commission} = Commissions.create_commission(@valid_attrs)
-      assert commission.status == :pending
+      assert commission.status == :submitted
       assert commission.title == "some title"
     end
 

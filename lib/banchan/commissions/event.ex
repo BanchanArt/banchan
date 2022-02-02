@@ -15,7 +15,7 @@ defmodule Banchan.Commissions.Event do
 
     field :status, Ecto.Enum,
       values: Commission.status_values(),
-      default: :pending
+      default: :submitted
 
     belongs_to :actor, User
     belongs_to :commission, Commission
