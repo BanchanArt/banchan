@@ -61,7 +61,7 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_commission(actor, studio, offering, attrs \\ %{}) do
+  def create_commission(actor, studio, offering, line_items, attrs \\ %{}) do
     {:ok, ret} =
       Repo.transaction(fn ->
         available_slot_count = Offerings.offering_available_slots(offering)
@@ -77,7 +77,7 @@ defmodule Banchan.Commissions do
             {:error, :no_proposals_available}
 
           true ->
-            insert_commission(actor, studio, offering, attrs)
+            insert_commission(actor, studio, offering, line_items, attrs)
         end
       end)
 
@@ -95,12 +95,13 @@ defmodule Banchan.Commissions do
     end
   end
 
-  defp insert_commission(actor, studio, offering, attrs) do
+  defp insert_commission(actor, studio, offering, line_items, attrs) do
     %Commission{
       public_id: Commission.gen_public_id(),
       studio: studio,
       offering: offering,
       client: actor,
+      line_items: line_items,
       events: [
         %{
           actor: actor,
