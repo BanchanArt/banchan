@@ -49,7 +49,7 @@ defmodule Banchan.Offerings do
       Repo.one(
         from c in Banchan.Commissions.Commission,
           where: c.offering_id == ^offering.id,
-          where: c.status != :closed and c.status != :pending,
+          where: c.status != :closed and c.status != :submitted,
           select: count(c)
       )
 
@@ -69,7 +69,7 @@ defmodule Banchan.Offerings do
       Repo.one(
         from c in Banchan.Commissions.Commission,
           where: c.offering_id == ^offering.id,
-          where: c.status == :pending,
+          where: c.status == :submitted,
           select: count(c)
       )
 

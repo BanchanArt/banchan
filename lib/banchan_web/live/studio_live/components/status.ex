@@ -24,7 +24,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Status do
           <Select
             selected={@commission.status}
             options={[
-              Pending: :pending,
+              Pending: :submitted,
               Accepted: :accepted,
               Paused: :paused,
               "In Progress": :in_progress,
