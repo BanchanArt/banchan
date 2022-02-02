@@ -12,10 +12,9 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Card
   alias BanchanWeb.Components.Form.{Checkbox, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.Commissions.Attachments
+  alias BanchanWeb.StudioLive.Components.Commissions.{Attachments, Summary}
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
@@ -78,7 +77,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   end
 
   @impl true
-  def handle_event("add_option", %{"value" => idx}, socket) do
+  def handle_event("add_item", %{"value" => idx}, socket) do
     {idx, ""} = Integer.parse(idx)
     {:ok, option} = Enum.fetch(socket.assigns.offering.options, idx)
 
@@ -101,7 +100,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   end
 
   @impl true
-  def handle_event("remove_option", %{"value" => idx}, socket) do
+  def handle_event("remove_item", %{"value" => idx}, socket) do
     {idx, ""} = Integer.parse(idx)
     line_item = Enum.at(socket.assigns.line_items, idx)
 
@@ -200,51 +199,12 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
         <div class="col-span-2 col-end-13 p-6">
           <div id="sidebar">
             <div class="block sidebar-box">
-              <Card>
-                <:header>Summary</:header>
-                <ul class="divide-y">
-                  {#for {line_item, idx} <- Enum.with_index(@line_items)}
-                    <li>
-                      <div class="float-right">
-                        <span>{to_string(line_item.amount)}</span>
-                        {#if !line_item.sticky}
-                          <button :on-click="remove_option" value={idx} class="fas fa-times-circle" />
-                        {/if}
-                      </div>
-                      <span>{line_item.name}</span>
-                    </li>
-                  {/for}
-                </ul>
-                <hr>
-                <div>
-                  <p class="float-right">
-                    {Money.to_string(
-                      Enum.reduce(
-                        @line_items,
-                        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-                        Money.new(0, :USD),
-                        fn item, acc -> Money.add(acc, item.amount) end
-                      )
-                    )}
-                  </p>
-                  <h5>Estimated Total</h5>
-                </div>
-                {#if Enum.any?(@offering.options)}
-                  <hr>
-                  <h5>Additional Options</h5>
-                  <ul>
-                    {#for {option, idx} <- Enum.with_index(@offering.options)}
-                      {#if option.multiple || !Enum.any?(@line_items, &(&1.option.id == option.id))}
-                        <li>
-                          <span>{to_string(option.price)}</span>
-                          <span>{option.name}</span>
-                          <button :on-click="add_option" value={idx} class="fas fa-plus-circle" />
-                        </li>
-                      {/if}
-                    {/for}
-                  </ul>
-                {/if}
-              </Card>
+              <Summary
+                add_item="add_item"
+                remove_item="remove_item"
+                line_items={@line_items}
+                offering={@offering}
+              />
             </div>
             <div class="block sidebar-box pt-6">
               <Attachments id="commission-attachments" />

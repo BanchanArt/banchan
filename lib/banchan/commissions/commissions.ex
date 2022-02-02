@@ -45,7 +45,7 @@ defmodule Banchan.Commissions do
         where:
           c.studio_id == ^studio.id and c.public_id == ^public_id and
             (^current_user_member? or c.client_id == ^current_user.id),
-        preload: [events: [:actor], line_items: []]
+        preload: [events: [:actor], line_items: [:option], offering: [:options]]
     )
   end
 

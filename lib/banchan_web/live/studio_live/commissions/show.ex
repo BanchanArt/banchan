@@ -31,7 +31,8 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
         socket.assigns.current_user_member?
       )
 
-    {:ok, assign(socket, commission: commission, changeset: Commissions.change_commission(commission))}
+    {:ok,
+     assign(socket, commission: commission, changeset: Commissions.change_commission(commission))}
   end
 
   @impl true
@@ -56,7 +57,12 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
           <div class="col-span-2 col-end-13 p-6">
             <div id="sidebar">
               <div class="block sidebar-box">
-                <Summary id="commission-summary" changeset={@changeset} />
+                <Summary
+                  line_items={@commission.line_items}
+                  offering={@commission.offering}
+                  add_item="add_item"
+                  remove_item="remove_item"
+                />
               </div>
               <div class="block sidebar-box">
                 <Status commission={@commission} change="update-status" />
@@ -70,6 +76,20 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       </div>
     </StudioLayout>
     """
+  end
+
+  @impl true
+  def handle_event("remove_item", %{"value" => idx}, socket) do
+    # TODO: this should go through a consent workflow.
+    {idx, ""} = Integer.parse(idx)
+    line_item = Enum.at(socket.assigns.commission.line_items, idx)
+    new_items = List.delete_at(socket.assigns.commission.line_items, idx)
+
+    if line_item && !line_item.sticky do
+      {:noreply, assign(socket, commission: %{socket.assigns.commission | line_items: new_items})}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true

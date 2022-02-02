@@ -2,13 +2,14 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
   @moduledoc """
   Summary card for the Commissions Page sidebar
   """
-  use BanchanWeb, :live_component
-
-  import Ecto.Changeset
+  use BanchanWeb, :component
 
   alias BanchanWeb.Components.Card
 
-  prop changeset, :struct, required: true
+  prop line_items, :list, required: true
+  prop offering, :struct
+  prop add_item, :event
+  prop remove_item, :event
 
   def render(assigns) do
     ~F"""
@@ -18,12 +19,12 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
       </:header>
 
       <ul class="divide-y">
-        {#for item <- fetch_field!(@changeset, :line_items)}
+        {#for {item, idx} <- Enum.with_index(@line_items)}
           <li class="line-item container p-4">
             <div class="float-right">
               {Money.to_string(item.amount)}
               {#if !item.sticky}
-                <i class="fas fa-times-circle" />
+                <button :on-click="remove_item" value={idx} class="fas fa-times-circle" />
               {/if}
             </div>
             <div>{item.name}</div>
@@ -34,19 +35,32 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
       <hr>
       <div class="container">
         <p class="p-4">Estimate: <span class="float-right">
-                  {Money.to_string(
-                      Enum.reduce(
-                        fetch_field!(@changeset, :line_items),
-                        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-                        Money.new(0, :USD),
-                        fn item, acc -> Money.add(acc, item.amount || Money.new(0, :USD)) end
-                      )
-                    )}
+            {Money.to_string(
+              Enum.reduce(
+                @line_items,
+                # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
+                Money.new(0, :USD),
+                fn item, acc -> Money.add(acc, item.amount) end
+              )
+            )}
           </span></p>
       </div>
-
       <:footer>
-        <a class="text-center rounded-full py-1 px-5 btn btn-secondary m-1" href="#">Add Offering</a>
+        {#if @offering && Enum.any?(@offering.options)}
+          <hr>
+          <h5>Additional Options</h5>
+          <ul>
+            {#for {option, idx} <- Enum.with_index(@offering.options)}
+              {#if option.multiple || !Enum.any?(@line_items, &(&1.option.id == option.id))}
+                <li>
+                  <span>{to_string(option.price)}</span>
+                  <span>{option.name}</span>
+                  <button :on-click="add_item" value={idx} class="fas fa-plus-circle" />
+                </li>
+              {/if}
+            {/for}
+          </ul>
+        {/if}
       </:footer>
     </Card>
     """
