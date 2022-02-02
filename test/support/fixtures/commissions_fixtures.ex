@@ -33,7 +33,7 @@ defmodule Banchan.CommissionsFixtures do
       })
 
     {:ok, commission} =
-      Banchan.Commissions.create_commission(user, offering, %{
+      Banchan.Commissions.create_commission(user, studio, offering, [], %{
         title: "Please do this thing",
         description: "the thing to do is like so",
         tos_ok: true
