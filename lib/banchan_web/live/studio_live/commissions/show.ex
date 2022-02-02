@@ -31,7 +31,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
         socket.assigns.current_user_member?
       )
 
-    {:ok, assign(socket, commission: commission)}
+    {:ok, assign(socket, commission: commission, changeset: Commissions.change_commission(commission))}
   end
 
   @impl true
@@ -56,7 +56,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
           <div class="col-span-2 col-end-13 p-6">
             <div id="sidebar">
               <div class="block sidebar-box">
-                <Summary id="commission-summary" commission={@commission} />
+                <Summary id="commission-summary" changeset={@changeset} />
               </div>
               <div class="block sidebar-box">
                 <Status commission={@commission} change="update-status" />

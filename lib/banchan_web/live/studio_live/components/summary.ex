@@ -4,9 +4,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
   """
   use BanchanWeb, :live_component
 
+  import Ecto.Changeset
+
   alias BanchanWeb.Components.Card
 
-  prop commission, :struct, required: true
+  prop changeset, :struct, required: true
 
   def render(assigns) do
     ~F"""
@@ -16,7 +18,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
       </:header>
 
       <ul class="divide-y">
-        {#for item <- @commission.line_items}
+        {#for item <- fetch_field!(@changeset, :line_items)}
           <li class="line-item container p-4">
             <div class="float-right">
               {Money.to_string(item.amount)}
@@ -32,14 +34,14 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
       <hr>
       <div class="container">
         <p class="p-4">Estimate: <span class="float-right">
-            {Money.to_string(
-              Enum.reduce(
-                @commission.line_items,
-                # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-                Money.new(0, :USD),
-                fn item, acc -> Money.add(acc, item.amount) end
-              )
-            )}
+                  {Money.to_string(
+                      Enum.reduce(
+                        fetch_field!(@changeset, :line_items),
+                        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
+                        Money.new(0, :USD),
+                        fn item, acc -> Money.add(acc, item.amount || Money.new(0, :USD)) end
+                      )
+                    )}
           </span></p>
       </div>
 
