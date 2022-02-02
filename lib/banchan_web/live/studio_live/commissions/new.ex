@@ -12,7 +12,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Form.{Checkbox, Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.Commissions.{Attachments, Summary}
   import BanchanWeb.StudioLive.Helpers
@@ -177,7 +177,8 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                   class="w-full"
                   opts={required: true, placeholder: "A Brief Title"}
                 />
-                <TextArea
+                <MarkdownInput
+                  id="initial-message"
                   name={:description}
                   show_label={false}
                   class="w-full"

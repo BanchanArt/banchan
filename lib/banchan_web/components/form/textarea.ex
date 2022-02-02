@@ -14,6 +14,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
   prop wrapper_class, :css_class
   prop rows, :number
   prop class, :css_class
+  prop change, :event
 
   slot left
   slot right
