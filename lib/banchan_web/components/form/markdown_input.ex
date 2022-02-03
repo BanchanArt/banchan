@@ -17,6 +17,12 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   data previewing, :boolean, default: false
   data markdown, :string, default: ""
 
+  @impl true
+  def update(assigns, socket) do
+    {:ok, assign(assign(socket, assigns), markdown: "")}
+  end
+
+  @impl true
   def handle_event("markdown", _, socket) do
     {:noreply, assign(socket, previewing: false)}
   end
@@ -45,18 +51,20 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
       <div class="control">
         <InputContext :let={form: form, field: field}>
           <div class="tabs">
-            <a :on-click="markdown" class={"tab", "tab-lifted", "tab-active": !@previewing}>Markdown</a>
+            <a :on-click="markdown" class={"tab", "tab-lifted", "tab-active": !@previewing}>Write</a>
             <a :on-click="preview" class={"tab", "tab-lifted", "tab-active": @previewing}>Preview</a>
           </div>
           <div class="border-solid rounded-sm">
-              <div class={"h-40", hidden: !@previewing}>
+            {#if @previewing}
+              <div class="h-40">
                 {#if @markdown == ""}
                   Nothing to preview
                 {#else}
                   {raw(@markdown)}
                 {/if}
               </div>
-              <div class={hidden: @previewing} :hook="MarkdownInput" id={@hook_id}>
+            {#else}
+              <div :hook="MarkdownInput" id={@hook_id}>
                 <TextArea
                   class={
                     "textarea",
@@ -69,6 +77,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
                   opts={@opts}
                 />
               </div>
+            {/if}
           </div>
         </InputContext>
       </div>

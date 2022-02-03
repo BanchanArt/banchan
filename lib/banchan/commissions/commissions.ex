@@ -6,6 +6,7 @@ defmodule Banchan.Commissions do
   import Ecto.Query, warn: false
   alias Banchan.Repo
 
+  alias Banchan.Accounts.User
   alias Banchan.Commissions.{Commission, Event}
   alias Banchan.Offerings
 
@@ -202,8 +203,8 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_event(actor, commission, attrs \\ %{}) do
-    %Event{commission: commission, actor: actor}
+  def create_event(type, %User{} = actor, %Commission{} = commission, attrs \\ %{}) do
+    %Event{type: type, commission: commission, actor: actor}
     |> Event.changeset(attrs)
     |> Repo.insert()
   end
