@@ -39,7 +39,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   def handle_info(%{event: "new_comment", payload: payload}, socket) do
     events = socket.assigns.commission.events ++ [payload]
     events = events |> Enum.sort_by(& &1.inserted_at)
-    commission = %{socket.assigns.commission | events: events }
+    commission = %{socket.assigns.commission | events: events}
     {:noreply, assign(socket, commission: commission)}
   end
 
