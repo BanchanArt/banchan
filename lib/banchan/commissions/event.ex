@@ -6,7 +6,7 @@ defmodule Banchan.Commissions.Event do
   import Ecto.Changeset
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions.Commission
+  alias Banchan.Commissions.{Commission, Common}
 
   schema "commission_events" do
     field :type, Ecto.Enum, values: [:comment, :line_item, :payment_request, :status, :attachment]
@@ -14,7 +14,7 @@ defmodule Banchan.Commissions.Event do
     field :amount, Money.Ecto.Composite.Type
 
     field :status, Ecto.Enum,
-      values: Commission.status_values(),
+      values: Common.status_values(),
       default: :submitted
 
     belongs_to :actor, User

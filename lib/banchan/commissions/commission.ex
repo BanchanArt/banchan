@@ -5,7 +5,7 @@ defmodule Banchan.Commissions.Commission do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @status_values [:submitted, :accepted, :in_progress, :paused, :waiting, :closed]
+  alias Banchan.Commissions.Common
 
   schema "commissions" do
     field :public_id, :string
@@ -14,7 +14,7 @@ defmodule Banchan.Commissions.Commission do
     field :tos_ok, :boolean, virtual: true
 
     field :status, Ecto.Enum,
-      values: @status_values,
+      values: Common.status_values(),
       default: :submitted
 
     has_many :line_items, Banchan.Commissions.LineItem, preload_order: [asc: :inserted_at]
@@ -24,10 +24,6 @@ defmodule Banchan.Commissions.Commission do
     belongs_to :client, Banchan.Accounts.User
 
     timestamps()
-  end
-
-  def status_values do
-    @status_values
   end
 
   def gen_public_id do
