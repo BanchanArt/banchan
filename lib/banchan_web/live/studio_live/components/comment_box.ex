@@ -9,7 +9,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Form.{Submit, MarkdownInput}
+  alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
 
   prop commission, :struct, required: true
   prop actor, :struct, required: true
