@@ -80,7 +80,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       BanchanWeb.Endpoint.broadcast_from!(
         self(),
         "commission:#{commission.public_id}",
-        "line_items_changes",
+        "line_items_changed",
         commission.line_items
       )
 
