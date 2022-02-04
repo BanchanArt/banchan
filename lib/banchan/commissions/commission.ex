@@ -17,7 +17,10 @@ defmodule Banchan.Commissions.Commission do
       values: Common.status_values(),
       default: :submitted
 
-    has_many :line_items, Banchan.Commissions.LineItem, preload_order: [asc: :inserted_at], on_replace: :delete
+    has_many :line_items, Banchan.Commissions.LineItem,
+      preload_order: [asc: :inserted_at],
+      on_replace: :delete
+
     has_many :events, Banchan.Commissions.Event, preload_order: [asc: :inserted_at]
     belongs_to :offering, Banchan.Offerings.Offering
     belongs_to :studio, Banchan.Studios.Studio
