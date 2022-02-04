@@ -43,8 +43,8 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     {:noreply, assign(socket, commission: commission)}
   end
 
-  def handle_info(%{event: "commission_changed", payload: commission}, socket) do
-    {:noreply, assign(socket, commission: commission)}
+  def handle_info(%{event: "line_items_changed", payload: line_items}, socket) do
+    {:noreply, assign(socket, commission: %{socket.assigns.commission | line_items: line_items})}
   end
 
   def handle_info(%{event: "new_status", payload: status}, socket) do
@@ -74,15 +74,17 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       # someone is trying to send us Shenanigans data.
       {:noreply, socket}
     else
-      {:ok, {commission, _events}} =
+      {:ok, {commission, events}} =
         Commissions.add_line_item(socket.assigns.current_user, commission, option)
 
       BanchanWeb.Endpoint.broadcast_from!(
         self(),
         "commission:#{commission.public_id}",
-        "commission_changed",
-        commission
+        "line_items_changes",
+        commission.line_items
       )
+
+      BanchanWeb.Endpoint.broadcast!("commission:#{commission.public_id}", "new_events", events)
 
       {:noreply, assign(socket, commission: commission)}
     end
@@ -93,7 +95,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     line_item = Enum.at(socket.assigns.commission.line_items, idx)
 
     if socket.assigns.current_user_member? && line_item && !line_item.sticky do
-      {:ok, {commission, _events}} =
+      {:ok, {commission, events}} =
         Commissions.remove_line_item(
           socket.assigns.current_user,
           socket.assigns.commission,
@@ -103,9 +105,11 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       BanchanWeb.Endpoint.broadcast_from!(
         self(),
         "commission:#{commission.public_id}",
-        "commission_changed",
-        commission
+        "line_items_changed",
+        commission.line_items
       )
+
+      BanchanWeb.Endpoint.broadcast!("commission:#{commission.public_id}", "new_events", events)
 
       {:noreply, assign(socket, commission: commission)}
     else
