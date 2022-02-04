@@ -175,6 +175,32 @@ defmodule Banchan.Commissions do
     ret
   end
 
+  def remove_line_item(%User{} = actor, %Commission{} = commission, line_item) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        line_items = Enum.filter(commission.line_items, &(&1.id != line_item.id))
+
+        case commission
+             |> Commission.changeset(%{
+               tos_ok: true
+             })
+             |> Ecto.Changeset.put_assoc(:line_items, line_items)
+             |> Repo.update() do
+          {:error, err} ->
+            {:error, err}
+
+          {:ok, commission} ->
+            # credo:disable-for-next-line Credo.Check.Refactor.Nesting
+            case create_event(:line_item_removed, actor, commission, %{amount: line_item.amount}) do
+              {:error, err} -> {:error, err}
+              {:ok, event} -> {:ok, {commission, [event]}}
+            end
+        end
+      end)
+
+    ret
+  end
+
   @doc """
   Deletes a commission.
 

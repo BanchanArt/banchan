@@ -43,6 +43,10 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     {:noreply, assign(socket, commission: commission)}
   end
 
+  def handle_info(%{event: "commission_changed", payload: commission}, socket) do
+    {:noreply, assign(socket, commission: commission)}
+  end
+
   def handle_info(%{event: "new_status", payload: status}, socket) do
     commission = %{socket.assigns.commission | status: status}
     {:noreply, assign(socket, commission: commission)}
@@ -70,30 +74,40 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       # someone is trying to send us Shenanigans data.
       {:noreply, socket}
     else
-      case Commissions.add_line_item(socket.assigns.current_user, commission, option) do
-        {:ok, {commission, events}} ->
-          BanchanWeb.Endpoint.broadcast!(
-            "commission:#{commission.public_id}",
-            "new_events",
-            events
-          )
+      {:ok, {commission, _events}} =
+        Commissions.add_line_item(socket.assigns.current_user, commission, option)
 
-          {:noreply, assign(socket, commission: commission)}
+      BanchanWeb.Endpoint.broadcast_from!(
+        self(),
+        "commission:#{commission.public_id}",
+        "commission_changed",
+        commission
+      )
 
-        {:error, error} ->
-          {:error, error}
-      end
+      {:noreply, assign(socket, commission: commission)}
     end
   end
 
   def handle_event("remove_item", %{"value" => idx}, socket) do
-    # TODO: this should go through a consent workflow.
     {idx, ""} = Integer.parse(idx)
     line_item = Enum.at(socket.assigns.commission.line_items, idx)
-    new_items = List.delete_at(socket.assigns.commission.line_items, idx)
 
     if socket.assigns.current_user_member? && line_item && !line_item.sticky do
-      {:noreply, assign(socket, commission: %{socket.assigns.commission | line_items: new_items})}
+      {:ok, {commission, _events}} =
+        Commissions.remove_line_item(
+          socket.assigns.current_user,
+          socket.assigns.commission,
+          line_item
+        )
+
+      BanchanWeb.Endpoint.broadcast_from!(
+        self(),
+        "commission:#{commission.public_id}",
+        "commission_changed",
+        commission
+      )
+
+      {:noreply, assign(socket, commission: commission)}
     else
       {:noreply, socket}
     end
