@@ -202,6 +202,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
             <div class="block sidebar-box">
               <Summary
                 add_item="add_item"
+                allow_edits
                 remove_item="remove_item"
                 line_items={@line_items}
                 offering={@offering}

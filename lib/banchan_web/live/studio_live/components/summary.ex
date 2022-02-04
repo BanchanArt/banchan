@@ -7,6 +7,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
   alias BanchanWeb.Components.Card
 
   prop line_items, :list, required: true
+  prop allow_edits, :boolean, default: false
   prop offering, :struct
   prop add_item, :event
   prop remove_item, :event
@@ -23,7 +24,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
           <li class="line-item container p-4">
             <div class="float-right">
               {Money.to_string(item.amount)}
-              {#if !item.sticky}
+              {#if @allow_edits && !item.sticky}
                 <button :on-click="remove_item" value={idx} class="fas fa-times-circle" />
               {/if}
             </div>
@@ -55,7 +56,9 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
                 <li>
                   <span>{to_string(option.price)}</span>
                   <span>{option.name}</span>
-                  <button :on-click="add_item" value={idx} class="fas fa-plus-circle" />
+                  {#if @allow_edits}
+                    <button :on-click="add_item" value={idx} class="fas fa-plus-circle" />
+                  {/if}
                 </li>
               {/if}
             {/for}

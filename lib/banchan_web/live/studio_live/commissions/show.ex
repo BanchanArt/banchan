@@ -64,7 +64,8 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
         }
       end
 
-    if !option.multiple && Enum.any?(commission.line_items, &(&1.option.id == option.id)) do
+    if !socket.assigns.current_user_member? ||
+         (!option.multiple && Enum.any?(commission.line_items, &(&1.option.id == option.id))) do
       # Deny the change. This shouldn't happen unless there's a bug, or
       # someone is trying to send us Shenanigans data.
       {:noreply, socket}
@@ -91,7 +92,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     line_item = Enum.at(socket.assigns.commission.line_items, idx)
     new_items = List.delete_at(socket.assigns.commission.line_items, idx)
 
-    if line_item && !line_item.sticky do
+    if socket.assigns.current_user_member? && line_item && !line_item.sticky do
       {:noreply, assign(socket, commission: %{socket.assigns.commission | line_items: new_items})}
     else
       {:noreply, socket}
@@ -140,6 +141,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
                 <Summary
                   line_items={@commission.line_items}
                   offering={@commission.offering}
+                  allow_edits={@current_user_member?}
                   add_item="add_item"
                   remove_item="remove_item"
                 />
