@@ -165,7 +165,10 @@ defmodule Banchan.Commissions do
 
           {:ok, commission} ->
             # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_added, actor, commission, %{amount: line_item.amount}) do
+            case create_event(:line_item_added, actor, commission, %{
+                   amount: line_item.amount,
+                   text: line_item.name
+                 }) do
               {:error, err} -> {:error, err}
               {:ok, event} -> {:ok, {commission, [event]}}
             end
@@ -191,7 +194,10 @@ defmodule Banchan.Commissions do
 
           {:ok, commission} ->
             # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_removed, actor, commission, %{amount: line_item.amount}) do
+            case create_event(:line_item_removed, actor, commission, %{
+                   amount: line_item.amount,
+                   text: line_item.name
+                 }) do
               {:error, err} -> {:error, err}
               {:ok, event} -> {:ok, {commission, [event]}}
             end
