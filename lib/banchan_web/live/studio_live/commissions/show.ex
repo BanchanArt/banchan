@@ -49,6 +49,42 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   end
 
   @impl true
+  def handle_event("add_item", %{"value" => idx}, socket) do
+    {idx, ""} = Integer.parse(idx)
+
+    commission = socket.assigns.commission
+
+    option =
+      if commission.offering do
+        {:ok, option} = Enum.fetch(commission.offering.options, idx)
+        option
+      else
+        %{
+          # TODO: fill this out?
+        }
+      end
+
+    if !option.multiple && Enum.any?(commission.line_items, &(&1.option.id == option.id)) do
+      # Deny the change. This shouldn't happen unless there's a bug, or
+      # someone is trying to send us Shenanigans data.
+      {:noreply, socket}
+    else
+      case Commissions.add_line_item(socket.assigns.current_user, commission, option) do
+        {:ok, {commission, events}} ->
+          BanchanWeb.Endpoint.broadcast!(
+            "commission:#{commission.public_id}",
+            "new_events",
+            events
+          )
+
+          {:noreply, assign(socket, commission: commission)}
+
+        {:error, error} ->
+          {:error, error}
+      end
+    end
+  end
+
   def handle_event("remove_item", %{"value" => idx}, socket) do
     # TODO: this should go through a consent workflow.
     {idx, ""} = Integer.parse(idx)

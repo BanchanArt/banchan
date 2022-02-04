@@ -7,8 +7,9 @@ defmodule Banchan.Commissions do
   alias Banchan.Repo
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions.{Commission, Event}
+  alias Banchan.Commissions.{Commission, Event, LineItem}
   alias Banchan.Offerings
+  alias Banchan.Offerings.OfferingOption
 
   @doc """
   Returns the list of commissions.
@@ -115,24 +116,6 @@ defmodule Banchan.Commissions do
     |> Repo.insert()
   end
 
-  @doc """
-  Updates a commission.
-
-  ## Examples
-
-      iex> update_commission(commission, %{field: new_value})
-      {:ok, %Commission{}}
-
-      iex> update_commission(commission, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_commission(%Commission{} = commission, attrs) do
-    commission
-    |> Commission.changeset(attrs)
-    |> Repo.update()
-  end
-
   def update_status(%User{} = actor, %Commission{} = commission, status) do
     {:ok, ret} =
       Repo.transaction(fn ->
@@ -144,6 +127,49 @@ defmodule Banchan.Commissions do
         {:ok, event} = create_event(:status, actor, commission, %{status: status})
 
         {:ok, {commission, [event]}}
+      end)
+
+    ret
+  end
+
+  def add_line_item(%User{} = actor, %Commission{} = commission, option) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        line_item =
+          case option do
+            %OfferingOption{} ->
+              %LineItem{
+                option: option,
+                amount: option.price || Money.new(0, :USD),
+                name: option.name,
+                description: option.description
+              }
+
+            %{amount: amount, name: name, description: description} ->
+              %LineItem{
+                option: nil,
+                amount: amount,
+                name: name,
+                description: description
+              }
+          end
+
+        case commission
+             |> Commission.changeset(%{
+               tos_ok: true
+             })
+             |> Ecto.Changeset.put_assoc(:line_items, commission.line_items ++ [line_item])
+             |> Repo.update() do
+          {:error, err} ->
+            {:error, err}
+
+          {:ok, commission} ->
+            # credo:disable-for-next-line Credo.Check.Refactor.Nesting
+            case create_event(:line_item_added, actor, commission, %{amount: line_item.amount}) do
+              {:error, err} -> {:error, err}
+              {:ok, event} -> {:ok, {commission, [event]}}
+            end
+        end
       end)
 
     ret

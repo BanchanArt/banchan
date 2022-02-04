@@ -36,8 +36,10 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                   {raw(fmt_md(event.text))}
                 </div>
               </Card>
-            {#match :line_item}
+            {#match :line_item_added}
               <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor.handle} added a line item {fmt_time(event.inserted_at)}.</p>
+            {#match :line_item_removed}
+              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor.handle} removed a line item {fmt_time(event.inserted_at)}.</p>
             {#match :payment_request}
               <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor.handle} requested payment of {Money.to_string(event.amount)} {fmt_time(event.inserted_at)}.</p>
             {#match :status}
