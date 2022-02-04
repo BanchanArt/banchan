@@ -36,10 +36,15 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   end
 
   @impl true
-  def handle_info(%{event: "new_comment", payload: payload}, socket) do
-    events = socket.assigns.commission.events ++ [payload]
+  def handle_info(%{event: "new_events", payload: events}, socket) do
+    events = socket.assigns.commission.events ++ events
     events = events |> Enum.sort_by(& &1.inserted_at)
     commission = %{socket.assigns.commission | events: events}
+    {:noreply, assign(socket, commission: commission)}
+  end
+
+  def handle_info(%{event: "new_status", payload: status}, socket) do
+    commission = %{socket.assigns.commission | status: status}
     {:noreply, assign(socket, commission: commission)}
   end
 
@@ -58,10 +63,18 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   end
 
   def handle_event("update-status", %{"status" => [new_status]}, socket) do
-    comm = socket.assigns.commission
+    comm = %{socket.assigns.commission | tos_ok: true}
 
-    {:ok, commission} =
-      Commissions.update_commission(comm, %{title: comm.title, status: new_status})
+    {:ok, {commission, events}} =
+      Commissions.update_status(socket.assigns.current_user, comm, new_status)
+
+    BanchanWeb.Endpoint.broadcast!(
+      "commission:#{comm.public_id}",
+      "new_status",
+      commission.status
+    )
+
+    BanchanWeb.Endpoint.broadcast!("commission:#{comm.public_id}", "new_events", events)
 
     {:noreply, socket |> assign(commission: commission)}
   end
@@ -96,7 +109,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
                 />
               </div>
               <div class="block sidebar-box">
-                <Status commission={@commission} change="update-status" />
+                <Status commission={@commission} editable={@current_user_member?} change="update-status" />
               </div>
               <div class="block sidebar-box">
                 <Attachments id="commission-attachments" />

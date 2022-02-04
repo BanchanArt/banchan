@@ -4,6 +4,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   """
   use BanchanWeb, :live_component
 
+  alias Banchan.Commissions.Common
+
   alias BanchanWeb.Components.Card
   alias BanchanWeb.Endpoint
 
@@ -35,13 +37,13 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                 </div>
               </Card>
             {#match :line_item}
-              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor} added a line item {fmt_time(event.inserted_at)}.</p>
+              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor.handle} added a line item {fmt_time(event.inserted_at)}.</p>
             {#match :payment_request}
-              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor} requested payment of {Money.to_string(event.amount)} {fmt_time(event.inserted_at)}.</p>
+              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor.handle} requested payment of {Money.to_string(event.amount)} {fmt_time(event.inserted_at)}.</p>
             {#match :status}
-              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor} changed the status of this commission to {to_string(event.status)} {fmt_time(event.inserted_at)}.</p>
+              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor.handle} changed the status to {Common.humanize_status(event.status)} {fmt_time(event.inserted_at)}.</p>
             {#match :attachment}
-              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor} added an attachment {fmt_time(event.inserted_at)}.</p>
+              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor.handle} added an attachment {fmt_time(event.inserted_at)}.</p>
           {/case}
         </article>
       {/for}

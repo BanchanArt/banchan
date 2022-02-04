@@ -52,8 +52,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
       {:ok, event} ->
         BanchanWeb.Endpoint.broadcast!(
           "commission:#{socket.assigns.commission.public_id}",
-          "new_comment",
-          event
+          "new_events",
+          [event]
         )
 
         {:noreply,

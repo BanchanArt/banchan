@@ -133,6 +133,22 @@ defmodule Banchan.Commissions do
     |> Repo.update()
   end
 
+  def update_status(%User{} = actor, %Commission{} = commission, status) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        {:ok, commission} =
+          commission
+          |> Commission.changeset(%{status: status})
+          |> Repo.update()
+
+        {:ok, event} = create_event(:status, actor, commission, %{status: status})
+
+        {:ok, {commission, [event]}}
+      end)
+
+    ret
+  end
+
   @doc """
   Deletes a commission.
 
@@ -203,7 +219,8 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_event(type, %User{} = actor, %Commission{} = commission, attrs \\ %{}) do
+  def create_event(type, %User{} = actor, %Commission{} = commission, attrs \\ %{})
+      when is_atom(type) do
     %Event{type: type, commission: commission, actor: actor}
     |> Event.changeset(attrs)
     |> Repo.insert()

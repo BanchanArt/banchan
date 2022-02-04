@@ -9,4 +9,26 @@ defmodule Banchan.Commissions.Common do
   def status_values do
     @status_values
   end
+
+  def humanize_status(status) do
+    case status do
+      :submitted ->
+        "Submitted"
+
+      :accepted ->
+        "Accepted"
+
+      :paused ->
+        "Paused"
+
+      :in_progress ->
+        "In Progress"
+
+      :waiting ->
+        "Waiting for Client"
+
+      :closed ->
+        "Closed"
+    end
+  end
 end
