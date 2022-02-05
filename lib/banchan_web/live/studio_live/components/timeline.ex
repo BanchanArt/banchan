@@ -67,14 +67,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                   <TimelineItem icon="S" event={event}>
                     changed the status to <strong>{Common.humanize_status(event.status)}</strong> {fmt_time(event.inserted_at)}.
                   </TimelineItem>
-                {#match :attachment_added}
-                  <TimelineItem icon="📎" event={event}>
-                    added an attachment {fmt_time(event.inserted_at)}.
-                  </TimelineItem>
-                {#match :attachment_removed}
-                  <TimelineItem icon="␡" event={event}>
-                    removed an attachment {fmt_time(event.inserted_at)}.
-                  </TimelineItem>
               {/case}
             {/for}
           </div>

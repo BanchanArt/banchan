@@ -18,8 +18,6 @@ defmodule Banchan.Commissions.Event do
         :payment_request,
         :payment_processed,
         :status,
-        :attachment_added,
-        :attachment_removed
       ]
 
     field :text, :string
