@@ -1,8 +1,8 @@
-defmodule Banchan.Repo.Migrations.CreateS3Uploads do
+defmodule Banchan.Repo.Migrations.CreateUploads do
   use Ecto.Migration
 
   def change do
-    create table(:s3_uploads) do
+    create table(:uploads) do
       add :bucket, :string
       add :key, :string
       add :content_type, :string
@@ -10,6 +10,6 @@ defmodule Banchan.Repo.Migrations.CreateS3Uploads do
       timestamps()
     end
 
-    create unique_index(:s3_uploads, [:bucket, :key])
+    create unique_index(:uploads, [:bucket, :key])
   end
 end

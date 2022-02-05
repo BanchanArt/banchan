@@ -5,7 +5,7 @@ defmodule Banchan.Uploads.Upload do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "s3_uploads" do
+  schema "uploads" do
     field :bucket, :string
     field :key, :string
     field :content_type, :string
