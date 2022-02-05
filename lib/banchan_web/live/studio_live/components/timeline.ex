@@ -7,6 +7,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   alias Banchan.Commissions.Common
 
   alias BanchanWeb.Components.Card
+  alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
   alias BanchanWeb.Endpoint
 
   prop commission, :any, required: true
@@ -45,32 +46,36 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
         {#else}
           <div class="steps steps-vertical">
             {#for event <- chunk}
-              <div data-content="" class="timeline-item step">
-                <p>
-                  {#case event.type}
-                    {#match :line_item_added}
-                      <img class="w-6 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
-                      <a href={"/denizens/#{event.actor.handle}"}><strong>{event.actor.handle}</strong></a>
-                      added <strong>{event.text}</strong> ({Money.to_string(event.amount)}) {fmt_time(event.inserted_at)}.
-                    {#match :line_item_removed}
-                      <img class="w-6 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
-                      <a href={"/denizens/#{event.actor.handle}"}><strong>{event.actor.handle}</strong></a>
-                      removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))}) {fmt_time(event.inserted_at)}.
-                    {#match :payment_request}
-                      <img class="w-6 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
-                      <a href={"/denizens/#{event.actor.handle}"}><strong>{event.actor.handle}</strong></a>
-                      requested payment of {Money.to_string(event.amount)} {fmt_time(event.inserted_at)}.
-                    {#match :status}
-                      <img class="w-6 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
-                      <a href={"/denizens/#{event.actor.handle}"}><strong>{event.actor.handle}</strong></a>
-                      changed the status to <strong>{Common.humanize_status(event.status)}</strong> {fmt_time(event.inserted_at)}.
-                    {#match :attachment}
-                      <img class="w-6 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
-                      <a href={"/denizens/#{event.actor.handle}"}><strong>{event.actor.handle}</strong></a>
-                      added an attachment {fmt_time(event.inserted_at)}.
-                  {/case}
-                </p>
-              </div>
+              {#case event.type}
+                {#match :line_item_added}
+                  <TimelineItem icon="➕" event={event}>
+                    added <strong>{event.text}</strong> ({Money.to_string(event.amount)}) {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :line_item_removed}
+                  <TimelineItem icon="✕" event={event}>
+                    removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))}) {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :payment_request}
+                  <TimelineItem icon="$" event={event}>
+                    requested payment of {Money.to_string(event.amount)} {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :payment_processed}
+                  <TimelineItem icon="$" event={event}>
+                    paid {Money.to_string(event.amount)} {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :status}
+                  <TimelineItem icon="S" event={event}>
+                    changed the status to <strong>{Common.humanize_status(event.status)}</strong> {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :attachment_added}
+                  <TimelineItem icon="📎" event={event}>
+                    added an attachment {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :attachment_removed}
+                  <TimelineItem icon="␡" event={event}>
+                    removed an attachment {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+              {/case}
             {/for}
           </div>
         {/if}
