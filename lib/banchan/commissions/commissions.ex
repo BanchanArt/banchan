@@ -13,35 +13,35 @@ defmodule Banchan.Commissions do
   alias Banchan.Studios.Studio
 
   def list_commission_data_for_dashboard(%User{} = user, order \\ nil) do
-      main_dashboard_query(user)
-      |> dashboard_query_order_by(order)
-      |> Repo.all()
+    main_dashboard_query(user)
+    |> dashboard_query_order_by(order)
+    |> Repo.all()
   end
 
   defp main_dashboard_query(%User{} = user) do
     from c in Commission,
-        join: client in User,
-        join: s in Studio,
-        join: e in Event,
-        where:
-          c.id == e.commission_id and
+      join: client in User,
+      join: s in Studio,
+      join: e in Event,
+      where:
+        c.id == e.commission_id and
           c.studio_id == s.id and
-            c.client_id == client.id and
-            (c.client_id == ^user.id or
-               ^user.id in subquery(studio_artists_query())),
-        distinct: true,
-        group_by: [c.id, client.handle, s.handle, s.name],
-        select: %{
-          id: c.id,
-          client_handle: client.handle,
-          title: c.title,
-          status: c.status,
-          public_id: c.public_id,
-          studio_handle: s.handle,
-          studio_name: s.name,
-          submitted_at: c.inserted_at,
-          updated_at: max(e.inserted_at)
-        }
+          c.client_id == client.id and
+          (c.client_id == ^user.id or
+             ^user.id in subquery(studio_artists_query())),
+      distinct: true,
+      group_by: [c.id, client.handle, s.handle, s.name],
+      select: %{
+        id: c.id,
+        client_handle: client.handle,
+        title: c.title,
+        status: c.status,
+        public_id: c.public_id,
+        studio_handle: s.handle,
+        studio_name: s.name,
+        submitted_at: c.inserted_at,
+        updated_at: max(e.inserted_at)
+      }
   end
 
   defp studio_artists_query do
