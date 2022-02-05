@@ -13,14 +13,19 @@ defmodule Banchan.Commissions do
   alias Banchan.Studios.Studio
 
   def list_commission_data_for_dashboard(%User{} = user, order \\ nil) do
-    query =
-      from c in Commission,
+      main_dashboard_query(user)
+      |> dashboard_query_order_by(order)
+      |> Repo.all()
+  end
+
+  defp main_dashboard_query(%User{} = user) do
+    from c in Commission,
         join: client in User,
         join: s in Studio,
         join: e in Event,
         where:
           c.id == e.commission_id and
-            c.studio_id == s.id and
+          c.studio_id == s.id and
             c.client_id == client.id and
             (c.client_id == ^user.id or
                ^user.id in subquery(studio_artists_query())),
@@ -37,15 +42,11 @@ defmodule Banchan.Commissions do
           submitted_at: c.inserted_at,
           updated_at: max(e.inserted_at)
         }
-
-    query = dashboard_query_order_by(query, order)
-
-    Repo.all(query)
   end
 
   defp studio_artists_query do
-    from u in User,
-      join: s in Studio,
+    from s in Studio,
+      join: u in User,
       join: us in "users_studios",
       join: c in Commission,
       where: u.id == us.user_id and s.id == us.studio_id and c.studio_id == s.id,
