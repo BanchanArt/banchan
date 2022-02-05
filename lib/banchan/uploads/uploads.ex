@@ -7,15 +7,32 @@ defmodule Banchan.Uploads do
   alias Banchan.Repo
   alias Banchan.Uploads.Upload
 
-  @doc """
-  Generates a unique path for an upload.
-  """
-  def gen_path do
+  defp gen_key do
     UUID.uuid4(:hex)
   end
 
   defp local_upload_dir do
     Application.fetch_env!(:banchan, :upload_dir)
+  end
+
+  def save_file!(src, content_type, bucket \\ Application.fetch_env!(:ex_aws, :bucket)) do
+    key = gen_key()
+    local = Path.join([local_upload_dir(), bucket, key])
+    File.mkdir_p!(Path.dirname(local))
+    File.cp!(src, local)
+
+    if Mix.env() == :prod || Application.fetch_env!(:banchan, :region) do
+      local
+      |> ExAws.S3.Upload.stream_file()
+      |> ExAws.S3.upload(bucket, key)
+      |> ExAws.request!()
+    end
+
+    %Upload{
+      key: key,
+      bucket: bucket,
+      content_type: content_type,
+    } |> Repo.insert!()
   end
 
   @doc """
