@@ -2,7 +2,6 @@ defmodule Banchan.Uploads do
   @moduledoc """
   The Uploads context.
   """
-
   import Ecto.Query, warn: false
   alias Banchan.Repo
   alias Banchan.Uploads.Upload
@@ -15,13 +14,21 @@ defmodule Banchan.Uploads do
     Application.fetch_env!(:banchan, :upload_dir)
   end
 
-  def save_file!(src, content_type, bucket \\ Application.fetch_env!(:ex_aws, :bucket)) do
+  defp get_bucket do
+    case Application.fetch_env!(:ex_aws, :bucket) do
+      {:system, var} -> System.get_env(var) || "other"
+      var when is_binary(var) -> var
+      _ -> "other"
+    end
+  end
+
+  def save_file!(src, content_type, bucket \\ get_bucket()) do
     key = gen_key()
-    local = Path.join([local_upload_dir(), bucket, key])
+    local = Path.join(IO.inspect([local_upload_dir(), bucket, key]))
     File.mkdir_p!(Path.dirname(local))
     File.cp!(src, local)
 
-    if Mix.env() == :prod || Application.fetch_env!(:banchan, :region) do
+    if Mix.env() == :prod || IO.inspect(System.get_env("AWS_REGION")) do
       local
       |> ExAws.S3.Upload.stream_file()
       |> ExAws.S3.upload(bucket, key)
@@ -31,8 +38,9 @@ defmodule Banchan.Uploads do
     %Upload{
       key: key,
       bucket: bucket,
-      content_type: content_type,
-    } |> Repo.insert!()
+      content_type: content_type
+    }
+    |> Repo.insert!()
   end
 
   @doc """
@@ -83,13 +91,13 @@ defmodule Banchan.Uploads do
     if File.exists?(local) do
       File.stat!(local).size
     else
-    ExAws.S3.head_object(upload.bucket, upload.key)
-    |> ExAws.request!()
-    |> Map.get(:headers)
-    |> List.keyfind("Content-Length", 0)
-    |> elem(1)
-    |> Integer.parse()
-    |> elem(0)
+      ExAws.S3.head_object(upload.bucket, upload.key)
+      |> ExAws.request!()
+      |> Map.get(:headers)
+      |> List.keyfind("Content-Length", 0)
+      |> elem(1)
+      |> Integer.parse()
+      |> elem(0)
     end
   end
 

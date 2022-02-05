@@ -7,14 +7,16 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, LineItem}
   alias Banchan.Offerings
+  alias Banchan.Uploads
 
   alias BanchanWeb.StudioLive.Components.StudioLayout
 
   alias Surface.Components.Form
+  alias Surface.Components.LiveFileInput
 
   alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput}
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.Commissions.{Attachments, Summary}
+  alias BanchanWeb.StudioLive.Components.Commissions.Summary
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
@@ -43,11 +45,21 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
         end)
 
       {:ok,
-       assign(socket,
+       socket
+       |> assign(
          changeset: Commission.changeset(%Commission{}, %{}),
          line_items: default_items,
          offering: offering,
          terms: terms
+       )
+       # TODO: move max file size somewhere configurable.
+       # TODO: constrain :accept?
+       |> allow_upload(:attachment,
+         accept: :any,
+         max_entries: 10,
+         max_file_size: 25_000_000,
+         auto_upload: true,
+         progress: &handle_progress/3
        )}
     else
       # TODO: Maybe show this on this page itself?
@@ -154,6 +166,24 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     end
   end
 
+  defp error_to_string(:too_large), do: "Too large"
+  defp error_to_string(:too_many_files), do: "You have selected too many files"
+  defp error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
+
+  defp handle_progress(:attachment, entry, socket) do
+    if entry.done? do
+      uploaded_file =
+        consume_uploaded_entry(socket, entry, fn %{path: path} = meta ->
+          IO.inspect(meta)
+          {:ok, Uploads.save_file!(path, "idk")}
+        end)
+
+      {:noreply, put_flash(socket, :info, "file #{uploaded_file.id} uploaded")}
+    else
+      {:noreply, socket}
+    end
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -184,6 +214,10 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                   class="w-full"
                   opts={required: true, placeholder: "Here's what I'd like..."}
                 />
+                <LiveFileInput upload={@uploads.attachment} />
+                {#for err <- upload_errors(@uploads.attachment)}
+                  <p>{error_to_string(err)}</p>
+                {/for}
               </div>
               <div class="content block">
                 <h3>Terms and Conditions</h3>
@@ -207,9 +241,6 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 line_items={@line_items}
                 offering={@offering}
               />
-            </div>
-            <div class="block sidebar-box pt-6">
-              <Attachments id="commission-attachments" />
             </div>
           </div>
         </div>

@@ -17,7 +17,7 @@ defmodule Banchan.Commissions.Event do
         :line_item_removed,
         :payment_request,
         :payment_processed,
-        :status,
+        :status
       ]
 
     field :text, :string
