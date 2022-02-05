@@ -42,12 +42,15 @@ defmodule BanchanWeb.DashboardLive.Components.DashboardPaginator do
   def start_page(current_page), do: current_page - @distance
 
   def end_page(current_page, 0), do: current_page
+
   def end_page(current_page, total)
-       when current_page <= @distance and @distance * 2 <= total do
+      when current_page <= @distance and @distance * 2 <= total do
     @distance * 2
   end
+
   def end_page(current_page, total) when current_page + @distance >= total do
     total
   end
+
   def end_page(current_page, _total), do: current_page + @distance - 1
 end

@@ -22,7 +22,11 @@ defmodule BanchanWeb.DashboardLive do
      |> assign(:params, params)
      |> assign(
        :results,
-       Commissions.list_commission_data_for_dashboard(socket.assigns.current_user, page(params), sort(params))
+       Commissions.list_commission_data_for_dashboard(
+         socket.assigns.current_user,
+         page(params),
+         sort(params)
+       )
      )}
   end
 
