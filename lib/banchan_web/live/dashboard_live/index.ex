@@ -4,12 +4,34 @@ defmodule BanchanWeb.DashboardLive do
   """
   use BanchanWeb, :surface_view
 
+  alias Banchan.Commissions
+
   alias BanchanWeb.Components.Layout
+  alias BanchanWeb.DashboardLive.Components.{TableLink, TableRow}
 
   @impl true
   def mount(_params, session, socket) do
     socket = assign_defaults(session, socket)
     {:ok, socket}
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    {:noreply,
+     socket
+     |> assign(:params, params)
+     |> assign(
+       :rows,
+       Commissions.list_commission_data_for_dashboard(socket.assigns.current_user, sort(params))
+     )}
+  end
+
+  defp sort(%{"by" => field, "dir" => direction}) when direction in ~w(asc desc) do
+    {String.to_existing_atom(direction), String.to_existing_atom(field)}
+  end
+
+  defp sort(_other) do
+    {:asc, :id}
   end
 
   @impl true
@@ -22,80 +44,18 @@ defmodule BanchanWeb.DashboardLive do
         <table class="table w-full table-compact">
           <thead>
             <tr>
-              <th>
-                <label>
-                  Select
-                </label>
-              </th>
-              <th>User</th>
-              <th>Commission</th>
-              <th>Status</th>
+              <th><TableLink field={:client_handle} params={@params}>Client</TableLink></th>
+              <th><TableLink field={:studio_handle} params={@params}>Studio</TableLink></th>
+              <th><TableLink field={:title} params={@params}>Commission</TableLink></th>
+              <th><TableLink field={:status} params={@params}>Status</TableLink></th>
               <th />
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <th>
-                <label>
-                  <input type="checkbox" class="checkbox">
-                </label>
-              </th>
-              <td>
-                <div class="flex items-center space-x-3">
-                  <img
-                    src="/images/kat-chibi.jpeg"
-                    alt="Avatar"
-                    class="w-12 h-12 avatar mb-8 rounded-box ring ring-secondary ring-offset-base-100 ring-offset-2"
-                  />
-                  <div class="font-bold">
-                    zkat
-                  </div>
-                </div>
-              </td>
-              <td>
-                Thing 1 Example Commission
-              </td>
-              <td>Started</td>
-              <th>
-                <button class="btn btn-secondary btn-xs"><a href="/studios/kitteh-studio/commissions/thing-1/" class="link">details</a></button>
-              </th>
-            </tr>
-            <tr>
-              <th>
-                <label>
-                  <input type="checkbox" class="checkbox">
-                </label>
-              </th>
-              <td>
-                <div class="flex items-center space-x-3">
-                  <img
-                    src="/images/kat-chibi.jpeg"
-                    alt="Avatar"
-                    class="w-12 h-12 avatar mb-8 rounded-box ring ring-secondary ring-offset-base-100 ring-offset-2"
-                  />
-                  <div class="font-bold">
-                    zkat
-                  </div>
-                </div>
-              </td>
-              <td>
-                Thing 2 Example Commission
-              </td>
-              <td>Pending</td>
-              <th>
-                <button class="btn btn-secondary btn-xs"><a href="/studios/kitteh-studio/commissions/thing-2/" class="link">details</a></button>
-              </th>
-            </tr>
+            {#for row <- @rows}
+              <TableRow data={row} />
+            {/for}
           </tbody>
-          <tfoot>
-            <tr>
-              <th />
-              <th>User</th>
-              <th>Commission</th>
-              <th>Status</th>
-              <th />
-            </tr>
-          </tfoot>
         </table>
       </div>
     </Layout>

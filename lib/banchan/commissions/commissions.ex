@@ -10,21 +10,56 @@ defmodule Banchan.Commissions do
   alias Banchan.Commissions.{Commission, Event, LineItem}
   alias Banchan.Offerings
   alias Banchan.Offerings.OfferingOption
+  alias Banchan.Studios.Studio
 
-  @doc """
-  Returns the list of commissions.
-
-  ## Examples
-
-      iex> list_commissions(studio)
-      [%Commission{}, ...]
-
-  """
-  def list_commissions(studio) do
-    Repo.all(
+  def list_commission_data_for_dashboard(%User{} = user, order \\ nil) do
+    query =
       from c in Commission,
-        where: c.studio_id == ^studio.id
-    )
+        join: client in User,
+        join: s in Studio,
+        where:
+          c.studio_id == s.id and
+            c.client_id == client.id and
+            (c.client_id == ^user.id or
+               ^user.id in subquery(studio_artists_query())),
+        distinct: true,
+        select: %{
+          id: c.id,
+          client_handle: client.handle,
+          title: c.title,
+          status: c.status,
+          public_id: c.public_id,
+          studio_handle: s.handle
+        }
+
+    query = dashboard_query_order_by(query, order)
+
+    Repo.all(query)
+  end
+
+  defp studio_artists_query do
+    from u in User,
+      join: s in Studio,
+      join: us in "users_studios",
+      join: c in Commission,
+      where: u.id == us.user_id and s.id == us.studio_id and c.studio_id == s.id,
+      select: u.id
+  end
+
+  defp dashboard_query_order_by(query, order) do
+    case order do
+      {ord, :client_handle} ->
+        query |> order_by([c, client], [{^ord, client.handle}])
+
+      {ord, :studio_handle} ->
+        query |> order_by([c, client, s], [{^ord, s.handle}])
+
+      {ord, field} ->
+        query |> order_by([{^ord, ^field}])
+
+      nil ->
+        query
+    end
   end
 
   @doc """
