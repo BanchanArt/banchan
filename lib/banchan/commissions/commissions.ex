@@ -19,9 +19,9 @@ defmodule Banchan.Commissions do
   end
 
   defp main_dashboard_query(%User{} = user) do
-    from c in Commission,
+    from s in Studio,
       join: client in User,
-      join: s in Studio,
+      join: c in Commission,
       join: e in Event,
       where:
         c.id == e.commission_id and
@@ -29,8 +29,7 @@ defmodule Banchan.Commissions do
           c.client_id == client.id and
           (c.client_id == ^user.id or
              ^user.id in subquery(studio_artists_query())),
-      distinct: true,
-      group_by: [c.id, client.handle, s.handle, s.name],
+      group_by: [c.id, s.id, client.handle, s.handle, s.name],
       select: %{
         id: c.id,
         client_handle: client.handle,
