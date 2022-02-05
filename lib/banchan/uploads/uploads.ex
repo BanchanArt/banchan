@@ -22,13 +22,13 @@ defmodule Banchan.Uploads do
     end
   end
 
-  def save_file!(src, content_type, bucket \\ get_bucket()) do
+  def save_file!(src, content_type, file_name, bucket \\ get_bucket()) do
     key = gen_key()
-    local = Path.join(IO.inspect([local_upload_dir(), bucket, key]))
+    local = Path.join([local_upload_dir(), bucket, key])
     File.mkdir_p!(Path.dirname(local))
     File.cp!(src, local)
 
-    if Mix.env() == :prod || IO.inspect(System.get_env("AWS_REGION")) do
+    if Mix.env() == :prod || System.get_env("AWS_REGION") do
       local
       |> ExAws.S3.Upload.stream_file()
       |> ExAws.S3.upload(bucket, key)
@@ -36,6 +36,7 @@ defmodule Banchan.Uploads do
     end
 
     %Upload{
+      name: file_name,
       key: key,
       bucket: bucket,
       content_type: content_type

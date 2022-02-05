@@ -3,6 +3,7 @@ defmodule Banchan.Repo.Migrations.CreateUploads do
 
   def change do
     create table(:uploads) do
+      add :name, :string
       add :bucket, :string
       add :key, :string
       add :content_type, :string

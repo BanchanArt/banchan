@@ -50,6 +50,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
          changeset: Commission.changeset(%Commission{}, %{}),
          line_items: default_items,
          offering: offering,
+         attachments: [],
          terms: terms
        )
        # TODO: move max file size somewhere configurable.
@@ -173,12 +174,14 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   defp handle_progress(:attachment, entry, socket) do
     if entry.done? do
       uploaded_file =
-        consume_uploaded_entry(socket, entry, fn %{path: path} = meta ->
-          IO.inspect(meta)
-          {:ok, Uploads.save_file!(path, "idk")}
+        consume_uploaded_entry(socket, entry, fn %{path: path} ->
+          {:ok, Uploads.save_file!(path, entry.client_type, entry.client_name)}
         end)
 
-      {:noreply, put_flash(socket, :info, "file #{uploaded_file.id} uploaded")}
+      {:noreply,
+       socket
+       |> put_flash(:info, "file #{uploaded_file.name} successfully uploaded")
+       |> assign(attachments: socket.assigns.attachments ++ [uploaded_file])}
     else
       {:noreply, socket}
     end
@@ -215,6 +218,15 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                   opts={required: true, placeholder: "Here's what I'd like..."}
                 />
                 <LiveFileInput upload={@uploads.attachment} />
+                <ul>
+                  {#for entry <- @uploads.attachment.entries}
+                    <li>{entry.client_name}</li>
+                    <progress value={entry.progress} max="100">{entry.progress}%</progress>
+                    {#for err <- upload_errors(@uploads.attachment, entry)}
+                      <p>{error_to_string(err)}</p>
+                    {/for}
+                  {/for}
+                </ul>
                 {#for err <- upload_errors(@uploads.attachment)}
                   <p>{error_to_string(err)}</p>
                 {/for}

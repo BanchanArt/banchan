@@ -6,6 +6,7 @@ defmodule Banchan.Uploads.Upload do
   import Ecto.Changeset
 
   schema "uploads" do
+    field :name, :string
     field :bucket, :string
     field :key, :string
     field :content_type, :string
@@ -16,8 +17,8 @@ defmodule Banchan.Uploads.Upload do
   @doc false
   def changeset(upload, attrs) do
     upload
-    |> cast(attrs, [:key, :bucket, :content_type])
-    |> validate_required([:key, :bucket, :content_type])
+    |> cast(attrs, [:name, :key, :bucket, :content_type])
+    |> validate_required([:name, :key, :bucket, :content_type])
     |> unique_constraint([:bucket, :key])
   end
 end
