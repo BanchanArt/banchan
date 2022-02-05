@@ -10,21 +10,62 @@ defmodule Banchan.Commissions do
   alias Banchan.Commissions.{Commission, Event, LineItem}
   alias Banchan.Offerings
   alias Banchan.Offerings.OfferingOption
+  alias Banchan.Studios.Studio
 
-  @doc """
-  Returns the list of commissions.
+  def list_commission_data_for_dashboard(%User{} = user, page, order \\ nil) do
+    main_dashboard_query(user)
+    |> dashboard_query_order_by(order)
+    |> Repo.paginate(page: page, page_size: 10)
+  end
 
-  ## Examples
+  defp main_dashboard_query(%User{} = user) do
+    from s in Studio,
+      join: client in User,
+      join: c in Commission,
+      join: e in Event,
+      where:
+        c.id == e.commission_id and
+          c.studio_id == s.id and
+          c.client_id == client.id and
+          (c.client_id == ^user.id or
+             ^user.id in subquery(studio_artists_query())),
+      group_by: [c.id, s.id, client.handle, s.handle, s.name],
+      select: %{
+        id: c.id,
+        client_handle: client.handle,
+        title: c.title,
+        status: c.status,
+        public_id: c.public_id,
+        studio_handle: s.handle,
+        studio_name: s.name,
+        submitted_at: c.inserted_at,
+        updated_at: max(e.inserted_at)
+      }
+  end
 
-      iex> list_commissions(studio)
-      [%Commission{}, ...]
+  defp studio_artists_query do
+    from s in Studio,
+      join: u in User,
+      join: us in "users_studios",
+      join: c in Commission,
+      where: u.id == us.user_id and s.id == us.studio_id and c.studio_id == s.id,
+      select: u.id
+  end
 
-  """
-  def list_commissions(studio) do
-    Repo.all(
-      from c in Commission,
-        where: c.studio_id == ^studio.id
-    )
+  defp dashboard_query_order_by(query, order) do
+    case order do
+      {ord, :client_handle} ->
+        query |> order_by([c, client], [{^ord, client.handle}])
+
+      {ord, :studio_handle} ->
+        query |> order_by([c, client, s], [{^ord, s.handle}])
+
+      {ord, field} ->
+        query |> order_by([{^ord, ^field}])
+
+      nil ->
+        query
+    end
   end
 
   @doc """

@@ -72,6 +72,7 @@ defmodule Banchan.MixProject do
       {:html_sanitize_ex, "~> 1.4.2"},
       {:uuid, "~> 1.1"},
       {:timex, "~> 3.7.6"},
+      {:scrivener_ecto, "~> 2.7.0"},
       {:phoenix_live_reload, "~> 1.3", only: :dev},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       # Testing and static analysis
