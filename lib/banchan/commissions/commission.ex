@@ -5,7 +5,7 @@ defmodule Banchan.Commissions.Commission do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @status_values [:submitted, :accepted, :in_progress, :paused, :waiting, :closed]
+  alias Banchan.Commissions.Common
 
   schema "commissions" do
     field :public_id, :string
@@ -14,20 +14,19 @@ defmodule Banchan.Commissions.Commission do
     field :tos_ok, :boolean, virtual: true
 
     field :status, Ecto.Enum,
-      values: @status_values,
+      values: Common.status_values(),
       default: :submitted
 
-    has_many :line_items, Banchan.Commissions.LineItem, preload_order: [asc: :inserted_at]
+    has_many :line_items, Banchan.Commissions.LineItem,
+      preload_order: [asc: :inserted_at],
+      on_replace: :delete
+
     has_many :events, Banchan.Commissions.Event, preload_order: [asc: :inserted_at]
     belongs_to :offering, Banchan.Offerings.Offering
     belongs_to :studio, Banchan.Studios.Studio
     belongs_to :client, Banchan.Accounts.User
 
     timestamps()
-  end
-
-  def status_values do
-    @status_values
   end
 
   def gen_public_id do
@@ -41,7 +40,7 @@ defmodule Banchan.Commissions.Commission do
   @doc false
   def changeset(commission, attrs) do
     commission
-    |> cast(attrs, [:title, :description, :tos_ok])
+    |> cast(attrs, [:title, :description, :status, :tos_ok])
     |> cast_assoc(:line_items)
     |> cast_assoc(:events)
     |> validate_change(:tos_ok, fn field, tos_ok ->

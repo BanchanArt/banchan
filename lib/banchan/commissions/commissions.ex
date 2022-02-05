@@ -6,8 +6,10 @@ defmodule Banchan.Commissions do
   import Ecto.Query, warn: false
   alias Banchan.Repo
 
-  alias Banchan.Commissions.{Commission, Event}
+  alias Banchan.Accounts.User
+  alias Banchan.Commissions.{Commission, Event, LineItem}
   alias Banchan.Offerings
+  alias Banchan.Offerings.OfferingOption
 
   @doc """
   Returns the list of commissions.
@@ -45,7 +47,7 @@ defmodule Banchan.Commissions do
         where:
           c.studio_id == ^studio.id and c.public_id == ^public_id and
             (^current_user_member? or c.client_id == ^current_user.id),
-        preload: [events: [:actor], line_items: []]
+        preload: [events: [:actor], line_items: [:option], offering: [:options]]
     )
   end
 
@@ -114,22 +116,95 @@ defmodule Banchan.Commissions do
     |> Repo.insert()
   end
 
-  @doc """
-  Updates a commission.
+  def update_status(%User{} = actor, %Commission{} = commission, status) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        {:ok, commission} =
+          commission
+          |> Commission.changeset(%{status: status})
+          |> Repo.update()
 
-  ## Examples
+        {:ok, event} = create_event(:status, actor, commission, %{status: status})
 
-      iex> update_commission(commission, %{field: new_value})
-      {:ok, %Commission{}}
+        {:ok, {commission, [event]}}
+      end)
 
-      iex> update_commission(commission, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+    ret
+  end
 
-  """
-  def update_commission(%Commission{} = commission, attrs) do
-    commission
-    |> Commission.changeset(attrs)
-    |> Repo.update()
+  def add_line_item(%User{} = actor, %Commission{} = commission, option) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        line_item =
+          case option do
+            %OfferingOption{} ->
+              %LineItem{
+                option: option,
+                amount: option.price || Money.new(0, :USD),
+                name: option.name,
+                description: option.description
+              }
+
+            %{amount: amount, name: name, description: description} ->
+              %LineItem{
+                option: nil,
+                amount: amount,
+                name: name,
+                description: description
+              }
+          end
+
+        case commission
+             |> Commission.changeset(%{
+               tos_ok: true
+             })
+             |> Ecto.Changeset.put_assoc(:line_items, commission.line_items ++ [line_item])
+             |> Repo.update() do
+          {:error, err} ->
+            {:error, err}
+
+          {:ok, commission} ->
+            # credo:disable-for-next-line Credo.Check.Refactor.Nesting
+            case create_event(:line_item_added, actor, commission, %{
+                   amount: line_item.amount,
+                   text: line_item.name
+                 }) do
+              {:error, err} -> {:error, err}
+              {:ok, event} -> {:ok, {commission, [event]}}
+            end
+        end
+      end)
+
+    ret
+  end
+
+  def remove_line_item(%User{} = actor, %Commission{} = commission, line_item) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        line_items = Enum.filter(commission.line_items, &(&1.id != line_item.id))
+
+        case commission
+             |> Commission.changeset(%{
+               tos_ok: true
+             })
+             |> Ecto.Changeset.put_assoc(:line_items, line_items)
+             |> Repo.update() do
+          {:error, err} ->
+            {:error, err}
+
+          {:ok, commission} ->
+            # credo:disable-for-next-line Credo.Check.Refactor.Nesting
+            case create_event(:line_item_removed, actor, commission, %{
+                   amount: line_item.amount,
+                   text: line_item.name
+                 }) do
+              {:error, err} -> {:error, err}
+              {:ok, event} -> {:ok, {commission, [event]}}
+            end
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -202,8 +277,9 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_event(actor, commission, attrs \\ %{}) do
-    %Event{commission: commission, actor: actor}
+  def create_event(type, %User{} = actor, %Commission{} = commission, attrs \\ %{})
+      when is_atom(type) do
+    %Event{type: type, commission: commission, actor: actor}
     |> Event.changeset(attrs)
     |> Repo.insert()
   end

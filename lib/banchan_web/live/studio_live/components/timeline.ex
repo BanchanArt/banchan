@@ -4,8 +4,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   """
   use BanchanWeb, :live_component
 
+  alias Banchan.Commissions.Common
+
   alias BanchanWeb.Components.Card
   alias BanchanWeb.Endpoint
+  alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
 
   prop commission, :any, required: true
 
@@ -18,32 +21,64 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   end
 
   def render(assigns) do
+    event_chunks = Enum.chunk_by(assigns.commission.events, &(&1.type == :comment))
+
     ~F"""
     <div class="timeline">
-      {#for event <- @commission.events}
-        <article class="timeline-item">
-          {#case event.type}
-            {#match :comment}
-              <Card>
-                <:header>
-                  <img class="w-6 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
-                  {event.actor.handle} commented {fmt_time(event.inserted_at)}.
-                </:header>
+      {#for chunk <- event_chunks}
+        {#if List.first(chunk).type == :comment}
+          <div>
+            {#for event <- chunk}
+              <article class="timeline-item">
+                <Card>
+                  <:header>
+                    <img class="w-6 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
+                    {event.actor.handle} commented {fmt_time(event.inserted_at)}.
+                  </:header>
 
-                <div class="content">
-                  {raw(fmt_md(event.text))}
-                </div>
-              </Card>
-            {#match :line_item}
-              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor} added a line item {fmt_time(event.inserted_at)}.</p>
-            {#match :payment_request}
-              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor} requested payment of {Money.to_string(event.amount)} {fmt_time(event.inserted_at)}.</p>
-            {#match :status}
-              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor} changed the status of this commission to {to_string(event.status)} {fmt_time(event.inserted_at)}.</p>
-            {#match :attachment}
-              <p class="timeline-item block"><i class="fas fa-clipboard-check" /> {event.actor} added an attachment {fmt_time(event.inserted_at)}.</p>
-          {/case}
-        </article>
+                  <div class="content">
+                    {raw(fmt_md(event.text))}
+                  </div>
+                </Card>
+              </article>
+            {/for}
+          </div>
+        {#else}
+          <div class="steps steps-vertical">
+            {#for event <- chunk}
+              {#case event.type}
+                {#match :line_item_added}
+                  <TimelineItem icon="➕" event={event}>
+                    added <strong>{event.text}</strong> ({Money.to_string(event.amount)}) {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :line_item_removed}
+                  <TimelineItem icon="✕" event={event}>
+                    removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))}) {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :payment_request}
+                  <TimelineItem icon="$" event={event}>
+                    requested payment of {Money.to_string(event.amount)} {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :payment_processed}
+                  <TimelineItem icon="$" event={event}>
+                    paid {Money.to_string(event.amount)} {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :status}
+                  <TimelineItem icon="S" event={event}>
+                    changed the status to <strong>{Common.humanize_status(event.status)}</strong> {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :attachment_added}
+                  <TimelineItem icon="📎" event={event}>
+                    added an attachment {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+                {#match :attachment_removed}
+                  <TimelineItem icon="␡" event={event}>
+                    removed an attachment {fmt_time(event.inserted_at)}.
+                  </TimelineItem>
+              {/case}
+            {/for}
+          </div>
+        {/if}
       {/for}
     </div>
     """
