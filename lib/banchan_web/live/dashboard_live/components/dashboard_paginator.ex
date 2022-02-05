@@ -21,11 +21,7 @@ defmodule BanchanWeb.DashboardLive.Components.DashboardPaginator do
         {/if}
 
         {#for num <- start_page(@page.page_number)..end_page(@page.page_number, @page.total_pages)}
-          {#if @page.total_pages == 1}
-            <button class="btn" disabled="true">{num}</button>
-          {#else}
-            <LivePatch class={"btn", "btn-active": num == @page.page_number} to={"?page=#{num}"}>{num}</LivePatch>
-          {/if}
+          <LivePatch class={"btn", "btn-active": num == @page.page_number} to={"?page=#{num}"}>{num}</LivePatch>
         {/for}
 
         {#if @page.page_number != @page.total_pages}
