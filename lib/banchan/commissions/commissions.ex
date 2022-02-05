@@ -12,10 +12,10 @@ defmodule Banchan.Commissions do
   alias Banchan.Offerings.OfferingOption
   alias Banchan.Studios.Studio
 
-  def list_commission_data_for_dashboard(%User{} = user, order \\ nil) do
+  def list_commission_data_for_dashboard(%User{} = user, page, order \\ nil) do
     main_dashboard_query(user)
     |> dashboard_query_order_by(order)
-    |> Repo.all()
+    |> Repo.paginate(page: page, page_size: 10)
   end
 
   defp main_dashboard_query(%User{} = user) do

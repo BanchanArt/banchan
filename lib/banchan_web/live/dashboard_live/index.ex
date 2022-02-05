@@ -7,7 +7,7 @@ defmodule BanchanWeb.DashboardLive do
   alias Banchan.Commissions
 
   alias BanchanWeb.Components.Layout
-  alias BanchanWeb.DashboardLive.Components.DashboardResult
+  alias BanchanWeb.DashboardLive.Components.{DashboardPaginator, DashboardResult}
 
   @impl true
   def mount(_params, session, socket) do
@@ -22,7 +22,7 @@ defmodule BanchanWeb.DashboardLive do
      |> assign(:params, params)
      |> assign(
        :results,
-       Commissions.list_commission_data_for_dashboard(socket.assigns.current_user, sort(params))
+       Commissions.list_commission_data_for_dashboard(socket.assigns.current_user, page(params), sort(params))
      )}
   end
 
@@ -34,18 +34,28 @@ defmodule BanchanWeb.DashboardLive do
     {:asc, :id}
   end
 
+  defp page(%{"page" => page}) do
+    {page, ""} = Integer.parse(page)
+    page
+  end
+
+  defp page(_other) do
+    1
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       <h1 class="text-2xl">Commission Dashboard</h1>
       <ul class="divide-y">
-        {#for result <- @results}
+        {#for result <- @results.entries}
           <li>
             <DashboardResult result={result} />
           </li>
         {/for}
       </ul>
+      <DashboardPaginator page={@results} />
     </Layout>
     """
   end
