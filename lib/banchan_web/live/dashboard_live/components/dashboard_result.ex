@@ -36,6 +36,9 @@ defmodule BanchanWeb.DashboardLive.Components.DashboardResult do
         {@result.client_handle}
       </LiveRedirect>
       {Timex.format!(@result.submitted_at, "{relative}", :relative)}.
+      <div class="float-right">
+        Updated {Timex.format!(@result.updated_at, "{relative}", :relative)}.
+      </div>
     </div>
     """
   end

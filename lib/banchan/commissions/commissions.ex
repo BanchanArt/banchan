@@ -17,12 +17,15 @@ defmodule Banchan.Commissions do
       from c in Commission,
         join: client in User,
         join: s in Studio,
+        join: e in Event,
         where:
-          c.studio_id == s.id and
+          c.id == e.commission_id and
+            c.studio_id == s.id and
             c.client_id == client.id and
             (c.client_id == ^user.id or
                ^user.id in subquery(studio_artists_query())),
         distinct: true,
+        group_by: [c.id, client.handle, s.handle, s.name],
         select: %{
           id: c.id,
           client_handle: client.handle,
@@ -31,7 +34,8 @@ defmodule Banchan.Commissions do
           public_id: c.public_id,
           studio_handle: s.handle,
           studio_name: s.name,
-          submitted_at: c.inserted_at
+          submitted_at: c.inserted_at,
+          updated_at: max(e.inserted_at)
         }
 
     query = dashboard_query_order_by(query, order)
