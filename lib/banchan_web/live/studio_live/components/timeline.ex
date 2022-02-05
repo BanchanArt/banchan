@@ -7,8 +7,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   alias Banchan.Commissions.Common
 
   alias BanchanWeb.Components.Card
-  alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
   alias BanchanWeb.Endpoint
+  alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
 
   prop commission, :any, required: true
 
