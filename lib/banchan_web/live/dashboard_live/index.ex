@@ -7,7 +7,7 @@ defmodule BanchanWeb.DashboardLive do
   alias Banchan.Commissions
 
   alias BanchanWeb.Components.Layout
-  alias BanchanWeb.DashboardLive.Components.{TableLink, TableRow}
+  alias BanchanWeb.DashboardLive.Components.DashboardResult
 
   @impl true
   def mount(_params, session, socket) do
@@ -21,7 +21,7 @@ defmodule BanchanWeb.DashboardLive do
      socket
      |> assign(:params, params)
      |> assign(
-       :rows,
+       :results,
        Commissions.list_commission_data_for_dashboard(socket.assigns.current_user, sort(params))
      )}
   end
@@ -38,26 +38,14 @@ defmodule BanchanWeb.DashboardLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Dashboard</h1>
-      <h2 class="text-xl">Commissions</h2>
-      <div class="overflow-x-auto">
-        <table class="table w-full table-compact">
-          <thead>
-            <tr>
-              <th><TableLink field={:client_handle} params={@params}>Client</TableLink></th>
-              <th><TableLink field={:studio_handle} params={@params}>Studio</TableLink></th>
-              <th><TableLink field={:title} params={@params}>Commission</TableLink></th>
-              <th><TableLink field={:status} params={@params}>Status</TableLink></th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {#for row <- @rows}
-              <TableRow data={row} />
-            {/for}
-          </tbody>
-        </table>
-      </div>
+      <h1 class="text-2xl">Commission Dashboard</h1>
+      <ul class="divide-y">
+        {#for result <- @results}
+          <li>
+            <DashboardResult result={result} />
+          </li>
+        {/for}
+      </ul>
     </Layout>
     """
   end

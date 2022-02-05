@@ -29,7 +29,9 @@ defmodule Banchan.Commissions do
           title: c.title,
           status: c.status,
           public_id: c.public_id,
-          studio_handle: s.handle
+          studio_handle: s.handle,
+          studio_name: s.name,
+          submitted_at: c.inserted_at
         }
 
     query = dashboard_query_order_by(query, order)
