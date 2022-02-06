@@ -46,13 +46,19 @@ defmodule BanchanWeb.CommissionAttachmentController do
         conn.assigns.current_user
       )
 
-    conn
-    |> put_resp_header("content-length", "#{attachment.thumbnail.size}")
-    |> put_resp_header(
-      "content-disposition",
-      "attachment; filename=\"#{attachment.thumbnail.name || attachment.thumbnail.key}\""
-    )
-    |> put_resp_content_type(attachment.thumbnail.type)
-    |> send_resp(200, Uploads.get_data!(attachment.thumbnail))
+    if attachment.thumbnail do
+      conn
+      |> put_resp_header("content-length", "#{attachment.thumbnail.size}")
+      |> put_resp_header(
+        "content-disposition",
+        "attachment; filename=\"#{attachment.thumbnail.name || attachment.thumbnail.key}\""
+      )
+      |> put_resp_content_type(attachment.thumbnail.type)
+      |> send_resp(200, Uploads.get_data!(attachment.thumbnail))
+    else
+      conn
+      |> resp(404, "Not Found")
+      |> send_resp()
+    end
   end
 end

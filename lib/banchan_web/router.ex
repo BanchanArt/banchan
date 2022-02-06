@@ -53,6 +53,7 @@ defmodule BanchanWeb.Router do
     get "/studios/:handle/commissions/:commission_id/attachment/:key",
         CommissionAttachmentController,
         :show
+
     get "/studios/:handle/commissions/:commission_id/attachment/:key/thumbnail",
         CommissionAttachmentController,
         :thumbnail

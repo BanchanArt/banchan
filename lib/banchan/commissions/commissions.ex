@@ -3,6 +3,12 @@ defmodule Banchan.Commissions do
   The Commissions context.
   """
 
+  @thumbnail_support ~w(
+    image/bmp image/gif image/png image/jpeg image/jpg
+    image/x-icon image/jp2 image/psd image/tiff image/webp
+    video/mpeg video/mp4 video/ogg video/webm video/x-msvideo
+    video/x-ms-wmv)
+
   import Ecto.Query, warn: false
   alias Banchan.Repo
 
@@ -91,7 +97,7 @@ defmodule Banchan.Commissions do
           c.studio_id == ^studio.id and c.public_id == ^public_id and
             (^current_user_member? or c.client_id == ^current_user.id),
         preload: [
-          events: [:actor, attachments: [:upload]],
+          events: [:actor, attachments: [:upload, :thumbnail]],
           line_items: [:option],
           offering: [:options]
         ]
@@ -408,16 +414,21 @@ defmodule Banchan.Commissions do
 
   def make_attachment!(%User{} = user, src, type, name) do
     upload = Uploads.save_file!(user, src, type, name)
-    thumbnail = if type in ~w(image/jpeg image/png image/gif) do
-      mog = Mogrify.open(src)
-      |> Mogrify.format("jpeg")
-      |> Mogrify.gravity("Center")
-      |> Mogrify.resize_to_fill("128x128")
-      |> Mogrify.save(in_place: true)
-      thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")
-      File.rm!(mog.path)
-      thumb
-    end
+
+    thumbnail =
+      if type in @thumbnail_support do
+        mog =
+          Mogrify.open(src)
+          |> Mogrify.format("jpeg")
+          |> Mogrify.gravity("Center")
+          |> Mogrify.resize_to_fill("128x128")
+          |> Mogrify.save(in_place: true)
+
+        thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")
+        File.rm!(mog.path)
+        thumb
+      end
+
     %EventAttachment{
       upload: upload,
       thumbnail: thumbnail
