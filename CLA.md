@@ -85,3 +85,4 @@ The undersigned have all agreed to this CLA:
 * Kat Marchán (@zkat)
 * Atrian Wagner (@skullbunnygalaxy)
 * Maria Mora (@riamaria)
+* Troy Coll (@tacohole)
