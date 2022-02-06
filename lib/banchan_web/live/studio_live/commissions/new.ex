@@ -9,14 +9,12 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   alias Banchan.Offerings
   alias Banchan.Uploads
 
-  alias BanchanWeb.StudioLive.Components.StudioLayout
-
   alias Surface.Components.Form
-  alias Surface.Components.LiveFileInput
 
   alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.Commissions.Summary
+  alias BanchanWeb.StudioLive.Components.{AttachmentInput, StudioLayout}
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
@@ -167,10 +165,6 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     end
   end
 
-  defp error_to_string(:too_large), do: "Too large"
-  defp error_to_string(:too_many_files), do: "You have selected too many files"
-  defp error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
-
   defp handle_progress(:attachment, entry, socket) do
     if entry.done? do
       uploaded_file =
@@ -180,7 +174,6 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
       {:noreply,
        socket
-       |> put_flash(:info, "file #{uploaded_file.name} successfully uploaded")
        |> assign(attachments: socket.assigns.attachments ++ [uploaded_file])}
     else
       {:noreply, socket}
@@ -217,19 +210,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                   class="w-full"
                   opts={required: true, placeholder: "Here's what I'd like..."}
                 />
-                <LiveFileInput upload={@uploads.attachment} />
-                <ul>
-                  {#for entry <- @uploads.attachment.entries}
-                    <li>{entry.client_name}</li>
-                    <progress value={entry.progress} max="100">{entry.progress}%</progress>
-                    {#for err <- upload_errors(@uploads.attachment, entry)}
-                      <p>{error_to_string(err)}</p>
-                    {/for}
-                  {/for}
-                </ul>
-                {#for err <- upload_errors(@uploads.attachment)}
-                  <p>{error_to_string(err)}</p>
-                {/for}
+                <AttachmentInput upload={@uploads.attachment} completed={@attachments} />
               </div>
               <div class="content block">
                 <h3>Terms and Conditions</h3>
