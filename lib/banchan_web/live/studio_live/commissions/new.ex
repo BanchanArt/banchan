@@ -77,6 +77,19 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   end
 
   @impl true
+  def handle_event("change", %{"_target" => ["attachment"]}, socket) do
+    uploads = socket.assigns.uploads
+    {:noreply, Enum.reduce(uploads.attachment.entries, socket, fn entry, socket ->
+      case upload_errors(uploads.attachment, entry) do
+        [f | _] ->
+          socket |> cancel_upload(:attachment, entry.ref) |> put_flash(:error, AttachmentInput.error_to_string(f))
+        [] ->
+          socket
+      end
+    end)}
+  end
+
+  @impl true
   def handle_event("change", %{"commission" => commission}, socket) do
     changeset =
       %Commission{}
