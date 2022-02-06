@@ -79,5 +79,26 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
 
     create index(:line_items, [:commission_id])
     create index(:line_items, [:offering_option_id])
+
+    create table(:uploads) do
+      add :name, :string
+      add :bucket, :string
+      add :key, :string
+      add :content_type, :string
+
+      timestamps()
+    end
+
+    create unique_index(:uploads, [:bucket, :key])
+
+    create table(:event_attachments) do
+      add :event_id, references(:commission_events, on_delete: :nothing)
+      add :upload_id, references(:uploads, on_delete: :nothing)
+
+      timestamps()
+    end
+
+    create index(:event_attachments, [:event_id])
+    create index(:event_attachments, [:upload_id])
   end
 end

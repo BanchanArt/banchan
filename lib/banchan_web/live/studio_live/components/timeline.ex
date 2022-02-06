@@ -39,6 +39,15 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                   <div class="content">
                     {raw(fmt_md(event.text))}
                   </div>
+
+                  <:footer>
+                    Attachments:
+                    <ul>
+                      {#for attachment <- event.attachments}
+                        <li>{attachment.upload.name} ({attachment.upload.content_type})</li>
+                      {/for}
+                    </ul>
+                  </:footer>
                 </Card>
               </article>
             {/for}

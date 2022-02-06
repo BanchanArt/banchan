@@ -7,7 +7,7 @@ defmodule Banchan.Commissions do
   alias Banchan.Repo
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions.{Commission, Event, LineItem}
+  alias Banchan.Commissions.{Commission, Event, EventAttachment, LineItem}
   alias Banchan.Offerings
   alias Banchan.Offerings.OfferingOption
   alias Banchan.Studios.Studio
@@ -88,7 +88,11 @@ defmodule Banchan.Commissions do
         where:
           c.studio_id == ^studio.id and c.public_id == ^public_id and
             (^current_user_member? or c.client_id == ^current_user.id),
-        preload: [events: [:actor], line_items: [:option], offering: [:options]]
+        preload: [
+          events: [:actor, attachments: [:upload]],
+          line_items: [:option],
+          offering: [:options]
+        ]
     )
   end
 
@@ -104,7 +108,7 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_commission(actor, studio, offering, line_items, attrs \\ %{}) do
+  def create_commission(actor, studio, offering, line_items, attachments, attrs \\ %{}) do
     {:ok, ret} =
       Repo.transaction(fn ->
         available_slot_count = Offerings.offering_available_slots(offering)
@@ -120,7 +124,7 @@ defmodule Banchan.Commissions do
             {:error, :no_proposals_available}
 
           true ->
-            insert_commission(actor, studio, offering, line_items, attrs)
+            insert_commission(actor, studio, offering, line_items, attachments, attrs)
         end
       end)
 
@@ -138,7 +142,7 @@ defmodule Banchan.Commissions do
     end
   end
 
-  defp insert_commission(actor, studio, offering, line_items, attrs) do
+  defp insert_commission(actor, studio, offering, line_items, attachments, attrs) do
     %Commission{
       public_id: Commission.gen_public_id(),
       studio: studio,
@@ -149,7 +153,8 @@ defmodule Banchan.Commissions do
         %{
           actor: actor,
           type: :comment,
-          text: Map.get(attrs, "description", "")
+          text: Map.get(attrs, "description", ""),
+          attachments: Enum.map(attachments, &%EventAttachment{upload: &1})
         }
       ]
     }
