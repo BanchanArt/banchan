@@ -409,13 +409,14 @@ defmodule Banchan.Commissions do
   def make_attachment!(%User{} = user, src, type, name) do
     upload = Uploads.save_file!(user, src, type, name)
     thumbnail = if type in ~w(image/jpeg image/png image/gif) do
-      Mogrify.open(src)
-      |> Mogrify.format("jpg")
+      mog = Mogrify.open(src)
+      |> Mogrify.format("jpeg")
       |> Mogrify.gravity("Center")
       |> Mogrify.resize_to_fill("128x128")
-      |> Mogrify.quality(50)
       |> Mogrify.save(in_place: true)
-      Uploads.save_file!(user, src, "image/jpeg", "thumbnail.jpg")
+      thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")
+      File.rm!(mog.path)
+      thumb
     end
     %EventAttachment{
       upload: upload,
