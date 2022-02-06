@@ -170,7 +170,7 @@ defmodule Banchan.Commissions do
           |> Commission.changeset(%{status: status})
           |> Repo.update()
 
-        {:ok, event} = create_event(:status, actor, commission, %{status: status})
+        {:ok, event} = create_event(:status, actor, commission, [], %{status: status})
 
         {:ok, {commission, [event]}}
       end)
@@ -211,7 +211,7 @@ defmodule Banchan.Commissions do
 
           {:ok, commission} ->
             # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_added, actor, commission, %{
+            case create_event(:line_item_added, actor, commission, [], %{
                    amount: line_item.amount,
                    text: line_item.name
                  }) do
@@ -240,7 +240,7 @@ defmodule Banchan.Commissions do
 
           {:ok, commission} ->
             # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_removed, actor, commission, %{
+            case create_event(:line_item_removed, actor, commission, [], %{
                    amount: line_item.amount,
                    text: line_item.name
                  }) do
@@ -323,9 +323,14 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_event(type, %User{} = actor, %Commission{} = commission, attrs \\ %{})
+  def create_event(type, %User{} = actor, %Commission{} = commission, attachments, attrs \\ %{})
       when is_atom(type) do
-    %Event{type: type, commission: commission, actor: actor}
+    %Event{
+      type: type,
+      commission: commission,
+      actor: actor,
+      attachments: Enum.map(attachments, &%EventAttachment{upload: &1})
+    }
     |> Event.changeset(attrs)
     |> Repo.insert()
   end

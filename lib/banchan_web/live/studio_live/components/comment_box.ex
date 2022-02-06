@@ -6,19 +6,23 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.Event
+  alias Banchan.Uploads
 
   alias Surface.Components.Form
 
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
+  alias BanchanWeb.StudioLive.Components.AttachmentInput
 
   prop commission, :struct, required: true
   prop actor, :struct, required: true
 
   data changeset, :struct
+  data uploads, :map
 
   def mount(socket) do
     {:ok,
-     assign(socket,
+     socket
+     |> assign(
        changeset:
          Commissions.change_event(
            %Event{
@@ -26,6 +30,13 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
            },
            %{}
          )
+     )
+     # TODO: move max file size somewhere configurable.
+     # TODO: constrain :accept?
+     |> allow_upload(:attachment,
+       accept: :any,
+       max_entries: 10,
+       max_file_size: 25_000_000
      )}
   end
 
@@ -42,11 +53,22 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
     {:noreply, assign(socket, changeset: changeset)}
   end
 
+  @impl true
+  def handle_event("cancel_upload", %{"ref" => ref}, socket) do
+    {:noreply, cancel_upload(socket, :attachment, ref)}
+  end
+
   def handle_event("add_comment", %{"event" => event}, socket) do
+    uploads =
+      consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
+        {:ok, Uploads.save_file!(path, entry.client_type, entry.client_name)}
+      end)
+
     case Commissions.create_event(
            :comment,
            socket.assigns.actor,
            socket.assigns.commission,
+           uploads,
            event
          ) do
       {:ok, event} ->
@@ -84,6 +106,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
             class="w-full"
             opts={required: true, placeholder: "Here's what I'd like..."}
           />
+          <AttachmentInput upload={@uploads.attachment} cancel="cancel_upload" />
           <Submit changeset={@changeset} label="Reply" />
         </div>
       </Form>

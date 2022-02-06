@@ -32,7 +32,10 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       )
 
     BanchanWeb.Endpoint.subscribe("commission:#{commission.public_id}")
-    {:ok, assign(socket, commission: commission)}
+
+    {:ok,
+     socket
+     |> assign(commission: commission)}
   end
 
   @impl true
