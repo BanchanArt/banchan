@@ -56,13 +56,17 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                               attachment.upload.key
                             )}
                           >
+                          {#if attachment.thumbnail}
                             <img src={Routes.commission_attachment_path(
                               Endpoint,
-                              :show,
+                              :thumbnail,
                               @studio.handle,
                               @commission.public_id,
                               attachment.upload.key
                             )}>
+                          {#else}
+                            {attachment.name}
+                          {/if}
                           </a>
                         </li>
                       {/for}

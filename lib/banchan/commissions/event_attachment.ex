@@ -11,6 +11,7 @@ defmodule Banchan.Commissions.EventAttachment do
   schema "event_attachments" do
     belongs_to :event, Event
     belongs_to :upload, Upload
+    belongs_to :thumbnail, Upload
 
     timestamps()
   end

@@ -11,6 +11,7 @@ defmodule Banchan.Commissions do
   alias Banchan.Offerings
   alias Banchan.Offerings.OfferingOption
   alias Banchan.Studios.Studio
+  alias Banchan.Uploads
   alias Banchan.Uploads.Upload
 
   def list_commission_data_for_dashboard(%User{} = user, page, order \\ nil) do
@@ -155,7 +156,7 @@ defmodule Banchan.Commissions do
           actor: actor,
           type: :comment,
           text: Map.get(attrs, "description", ""),
-          attachments: Enum.map(attachments, &%EventAttachment{upload: &1})
+          attachments: attachments
         }
       ]
     }
@@ -330,7 +331,7 @@ defmodule Banchan.Commissions do
       type: type,
       commission: commission,
       actor: actor,
-      attachments: Enum.map(attachments, &%EventAttachment{upload: &1})
+      attachments: attachments
     }
     |> Event.changeset(attrs)
     |> Repo.insert()
@@ -396,11 +397,29 @@ defmodule Banchan.Commissions do
           s.handle == ^studio and
             c.public_id == ^commission and
             ul.key == ^key and
+            ea.upload_id == ul.id and
             e.id == ea.event_id and
             e.commission_id == c.id and
             c.studio_id == s.id and
             (c.client_id == ^user.id or ^user.id in subquery(studio_artists_query())),
-        preload: [:upload]
+        preload: [:upload, :thumbnail]
     )
+  end
+
+  def make_attachment!(%User{} = user, src, type, name) do
+    upload = Uploads.save_file!(user, src, type, name)
+    thumbnail = if type in ~w(image/jpeg image/png image/gif) do
+      Mogrify.open(src)
+      |> Mogrify.format("jpg")
+      |> Mogrify.gravity("Center")
+      |> Mogrify.resize_to_fill("128x128")
+      |> Mogrify.quality(50)
+      |> Mogrify.save(in_place: true)
+      Uploads.save_file!(user, src, "image/jpeg", "thumbnail.jpg")
+    end
+    %EventAttachment{
+      upload: upload,
+      thumbnail: thumbnail
+    }
   end
 end

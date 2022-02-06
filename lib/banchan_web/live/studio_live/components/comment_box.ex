@@ -6,7 +6,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.Event
-  alias Banchan.Uploads
 
   alias Surface.Components.Form
 
@@ -59,11 +58,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
   end
 
   def handle_event("add_comment", %{"event" => event}, socket) do
-    uploads =
+    attachments =
       consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
         {:ok,
-         Uploads.save_file!(
-           socket.assigns.current_user,
+         Commissions.make_attachment!(
+           socket.assigns.actor,
            path,
            entry.client_type,
            entry.client_name
@@ -74,7 +73,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
            :comment,
            socket.assigns.actor,
            socket.assigns.commission,
-           uploads,
+           attachments,
            event
          ) do
       {:ok, event} ->

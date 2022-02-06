@@ -7,7 +7,6 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, LineItem}
   alias Banchan.Offerings
-  alias Banchan.Uploads
 
   alias Surface.Components.Form
 
@@ -147,10 +146,10 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   @impl true
   def handle_event("submit", %{"commission" => commission}, socket) do
-    uploads =
+    attachments =
       consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
         {:ok,
-         Uploads.save_file!(
+         Commissions.make_attachment!(
            socket.assigns.current_user,
            path,
            entry.client_type,
@@ -163,7 +162,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
            socket.assigns.studio,
            socket.assigns.offering,
            socket.assigns.line_items,
-           uploads,
+           attachments,
            commission
          ) do
       {:ok, created_commission} ->

@@ -36,4 +36,23 @@ defmodule BanchanWeb.CommissionAttachmentController do
       end)
     )
   end
+
+  def thumbnail(conn, %{"handle" => studio_handle, "commission_id" => public_id, "key" => key}) do
+    attachment =
+      Commissions.get_attachment_if_allowed!(
+        studio_handle,
+        public_id,
+        key,
+        conn.assigns.current_user
+      )
+
+    conn
+    |> put_resp_header("content-length", "#{attachment.thumbnail.size}")
+    |> put_resp_header(
+      "content-disposition",
+      "attachment; filename=\"#{attachment.thumbnail.name || attachment.thumbnail.key}\""
+    )
+    |> put_resp_content_type(attachment.thumbnail.type)
+    |> send_resp(200, Uploads.get_data!(attachment.thumbnail))
+  end
 end
