@@ -1,4 +1,7 @@
 defmodule Banchan.Commissions.EventAttachment do
+  @moduledoc """
+  File/upload attachments for commission Events.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 
