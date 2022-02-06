@@ -14,16 +14,7 @@ defmodule Banchan.UploadsTest do
       upload
     end
 
-    test "list_uploads/0 lists all uploads" do
-      upload = upload_fixture()
-      assert Uploads.list_uploads() == [upload]
-    end
-
-    test "get_upload!/1 returns the upload with the given id" do
-      upload = upload_fixture()
-      assert Uploads.get_upload!(upload.id) == upload
-    end
-
+    @tag :skip
     test "delete_upload/2 deletes the upload with the given id" do
       upload = upload_fixture()
       id = upload.id
