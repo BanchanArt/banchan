@@ -38,8 +38,14 @@ defmodule BanchanWeb.DenizenLive.Edit do
             <TextInput name={:name} icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />
             <TextArea name={:bio} />
-            <UploadInput upload={@uploads.pfp} cancel="cancel_pfp_upload" />
             <Submit changeset={@changeset} label="Save" />
+          </Form>
+        </div>
+        <div class="p-6">
+          <h2 class="text-xl">Update profile picture</h2>
+          <Form for={:pfp} change="change_pfp" submit="submit_pfp">
+            <UploadInput upload={@uploads.pfp} cancel="cancel_pfp_upload" />
+            <Submit label="Upload" />
           </Form>
         </div>
       </div>
@@ -56,6 +62,26 @@ defmodule BanchanWeb.DenizenLive.Edit do
 
     socket = assign(socket, changeset: changeset)
 
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("submit", val, socket) do
+    case Accounts.update_user_profile(socket.assigns.user, val["user"]) do
+      {:ok, user} ->
+        socket = assign(socket, changeset: User.profile_changeset(user), user: user)
+        socket = put_flash(socket, :info, "Profile updated")
+
+        {:noreply,
+         push_redirect(socket, to: Routes.denizen_show_path(Endpoint, :show, user.handle))}
+
+      other ->
+        other
+    end
+  end
+
+  @impl true
+  def handle_event("change_pfp", _, socket) do
     uploads = socket.assigns.uploads
 
     socket =
@@ -83,7 +109,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
   end
 
   @impl true
-  def handle_event("submit", val, socket) do
+  def handle_event("submit_pfp", _, socket) do
     consume_uploaded_entries(socket, :pfp, fn %{path: path}, _entry ->
       {:ok,
        Accounts.update_user_pfp(
@@ -92,16 +118,6 @@ defmodule BanchanWeb.DenizenLive.Edit do
        )}
     end)
 
-    case Accounts.update_user_profile(socket.assigns.user, val["user"]) do
-      {:ok, user} ->
-        socket = assign(socket, changeset: User.profile_changeset(user), user: user)
-        socket = put_flash(socket, :info, "Profile updated")
-
-        {:noreply,
-         push_redirect(socket, to: Routes.denizen_show_path(Endpoint, :show, user.handle))}
-
-      other ->
-        other
-    end
+    {:noreply, socket}
   end
 end
