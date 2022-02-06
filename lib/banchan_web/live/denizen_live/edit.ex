@@ -8,7 +8,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
 
   alias Banchan.Accounts
 
-  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput, UploadInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -16,7 +16,15 @@ defmodule BanchanWeb.DenizenLive.Edit do
   def mount(%{"handle" => handle}, session, socket) do
     socket = assign_defaults(session, socket)
     user = Accounts.get_user_by_handle!(handle)
-    {:ok, assign(socket, user: user, changeset: User.profile_changeset(user))}
+
+    {:ok,
+     socket
+     |> assign(user: user, changeset: User.profile_changeset(user))
+     |> allow_upload(:pfp,
+       accept: ~w(image/jpeg image/png),
+       max_entries: 1,
+       max_file_size: 5_000_000
+     )}
   end
 
   @impl true
@@ -29,7 +37,8 @@ defmodule BanchanWeb.DenizenLive.Edit do
           <Form for={@changeset} change="change" submit="submit">
             <TextInput name={:name} icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />
-            <TextArea name={:bio} opts={required: true} />
+            <TextArea name={:bio} />
+            <UploadInput upload={@uploads.pfp} cancel="cancel_pfp_upload" />
             <Submit changeset={@changeset} label="Save" />
           </Form>
         </div>
@@ -46,11 +55,43 @@ defmodule BanchanWeb.DenizenLive.Edit do
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)
+
+    uploads = socket.assigns.uploads
+
+    socket =
+      Enum.reduce(uploads.pfp.entries, socket, fn entry, socket ->
+        case upload_errors(uploads.pfp, entry) do
+          [f | _] ->
+            socket
+            |> cancel_upload(:pfp, entry.ref)
+            |> put_flash(
+              :error,
+              "File `#{entry.client_name}` upload failed: #{UploadInput.error_to_string(f)}"
+            )
+
+          [] ->
+            socket
+        end
+      end)
+
     {:noreply, socket}
   end
 
   @impl true
+  def handle_event("cancel_pfp_upload", %{"ref" => ref}, socket) do
+    {:noreply, cancel_upload(socket, :pfp, ref)}
+  end
+
+  @impl true
   def handle_event("submit", val, socket) do
+    consume_uploaded_entries(socket, :pfp, fn %{path: path}, _entry ->
+      {:ok,
+       Accounts.update_user_pfp(
+         Accounts.get_user_by_handle!(socket.assigns.current_user.handle),
+         path
+       )}
+    end)
+
     case Accounts.update_user_profile(socket.assigns.user, val["user"]) do
       {:ok, user} ->
         socket = assign(socket, changeset: User.profile_changeset(user), user: user)

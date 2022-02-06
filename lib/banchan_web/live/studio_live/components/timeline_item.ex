@@ -15,7 +15,10 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.TimelineItem do
     ~F"""
     <div data-content={@icon} class="timeline-item step">
       <p>
-        <img class="w-6 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
+        <img
+          class="w-6 inline-block"
+          src={Routes.profile_image_path(Endpoint, :thumb, @event.actor.handle)}
+        />
         <a href={"/denizens/#{@event.actor.handle}"}><strong>{@event.actor.handle}</strong></a>
         <#slot />
       </p>

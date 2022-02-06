@@ -9,8 +9,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
-  alias BanchanWeb.StudioLive.Components.AttachmentInput
+  alias BanchanWeb.Components.Form.{MarkdownInput, Submit, UploadInput}
 
   prop commission, :struct, required: true
   prop actor, :struct, required: true
@@ -111,7 +110,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
             class="w-full"
             opts={required: true, placeholder: "Here's what I'd like..."}
           />
-          <AttachmentInput upload={@uploads.attachment} cancel="cancel_upload" />
+          <UploadInput upload={@uploads.attachment} cancel="cancel_upload" />
           <Submit changeset={@changeset} label="Reply" />
         </div>
       </Form>

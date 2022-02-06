@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.AttachmentInput do
+defmodule BanchanWeb.Components.Form.UploadInput do
   @moduledoc """
   File upload input component.
   """

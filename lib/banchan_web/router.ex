@@ -72,6 +72,10 @@ defmodule BanchanWeb.Router do
     live "/", HomeLive, :index
 
     live "/denizens/:handle", DenizenLive.Show, :show
+    get "/denizens/:handle/pfp.jpeg", ProfileImageController, :pfp
+    get "/denizens/:handle/pfp_thumb.jpeg", ProfileImageController, :thumb
+    get "/denizens/:handle/header.jpeg", ProfileImageController, :header
+
     live "/studios", StudioLive.Index, :index
     live "/studios/:handle", StudioLive.Shop, :show
     live "/studios/:handle/about", StudioLive.About, :show

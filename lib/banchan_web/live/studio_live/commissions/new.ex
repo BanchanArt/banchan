@@ -10,10 +10,10 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.Commissions.Summary
-  alias BanchanWeb.StudioLive.Components.{AttachmentInput, StudioLayout}
+  alias BanchanWeb.StudioLive.Components.StudioLayout
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
@@ -89,7 +89,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
            |> cancel_upload(:attachment, entry.ref)
            |> put_flash(
              :error,
-             "File `#{entry.client_name}` upload failed: #{AttachmentInput.error_to_string(f)}"
+             "File `#{entry.client_name}` upload failed: #{UploadInput.error_to_string(f)}"
            )
 
          [] ->
@@ -229,7 +229,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                   class="w-full"
                   opts={required: true, placeholder: "Here's what I'd like..."}
                 />
-                <AttachmentInput upload={@uploads.attachment} cancel="cancel_upload" />
+                <UploadInput upload={@uploads.attachment} cancel="cancel_upload" />
               </div>
               <div class="content block">
                 <h3>Terms and Conditions</h3>

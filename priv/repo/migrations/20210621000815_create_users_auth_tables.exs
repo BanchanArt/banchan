@@ -26,6 +26,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :bio, :string
       add :header_img_id, references(:uploads, on_delete: :nilify_all)
       add :pfp_img_id, references(:uploads, on_delete: :nilify_all)
+      add :pfp_thumb_id, references(:uploads, on_delete: :nilify_all)
       timestamps()
     end
 
@@ -34,6 +35,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
 
     create index(:users, [:header_img_id])
     create index(:users, [:pfp_img_id])
+    create index(:users, [:pfp_thumb_id])
 
     alter table(:uploads) do
       add :uploader_id, references(:users, on_delete: :nilify_all)
