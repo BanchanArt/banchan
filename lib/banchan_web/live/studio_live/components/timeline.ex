@@ -45,7 +45,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                     Attachments:
                     <ul>
                       {#for attachment <- event.attachments}
-                        <li>{attachment.upload.name} ({attachment.upload.type})
+                        <li>
                           <a
                             target="_blank"
                             href={Routes.commission_attachment_path(
@@ -55,7 +55,16 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                               @commission.public_id,
                               attachment.upload.key
                             )}
-                          >Download</a></li>
+                          >
+                            <img src={Routes.commission_attachment_path(
+                              Endpoint,
+                              :show,
+                              @studio.handle,
+                              @commission.public_id,
+                              attachment.upload.key
+                            )}>
+                          </a>
+                        </li>
                       {/for}
                     </ul>
                   </:footer>
