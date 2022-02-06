@@ -7,18 +7,16 @@ defmodule BanchanWeb.StudioLive.Components.AttachmentInput do
   alias Surface.Components.LiveFileInput
 
   prop upload, :struct, required: true
-  prop completed, :list, required: true
+  prop cancel, :event, required: true
 
   def render(assigns) do
     ~F"""
     <LiveFileInput upload={@upload} />
     <ul>
-      {#for completed <- @completed}
-        <li>{completed.name} uploaded</li>
-      {/for}
       {#for entry <- @upload.entries}
         <li>{entry.client_name} uploading</li>
         <progress value={entry.progress} max="100">{entry.progress}%</progress>
+        <button :on-click={@cancel} phx-value-ref={entry.ref}>&times;</button>
         {#for err <- upload_errors(@upload, entry)}
           <p>{error_to_string(err)}</p>
         {/for}
