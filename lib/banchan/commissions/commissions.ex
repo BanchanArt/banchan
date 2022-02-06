@@ -11,6 +11,7 @@ defmodule Banchan.Commissions do
   alias Banchan.Offerings
   alias Banchan.Offerings.OfferingOption
   alias Banchan.Studios.Studio
+  alias Banchan.Uploads.Upload
 
   def list_commission_data_for_dashboard(%User{} = user, page, order \\ nil) do
     main_dashboard_query(user)
@@ -380,5 +381,26 @@ defmodule Banchan.Commissions do
   """
   def change_event(%Event{} = event, attrs \\ %{}) do
     Event.changeset(event, attrs)
+  end
+
+  # This one expects binaries for everything because it looks everything up in one fell swoop.
+  def get_attachment_if_allowed!(studio, commission, key, user) do
+    Repo.one!(
+      from ea in EventAttachment,
+        join: s in Studio,
+        join: ul in Upload,
+        join: e in Event,
+        join: c in Commission,
+        select: ea,
+        where:
+          s.handle == ^studio and
+            c.public_id == ^commission and
+            ul.key == ^key and
+            e.id == ea.event_id and
+            e.commission_id == c.id and
+            c.studio_id == s.id and
+            (c.client_id == ^user.id or ^user.id in subquery(studio_artists_query())),
+        preload: [:upload]
+    )
   end
 end

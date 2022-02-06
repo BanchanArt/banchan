@@ -6,8 +6,8 @@ defmodule Banchan.UploadsTest do
   describe "uploads" do
     alias Banchan.Uploads.Upload
 
-    @valid_attrs %{bucket: "bucket", key: "uuid_goes_here", content_type: "image/png"}
-    @invalid_attrs %{status: nil, title: nil, content_type: nil}
+    @valid_attrs %{bucket: "bucket", key: "uuid_goes_here", type: "image/png", size: 10_000}
+    @invalid_attrs %{status: nil, title: nil, type: nil, size: nil}
 
     def upload_fixture(attrs \\ %{}) do
       {:ok, upload} = Uploads.create_upload(attrs |> Enum.into(@valid_attrs))

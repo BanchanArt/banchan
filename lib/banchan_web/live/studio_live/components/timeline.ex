@@ -10,6 +10,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
 
+  prop studio, :struct, required: true
   prop commission, :any, required: true
 
   def fmt_time(time) do
@@ -44,7 +45,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                     Attachments:
                     <ul>
                       {#for attachment <- event.attachments}
-                        <li>{attachment.upload.name} ({attachment.upload.content_type})</li>
+                        <li>{attachment.upload.name} ({attachment.upload.type})
+                        <a target="_blank" href={Routes.commission_attachment_path(Endpoint, :show, @studio.handle, @commission.public_id, attachment.upload.key)}>Download</a></li>
                       {/for}
                     </ul>
                   </:footer>

@@ -149,7 +149,13 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   def handle_event("submit", %{"commission" => commission}, socket) do
     uploads =
       consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
-        {:ok, Uploads.save_file!(path, entry.client_type, entry.client_name)}
+        {:ok,
+         Uploads.save_file!(
+           socket.assigns.current_user,
+           path,
+           entry.client_type,
+           entry.client_name
+         )}
       end)
 
     case Commissions.create_commission(

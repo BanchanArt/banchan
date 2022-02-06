@@ -41,11 +41,8 @@ defmodule Banchan.CommissionsFixtures do
 
     {:ok, event} =
       attrs
-      |> Enum.into(%{
-        data: %{},
-        type: "some type"
-      })
-      |> then(&Banchan.Commissions.create_event(user, commission, &1))
+      |> Enum.into(%{})
+      |> then(&Banchan.Commissions.create_event(:comment, user, commission, [], &1))
 
     event
   end

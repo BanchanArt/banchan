@@ -3,6 +3,8 @@ defmodule Banchan.Uploads do
   The Uploads context.
   """
   import Ecto.Query, warn: false
+
+  alias Banchan.Accounts.User
   alias Banchan.Repo
   alias Banchan.Uploads.Upload
 
@@ -22,9 +24,10 @@ defmodule Banchan.Uploads do
     end
   end
 
-  def save_file!(src, content_type, file_name, bucket \\ get_bucket()) do
+  def save_file!(%User{} = user, src, type, file_name, bucket \\ get_bucket()) do
     key = gen_key()
     local = Path.join([local_upload_dir(), bucket, key])
+    size = File.stat!(src).size
     File.mkdir_p!(Path.dirname(local))
     File.cp!(src, local)
 
@@ -36,10 +39,12 @@ defmodule Banchan.Uploads do
     end
 
     %Upload{
+      uploader: user,
       name: file_name,
       key: key,
       bucket: bucket,
-      content_type: content_type
+      type: type,
+      size: size
     }
     |> Repo.insert!()
   end
@@ -76,29 +81,10 @@ defmodule Banchan.Uploads do
     local = Path.join([local_upload_dir(), upload.bucket, upload.key])
 
     if File.exists?(local) do
-      File.stream!(local)
+      File.stream!(local, [], 32_768)
     else
       ExAws.S3.download_file(upload.bucket, upload.key, :memory)
       |> ExAws.stream!()
-    end
-  end
-
-  @doc """
-  Gets the content length of an Upload.
-  """
-  def get_size!(upload) do
-    local = Path.join([local_upload_dir(), upload.bucket, upload.key])
-
-    if File.exists?(local) do
-      File.stat!(local).size
-    else
-      ExAws.S3.head_object(upload.bucket, upload.key)
-      |> ExAws.request!()
-      |> Map.get(:headers)
-      |> List.keyfind("Content-Length", 0)
-      |> elem(1)
-      |> Integer.parse()
-      |> elem(0)
     end
   end
 

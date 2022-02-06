@@ -82,14 +82,17 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
 
     create table(:uploads) do
       add :name, :string
-      add :bucket, :string
-      add :key, :string
-      add :content_type, :string
+      add :uploader_id, references(:users, on_delete: :nothing)
+      add :bucket, :string, null: false
+      add :key, :string, null: false
+      add :type, :string
+      add :size, :integer, null: false
 
       timestamps()
     end
 
     create unique_index(:uploads, [:bucket, :key])
+    create index(:uploads, [:uploader_id])
 
     create table(:event_attachments) do
       add :event_id, references(:commission_events, on_delete: :nothing)
