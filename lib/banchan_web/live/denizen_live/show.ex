@@ -27,7 +27,7 @@ defmodule BanchanWeb.DenizenLive.Show do
         <div class="col-span-12">
           <article class="ml-8">
             <figure class="">
-              <img src={Routes.profile_image_path(Endpoint, :thumb, @user.handle)}>
+              <img class="mask mask-circle" src={Routes.profile_image_path(Endpoint, :thumb, @user.handle)}>
             </figure>
             <h1 class="text-xl text-base-content font-bold">
               {@user.handle}
@@ -68,7 +68,7 @@ defmodule BanchanWeb.DenizenLive.Show do
             About {@user.handle}
           </h2>
           <figure class="" alt="denizen ID">
-            <img src={Routes.profile_image_path(Endpoint, :thumb, @user.handle)}>
+            <img class="mask mask-circle" src={Routes.profile_image_path(Endpoint, :thumb, @user.handle)}>
           </figure>
           <div class="content">
             <p class="">Name: {@user.name}</p>

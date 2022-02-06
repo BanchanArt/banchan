@@ -15,11 +15,11 @@ defmodule BanchanWeb.Components.Form.UploadInput do
     <ul>
       {#for entry <- @upload.entries}
         <li>{entry.client_name}
-        <button :on-click={@cancel} phx-value-ref={entry.ref}>&times;</button>
-        <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
-        {#for err <- upload_errors(@upload, entry)}
-          <p>{error_to_string(err)}</p>
-        {/for}
+          <button :on-click={@cancel} phx-value-ref={entry.ref}>&times;</button>
+          <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
+          {#for err <- upload_errors(@upload, entry)}
+            <p>{error_to_string(err)}</p>
+          {/for}
         </li>
       {/for}
     </ul>

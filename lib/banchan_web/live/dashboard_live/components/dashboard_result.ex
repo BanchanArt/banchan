@@ -33,7 +33,7 @@ defmodule BanchanWeb.DashboardLive.Components.DashboardResult do
         class="font-bold hover:text-secondary"
       >
         <img
-          class="w-4 inline-block"
+          class="w-4 inline-block mask mask-circle"
           src={Routes.profile_image_path(Endpoint, :thumb, @result.client_handle)}
         />
         {@result.client_handle}

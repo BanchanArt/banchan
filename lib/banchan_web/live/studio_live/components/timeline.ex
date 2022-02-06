@@ -34,7 +34,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                 <Card>
                   <:header>
                     <img
-                      class="w-6 inline-block"
+                      class="w-6 inline-block mask mask-circle"
                       src={Routes.profile_image_path(Endpoint, :thumb, event.actor.handle)}
                     />
                     {event.actor.handle} commented {fmt_time(event.inserted_at)}.
