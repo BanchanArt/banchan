@@ -102,7 +102,7 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
         <div class="p-4">
           <ul class="flex space-x-4 p-2">
             {#for attachment <- Enum.filter(@event.attachments, & &1.thumbnail)}
-              <li>
+              <li class="h-32 w-32">
                 <button
                   :on-click="open_preview"
                   phx-value-key={attachment.upload.key}
