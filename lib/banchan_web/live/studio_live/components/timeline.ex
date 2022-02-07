@@ -30,7 +30,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
           <div class="flex flex-col space-y-4">
             {#for event <- chunk}
               <article class="timeline-item">
-                <Comment studio={@studio} event={event} commission={@commission} />
+                {!-- TODO: IMPORTANT: add a unique public id to events --}
+                <Comment id={"event-#{event.id}"} studio={@studio} event={event} commission={@commission} />
               </article>
             {/for}
           </div>
