@@ -72,6 +72,7 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
               />
             {#else}
               <video
+                :on-click="nothing"
                 class="p-10"
                 alt={@previewing.name}
                 type={@previewing.type}
