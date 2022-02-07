@@ -60,7 +60,6 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
             {#if Uploads.image?(@previewing)}
               <img
                 :on-click="nothing"
-                class="p-10"
                 alt={@previewing.name}
                 src={Routes.commission_attachment_path(
                   Endpoint,
@@ -73,7 +72,6 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
             {#else}
               <video
                 :on-click="nothing"
-                class="p-10"
                 alt={@previewing.name}
                 type={@previewing.type}
                 controls="controls"
