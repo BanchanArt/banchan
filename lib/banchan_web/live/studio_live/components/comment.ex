@@ -124,7 +124,7 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
       {#if Enum.any?(@event.attachments)}
         <hr>
         <div class="p-4">
-          <ul class="flex space-x-4 p-2">
+          <ul class="flex flex-wrap gap-4 p-2">
             {#for attachment <- Enum.filter(@event.attachments, & &1.thumbnail)}
               <li class="h-32 w-32">
                 <button
