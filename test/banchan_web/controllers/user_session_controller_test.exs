@@ -110,6 +110,36 @@ defmodule BanchanWeb.UserSessionControllerTest do
       assert response =~ "Log in</h1>"
       assert response =~ "Invalid email, password, or MFA token"
     end
+
+    test "emits error message with valid credentials no MFA", %{conn: conn, user_mfa: user} do
+      conn =
+        post(conn, Routes.user_session_path(conn, :create), %{
+          "user" => %{
+            "email" => user.email,
+            "password" => valid_user_password(),
+            "mfa_token" => nil
+          }
+        })
+
+      response = html_response(conn, 200)
+      assert response =~ "Log in</h1>"
+      assert response =~ "Invalid email, password, or MFA token"
+    end
+
+    test "emits error message with valid credentials wrong MFA", %{conn: conn, user_mfa: user} do
+      conn =
+        post(conn, Routes.user_session_path(conn, :create), %{
+          "user" => %{
+            "email" => user.email,
+            "password" => valid_user_password(),
+            "mfa_token" => "000"
+          }
+        })
+
+      response = html_response(conn, 200)
+      assert response =~ "Log in</h1>"
+      assert response =~ "Invalid email, password, or MFA token"
+    end
   end
 
   describe "DELETE /users/log_out" do
