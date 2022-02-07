@@ -38,6 +38,7 @@ defmodule BanchanWeb.LoginLive do
           >
             <EmailInput name={:email} icon="envelope" opts={required: true} />
             <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+            <TextInput name={:mfa_token} icon="mobile-alt" opts={maxlength: 6, placeholder: "optional"} />
             <Checkbox name={:remember_me}>Keep me logged in for 60 days.</Checkbox>
             <Submit changeset={@changeset} label="Log in" />
           </Form>
