@@ -301,6 +301,34 @@ defmodule Banchan.Accounts do
     end
   end
 
+  @doc """
+  Generates a new TOTP secret for a user.
+
+  ## Examples
+
+      iex> generate_totp_secret(user)
+      {:ok, %User{}}
+
+      iex> generate_totp_secret(user)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def generate_totp_secret(user) do
+    secret = NimbleTOTP.secret()
+
+    changeset =
+      user
+      |> User.totp_secret_changeset(%{totp_secret: secret})
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, changeset)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} -> {:ok, user}
+      {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
   ## Session
 
   @doc """
