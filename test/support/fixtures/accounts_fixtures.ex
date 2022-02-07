@@ -20,7 +20,7 @@ defmodule Banchan.AccountsFixtures do
     {:ok, user} =
       attrs
       |> valid_user_attributes()
-      |> Banchan.Accounts.register_user()
+      |> Banchan.Accounts.register_user_test()
 
     user
   end
