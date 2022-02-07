@@ -57,7 +57,6 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
          max_file_size: 25_000_000
        )}
     else
-      # TODO: Maybe show this on this page itself?
       socket =
         put_flash(
           socket,

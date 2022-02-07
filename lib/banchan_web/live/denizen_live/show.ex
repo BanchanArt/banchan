@@ -36,16 +36,8 @@ defmodule BanchanWeb.DenizenLive.Show do
             <p class="text-base text-secondary-content">
               Witty phrase here.
             </p>
-            <a
-              href="/"
-              #TODO:
-              add
-              in
-              follow
-              functionality
-              class="btn glass btn-sm text-center rounded-full px-4 py-0"
-              label="Follow"
-            >Follow</a>
+            {!-- TODO: add in follow functionality --}
+            <a href="/" class="btn glass btn-sm text-center rounded-full px-4 py-0" label="Follow">Follow</a>
           </article>
         </div>
         <nav class="tabs col-start-2 grid-cols-3 inline-grid">
