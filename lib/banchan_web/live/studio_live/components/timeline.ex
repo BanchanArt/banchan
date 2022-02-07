@@ -27,7 +27,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
     <div class="timeline">
       {#for chunk <- event_chunks}
         {#if List.first(chunk).type == :comment}
-          <div>
+          <div class="flex flex-col space-y-4">
             {#for event <- chunk}
               <article class="timeline-item">
                 <Comment studio={@studio} event={event} commission={@commission} />

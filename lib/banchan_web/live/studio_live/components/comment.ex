@@ -4,8 +4,6 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
   """
   use BanchanWeb, :component
 
-  alias BanchanWeb.Components.Card
-
   prop studio, :struct, required: true
   prop commission, :struct, required: true
   prop event, :struct, required: true
@@ -20,55 +18,60 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
 
   def render(assigns) do
     ~F"""
-    <Card>
-      <div class="text-sm">
-        <img
-          class="w-6 inline-block mask mask-circle"
-          src={Routes.profile_image_path(Endpoint, :thumb, @event.actor.handle)}
-        />
-        {@event.actor.handle} commented {fmt_time(@event.inserted_at)}.
+    <div class="shadow-lg bg-base-200 rounded-box border-2">
+      <div class="text-sm p-2">
+        <a href={"/denizens/#{@event.actor.handle}"}>
+          <img
+            class="w-6 inline-block mask mask-circle"
+            src={Routes.profile_image_path(Endpoint, :thumb, @event.actor.handle)}
+          />
+          <strong>{@event.actor.handle}</strong></a>
+        commented {fmt_time(@event.inserted_at)}.
       </div>
 
-      <div class="content">
+      <hr>
+
+      <div class="content p-4 h-24 min-h-full user-markdown">
         {raw(fmt_md(@event.text))}
       </div>
 
-      <:footer>
+      {#if Enum.any?(@event.attachments)}
         <hr>
-        <h2 class="text-xl">Attachments</h2>
-        <ul class="flex space-x-4">
-          {#for attachment <- @event.attachments}
-            <li class="w-32 h-32">
-              <a
-                target="_blank"
-                href={Routes.commission_attachment_path(
-                  Endpoint,
-                  :show,
-                  @studio.handle,
-                  @commission.public_id,
-                  attachment.upload.key
-                )}
-              >
-                {#if attachment.thumbnail}
-                  <img
-                    class="rounded-box"
-                    src={Routes.commission_attachment_path(
-                      Endpoint,
-                      :thumbnail,
-                      @studio.handle,
-                      @commission.public_id,
-                      attachment.upload.key
-                    )}
-                  />
-                {#else}
-                  {attachment.upload.name}
-                {/if}
-              </a>
-            </li>
-          {/for}
-        </ul>
-      </:footer>
-    </Card>
+        <div class="p-4">
+          <ul class="flex space-x-4 p-2">
+            {#for attachment <- @event.attachments}
+              <li class="w-32 h-32">
+                <a
+                  target="_blank"
+                  href={Routes.commission_attachment_path(
+                    Endpoint,
+                    :show,
+                    @studio.handle,
+                    @commission.public_id,
+                    attachment.upload.key
+                  )}
+                >
+                  {#if attachment.thumbnail}
+                    <img
+                      class="rounded-box"
+                      src={Routes.commission_attachment_path(
+                        Endpoint,
+                        :thumbnail,
+                        @studio.handle,
+                        @commission.public_id,
+                        attachment.upload.key
+                      )}
+                    />
+                  {#else}
+                    {attachment.upload.name}
+                  {/if}
+                </a>
+              </li>
+            {/for}
+          </ul>
+        </div>
+      {/if}
+    </div>
     """
   end
 end
