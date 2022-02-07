@@ -34,7 +34,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
       <div class="shadow bg-base-200 text-base-content">
         <div class="p-6">
           <h1 class="text-2xl">Edit Profile for @{@user.handle}</h1>
-          <Form for={@changeset} change="change" submit="submit">
+          <Form class="profile-info" for={@changeset} change="change" submit="submit">
             <TextInput name={:name} icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />
             <TextArea name={:bio} />
@@ -43,7 +43,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
         </div>
         <div class="p-6">
           <h2 class="text-xl">Update profile picture</h2>
-          <Form for={:pfp} change="change_pfp" submit="submit_pfp">
+          <Form class="pfp-upload" for={:pfp} change="change_pfp" submit="submit_pfp">
             <UploadInput upload={@uploads.pfp} cancel="cancel_pfp_upload" />
             <Submit label="Upload" />
           </Form>
