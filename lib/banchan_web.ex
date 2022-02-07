@@ -115,6 +115,7 @@ defmodule BanchanWeb do
       import BanchanWeb.ErrorHelpers
       import BanchanWeb.Gettext
       alias BanchanWeb.Router.Helpers, as: Routes
+      alias BanchanWeb.Endpoint
 
       import Surface
     end

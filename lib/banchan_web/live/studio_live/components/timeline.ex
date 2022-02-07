@@ -6,8 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
 
   alias Banchan.Commissions.Common
 
-  alias BanchanWeb.Components.Card
-  alias BanchanWeb.Endpoint
+  alias BanchanWeb.StudioLive.Components.Comment
   alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
 
   prop studio, :struct, required: true
@@ -31,51 +30,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
           <div>
             {#for event <- chunk}
               <article class="timeline-item">
-                <Card>
-                  <:header>
-                    <img
-                      class="w-6 inline-block mask mask-circle"
-                      src={Routes.profile_image_path(Endpoint, :thumb, event.actor.handle)}
-                    />
-                    {event.actor.handle} commented {fmt_time(event.inserted_at)}.
-                  </:header>
-
-                  <div class="content">
-                    {raw(fmt_md(event.text))}
-                  </div>
-
-                  <:footer>
-                    Attachments:
-                    <ul>
-                      {#for attachment <- event.attachments}
-                        <li>
-                          <a
-                            target="_blank"
-                            href={Routes.commission_attachment_path(
-                              Endpoint,
-                              :show,
-                              @studio.handle,
-                              @commission.public_id,
-                              attachment.upload.key
-                            )}
-                          >
-                            {#if IO.inspect(attachment.thumbnail)}
-                              <img src={Routes.commission_attachment_path(
-                                Endpoint,
-                                :thumbnail,
-                                @studio.handle,
-                                @commission.public_id,
-                                attachment.upload.key
-                              )}>
-                            {#else}
-                              {attachment.upload.name}
-                            {/if}
-                          </a>
-                        </li>
-                      {/for}
-                    </ul>
-                  </:footer>
-                </Card>
+                <Comment studio={@studio} event={event} commission={@commission} />
               </article>
             {/for}
           </div>
