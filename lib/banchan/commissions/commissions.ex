@@ -3,12 +3,6 @@ defmodule Banchan.Commissions do
   The Commissions context.
   """
 
-  @thumbnail_support ~w(
-    image/bmp image/gif image/png image/jpeg image/jpg
-    image/x-icon image/jp2 image/psd image/tiff image/webp
-    video/mpeg video/mp4 video/ogg video/webm video/x-msvideo
-    video/x-ms-wmv)
-
   import Ecto.Query, warn: false
   alias Banchan.Repo
 
@@ -416,16 +410,30 @@ defmodule Banchan.Commissions do
     upload = Uploads.save_file!(user, src, type, name)
 
     thumbnail =
-      if type in @thumbnail_support do
+      if Uploads.image?(upload) || Uploads.video?(upload) do
+        tmp_dir = Path.join([System.tmp_dir!(), upload.key])
+        tmp_file = Path.join([tmp_dir, name])
+        File.mkdir_p!(tmp_dir)
+        File.rename(src, tmp_file)
+
         mog =
-          Mogrify.open(src)
+          Mogrify.open(tmp_file)
           |> Mogrify.format("jpeg")
           |> Mogrify.gravity("Center")
           |> Mogrify.resize_to_fill("128x128")
-          |> Mogrify.save(in_place: true)
+          |> Mogrify.save()
 
-        thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")
-        File.rm!(mog.path)
+        final_path =
+          if Uploads.video?(upload) do
+            mog.path |> String.replace(~r/\.jpeg$/, "-0.jpeg")
+          else
+            mog.path
+          end
+
+        thumb = Uploads.save_file!(user, final_path, "image/jpeg", "thumbnail.jpg")
+        File.rm_rf!(tmp_dir)
+        File.rm!(final_path)
+
         thumb
       end
 

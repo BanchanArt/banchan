@@ -8,6 +8,25 @@ defmodule Banchan.Uploads do
   alias Banchan.Repo
   alias Banchan.Uploads.Upload
 
+  @image_formats ~w(
+    image/bmp image/gif image/png image/jpeg image/jpg
+    image/x-icon image/jp2 image/psd image/vnd.adobe.photoshop
+    image/tiff image/webp
+  )
+
+  @video_formats ~w(
+    video/mpeg video/mp4 video/ogg video/webm video/x-msvideo video/x-ms-wmv
+    video/quicktime
+  )
+
+  def image?(%Upload{type: type}) do
+    type in @image_formats
+  end
+
+  def video?(%Upload{type: type}) do
+    type in @video_formats
+  end
+
   defp gen_key do
     UUID.uuid4(:hex)
   end
@@ -22,6 +41,10 @@ defmodule Banchan.Uploads do
       var when is_binary(var) -> var
       _ -> "other"
     end
+  end
+
+  def get_upload!(bucket, key) do
+    Repo.one!(from u in Upload, where: u.bucket == ^bucket and u.key == ^key)
   end
 
   def save_file!(%User{} = user, src, type, file_name, bucket \\ get_bucket()) do

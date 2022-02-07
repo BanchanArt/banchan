@@ -4,6 +4,8 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
   """
   use BanchanWeb, :live_component
 
+  alias Banchan.Uploads
+
   prop studio, :struct, required: true
   prop commission, :struct, required: true
   prop event, :struct, required: true
@@ -24,8 +26,8 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
   end
 
   @impl true
-  def handle_event("open_preview", %{"key" => key, "name" => name}, socket) do
-    {:noreply, socket |> assign(previewing: %{key: key, name: name})}
+  def handle_event("open_preview", %{"key" => key, "bucket" => bucket}, socket) do
+    {:noreply, socket |> assign(previewing: Uploads.get_upload!(bucket, key))}
   end
 
   @impl true
@@ -44,23 +46,45 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
     {:noreply, socket |> assign(previewing: nil)}
   end
 
+  @impl true
+  def handle_event("keydown", _, socket) do
+    {:noreply, socket}
+  end
+
   def render(assigns) do
     ~F"""
     <div class="shadow-lg bg-base-200 rounded-box border-2">
       <div class={"modal", "modal-open": @previewing} :on-click="close_preview">
         {#if @previewing}
           <div :on-window-keydown="keydown">
-            <img
-              :on-click="nothing"
-              alt={@previewing.name}
-              src={Routes.commission_attachment_path(
-                Endpoint,
-                :show,
-                @studio.handle,
-                @commission.public_id,
-                @previewing.key
-              )}
-            />
+            {#if Uploads.image?(@previewing)}
+              <img
+                :on-click="nothing"
+                class="p-10"
+                alt={@previewing.name}
+                src={Routes.commission_attachment_path(
+                  Endpoint,
+                  :show,
+                  @studio.handle,
+                  @commission.public_id,
+                  @previewing.key
+                )}
+              />
+            {#else}
+              <video
+                class="p-10"
+                alt={@previewing.name}
+                type={@previewing.type}
+                controls="controls"
+                src={Routes.commission_attachment_path(
+                  Endpoint,
+                  :show,
+                  @studio.handle,
+                  @commission.public_id,
+                  @previewing.key
+                )}
+              />
+            {/if}
           </div>
           <button
             :on-click="close_preview"
@@ -105,9 +129,13 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
               <li class="h-32 w-32">
                 <button
                   :on-click="open_preview"
+                  class="relative"
                   phx-value-key={attachment.upload.key}
-                  phx-value-name={attachment.upload.name}
+                  phx-value-bucket={attachment.upload.bucket}
                 >
+                  {#if Uploads.video?(attachment.upload)}
+                    <i class="fas fa-play text-4xl absolute top-10 left-10" />
+                  {/if}
                   <img
                     alt={attachment.upload.name}
                     title={attachment.upload.name}
@@ -137,7 +165,7 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
                 )}
               >
                 <div title={attachment.upload.name} class="border-2 p-4 m-1">
-                  <i class="float-right fas fa-file-download" /> <p class="truncate">{attachment.upload.name}</p>
+                  <i class="float-right fas fa-file-download" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
                 </div>
               </a>
             {/for}
