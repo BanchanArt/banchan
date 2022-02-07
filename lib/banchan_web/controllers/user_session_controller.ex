@@ -12,8 +12,8 @@ defmodule BanchanWeb.UserSessionController do
     if user = Accounts.get_user_by_email_and_password(email, password) do
       if user.totp_activated == true && !NimbleTOTP.valid?(user.totp_secret, mfa_token) do
         conn
-          |> put_flash(:error, "Invalid email, password, or MFA token")
-          |> LiveView.Controller.live_render(BanchanWeb.LoginLive)
+        |> put_flash(:error, "Invalid email, password, or MFA token")
+        |> LiveView.Controller.live_render(BanchanWeb.LoginLive)
       else
         UserAuth.log_in_user(conn, user, user_params)
       end
