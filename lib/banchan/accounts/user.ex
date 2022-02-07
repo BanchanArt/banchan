@@ -61,6 +61,21 @@ defmodule Banchan.Accounts.User do
     |> validate_password(opts)
   end
 
+  @doc """
+  The same as above, but used for testing purposes only!
+
+  This is used so that MFA settings can be set instantly.
+  """
+  def registration_test_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:handle, :email, :password, :totp_secret, :totp_activated])
+    |> validate_handle_unique(:handle)
+    |> unique_constraint(:handle)
+    |> validate_email()
+    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_password(opts)
+  end
+
   @spec login_changeset(
           {map, map}
           | %{

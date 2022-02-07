@@ -4,7 +4,8 @@ defmodule BanchanWeb.UserSessionControllerTest do
   import Banchan.AccountsFixtures
 
   setup do
-    %{user: user_fixture()}
+    mfa_attrs = %{totp_secret: NimbleTOTP.secret(), totp_activated: true}
+    %{user: user_fixture(), user_mfa: user_fixture(mfa_attrs)}
   end
 
   describe "GET /users/log_in" do
@@ -26,7 +27,32 @@ defmodule BanchanWeb.UserSessionControllerTest do
     test "logs the user in", %{conn: conn, user: user} do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
-          "user" => %{"email" => user.email, "password" => valid_user_password()}
+          "user" => %{
+            "email" => user.email,
+            "password" => valid_user_password(),
+            "mfa_token" => nil
+          }
+        })
+
+      assert get_session(conn, :user_token)
+      assert redirected_to(conn) =~ "/"
+
+      # Now do a logged in request and assert on the menu
+      conn = get(conn, "/")
+      response = html_response(conn, 200)
+      assert response =~ user.handle
+      assert response =~ "Settings"
+      assert response =~ "Log out"
+    end
+
+    test "logs the user in with MFA", %{conn: conn, user_mfa: user} do
+      conn =
+        post(conn, Routes.user_session_path(conn, :create), %{
+          "user" => %{
+            "email" => user.email,
+            "password" => valid_user_password(),
+            "mfa_token" => NimbleTOTP.verification_code(user.totp_secret)
+          }
         })
 
       assert get_session(conn, :user_token)
@@ -46,7 +72,8 @@ defmodule BanchanWeb.UserSessionControllerTest do
           "user" => %{
             "email" => user.email,
             "password" => valid_user_password(),
-            "remember_me" => "true"
+            "remember_me" => "true",
+            "mfa_token" => nil
           }
         })
 
@@ -61,7 +88,8 @@ defmodule BanchanWeb.UserSessionControllerTest do
         |> post(Routes.user_session_path(conn, :create), %{
           "user" => %{
             "email" => user.email,
-            "password" => valid_user_password()
+            "password" => valid_user_password(),
+            "mfa_token" => nil
           }
         })
 
@@ -71,12 +99,16 @@ defmodule BanchanWeb.UserSessionControllerTest do
     test "emits error message with invalid credentials", %{conn: conn, user: user} do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
-          "user" => %{"email" => user.email, "password" => "invalid_password"}
+          "user" => %{
+            "email" => user.email,
+            "password" => "invalid_password",
+            "mfa_token" => nil
+          }
         })
 
       response = html_response(conn, 200)
       assert response =~ "Log in</h1>"
-      assert response =~ "Invalid email or password"
+      assert response =~ "Invalid email, password, or MFA token"
     end
   end
 

@@ -105,6 +105,17 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  The same as above, but used for testing purposes only!
+
+  This is used so that MFA settings can be set instantly.
+  """
+  def register_user_test(attrs) do
+    %User{}
+    |> User.registration_test_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
   Register an admin.
   """
   def register_admin(attrs) do
@@ -330,7 +341,7 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
-  Generates a new TOTP secret for a user.
+  Deactivates a user's TOTP secret.
 
   ## Examples
 
@@ -356,7 +367,7 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
-  Generates a new TOTP secret for a user.
+  Activates a TOTP secret for a user.
 
   ## Examples
 
