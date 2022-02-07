@@ -329,6 +329,62 @@ defmodule Banchan.Accounts do
     end
   end
 
+  @doc """
+  Generates a new TOTP secret for a user.
+
+  ## Examples
+
+      iex> deactivate_totp(user)
+      {:ok, %User{}}
+
+      iex> deactivate_totp(user)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def deactivate_totp(user) do
+    changeset =
+      user
+      |> User.totp_secret_changeset(%{totp_secret: nil, totp_activated: false})
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, changeset)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} -> {:ok, user}
+      {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  @doc """
+  Generates a new TOTP secret for a user.
+
+  ## Examples
+
+      iex> activate_totp(user, token)
+      {:ok, %User{}}
+
+      iex> activate_totp(user, token)
+      {:invalid_token, %Ecto.Changeset{}}
+
+  """
+  def activate_totp(user, token) do
+    changeset =
+      user
+      |> User.totp_secret_changeset(%{totp_activated: true})
+
+    if NimbleTOTP.valid?(user.totp_secret, token) do
+      Ecto.Multi.new()
+      |> Ecto.Multi.update(:user, changeset)
+      |> Repo.transaction()
+      |> case do
+        {:ok, %{user: user}} -> {:ok, user}
+        {:error, :user, changeset, _} -> {:error, changeset}
+      end
+    else
+      {:invalid_token, changeset}
+    end
+  end
+
   ## Session
 
   @doc """

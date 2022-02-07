@@ -195,17 +195,6 @@ defmodule Banchan.Accounts.User do
   end
 
   @doc """
-  Activates the TOTP token upon validation of the given TOTP token.
-  """
-  def activate_totp(user, token) do
-    if NimbleTOTP.valid?(user.totp_secret, token) do
-      change(user, totp_activated: true)
-    else
-      {:error, :invalid_token}
-    end
-  end
-
-  @doc """
   Confirms the account by setting `confirmed_at`.
   """
   def confirm_changeset(user) do
