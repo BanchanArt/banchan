@@ -61,6 +61,7 @@ defmodule BanchanWeb.Router do
     live "/dashboard", DashboardLive, :index
 
     live "/settings", SettingsLive, :edit
+    live "/mfa_setup", SetupMfaLive, :edit
 
     get "/settings/confirm_email/:token", UserSettingsController, :confirm_email
     get "/settings/refresh_session/:return_to", UserSessionController, :refresh_session

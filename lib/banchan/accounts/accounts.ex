@@ -105,6 +105,17 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  The same as above, but used for testing purposes only!
+
+  This is used so that MFA settings can be set instantly.
+  """
+  def register_user_test(attrs) do
+    %User{}
+    |> User.registration_test_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
   Register an admin.
   """
   def register_admin(attrs) do
@@ -298,6 +309,90 @@ defmodule Banchan.Accounts do
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  @doc """
+  Generates a new TOTP secret for a user.
+
+  ## Examples
+
+      iex> generate_totp_secret(user)
+      {:ok, %User{}}
+
+      iex> generate_totp_secret(user)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def generate_totp_secret(user) do
+    secret = NimbleTOTP.secret()
+
+    changeset =
+      user
+      |> User.totp_secret_changeset(%{totp_secret: secret})
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, changeset)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} -> {:ok, user}
+      {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  @doc """
+  Deactivates a user's TOTP secret.
+
+  ## Examples
+
+      iex> deactivate_totp(user)
+      {:ok, %User{}}
+
+      iex> deactivate_totp(user)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def deactivate_totp(user) do
+    changeset =
+      user
+      |> User.totp_secret_changeset(%{totp_secret: nil, totp_activated: false})
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, changeset)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} -> {:ok, user}
+      {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  @doc """
+  Activates a TOTP secret for a user.
+
+  ## Examples
+
+      iex> activate_totp(user, token)
+      {:ok, %User{}}
+
+      iex> activate_totp(user, token)
+      {:invalid_token, %Ecto.Changeset{}}
+
+  """
+  def activate_totp(user, token) do
+    changeset =
+      user
+      |> User.totp_secret_changeset(%{totp_activated: true})
+
+    if NimbleTOTP.valid?(user.totp_secret, token) do
+      Ecto.Multi.new()
+      |> Ecto.Multi.update(:user, changeset)
+      |> Repo.transaction()
+      |> case do
+        {:ok, %{user: user}} -> {:ok, user}
+        {:error, :user, changeset, _} -> {:error, changeset}
+      end
+    else
+      {:invalid_token, changeset}
     end
   end
 

@@ -18,6 +18,8 @@ defmodule Banchan.Accounts.User do
     field :name, :string
     field :bio, :string
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
+    field :totp_secret, :binary
+    field :totp_activated, :boolean
 
     belongs_to :header_img, Upload, on_replace: :nilify
     belongs_to :pfp_img, Upload, on_replace: :nilify
@@ -52,6 +54,21 @@ defmodule Banchan.Accounts.User do
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:handle, :email, :password])
+    |> validate_handle_unique(:handle)
+    |> unique_constraint(:handle)
+    |> validate_email()
+    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_password(opts)
+  end
+
+  @doc """
+  The same as above, but used for testing purposes only!
+
+  This is used so that MFA settings can be set instantly.
+  """
+  def registration_test_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:handle, :email, :password, :totp_secret, :totp_activated])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
     |> validate_email()
@@ -176,6 +193,20 @@ defmodule Banchan.Accounts.User do
     |> cast(attrs, [:password])
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
+  end
+
+  @doc """
+  User changeset for setting a TOTP token.
+
+  Will fail if current TOTP is activated.
+  """
+  def totp_secret_changeset(user, attrs) do
+    if user.totp_activated == true do
+      {:error, :totp_activated}
+    end
+
+    user
+    |> cast(attrs, [:totp_secret, :totp_activated])
   end
 
   @doc """
