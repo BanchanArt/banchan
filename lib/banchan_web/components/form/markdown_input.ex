@@ -19,7 +19,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
 
   @impl true
   def update(assigns, socket) do
-    {:ok, assign(assign(socket, assigns), markdown: "")}
+    {:ok, socket |> assign(assigns) |> assign(markdown: "")}
   end
 
   @impl true
