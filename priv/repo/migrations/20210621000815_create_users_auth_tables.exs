@@ -24,6 +24,8 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :roles, {:array, :string}, default: [], null: false
       add :name, :string
       add :bio, :string
+      add :totp_secret, :binary
+      add :totp_activated, :boolean
       add :header_img_id, references(:uploads, on_delete: :nilify_all)
       add :pfp_img_id, references(:uploads, on_delete: :nilify_all)
       add :pfp_thumb_id, references(:uploads, on_delete: :nilify_all)
