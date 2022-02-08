@@ -146,7 +146,6 @@ defmodule Banchan.Commissions do
 
   defp insert_commission(actor, studio, offering, line_items, attachments, attrs) do
     %Commission{
-      public_id: Commission.gen_public_id(),
       studio: studio,
       offering: offering,
       client: actor,

@@ -8,7 +8,7 @@ defmodule Banchan.Commissions.Commission do
   alias Banchan.Commissions.Common
 
   schema "commissions" do
-    field :public_id, :string
+    field :public_id, :string, autogenerate: {Common, :gen_public_id, []}
     field :title, :string
     field :description, :string
     field :tos_ok, :boolean, virtual: true
@@ -27,14 +27,6 @@ defmodule Banchan.Commissions.Commission do
     belongs_to :client, Banchan.Accounts.User
 
     timestamps()
-  end
-
-  def gen_public_id do
-    random_string(10)
-  end
-
-  def random_string(length) do
-    :crypto.strong_rand_bytes(length) |> Base.url_encode64() |> binary_part(0, length)
   end
 
   @doc false

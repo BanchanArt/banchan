@@ -9,6 +9,8 @@ defmodule Banchan.Commissions.Event do
   alias Banchan.Commissions.{Commission, Common, EventAttachment}
 
   schema "commission_events" do
+    field :public_id, :string, autogenerate: {Common, :gen_public_id, []}
+
     field :type, Ecto.Enum,
       values: [
         # No added/edited/removed variant because these are mutable.

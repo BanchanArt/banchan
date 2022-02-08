@@ -39,6 +39,11 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:noreply, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def handle_info(%{event: "new_events", payload: events}, socket) do
     events = socket.assigns.commission.events ++ events
     events = events |> Enum.sort_by(& &1.inserted_at)
@@ -153,7 +158,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
         <div class="commission grid gap-4">
           <div class="col-span-10">
             <div class="p-4">
-              <Timeline studio={@studio} commission={@commission} />
+              <Timeline uri={@uri} studio={@studio} commission={@commission} />
             </div>
             <div class="p4">
               <CommentBox id="comment-box" commission={@commission} actor={@current_user} />

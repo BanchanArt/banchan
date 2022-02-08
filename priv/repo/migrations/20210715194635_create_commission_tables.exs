@@ -52,6 +52,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     create unique_index(:commissions, [:public_id, :studio_id])
 
     create table(:commission_events) do
+      add :public_id, :string, null: false
       add :type, :citext, null: false
       add :text, :text
       add :amount, :money_with_currency

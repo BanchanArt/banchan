@@ -11,6 +11,7 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
   prop studio, :struct, required: true
   prop commission, :struct, required: true
   prop event, :struct, required: true
+  prop uri, :string, required: true
 
   data previewing, :struct
 
@@ -24,23 +25,30 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
 
   @impl true
   def handle_event("open_preview", %{"key" => key, "bucket" => bucket}, socket) do
-    MediaPreview.open("preview-#{socket.assigns.event.id}", Uploads.get_upload!(bucket, key))
+    MediaPreview.open(
+      "preview-#{socket.assigns.event.public_id}",
+      Uploads.get_upload!(bucket, key)
+    )
+
     {:noreply, socket}
+  end
+
+  defp replace_fragment(uri, event) do
+    URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
   end
 
   def render(assigns) do
     ~F"""
     <div class="shadow-lg bg-base-200 rounded-box border-2">
-      {!-- # TODO: use unique comment ID instead of internal db id --}
-      <MediaPreview id={"preview-#{@event.id}"} commission={@commission} studio={@studio} />
+      <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} studio={@studio} />
       <div class="text-sm p-2">
         <a href={"/denizens/#{@event.actor.handle}"}>
           <img
             class="w-6 inline-block mask mask-circle"
             src={Routes.profile_image_path(Endpoint, :thumb, @event.actor.handle)}
           />
-          <strong>{@event.actor.handle}</strong></a>
-        commented {fmt_time(@event.inserted_at)}.
+          <strong class="hover:underline">{@event.actor.handle}</strong></a>
+        commented <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.
       </div>
 
       <hr>

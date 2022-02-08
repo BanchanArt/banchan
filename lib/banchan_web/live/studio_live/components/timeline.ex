@@ -11,6 +11,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
 
   prop studio, :struct, required: true
   prop commission, :any, required: true
+  prop uri, :string, required: true
 
   def fmt_time(time) do
     Timex.format!(time, "{relative}", :relative)
@@ -29,9 +30,14 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
         {#if List.first(chunk).type == :comment}
           <div class="flex flex-col space-y-4">
             {#for event <- chunk}
-              <article class="timeline-item">
-                {!-- # TODO: IMPORTANT: add a unique public id to events --}
-                <Comment id={"event-#{event.id}"} studio={@studio} event={event} commission={@commission} />
+              <article class="timeline-item" id={"event-#{event.public_id}"}>
+                <Comment
+                  id={"event-#{event.public_id}"}
+                  uri={@uri}
+                  studio={@studio}
+                  event={event}
+                  commission={@commission}
+                />
               </article>
             {/for}
           </div>
@@ -40,24 +46,24 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
             {#for event <- chunk}
               {#case event.type}
                 {#match :line_item_added}
-                  <TimelineItem icon="➕" event={event}>
-                    added <strong>{event.text}</strong> ({Money.to_string(event.amount)}) {fmt_time(event.inserted_at)}.
+                  <TimelineItem uri={@uri} icon="➕" event={event}>
+                    added <strong>{event.text}</strong> ({Money.to_string(event.amount)})
                   </TimelineItem>
                 {#match :line_item_removed}
-                  <TimelineItem icon="✕" event={event}>
-                    removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))}) {fmt_time(event.inserted_at)}.
+                  <TimelineItem uri={@uri} icon="✕" event={event}>
+                    removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))})
                   </TimelineItem>
                 {#match :payment_request}
-                  <TimelineItem icon="$" event={event}>
-                    requested payment of {Money.to_string(event.amount)} {fmt_time(event.inserted_at)}.
+                  <TimelineItem uri={@uri} icon="$" event={event}>
+                    requested payment of {Money.to_string(event.amount)}
                   </TimelineItem>
                 {#match :payment_processed}
-                  <TimelineItem icon="$" event={event}>
-                    paid {Money.to_string(event.amount)} {fmt_time(event.inserted_at)}.
+                  <TimelineItem uri={@uri} icon="$" event={event}>
+                    paid {Money.to_string(event.amount)}
                   </TimelineItem>
                 {#match :status}
-                  <TimelineItem icon="S" event={event}>
-                    changed the status to <strong>{Common.humanize_status(event.status)}</strong> {fmt_time(event.inserted_at)}.
+                  <TimelineItem uri={@uri} icon="S" event={event}>
+                    changed the status to <strong>{Common.humanize_status(event.status)}</strong>
                   </TimelineItem>
               {/case}
             {/for}
