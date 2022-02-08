@@ -158,7 +158,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
         <div class="commission grid gap-4">
           <div class="col-span-10">
             <div class="p-4">
-              <Timeline uri={@uri} studio={@studio} commission={@commission} />
+              <Timeline uri={@uri} studio={@studio} commission={@commission} current_user={@current_user} />
             </div>
             <div class="p4">
               <CommentBox id="comment-box" commission={@commission} actor={@current_user} />

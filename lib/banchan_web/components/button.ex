@@ -8,6 +8,7 @@ defmodule BanchanWeb.Components.Button do
   prop label, :string
   prop value, :any
   prop click, :event, required: true
+  prop class, :css_class
 
   slot default
 
@@ -20,6 +21,7 @@ defmodule BanchanWeb.Components.Button do
         "rounded-full",
         "py-1",
         "px-5 m-1",
+        @class,
         "btn-primary": @is_primary,
         "btn-secondary": !@is_primary
       }
