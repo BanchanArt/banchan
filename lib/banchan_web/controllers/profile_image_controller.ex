@@ -68,5 +68,4 @@ defmodule BanchanWeb.ProfileImageController do
     |> resp(404, "")
     |> send_resp()
   end
-
 end
