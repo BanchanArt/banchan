@@ -39,9 +39,9 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :title, :string, null: false
       add :description, :text
       add :status, :string, null: false
-      add :studio_id, references(:studios, on_delete: :nothing)
-      add :client_id, references(:users, on_delete: :nothing)
-      add :offering_id, references(:offerings, on_delete: :nothing)
+      add :studio_id, references(:studios, on_delete: :nilify_all)
+      add :client_id, references(:users, on_delete: :nilify_all)
+      add :offering_id, references(:offerings, on_delete: :nilify_all)
 
       timestamps()
     end
@@ -71,7 +71,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :name, :string, null: false
       add :description, :text, null: false
       add :commission_id, references(:commissions, on_delete: :delete_all), null: false
-      add :offering_option_id, references(:offering_options, on_delete: :nothing)
+      add :offering_option_id, references(:offering_options, on_delete: :nilify_all)
       add :sticky, :boolean
 
       timestamps()
@@ -79,5 +79,16 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
 
     create index(:line_items, [:commission_id])
     create index(:line_items, [:offering_option_id])
+
+    create table(:event_attachments) do
+      add :event_id, references(:commission_events, on_delete: :delete_all)
+      add :upload_id, references(:uploads, on_delete: :delete_all)
+      add :thumbnail_id, references(:uploads, on_delete: :nilify_all)
+
+      timestamps()
+    end
+
+    create index(:event_attachments, [:event_id])
+    create index(:event_attachments, [:upload_id])
   end
 end

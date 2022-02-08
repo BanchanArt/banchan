@@ -6,10 +6,10 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
 
   alias Banchan.Commissions.Common
 
-  alias BanchanWeb.Components.Card
-  alias BanchanWeb.Endpoint
+  alias BanchanWeb.StudioLive.Components.Comment
   alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
 
+  prop studio, :struct, required: true
   prop commission, :any, required: true
 
   def fmt_time(time) do
@@ -27,19 +27,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
     <div class="timeline">
       {#for chunk <- event_chunks}
         {#if List.first(chunk).type == :comment}
-          <div>
+          <div class="flex flex-col space-y-4">
             {#for event <- chunk}
               <article class="timeline-item">
-                <Card>
-                  <:header>
-                    <img class="w-6 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
-                    {event.actor.handle} commented {fmt_time(event.inserted_at)}.
-                  </:header>
-
-                  <div class="content">
-                    {raw(fmt_md(event.text))}
-                  </div>
-                </Card>
+                {!-- TODO: IMPORTANT: add a unique public id to events --}
+                <Comment id={"event-#{event.id}"} studio={@studio} event={event} commission={@commission} />
               </article>
             {/for}
           </div>
@@ -66,14 +58,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                 {#match :status}
                   <TimelineItem icon="S" event={event}>
                     changed the status to <strong>{Common.humanize_status(event.status)}</strong> {fmt_time(event.inserted_at)}.
-                  </TimelineItem>
-                {#match :attachment_added}
-                  <TimelineItem icon="📎" event={event}>
-                    added an attachment {fmt_time(event.inserted_at)}.
-                  </TimelineItem>
-                {#match :attachment_removed}
-                  <TimelineItem icon="␡" event={event}>
-                    removed an attachment {fmt_time(event.inserted_at)}.
                   </TimelineItem>
               {/case}
             {/for}

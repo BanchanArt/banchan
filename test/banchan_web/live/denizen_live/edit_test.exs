@@ -66,7 +66,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
       rendered =
         page_live
-        |> element("form")
+        |> element(".profile-info")
         |> render_change(%{
           user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
         })
@@ -86,7 +86,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
       rendered =
         page_live
-        |> element("form")
+        |> element(".profile-info")
         |> render_change(%{
           user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
         })
@@ -112,7 +112,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
       rendered =
         page_live
-        |> element("form")
+        |> element(".profile-info")
         |> render_change(%{
           user: %{
             handle: "bad handle",
@@ -137,7 +137,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
         live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
 
       page_live
-      |> element("form")
+      |> element(".profile-info")
       |> render_submit(%{
         user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
       })

@@ -32,7 +32,10 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       )
 
     BanchanWeb.Endpoint.subscribe("commission:#{commission.public_id}")
-    {:ok, assign(socket, commission: commission)}
+
+    {:ok,
+     socket
+     |> assign(commission: commission)}
   end
 
   @impl true
@@ -149,9 +152,12 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
         <hr>
         <div class="commission grid gap-4">
           <div class="col-span-10">
-            <Timeline id="timeline" commission={@commission} />
-            <hr>
-            <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
+            <div class="p-4">
+              <Timeline id="timeline" studio={@studio} commission={@commission} />
+            </div>
+            <div class="p4">
+              <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
+            </div>
           </div>
           <div class="col-span-2 col-end-13 p-6">
             <div id="sidebar">

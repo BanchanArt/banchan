@@ -3,7 +3,10 @@ defmodule Banchan.Accounts.User do
 
   use Ecto.Schema
   import Ecto.Changeset
+
   alias Banchan.Identities
+
+  alias Banchan.Uploads.Upload
 
   @derive {Inspect, except: [:password]}
   schema "users" do
@@ -14,9 +17,11 @@ defmodule Banchan.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :name, :string
     field :bio, :string
-    field :header_img, :string
-    field :pfp_img, :string
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
+
+    belongs_to :header_img, Upload, on_replace: :nilify
+    belongs_to :pfp_img, Upload, on_replace: :nilify
+    belongs_to :pfp_thumb, Upload, on_replace: :nilify
 
     many_to_many :studios, Banchan.Studios.Studio, join_through: "users_studios"
 
@@ -129,7 +134,7 @@ defmodule Banchan.Accounts.User do
   """
   def profile_changeset(user, attrs \\ %{}) do
     user
-    |> cast(attrs, [:handle, :name, :bio, :header_img, :pfp_img])
+    |> cast(attrs, [:handle, :name, :bio])
     |> validate_required([:handle])
     |> validate_handle()
     |> validate_name()

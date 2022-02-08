@@ -48,7 +48,6 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   @impl true
   def handle_info({"save", offering}, socket) do
     case Offerings.new_offering(socket.assigns.studio, offering) do
-      # TODO: Redirect to the new offering itself.
       {:ok, _offering} ->
         put_flash(socket, :info, "Offering created.")
 

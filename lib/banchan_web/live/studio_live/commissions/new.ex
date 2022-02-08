@@ -8,13 +8,12 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   alias Banchan.Commissions.{Commission, LineItem}
   alias Banchan.Offerings
 
-  alias BanchanWeb.StudioLive.Components.StudioLayout
-
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.Commissions.{Attachments, Summary}
+  alias BanchanWeb.StudioLive.Components.Commissions.Summary
+  alias BanchanWeb.StudioLive.Components.StudioLayout
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
@@ -43,14 +42,21 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
         end)
 
       {:ok,
-       assign(socket,
+       socket
+       |> assign(
          changeset: Commission.changeset(%Commission{}, %{}),
          line_items: default_items,
          offering: offering,
          terms: terms
+       )
+       # TODO: move max file size somewhere configurable.
+       # TODO: constrain :accept?
+       |> allow_upload(:attachment,
+         accept: :any,
+         max_entries: 10,
+         max_file_size: 25_000_000
        )}
     else
-      # TODO: Maybe show this on this page itself?
       socket =
         put_flash(
           socket,
@@ -63,6 +69,32 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
          to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
        )}
     end
+  end
+
+  @impl true
+  def handle_event("cancel_upload", %{"ref" => ref}, socket) do
+    {:noreply, cancel_upload(socket, :attachment, ref)}
+  end
+
+  @impl true
+  def handle_event("change", %{"_target" => ["attachment"]}, socket) do
+    uploads = socket.assigns.uploads
+
+    {:noreply,
+     Enum.reduce(uploads.attachment.entries, socket, fn entry, socket ->
+       case upload_errors(uploads.attachment, entry) do
+         [f | _] ->
+           socket
+           |> cancel_upload(:attachment, entry.ref)
+           |> put_flash(
+             :error,
+             "File `#{entry.client_name}` upload failed: #{UploadInput.error_to_string(f)}"
+           )
+
+         [] ->
+           socket
+       end
+     end)}
   end
 
   @impl true
@@ -113,11 +145,23 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   @impl true
   def handle_event("submit", %{"commission" => commission}, socket) do
+    attachments =
+      consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
+        {:ok,
+         Commissions.make_attachment!(
+           socket.assigns.current_user,
+           path,
+           entry.client_type,
+           entry.client_name
+         )}
+      end)
+
     case Commissions.create_commission(
            socket.assigns.current_user,
            socket.assigns.studio,
            socket.assigns.offering,
            socket.assigns.line_items,
+           attachments,
            commission
          ) do
       {:ok, created_commission} ->
@@ -184,6 +228,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                   class="w-full"
                   opts={required: true, placeholder: "Here's what I'd like..."}
                 />
+                <UploadInput upload={@uploads.attachment} cancel="cancel_upload" />
               </div>
               <div class="content block">
                 <h3>Terms and Conditions</h3>
@@ -207,9 +252,6 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 line_items={@line_items}
                 offering={@offering}
               />
-            </div>
-            <div class="block sidebar-box pt-6">
-              <Attachments id="commission-attachments" />
             </div>
           </div>
         </div>

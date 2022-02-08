@@ -51,3 +51,6 @@ npm-debug.log
 
 # Ignore self-signed cert
 priv/cert/
+
+# Ignore local uploads
+/priv/uploads

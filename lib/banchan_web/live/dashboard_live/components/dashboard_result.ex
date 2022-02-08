@@ -32,7 +32,10 @@ defmodule BanchanWeb.DashboardLive.Components.DashboardResult do
         to={Routes.denizen_show_path(Endpoint, :show, @result.client_handle)}
         class="font-bold hover:text-secondary"
       >
-        <img class="w-4 inline-block" src={Routes.static_path(Endpoint, "/images/kat-chibi.jpeg")}>
+        <img
+          class="w-4 inline-block mask mask-circle"
+          src={Routes.profile_image_path(Endpoint, :thumb, @result.client_handle)}
+        />
         {@result.client_handle}
       </LiveRedirect>
       {Timex.format!(@result.submitted_at, "{relative}", :relative)}.

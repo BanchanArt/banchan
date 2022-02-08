@@ -7,9 +7,22 @@ defmodule Banchan.Accounts do
 
   alias Banchan.Accounts.{User, UserNotifier, UserToken}
   alias Banchan.Repo
+  alias Banchan.Uploads
+
   alias BanchanWeb.UserAuth
 
   ## Database getters
+
+  @doc """
+  Gets a single user.
+  Raises `Ecto.NoResultsError` if the User does not exist.
+  ## Examples
+      iex> get_user!(123)
+      %User{}
+      iex> get_user!(456)
+      ** (Ecto.NoResultsError)
+  """
+  def get_user!(id), do: Repo.get!(User, id)
 
   @doc """
   Gets a user by email.
@@ -24,7 +37,9 @@ defmodule Banchan.Accounts do
 
   """
   def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
+    Repo.one(
+      from u in User, where: u.email == ^email, preload: [:pfp_img, :pfp_thumb, :header_img]
+    )
   end
 
   @doc """
@@ -40,7 +55,11 @@ defmodule Banchan.Accounts do
 
   """
   def get_user_by_handle!(handle) when is_binary(handle) do
-    Repo.get_by!(User, handle: handle)
+    Repo.one!(
+      from u in User,
+        where: u.handle == ^handle,
+        preload: [:pfp_img, :pfp_thumb, :header_img]
+    )
   end
 
   @doc """
@@ -57,25 +76,13 @@ defmodule Banchan.Accounts do
   """
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
+    user =
+      Repo.one(
+        from u in User, where: u.email == ^email, preload: [:pfp_img, :pfp_thumb, :header_img]
+      )
+
     if User.valid_password?(user, password), do: user
   end
-
-  @doc """
-  Gets a single user.
-
-  Raises `Ecto.NoResultsError` if the User does not exist.
-
-  ## Examples
-
-      iex> get_user!(123)
-      %User{}
-
-      iex> get_user!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_user!(id), do: Repo.get!(User, id)
 
   ## User registration
 
@@ -443,5 +450,33 @@ defmodule Banchan.Accounts do
         user: user
       }
     )
+  end
+
+  def update_user_pfp(%User{} = user, src) do
+    mog =
+      Mogrify.open(src)
+      |> Mogrify.format("jpeg")
+      |> Mogrify.gravity("Center")
+      |> Mogrify.resize_to_fill("512x512")
+      |> Mogrify.save(in_place: true)
+
+    pfp = Uploads.save_file!(user, mog.path, "image/jpeg", "profile.jpg")
+    File.rm!(mog.path)
+
+    mog =
+      Mogrify.open(src)
+      |> Mogrify.format("jpeg")
+      |> Mogrify.gravity("Center")
+      |> Mogrify.resize_to_fill("64x64")
+      |> Mogrify.save(in_place: true)
+
+    thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")
+    File.rm!(mog.path)
+
+    user
+    |> User.changeset(%{})
+    |> Ecto.Changeset.put_assoc(:pfp_img, pfp)
+    |> Ecto.Changeset.put_assoc(:pfp_thumb, thumb)
+    |> Repo.update()
   end
 end

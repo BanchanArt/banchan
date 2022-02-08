@@ -7,10 +7,12 @@ defmodule Banchan.Commissions do
   alias Banchan.Repo
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions.{Commission, Event, LineItem}
+  alias Banchan.Commissions.{Commission, Event, EventAttachment, LineItem}
   alias Banchan.Offerings
   alias Banchan.Offerings.OfferingOption
   alias Banchan.Studios.Studio
+  alias Banchan.Uploads
+  alias Banchan.Uploads.Upload
 
   def list_commission_data_for_dashboard(%User{} = user, page, order \\ nil) do
     main_dashboard_query(user)
@@ -88,7 +90,11 @@ defmodule Banchan.Commissions do
         where:
           c.studio_id == ^studio.id and c.public_id == ^public_id and
             (^current_user_member? or c.client_id == ^current_user.id),
-        preload: [events: [:actor], line_items: [:option], offering: [:options]]
+        preload: [
+          events: [:actor, attachments: [:upload, :thumbnail]],
+          line_items: [:option],
+          offering: [:options]
+        ]
     )
   end
 
@@ -104,7 +110,7 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_commission(actor, studio, offering, line_items, attrs \\ %{}) do
+  def create_commission(actor, studio, offering, line_items, attachments, attrs \\ %{}) do
     {:ok, ret} =
       Repo.transaction(fn ->
         available_slot_count = Offerings.offering_available_slots(offering)
@@ -120,7 +126,7 @@ defmodule Banchan.Commissions do
             {:error, :no_proposals_available}
 
           true ->
-            insert_commission(actor, studio, offering, line_items, attrs)
+            insert_commission(actor, studio, offering, line_items, attachments, attrs)
         end
       end)
 
@@ -138,7 +144,7 @@ defmodule Banchan.Commissions do
     end
   end
 
-  defp insert_commission(actor, studio, offering, line_items, attrs) do
+  defp insert_commission(actor, studio, offering, line_items, attachments, attrs) do
     %Commission{
       public_id: Commission.gen_public_id(),
       studio: studio,
@@ -149,7 +155,8 @@ defmodule Banchan.Commissions do
         %{
           actor: actor,
           type: :comment,
-          text: Map.get(attrs, "description", "")
+          text: Map.get(attrs, "description", ""),
+          attachments: attachments
         }
       ]
     }
@@ -165,7 +172,7 @@ defmodule Banchan.Commissions do
           |> Commission.changeset(%{status: status})
           |> Repo.update()
 
-        {:ok, event} = create_event(:status, actor, commission, %{status: status})
+        {:ok, event} = create_event(:status, actor, commission, [], %{status: status})
 
         {:ok, {commission, [event]}}
       end)
@@ -206,7 +213,7 @@ defmodule Banchan.Commissions do
 
           {:ok, commission} ->
             # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_added, actor, commission, %{
+            case create_event(:line_item_added, actor, commission, [], %{
                    amount: line_item.amount,
                    text: line_item.name
                  }) do
@@ -235,7 +242,7 @@ defmodule Banchan.Commissions do
 
           {:ok, commission} ->
             # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_removed, actor, commission, %{
+            case create_event(:line_item_removed, actor, commission, [], %{
                    amount: line_item.amount,
                    text: line_item.name
                  }) do
@@ -318,9 +325,14 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_event(type, %User{} = actor, %Commission{} = commission, attrs \\ %{})
+  def create_event(type, %User{} = actor, %Commission{} = commission, attachments, attrs \\ %{})
       when is_atom(type) do
-    %Event{type: type, commission: commission, actor: actor}
+    %Event{
+      type: type,
+      commission: commission,
+      actor: actor,
+      attachments: attachments
+    }
     |> Event.changeset(attrs)
     |> Repo.insert()
   end
@@ -370,5 +382,64 @@ defmodule Banchan.Commissions do
   """
   def change_event(%Event{} = event, attrs \\ %{}) do
     Event.changeset(event, attrs)
+  end
+
+  # This one expects binaries for everything because it looks everything up in one fell swoop.
+  def get_attachment_if_allowed!(studio, commission, key, user) do
+    Repo.one!(
+      from ea in EventAttachment,
+        join: s in Studio,
+        join: ul in Upload,
+        join: e in Event,
+        join: c in Commission,
+        select: ea,
+        where:
+          s.handle == ^studio and
+            c.public_id == ^commission and
+            ul.key == ^key and
+            ea.upload_id == ul.id and
+            e.id == ea.event_id and
+            e.commission_id == c.id and
+            c.studio_id == s.id and
+            (c.client_id == ^user.id or ^user.id in subquery(studio_artists_query())),
+        preload: [:upload, :thumbnail]
+    )
+  end
+
+  def make_attachment!(%User{} = user, src, type, name) do
+    upload = Uploads.save_file!(user, src, type, name)
+
+    thumbnail =
+      if Uploads.image?(upload) || Uploads.video?(upload) do
+        tmp_dir = Path.join([System.tmp_dir!(), upload.key])
+        tmp_file = Path.join([tmp_dir, name])
+        File.mkdir_p!(tmp_dir)
+        File.rename(src, tmp_file)
+
+        mog =
+          Mogrify.open(tmp_file)
+          |> Mogrify.format("jpeg")
+          |> Mogrify.gravity("Center")
+          |> Mogrify.resize_to_fill("128x128")
+          |> Mogrify.save()
+
+        final_path =
+          if Uploads.video?(upload) do
+            mog.path |> String.replace(~r/\.jpeg$/, "-0.jpeg")
+          else
+            mog.path
+          end
+
+        thumb = Uploads.save_file!(user, final_path, "image/jpeg", "thumbnail.jpg")
+        File.rm_rf!(tmp_dir)
+        File.rm!(final_path)
+
+        thumb
+      end
+
+    %EventAttachment{
+      upload: upload,
+      thumbnail: thumbnail
+    }
   end
 end

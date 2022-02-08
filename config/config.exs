@@ -20,7 +20,8 @@ import Config
 
 config :banchan,
   namespace: Banchan,
-  ecto_repos: [Banchan.Repo]
+  ecto_repos: [Banchan.Repo],
+  upload_dir: Path.expand("../priv/uploads", __DIR__)
 
 # Configures the endpoint
 config :banchan, BanchanWeb.Endpoint,

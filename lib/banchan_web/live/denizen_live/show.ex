@@ -27,7 +27,7 @@ defmodule BanchanWeb.DenizenLive.Show do
         <div class="col-span-12">
           <article class="ml-8">
             <figure class="">
-              <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
+              <img class="mask mask-circle" src={Routes.profile_image_path(Endpoint, :thumb, @user.handle)}>
             </figure>
             <h1 class="text-xl text-base-content font-bold">
               {@user.handle}
@@ -36,16 +36,8 @@ defmodule BanchanWeb.DenizenLive.Show do
             <p class="text-base text-secondary-content">
               Witty phrase here.
             </p>
-            <a
-              href="/"
-              #TODO:
-              add
-              in
-              follow
-              functionality
-              class="btn glass btn-sm text-center rounded-full px-4 py-0"
-              label="Follow"
-            >Follow</a>
+            {!-- TODO: add in follow functionality --}
+            <a href="/" class="btn glass btn-sm text-center rounded-full px-4 py-0" label="Follow">Follow</a>
           </article>
         </div>
         <nav class="tabs col-start-2 grid-cols-3 inline-grid">
@@ -68,7 +60,7 @@ defmodule BanchanWeb.DenizenLive.Show do
             About {@user.handle}
           </h2>
           <figure class="" alt="denizen ID">
-            <img src="/">
+            <img class="mask mask-circle" src={Routes.profile_image_path(Endpoint, :thumb, @user.handle)}>
           </figure>
           <div class="content">
             <p class="">Name: {@user.name}</p>

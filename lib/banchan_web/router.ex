@@ -15,7 +15,7 @@ defmodule BanchanWeb.Router do
     # NB(zkat): unsafe-eval has to be enabled because webpack does it for its internals.
     plug :put_secure_browser_headers, %{
       "content-security-policy" =>
-        "default-src 'self' 'unsafe-eval'; object-src data: 'unsafe-eval'; font-src data: 'unsafe-eval'"
+        "default-src 'self' 'unsafe-eval'; style-src data: 'self' 'unsafe-inline'; script-src data: 'self' 'unsafe-inline' 'unsafe-eval'; object-src data: 'unsafe-eval'; font-src data: 'unsafe-eval'; img-src data: 'self'"
     }
 
     plug :fetch_current_user
@@ -50,6 +50,14 @@ defmodule BanchanWeb.Router do
     live "/studios/:handle/commissions/new/:offering_type", StudioLive.Commissions.New, :new
     live "/studios/:handle/commissions/:commission_id", StudioLive.Commissions.Show, :show
 
+    get "/studios/:handle/commissions/:commission_id/attachment/:key",
+        CommissionAttachmentController,
+        :show
+
+    get "/studios/:handle/commissions/:commission_id/attachment/:key/thumbnail",
+        CommissionAttachmentController,
+        :thumbnail
+
     live "/dashboard", DashboardLive, :index
 
     live "/settings", SettingsLive, :edit
@@ -64,6 +72,10 @@ defmodule BanchanWeb.Router do
     live "/", HomeLive, :index
 
     live "/denizens/:handle", DenizenLive.Show, :show
+    get "/denizens/:handle/pfp.jpeg", ProfileImageController, :pfp
+    get "/denizens/:handle/pfp_thumb.jpeg", ProfileImageController, :thumb
+    get "/denizens/:handle/header.jpeg", ProfileImageController, :header
+
     live "/studios", StudioLive.Index, :index
     live "/studios/:handle", StudioLive.Shop, :show
     live "/studios/:handle/about", StudioLive.About, :show
