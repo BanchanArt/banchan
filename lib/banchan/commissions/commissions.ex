@@ -441,4 +441,9 @@ defmodule Banchan.Commissions do
       thumbnail: thumbnail
     }
   end
+
+  def delete_attachment!(%EventAttachment{} = event_attachment) do
+    # NOTE: This also deletes any associated uploads, because of the db ON DELETE
+    Repo.delete!(event_attachment)
+  end
 end

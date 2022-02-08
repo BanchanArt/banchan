@@ -87,8 +87,21 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
     {:noreply, socket |> assign(changeset: nil)}
   end
 
+  @impl true
+  def handle_event("remove_attachment", %{"attachment-idx" => idx}, socket) do
+    {index, ""} = Integer.parse(idx)
+    attachment = Enum.fetch!(socket.assigns.event.attachments, index)
+    Commissions.delete_attachment!(attachment)
+    new_attachments = Enum.reject(socket.assigns.event.attachments, &(&1 == attachment))
+    {:noreply, socket |> assign(event: %{socket.assigns.event | attachments: new_attachments})}
+  end
+
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
+  end
+
+  defp get_attachment_index(event, attachment) do
+    Enum.find_index(event.attachments, &(&1 == attachment))
   end
 
   def render(assigns) do
@@ -148,6 +161,16 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
                   {#if Uploads.video?(attachment.upload)}
                     <i class="fas fa-play text-4xl absolute top-10 left-10" />
                   {/if}
+                  {#if @changeset}
+                    <a
+                      href="#"
+                      :on-click="remove_attachment"
+                      phx-value-attachment-idx={get_attachment_index(@event, attachment)}
+                      class="-top-2 -right-2 absolute"
+                    >
+                      <i class="fas fa-times-circle text-2xl" />
+                    </a>
+                  {/if}
                   <img
                     alt={attachment.upload.name}
                     title={attachment.upload.name}
@@ -166,20 +189,33 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
           </ul>
           <div class="flex flex-col p-2">
             {#for attachment <- Enum.filter(@event.attachments, &(!&1.thumbnail))}
-              <a
-                target="_blank"
-                href={Routes.commission_attachment_path(
-                  Endpoint,
-                  :show,
-                  @studio.handle,
-                  @commission.public_id,
-                  attachment.upload.key
-                )}
-              >
-                <div title={attachment.upload.name} class="border-2 p-4 m-1">
-                  <i class="float-right fas fa-file-download" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
-                </div>
-              </a>
+              <div class="relative">
+                <a
+                  class="relative"
+                  target="_blank"
+                  href={Routes.commission_attachment_path(
+                    Endpoint,
+                    :show,
+                    @studio.handle,
+                    @commission.public_id,
+                    attachment.upload.key
+                  )}
+                >
+                  <div title={attachment.upload.name} class="border-2 p-4 m-1">
+                    <i class="float-right fas fa-file-download" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
+                  </div>
+                </a>
+                {#if @changeset}
+                  <a
+                    href="#"
+                    :on-click="remove_attachment"
+                    phx-value-attachment-idx={get_attachment_index(@event, attachment)}
+                    class="-top-2 -right-2 absolute"
+                  >
+                    <i class="fas fa-times-circle text-2xl" />
+                  </a>
+                {/if}
+              </div>
             {/for}
           </div>
         </div>
