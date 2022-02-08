@@ -2,7 +2,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   @moduledoc """
   Main component for the Commission Page's timeline.
   """
-  use BanchanWeb, :live_component
+  use BanchanWeb, :component
 
   alias Banchan.Commissions.Common
 
@@ -30,7 +30,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
           <div class="flex flex-col space-y-4">
             {#for event <- chunk}
               <article class="timeline-item">
-                {!-- TODO: IMPORTANT: add a unique public id to events --}
+                {!-- # TODO: IMPORTANT: add a unique public id to events --}
                 <Comment id={"event-#{event.id}"} studio={@studio} event={event} commission={@commission} />
               </article>
             {/for}

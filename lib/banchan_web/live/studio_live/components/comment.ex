@@ -6,6 +6,8 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
 
   alias Banchan.Uploads
 
+  alias BanchanWeb.StudioLive.Components.MediaPreview
+
   prop studio, :struct, required: true
   prop commission, :struct, required: true
   prop event, :struct, required: true
@@ -21,89 +23,16 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
   end
 
   @impl true
-  def update(params, socket) do
-    {:ok, socket |> assign(params) |> assign(previewing: nil)}
-  end
-
-  @impl true
   def handle_event("open_preview", %{"key" => key, "bucket" => bucket}, socket) do
-    {:noreply, socket |> assign(previewing: Uploads.get_upload!(bucket, key))}
-  end
-
-  @impl true
-  def handle_event("close_preview", _, socket) do
-    {:noreply, socket |> assign(previewing: nil)}
-  end
-
-  @impl true
-  def handle_event("nothing", _, socket) do
-    # This is used to prevent clicking on images from closing the preview.
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("keydown", %{"key" => "Escape"}, socket) do
-    {:noreply, socket |> assign(previewing: nil)}
-  end
-
-  @impl true
-  def handle_event("keydown", _, socket) do
+    MediaPreview.open("preview-#{socket.assigns.event.id}", Uploads.get_upload!(bucket, key))
     {:noreply, socket}
   end
 
   def render(assigns) do
     ~F"""
     <div class="shadow-lg bg-base-200 rounded-box border-2">
-      <div class={"modal", "modal-open": @previewing} :on-click="close_preview">
-        {#if @previewing}
-          <div :on-window-keydown="keydown">
-            {#if Uploads.image?(@previewing)}
-              <img
-                :on-click="nothing"
-                alt={@previewing.name}
-                src={Routes.commission_attachment_path(
-                  Endpoint,
-                  :show,
-                  @studio.handle,
-                  @commission.public_id,
-                  @previewing.key
-                )}
-              />
-            {#else}
-              <video
-                :on-click="nothing"
-                alt={@previewing.name}
-                type={@previewing.type}
-                controls="controls"
-                src={Routes.commission_attachment_path(
-                  Endpoint,
-                  :show,
-                  @studio.handle,
-                  @commission.public_id,
-                  @previewing.key
-                )}
-              />
-            {/if}
-          </div>
-          <button
-            :on-click="close_preview"
-            type="button"
-            class="hover:brightness-150 absolute top-4 right-4 text-6xl"
-          >×</button>
-          <a
-            class="hover:brightness-150 absolute top-4 left-4 text-6xl"
-            href={Routes.commission_attachment_path(
-              Endpoint,
-              :show,
-              @studio.handle,
-              @commission.public_id,
-              @previewing.key
-            )}
-          >
-            <i class="float-right fas fa-file-download" />
-          </a>
-        {/if}
-      </div>
+      {!-- # TODO: use unique comment ID instead of internal db id --}
+      <MediaPreview id={"preview-#{@event.id}"} commission={@commission} studio={@studio} />
       <div class="text-sm p-2">
         <a href={"/denizens/#{@event.actor.handle}"}>
           <img
@@ -127,8 +56,8 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
             {#for attachment <- Enum.filter(@event.attachments, & &1.thumbnail)}
               <li class="h-32 w-32">
                 <button
-                  :on-click="open_preview"
                   class="relative"
+                  :on-click="open_preview"
                   phx-value-key={attachment.upload.key}
                   phx-value-bucket={attachment.upload.bucket}
                 >
