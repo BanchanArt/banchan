@@ -8,10 +8,11 @@ defmodule BanchanWeb.StudioLive.Shop do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.Components.Card
+  alias BanchanWeb.Components.{Avatar, Card}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{CommissionCard, StudioLayout}
   import BanchanWeb.StudioLive.Helpers
+
 
   @impl true
   def mount(params, session, socket) do
@@ -66,15 +67,7 @@ defmodule BanchanWeb.StudioLive.Shop do
             <h2 class="text-xl">Members</h2>
             <div class="studio-members grid grid-cols-4 gap-1">
               {#for member <- @members}
-                <figure class="col-span-1">
-                  <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, member.handle)}>
-                    <img
-                      alt={member.name}
-                      class="rounded-full h-24 w-24 flex items-center justify-center"
-                      src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
-                    />
-                  </LiveRedirect>
-                </figure>
+                <Avatar class="w-24 h-24" user={member} />
               {/for}
             </div>
           </div>

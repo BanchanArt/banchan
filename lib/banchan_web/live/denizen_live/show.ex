@@ -26,7 +26,7 @@ defmodule BanchanWeb.DenizenLive.Show do
       <section class="grid grid-cols-2 bg-secondary">
         <div class="col-span-12">
           <article class="ml-8">
-            <Avatar class="w-32" user={@user} />
+            <Avatar class="w-24 h-24" user={@user} />
             <h1 class="text-xl text-base-content font-bold">
               {@user.handle}
             </h1>
