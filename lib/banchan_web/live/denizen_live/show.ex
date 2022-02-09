@@ -8,7 +8,7 @@ defmodule BanchanWeb.DenizenLive.Show do
 
   alias Banchan.Accounts
   alias Banchan.Studios
-  alias BanchanWeb.Components.{Layout, StudioCard}
+  alias BanchanWeb.Components.{Avatar, Layout, StudioCard}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -26,9 +26,7 @@ defmodule BanchanWeb.DenizenLive.Show do
       <section class="grid grid-cols-2 bg-secondary">
         <div class="col-span-12">
           <article class="ml-8">
-            <figure class="">
-              <img class="mask mask-circle" src={Routes.profile_image_path(Endpoint, :thumb, @user.handle)}>
-            </figure>
+            <Avatar class="w-32" user={@user} />
             <h1 class="text-xl text-base-content font-bold">
               {@user.handle}
             </h1>
@@ -59,8 +57,8 @@ defmodule BanchanWeb.DenizenLive.Show do
           <h2 class="text-xl text-secondary-content font-bold flex-grow">
             About {@user.handle}
           </h2>
-          <figure class="" alt="denizen ID">
-            <img class="mask mask-circle" src={Routes.profile_image_path(Endpoint, :thumb, @user.handle)}>
+          <figure alt="denizen ID">
+            <Avatar class="w-10" user={@user} />
           </figure>
           <div class="content">
             <p class="">Name: {@user.name}</p>

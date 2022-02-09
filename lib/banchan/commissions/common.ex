@@ -31,4 +31,12 @@ defmodule Banchan.Commissions.Common do
         "Closed"
     end
   end
+
+  def gen_public_id do
+    random_string(10)
+  end
+
+  defp random_string(length) do
+    :crypto.strong_rand_bytes(length) |> Base.url_encode64() |> binary_part(0, length)
+  end
 end

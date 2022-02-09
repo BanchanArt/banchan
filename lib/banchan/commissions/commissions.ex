@@ -31,16 +31,26 @@ defmodule Banchan.Commissions do
           c.client_id == client.id and
           (c.client_id == ^user.id or
              ^user.id in subquery(studio_artists_query())),
-      group_by: [c.id, s.id, client.handle, s.handle, s.name],
+      group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name],
       select: %{
-        id: c.id,
-        client_handle: client.handle,
-        title: c.title,
-        status: c.status,
-        public_id: c.public_id,
-        studio_handle: s.handle,
-        studio_name: s.name,
-        submitted_at: c.inserted_at,
+        commission: %Commission{
+          id: c.id,
+          title: c.title,
+          status: c.status,
+          public_id: c.public_id,
+          inserted_at: c.inserted_at
+        },
+        client: %User{
+          id: client.id,
+          name: client.name,
+          handle: client.handle,
+          pfp_thumb_id: client.pfp_thumb_id
+        },
+        studio: %Studio{
+          id: s.id,
+          handle: s.handle,
+          name: s.name
+        },
         updated_at: max(e.inserted_at)
       }
   end
@@ -146,7 +156,6 @@ defmodule Banchan.Commissions do
 
   defp insert_commission(actor, studio, offering, line_items, attachments, attrs) do
     %Commission{
-      public_id: Commission.gen_public_id(),
       studio: studio,
       offering: offering,
       client: actor,
@@ -195,7 +204,6 @@ defmodule Banchan.Commissions do
 
             %{amount: amount, name: name, description: description} ->
               %LineItem{
-                option: nil,
                 amount: amount,
                 name: name,
                 description: description
@@ -218,7 +226,7 @@ defmodule Banchan.Commissions do
                    text: line_item.name
                  }) do
               {:error, err} -> {:error, err}
-              {:ok, event} -> {:ok, {commission, [event]}}
+              {:ok, event} -> {:ok, {commission |> Repo.preload(line_items: [:option]), [event]}}
             end
         end
       end)
@@ -384,6 +392,10 @@ defmodule Banchan.Commissions do
     Event.changeset(event, attrs)
   end
 
+  def change_event_text(%Event{} = event, attrs \\ %{}) do
+    Event.text_changeset(event, attrs)
+  end
+
   # This one expects binaries for everything because it looks everything up in one fell swoop.
   def get_attachment_if_allowed!(studio, commission, key, user) do
     Repo.one!(
@@ -441,5 +453,10 @@ defmodule Banchan.Commissions do
       upload: upload,
       thumbnail: thumbnail
     }
+  end
+
+  def delete_attachment!(%EventAttachment{} = event_attachment) do
+    # NOTE: This also deletes any associated uploads, because of the db ON DELETE
+    Repo.delete!(event_attachment)
   end
 end

@@ -111,23 +111,7 @@ defmodule Banchan.Uploads do
     end
   end
 
-  @doc """
-  Deletes an Upload. This will also delete it from S3 unless `delete_from_s3` is `false`.
-
-  ## Examples
-
-      iex> delete_upload(upload)
-      {:ok, %Upload{}}
-
-      iex> delete_upload(upload)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_upload(%Upload{bucket: bucket, key: key} = upload, delete_from_s3 \\ true) do
-    if delete_from_s3 do
-      ExAws.S3.delete_object(bucket, key) |> ExAws.request!()
-    end
-
-    Repo.delete(upload)
+  def delete_upload!(%Upload{} = upload) do
+    Repo.delete!(upload)
   end
 end

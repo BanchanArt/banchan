@@ -4,7 +4,10 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
   """
   use BanchanWeb, :component
 
+  alias Surface.Components.Form
+
   alias BanchanWeb.Components.Card
+  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
 
   prop line_items, :list, required: true
   prop allow_edits, :boolean, default: false
@@ -12,11 +15,17 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
   prop add_item, :event
   prop remove_item, :event
 
+  prop custom_changeset, :struct
+  prop open_custom, :boolean, default: false
+  prop submit_custom, :event
+  prop change_custom, :event
+  prop toggle_custom, :event
+
   def render(assigns) do
     ~F"""
     <Card>
       <:header>
-        Summary
+        <h1 class="text-2xl">Summary</h1>
       </:header>
 
       <ul class="divide-y">
@@ -25,7 +34,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
             <div class="float-right">
               {Money.to_string(item.amount)}
               {#if @allow_edits && !item.sticky}
-                <button :on-click="remove_item" value={idx} class="fas fa-times-circle" />
+                <button :on-click={@remove_item} value={idx} class="fas fa-times-circle" />
               {/if}
             </div>
             <div>{item.name}</div>
@@ -49,20 +58,41 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
       <:footer>
         {#if @offering && Enum.any?(@offering.options)}
           <hr>
-          <h5>Additional Options</h5>
+          <h5 class="text-2xl">Additional Options</h5>
           <ul>
             {#for {option, idx} <- Enum.with_index(@offering.options)}
-              {#if option.multiple || !Enum.any?(@line_items, &(&1.option.id == option.id))}
+              {#if option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
                 <li>
                   <span>{to_string(option.price)}</span>
                   <span>{option.name}</span>
                   {#if @allow_edits}
-                    <button :on-click="add_item" value={idx} class="fas fa-plus-circle" />
+                    <button :on-click={@add_item} value={idx} class="fas fa-plus-circle" />
                   {/if}
                 </li>
               {/if}
             {/for}
           </ul>
+          {#if @custom_changeset}
+            <hr>
+            <details open={@open_custom}>
+              <summary :on-click={@toggle_custom} class="text-2xl">Custom Option</summary>
+              <Form
+                class="flex flex-col space-y-2"
+                for={@custom_changeset}
+                change={@change_custom}
+                submit={@submit_custom}
+              >
+                <TextInput name={:name} show_label={false} opts={required: true, placeholder: "Name"} />
+                <TextArea
+                  name={:description}
+                  show_label={false}
+                  opts={required: true, placeholder: "Description"}
+                />
+                <TextInput name={:amount} show_label={false} opts={required: true, placeholder: "Price"} />
+                <Submit changeset={@custom_changeset} />
+              </Form>
+            </details>
+          {/if}
         {/if}
       </:footer>
     </Card>
