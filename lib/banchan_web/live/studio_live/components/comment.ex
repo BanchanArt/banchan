@@ -9,7 +9,7 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.{Avatar, Button}
+  alias BanchanWeb.Components.{Avatar, Button, UserHandle}
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
   alias BanchanWeb.StudioLive.Components.MediaPreview
 
@@ -110,8 +110,7 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
       <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} studio={@studio} />
       <div class="text-sm p-2 items-center flex space-x-2">
         <Avatar class="w-6" user={@event.actor} />
-        <a href={Routes.denizen_show_path(Endpoint, :show, @event.actor.handle)}>
-          <strong class="hover:underline">{@event.actor.handle}</strong></a>
+        <UserHandle user={@event.actor} />
         <span>commented <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.</span>
         {#if @event.inserted_at != @event.updated_at}
           <span class="text-xs italic">edited {fmt_time(@event.updated_at)}</span>

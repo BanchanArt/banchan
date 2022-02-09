@@ -8,7 +8,7 @@ defmodule BanchanWeb.DashboardLive.Components.DashboardResult do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.Components.Avatar
+  alias BanchanWeb.Components.{Avatar, UserHandle}
 
   prop result, :struct, required: true
 
@@ -36,12 +36,7 @@ defmodule BanchanWeb.DashboardLive.Components.DashboardResult do
         by
       </span>
       <Avatar user={@result.client} class="w-4" />
-      <LiveRedirect
-        to={Routes.denizen_show_path(Endpoint, :show, @result.client.handle)}
-        class="font-bold hover:text-secondary"
-      >
-        {@result.client.handle}
-      </LiveRedirect>
+      <UserHandle user={@result.client} />
       <span>
         {Timex.format!(@result.commission.inserted_at, "{relative}", :relative)}.
       </span>
