@@ -31,16 +31,26 @@ defmodule Banchan.Commissions do
           c.client_id == client.id and
           (c.client_id == ^user.id or
              ^user.id in subquery(studio_artists_query())),
-      group_by: [c.id, s.id, client.handle, s.handle, s.name],
+      group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name],
       select: %{
-        id: c.id,
-        client_handle: client.handle,
-        title: c.title,
-        status: c.status,
-        public_id: c.public_id,
-        studio_handle: s.handle,
-        studio_name: s.name,
-        submitted_at: c.inserted_at,
+        commission: %Commission{
+          id: c.id,
+          title: c.title,
+          status: c.status,
+          public_id: c.public_id,
+          inserted_at: c.inserted_at
+        },
+        client: %User{
+          id: client.id,
+          name: client.name,
+          handle: client.handle,
+          pfp_thumb_id: client.pfp_thumb_id
+        },
+        studio: %Studio{
+          id: s.id,
+          handle: s.handle,
+          name: s.name
+        },
         updated_at: max(e.inserted_at)
       }
   end

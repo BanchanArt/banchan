@@ -7,6 +7,8 @@ defmodule BanchanWeb.StudioLive.Components.MediaPreview do
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
 
+  alias Surface.Components.LiveRedirect
+
   prop commission, :struct, required: true
   prop studio, :struct, required: true
 
@@ -65,9 +67,9 @@ defmodule BanchanWeb.StudioLive.Components.MediaPreview do
           type="button"
           class="hover:brightness-150 absolute top-4 right-4 text-6xl"
         >×</button>
-        <a
+        <LiveRedirect
           class="hover:brightness-150 absolute top-4 left-4 text-6xl"
-          href={Routes.commission_attachment_path(
+          to={Routes.commission_attachment_path(
             Endpoint,
             :show,
             @studio.handle,
@@ -76,7 +78,7 @@ defmodule BanchanWeb.StudioLive.Components.MediaPreview do
           )}
         >
           <i class="float-right fas fa-file-download" />
-        </a>
+        </LiveRedirect>
       {/if}
     </div>
     """

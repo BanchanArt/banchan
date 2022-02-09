@@ -4,7 +4,9 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.TimelineItem do
   """
   use BanchanWeb, :component
 
-  alias BanchanWeb.Endpoint
+  alias Surface.Components.LiveRedirect
+
+  alias BanchanWeb.Components.Avatar
 
   prop event, :struct, required: true
   prop icon, :string, default: ""
@@ -23,16 +25,16 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.TimelineItem do
   def render(assigns) do
     ~F"""
     <div id={"event-#{@event.public_id}"} data-content={@icon} class="timeline-item step">
-      <p>
-        <a href={"/denizens/#{@event.actor.handle}"}>
-          <img
-            class="w-6 inline-block mask mask-circle"
-            src={Routes.profile_image_path(Endpoint, :thumb, @event.actor.handle)}
-          />
-          <strong class="hover:underline">{@event.actor.handle}</strong></a>
-        <#slot />
-        <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.
-      </p>
+      <div class="items-center flex space-x-2">
+        <Avatar class="w-6" user={@event.actor} />
+        <span>
+          <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @event.actor.handle)}>
+            <strong class="hover:underline">{@event.actor.handle}</strong>
+          </LiveRedirect>
+          <#slot />
+          <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.
+        </span>
+      </div>
     </div>
     """
   end
