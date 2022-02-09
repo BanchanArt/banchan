@@ -14,6 +14,7 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
   alias BanchanWeb.StudioLive.Components.MediaPreview
 
   prop current_user, :struct, required: true
+  prop current_user_member?, :boolean, required: true
   prop studio, :struct, required: true
   prop commission, :struct, required: true
   prop event, :struct, required: true
@@ -53,7 +54,7 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
      socket
      |> assign(
        changeset:
-         assigns.current_user.id == assigns.event.actor.id &&
+         (assigns.current_user_member? || assigns.current_user.id == assigns.event.actor.id) &&
            Commissions.change_event(assigns.event, %{})
      )}
   end
@@ -115,7 +116,7 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
         {#if @event.inserted_at != @event.updated_at}
           <span class="text-xs italic">edited {fmt_time(@event.updated_at)}</span>
         {/if}
-        {#if !@changeset && @current_user.id == @event.actor.id}
+        {#if !@changeset && (@current_user_member? || @current_user.id == @event.actor.id)}
           <button type="button" :on-click="edit" class="hover:underline">edit</button>
         {/if}
       </div>

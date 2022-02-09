@@ -10,6 +10,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
 
   prop current_user, :struct, required: true
+  prop current_user_member?, :boolean, required: true
   prop studio, :struct, required: true
   prop commission, :any, required: true
   prop uri, :string, required: true
@@ -39,6 +40,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                   event={event}
                   commission={@commission}
                   current_user={@current_user}
+                  current_user_member?={@current_user_member?}
                 />
               </article>
             {/for}
