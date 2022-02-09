@@ -5,6 +5,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   use BanchanWeb, :surface_view
 
   alias Banchan.Commissions
+  alias Banchan.Commissions.LineItem
 
   alias BanchanWeb.StudioLive.Components.Commissions.{
     CommentBox,
@@ -32,9 +33,16 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
 
     BanchanWeb.Endpoint.subscribe("commission:#{commission.public_id}")
 
+    custom_changeset =
+      if socket.assigns.current_user_member? do
+        %LineItem{} |> LineItem.custom_changeset(%{})
+      else
+        nil
+      end
+
     {:ok,
      socket
-     |> assign(commission: commission)}
+     |> assign(commission: commission, custom_changeset: custom_changeset, open_custom: false)}
   end
 
   @impl true
@@ -124,6 +132,63 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     end
   end
 
+  def handle_event("toggle_custom", _, socket) do
+    {:noreply, assign(socket, open_custom: !socket.assigns.open_custom)}
+  end
+
+  def handle_event(
+        "change_custom",
+        %{"line_item" => %{"name" => name, "description" => description, "amount" => amount}},
+        socket
+      ) do
+    changeset =
+      %LineItem{}
+      |> LineItem.custom_changeset(%{
+        name: name,
+        description: description,
+        amount: moneyfy(amount)
+      })
+      |> Map.put(:action, :insert)
+
+    {:noreply, socket |> assign(:custom_changeset, changeset)}
+  end
+
+  def handle_event(
+        "submit_custom",
+        %{"line_item" => %{"name" => name, "description" => description, "amount" => amount}},
+        socket
+      ) do
+    commission = socket.assigns.commission
+
+    if socket.assigns.current_user_member? do
+      {:ok, {commission, events}} =
+        Commissions.add_line_item(socket.assigns.current_user, commission, %{
+          name: name,
+          description: description,
+          amount: moneyfy(amount)
+        })
+
+      BanchanWeb.Endpoint.broadcast_from!(
+        self(),
+        "commission:#{commission.public_id}",
+        "line_items_changed",
+        commission.line_items
+      )
+
+      BanchanWeb.Endpoint.broadcast!("commission:#{commission.public_id}", "new_events", events)
+
+      {:noreply,
+       assign(socket,
+         commission: commission,
+         custom_changeset: %LineItem{} |> LineItem.custom_changeset(%{})
+       )}
+    else
+      # Deny the change. This shouldn't happen unless there's a bug, or
+      # someone is trying to send us Shenanigans data.
+      {:noreply, socket}
+    end
+  end
+
   def handle_event("update-status", %{"status" => [new_status]}, socket) do
     comm = %{socket.assigns.commission | tos_ok: true}
 
@@ -139,6 +204,17 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     BanchanWeb.Endpoint.broadcast!("commission:#{comm.public_id}", "new_events", events)
 
     {:noreply, socket |> assign(commission: commission)}
+  end
+
+  defp moneyfy(amount) do
+    # TODO: In the future, we can replace this :USD with a param and the DB will be fine.
+    case Money.parse(amount, :USD) do
+      {:ok, money} ->
+        money
+
+      :error ->
+        amount
+    end
   end
 
   @impl true
@@ -165,7 +241,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
                 current_user_member?={@current_user_member?}
               />
             </div>
-            <div class="p4">
+            <div class="p-4">
               <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
             </div>
           </div>
@@ -178,6 +254,11 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
                   allow_edits={@current_user_member?}
                   add_item="add_item"
                   remove_item="remove_item"
+                  custom_changeset={@custom_changeset}
+                  open_custom={@open_custom}
+                  toggle_custom="toggle_custom"
+                  change_custom="change_custom"
+                  submit_custom="submit_custom"
                 />
               </div>
               <div class="block sidebar-box">

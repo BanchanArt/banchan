@@ -204,7 +204,6 @@ defmodule Banchan.Commissions do
 
             %{amount: amount, name: name, description: description} ->
               %LineItem{
-                option: nil,
                 amount: amount,
                 name: name,
                 description: description
@@ -227,7 +226,7 @@ defmodule Banchan.Commissions do
                    text: line_item.name
                  }) do
               {:error, err} -> {:error, err}
-              {:ok, event} -> {:ok, {commission, [event]}}
+              {:ok, event} -> {:ok, {commission |> Repo.preload(line_items: [:option]), [event]}}
             end
         end
       end)

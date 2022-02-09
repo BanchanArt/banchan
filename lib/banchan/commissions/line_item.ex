@@ -27,6 +27,14 @@ defmodule Banchan.Commissions.LineItem do
     |> validate_required([:amount, :name, :description])
   end
 
+  @doc false
+  def custom_changeset(line_item, attrs) do
+    line_item
+    |> cast(attrs, [:amount, :name, :description])
+    |> validate_money(:amount)
+    |> validate_required([:amount, :name, :description])
+  end
+
   defp validate_money(changeset, field) do
     validate_change(changeset, field, fn
       _, %Money{} -> []
