@@ -51,15 +51,21 @@ defmodule BanchanWeb.DashboardLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Commission Dashboard</h1>
-      <ul class="divide-y">
-        {#for result <- @results.entries}
-          <li>
-            <DashboardResult result={result} />
-          </li>
-        {/for}
-      </ul>
-      <DashboardPaginator page={@results} />
+      <section class="shadow bg-base-200 text-base-content min-h-full">
+        <div class="p-6">
+          <h1 class="text-2xl">Commission Dashboard</h1>
+          <ul class="divide-y">
+            {#for result <- @results.entries}
+              <li class="bg-base-100 px-4 py-2 shadow">
+                <DashboardResult result={result}/>
+              </li>
+              {#else}
+              <p>You currently have no open commissions. Check back in later!</p>
+            {/for}
+          </ul>
+          <DashboardPaginator page={@results} />
+        </div>
+      </section>
     </Layout>
     """
   end
