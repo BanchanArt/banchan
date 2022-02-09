@@ -43,4 +43,8 @@ defmodule Banchan.Commissions.Event do
     |> cast_assoc(:commission)
     |> validate_required([:type])
   end
+
+  def text_changeset(event, attrs) do
+    event |> cast(attrs, [:text])
+  end
 end

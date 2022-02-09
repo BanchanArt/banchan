@@ -393,6 +393,10 @@ defmodule Banchan.Commissions do
     Event.changeset(event, attrs)
   end
 
+  def change_event_text(%Event{} = event, attrs \\ %{}) do
+    Event.text_changeset(event, attrs)
+  end
+
   # This one expects binaries for everything because it looks everything up in one fell swoop.
   def get_attachment_if_allowed!(studio, commission, key, user) do
     Repo.one!(

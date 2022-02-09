@@ -49,22 +49,20 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
   def handle_event("edit", %{}, socket) do
     assigns = socket.assigns
 
-    # TODO: Use a more constrained changeset here that can only modify `text`.
     {:noreply,
      socket
      |> assign(
        changeset:
          (assigns.current_user_member? || assigns.current_user.id == assigns.event.actor.id) &&
-           Commissions.change_event(assigns.event, %{})
+           Commissions.change_event_text(assigns.event, %{})
      )}
   end
 
   @impl true
   def handle_event("change_edit", %{"event" => event}, socket) do
-    # TODO: Use a more constrained changeset here that can only modify `text`.
     changeset =
       socket.assigns.event
-      |> Commissions.change_event(event)
+      |> Commissions.change_event_text(event)
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)
