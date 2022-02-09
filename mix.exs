@@ -109,7 +109,6 @@ defmodule Banchan.MixProject do
         "compile --all-warnings --warnings-as-errors",
         "test",
         "format",
-        "surface.format",
         "credo --strict",
         "sobelow --verbose",
         "dialyzer --ignore-exit-status"
@@ -118,7 +117,6 @@ defmodule Banchan.MixProject do
         "compile --all-warnings --warnings-as-errors",
         "test --slowest 10",
         "format --check-formatted",
-        "surface.format --check-formatted",
         "credo --strict",
         "sobelow --exit"
         # "dialyzer"
