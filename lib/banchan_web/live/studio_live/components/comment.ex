@@ -107,15 +107,17 @@ defmodule BanchanWeb.StudioLive.Components.Comment do
     ~F"""
     <div class="shadow-lg bg-base-200 rounded-box border-2">
       <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} studio={@studio} />
-      <div class="text-sm p-2 items-center flex space-x-2">
-        <Avatar class="w-6" user={@event.actor} />
-        <UserHandle user={@event.actor} />
-        <span>commented <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.</span>
-        {#if @event.inserted_at != @event.updated_at}
-          <span class="text-xs italic">edited {fmt_time(@event.updated_at)}</span>
-        {/if}
+      <div class="text-sm p-2 items-center flex">
+        <div class="flex items-center space-x-1">
+          <Avatar class="w-6" user={@event.actor} />
+          <UserHandle user={@event.actor} />
+          <span>commented <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.</span>
+          {#if @event.inserted_at != @event.updated_at}
+            <span class="text-xs italic">edited {fmt_time(@event.updated_at)}</span>
+          {/if}
+        </div>
         {#if !@changeset && (@current_user_member? || @current_user.id == @event.actor.id)}
-          <button type="button" :on-click="edit" class="hover:underline">edit</button>
+          <button type="button" :on-click="edit" class="ml-auto hover:underline">edit</button>
         {/if}
       </div>
 
