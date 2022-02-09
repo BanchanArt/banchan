@@ -7,7 +7,6 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   alias Banchan.Commissions
 
   alias BanchanWeb.StudioLive.Components.Commissions.{
-    Attachments,
     CommentBox,
     Status,
     Summary,
@@ -183,9 +182,6 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
               </div>
               <div class="block sidebar-box">
                 <Status commission={@commission} editable={@current_user_member?} change="update-status" />
-              </div>
-              <div class="block sidebar-box">
-                <Attachments id="commission-attachments" />
               </div>
             </div>
           </div>
