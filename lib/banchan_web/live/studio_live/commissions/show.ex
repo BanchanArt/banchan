@@ -84,7 +84,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       end
 
     if !socket.assigns.current_user_member? ||
-         (!option.multiple && Enum.any?(commission.line_items, &(&1.option.id == option.id))) do
+         (!option.multiple && Enum.any?(commission.line_items, &(&1.option && &1.option.id == option.id))) do
       # Deny the change. This shouldn't happen unless there's a bug, or
       # someone is trying to send us Shenanigans data.
       {:noreply, socket}
