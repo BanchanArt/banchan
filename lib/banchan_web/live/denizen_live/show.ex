@@ -50,6 +50,8 @@ defmodule BanchanWeb.DenizenLive.Show do
           <div class="denizen-studios">
             {#for studio <- @studios}
               <StudioCard studio={studio} />
+              {#else}
+              <p>This user is not in a studio right now.</p>
             {/for}
           </div>
         </div>

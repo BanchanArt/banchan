@@ -562,7 +562,7 @@ defmodule Banchan.Accounts do
       Mogrify.open(src)
       |> Mogrify.format("jpeg")
       |> Mogrify.gravity("Center")
-      |> Mogrify.resize_to_fill("64x64")
+      |> Mogrify.resize_to_fill("128x128")
       |> Mogrify.save(in_place: true)
 
     thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")

@@ -87,6 +87,11 @@ defmodule BanchanWeb.StudioLive.Offerings.Index do
                   >Edit</a></button>
               </th>
             </tr>
+            {#else}
+              <tr>
+                <td></td>
+                <td class="alert alert-warning">You currently have no offerings. Feel free to click new offering above to add one.</td>
+              </tr>
           {/for}
         </tbody>
         <tfoot>

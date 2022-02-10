@@ -37,7 +37,7 @@ defmodule BanchanWeb.StudioLive.Shop do
       tab={:shop}
     >
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
-        <div class="offerings">
+        <div class="offerings mt-6">
           {#for offering <- @offerings}
             <CommissionCard studio={@studio} offering={offering} />
           {#else}
