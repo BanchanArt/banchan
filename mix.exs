@@ -104,7 +104,12 @@ defmodule Banchan.MixProject do
         "esbuild default --minify",
         "phx.digest"
       ],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      reset: [
+        "deps.get",
+        "cmd --cd assets npm install",
+        "ecto.reset"
+      ],
+      test: ["ecto.reset --quiet", "test"],
       quality: [
         "compile --all-warnings --warnings-as-errors",
         "test",
