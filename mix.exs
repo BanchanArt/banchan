@@ -104,7 +104,7 @@ defmodule Banchan.MixProject do
         "esbuild default --minify",
         "phx.digest"
       ],
-      update: [
+      reset: [
         "deps.get",
         "cmd --cd assets npm install",
         "ecto.reset"
