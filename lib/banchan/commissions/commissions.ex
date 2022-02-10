@@ -512,9 +512,8 @@ defmodule Banchan.Commissions do
 
     thumbnail =
       if Uploads.image?(upload) || Uploads.video?(upload) do
-        tmp_dir = Path.join([System.tmp_dir!(), upload.key])
-        tmp_file = Path.join([tmp_dir, name])
-        File.mkdir_p!(tmp_dir)
+        tmp_file = Path.join([System.tmp_dir!(), upload.key <> Path.extname(name)])
+        File.mkdir_p!(Path.dirname(tmp_file))
         File.rename(src, tmp_file)
 
         mog =
@@ -532,7 +531,7 @@ defmodule Banchan.Commissions do
           end
 
         thumb = Uploads.save_file!(user, final_path, "image/jpeg", "thumbnail.jpg")
-        File.rm_rf!(tmp_dir)
+        File.rm!(tmp_file)
         File.rm!(final_path)
 
         thumb
