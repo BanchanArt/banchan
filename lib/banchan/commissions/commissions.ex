@@ -512,10 +512,12 @@ defmodule Banchan.Commissions do
 
     thumbnail =
       if Uploads.image?(upload) || Uploads.video?(upload) do
+        # SECURITY: No fs traversal here because Path.extname(name) is safe. We do need that extension, tho.
         tmp_file = Path.join([System.tmp_dir!(), upload.key <> Path.extname(name)])
         File.mkdir_p!(Path.dirname(tmp_file))
         File.rename(src, tmp_file)
 
+        # SECURITY: If someone uploads an .exe as a media type, this will crash, so we're safe :)
         mog =
           Mogrify.open(tmp_file)
           |> Mogrify.format("jpeg")
