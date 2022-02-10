@@ -10,6 +10,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :header_img, :string
       add :card_img, :string
       add :default_terms, :text
+      add :stripe_id, :string
       timestamps()
     end
 

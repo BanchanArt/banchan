@@ -14,6 +14,8 @@ defmodule Banchan.Studios.Studio do
     field :summary, :string
     field :default_terms, :string
 
+    field :stripe_id, :string
+
     many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
 
     has_many :offerings, Banchan.Offerings.Offering, preload_order: [:asc, :index]

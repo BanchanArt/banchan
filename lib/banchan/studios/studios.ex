@@ -2,6 +2,7 @@ defmodule Banchan.Studios do
   @moduledoc """
   The Studios context.
   """
+  @dialyzer {:nowarn_function, create_stripe_account: 0}
 
   import Ecto.Query, warn: false
 
@@ -125,5 +126,14 @@ defmodule Banchan.Studios do
     Repo.exists?(
       from us in "users_studios", where: us.user_id == ^user.id and us.studio_id == ^studio.id
     )
+  end
+
+  def create_stripe_account do
+    # NOTE: I don't know why dialyzer complains about this. It works just fine.
+    Stripe.Account.create(%{
+      type: "express",
+      settings: %{payouts: %{schedule: %{interval: "manual"}}},
+      tos_acceptance: %{service_agreement: "recipient"}
+    })
   end
 end
