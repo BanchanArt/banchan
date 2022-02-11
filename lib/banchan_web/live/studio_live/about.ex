@@ -10,7 +10,7 @@ defmodule BanchanWeb.StudioLive.About do
   @impl true
   def mount(params, session, socket) do
     socket = assign_defaults(session, socket, false)
-    socket = assign_studio_defaults(params, socket, false)
+    socket = assign_studio_defaults(params, socket, false, false)
     {:ok, socket}
   end
 

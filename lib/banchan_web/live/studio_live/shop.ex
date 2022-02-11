@@ -16,7 +16,7 @@ defmodule BanchanWeb.StudioLive.Shop do
   @impl true
   def mount(params, session, socket) do
     socket = assign_defaults(session, socket, false)
-    socket = assign_studio_defaults(params, socket, false)
+    socket = assign_studio_defaults(params, socket, false, false)
     studio = socket.assigns.studio
     members = Studios.list_studio_members(studio)
     offerings = Studios.list_studio_offerings(studio, socket.assigns.current_user_member?)
@@ -36,6 +36,7 @@ defmodule BanchanWeb.StudioLive.Shop do
       tab={:shop}
     >
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
+        {#if @studio.stripe_id}
         <div class="offerings">
           {#for offering <- @offerings}
             <CommissionCard studio={@studio} offering={offering} />
@@ -51,6 +52,11 @@ defmodule BanchanWeb.StudioLive.Shop do
             </div>
           {/if}
         </div>
+        {#elseif @current_user_member?}
+        <p>You need to onboard your studio on stripe</p>
+        {#else}
+        <p>This studio is still working on opening its doors. Check back in soon!</p>
+        {/if}
         <div class="col-start-3">
           {#if @summary}
             <div class="bg-base-200 text-base-content">

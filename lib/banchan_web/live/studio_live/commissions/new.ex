@@ -19,7 +19,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   @impl true
   def mount(%{"offering_type" => offering_type} = params, session, socket) do
     socket = assign_defaults(session, socket, true)
-    socket = assign_studio_defaults(params, socket, false)
+    socket = assign_studio_defaults(params, socket, false, true)
     offering = Offerings.get_offering_by_type!(offering_type, socket.assigns.current_user_member?)
 
     terms =

@@ -2,7 +2,10 @@ defmodule Banchan.Studios do
   @moduledoc """
   The Studios context.
   """
-  @dialyzer {:nowarn_function, create_stripe_account: 0}
+  @dialyzer [
+    # {:nowarn_function, create_stripe_account: 0},
+    :no_return
+  ]
 
   import Ecto.Query, warn: false
 
@@ -54,7 +57,7 @@ defmodule Banchan.Studios do
       {:ok, %Studio{}}
   """
   def new_studio(studio, attrs) do
-    studio
+    %{studio | stripe_id: create_stripe_account()}
     |> Studio.changeset(attrs)
     |> Repo.insert()
   end
@@ -128,12 +131,12 @@ defmodule Banchan.Studios do
     )
   end
 
-  def create_stripe_account do
+  defp create_stripe_account do
     # NOTE: I don't know why dialyzer complains about this. It works just fine.
-    Stripe.Account.create(%{
+    {:ok, acct} = Stripe.Account.create(%{
       type: "express",
-      settings: %{payouts: %{schedule: %{interval: "manual"}}},
-      tos_acceptance: %{service_agreement: "recipient"}
+      settings: %{payouts: %{schedule: %{interval: "manual"}}}
     })
+    acct.id
   end
 end

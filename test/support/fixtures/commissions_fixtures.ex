@@ -3,6 +3,7 @@ defmodule Banchan.CommissionsFixtures do
   This module defines test helpers for creating
   entities via the `Banchan.Commissions` context.
   """
+  @dialyzer [:no_return]
 
   @doc """
   Generate a event.

@@ -14,7 +14,7 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   @impl true
   def mount(params, session, socket) do
     socket = assign_defaults(session, socket, true)
-    socket = assign_studio_defaults(params, socket, true)
+    socket = assign_studio_defaults(params, socket, true, false)
     changeset = Offering.changeset(%Offering{}, %{})
 
     {:ok, assign(socket, changeset: changeset)}
