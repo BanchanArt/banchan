@@ -3,7 +3,7 @@ defmodule Banchan.Studios do
   The Studios context.
   """
   @dialyzer [
-    {:nowarn_function, create_stripe_account: 0},
+    {:nowarn_function, create_stripe_account: 1},
     :no_return
   ]
 
@@ -56,10 +56,17 @@ defmodule Banchan.Studios do
       iex> new_studio(studio, %{handle: ..., name: ..., ...})
       {:ok, %Studio{}}
   """
-  def new_studio(studio, attrs) do
-    %{studio | stripe_id: create_stripe_account()}
-    |> Studio.changeset(attrs)
-    |> Repo.insert()
+  def new_studio(studio, url, attrs) do
+    changeset = studio |> Studio.changeset(attrs)
+
+    changeset =
+      if changeset.valid? do
+        %{changeset | data: %{studio | stripe_id: create_stripe_account(url)}}
+      else
+        changeset
+      end
+
+    changeset |> Repo.insert()
   end
 
   @doc """
@@ -144,6 +151,9 @@ defmodule Banchan.Studios do
   end
 
   def charges_enabled?(%Studio{} = studio, refresh \\ false) do
+    # TODO: Use the `refresh` version of this somewhere. Maybe in the Studio
+    # settings page? We don't want to hit this endpoint on every shop page
+    # load, though.
     if refresh do
       {:ok, acct} = Stripe.Account.retrieve(studio.stripe_id)
 
@@ -163,12 +173,17 @@ defmodule Banchan.Studios do
     |> Repo.update_all(set: [stripe_charges_enabled: charges_enabled])
   end
 
-  defp create_stripe_account do
+  defp create_stripe_account(studio_url) do
     # NOTE: I don't know why dialyzer complains about this. It works just fine.
     {:ok, acct} =
       Stripe.Account.create(%{
         type: "express",
-        settings: %{payouts: %{schedule: %{interval: "manual"}}}
+        settings: %{payouts: %{schedule: %{interval: "manual"}}},
+        business_profile: %{
+          mcc: "7333",
+          # Just to make our lives easier.
+          url: String.replace(studio_url, "http://localhost:4000", "https://banchan.art")
+        }
       })
 
     acct.id
