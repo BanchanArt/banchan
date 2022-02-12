@@ -522,4 +522,9 @@ defmodule Banchan.Commissions do
     # NOTE: This also deletes any associated uploads, because of the db ON DELETE
     Repo.delete!(event_attachment)
   end
+
+  def request_payment(%User{} = actor, %Commission{} = commission, amount) do
+    # NOTE: We pun off `status` here because we need to know whether a payment has been completed.
+    create_event(:payment_requested, actor, commission, [], %{amount: amount, status: :waiting})
+  end
 end

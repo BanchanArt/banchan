@@ -6,7 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
 
   alias Banchan.Commissions.Common
 
-  alias BanchanWeb.StudioLive.Components.Comment
+  alias BanchanWeb.StudioLive.Components.{Comment, RequestPaymentEvent}
   alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
 
   prop current_user, :struct, required: true
@@ -24,7 +24,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   end
 
   def render(assigns) do
-    event_chunks = Enum.chunk_by(assigns.commission.events, &(&1.type == :comment))
+    event_chunks =
+      Enum.chunk_by(
+        assigns.commission.events,
+        &(&1.type == :comment || &1.type == :payment_requested)
+      )
 
     ~F"""
     <div class="timeline">
@@ -45,6 +49,19 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
               </article>
             {/for}
           </div>
+        {#elseif List.first(chunk).type == :payment_requested}
+          <div class="flex flex-col space-y-4">
+            {#for event <- chunk}
+              <article class="timeline-item" id={"event-#{event.public_id}"}>
+                <RequestPaymentEvent
+                  id={"event-#{event.public_id}"}
+                  current_user={@current_user}
+                  commission={@commission}
+                  event={event}
+                />
+              </article>
+            {/for}
+          </div>
         {#else}
           <div class="steps steps-vertical">
             {#for event <- chunk}
@@ -56,10 +73,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                 {#match :line_item_removed}
                   <TimelineItem uri={@uri} icon="✕" event={event}>
                     removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))})
-                  </TimelineItem>
-                {#match :payment_request}
-                  <TimelineItem uri={@uri} icon="$" event={event}>
-                    requested payment of {Money.to_string(event.amount)}
                   </TimelineItem>
                 {#match :payment_processed}
                   <TimelineItem uri={@uri} icon="$" event={event}>

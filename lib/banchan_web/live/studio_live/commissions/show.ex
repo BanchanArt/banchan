@@ -9,6 +9,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
 
   alias BanchanWeb.StudioLive.Components.Commissions.{
     CommentBox,
+    RequestPayment,
     Status,
     Summary,
     Timeline
@@ -230,6 +231,11 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
               <div class="block sidebar-box">
                 <Status commission={@commission} editable={@current_user_member?} change="update-status" />
               </div>
+              {#if @current_user_member?}
+                <div class="block sidebar-box">
+                  <RequestPayment id="request_payment" current_user={@current_user} commission={@commission} />
+                </div>
+              {/if}
             </div>
           </div>
         </div>
