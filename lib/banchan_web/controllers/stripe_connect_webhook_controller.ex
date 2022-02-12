@@ -6,8 +6,6 @@ defmodule BanchanWeb.StripeConnectWebhookController do
 
   alias Banchan.Studios
 
-  @pubsub Banchan.PubSub
-
   def webhook(conn, _params) do
     [sig] = get_req_header(conn, "stripe-signature")
 
@@ -23,12 +21,6 @@ defmodule BanchanWeb.StripeConnectWebhookController do
 
   defp handle_event(%Stripe.Event{type: "account.updated"} = event, conn) do
     Studios.update_stripe_charges_enabled(event.account, event.data.object.charges_enabled)
-
-    Phoenix.PubSub.broadcast!(
-      @pubsub,
-      "studio_stripe_state:#{event.account}",
-      %{event: "charges_state_changed", payload: event.data.object.charges_enabled}
-    )
 
     conn
     |> resp(200, "OK")

@@ -14,6 +14,8 @@ defmodule Banchan.Commissions do
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
 
+  @pubsub Banchan.PubSub
+
   def list_commission_data_for_dashboard(%User{} = user, page, order \\ nil) do
     main_dashboard_query(user)
     |> dashboard_query_order_by(order)
@@ -108,6 +110,10 @@ defmodule Banchan.Commissions do
     )
   end
 
+  def subscribe_to_commission_events(%Commission{public_id: public_id}) do
+    Phoenix.PubSub.subscribe(@pubsub, "commission:#{public_id}")
+  end
+
   @doc """
   Creates a commission.
 
@@ -184,6 +190,12 @@ defmodule Banchan.Commissions do
         {:ok, event} = create_event(:status, actor, commission, [], %{status: status})
 
         {:ok, {commission, [event]}}
+
+        Phoenix.PubSub.broadcast!(
+          @pubsub,
+          "commission:#{commission.public_id}",
+          %{event: "new_status", payload: commission.status}
+        )
       end)
 
     ret
@@ -225,8 +237,21 @@ defmodule Banchan.Commissions do
                    amount: line_item.amount,
                    text: line_item.name
                  }) do
-              {:error, err} -> {:error, err}
-              {:ok, event} -> {:ok, {commission |> Repo.preload(line_items: [:option]), [event]}}
+              {:error, err} ->
+                {:error, err}
+
+              {:ok, event} ->
+                Phoenix.PubSub.broadcast_from!(
+                  @pubsub,
+                  self(),
+                  "commission:#{commission.public_id}",
+                  %{
+                    event: "line_items_changed",
+                    payload: commission.line_items
+                  }
+                )
+
+                {:ok, {commission |> Repo.preload(line_items: [:option]), [event]}}
             end
         end
       end)
@@ -254,8 +279,21 @@ defmodule Banchan.Commissions do
                    amount: line_item.amount,
                    text: line_item.name
                  }) do
-              {:error, err} -> {:error, err}
-              {:ok, event} -> {:ok, {commission, [event]}}
+              {:error, err} ->
+                {:error, err}
+
+              {:ok, event} ->
+                Phoenix.PubSub.broadcast_from!(
+                  @pubsub,
+                  self(),
+                  "commission:#{commission.public_id}",
+                  %{
+                    event: "line_items_changed",
+                    payload: commission.line_items
+                  }
+                )
+
+                {:ok, {commission, [event]}}
             end
         end
       end)
@@ -335,14 +373,29 @@ defmodule Banchan.Commissions do
   """
   def create_event(type, %User{} = actor, %Commission{} = commission, attachments, attrs \\ %{})
       when is_atom(type) do
-    %Event{
-      type: type,
-      commission: commission,
-      actor: actor,
-      attachments: attachments
-    }
-    |> Event.changeset(attrs)
-    |> Repo.insert()
+    ret =
+      %Event{
+        type: type,
+        commission: commission,
+        actor: actor,
+        attachments: attachments
+      }
+      |> Event.changeset(attrs)
+      |> Repo.insert()
+
+    case ret do
+      {:ok, event} ->
+        Phoenix.PubSub.broadcast!(
+          @pubsub,
+          "commission:#{commission.public_id}",
+          %{event: "new_events", payload: [event]}
+        )
+
+      _ ->
+        nil
+    end
+
+    ret
   end
 
   @doc """

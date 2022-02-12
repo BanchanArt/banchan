@@ -6,11 +6,10 @@ defmodule BanchanWeb.LiveHelpers do
   alias Banchan.Accounts
   alias Banchan.Accounts.User
   alias BanchanWeb.Router.Helpers, as: Routes
-  alias BanchanWeb.UserAuth
 
   def assign_defaults(session, socket, auth \\ true) do
     # This is important so clients get booted when they log out elsewhere.
-    BanchanWeb.Endpoint.subscribe(UserAuth.pubsub_topic())
+    Accounts.subscribe_to_auth_events()
 
     socket =
       assign_new(socket, :current_user, fn ->

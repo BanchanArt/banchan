@@ -18,8 +18,6 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
 
   import BanchanWeb.StudioLive.Helpers
 
-  @pubsub Banchan.PubSub
-
   @impl true
   def mount(%{"commission_id" => commission_id} = params, session, socket) do
     socket = assign_defaults(session, socket, true)
@@ -33,7 +31,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
         socket.assigns.current_user_member?
       )
 
-    BanchanWeb.Endpoint.subscribe("commission:#{commission.public_id}")
+    Commissions.subscribe_to_commission_events(commission)
 
     custom_changeset =
       if socket.assigns.current_user_member? do
@@ -92,24 +90,8 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       # someone is trying to send us Shenanigans data.
       {:noreply, socket}
     else
-      {:ok, {commission, events}} =
+      {:ok, {commission, _events}} =
         Commissions.add_line_item(socket.assigns.current_user, commission, option)
-
-      Phoenix.PubSub.broadcast_from!(
-        @pubsub,
-        self(),
-        "commission:#{commission.public_id}",
-        %{
-          event: "line_items_changed",
-          payload: commission.line_items
-        }
-      )
-
-      Phoenix.PubSub.broadcast!(
-        @pubsub,
-        "commission:#{commission.public_id}",
-        %{event: "new_events", payload: events}
-      )
 
       {:noreply, assign(socket, commission: commission)}
     end
@@ -120,25 +102,12 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     line_item = Enum.at(socket.assigns.commission.line_items, idx)
 
     if socket.assigns.current_user_member? && line_item && !line_item.sticky do
-      {:ok, {commission, events}} =
+      {:ok, {commission, _events}} =
         Commissions.remove_line_item(
           socket.assigns.current_user,
           socket.assigns.commission,
           line_item
         )
-
-      Phoenix.PubSub.broadcast_from!(
-        @pubsub,
-        self(),
-        "commission:#{commission.public_id}",
-        %{event: "line_items_changed", payload: commission.line_items}
-      )
-
-      Phoenix.PubSub.broadcast!(
-        @pubsub,
-        "commission:#{commission.public_id}",
-        %{event: "new_events", payload: events}
-      )
 
       {:noreply, assign(socket, commission: commission)}
     else
@@ -175,25 +144,12 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     commission = socket.assigns.commission
 
     if socket.assigns.current_user_member? do
-      {:ok, {commission, events}} =
+      {:ok, {commission, _events}} =
         Commissions.add_line_item(socket.assigns.current_user, commission, %{
           name: name,
           description: description,
           amount: moneyfy(amount)
         })
-
-      Phoenix.PubSub.broadcast_from!(
-        @pubsub,
-        self(),
-        "commission:#{commission.public_id}",
-        %{event: "line_items_changed", payload: commission.line_items}
-      )
-
-      Phoenix.PubSub.broadcast!(
-        @pubsub,
-        "commission:#{commission.public_id}",
-        %{event: "new_events", payload: events}
-      )
 
       {:noreply,
        assign(socket,
@@ -210,19 +166,8 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   def handle_event("update-status", %{"status" => [new_status]}, socket) do
     comm = %{socket.assigns.commission | tos_ok: true}
 
-    {:ok, {commission, events}} =
+    {:ok, {commission, _events}} =
       Commissions.update_status(socket.assigns.current_user, comm, new_status)
-
-    Phoenix.PubSub.broadcast!(
-      @pubsub,
-      "commission:#{comm.public_id}",
-      %{event: "new_status", payload: commission.status}
-    )
-
-    Phoenix.PubSub.broadcast!(@pubsub, "commission:#{comm.public_id}", %{
-      event: "new_events",
-      payload: events
-    })
 
     {:noreply, socket |> assign(commission: commission)}
   end

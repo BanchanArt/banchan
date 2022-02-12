@@ -65,6 +65,7 @@ defmodule BanchanWeb.UserAuthTest do
 
     test "broadcasts to the given live_socket_id", %{conn: conn} do
       live_socket_id = "users_sessions:abcdef-token"
+      Accounts.subscribe_to_auth_events()
       BanchanWeb.Endpoint.subscribe(live_socket_id)
 
       conn

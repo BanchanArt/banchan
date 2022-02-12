@@ -552,6 +552,10 @@ defmodule Banchan.Accounts do
     )
   end
 
+  def subscribe_to_auth_events() do
+    Phoenix.PubSub.subscribe(@pubsub, UserAuth.pubsub_topic())
+  end
+
   def update_user_pfp(%User{} = user, src) do
     mog =
       Mogrify.open(src)
