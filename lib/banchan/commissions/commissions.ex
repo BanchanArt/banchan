@@ -189,8 +189,6 @@ defmodule Banchan.Commissions do
 
         {:ok, event} = create_event(:status, actor, commission, [], %{status: status})
 
-        {:ok, {commission, [event]}}
-
         Phoenix.PubSub.broadcast!(
           @pubsub,
           "commission:#{commission.public_id}",
@@ -200,6 +198,8 @@ defmodule Banchan.Commissions do
             payload: commission.status
           }
         )
+
+        {:ok, {commission, [event]}}
       end)
 
     ret
