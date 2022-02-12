@@ -18,7 +18,7 @@ defmodule BanchanWeb.Components.Nav do
       role="navigation"
       aria-label="main navigation"
     >
-      <div class="md:container md:mx-auto flex items-center gap-12 justify-start">
+      <div class="md:container md:mx-auto flex items-center gap-12 justify-start px-6">
         <div class="navbar-start">
           <a href="/">
             <img
