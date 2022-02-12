@@ -194,7 +194,11 @@ defmodule Banchan.Commissions do
         Phoenix.PubSub.broadcast!(
           @pubsub,
           "commission:#{commission.public_id}",
-          %{event: "new_status", payload: commission.status}
+          %Phoenix.Socket.Broadcast{
+            topic: "commission:#{commission.public_id}",
+            event: "new_status",
+            payload: commission.status
+          }
         )
       end)
 
@@ -245,7 +249,8 @@ defmodule Banchan.Commissions do
                   @pubsub,
                   self(),
                   "commission:#{commission.public_id}",
-                  %{
+                  %Phoenix.Socket.Broadcast{
+                    topic: "commission:#{commission.public_id}",
                     event: "line_items_changed",
                     payload: commission.line_items
                   }
@@ -287,7 +292,8 @@ defmodule Banchan.Commissions do
                   @pubsub,
                   self(),
                   "commission:#{commission.public_id}",
-                  %{
+                  %Phoenix.Socket.Broadcast{
+                    topic: "commission:#{commission.public_id}",
                     event: "line_items_changed",
                     payload: commission.line_items
                   }
@@ -388,7 +394,11 @@ defmodule Banchan.Commissions do
         Phoenix.PubSub.broadcast!(
           @pubsub,
           "commission:#{commission.public_id}",
-          %{event: "new_events", payload: [event]}
+          %Phoenix.Socket.Broadcast{
+            topic: "commission:#{commission.public_id}",
+            event: "new_events",
+            payload: [event]
+          }
         )
 
       _ ->

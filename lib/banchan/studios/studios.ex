@@ -174,10 +174,15 @@ defmodule Banchan.Studios do
       from(s in Studio, where: s.stripe_id == ^account_id)
       |> Repo.update_all(set: [stripe_charges_enabled: charges_enabled])
 
-    Phoenix.PubSub.broadcast!(@pubsub, "studio_stripe_state:#{account_id}", %{
-      event: "charges_state_changed",
-      payload: charges_enabled
-    })
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "studio_stripe_state:#{account_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "studio_stripe_state:#{account_id}",
+        event: "charges_state_changed",
+        payload: charges_enabled
+      }
+    )
 
     ret
   end

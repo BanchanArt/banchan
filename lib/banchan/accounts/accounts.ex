@@ -543,7 +543,8 @@ defmodule Banchan.Accounts do
       @pubsub,
       self(),
       UserAuth.pubsub_topic(),
-      %{
+      %Phoenix.Socket.Broadcast{
+        topic: UserAuth.pubsub_topic(),
         event: "logout_user",
         payload: %{
           user: user

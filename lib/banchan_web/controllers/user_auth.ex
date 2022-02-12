@@ -82,7 +82,11 @@ defmodule BanchanWeb.UserAuth do
     user_token && Accounts.delete_session_token(user_token)
 
     if live_socket_id = get_session(conn, :live_socket_id) do
-      Phoenix.PubSub.broadcast(@pubsub, live_socket_id, %{event: "disconnect", payload: %{}})
+      Phoenix.PubSub.broadcast(@pubsub, live_socket_id, %Phoenix.Socket.Broadcast{
+        topic: live_socket_id,
+        event: "disconnect",
+        payload: %{}
+      })
     end
 
     conn
