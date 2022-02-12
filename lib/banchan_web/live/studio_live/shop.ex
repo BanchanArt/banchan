@@ -22,6 +22,8 @@ defmodule BanchanWeb.StudioLive.Shop do
     offerings = Studios.list_studio_offerings(studio, socket.assigns.current_user_member?)
     summary = studio.summary && HtmlSanitizeEx.markdown_html(Earmark.as_html!(studio.summary))
 
+    BanchanWeb.Endpoint.subscribe("studio_stripe_state:#{studio.stripe_id}")
+
     stripe_onboarding_url =
       if !Studios.charges_enabled?(studio) && socket.assigns.current_user_member? do
         Studios.get_onboarding_link(
@@ -40,6 +42,12 @@ defmodule BanchanWeb.StudioLive.Shop do
        summary: summary,
        stripe_onboarding_url: stripe_onboarding_url
      )}
+  end
+
+  @impl true
+  def handle_info(%{event: "charges_state_changed", payload: enabled?}, socket) do
+    socket
+    |> assign(studio: %{socket.assigns.studio | stripe_charges_enabled: enabled?})
   end
 
   @impl true

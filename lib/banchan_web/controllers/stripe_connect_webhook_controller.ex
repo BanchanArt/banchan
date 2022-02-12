@@ -16,12 +16,20 @@ defmodule BanchanWeb.StripeConnectWebhookController do
         Application.fetch_env!(:stripity_stripe, :endpoint_secret)
       )
 
-    handle_event(conn, event)
+    handle_event(event, conn)
   end
 
-  defp handle_event(conn, %Stripe.Event{type: "account.updated"} = event) do
+  defp handle_event(%Stripe.Event{type: "account.updated"} = event, conn) do
     Studios.update_stripe_charges_enabled(event.account, event.data.object.charges_enabled)
+    BanchanWeb.Endpoint.broadcast!("studio_stripe_state:#{event.account}", "charges_state_changed", event.data.object.charges_enabled)
 
+    conn
+    |> resp(200, "OK")
+    |> send_resp()
+  end
+
+  defp handle_event(%Stripe.Event{}, conn) do
+    # TODO: Do we want to log anything about events we got that we're not handling?
     conn
     |> resp(200, "OK")
     |> send_resp()
