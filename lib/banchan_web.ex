@@ -24,6 +24,7 @@ defmodule BanchanWeb do
       import Plug.Conn
       import BanchanWeb.Gettext
       alias BanchanWeb.Router.Helpers, as: Routes
+      alias BanchanWeb.Endpoint
     end
   end
 

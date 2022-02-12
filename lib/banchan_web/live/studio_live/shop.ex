@@ -26,11 +26,7 @@ defmodule BanchanWeb.StudioLive.Shop do
 
     stripe_onboarding_url =
       if !Studios.charges_enabled?(studio) && socket.assigns.current_user_member? do
-        Studios.get_onboarding_link(
-          studio,
-          Routes.studio_shop_url(Endpoint, :show, studio.handle),
-          Routes.studio_shop_url(Endpoint, :show, studio.handle)
-        )
+        Routes.stripe_account_path(Endpoint, :account_link, studio.handle)
       else
         nil
       end
@@ -78,7 +74,7 @@ defmodule BanchanWeb.StudioLive.Shop do
             {/if}
           </div>
         {#elseif @current_user_member?}
-          <p>You need to <a class="hover:underline font-bold" :on-click="onboard" href={@stripe_onboarding_url}>onboard your studio on Stripe</a></p>
+          <p>You need to <a class="hover:underline font-bold" href={@stripe_onboarding_url}>onboard your studio on Stripe</a></p>
         {#else}
           <p>This studio is still working on opening its doors. Check back in soon!</p>
         {/if}
