@@ -160,7 +160,7 @@ defmodule Banchan.Studios do
       {:ok, acct} = Stripe.Account.retrieve(studio.stripe_id)
 
       if acct.charges_enabled != studio.stripe_charges_enabled do
-        update_stripe_charges_enabled(studio.stripe_id, acct.charges_enabled)
+        update_stripe_state(studio.stripe_id, acct)
       end
 
       acct.charges_enabled
@@ -169,10 +169,15 @@ defmodule Banchan.Studios do
     end
   end
 
-  def update_stripe_charges_enabled(account_id, charges_enabled) do
+  def update_stripe_state(account_id, account) do
     ret =
       from(s in Studio, where: s.stripe_id == ^account_id)
-      |> Repo.update_all(set: [stripe_charges_enabled: charges_enabled])
+      |> Repo.update_all(
+        set: [
+          stripe_charges_enabled: account.charges_enabled,
+          stripe_details_submitted: account.details_submitted
+        ]
+      )
 
     Phoenix.PubSub.broadcast!(
       @pubsub,
@@ -180,7 +185,17 @@ defmodule Banchan.Studios do
       %Phoenix.Socket.Broadcast{
         topic: "studio_stripe_state:#{account_id}",
         event: "charges_state_changed",
-        payload: charges_enabled
+        payload: account.charges_enabled
+      }
+    )
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "studio_stripe_state:#{account_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "studio_stripe_state:#{account_id}",
+        event: "details_submitted_changed",
+        payload: account.details_submitted
       }
     )
 
