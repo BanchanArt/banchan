@@ -11,6 +11,8 @@ defmodule Banchan.Accounts do
 
   alias BanchanWeb.UserAuth
 
+  @pubsub Banchan.PubSub
+
   ## Database getters
 
   @doc """
@@ -537,12 +539,15 @@ defmodule Banchan.Accounts do
     Repo.delete_all(UserToken.user_and_contexts_query(user, :all))
 
     # Broadcast to all LiveViews to immediately disconnect the user
-    BanchanWeb.Endpoint.broadcast_from(
+    Phoenix.PubSub.broadcast_from(
+      @pubsub,
       self(),
       UserAuth.pubsub_topic(),
-      "logout_user",
       %{
-        user: user
+        event: "logout_user",
+        payload: %{
+          user: user
+        }
       }
     )
   end

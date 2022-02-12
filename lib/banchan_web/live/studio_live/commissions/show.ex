@@ -18,6 +18,8 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
 
   import BanchanWeb.StudioLive.Helpers
 
+  @pubsub Banchan.PubSub
+
   @impl true
   def mount(%{"commission_id" => commission_id} = params, session, socket) do
     socket = assign_defaults(session, socket, true)
@@ -93,14 +95,21 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       {:ok, {commission, events}} =
         Commissions.add_line_item(socket.assigns.current_user, commission, option)
 
-      BanchanWeb.Endpoint.broadcast_from!(
+      Phoenix.PubSub.broadcast_from!(
+        @pubsub,
         self(),
         "commission:#{commission.public_id}",
-        "line_items_changed",
-        commission.line_items
+        %{
+          event: "line_items_changed",
+          payload: commission.line_items
+        }
       )
 
-      BanchanWeb.Endpoint.broadcast!("commission:#{commission.public_id}", "new_events", events)
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "commission:#{commission.public_id}",
+        %{event: "new_events", payload: events}
+      )
 
       {:noreply, assign(socket, commission: commission)}
     end
@@ -118,14 +127,18 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
           line_item
         )
 
-      BanchanWeb.Endpoint.broadcast_from!(
+      Phoenix.PubSub.broadcast_from!(
+        @pubsub,
         self(),
         "commission:#{commission.public_id}",
-        "line_items_changed",
-        commission.line_items
+        %{event: "line_items_changed", payload: commission.line_items}
       )
 
-      BanchanWeb.Endpoint.broadcast!("commission:#{commission.public_id}", "new_events", events)
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "commission:#{commission.public_id}",
+        %{event: "new_events", payload: events}
+      )
 
       {:noreply, assign(socket, commission: commission)}
     else
@@ -169,14 +182,18 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
           amount: moneyfy(amount)
         })
 
-      BanchanWeb.Endpoint.broadcast_from!(
+      Phoenix.PubSub.broadcast_from!(
+        @pubsub,
         self(),
         "commission:#{commission.public_id}",
-        "line_items_changed",
-        commission.line_items
+        %{event: "line_items_changed", payload: commission.line_items}
       )
 
-      BanchanWeb.Endpoint.broadcast!("commission:#{commission.public_id}", "new_events", events)
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "commission:#{commission.public_id}",
+        %{event: "new_events", payload: events}
+      )
 
       {:noreply,
        assign(socket,
@@ -196,13 +213,16 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     {:ok, {commission, events}} =
       Commissions.update_status(socket.assigns.current_user, comm, new_status)
 
-    BanchanWeb.Endpoint.broadcast!(
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
       "commission:#{comm.public_id}",
-      "new_status",
-      commission.status
+      %{event: "new_status", payload: commission.status}
     )
 
-    BanchanWeb.Endpoint.broadcast!("commission:#{comm.public_id}", "new_events", events)
+    Phoenix.PubSub.broadcast!(@pubsub, "commission:#{comm.public_id}", %{
+      event: "new_events",
+      payload: events
+    })
 
     {:noreply, socket |> assign(commission: commission)}
   end

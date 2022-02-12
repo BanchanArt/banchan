@@ -7,6 +7,8 @@ defmodule Banchan.Studios do
     :no_return
   ]
 
+  @pubsub Banchan.PubSub
+
   import Ecto.Query, warn: false
 
   alias Banchan.Offerings.Offering
@@ -158,8 +160,7 @@ defmodule Banchan.Studios do
       {:ok, acct} = Stripe.Account.retrieve(studio.stripe_id)
 
       if acct.charges_enabled != studio.stripe_charges_enabled do
-        %{studio | stripe_charges_enabled: acct.charges_enabled}
-        |> Repo.update!()
+        update_stripe_charges_enabled(studio.stripe_id, acct.charges_enabled)
       end
 
       acct.charges_enabled
@@ -169,8 +170,20 @@ defmodule Banchan.Studios do
   end
 
   def update_stripe_charges_enabled(account_id, charges_enabled) do
-    from(s in Studio, where: s.stripe_id == ^account_id)
-    |> Repo.update_all(set: [stripe_charges_enabled: charges_enabled])
+    ret =
+      from(s in Studio, where: s.stripe_id == ^account_id)
+      |> Repo.update_all(set: [stripe_charges_enabled: charges_enabled])
+
+    Phoenix.PubSub.broadcast!(@pubsub, "studio_stripe_state:#{account_id}", %{
+      event: "charges_state_changed",
+      payload: charges_enabled
+    })
+
+    ret
+  end
+
+  def subscribe_to_stripe_state(%Studio{stripe_id: stripe_id}) do
+    Phoenix.PubSub.subscribe(@pubsub, "studio_stripe_state:#{stripe_id}")
   end
 
   defp create_stripe_account(studio_url) do

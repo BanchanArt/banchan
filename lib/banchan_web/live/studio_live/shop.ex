@@ -22,7 +22,7 @@ defmodule BanchanWeb.StudioLive.Shop do
     offerings = Studios.list_studio_offerings(studio, socket.assigns.current_user_member?)
     summary = studio.summary && HtmlSanitizeEx.markdown_html(Earmark.as_html!(studio.summary))
 
-    BanchanWeb.Endpoint.subscribe("studio_stripe_state:#{studio.stripe_id}")
+    Studios.subscribe_to_stripe_state(studio)
 
     stripe_onboarding_url =
       if !Studios.charges_enabled?(studio) && socket.assigns.current_user_member? do

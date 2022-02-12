@@ -11,6 +11,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
 
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit, UploadInput}
 
+  @pubsub Banchan.PubSub
+
   prop commission, :struct, required: true
   prop actor, :struct, required: true
 
@@ -76,10 +78,10 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
            event
          ) do
       {:ok, event} ->
-        BanchanWeb.Endpoint.broadcast!(
+        Phoenix.PubSub.broadcast!(
+          @pubsub,
           "commission:#{socket.assigns.commission.public_id}",
-          "new_events",
-          [event]
+          %{event: "new_events", payload: [event]}
         )
 
         {:noreply,
