@@ -27,12 +27,11 @@ defmodule BanchanWeb.Components.Nav do
             /> Banchan Art
           </a>
         </div>
-
         <div class="navbar-end flex gap-4 items-center">
           {#if @current_user}
             <LiveRedirect to={Routes.dashboard_path(Endpoint, :index)}>
               <span>
-                <i class="fa fa-palette" />
+                <i class="fa fa-paintbrush" />
                 Dashboard
               </span>
             </LiveRedirect>
