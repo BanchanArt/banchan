@@ -7,6 +7,9 @@ defmodule BanchanWeb.StudioLive.Helpers do
 
   alias Banchan.Studios
 
+  alias BanchanWeb.Endpoint
+  alias BanchanWeb.Router.Helpers, as: Routes
+
   def assign_studio_defaults(%{"handle" => handle}, socket, current_member, requires_stripe) do
     studio = Studios.get_studio_by_handle!(handle)
 
@@ -14,10 +17,19 @@ defmodule BanchanWeb.StudioLive.Helpers do
       socket.assigns.current_user &&
         Studios.is_user_in_studio(socket.assigns.current_user, studio)
 
-    if (requires_stripe && !studio.stripe_id) || (current_member && !current_user_member?) do
-      throw(Ecto.NoResultsError)
-    else
-      assign(socket, studio: studio, current_user_member?: current_user_member?)
+    cond do
+      requires_stripe && !Studios.charges_enabled?(studio, false) ->
+        socket
+        |> assign(studio: studio, current_user_member?: current_user_member?)
+        |> put_flash(:error, "This studio is not ready to accept commissions yet.")
+        |> redirect(to: Routes.studio_shop_path(Endpoint, :show, handle))
+
+      current_member && !current_user_member? ->
+        throw(Ecto.NoResultsError)
+
+      true ->
+        socket
+        |> assign(studio: studio, current_user_member?: current_user_member?)
     end
   end
 end

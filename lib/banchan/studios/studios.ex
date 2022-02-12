@@ -3,7 +3,7 @@ defmodule Banchan.Studios do
   The Studios context.
   """
   @dialyzer [
-    # {:nowarn_function, create_stripe_account: 0},
+    {:nowarn_function, create_stripe_account: 0},
     :no_return
   ]
 
@@ -131,12 +131,46 @@ defmodule Banchan.Studios do
     )
   end
 
+  def get_onboarding_link(%Studio{} = studio, return_url, refresh_url) do
+    {:ok, link} =
+      Stripe.AccountLink.create(%{
+        account: studio.stripe_id,
+        type: "account_onboarding",
+        return_url: return_url,
+        refresh_url: refresh_url
+      })
+
+    link.url
+  end
+
+  def charges_enabled?(%Studio{} = studio, refresh \\ false) do
+    if refresh do
+      {:ok, acct} = Stripe.Account.retrieve(studio.stripe_id)
+
+      if acct.charges_enabled != studio.stripe_charges_enabled do
+        %{studio | stripe_charges_enabled: acct.charges_enabled}
+        |> Repo.update!()
+      end
+
+      acct.charges_enabled
+    else
+      studio.stripe_charges_enabled
+    end
+  end
+
+  def update_stripe_charges_enabled(account_id, charges_enabled) do
+    from(s in Studio, where: s.stripe_id == ^account_id)
+    |> Repo.update_all(set: [stripe_charges_enabled: charges_enabled])
+  end
+
   defp create_stripe_account do
     # NOTE: I don't know why dialyzer complains about this. It works just fine.
-    {:ok, acct} = Stripe.Account.create(%{
-      type: "express",
-      settings: %{payouts: %{schedule: %{interval: "manual"}}}
-    })
+    {:ok, acct} =
+      Stripe.Account.create(%{
+        type: "express",
+        settings: %{payouts: %{schedule: %{interval: "manual"}}}
+      })
+
     acct.id
   end
 end

@@ -15,6 +15,7 @@ defmodule Banchan.Studios.Studio do
     field :default_terms, :string
 
     field :stripe_id, :string
+    field :stripe_charges_enabled, :boolean
 
     many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
 

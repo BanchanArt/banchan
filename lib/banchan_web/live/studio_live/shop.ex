@@ -22,7 +22,24 @@ defmodule BanchanWeb.StudioLive.Shop do
     offerings = Studios.list_studio_offerings(studio, socket.assigns.current_user_member?)
     summary = studio.summary && HtmlSanitizeEx.markdown_html(Earmark.as_html!(studio.summary))
 
-    {:ok, assign(socket, members: members, offerings: offerings, summary: summary)}
+    stripe_onboarding_url =
+      if !Studios.charges_enabled?(studio) && socket.assigns.current_user_member? do
+        Studios.get_onboarding_link(
+          studio,
+          Routes.studio_shop_url(Endpoint, :show, studio.handle),
+          Routes.studio_shop_url(Endpoint, :show, studio.handle)
+        )
+      else
+        nil
+      end
+
+    {:ok,
+     assign(socket,
+       members: members,
+       offerings: offerings,
+       summary: summary,
+       stripe_onboarding_url: stripe_onboarding_url
+     )}
   end
 
   @impl true
@@ -36,26 +53,26 @@ defmodule BanchanWeb.StudioLive.Shop do
       tab={:shop}
     >
       <div class="grid grid-cols-3 justify-items-stretch gap-6">
-        {#if @studio.stripe_id}
-        <div class="offerings">
-          {#for offering <- @offerings}
-            <CommissionCard studio={@studio} offering={offering} />
-          {#else}
-            This shop has no offerings currently available. Check back in later!
-          {/for}
-          {#if @current_user_member?}
-            <div class="">
-              <LiveRedirect
-                to={Routes.studio_offerings_index_path(Endpoint, :index, @studio.handle)}
-                class="btn btn-sm text-center rounded-full m-5 btn-warning"
-              >Manage Offerings</LiveRedirect>
-            </div>
-          {/if}
-        </div>
+        {#if Studios.charges_enabled?(@studio)}
+          <div class="offerings">
+            {#for offering <- @offerings}
+              <CommissionCard studio={@studio} offering={offering} />
+            {#else}
+              This shop has no offerings currently available. Check back in later!
+            {/for}
+            {#if @current_user_member?}
+              <div class="">
+                <LiveRedirect
+                  to={Routes.studio_offerings_index_path(Endpoint, :index, @studio.handle)}
+                  class="btn btn-sm text-center rounded-full m-5 btn-warning"
+                >Manage Offerings</LiveRedirect>
+              </div>
+            {/if}
+          </div>
         {#elseif @current_user_member?}
-        <p>You need to onboard your studio on stripe</p>
+          <p>You need to <a class="hover:underline font-bold" :on-click="onboard" href={@stripe_onboarding_url}>onboard your studio on Stripe</a></p>
         {#else}
-        <p>This studio is still working on opening its doors. Check back in soon!</p>
+          <p>This studio is still working on opening its doors. Check back in soon!</p>
         {/if}
         <div class="col-start-3">
           {#if @summary}
