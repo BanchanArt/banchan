@@ -530,7 +530,7 @@ defmodule Banchan.Commissions do
     create_event(:payment_requested, actor, commission, [], %{amount: amount, status: "waiting"})
   end
 
-  def process_payment!(%Commission{} = commission, uri, amount, tip) do
+  def process_payment!(%Event{} = event, %Commission{} = commission, uri, amount, tip) do
     items = [
       %{
         name: "Commission Payment",
@@ -570,6 +570,23 @@ defmodule Banchan.Commissions do
         }
       })
 
+    # TODO: PubSub notification here
+    from(e in Event, where: e.id == ^event.id)
+    |> Repo.update_all(set: [text: session.id, status: :in_progress])
+
+    {:ok, _} = update_event(%{event | text: session.id, status: :in_progress}, %{})
     session.url
+  end
+
+  def process_payment_succeeded(session_id) do
+    # TODO: PubSub notification here
+    from(e in Event, where: e.text == ^session_id)
+    |> Repo.update_all(set: [status: :accepted])
+  end
+
+  def process_payment_failed(session_id) do
+    # TODO: PubSub notification here
+    from(e in Event, where: e.text == ^session_id)
+    |> Repo.update_all(set: [status: :closed])
   end
 end

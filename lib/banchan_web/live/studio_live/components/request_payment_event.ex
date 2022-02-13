@@ -60,6 +60,7 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
     if changeset.valid? do
       url =
         Commissions.process_payment!(
+          socket.assigns.event,
           socket.assigns.commission,
           socket.assigns.uri,
           socket.assigns.event.amount,
@@ -95,10 +96,20 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
             Waiting for Payment
           {/if}
         </div>
-      {#elseif @event.status == :submitted}
+      {#elseif @event.status == :in_progress}
+        <hr>
+        <div class="p-4">
+          A payment is being processed. Please wait.
+        </div>
+      {#elseif @event.status == :accepted}
         <hr>
         <div class="p-4">
           Yay it's paid!
+        </div>
+      {#elseif @event.status == :closed}
+        <hr>
+        <div class="p-4">
+          Payment failed. Please submit another payment request to try again.
         </div>
       {/if}
     </div>

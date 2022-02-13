@@ -4,6 +4,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
   """
   use BanchanWeb, :controller
 
+  alias Banchan.Commissions
   alias Banchan.Studios
 
   def webhook(conn, _params) do
@@ -21,6 +22,32 @@ defmodule BanchanWeb.StripeConnectWebhookController do
 
   defp handle_event(%Stripe.Event{type: "account.updated"} = event, conn) do
     Studios.update_stripe_state(event.account, event.data.object)
+
+    conn
+    |> resp(200, "OK")
+    |> send_resp()
+  end
+
+  defp handle_event(%Stripe.Event{type: "checkout.session.completed"} = event, conn) do
+    if event.data.object.payment_status == "paid" do
+      Commissions.process_payment_succeeded(event.data.object.id)
+    end
+
+    conn
+    |> resp(200, "OK")
+    |> send_resp()
+  end
+
+  defp handle_event(%Stripe.Event{type: "checkout.session.async_payment_succeeded"} = event, conn) do
+    Commissions.process_payment_succeeded(event.data.object.id)
+
+    conn
+    |> resp(200, "OK")
+    |> send_resp()
+  end
+
+  defp handle_event(%Stripe.Event{type: "checkout.session.async_payment_failed"} = event, conn) do
+    Commissions.process_payment_failed(event.data.object.id)
 
     conn
     |> resp(200, "OK")
