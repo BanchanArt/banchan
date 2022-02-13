@@ -4,6 +4,7 @@ defmodule Banchan.Studios do
   """
   @dialyzer [
     {:nowarn_function, create_stripe_account: 1},
+    {:nowarn_function, get_dashboard_login_link!: 1},
     :no_return
   ]
 
