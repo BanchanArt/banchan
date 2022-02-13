@@ -5,6 +5,8 @@ defmodule Banchan.Studios.Studio do
   import Ecto.Changeset
   alias Banchan.Identities
 
+  @default_platform_fee Application.fetch_env!(:banchan, :default_platform_fee)
+
   schema "studios" do
     field :name, :string
     field :handle, :string
@@ -17,6 +19,7 @@ defmodule Banchan.Studios.Studio do
     field :stripe_id, :string
     field :stripe_charges_enabled, :boolean
     field :stripe_details_submitted, :boolean
+    field :platform_fee, :decimal, default: @default_platform_fee
 
     many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
 

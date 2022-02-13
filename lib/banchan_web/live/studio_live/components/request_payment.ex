@@ -34,15 +34,20 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.RequestPayment do
       |> Event.amount_changeset(%{"amount" => moneyfy(amount)})
       |> Map.put(:action, :insert)
 
-    if changeset.valid? do
-      Commissions.request_payment(
-        socket.assigns.current_user,
-        socket.assigns.commission,
-        moneyfy(amount)
-      )
-    end
+    changeset =
+      if changeset.valid? do
+        Commissions.request_payment(
+          socket.assigns.current_user,
+          socket.assigns.commission,
+          moneyfy(amount)
+        )
 
-    {:noreply, socket}
+        %Event{} |> Event.amount_changeset(%{})
+      else
+        changeset
+      end
+
+    {:noreply, socket |> assign(:changeset, changeset)}
   end
 
   defp moneyfy(amount) do

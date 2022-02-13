@@ -103,6 +103,8 @@ defmodule Banchan.Commissions do
           c.studio_id == ^studio.id and c.public_id == ^public_id and
             (^current_user_member? or c.client_id == ^current_user.id),
         preload: [
+          client: [],
+          studio: [],
           events: [:actor, attachments: [:upload, :thumbnail]],
           line_items: [:option],
           offering: [:options]
@@ -525,6 +527,43 @@ defmodule Banchan.Commissions do
 
   def request_payment(%User{} = actor, %Commission{} = commission, amount) do
     # NOTE: We pun off `status` here because we need to know whether a payment has been completed.
-    create_event(:payment_requested, actor, commission, [], %{amount: amount, status: :waiting})
+    create_event(:payment_requested, actor, commission, [], %{amount: amount, status: "waiting"})
+  end
+
+  def process_payment!(%Commission{} = commission, uri, amount, tip) do
+    items = [
+        %{
+          name: "Commission Payment",
+          quantity: 1,
+          amount: amount.amount,
+          currency: String.downcase(to_string(amount.currency))
+        },
+    ]
+    items = if tip do
+      items ++ [%{
+        name: "Tip",
+        quantity: 1,
+        amount: tip.amount,
+        currency: String.downcase(to_string(tip.currency))
+      }]
+    else
+      items
+    end
+    {:ok, session} =
+      Stripe.Session.create(%{
+        payment_method_types: ["card"],
+        mode: "payment",
+        cancel_url: uri,
+        success_url: uri,
+        line_items: items,
+        payment_intent_data: %{
+          application_fee_amount: Money.multiply(amount, commission.studio.platform_fee).amount,
+          transfer_data: %{
+            destination: commission.studio.stripe_id
+          }
+        }
+      })
+
+    session.url
   end
 end

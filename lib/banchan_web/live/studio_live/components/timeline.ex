@@ -33,10 +33,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
     ~F"""
     <div class="timeline">
       {#for chunk <- event_chunks}
-        {#if List.first(chunk).type == :comment}
+        {#if List.first(chunk).type == :comment || List.first(chunk).type == :payment_requested}
           <div class="flex flex-col space-y-4">
             {#for event <- chunk}
               <article class="timeline-item" id={"event-#{event.public_id}"}>
+                {#if event.type == :comment}
                 <Comment
                   id={"event-#{event.public_id}"}
                   uri={@uri}
@@ -46,19 +47,15 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                   current_user={@current_user}
                   current_user_member?={@current_user_member?}
                 />
-              </article>
-            {/for}
-          </div>
-        {#elseif List.first(chunk).type == :payment_requested}
-          <div class="flex flex-col space-y-4">
-            {#for event <- chunk}
-              <article class="timeline-item" id={"event-#{event.public_id}"}>
+                {#elseif event.type == :payment_requested}
                 <RequestPaymentEvent
                   id={"event-#{event.public_id}"}
+                  uri={@uri}
                   current_user={@current_user}
                   commission={@commission}
                   event={event}
                 />
+                {/if}
               </article>
             {/for}
           </div>
