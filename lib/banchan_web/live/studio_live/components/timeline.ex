@@ -38,23 +38,23 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
             {#for event <- chunk}
               <article class="timeline-item" id={"event-#{event.public_id}"}>
                 {#if event.type == :comment}
-                <Comment
-                  id={"event-#{event.public_id}"}
-                  uri={@uri}
-                  studio={@studio}
-                  event={event}
-                  commission={@commission}
-                  current_user={@current_user}
-                  current_user_member?={@current_user_member?}
-                />
+                  <Comment
+                    id={"event-#{event.public_id}"}
+                    uri={@uri}
+                    studio={@studio}
+                    event={event}
+                    commission={@commission}
+                    current_user={@current_user}
+                    current_user_member?={@current_user_member?}
+                  />
                 {#elseif event.type == :payment_requested}
-                <RequestPaymentEvent
-                  id={"event-#{event.public_id}"}
-                  uri={@uri}
-                  current_user={@current_user}
-                  commission={@commission}
-                  event={event}
-                />
+                  <RequestPaymentEvent
+                    id={"event-#{event.public_id}"}
+                    uri={@uri}
+                    current_user={@current_user}
+                    commission={@commission}
+                    event={event}
+                  />
                 {/if}
               </article>
             {/for}

@@ -532,23 +532,29 @@ defmodule Banchan.Commissions do
 
   def process_payment!(%Commission{} = commission, uri, amount, tip) do
     items = [
-        %{
-          name: "Commission Payment",
-          quantity: 1,
-          amount: amount.amount,
-          currency: String.downcase(to_string(amount.currency))
-        },
-    ]
-    items = if tip do
-      items ++ [%{
-        name: "Tip",
+      %{
+        name: "Commission Payment",
         quantity: 1,
-        amount: tip.amount,
-        currency: String.downcase(to_string(tip.currency))
-      }]
-    else
-      items
-    end
+        amount: amount.amount,
+        currency: String.downcase(to_string(amount.currency))
+      }
+    ]
+
+    items =
+      if tip do
+        items ++
+          [
+            %{
+              name: "Tip",
+              quantity: 1,
+              amount: tip.amount,
+              currency: String.downcase(to_string(tip.currency))
+            }
+          ]
+      else
+        items
+      end
+
     {:ok, session} =
       Stripe.Session.create(%{
         payment_method_types: ["card"],
