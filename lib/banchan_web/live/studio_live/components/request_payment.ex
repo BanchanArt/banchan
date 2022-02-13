@@ -5,7 +5,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.RequestPayment do
   use BanchanWeb, :live_component
 
   alias Banchan.Commissions
-  alias Banchan.Commissions.Event
+  alias Banchan.Commissions.PaymentRequest
 
   alias Surface.Components.Form
 
@@ -15,23 +15,23 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.RequestPayment do
   prop current_user, :struct, required: true
   prop commission, :struct, required: true
 
-  data changeset, :struct, default: %Event{} |> Event.amount_changeset(%{})
+  data changeset, :struct, default: %PaymentRequest{} |> PaymentRequest.amount_changeset(%{})
 
   @impl true
-  def handle_event("change", %{"event" => %{"amount" => amount}}, socket) do
+  def handle_event("change", %{"payment_request" => %{"amount" => amount}}, socket) do
     changeset =
-      %Event{}
-      |> Event.amount_changeset(%{"amount" => moneyfy(amount)})
+      %PaymentRequest{}
+      |> PaymentRequest.amount_changeset(%{"amount" => moneyfy(amount)})
       |> Map.put(:action, :insert)
 
     {:noreply, socket |> assign(:changeset, changeset)}
   end
 
   @impl true
-  def handle_event("submit", %{"event" => %{"amount" => amount}}, socket) do
+  def handle_event("submit", %{"payment_request" => %{"amount" => amount}}, socket) do
     changeset =
-      %Event{}
-      |> Event.amount_changeset(%{"amount" => moneyfy(amount)})
+      %PaymentRequest{}
+      |> PaymentRequest.amount_changeset(%{"amount" => moneyfy(amount)})
       |> Map.put(:action, :insert)
 
     changeset =
@@ -42,7 +42,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.RequestPayment do
           moneyfy(amount)
         )
 
-        %Event{} |> Event.amount_changeset(%{})
+        %PaymentRequest{} |> PaymentRequest.amount_changeset(%{})
       else
         changeset
       end

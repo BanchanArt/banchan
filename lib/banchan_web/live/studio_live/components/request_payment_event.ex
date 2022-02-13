@@ -62,8 +62,7 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
         Commissions.process_payment!(
           socket.assigns.event,
           socket.assigns.commission,
-          socket.assigns.uri,
-          socket.assigns.event.amount,
+          replace_fragment(socket.assigns.uri, socket.assigns.event),
           moneyfy(amount)
         )
 
@@ -83,35 +82,38 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
           <span>requested payment of <span class="font-bold">{Money.to_string(@event.amount)}</span> <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.</span>
         </div>
       </div>
-      {#if @event.status == :waiting}
-        <hr>
-        <div class="p-4">
-          {#if @current_user.id == @commission.client.id}
-            Banchan holds all funds until both parties agree to pay out the balance (this can happen any time).
-            <Form for={@changeset} change="change" submit="submit">
-              <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
-              <Submit changeset={@changeset} label="Pay" />
-            </Form>
-          {#else}
-            Waiting for Payment
-          {/if}
-        </div>
-      {#elseif @event.status == :in_progress}
-        <hr>
-        <div class="p-4">
-          A payment is being processed. Please wait.
-        </div>
-      {#elseif @event.status == :accepted}
-        <hr>
-        <div class="p-4">
-          Yay it's paid!
-        </div>
-      {#elseif @event.status == :closed}
-        <hr>
-        <div class="p-4">
-          Payment failed. Please submit another payment request to try again.
-        </div>
-      {/if}
+      {#case @event.payment_request && @event.payment_request.status}
+        {#match :pending}
+          TODO:
+          <hr>
+          <div class="p-4">
+            {#if @current_user.id == @commission.client.id}
+              Banchan holds all funds until both parties agree to pay out the balance (this can happen any time).
+              <Form for={@changeset} change="change" submit="submit">
+                <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
+                <Submit changeset={@changeset} label="Pay" />
+              </Form>
+            {#else}
+              Waiting for Payment
+            {/if}
+          </div>
+        {#match :submitted}
+          <hr>
+          TODO: Show option to go back to payment session or cancel session here.
+        {#match :canceled}
+          <hr>
+          TODO: Payment was canceled
+        {#match :succeeded}
+          <hr>
+          <div class="p-4">
+            TODO: Yay it's paid! Banchan will hold on to funds until the commission is completed.
+          </div>
+        {#match :paid_out}
+          <hr>
+          TODO: Funds have been paid out to the Studio.
+        {#match nil}
+          TODO: Please Wait...
+      {/case}
     </div>
     """
   end

@@ -91,5 +91,24 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
 
     create index(:event_attachments, [:event_id])
     create index(:event_attachments, [:upload_id])
+
+    create table(:commission_payment_requests) do
+      add :stripe_session_id, :text
+      add :checkout_url, :text
+      add :status, :string, null: false
+      add :tip, :money_with_currency
+      add :amount, :money_with_currency, null: false
+      add :platform_fee, :money_with_currency
+      add :commission_id, references(:commissions, on_delete: :nothing)
+      add :client_id, references(:users, on_delete: :nothing)
+      add :event_id, references(:commission_events, on_delete: :nothing)
+
+      timestamps()
+    end
+
+    create unique_index(:commission_payment_requests, [:stripe_session_id])
+    create index(:commission_payment_requests, [:commission_id])
+    create index(:commission_payment_requests, [:client_id])
+    create index(:commission_payment_requests, [:event_id])
   end
 end

@@ -7,7 +7,7 @@ defmodule Banchan.Commissions do
   alias Banchan.Repo
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions.{Commission, Event, EventAttachment, LineItem}
+  alias Banchan.Commissions.{Commission, Event, EventAttachment, LineItem, PaymentRequest}
   alias Banchan.Offerings
   alias Banchan.Offerings.OfferingOption
   alias Banchan.Studios.Studio
@@ -105,7 +105,7 @@ defmodule Banchan.Commissions do
         preload: [
           client: [],
           studio: [],
-          events: [:actor, attachments: [:upload, :thumbnail]],
+          events: [:actor, payment_request: [], attachments: [:upload, :thumbnail]],
           line_items: [:option],
           offering: [:options]
         ]
@@ -399,7 +399,7 @@ defmodule Banchan.Commissions do
           %Phoenix.Socket.Broadcast{
             topic: "commission:#{commission.public_id}",
             event: "new_events",
-            payload: [event]
+            payload: [%{event | payment_request: nil}]
           }
         )
 
@@ -526,34 +526,52 @@ defmodule Banchan.Commissions do
   end
 
   def request_payment(%User{} = actor, %Commission{} = commission, amount) do
-    # NOTE: We pun off `status` here because we need to know whether a payment has been completed.
-    create_event(:payment_requested, actor, commission, [], %{amount: amount, status: "waiting"})
+    {:ok, _} =
+      Repo.transaction(fn ->
+        {:ok, event} = create_event(:payment_requested, actor, commission, [], %{amount: amount})
+
+        {:ok, request} =
+          %PaymentRequest{
+            commission: commission,
+            event: event
+          }
+          |> PaymentRequest.amount_changeset(%{"amount" => amount})
+          |> Repo.insert()
+
+        Phoenix.PubSub.broadcast!(
+          @pubsub,
+          "commission:#{commission.public_id}",
+          %Phoenix.Socket.Broadcast{
+            topic: "commission:#{commission.public_id}",
+            event: "event_updated",
+            payload: %{event | payment_request: request}
+          }
+        )
+      end)
   end
 
-  def process_payment!(%Event{} = event, %Commission{} = commission, uri, amount, tip) do
+  def process_payment!(
+        %Event{payment_request: %PaymentRequest{amount: amount} = payment_request} = event,
+        %Commission{} = commission,
+        uri,
+        tip
+      ) do
     items = [
       %{
         name: "Commission Payment",
         quantity: 1,
         amount: amount.amount,
         currency: String.downcase(to_string(amount.currency))
+      },
+      %{
+        name: "Tip",
+        quantity: 1,
+        amount: tip.amount,
+        currency: String.downcase(to_string(tip.currency))
       }
     ]
 
-    items =
-      if tip do
-        items ++
-          [
-            %{
-              name: "Tip",
-              quantity: 1,
-              amount: tip.amount,
-              currency: String.downcase(to_string(tip.currency))
-            }
-          ]
-      else
-        items
-      end
+    platform_fee = Money.multiply(Money.add(amount, tip), commission.studio.platform_fee)
 
     {:ok, session} =
       Stripe.Session.create(%{
@@ -563,69 +581,67 @@ defmodule Banchan.Commissions do
         success_url: uri,
         line_items: items,
         payment_intent_data: %{
-          application_fee_amount: Money.multiply(amount, commission.studio.platform_fee).amount,
+          application_fee_amount: platform_fee.amount,
           transfer_data: %{
             destination: commission.studio.stripe_id
           }
         }
       })
 
-    {1, _} =
-      from(e in Event, where: e.id == ^event.id)
-      |> Repo.update_all(set: [text: session.id, status: :in_progress])
+    {:ok, _} =
+      Repo.transaction(fn ->
+        request =
+          payment_request
+          |> PaymentRequest.submit_changeset(%{
+            tip: tip,
+            platform_fee: platform_fee,
+            stripe_session_id: session.id,
+            checkout_url: session.url,
+            status: :submitted
+          })
+          |> Repo.update!()
 
-    ev = Repo.one!(from e in Event, where: e.text == ^session.id, preload: [:commission, :actor])
-
-    Phoenix.PubSub.broadcast!(
-      @pubsub,
-      "commission:#{commission.public_id}",
-      %Phoenix.Socket.Broadcast{
-        topic: "commission:#{commission.public_id}",
-        event: "event_updated",
-        payload: ev
-      }
-    )
+        Phoenix.PubSub.broadcast!(
+          @pubsub,
+          "commission:#{commission.public_id}",
+          %Phoenix.Socket.Broadcast{
+            topic: "commission:#{commission.public_id}",
+            event: "event_updated",
+            payload: %{event | payment_request: request}
+          }
+        )
+      end)
 
     session.url
   end
 
   def process_payment_succeeded!(session_id) do
-    {1, _} =
-      from(e in Event, where: e.text == ^session_id)
-      |> Repo.update_all(set: [status: :accepted])
+    {1, [req]} =
+      from(p in PaymentRequest, where: p.stripe_session_id == ^session_id, select: p)
+      |> Repo.update_all(set: [status: :succeeded])
 
-    ev = Repo.one!(from e in Event, where: e.text == ^session_id, preload: [:commission, :actor])
+    event =
+      from(e in Event,
+        where: e.id == ^req.event_id,
+        select: e,
+        preload: [:actor, payment_request: [], attachments: [:upload, :thumbnail]]
+      )
+      |> Repo.one!()
 
-    Phoenix.PubSub.broadcast!(
-      @pubsub,
-      "commission:#{ev.commission.public_id}",
-      %Phoenix.Socket.Broadcast{
-        topic: "commission:#{ev.commission.public_id}",
-        event: "event_updated",
-        payload: ev
-      }
-    )
-
-    ev
-  end
-
-  def process_payment_failed!(session_id) do
-    {1, _} =
-      from(e in Event, where: e.text == ^session_id)
-      |> Repo.update_all(set: [status: :closed])
-
-    ev = Repo.one!(from e in Event, where: e.text == ^session_id, preload: [:commission, :actor])
+    public_id =
+      from(c in Commission, where: c.id == ^req.commission_id, select: c.public_id)
+      |> Repo.one!()
 
     Phoenix.PubSub.broadcast!(
       @pubsub,
-      "commission:#{ev.commission.public_id}",
+      "commission:#{public_id}",
       %Phoenix.Socket.Broadcast{
-        topic: "commission:#{ev.commission.public_id}",
+        topic: "commission:#{public_id}",
         event: "event_updated",
-        payload: ev
+        payload: event
       }
     )
 
-    ev
+    :ok
   end
 end

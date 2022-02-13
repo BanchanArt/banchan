@@ -6,7 +6,7 @@ defmodule Banchan.Commissions.Event do
   import Ecto.Changeset
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions.{Commission, Common, EventAttachment}
+  alias Banchan.Commissions.{Commission, Common, EventAttachment, PaymentRequest}
 
   schema "commission_events" do
     field :public_id, :string, autogenerate: {Common, :gen_public_id, []}
@@ -31,6 +31,7 @@ defmodule Banchan.Commissions.Event do
 
     belongs_to :actor, User
     belongs_to :commission, Commission
+    has_one :payment_request, PaymentRequest
     has_many :attachments, EventAttachment
     timestamps()
   end
