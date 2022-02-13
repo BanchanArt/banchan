@@ -87,6 +87,7 @@ defmodule BanchanWeb.Router do
     live("/studios/:handle/portfolio", StudioLive.Portfolio, :show)
     live("/studios/:handle/qa", StudioLive.Qa, :show)
     get("/studios/:handle/connect_to_stripe", StripeAccountController, :account_link)
+    get("/studios/:handle/stripe_dashboard", StripeAccountController, :redirect_to_dashboard)
 
     live("/confirm", ConfirmationLive, :show)
     get("/confirm/:token", UserConfirmationController, :confirm)

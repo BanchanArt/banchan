@@ -206,6 +206,11 @@ defmodule Banchan.Studios do
     Phoenix.PubSub.subscribe(@pubsub, "studio_stripe_state:#{stripe_id}")
   end
 
+  def get_dashboard_login_link!(%Studio{stripe_id: stripe_id}) do
+    {:ok, link} = Stripe.Account.create_login_link(stripe_id, %{})
+    link.url
+  end
+
   defp create_stripe_account(studio_url) do
     # NOTE: I don't know why dialyzer complains about this. It works just fine.
     {:ok, acct} =
