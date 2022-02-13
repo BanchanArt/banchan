@@ -154,9 +154,6 @@ defmodule Banchan.Studios do
   end
 
   def charges_enabled?(%Studio{} = studio, refresh \\ false) do
-    # TODO: Use the `refresh` version of this somewhere. Maybe in the Studio
-    # settings page? We don't want to hit this endpoint on every shop page
-    # load, though.
     if refresh do
       {:ok, acct} = Stripe.Account.retrieve(studio.stripe_id)
 
