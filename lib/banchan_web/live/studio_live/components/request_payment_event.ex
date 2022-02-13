@@ -17,7 +17,8 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
   prop event, :struct, required: true
   prop uri, :string, required: true
 
-  # NOTE: We're not actually going to create an event directly. We're just punning off this for the changeset validation.
+  # NOTE: We're not actually going to create an event directly. We're just
+  # punning off this for the changeset validation.
   data changeset, :struct, default: %Event{} |> Event.amount_changeset(%{})
 
   defp fmt_time(time) do
