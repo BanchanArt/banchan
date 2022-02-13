@@ -68,6 +68,21 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     {:noreply, assign(socket, commission: commission)}
   end
 
+  def handle_info(%{event: "event_updated", payload: event}, socket) do
+    events =
+      socket.assigns.commission.events
+      |> Enum.map(fn ev ->
+        if ev.id == event.id do
+          event
+        else
+          ev
+        end
+      end)
+
+    commission = %{socket.assigns.commission | events: events}
+    {:noreply, assign(socket, commission: commission)}
+  end
+
   @impl true
   def handle_event("add_item", %{"value" => idx}, socket) do
     {idx, ""} = Integer.parse(idx)

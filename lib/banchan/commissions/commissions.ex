@@ -570,23 +570,62 @@ defmodule Banchan.Commissions do
         }
       })
 
-    # TODO: PubSub notification here
-    from(e in Event, where: e.id == ^event.id)
-    |> Repo.update_all(set: [text: session.id, status: :in_progress])
+    {1, _} =
+      from(e in Event, where: e.id == ^event.id)
+      |> Repo.update_all(set: [text: session.id, status: :in_progress])
 
-    {:ok, _} = update_event(%{event | text: session.id, status: :in_progress}, %{})
+    ev = Repo.one!(from e in Event, where: e.text == ^session.id, preload: [:commission, :actor])
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "commission:#{commission.public_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "commission:#{commission.public_id}",
+        event: "event_updated",
+        payload: ev
+      }
+    )
+
     session.url
   end
 
-  def process_payment_succeeded(session_id) do
-    # TODO: PubSub notification here
-    from(e in Event, where: e.text == ^session_id)
-    |> Repo.update_all(set: [status: :accepted])
+  def process_payment_succeeded!(session_id) do
+    {1, _} =
+      from(e in Event, where: e.text == ^session_id)
+      |> Repo.update_all(set: [status: :accepted])
+
+    ev = Repo.one!(from e in Event, where: e.text == ^session_id, preload: [:commission, :actor])
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "commission:#{ev.commission.public_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "commission:#{ev.commission.public_id}",
+        event: "event_updated",
+        payload: ev
+      }
+    )
+
+    ev
   end
 
-  def process_payment_failed(session_id) do
-    # TODO: PubSub notification here
-    from(e in Event, where: e.text == ^session_id)
-    |> Repo.update_all(set: [status: :closed])
+  def process_payment_failed!(session_id) do
+    {1, _} =
+      from(e in Event, where: e.text == ^session_id)
+      |> Repo.update_all(set: [status: :closed])
+
+    ev = Repo.one!(from e in Event, where: e.text == ^session_id, preload: [:commission, :actor])
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "commission:#{ev.commission.public_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "commission:#{ev.commission.public_id}",
+        event: "event_updated",
+        payload: ev
+      }
+    )
+
+    ev
   end
 end
