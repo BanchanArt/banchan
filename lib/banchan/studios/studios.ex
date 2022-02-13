@@ -218,6 +218,7 @@ defmodule Banchan.Studios do
         type: "express",
         settings: %{payouts: %{schedule: %{interval: "manual"}}},
         business_profile: %{
+          # Digital Media
           mcc: "7333",
           # Just to make our lives easier.
           url: String.replace(studio_url, "http://localhost:4000", "https://banchan.art")
