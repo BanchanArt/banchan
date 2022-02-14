@@ -106,7 +106,7 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
         <div class="p-4">
           {#case @event.payment_request.status}
             {#match :pending}
-              TODO:
+              {!-- #TODO: Improve this --}
               {#if @current_user.id == @commission.client.id}
                 Banchan holds all funds until both parties agree to pay out the balance (this can happen any time).
                 <Form for={@changeset} change="change" submit="submit">
@@ -117,31 +117,42 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
                 Waiting for Payment
               {/if}
               {#if @current_user_member?}
+                {!-- # TODO: This should be a Link so it's accessible. --}
                 <Button click="force_expire" label="Cancel Payment" />
               {/if}
             {#match :submitted}
-              TODO:
+              {!-- #TODO: Improve this --}
               {#if @current_user.id == @commission.client.id}
-                {!-- TODO: This should be a Link so it's accessible. --}
+                {!-- # TODO: This should be a Link so it's accessible. --}
                 <Button click="continue_payment" label="Continue Payment" />
               {#else}
                 Waiting for Payment
               {/if}
               {#if @current_user_member?}
+                {!-- # TODO: This should be a Link so it's accessible. --}
                 <Button click="force_expire" label="Cancel Payment" />
               {/if}
             {#match :expired}
+              {!-- #TODO: Improve this --}
               TODO: Payment session has expired. Please request payment again.
             {#match :succeeded}
+              {!-- #TODO: Improve this --}
               TODO: Yay it's paid! Banchan will hold on to funds until the commission is completed.
               Tip: {Money.to_string(@event.payment_request.tip)}, Total Platform Fees: {Money.to_string(@event.payment_request.platform_fee)}, Total for Studio: {Money.subtract(
                 Money.add(@event.payment_request.tip, @event.payment_request.amount),
                 @event.payment_request.platform_fee
               )}
             {#match :paid_out}
+              {!-- #TODO: Improve this --}
               TODO: Funds have been paid out to the Studio.
             {#match nil}
-              TODO: Please Wait...
+              {!-- #TODO: Improve this --}
+              {!-- NOTE: This state happens for a very brief window of time
+              between when the payment request event is created, and when the
+              PaymentRequest itself is created, where there _is_ no
+              PaymentRequest for the event. If it's anything but a quick flash,
+              there's probably a bug. --}
+              Please Wait...
           {/case}
         </div>
       {/if}
