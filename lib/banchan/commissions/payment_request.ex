@@ -18,8 +18,8 @@ defmodule Banchan.Commissions.PaymentRequest do
         :pending,
         # Client has clicked through to Checkout.
         :submitted,
-        # Payment was canceled.
-        :canceled,
+        # Checkout session has expired.
+        :expired,
         # Payment succeeded.
         :succeeded,
         # Payment amount has been paid out to Studio.

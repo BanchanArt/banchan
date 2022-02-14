@@ -38,6 +38,14 @@ defmodule BanchanWeb.StripeConnectWebhookController do
     |> send_resp()
   end
 
+  defp handle_event(%Stripe.Event{type: "checkout.session.expired"} = event, conn) do
+    Commissions.process_payment_expired!(event.data.object.id)
+
+    conn
+    |> resp(200, "OK")
+    |> send_resp()
+  end
+
   defp handle_event(%Stripe.Event{}, conn) do
     # TODO: Do we want to log anything about events we got that we're not handling?
     conn

@@ -52,6 +52,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                     id={"event-#{event.public_id}"}
                     uri={@uri}
                     current_user={@current_user}
+                    current_user_member?={@current_user_member?}
                     commission={@commission}
                     event={event}
                   />

@@ -644,4 +644,70 @@ defmodule Banchan.Commissions do
 
     :ok
   end
+
+  def process_payment_expired!(session_id) do
+    {1, [req]} =
+      from(p in PaymentRequest, where: p.stripe_session_id == ^session_id, select: p)
+      |> Repo.update_all(set: [status: :expired])
+
+    event =
+      from(e in Event,
+        where: e.id == ^req.event_id,
+        select: e,
+        preload: [:actor, payment_request: [], attachments: [:upload, :thumbnail]]
+      )
+      |> Repo.one!()
+
+    public_id =
+      from(c in Commission, where: c.id == ^req.commission_id, select: c.public_id)
+      |> Repo.one!()
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "commission:#{public_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "commission:#{public_id}",
+        event: "event_updated",
+        payload: event
+      }
+    )
+  end
+
+  def expire_payment!(%PaymentRequest{id: id, stripe_session_id: nil}) do
+    {1, [req]} =
+      from(p in PaymentRequest, where: p.id == ^id, select: p)
+      |> Repo.update_all(set: [status: :expired])
+
+    event =
+      from(e in Event,
+        where: e.id == ^req.event_id,
+        select: e,
+        preload: [:actor, payment_request: [], attachments: [:upload, :thumbnail]]
+      )
+      |> Repo.one!()
+
+    public_id =
+      from(c in Commission, where: c.id == ^req.commission_id, select: c.public_id)
+      |> Repo.one!()
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "commission:#{public_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "commission:#{public_id}",
+        event: "event_updated",
+        payload: event
+      }
+    )
+  end
+
+  def expire_payment!(%PaymentRequest{stripe_session_id: session_id}) do
+    {:ok, _} =
+      Stripe.Request.new_request([])
+      |> Stripe.Request.put_endpoint("checkout/sessions/#{session_id}/expire")
+      |> Stripe.Request.put_method(:post)
+      |> Stripe.Request.make_request()
+
+    :ok
+  end
 end
