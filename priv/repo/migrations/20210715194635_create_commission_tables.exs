@@ -92,7 +92,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     create index(:event_attachments, [:event_id])
     create index(:event_attachments, [:upload_id])
 
-    create table(:commission_payment_requests) do
+    create table(:commission_invoices) do
       add :stripe_session_id, :text
       add :checkout_url, :text
       add :status, :string, null: false
@@ -106,9 +106,9 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       timestamps()
     end
 
-    create unique_index(:commission_payment_requests, [:stripe_session_id])
-    create index(:commission_payment_requests, [:commission_id])
-    create index(:commission_payment_requests, [:client_id])
-    create index(:commission_payment_requests, [:event_id])
+    create unique_index(:commission_invoices, [:stripe_session_id])
+    create index(:commission_invoices, [:commission_id])
+    create index(:commission_invoices, [:client_id])
+    create index(:commission_invoices, [:event_id])
   end
 end

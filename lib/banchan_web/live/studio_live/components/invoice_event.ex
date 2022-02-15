@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
+defmodule BanchanWeb.StudioLive.Components.InvoiceEvent do
   @moduledoc """
   This is what shows up on the commission timeline when an artist asks for payment.
   """
@@ -75,8 +75,7 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
 
   @impl true
   def handle_event("continue_payment", _, socket) do
-    uri =
-      socket.assigns.event.payment_request && socket.assigns.event.payment_request.checkout_url
+    uri = socket.assigns.event.invoice && socket.assigns.event.invoice.checkout_url
 
     if uri do
       {:noreply, socket |> redirect(external: uri)}
@@ -87,7 +86,7 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
 
   @impl true
   def handle_event("force_expire", _, socket) do
-    Commissions.expire_payment!(socket.assigns.event.payment_request)
+    Commissions.expire_payment!(socket.assigns.event.invoice)
     {:noreply, socket}
   end
 
@@ -101,10 +100,10 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
           <span>requested payment of <span class="font-bold">{Money.to_string(@event.amount)}</span> <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.</span>
         </div>
       </div>
-      {#if @event.payment_request}
+      {#if @event.invoice}
         <hr>
         <div class="p-4">
-          {#case @event.payment_request.status}
+          {#case @event.invoice.status}
             {#match :pending}
               {!-- #TODO: Improve this --}
               {#if @current_user.id == @commission.client.id}
@@ -138,9 +137,9 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
             {#match :succeeded}
               {!-- #TODO: Improve this --}
               TODO: Yay it's paid! Banchan will hold on to funds until the commission is completed.
-              Tip: {Money.to_string(@event.payment_request.tip)}, Total Platform Fees: {Money.to_string(@event.payment_request.platform_fee)}, Total for Studio: {Money.subtract(
-                Money.add(@event.payment_request.tip, @event.payment_request.amount),
-                @event.payment_request.platform_fee
+              Tip: {Money.to_string(@event.invoice.tip)}, Total Platform Fees: {Money.to_string(@event.invoice.platform_fee)}, Total for Studio: {Money.subtract(
+                Money.add(@event.invoice.tip, @event.invoice.amount),
+                @event.invoice.platform_fee
               )}
             {#match :paid_out}
               {!-- #TODO: Improve this --}
@@ -149,8 +148,8 @@ defmodule BanchanWeb.StudioLive.Components.RequestPaymentEvent do
               {!-- #TODO: Improve this --}
               {!-- NOTE: This state happens for a very brief window of time
               between when the payment request event is created, and when the
-              PaymentRequest itself is created, where there _is_ no
-              PaymentRequest for the event. If it's anything but a quick flash,
+              Invoice itself is created, where there _is_ no
+              Invoice for the event. If it's anything but a quick flash,
               there's probably a bug. --}
               Please Wait...
           {/case}

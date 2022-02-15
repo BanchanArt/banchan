@@ -6,7 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
 
   alias Banchan.Commissions.Common
 
-  alias BanchanWeb.StudioLive.Components.{Comment, RequestPaymentEvent}
+  alias BanchanWeb.StudioLive.Components.{Comment, InvoiceEvent}
   alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
 
   prop current_user, :struct, required: true
@@ -27,13 +27,13 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
     event_chunks =
       Enum.chunk_by(
         assigns.commission.events,
-        &(&1.type == :comment || &1.type == :payment_requested)
+        &(&1.type == :comment || &1.type == :invoice)
       )
 
     ~F"""
     <div class="timeline">
       {#for chunk <- event_chunks}
-        {#if List.first(chunk).type == :comment || List.first(chunk).type == :payment_requested}
+        {#if List.first(chunk).type == :comment || List.first(chunk).type == :invoice}
           <div class="flex flex-col space-y-4">
             {#for event <- chunk}
               <article class="timeline-item" id={"event-#{event.public_id}"}>
@@ -47,8 +47,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                     current_user={@current_user}
                     current_user_member?={@current_user_member?}
                   />
-                {#elseif event.type == :payment_requested}
-                  <RequestPaymentEvent
+                {#elseif event.type == :invoice}
+                  <InvoiceEvent
                     id={"event-#{event.public_id}"}
                     uri={@uri}
                     current_user={@current_user}

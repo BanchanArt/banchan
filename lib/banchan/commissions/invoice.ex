@@ -1,11 +1,11 @@
-defmodule Banchan.Commissions.PaymentRequest do
+defmodule Banchan.Commissions.Invoice do
   @moduledoc """
-  Schema for payment requests within Commissions.
+  Schema for individual Invoices within Commissions.
   """
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "commission_payment_requests" do
+  schema "commission_invoices" do
     field :stripe_session_id, :string
     field :checkout_url, :string
     field :amount, Money.Ecto.Composite.Type
