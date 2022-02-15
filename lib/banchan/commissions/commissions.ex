@@ -461,6 +461,30 @@ defmodule Banchan.Commissions do
     Event.text_changeset(event, attrs)
   end
 
+  def send_event_update!(event_id) do
+    event =
+      from(e in Event,
+        where: e.id == ^event_id,
+        select: e,
+        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail]]
+      )
+      |> Repo.one!()
+
+    public_id =
+      from(c in Commission, where: c.id == ^event.commission_id, select: c.public_id)
+      |> Repo.one!()
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "commission:#{public_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "commission:#{public_id}",
+        event: "event_updated",
+        payload: event
+      }
+    )
+  end
+
   # This one expects binaries for everything because it looks everything up in one fell swoop.
   def get_attachment_if_allowed!(studio, commission, key, user) do
     Repo.one!(
@@ -530,7 +554,7 @@ defmodule Banchan.Commissions do
       Repo.transaction(fn ->
         {:ok, event} = create_event(:invoice, actor, commission, [], %{amount: amount})
 
-        {:ok, request} =
+        {:ok, _} =
           %Invoice{
             commission: commission,
             event: event
@@ -538,15 +562,7 @@ defmodule Banchan.Commissions do
           |> Invoice.amount_changeset(%{"amount" => amount})
           |> Repo.insert()
 
-        Phoenix.PubSub.broadcast!(
-          @pubsub,
-          "commission:#{commission.public_id}",
-          %Phoenix.Socket.Broadcast{
-            topic: "commission:#{commission.public_id}",
-            event: "event_updated",
-            payload: %{event | invoice: request}
-          }
-        )
+        send_event_update!(event.id)
       end)
   end
 
@@ -558,13 +574,13 @@ defmodule Banchan.Commissions do
       ) do
     items = [
       %{
-        name: "Commission Payment",
+        name: "Commission Invoice Payment",
         quantity: 1,
         amount: amount.amount,
         currency: String.downcase(to_string(amount.currency))
       },
       %{
-        name: "Tip",
+        name: "Extra Tip",
         quantity: 1,
         amount: tip.amount,
         currency: String.downcase(to_string(tip.currency))
@@ -588,117 +604,44 @@ defmodule Banchan.Commissions do
         }
       })
 
-    {:ok, _} =
-      Repo.transaction(fn ->
-        request =
-          invoice
-          |> Invoice.submit_changeset(%{
-            tip: tip,
-            platform_fee: platform_fee,
-            stripe_session_id: session.id,
-            checkout_url: session.url,
-            status: :submitted
-          })
-          |> Repo.update!()
+    invoice
+    |> Invoice.submit_changeset(%{
+      tip: tip,
+      platform_fee: platform_fee,
+      stripe_session_id: session.id,
+      checkout_url: session.url,
+      status: :submitted
+    })
+    |> Repo.update!()
 
-        Phoenix.PubSub.broadcast!(
-          @pubsub,
-          "commission:#{commission.public_id}",
-          %Phoenix.Socket.Broadcast{
-            topic: "commission:#{commission.public_id}",
-            event: "event_updated",
-            payload: %{event | invoice: request}
-          }
-        )
-      end)
+    send_event_update!(event.id)
 
     session.url
   end
 
   def process_payment_succeeded!(session_id) do
-    {1, [req]} =
+    {1, [invoice]} =
       from(i in Invoice, where: i.stripe_session_id == ^session_id, select: i)
       |> Repo.update_all(set: [status: :succeeded])
 
-    event =
-      from(e in Event,
-        where: e.id == ^req.event_id,
-        select: e,
-        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail]]
-      )
-      |> Repo.one!()
-
-    public_id =
-      from(c in Commission, where: c.id == ^req.commission_id, select: c.public_id)
-      |> Repo.one!()
-
-    Phoenix.PubSub.broadcast!(
-      @pubsub,
-      "commission:#{public_id}",
-      %Phoenix.Socket.Broadcast{
-        topic: "commission:#{public_id}",
-        event: "event_updated",
-        payload: event
-      }
-    )
-
+    send_event_update!(invoice.event_id)
     :ok
   end
 
   def process_payment_expired!(session_id) do
-    {1, [req]} =
+    {1, [invoice]} =
       from(i in Invoice, where: i.stripe_session_id == ^session_id, select: i)
       |> Repo.update_all(set: [status: :expired])
 
-    event =
-      from(e in Event,
-        where: e.id == ^req.event_id,
-        select: e,
-        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail]]
-      )
-      |> Repo.one!()
-
-    public_id =
-      from(c in Commission, where: c.id == ^req.commission_id, select: c.public_id)
-      |> Repo.one!()
-
-    Phoenix.PubSub.broadcast!(
-      @pubsub,
-      "commission:#{public_id}",
-      %Phoenix.Socket.Broadcast{
-        topic: "commission:#{public_id}",
-        event: "event_updated",
-        payload: event
-      }
-    )
+    send_event_update!(invoice.event_id)
   end
 
   def expire_payment!(%Invoice{id: id, stripe_session_id: nil}) do
-    {1, [req]} =
+    {1, [invoice]} =
       from(i in Invoice, where: i.id == ^id, select: i)
       |> Repo.update_all(set: [status: :expired])
 
-    event =
-      from(e in Event,
-        where: e.id == ^req.event_id,
-        select: e,
-        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail]]
-      )
-      |> Repo.one!()
-
-    public_id =
-      from(c in Commission, where: c.id == ^req.commission_id, select: c.public_id)
-      |> Repo.one!()
-
-    Phoenix.PubSub.broadcast!(
-      @pubsub,
-      "commission:#{public_id}",
-      %Phoenix.Socket.Broadcast{
-        topic: "commission:#{public_id}",
-        event: "event_updated",
-        payload: event
-      }
-    )
+    send_event_update!(invoice.event_id)
   end
 
   def expire_payment!(%Invoice{stripe_session_id: session_id}) do
@@ -708,6 +651,8 @@ defmodule Banchan.Commissions do
       |> Stripe.Request.put_method(:post)
       |> Stripe.Request.make_request()
 
+    # NOTE: We don't manually expire the invoice in the database here. That's
+    # handled by process_payment_expired!/1 when the webhook fired.
     :ok
   end
 end
