@@ -141,7 +141,7 @@ defmodule BanchanWeb.StudioLive.Components.InvoiceEvent do
                   @event.invoice.platform_fee
                 )}</p>
               {#if @event.invoice.payout_available_on}
-                <p>This payment will be available for payout on {fmt_time(@event.invoice.payout_available_on)}</p>
+                <p>This payment will be available for payout {fmt_time(@event.invoice.payout_available_on)}</p>
               {/if}
             {#match :paid_out}
               {!-- #TODO: Improve this --}
