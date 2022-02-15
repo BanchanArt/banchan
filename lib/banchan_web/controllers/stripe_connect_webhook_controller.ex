@@ -30,7 +30,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
 
   defp handle_event(%Stripe.Event{type: "checkout.session.completed"} = event, conn) do
     if event.data.object.payment_status == "paid" do
-      Commissions.process_payment_succeeded!(event.data.object.id)
+      Commissions.process_payment_succeeded!(event.data.object)
     end
 
     conn
@@ -39,7 +39,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
   end
 
   defp handle_event(%Stripe.Event{type: "checkout.session.expired"} = event, conn) do
-    Commissions.process_payment_expired!(event.data.object.id)
+    Commissions.process_payment_expired!(event.data.object)
 
     conn
     |> resp(200, "OK")

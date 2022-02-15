@@ -102,6 +102,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :commission_id, references(:commissions, on_delete: :nothing)
       add :client_id, references(:users, on_delete: :nothing)
       add :event_id, references(:commission_events, on_delete: :nothing)
+      add :payout_available_on, :utc_datetime
 
       timestamps()
     end

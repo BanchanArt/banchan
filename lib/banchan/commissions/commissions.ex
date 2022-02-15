@@ -619,18 +619,30 @@ defmodule Banchan.Commissions do
     session.url
   end
 
-  def process_payment_succeeded!(session_id) do
+  def process_payment_succeeded!(session) do
+    {:ok, %{charges: %{data: [%{balance_transaction: txn_id}]}}} =
+      Stripe.PaymentIntent.retrieve(session.payment_intent, %{})
+
+    {:ok, %{available_on: available_on}} = Stripe.BalanceTransaction.retrieve(txn_id)
+
+    {:ok, available_on} = DateTime.from_unix(available_on)
+
     {1, [invoice]} =
-      from(i in Invoice, where: i.stripe_session_id == ^session_id, select: i)
-      |> Repo.update_all(set: [status: :succeeded])
+      IO.inspect(from(i in Invoice, where: i.stripe_session_id == ^session.id, select: i)
+      |> Repo.update_all(
+        set: [
+          status: :succeeded,
+          payout_available_on: available_on
+        ]
+      ))
 
     send_event_update!(invoice.event_id)
     :ok
   end
 
-  def process_payment_expired!(session_id) do
+  def process_payment_expired!(session) do
     {1, [invoice]} =
-      from(i in Invoice, where: i.stripe_session_id == ^session_id, select: i)
+      from(i in Invoice, where: i.stripe_session_id == ^session.id, select: i)
       |> Repo.update_all(set: [status: :expired])
 
     send_event_update!(invoice.event_id)

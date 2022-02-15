@@ -11,6 +11,7 @@ defmodule Banchan.Commissions.Invoice do
     field :amount, Money.Ecto.Composite.Type
     field :tip, Money.Ecto.Composite.Type
     field :platform_fee, Money.Ecto.Composite.Type
+    field :payout_available_on, :utc_datetime
 
     field :status, Ecto.Enum,
       values: [
