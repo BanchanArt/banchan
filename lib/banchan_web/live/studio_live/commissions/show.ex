@@ -210,7 +210,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       tab={:shop}
     >
       <div>
-        <h1 class="text-3xl">{@commission.title}</h1>
+        <h1 class="text-3xl p-4">{@commission.title}</h1>
         <hr>
         <div class="commission grid gap-4">
           <div class="col-span-10">
