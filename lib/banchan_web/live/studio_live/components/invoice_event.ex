@@ -121,11 +121,10 @@ defmodule BanchanWeb.StudioLive.Components.InvoiceEvent do
               {/if}
             {#match :submitted}
               {!-- #TODO: Improve this --}
+              Payment session in progress.
               {#if @current_user.id == @commission.client.id}
                 {!-- # TODO: This should be a Link so it's accessible. --}
                 <Button click="continue_payment" label="Continue Payment" />
-              {#else}
-                Waiting for Payment
               {/if}
               {#if @current_user_member?}
                 {!-- # TODO: This should be a Link so it's accessible. --}
@@ -133,7 +132,7 @@ defmodule BanchanWeb.StudioLive.Components.InvoiceEvent do
               {/if}
             {#match :expired}
               {!-- #TODO: Improve this --}
-              Payment session has expired. Please request payment again.
+              Payment session has expired. Please submit another invoice.
             {#match :succeeded}
               {!-- #TODO: Improve this --}
               <p>Yay it's paid! Banchan will hold on to funds until the commission is completed.
