@@ -628,13 +628,13 @@ defmodule Banchan.Commissions do
     {:ok, available_on} = DateTime.from_unix(available_on)
 
     {1, [invoice]} =
-      IO.inspect(from(i in Invoice, where: i.stripe_session_id == ^session.id, select: i)
+      from(i in Invoice, where: i.stripe_session_id == ^session.id, select: i)
       |> Repo.update_all(
         set: [
           status: :succeeded,
           payout_available_on: available_on
         ]
-      ))
+      )
 
     send_event_update!(invoice.event_id)
     :ok

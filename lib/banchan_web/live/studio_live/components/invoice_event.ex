@@ -136,12 +136,12 @@ defmodule BanchanWeb.StudioLive.Components.InvoiceEvent do
             {#match :succeeded}
               {!-- #TODO: Improve this --}
               <p>Yay it's paid! Banchan will hold on to funds until the commission is completed.
-              Tip: {Money.to_string(@event.invoice.tip)}, Total Platform Fees: {Money.to_string(@event.invoice.platform_fee)}, Total for Studio: {Money.subtract(
-                Money.add(@event.invoice.tip, @event.invoice.amount),
-                @event.invoice.platform_fee
-              )}</p>
+                Tip: {Money.to_string(@event.invoice.tip)}, Total Platform Fees: {Money.to_string(@event.invoice.platform_fee)}, Total for Studio: {Money.subtract(
+                  Money.add(@event.invoice.tip, @event.invoice.amount),
+                  @event.invoice.platform_fee
+                )}</p>
               {#if @event.invoice.payout_available_on}
-              <p>This payment will be available for payout on {fmt_time(@event.invoice.payout_available_on)}</p>
+                <p>This payment will be available for payout on {fmt_time(@event.invoice.payout_available_on)}</p>
               {/if}
             {#match :paid_out}
               {!-- #TODO: Improve this --}
