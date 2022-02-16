@@ -5,12 +5,14 @@ defmodule BanchanWeb.Components.Markdown do
   use BanchanWeb, :component
 
   prop content, :string, required: true
+  prop class, :css_class
 
   def render(assigns) do
     md = assigns.content
     content = md && HtmlSanitizeEx.markdown_html(Earmark.as_html!(md))
+
     ~F"""
-    <div class="markdown">
+    <div class={"markdown", @class}>
       {raw(content)}
     </div>
     """

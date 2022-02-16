@@ -4,6 +4,8 @@ defmodule BanchanWeb.StudioLive.About do
   """
   use BanchanWeb, :surface_view
 
+  alias BanchanWeb.Components.Markdown
+
   alias BanchanWeb.StudioLive.Components.StudioLayout
   import BanchanWeb.StudioLive.Helpers
 
@@ -24,7 +26,7 @@ defmodule BanchanWeb.StudioLive.About do
       current_user_member?={@current_user_member?}
       tab={:about}
     >
-      About page goes here
+      <Markdown content={@studio.summary} />
     </StudioLayout>
     """
   end

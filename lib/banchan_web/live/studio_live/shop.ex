@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Shop do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.Components.{Button, Card, Markdown}
+  alias BanchanWeb.Components.Button
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{CommissionCard, StudioLayout}
   import BanchanWeb.StudioLive.Helpers
@@ -69,51 +69,37 @@ defmodule BanchanWeb.StudioLive.Shop do
       current_user_member?={@current_user_member?}
       tab={:shop}
     >
-      <div class="md:grid md:grid-cols-3 gap-4">
-        <div class="md:order-last">
-          {#if @studio.summary}
-            <div class="bg-base-200 text-base-content">
-              <Card>
-                <:header>
-                  <span class="text-2xl">Summary</span>
-                </:header>
-                <Markdown content={@studio.summary} />
-              </Card>
+      {#if Studios.charges_enabled?(@studio)}
+        <div class="flex flex-wrap">
+          {#for offering <- @offerings}
+            <div class="md:basis-1/2 p-2">
+              <CommissionCard studio={@studio} offering={offering} />
+            </div>
+          {#else}
+            This shop has no offerings currently available. Check back in later!
+          {/for}
+          {#if @current_user_member?}
+            <div class="md:basis-1/2">
+              <LiveRedirect
+                to={Routes.studio_offerings_index_path(Endpoint, :index, @studio.handle)}
+                class="btn btn-sm text-center rounded-full m-5 btn-warning"
+              >Manage Offerings</LiveRedirect>
             </div>
           {/if}
         </div>
-        {#if Studios.charges_enabled?(@studio)}
-          <div class="flex flex-wrap md:col-span-2">
-            {#for offering <- @offerings}
-              <div class="md:basis-1/2 p-2">
-              <CommissionCard studio={@studio} offering={offering} />
-              </div>
-            {#else}
-              This shop has no offerings currently available. Check back in later!
-            {/for}
-            {#if @current_user_member?}
-              <div class="md:basis-1/2">
-                <LiveRedirect
-                  to={Routes.studio_offerings_index_path(Endpoint, :index, @studio.handle)}
-                  class="btn btn-sm text-center rounded-full m-5 btn-warning"
-                >Manage Offerings</LiveRedirect>
-              </div>
-            {/if}
-          </div>
-        {#elseif @current_user_member? && !@studio.stripe_details_submitted}
-          <p>You need to <a class="hover:underline font-bold" href={@stripe_onboarding_url}>onboard your studio on Stripe</a>
+      {#elseif @current_user_member? && !@studio.stripe_details_submitted}
+        <p>You need to <a class="hover:underline font-bold" href={@stripe_onboarding_url}>onboard your studio on Stripe</a>
 
-            <Button click="recheck_stripe" label="Recheck" />
-          </p>
-        {#elseif @current_user_member? && !@studio.stripe_charges_enabled}
-          <p>Details have been submitted to Stripe. Please wait while charges are enabled.
+          <Button click="recheck_stripe" label="Recheck" />
+        </p>
+      {#elseif @current_user_member? && !@studio.stripe_charges_enabled}
+        <p>Details have been submitted to Stripe. Please wait while charges are enabled.
 
-            <Button click="recheck_stripe" label="Recheck" />
-          </p>
-        {#else}
-          <p>This studio is still working on opening its doors. Check back in soon!</p>
-        {/if}
-      </div>
+          <Button click="recheck_stripe" label="Recheck" />
+        </p>
+      {#else}
+        <p>This studio is still working on opening its doors. Check back in soon!</p>
+      {/if}
     </StudioLayout>
     """
   end
