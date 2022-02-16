@@ -108,14 +108,14 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
         <hr class="p-2">
         <div class="md:flex">
           <div class="md:grow">
-          <Timeline
-            uri={@uri}
-            studio={@studio}
-            commission={@commission}
-            current_user={@current_user}
-            current_user_member?={@current_user_member?}
-          />
-          <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
+            <Timeline
+              uri={@uri}
+              studio={@studio}
+              commission={@commission}
+              current_user={@current_user}
+              current_user_member?={@current_user_member?}
+            />
+            <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
           </div>
           <div>
             <SummaryEditor
@@ -125,11 +125,11 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
               allow_edits={@current_user_member?}
             />
             <Status commission={@commission} editable={@current_user_member?} change="update_status" />
-          {#if @current_user_member?}
-            <div class="block">
-              <InvoiceForm id="invoice" current_user={@current_user} commission={@commission} />
-            </div>
-          {/if}
+            {#if @current_user_member?}
+              <div class="block">
+                <InvoiceForm id="invoice" current_user={@current_user} commission={@commission} />
+              </div>
+            {/if}
           </div>
         </div>
       </div>
