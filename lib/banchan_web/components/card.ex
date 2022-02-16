@@ -24,28 +24,28 @@ defmodule BanchanWeb.Components.Card do
 
   def render(assigns) do
     ~F"""
-    <div class="shadow-lg bg-base-200 card card-bordered">
-      <div class={"inline-block card-body #{@class}"}>
+    <div class="shadow-lg bg-base-200 card">
+      {#if slot_assigned?(:image)}
+        <figure class="aspect-video">
+          <#slot name="image" />
+        </figure>
+      {/if}
+      <div class={"card-body", @class}>
         {#if slot_assigned?(:header)}
-          <header class="container">
+          <header class="card-title flex items-center">
+            <div class="grow">
             <#slot name="header" />
+            </div>
             {#if slot_assigned?(:header_aside)}
-              <span class="float-right">
-                <#slot name="header_aside" />
-              </span>
+              <#slot name="header_aside" />
             {/if}
           </header>
-        {/if}
-        {#if slot_assigned?(:image)}
-          <div class="object-scale-down max-w-md">
-            <#slot name="image" />
-          </div>
         {/if}
         <div class="max-w-prose">
           <#slot />
         </div>
         {#if slot_assigned?(:footer)}
-          <footer>
+          <footer class="card-actions justify-end">
             <#slot name="footer" />
           </footer>
         {/if}
