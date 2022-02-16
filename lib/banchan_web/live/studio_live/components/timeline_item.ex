@@ -23,13 +23,15 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.TimelineItem do
   def render(assigns) do
     ~F"""
     <div id={"event-#{@event.public_id}"} data-content={@icon} class="timeline-item step">
-      <div class="items-center flex space-x-2">
-        <Avatar class="w-6" user={@event.actor} />
-        <span>
+      <div class="text-xs text-left">
+        <span class="inline-flex items-baseline space-x-1">
+          <div class="self-center">
+            <Avatar class="w-4" user={@event.actor} />
+          </div>
           <UserHandle user={@event.actor} />
-          <#slot />
-          <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.
         </span>
+        <#slot />
+        <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.
       </div>
     </div>
     """

@@ -84,7 +84,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   end
 
   @impl true
-  def handle_event("update-status", %{"status" => [new_status]}, socket) do
+  def handle_event("update_status", %{"status" => [new_status]}, socket) do
     comm = %{socket.assigns.commission | tos_ok: true}
 
     {:ok, {commission, _events}} =
@@ -105,41 +105,31 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     >
       <div>
         <h1 class="text-3xl p-4">{@commission.title}</h1>
-        <hr>
-        <div class="commission grid gap-4">
-          <div class="col-span-10">
-            <div class="p-4">
-              <Timeline
-                uri={@uri}
-                studio={@studio}
-                commission={@commission}
-                current_user={@current_user}
-                current_user_member?={@current_user_member?}
-              />
-            </div>
-            <div class="p-4">
-              <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
-            </div>
+        <hr class="p-2">
+        <div class="md:flex">
+          <div class="md:grow">
+          <Timeline
+            uri={@uri}
+            studio={@studio}
+            commission={@commission}
+            current_user={@current_user}
+            current_user_member?={@current_user_member?}
+          />
+          <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
           </div>
-          <div class="col-span-2 col-end-13 p-6">
-            <div id="sidebar">
-              <div class="block sidebar-box">
-                <SummaryEditor
-                  id="summary-editor"
-                  current_user={@current_user}
-                  commission={@commission}
-                  allow_edits={@current_user_member?}
-                />
-              </div>
-              <div class="block sidebar-box">
-                <Status commission={@commission} editable={@current_user_member?} change="update-status" />
-              </div>
-              {#if @current_user_member?}
-                <div class="block sidebar-box">
-                  <InvoiceForm id="invoice" current_user={@current_user} commission={@commission} />
-                </div>
-              {/if}
+          <div>
+            <SummaryEditor
+              id="summary-editor"
+              current_user={@current_user}
+              commission={@commission}
+              allow_edits={@current_user_member?}
+            />
+            <Status commission={@commission} editable={@current_user_member?} change="update_status" />
+          {#if @current_user_member?}
+            <div class="block">
+              <InvoiceForm id="invoice" current_user={@current_user} commission={@commission} />
             </div>
+          {/if}
           </div>
         </div>
       </div>
