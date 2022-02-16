@@ -71,16 +71,30 @@ defmodule BanchanWeb.StudioLive.Shop do
       current_user_member?={@current_user_member?}
       tab={:shop}
     >
-      <div class="grid grid-cols-3 justify-items-stretch gap-6">
+      <div class="md:grid md:grid-cols-3 gap-4">
+        <div class="md:order-last">
+          {#if @summary}
+            <div class="bg-base-200 text-base-content">
+              <Card>
+                <:header>
+                  Summary
+                </:header>
+                <div class="">{raw(@summary)}</div>
+              </Card>
+            </div>
+          {/if}
+        </div>
         {#if Studios.charges_enabled?(@studio)}
-          <div class="offerings">
+          <div class="flex flex-wrap md:col-span-2">
             {#for offering <- @offerings}
+              <div class="md:basis-1/2 p-2">
               <CommissionCard studio={@studio} offering={offering} />
+              </div>
             {#else}
               This shop has no offerings currently available. Check back in later!
             {/for}
             {#if @current_user_member?}
-              <div class="">
+              <div class="md:basis-1/2">
                 <LiveRedirect
                   to={Routes.studio_offerings_index_path(Endpoint, :index, @studio.handle)}
                   class="btn btn-sm text-center rounded-full m-5 btn-warning"
@@ -101,34 +115,6 @@ defmodule BanchanWeb.StudioLive.Shop do
         {#else}
           <p>This studio is still working on opening its doors. Check back in soon!</p>
         {/if}
-        <div class="col-start-3">
-          {#if @summary}
-            <div class="bg-base-200 text-base-content">
-              <Card>
-                <:header>
-                  Summary
-                </:header>
-                <div class="content leading-loose">{raw(@summary)}</div>
-              </Card>
-            </div>
-          {/if}
-          <div class="shadow bg-base-200 text-base-content p-6">
-            <h2 class="text-xl">Members</h2>
-            <div class="studio-members grid grid-cols-4 gap-1">
-              {#for member <- @members}
-                <figure class="col-span-1">
-                  <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, member.handle)}>
-                    <img
-                      alt={member.name}
-                      class="rounded-full h-24 w-24 flex items-center justify-center"
-                      src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
-                    />
-                  </LiveRedirect>
-                </figure>
-              {/for}
-            </div>
-          </div>
-        </div>
       </div>
     </StudioLayout>
     """
