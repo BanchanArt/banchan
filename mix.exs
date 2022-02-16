@@ -76,6 +76,7 @@ defmodule Banchan.MixProject do
       {:scrivener_ecto, "~> 2.7.0"},
       {:nimble_totp, "~> 0.1.0"},
       {:qr_code, "~> 2.2.1"},
+      {:stripity_stripe, "~> 2.12.1"},
       {:phoenix_live_reload, "~> 1.3", only: :dev},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       # Testing and static analysis
@@ -97,6 +98,9 @@ defmodule Banchan.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
+      "stripe.local": [
+        "cmd stripe listen --forward-to localhost:4000/api/stripe_webhook"
+      ],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       "assets.deploy": [

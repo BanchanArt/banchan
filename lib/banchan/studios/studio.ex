@@ -14,6 +14,13 @@ defmodule Banchan.Studios.Studio do
     field :summary, :string
     field :default_terms, :string
 
+    field :stripe_id, :string
+    field :stripe_charges_enabled, :boolean
+    field :stripe_details_submitted, :boolean
+
+    field :platform_fee, :decimal,
+      default: Application.fetch_env!(:banchan, :default_platform_fee)
+
     many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
 
     has_many :offerings, Banchan.Offerings.Offering, preload_order: [:asc, :index]

@@ -22,6 +22,7 @@ defmodule Banchan.Commissions.Commission do
       on_replace: :delete
 
     has_many :events, Banchan.Commissions.Event, preload_order: [asc: :inserted_at]
+
     belongs_to :offering, Banchan.Offerings.Offering
     belongs_to :studio, Banchan.Studios.Studio
     belongs_to :client, Banchan.Accounts.User

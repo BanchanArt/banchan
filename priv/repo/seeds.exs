@@ -19,29 +19,34 @@
   })
 
 {:ok, studio} =
-  Banchan.Studios.new_studio(%Banchan.Studios.Studio{artists: [user]}, %{
-    handle: "kitteh-studio",
-    name: "Kitteh Studio",
-    description: "Kitteh-related stuff",
-    summary: """
-    ### These are all private commissions, meaning: **non-commercial**
+  Banchan.Studios.new_studio(
+    %Banchan.Studios.Studio{artists: [user]},
+    "https://banchan.art/studios/kitteh-studio",
+    %{
+      handle: "kitteh-studio",
+      name: "Kitteh Studio",
+      description: "Kitteh-related stuff",
+      summary: """
+      ### These are all private commissions, meaning: **non-commercial**
 
-    You're only paying for my service to create the work not copyrights or licensing of the work itself!
+      You're only paying for my service to create the work not copyrights or licensing of the work itself!
 
-    #### I will draw
+      #### I will draw
 
-    * Humans/humanoids
-    * anthros+furries/creatures/monsters/animals
-    * mecha/robots/vehicles
-    * environments/any type of background
+      * Humans/humanoids
+      * anthros+furries/creatures/monsters/animals
+      * mecha/robots/vehicles
+      * environments/any type of background
 
-    #### I will not draw
+      #### I will not draw
 
-    * NSFW
-    * Fanart
-    """,
-    default_terms: "I agree that this can **never be used for NFTs** in any way, shape, or form."
-  })
+      * NSFW
+      * Fanart
+      """,
+      default_terms:
+        "I agree that this can **never be used for NFTs** in any way, shape, or form."
+    }
+  )
 
 {:ok, _} =
   Banchan.Offerings.new_offering(studio, %{

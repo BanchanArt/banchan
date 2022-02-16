@@ -3,6 +3,7 @@ defmodule Banchan.CommissionsFixtures do
   This module defines test helpers for creating
   entities via the `Banchan.Commissions` context.
   """
+  @dialyzer [:no_return]
 
   @doc """
   Generate a event.
@@ -17,11 +18,15 @@ defmodule Banchan.CommissionsFixtures do
       })
 
     {:ok, studio} =
-      Banchan.Studios.new_studio(%Banchan.Studios.Studio{artists: [user]}, %{
-        handle: "test-studio",
-        name: "Test Studio",
-        description: "stuff for testing"
-      })
+      Banchan.Studios.new_studio(
+        %Banchan.Studios.Studio{artists: [user]},
+        "http://localhost:4000/studios/test-studio",
+        %{
+          handle: "test-studio",
+          name: "Test Studio",
+          description: "stuff for testing"
+        }
+      )
 
     {:ok, offering} =
       Banchan.Offerings.new_offering(studio, %{

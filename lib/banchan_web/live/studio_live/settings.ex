@@ -4,7 +4,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.Form
+  alias Surface.Components.{Form, Link}
 
   alias Banchan.Studios
   alias Banchan.Studios.Studio
@@ -18,7 +18,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   @impl true
   def mount(params, session, socket) do
     socket = assign_defaults(session, socket, true)
-    socket = assign_studio_defaults(params, socket, true)
+    socket = assign_studio_defaults(params, socket, true, false)
     {:ok, assign(socket, changeset: Studio.changeset(socket.assigns.studio, %{}))}
   end
 
@@ -38,12 +38,19 @@ defmodule BanchanWeb.StudioLive.Settings do
           <h2 class="text-xl">{@studio.name}</h2>
           <Form class="col-span-one" for={@changeset} change="change" submit="submit">
             <TextInput name={:name} icon="user" opts={required: true} />
-            <TextInput name={:handle} icon="at" opts={required: true} />
+            {!-- # TODO: Bring this back when we've figured out how this interacts with Stripe --}
+            {!-- <TextInput name={:handle} icon="at" opts={required: true} /> --}
             <TextArea name={:description} opts={required: true} />
             <TextArea name={:summary} />
             <TextArea name={:default_terms} />
             <Submit changeset={@changeset} label="Save" />
           </Form>
+          <hr>
+          <h2 class="text-xl">Stripe Dashboard</h2>
+          <Link
+            label="Go to Dashboard"
+            to={Routes.stripe_account_path(Endpoint, :redirect_to_dashboard, @studio.handle)}
+          />
         </div>
       </div>
     </StudioLayout>

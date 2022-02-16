@@ -21,7 +21,8 @@ import Config
 config :banchan,
   namespace: Banchan,
   ecto_repos: [Banchan.Repo],
-  upload_dir: Path.expand("../priv/uploads", __DIR__)
+  upload_dir: Path.expand("../priv/uploads", __DIR__),
+  default_platform_fee: System.get_env("BANCHAN_PLATFORM_FEE") || 0.07
 
 # Configures the endpoint
 config :banchan, BanchanWeb.Endpoint,
@@ -56,6 +57,10 @@ config :esbuild,
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
+
+config :stripity_stripe,
+  api_key: System.get_env("STRIPE_SECRET"),
+  endpoint_secret: System.get_env("STRIPE_ENDPOINT_SECRET")
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

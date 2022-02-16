@@ -3,6 +3,7 @@ defmodule Banchan.StudiosFixtures do
   This module defines test helpers for creating
   entities via the `Banchan.Studios` context.
   """
+  @dialyzer [:no_return]
 
   def unique_studio_name, do: "studio#{System.unique_integer()}"
   def unique_studio_handle, do: "studio#{System.unique_integer()}"
@@ -17,7 +18,10 @@ defmodule Banchan.StudiosFixtures do
   def studio_fixture(studio, attrs \\ %{}) do
     {:ok, studio} =
       studio
-      |> Banchan.Studios.new_studio(valid_studio_attributes(attrs))
+      |> Banchan.Studios.new_studio(
+        "http://localhost:4000/studios/#{studio.handle}",
+        valid_studio_attributes(attrs)
+      )
 
     studio
   end

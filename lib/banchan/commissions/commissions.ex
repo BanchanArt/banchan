@@ -7,12 +7,14 @@ defmodule Banchan.Commissions do
   alias Banchan.Repo
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions.{Commission, Event, EventAttachment, LineItem}
+  alias Banchan.Commissions.{Commission, Event, EventAttachment, Invoice, LineItem}
   alias Banchan.Offerings
   alias Banchan.Offerings.OfferingOption
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
+
+  @pubsub Banchan.PubSub
 
   def list_commission_data_for_dashboard(%User{} = user, page, order \\ nil) do
     main_dashboard_query(user)
@@ -101,11 +103,17 @@ defmodule Banchan.Commissions do
           c.studio_id == ^studio.id and c.public_id == ^public_id and
             (^current_user_member? or c.client_id == ^current_user.id),
         preload: [
-          events: [:actor, attachments: [:upload, :thumbnail]],
+          client: [],
+          studio: [],
+          events: [:actor, invoice: [], attachments: [:upload, :thumbnail]],
           line_items: [:option],
           offering: [:options]
         ]
     )
+  end
+
+  def subscribe_to_commission_events(%Commission{public_id: public_id}) do
+    Phoenix.PubSub.subscribe(@pubsub, "commission:#{public_id}")
   end
 
   @doc """
@@ -183,6 +191,16 @@ defmodule Banchan.Commissions do
 
         {:ok, event} = create_event(:status, actor, commission, [], %{status: status})
 
+        Phoenix.PubSub.broadcast!(
+          @pubsub,
+          "commission:#{commission.public_id}",
+          %Phoenix.Socket.Broadcast{
+            topic: "commission:#{commission.public_id}",
+            event: "new_status",
+            payload: commission.status
+          }
+        )
+
         {:ok, {commission, [event]}}
       end)
 
@@ -225,8 +243,22 @@ defmodule Banchan.Commissions do
                    amount: line_item.amount,
                    text: line_item.name
                  }) do
-              {:error, err} -> {:error, err}
-              {:ok, event} -> {:ok, {commission |> Repo.preload(line_items: [:option]), [event]}}
+              {:error, err} ->
+                {:error, err}
+
+              {:ok, event} ->
+                Phoenix.PubSub.broadcast_from!(
+                  @pubsub,
+                  self(),
+                  "commission:#{commission.public_id}",
+                  %Phoenix.Socket.Broadcast{
+                    topic: "commission:#{commission.public_id}",
+                    event: "line_items_changed",
+                    payload: commission.line_items
+                  }
+                )
+
+                {:ok, {commission |> Repo.preload(line_items: [:option]), [event]}}
             end
         end
       end)
@@ -254,8 +286,22 @@ defmodule Banchan.Commissions do
                    amount: line_item.amount,
                    text: line_item.name
                  }) do
-              {:error, err} -> {:error, err}
-              {:ok, event} -> {:ok, {commission, [event]}}
+              {:error, err} ->
+                {:error, err}
+
+              {:ok, event} ->
+                Phoenix.PubSub.broadcast_from!(
+                  @pubsub,
+                  self(),
+                  "commission:#{commission.public_id}",
+                  %Phoenix.Socket.Broadcast{
+                    topic: "commission:#{commission.public_id}",
+                    event: "line_items_changed",
+                    payload: commission.line_items
+                  }
+                )
+
+                {:ok, {commission, [event]}}
             end
         end
       end)
@@ -335,14 +381,33 @@ defmodule Banchan.Commissions do
   """
   def create_event(type, %User{} = actor, %Commission{} = commission, attachments, attrs \\ %{})
       when is_atom(type) do
-    %Event{
-      type: type,
-      commission: commission,
-      actor: actor,
-      attachments: attachments
-    }
-    |> Event.changeset(attrs)
-    |> Repo.insert()
+    ret =
+      %Event{
+        type: type,
+        commission: commission,
+        actor: actor,
+        attachments: attachments
+      }
+      |> Event.changeset(attrs)
+      |> Repo.insert()
+
+    case ret do
+      {:ok, event} ->
+        Phoenix.PubSub.broadcast!(
+          @pubsub,
+          "commission:#{commission.public_id}",
+          %Phoenix.Socket.Broadcast{
+            topic: "commission:#{commission.public_id}",
+            event: "new_events",
+            payload: [%{event | invoice: nil}]
+          }
+        )
+
+      _ ->
+        nil
+    end
+
+    ret
   end
 
   @doc """
@@ -394,6 +459,30 @@ defmodule Banchan.Commissions do
 
   def change_event_text(%Event{} = event, attrs \\ %{}) do
     Event.text_changeset(event, attrs)
+  end
+
+  def send_event_update!(event_id) do
+    event =
+      from(e in Event,
+        where: e.id == ^event_id,
+        select: e,
+        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail]]
+      )
+      |> Repo.one!()
+
+    public_id =
+      from(c in Commission, where: c.id == ^event.commission_id, select: c.public_id)
+      |> Repo.one!()
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "commission:#{public_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "commission:#{public_id}",
+        event: "event_updated",
+        payload: event
+      }
+    )
   end
 
   # This one expects binaries for everything because it looks everything up in one fell swoop.
@@ -458,5 +547,124 @@ defmodule Banchan.Commissions do
   def delete_attachment!(%EventAttachment{} = event_attachment) do
     # NOTE: This also deletes any associated uploads, because of the db ON DELETE
     Repo.delete!(event_attachment)
+  end
+
+  def invoice(%User{} = actor, %Commission{} = commission, amount) do
+    {:ok, _} =
+      Repo.transaction(fn ->
+        {:ok, event} = create_event(:invoice, actor, commission, [], %{amount: amount})
+
+        {:ok, _} =
+          %Invoice{
+            commission: commission,
+            event: event
+          }
+          |> Invoice.amount_changeset(%{"amount" => amount})
+          |> Repo.insert()
+
+        send_event_update!(event.id)
+      end)
+  end
+
+  def process_payment!(
+        %Event{invoice: %Invoice{amount: amount} = invoice} = event,
+        %Commission{} = commission,
+        uri,
+        tip
+      ) do
+    items = [
+      %{
+        name: "Commission Invoice Payment",
+        quantity: 1,
+        amount: amount.amount,
+        currency: String.downcase(to_string(amount.currency))
+      },
+      %{
+        name: "Extra Tip",
+        quantity: 1,
+        amount: tip.amount,
+        currency: String.downcase(to_string(tip.currency))
+      }
+    ]
+
+    platform_fee = Money.multiply(Money.add(amount, tip), commission.studio.platform_fee)
+
+    {:ok, session} =
+      Stripe.Session.create(%{
+        payment_method_types: ["card"],
+        mode: "payment",
+        cancel_url: uri,
+        success_url: uri,
+        line_items: items,
+        payment_intent_data: %{
+          application_fee_amount: platform_fee.amount,
+          transfer_data: %{
+            destination: commission.studio.stripe_id
+          }
+        }
+      })
+
+    invoice
+    |> Invoice.submit_changeset(%{
+      tip: tip,
+      platform_fee: platform_fee,
+      stripe_session_id: session.id,
+      checkout_url: session.url,
+      status: :submitted
+    })
+    |> Repo.update!()
+
+    send_event_update!(event.id)
+
+    session.url
+  end
+
+  def process_payment_succeeded!(session) do
+    {:ok, %{charges: %{data: [%{balance_transaction: txn_id}]}}} =
+      Stripe.PaymentIntent.retrieve(session.payment_intent, %{})
+
+    {:ok, %{available_on: available_on}} = Stripe.BalanceTransaction.retrieve(txn_id)
+
+    {:ok, available_on} = DateTime.from_unix(available_on)
+
+    {1, [invoice]} =
+      from(i in Invoice, where: i.stripe_session_id == ^session.id, select: i)
+      |> Repo.update_all(
+        set: [
+          status: :succeeded,
+          payout_available_on: available_on
+        ]
+      )
+
+    send_event_update!(invoice.event_id)
+    :ok
+  end
+
+  def process_payment_expired!(session) do
+    {1, [invoice]} =
+      from(i in Invoice, where: i.stripe_session_id == ^session.id, select: i)
+      |> Repo.update_all(set: [status: :expired])
+
+    send_event_update!(invoice.event_id)
+  end
+
+  def expire_payment!(%Invoice{id: id, stripe_session_id: nil}) do
+    {1, [invoice]} =
+      from(i in Invoice, where: i.id == ^id, select: i)
+      |> Repo.update_all(set: [status: :expired])
+
+    send_event_update!(invoice.event_id)
+  end
+
+  def expire_payment!(%Invoice{stripe_session_id: session_id}) do
+    {:ok, _} =
+      Stripe.Request.new_request([])
+      |> Stripe.Request.put_endpoint("checkout/sessions/#{session_id}/expire")
+      |> Stripe.Request.put_method(:post)
+      |> Stripe.Request.make_request()
+
+    # NOTE: We don't manually expire the invoice in the database here. That's
+    # handled by process_payment_expired!/1 when the webhook fired.
+    :ok
   end
 end

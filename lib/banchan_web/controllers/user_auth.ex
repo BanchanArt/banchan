@@ -8,6 +8,8 @@ defmodule BanchanWeb.UserAuth do
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
 
+  @pubsub Banchan.PubSub
+
   # Make the remember me cookie valid for 60 days.
   # If you want bump or reduce this value, also change
   # the token expiry itself in UserToken.
@@ -80,7 +82,11 @@ defmodule BanchanWeb.UserAuth do
     user_token && Accounts.delete_session_token(user_token)
 
     if live_socket_id = get_session(conn, :live_socket_id) do
-      BanchanWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
+      Phoenix.PubSub.broadcast(@pubsub, live_socket_id, %Phoenix.Socket.Broadcast{
+        topic: live_socket_id,
+        event: "disconnect",
+        payload: %{}
+      })
     end
 
     conn

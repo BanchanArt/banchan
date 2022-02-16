@@ -6,7 +6,7 @@ defmodule Banchan.Commissions.Event do
   import Ecto.Changeset
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions.{Commission, Common, EventAttachment}
+  alias Banchan.Commissions.{Commission, Common, EventAttachment, Invoice}
 
   schema "commission_events" do
     field :public_id, :string, autogenerate: {Common, :gen_public_id, []}
@@ -17,7 +17,7 @@ defmodule Banchan.Commissions.Event do
         :comment,
         :line_item_added,
         :line_item_removed,
-        :payment_request,
+        :invoice,
         :payment_processed,
         :status
       ]
@@ -31,6 +31,7 @@ defmodule Banchan.Commissions.Event do
 
     belongs_to :actor, User
     belongs_to :commission, Commission
+    has_one :invoice, Invoice
     has_many :attachments, EventAttachment
     timestamps()
   end
@@ -41,10 +42,27 @@ defmodule Banchan.Commissions.Event do
     |> cast(attrs, [:type, :text, :amount, :status])
     |> cast_assoc(:actor, required: true)
     |> cast_assoc(:commission)
+    |> validate_money(:amount)
     |> validate_required([:type])
   end
 
   def text_changeset(event, attrs) do
     event |> cast(attrs, [:text])
+  end
+
+  def amount_changeset(event, attrs) do
+    event
+    |> cast(attrs, [:amount])
+    |> validate_money(:amount)
+    |> validate_required([:amount])
+  end
+
+  defp validate_money(changeset, field) do
+    validate_change(changeset, field, fn
+      _, %Money{} -> []
+      _, "" -> []
+      _, nil -> []
+      _, _ -> [{field, "must be an amount"}]
+    end)
   end
 end

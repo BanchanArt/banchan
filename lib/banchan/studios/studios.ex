@@ -2,6 +2,13 @@ defmodule Banchan.Studios do
   @moduledoc """
   The Studios context.
   """
+  @dialyzer [
+    {:nowarn_function, create_stripe_account: 1},
+    {:nowarn_function, get_dashboard_login_link!: 1},
+    :no_return
+  ]
+
+  @pubsub Banchan.PubSub
 
   import Ecto.Query, warn: false
 
@@ -52,10 +59,17 @@ defmodule Banchan.Studios do
       iex> new_studio(studio, %{handle: ..., name: ..., ...})
       {:ok, %Studio{}}
   """
-  def new_studio(studio, attrs) do
-    studio
-    |> Studio.changeset(attrs)
-    |> Repo.insert()
+  def new_studio(studio, url, attrs) do
+    changeset = studio |> Studio.changeset(attrs)
+
+    changeset =
+      if changeset.valid? do
+        %{changeset | data: %{studio | stripe_id: create_stripe_account(url)}}
+      else
+        changeset
+      end
+
+    changeset |> Repo.insert()
   end
 
   @doc """
@@ -125,5 +139,90 @@ defmodule Banchan.Studios do
     Repo.exists?(
       from us in "users_studios", where: us.user_id == ^user.id and us.studio_id == ^studio.id
     )
+  end
+
+  def get_onboarding_link(%Studio{} = studio, return_url, refresh_url) do
+    {:ok, link} =
+      Stripe.AccountLink.create(%{
+        account: studio.stripe_id,
+        type: "account_onboarding",
+        return_url: return_url,
+        refresh_url: refresh_url
+      })
+
+    link.url
+  end
+
+  def charges_enabled?(%Studio{} = studio, refresh \\ false) do
+    if refresh do
+      {:ok, acct} = Stripe.Account.retrieve(studio.stripe_id)
+
+      if acct.charges_enabled != studio.stripe_charges_enabled do
+        update_stripe_state(studio.stripe_id, acct)
+      end
+
+      acct.charges_enabled
+    else
+      studio.stripe_charges_enabled
+    end
+  end
+
+  def update_stripe_state(account_id, account) do
+    ret =
+      from(s in Studio, where: s.stripe_id == ^account_id)
+      |> Repo.update_all(
+        set: [
+          stripe_charges_enabled: account.charges_enabled,
+          stripe_details_submitted: account.details_submitted
+        ]
+      )
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "studio_stripe_state:#{account_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "studio_stripe_state:#{account_id}",
+        event: "charges_state_changed",
+        payload: account.charges_enabled
+      }
+    )
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "studio_stripe_state:#{account_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "studio_stripe_state:#{account_id}",
+        event: "details_submitted_changed",
+        payload: account.details_submitted
+      }
+    )
+
+    ret
+  end
+
+  def subscribe_to_stripe_state(%Studio{stripe_id: stripe_id}) do
+    Phoenix.PubSub.subscribe(@pubsub, "studio_stripe_state:#{stripe_id}")
+  end
+
+  def get_dashboard_login_link!(%Studio{stripe_id: stripe_id}) do
+    {:ok, link} = Stripe.Account.create_login_link(stripe_id, %{})
+    link.url
+  end
+
+  defp create_stripe_account(studio_url) do
+    # NOTE: I don't know why dialyzer complains about this. It works just fine.
+    {:ok, acct} =
+      Stripe.Account.create(%{
+        type: "express",
+        settings: %{payouts: %{schedule: %{interval: "manual"}}},
+        business_profile: %{
+          # Digital Media
+          mcc: "7333",
+          # Just to make our lives easier.
+          url: String.replace(studio_url, "http://localhost:4000", "https://banchan.art")
+        }
+      })
+
+    acct.id
   end
 end

@@ -6,7 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
 
   alias Banchan.Commissions.Common
 
-  alias BanchanWeb.StudioLive.Components.Comment
+  alias BanchanWeb.StudioLive.Components.{Comment, InvoiceEvent}
   alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
 
   prop current_user, :struct, required: true
@@ -24,24 +24,39 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
   end
 
   def render(assigns) do
-    event_chunks = Enum.chunk_by(assigns.commission.events, &(&1.type == :comment))
+    event_chunks =
+      Enum.chunk_by(
+        assigns.commission.events,
+        &(&1.type == :comment || &1.type == :invoice)
+      )
 
     ~F"""
     <div class="timeline">
       {#for chunk <- event_chunks}
-        {#if List.first(chunk).type == :comment}
+        {#if List.first(chunk).type == :comment || List.first(chunk).type == :invoice}
           <div class="flex flex-col space-y-4">
             {#for event <- chunk}
               <article class="timeline-item" id={"event-#{event.public_id}"}>
-                <Comment
-                  id={"event-#{event.public_id}"}
-                  uri={@uri}
-                  studio={@studio}
-                  event={event}
-                  commission={@commission}
-                  current_user={@current_user}
-                  current_user_member?={@current_user_member?}
-                />
+                {#if event.type == :comment}
+                  <Comment
+                    id={"event-#{event.public_id}"}
+                    uri={@uri}
+                    studio={@studio}
+                    event={event}
+                    commission={@commission}
+                    current_user={@current_user}
+                    current_user_member?={@current_user_member?}
+                  />
+                {#elseif event.type == :invoice}
+                  <InvoiceEvent
+                    id={"event-#{event.public_id}"}
+                    uri={@uri}
+                    current_user={@current_user}
+                    current_user_member?={@current_user_member?}
+                    commission={@commission}
+                    event={event}
+                  />
+                {/if}
               </article>
             {/for}
           </div>
@@ -56,10 +71,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                 {#match :line_item_removed}
                   <TimelineItem uri={@uri} icon="✕" event={event}>
                     removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))})
-                  </TimelineItem>
-                {#match :payment_request}
-                  <TimelineItem uri={@uri} icon="$" event={event}>
-                    requested payment of {Money.to_string(event.amount)}
                   </TimelineItem>
                 {#match :payment_processed}
                   <TimelineItem uri={@uri} icon="$" event={event}>

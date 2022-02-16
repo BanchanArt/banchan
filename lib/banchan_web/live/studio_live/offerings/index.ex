@@ -17,7 +17,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Index do
   @impl true
   def mount(params, session, socket) do
     socket = assign_defaults(session, socket, true)
-    socket = assign_studio_defaults(params, socket, true)
+    socket = assign_studio_defaults(params, socket, true, false)
 
     offerings =
       Studios.list_studio_offerings(socket.assigns.studio, socket.assigns.current_user_member?)

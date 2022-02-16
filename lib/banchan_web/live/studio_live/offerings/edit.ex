@@ -14,7 +14,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
   @impl true
   def mount(%{"offering_type" => offering_type} = params, session, socket) do
     socket = assign_defaults(session, socket, true)
-    socket = assign_studio_defaults(params, socket, true)
+    socket = assign_studio_defaults(params, socket, true, false)
     offering = Offerings.get_offering_by_type!(offering_type, socket.assigns.current_user_member?)
     changeset = Offering.changeset(offering, %{})
 
