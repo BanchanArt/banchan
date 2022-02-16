@@ -23,6 +23,7 @@ defmodule BanchanWeb.StudioLive.Components.TabButton do
         "text-center",
         "rounded-t-lg",
         "text-secondary-content",
+        "flex-1",
         "tab-active": @current_tab == @tab_name,
         "bg-primary": @current_tab != @tab_name,
         "bg-primary-focus": @current_tab == @tab_name
