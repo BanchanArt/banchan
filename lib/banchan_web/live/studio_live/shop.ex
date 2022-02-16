@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Shop do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.Components.{Button, Card}
+  alias BanchanWeb.Components.{Button, Card, Markdown}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{CommissionCard, StudioLayout}
   import BanchanWeb.StudioLive.Helpers
@@ -20,7 +20,6 @@ defmodule BanchanWeb.StudioLive.Shop do
     studio = socket.assigns.studio
     members = Studios.list_studio_members(studio)
     offerings = Studios.list_studio_offerings(studio, socket.assigns.current_user_member?)
-    summary = studio.summary && HtmlSanitizeEx.markdown_html(Earmark.as_html!(studio.summary))
 
     Studios.subscribe_to_stripe_state(studio)
 
@@ -35,7 +34,6 @@ defmodule BanchanWeb.StudioLive.Shop do
      assign(socket,
        members: members,
        offerings: offerings,
-       summary: summary,
        stripe_onboarding_url: stripe_onboarding_url
      )}
   end
@@ -73,13 +71,13 @@ defmodule BanchanWeb.StudioLive.Shop do
     >
       <div class="md:grid md:grid-cols-3 gap-4">
         <div class="md:order-last">
-          {#if @summary}
+          {#if @studio.summary}
             <div class="bg-base-200 text-base-content">
               <Card>
                 <:header>
-                  Summary
+                  <span class="text-2xl">Summary</span>
                 </:header>
-                <div class="">{raw(@summary)}</div>
+                <Markdown content={@studio.summary} />
               </Card>
             </div>
           {/if}
