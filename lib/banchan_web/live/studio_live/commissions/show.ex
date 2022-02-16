@@ -11,7 +11,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     CommentBox,
     InvoiceForm,
     Status,
-    Summary,
+    SummaryEditor,
     Timeline
   }
 
@@ -84,101 +84,6 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   end
 
   @impl true
-  def handle_event("add_item", %{"value" => idx}, socket) do
-    {idx, ""} = Integer.parse(idx)
-
-    commission = socket.assigns.commission
-
-    option =
-      if commission.offering do
-        {:ok, option} = Enum.fetch(commission.offering.options, idx)
-        option
-      else
-        %{
-          # TODO: fill this out?
-        }
-      end
-
-    if !socket.assigns.current_user_member? ||
-         (!option.multiple &&
-            Enum.any?(commission.line_items, &(&1.option && &1.option.id == option.id))) do
-      # Deny the change. This shouldn't happen unless there's a bug, or
-      # someone is trying to send us Shenanigans data.
-      {:noreply, socket}
-    else
-      {:ok, {commission, _events}} =
-        Commissions.add_line_item(socket.assigns.current_user, commission, option)
-
-      {:noreply, assign(socket, commission: commission)}
-    end
-  end
-
-  def handle_event("remove_item", %{"value" => idx}, socket) do
-    {idx, ""} = Integer.parse(idx)
-    line_item = Enum.at(socket.assigns.commission.line_items, idx)
-
-    if socket.assigns.current_user_member? && line_item && !line_item.sticky do
-      {:ok, {commission, _events}} =
-        Commissions.remove_line_item(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          line_item
-        )
-
-      {:noreply, assign(socket, commission: commission)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_event("toggle_custom", _, socket) do
-    {:noreply, assign(socket, open_custom: !socket.assigns.open_custom)}
-  end
-
-  def handle_event(
-        "change_custom",
-        %{"line_item" => %{"name" => name, "description" => description, "amount" => amount}},
-        socket
-      ) do
-    changeset =
-      %LineItem{}
-      |> LineItem.custom_changeset(%{
-        name: name,
-        description: description,
-        amount: moneyfy(amount)
-      })
-      |> Map.put(:action, :insert)
-
-    {:noreply, socket |> assign(:custom_changeset, changeset)}
-  end
-
-  def handle_event(
-        "submit_custom",
-        %{"line_item" => %{"name" => name, "description" => description, "amount" => amount}},
-        socket
-      ) do
-    commission = socket.assigns.commission
-
-    if socket.assigns.current_user_member? do
-      {:ok, {commission, _events}} =
-        Commissions.add_line_item(socket.assigns.current_user, commission, %{
-          name: name,
-          description: description,
-          amount: moneyfy(amount)
-        })
-
-      {:noreply,
-       assign(socket,
-         commission: commission,
-         custom_changeset: %LineItem{} |> LineItem.custom_changeset(%{})
-       )}
-    else
-      # Deny the change. This shouldn't happen unless there's a bug, or
-      # someone is trying to send us Shenanigans data.
-      {:noreply, socket}
-    end
-  end
-
   def handle_event("update-status", %{"status" => [new_status]}, socket) do
     comm = %{socket.assigns.commission | tos_ok: true}
 
@@ -186,17 +91,6 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       Commissions.update_status(socket.assigns.current_user, comm, new_status)
 
     {:noreply, socket |> assign(commission: commission)}
-  end
-
-  defp moneyfy(amount) do
-    # TODO: In the future, we can replace this :USD with a param and the DB will be fine.
-    case Money.parse(amount, :USD) do
-      {:ok, money} ->
-        money
-
-      :error ->
-        amount
-    end
   end
 
   @impl true
@@ -230,17 +124,11 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
           <div class="col-span-2 col-end-13 p-6">
             <div id="sidebar">
               <div class="block sidebar-box">
-                <Summary
-                  line_items={@commission.line_items}
-                  offering={@commission.offering}
+                <SummaryEditor
+                  id="summary-editor"
+                  current_user={@current_user}
+                  commission={@commission}
                   allow_edits={@current_user_member?}
-                  add_item="add_item"
-                  remove_item="remove_item"
-                  custom_changeset={@custom_changeset}
-                  open_custom={@open_custom}
-                  toggle_custom="toggle_custom"
-                  change_custom="change_custom"
-                  submit_custom="submit_custom"
                 />
               </div>
               <div class="block sidebar-box">

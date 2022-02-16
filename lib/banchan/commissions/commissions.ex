@@ -247,9 +247,8 @@ defmodule Banchan.Commissions do
                 {:error, err}
 
               {:ok, event} ->
-                Phoenix.PubSub.broadcast_from!(
+                Phoenix.PubSub.broadcast!(
                   @pubsub,
-                  self(),
                   "commission:#{commission.public_id}",
                   %Phoenix.Socket.Broadcast{
                     topic: "commission:#{commission.public_id}",
@@ -290,9 +289,8 @@ defmodule Banchan.Commissions do
                 {:error, err}
 
               {:ok, event} ->
-                Phoenix.PubSub.broadcast_from!(
+                Phoenix.PubSub.broadcast!(
                   @pubsub,
-                  self(),
                   "commission:#{commission.public_id}",
                   %Phoenix.Socket.Broadcast{
                     topic: "commission:#{commission.public_id}",
