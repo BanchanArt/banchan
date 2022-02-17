@@ -5,7 +5,6 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   use BanchanWeb, :surface_view
 
   alias Banchan.Commissions
-  alias Banchan.Commissions.LineItem
 
   alias BanchanWeb.StudioLive.Components.Commissions.{
     CommentBox,
@@ -34,16 +33,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
 
     Commissions.subscribe_to_commission_events(commission)
 
-    custom_changeset =
-      if socket.assigns.current_user_member? do
-        %LineItem{} |> LineItem.custom_changeset(%{})
-      else
-        nil
-      end
-
-    {:ok,
-     socket
-     |> assign(commission: commission, custom_changeset: custom_changeset, open_custom: false)}
+    {:ok, socket |> assign(commission: commission)}
   end
 
   @impl true
