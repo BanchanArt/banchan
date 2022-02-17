@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.MediaPreview do
+defmodule BanchanWeb.StudioLive.Components.Commissions.MediaPreview do
   @moduledoc """
   Media previewer meant for attachments in the commission page
   """

@@ -6,8 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
 
   alias Banchan.Commissions.Common
 
-  alias BanchanWeb.StudioLive.Components.{Comment, InvoiceEvent}
-  alias BanchanWeb.StudioLive.Components.Commissions.TimelineItem
+  alias BanchanWeb.StudioLive.Components.Commissions.{Comment, InvoiceEvent, TimelineItem}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
