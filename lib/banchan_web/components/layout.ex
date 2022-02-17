@@ -21,7 +21,7 @@ defmodule BanchanWeb.Components.Layout do
       {#if slot_assigned?(:hero)}
         <#slot name="hero" />
       {/if}
-      <section class="px-4 flex flex-col flex-grow">
+      <section class="flex flex-col flex-grow">
         <Flash flashes={@flashes} />
         <#slot />
       </section>

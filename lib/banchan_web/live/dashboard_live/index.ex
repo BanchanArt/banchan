@@ -53,14 +53,16 @@ defmodule BanchanWeb.DashboardLive do
     <Layout current_user={@current_user} flashes={@flash}>
       <div class="flex flex-col max-h-full grow">
         <h1 class="text-2xl p-2">Commission Dashboard</h1>
-        <hr class="p-2">
-        <ul class="divide-y flex-grow">
-          {#for result <- @results.entries}
-            <li>
-              <DashboardResult result={result} />
-            </li>
-          {/for}
-        </ul>
+        <hr>
+        <div class="flex-grow">
+          <ul class="divide-y flex-grow flex flex-col">
+            {#for result <- @results.entries}
+              <li>
+                <DashboardResult result={result} />
+              </li>
+            {/for}
+          </ul>
+        </div>
         <DashboardPaginator page={@results} />
       </div>
     </Layout>
