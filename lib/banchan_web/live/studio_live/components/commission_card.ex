@@ -40,10 +40,10 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
       <:image>
         <img class="object-cover" src={Routes.static_path(Endpoint, "/images/hj-illustration.jpg")}>
       </:image>
-      <div class="content">
-        <p class="mt-2">{@offering.description}</p>
-        <p class="text-success mt-2">
-          Base Price:
+      <div class="flex flex-col grow">
+        <p class="mt-2 grow flex">{@offering.description}</p>
+        <p class="text-success mt-2 grow-0">
+          <span class="font-bold">Base Price:</span>
           {#if base_price}
             <span class="float-right">{base_price}</span>
           {#else}

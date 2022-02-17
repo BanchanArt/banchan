@@ -70,9 +70,9 @@ defmodule BanchanWeb.StudioLive.Shop do
       tab={:shop}
     >
       {#if Studios.charges_enabled?(@studio)}
-        <div class="flex flex-wrap pt-4">
+        <div class="flex flex-wrap pt-4 items-stretch">
           {#for offering <- @offerings}
-            <div class="md:basis-1/2 p-2">
+            <div class="md:basis-1/2 p-2 max-w-sm flex flex-grow flex-col">
               <CommissionCard studio={@studio} offering={offering} />
             </div>
           {#else}
