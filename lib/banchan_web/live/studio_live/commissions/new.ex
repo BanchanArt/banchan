@@ -206,41 +206,49 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
       current_user_member?={@current_user_member?}
       tab={:shop}
     >
-      <div class="flex flex-col space-y-2 md:container md:mx-auto">
+      <div class="flex flex-col space-y-2 md:container md:mx-auto p-2">
         <h1 class="text-3xl p-2">{@offering.name}</h1>
         <h2 class="text-xl p-2">{@offering.description}</h2>
         <Form for={@changeset} change="change" submit="submit">
-          <div class="block space-y-4">
-            <TextInput
-              name={:title}
-              show_label={false}
-              class="w-full"
-              opts={required: true, placeholder: "A Brief Title"}
-            />
-            <Summary
-              add_item="add_item"
-              allow_edits
-              remove_item="remove_item"
-              line_items={@line_items}
-              offering={@offering}
-            />
-            <MarkdownInput
-              id="initial-message"
-              name={:description}
-              show_label={false}
-              class="w-full"
-              opts={required: true, placeholder: "Here's what I'd like..."}
-            />
-            <UploadInput upload={@uploads.attachment} cancel="cancel_upload" />
+          <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
+            <div class="md:order-1 md:col-span-2">
+              <TextInput
+                name={:title}
+                show_label={false}
+                class="w-full"
+                opts={required: true, placeholder: "A Brief Title"}
+              />
+            </div>
+            <div class="md:order-2 md:col-span-1 md:row-span-5">
+              <Summary
+                add_item="add_item"
+                allow_edits
+                remove_item="remove_item"
+                line_items={@line_items}
+                offering={@offering}
+              />
+            </div>
+            <div class="md:order-2 md:col-span-2 md:row-span-2">
+              <MarkdownInput
+                id="initial-message"
+                name={:description}
+                show_label={false}
+                class="w-full"
+                opts={required: true, placeholder: "Here's what I'd like..."}
+              />
+            </div>
+            <div class="md:col-span-2 md:order-4 md:row-span-2">
+              <UploadInput upload={@uploads.attachment} cancel="cancel_upload" />
+              <div class="pt-2">
+                <h3 class="font-bold text-xl">Commission Terms and Conditions</h3>
+                <Markdown content={@terms} />
+              </div>
+              <Checkbox name={:tos_ok} opts={required: true}>
+                I have read and agree to these Terms and Conditions.
+              </Checkbox>
+              <Submit changeset={@changeset} />
+            </div>
           </div>
-          <div class="pt-2">
-            <h3 class="font-bold text-xl">Commission Terms and Conditions</h3>
-            <Markdown content={@terms} />
-          </div>
-          <Checkbox name={:tos_ok} opts={required: true}>
-            I have read and agree to these Terms and Conditions.
-          </Checkbox>
-          <Submit changeset={@changeset} />
         </Form>
       </div>
     </StudioLayout>
