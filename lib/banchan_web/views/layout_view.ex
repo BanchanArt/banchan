@@ -18,7 +18,7 @@ defmodule BanchanWeb.LayoutView do
           src={Routes.static_path(@conn, "/assets/app.js")}
         />
       </head>
-      <body class="flex flex-col h-full">
+      <body>
         {@inner_content}
       </body>
     </html>

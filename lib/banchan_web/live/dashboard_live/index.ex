@@ -51,15 +51,20 @@ defmodule BanchanWeb.DashboardLive do
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Commission Dashboard</h1>
-      <ul class="divide-y">
-        {#for result <- @results.entries}
-          <li>
-            <DashboardResult result={result} />
-          </li>
-        {/for}
-      </ul>
-      <DashboardPaginator page={@results} />
+      <div class="flex flex-col max-h-full grow">
+        <h1 class="text-2xl p-2">Commission Dashboard</h1>
+        <hr>
+        <div class="flex-grow">
+          <ul class="divide-y flex-grow flex flex-col">
+            {#for result <- @results.entries}
+              <li>
+                <DashboardResult result={result} />
+              </li>
+            {/for}
+          </ul>
+        </div>
+        <DashboardPaginator page={@results} />
+      </div>
     </Layout>
     """
   end

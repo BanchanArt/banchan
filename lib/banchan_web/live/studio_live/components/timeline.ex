@@ -31,10 +31,10 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
       )
 
     ~F"""
-    <div class="timeline">
+    <div>
       {#for chunk <- event_chunks}
         {#if List.first(chunk).type == :comment || List.first(chunk).type == :invoice}
-          <div class="flex flex-col space-y-4">
+          <div class="flex flex-col space-y-2">
             {#for event <- chunk}
               <article class="timeline-item" id={"event-#{event.public_id}"}>
                 {#if event.type == :comment}

@@ -20,7 +20,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
     ~F"""
     <Layout current_user={@current_user} flashes={@flashes}>
       <:hero>
-        <section class="grid grid-cols-2 bg-secondary">
+        <section class="bg-secondary">
           <div class="ml-8 col-span-12">
             <p class="text-3xl text-secondary-content font-bold flex-grow">
               {@studio.name}
@@ -32,52 +32,47 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
             </p>
             <br>
           </div>
-          <nav class={
-            "tabs",
-            "ml-8",
-            "col-span-1",
-            "inline-grid",
-            "grid-cols-5": @current_user_member?,
-            "grid-cols-4": !@current_user_member?
-          }>
-            <TabButton
-              studio={@studio}
-              label="Shop"
-              tab_name={:shop}
-              current_tab={@tab}
-              to={Routes.studio_shop_path(Endpoint, :show, @studio.handle)}
-            />
-            <TabButton
-              studio={@studio}
-              label="About"
-              tab_name={:about}
-              current_tab={@tab}
-              to={Routes.studio_about_path(Endpoint, :show, @studio.handle)}
-            />
-            <TabButton
-              studio={@studio}
-              label="Portfolio"
-              tab_name={:portfolio}
-              current_tab={@tab}
-              to={Routes.studio_portfolio_path(Endpoint, :show, @studio.handle)}
-            />
-            <TabButton
-              studio={@studio}
-              label="Q&A"
-              tab_name={:qa}
-              current_tab={@tab}
-              to={Routes.studio_qa_path(Endpoint, :show, @studio.handle)}
-            />
-            {#if @current_user_member?}
+          <div class="overflow-auto min-w-screen">
+            <nav class="tabs px-2 flex flex-nowrap">
               <TabButton
                 studio={@studio}
-                label="Settings"
-                tab_name={:settings}
+                label="Shop"
+                tab_name={:shop}
                 current_tab={@tab}
-                to={Routes.studio_settings_path(Endpoint, :show, @studio.handle)}
+                to={Routes.studio_shop_path(Endpoint, :show, @studio.handle)}
               />
-            {/if}
-          </nav>
+              <TabButton
+                studio={@studio}
+                label="About"
+                tab_name={:about}
+                current_tab={@tab}
+                to={Routes.studio_about_path(Endpoint, :show, @studio.handle)}
+              />
+              <TabButton
+                studio={@studio}
+                label="Portfolio"
+                tab_name={:portfolio}
+                current_tab={@tab}
+                to={Routes.studio_portfolio_path(Endpoint, :show, @studio.handle)}
+              />
+              <TabButton
+                studio={@studio}
+                label="Q&A"
+                tab_name={:qa}
+                current_tab={@tab}
+                to={Routes.studio_qa_path(Endpoint, :show, @studio.handle)}
+              />
+              {#if @current_user_member?}
+                <TabButton
+                  studio={@studio}
+                  label="Settings"
+                  tab_name={:settings}
+                  current_tab={@tab}
+                  to={Routes.studio_settings_path(Endpoint, :show, @studio.handle)}
+                />
+              {/if}
+            </nav>
+          </div>
         </section>
       </:hero>
       <#slot />

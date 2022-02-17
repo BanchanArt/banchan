@@ -21,11 +21,11 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
     ~F"""
     <Card>
       <:header>
-        {@offering.name}
+        <div class="text-lg font-bold">{@offering.name}</div>
       </:header>
       <:header_aside>
         {#if @offering.open && !is_nil(@offering.slots)}
-          <div class="badge badge-outline badge-error">{available_slots}/{@offering.slots} Slots</div>
+          <div class="badge badge-outline badge-success">{available_slots}/{@offering.slots} Slots</div>
         {#elseif !@offering.open && !is_nil(@offering.slots)}
           <div class="badge badge-error badge-outline">0/{@offering.slots} Slots</div>
         {#elseif @offering.open}
@@ -38,12 +38,12 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
         {/if}
       </:header_aside>
       <:image>
-        <img class="object-cover" src={Routes.static_path(Endpoint, "/images/640x360.png")}>
+        <img class="object-cover" src={Routes.static_path(Endpoint, "/images/hj-illustration.jpg")}>
       </:image>
-      <div class="content">
-        <p class="mt-2">{@offering.description}</p>
-        <p class="text-success mt-2">
-          Base Price:
+      <div class="flex flex-col grow">
+        <p class="mt-2 grow flex">{@offering.description}</p>
+        <p class="text-success mt-2 grow-0">
+          <span class="font-bold">Base Price:</span>
           {#if base_price}
             <span class="float-right">{base_price}</span>
           {#else}
@@ -56,10 +56,10 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
           {#if @offering.open}
             <LiveRedirect
               to={Routes.studio_commissions_new_path(Endpoint, :new, @studio.handle, @offering.type)}
-              class="btn btn-sm text-center btn-info"
+              class="btn text-center btn-info"
             >Request</LiveRedirect>
           {#else}
-            <LiveRedirect to="#" class="btn btn-sm text-center btn-info">Notify Me</LiveRedirect>
+            <LiveRedirect to="#" class="btn text-center btn-info">Notify Me</LiveRedirect>
           {/if}
         </div>
       </:footer>

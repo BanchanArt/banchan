@@ -16,15 +16,4 @@ defmodule BanchanWeb.Components.SessionTest do
 
     assert html =~ "Log in"
   end
-
-  test "renders logout stuff when logged in" do
-    html =
-      render_surface do
-        ~F"""
-        <Nav current_user={%{email: "abc@example.com", handle: "abc"}} />
-        """
-      end
-
-    assert html =~ "Log out"
-  end
 end
