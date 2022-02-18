@@ -10,6 +10,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   alias Surface.Components.Form
 
+  alias BanchanWeb.Components.Markdown
   alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.Commissions.Summary
@@ -22,10 +23,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     socket = assign_studio_defaults(params, socket, false, true)
     offering = Offerings.get_offering_by_type!(offering_type, socket.assigns.current_user_member?)
 
-    terms =
-      HtmlSanitizeEx.markdown_html(
-        Earmark.as_html!(offering.terms || socket.assigns.studio.default_terms || "")
-      )
+    terms = offering.terms || socket.assigns.studio.default_terms || ""
 
     if offering.open do
       default_items =
@@ -208,43 +206,20 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
       current_user_member?={@current_user_member?}
       tab={:shop}
     >
-      <div class="grid grid-cols-13 gap-4">
-        <div class="col-span-10 shadow bg-base-200 text-base-content">
-          <div class="p-6 space-y-2">
-            <h1 class="text-2xl">{@offering.name}</h1>
-            <h2 class="text-xl">{@offering.description}</h2>
-            <Form for={@changeset} change="change" submit="submit">
-              <div class="block space-y-4">
-                <TextInput
-                  name={:title}
-                  show_label={false}
-                  class="w-full"
-                  opts={required: true, placeholder: "A Brief Title"}
-                />
-                <MarkdownInput
-                  id="initial-message"
-                  name={:description}
-                  show_label={false}
-                  class="w-full"
-                  opts={required: true, placeholder: "Here's what I'd like..."}
-                />
-                <UploadInput upload={@uploads.attachment} cancel="cancel_upload" />
-              </div>
-              <div class="content block">
-                <h3>Terms and Conditions</h3>
-                <p><strong>These Terms might vary between commission type.</strong></p>
-                <div>{raw(@terms)}</div>
-              </div>
-              <Checkbox name={:tos_ok} opts={required: true}>
-                I have read and agree to these Terms and Conditions.
-              </Checkbox>
-              <Submit changeset={@changeset} />
-            </Form>
-          </div>
-        </div>
-        <div class="col-span-2 col-end-13 p-6">
-          <div id="sidebar">
-            <div class="block sidebar-box">
+      <div class="flex flex-col space-y-2 md:container md:mx-auto p-2">
+        <h1 class="text-3xl px-2">{@offering.name}</h1>
+        <h2 class="text-xl px-2">{@offering.description}</h2>
+        <Form for={@changeset} change="change" submit="submit">
+          <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
+            <div class="md:order-1 md:col-span-2">
+              <TextInput
+                name={:title}
+                show_label={false}
+                class="w-full"
+                opts={required: true, placeholder: "A Brief Title"}
+              />
+            </div>
+            <div class="md:order-2 md:col-span-1 md:row-span-5">
               <Summary
                 add_item="add_item"
                 allow_edits
@@ -253,8 +228,36 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 offering={@offering}
               />
             </div>
+            <div class="md:order-2 md:col-span-2 md:row-span-2">
+              <MarkdownInput
+                id="initial-message"
+                name={:description}
+                show_label={false}
+                class="w-full"
+                opts={required: true, placeholder: "Here's what I'd like..."}
+              />
+            </div>
+            <div class="md:col-span-2 md:order-4 md:row-span-2">
+              <UploadInput upload={@uploads.attachment} cancel="cancel_upload" />
+              <div class="pt-2">
+                <h3 class="py-4 font-bold text-xl">Commission Terms and Conditions</h3>
+                <div class="p-2 border-2 rounded border-neutral max-h-60 overflow-auto">
+                  <div class="p-2">
+                    <Markdown content={@terms} />
+                  </div>
+                </div>
+              </div>
+              <div class="p-2">
+                <Checkbox name={:tos_ok} opts={required: true}>
+                  I have read and agree to these Terms.
+                </Checkbox>
+              </div>
+              <div class="p-2">
+                <Submit changeset={@changeset} />
+              </div>
+            </div>
           </div>
-        </div>
+        </Form>
       </div>
     </StudioLayout>
     """
