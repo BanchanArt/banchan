@@ -35,15 +35,20 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
     <div class="flex flex-col">
       <ul class="flex flex-col">
         {#for {item, idx} <- Enum.with_index(@line_items)}
-          <li class="flex p-2">
+          <li class="flex p-2 gap-2">
             {#if @allow_edits && !item.sticky}
               <button :on-click={@remove_item} value={idx} class="text-xl w-8 fas fa-times-circle" />
             {#else}
-              <div class="w-8" />
+              <button
+                type="button"
+                disabled="true"
+                title="This item cannot be removed"
+                class="w-8 place-self-center text-xl fas fa-thumbtack"
+              />
             {/if}
             <div class="grow flex flex-col">
-              <div>{item.name}</div>
-              <div>{item.description}</div>
+              <div class="font-bold">{item.name}</div>
+              <div class="text-sm">{item.description}</div>
             </div>
             <div class="p-2">{Money.to_string(item.amount)}</div>
           </li>
@@ -51,24 +56,24 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
       </ul>
       <hr class="pt-2">
       <div class="p-2 flex">
-        <div class="text-xl grow">Estimate:</div>
+        <div class="font-bold grow">Estimate:</div>
         <div class="p-2">{estimate}</div>
       </div>
       <hr class="pt-2">
       {#if @offering && Enum.any?(@offering.options)}
-        <h5 class="text-xl p-2">Add-ons</h5>
+        <h5 class="text-xl p-2">Add-ons:</h5>
         <ul class="flex flex-col">
           {#for {option, idx} <- Enum.with_index(@offering.options)}
             {#if option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
-              <li class="flex p-2">
+              <li class="flex gap-2 p-2">
                 {#if @allow_edits}
                   <button :on-click={@add_item} value={idx} class="w-8 text-xl fas fa-plus-circle" />
                 {#else}
                   <div class="w-8" />
                 {/if}
                 <div class="grow flex flex-col">
-                  <div>{option.name}</div>
-                  <div>{option.description}</div>
+                  <div class="font-bold">{option.name}</div>
+                  <div class="text-sm">{option.description}</div>
                 </div>
                 <div class="p-2">{Money.to_string(option.price)}</div>
               </li>

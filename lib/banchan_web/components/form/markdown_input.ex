@@ -7,6 +7,8 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   alias Surface.Components.Form.{ErrorTag, Field, Label, TextArea}
   alias Surface.Components.Form.Input.InputContext
 
+  alias BanchanWeb.Components.Markdown
+
   prop name, :any, required: true
   prop opts, :keyword, default: []
   prop label, :string
@@ -32,8 +34,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   end
 
   def handle_event("change", %{"value" => markdown}, socket) do
-    md = HtmlSanitizeEx.markdown_html(Earmark.as_html!(markdown || ""))
-    {:noreply, assign(socket, markdown: md)}
+    {:noreply, assign(socket, markdown: markdown || "")}
   end
 
   def render(assigns) do
@@ -50,18 +51,20 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
       {/if}
       <div class="control">
         <InputContext :let={form: form, field: field}>
-          <div class="tabs">
-            <a :on-click="markdown" class={"tab", "tab-lifted", "tab-active": !@previewing}>Write</a>
-            <a :on-click="preview" class={"tab", "tab-lifted", "tab-active": @previewing}>Preview</a>
+          <div class="tabs flex flex-nowrap">
+            <a :on-click="markdown" class={"tab tab-lifted flex-1 tab-lg", "tab-active": !@previewing}>Write</a>
+            <a :on-click="preview" class={"tab tab-lifted flex-1 tab-lg", "tab-active": @previewing}>Preview</a>
           </div>
-          <div class="border-solid rounded-sm">
+          <div>
             {#if @previewing}
-              <div class="h-40">
-                {#if @markdown == ""}
-                  Nothing to preview
-                {#else}
-                  {raw(@markdown)}
-                {/if}
+              <div class="h-40 border-2 border-neutral rounded">
+                <div class="p-2 text-sm">
+                  {#if @markdown == ""}
+                    Nothing to preview
+                  {#else}
+                    <Markdown content={@markdown} />
+                  {/if}
+                </div>
               </div>
             {#else}
               <div :hook="MarkdownInput" id={@hook_id}>

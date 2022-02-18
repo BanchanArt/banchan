@@ -207,8 +207,8 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
       tab={:shop}
     >
       <div class="flex flex-col space-y-2 md:container md:mx-auto p-2">
-        <h1 class="text-3xl p-2">{@offering.name}</h1>
-        <h2 class="text-xl p-2">{@offering.description}</h2>
+        <h1 class="text-3xl px-2">{@offering.name}</h1>
+        <h2 class="text-xl px-2">{@offering.description}</h2>
         <Form for={@changeset} change="change" submit="submit">
           <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
             <div class="md:order-1 md:col-span-2">
