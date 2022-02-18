@@ -34,6 +34,7 @@ defmodule BanchanWeb.Components.Form.TextInput do
               "input-primary",
               "input-bordered",
               "input-sm",
+              "w-full",
               @class,
               "has-icon-left": @icon,
               "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))

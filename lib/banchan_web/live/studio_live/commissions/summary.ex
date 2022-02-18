@@ -1,15 +1,12 @@
-defmodule BanchanWeb.StudioLive.Commissions.Timeline do
+defmodule BanchanWeb.StudioLive.Commissions.Summary do
   @moduledoc """
-  Subpage for commissions themselves. This is where the good stuff happens.
+  Commission summary tab page.
   """
   use BanchanWeb, :surface_view
 
   alias Banchan.Commissions
 
-  alias BanchanWeb.StudioLive.Components.Commissions.{
-    CommentBox,
-    Timeline
-  }
+  alias BanchanWeb.StudioLive.Components.Commissions.SummaryEditor
 
   alias BanchanWeb.StudioLive.Components.Commissions.CommissionLayout
 
@@ -38,12 +35,8 @@ defmodule BanchanWeb.StudioLive.Commissions.Timeline do
     {:noreply, socket |> assign(uri: uri)}
   end
 
-  @impl true
-  def handle_info(%{event: "new_events", payload: events}, socket) do
-    events = socket.assigns.commission.events ++ events
-    events = events |> Enum.sort_by(& &1.inserted_at)
-    commission = %{socket.assigns.commission | events: events}
-    {:noreply, assign(socket, commission: commission)}
+  def handle_info(%{event: "line_items_changed", payload: line_items}, socket) do
+    {:noreply, assign(socket, commission: %{socket.assigns.commission | line_items: line_items})}
   end
 
   def handle_info(%{event: "new_status", payload: status}, socket) do
@@ -51,19 +44,9 @@ defmodule BanchanWeb.StudioLive.Commissions.Timeline do
     {:noreply, assign(socket, commission: commission)}
   end
 
-  def handle_info(%{event: "event_updated", payload: event}, socket) do
-    events =
-      socket.assigns.commission.events
-      |> Enum.map(fn ev ->
-        if ev.id == event.id do
-          event
-        else
-          ev
-        end
-      end)
-
-    commission = %{socket.assigns.commission | events: events}
-    {:noreply, assign(socket, commission: commission)}
+  def handle_info(_, socket) do
+    # Ignore other events. We don't care about timeline items, for example.
+    {:noreply, socket}
   end
 
   @impl true
@@ -75,22 +58,19 @@ defmodule BanchanWeb.StudioLive.Commissions.Timeline do
       studio={@studio}
       current_user_member?={@current_user_member?}
       commission={@commission}
-      tab={:timeline}
+      tab={:summary}
     >
-      <Timeline
-        uri={@uri}
-        studio={@studio}
-        commission={@commission}
-        current_user={@current_user}
-        current_user_member?={@current_user_member?}
-      />
       <div class="h-20 border-2 border-neutral rounded-box p-2">
         {!-- #TODO --}
-        PLACEHOLDER: LatestDraft component?
         ALSO: Current $amount in escrow?
         ALSO ALSO: Move this to the side on md+ screens!
       </div>
-      <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
+      <SummaryEditor
+        id="summary-editor"
+        current_user={@current_user}
+        commission={@commission}
+        allow_edits={@current_user_member?}
+      />
     </CommissionLayout>
     """
   end

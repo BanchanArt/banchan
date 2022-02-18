@@ -50,6 +50,12 @@ defmodule BanchanWeb.Router do
     live("/studios/:handle/commissions/new/:offering_type", StudioLive.Commissions.New, :new)
     live("/studios/:handle/commissions/:commission_id", StudioLive.Commissions.Timeline, :show)
 
+    live(
+      "/studios/:handle/commissions/:commission_id/summary",
+      StudioLive.Commissions.Summary,
+      :show
+    )
+
     get(
       "/studios/:handle/commissions/:commission_id/attachment/:key",
       CommissionAttachmentController,

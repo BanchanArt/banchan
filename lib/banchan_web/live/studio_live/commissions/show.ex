@@ -93,36 +93,34 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
       current_user_member?={@current_user_member?}
       tab={:shop}
     >
-      <div>
-        <h1 class="text-3xl p-4">{@commission.title}</h1>
-        <hr class="p-2">
-        <nav class="tabs">
-        </nav>
-        <div class="md:flex">
-          <div class="md:grow">
-            <Timeline
-              uri={@uri}
-              studio={@studio}
-              commission={@commission}
-              current_user={@current_user}
-              current_user_member?={@current_user_member?}
-            />
-            <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
-          </div>
-          <div>
-            <SummaryEditor
-              id="summary-editor"
-              current_user={@current_user}
-              commission={@commission}
-              allow_edits={@current_user_member?}
-            />
-            <Status commission={@commission} editable={@current_user_member?} change="update_status" />
-            {#if @current_user_member?}
-              <div class="block">
-                <InvoiceForm id="invoice" current_user={@current_user} commission={@commission} />
-              </div>
-            {/if}
-          </div>
+      <h1 class="text-3xl p-4">{@commission.title}</h1>
+      <hr class="p-2">
+      <nav class="tabs">
+      </nav>
+      <div class="md:flex">
+        <div class="md:grow">
+          <Timeline
+            uri={@uri}
+            studio={@studio}
+            commission={@commission}
+            current_user={@current_user}
+            current_user_member?={@current_user_member?}
+          />
+          <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
+        </div>
+        <div>
+          <SummaryEditor
+            id="summary-editor"
+            current_user={@current_user}
+            commission={@commission}
+            allow_edits={@current_user_member?}
+          />
+          <Status commission={@commission} editable={@current_user_member?} change="update_status" />
+          {#if @current_user_member?}
+            <div class="block">
+              <InvoiceForm id="invoice" current_user={@current_user} commission={@commission} />
+            </div>
+          {/if}
         </div>
       </div>
     </StudioLayout>

@@ -86,24 +86,22 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
           {/for}
         </ul>
         {#if @custom_changeset}
-          <details open={@open_custom}>
-            <summary :on-click={@toggle_custom} class="text-2xl">Custom Option</summary>
-            <Form
-              class="flex flex-col space-y-2"
-              for={@custom_changeset}
-              change={@change_custom}
-              submit={@submit_custom}
-            >
-              <TextInput name={:name} show_label={false} opts={required: true, placeholder: "Name"} />
-              <TextArea
-                name={:description}
-                show_label={false}
-                opts={required: true, placeholder: "Description"}
-              />
-              <TextInput name={:amount} show_label={false} opts={required: true, placeholder: "Price"} />
-              <Submit changeset={@custom_changeset} />
-            </Form>
-          </details>
+          <h2 class="text-2xl">Add Custom Option</h2>
+          <Form
+            class="flex flex-col space-y-2"
+            for={@custom_changeset}
+            change={@change_custom}
+            submit={@submit_custom}
+          >
+            <TextInput name={:name} show_label={false} opts={required: true, placeholder: "Name"} />
+            <TextArea
+              name={:description}
+              show_label={false}
+              opts={required: true, placeholder: "Description"}
+            />
+            <TextInput name={:amount} show_label={false} opts={required: true, placeholder: "Price"} />
+            <Submit changeset={@custom_changeset} />
+          </Form>
         {/if}
       {/if}
     </div>
