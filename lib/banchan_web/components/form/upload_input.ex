@@ -26,7 +26,10 @@ defmodule BanchanWeb.Components.Form.UploadInput do
     {#for err <- upload_errors(@upload)}
       <p>{error_to_string(err)}</p>
     {/for}
-    <div class="relative h-15 rounded-lg border-dashed border-2 border-primary flex justify-center items-center" phx-drop-target={@upload.ref}>
+    <div
+      class="relative h-15 rounded-lg border-dashed border-2 border-primary flex justify-center items-center"
+      phx-drop-target={@upload.ref}
+    >
       <div class="absolute">
         <span class="block font-normal">Upload attachments. <i class="fas fa-file-upload" /></span>
       </div>
