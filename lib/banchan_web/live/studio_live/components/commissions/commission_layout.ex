@@ -35,18 +35,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommissionLayout do
             current_tab={@tab}
             to={Routes.studio_commissions_timeline_path(Endpoint, :show, @studio.handle, @commission.public_id)}
           />
-          <TabButton
-            label="Summary"
-            tab_name={:summary}
-            current_tab={@tab}
-            to="#"
-          />
-          <TabButton
-            label="Drafts"
-            tab_name={:drafts}
-            current_tab={@tab}
-            to="#"
-          />
+          <TabButton label="Summary" tab_name={:summary} current_tab={@tab} to="#" />
+          <TabButton label="Drafts" tab_name={:drafts} current_tab={@tab} to="#" />
         </nav>
         <div>
           <#slot />
