@@ -37,7 +37,12 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
         {#for {item, idx} <- Enum.with_index(@line_items)}
           <li class="flex p-2 gap-2">
             {#if @allow_edits && !item.sticky}
-              <button :on-click={@remove_item} value={idx} class="text-xl w-8 fas fa-times-circle" />
+              <button
+                type="button"
+                :on-click={@remove_item}
+                value={idx}
+                class="text-xl w-8 fas fa-times-circle"
+              />
             {#else}
               <button
                 type="button"
@@ -67,7 +72,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
             {#if option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
               <li class="flex gap-2 p-2">
                 {#if @allow_edits}
-                  <button :on-click={@add_item} value={idx} class="w-8 text-xl fas fa-plus-circle" />
+                  <button type="button" :on-click={@add_item} value={idx} class="w-8 text-xl fas fa-plus-circle" />
                 {#else}
                   <div class="w-8" />
                 {/if}
