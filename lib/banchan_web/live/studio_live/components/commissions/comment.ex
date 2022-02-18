@@ -105,7 +105,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
 
   def render(assigns) do
     ~F"""
-    <div class="shadow-lg bg-base-200 rounded-box border-2">
+    <div class="shadow-md bg-base-200 rounded-box">
       <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} studio={@studio} />
       <div class="text-sm p-2 items-center flex">
         <div class="flex items-center space-x-1">

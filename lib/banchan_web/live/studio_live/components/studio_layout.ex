@@ -35,28 +35,24 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
           <div class="overflow-auto min-w-screen">
             <nav class="tabs px-2 flex flex-nowrap">
               <TabButton
-                studio={@studio}
                 label="Shop"
                 tab_name={:shop}
                 current_tab={@tab}
                 to={Routes.studio_shop_path(Endpoint, :show, @studio.handle)}
               />
               <TabButton
-                studio={@studio}
                 label="About"
                 tab_name={:about}
                 current_tab={@tab}
                 to={Routes.studio_about_path(Endpoint, :show, @studio.handle)}
               />
               <TabButton
-                studio={@studio}
                 label="Portfolio"
                 tab_name={:portfolio}
                 current_tab={@tab}
                 to={Routes.studio_portfolio_path(Endpoint, :show, @studio.handle)}
               />
               <TabButton
-                studio={@studio}
                 label="Q&A"
                 tab_name={:qa}
                 current_tab={@tab}
@@ -64,7 +60,6 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
               />
               {#if @current_user_member?}
                 <TabButton
-                  studio={@studio}
                   label="Settings"
                   tab_name={:settings}
                   current_tab={@tab}

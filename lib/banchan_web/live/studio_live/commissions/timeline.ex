@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Commissions.Show do
+defmodule BanchanWeb.StudioLive.Commissions.Timeline do
   @moduledoc """
   Subpage for commissions themselves. This is where the good stuff happens.
   """
@@ -8,13 +8,10 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
 
   alias BanchanWeb.StudioLive.Components.Commissions.{
     CommentBox,
-    InvoiceForm,
-    Status,
-    SummaryEditor,
     Timeline
   }
 
-  alias BanchanWeb.StudioLive.Components.StudioLayout
+  alias BanchanWeb.StudioLive.Components.Commissions.CommissionLayout
 
   import BanchanWeb.StudioLive.Helpers
 
@@ -49,10 +46,6 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     {:noreply, assign(socket, commission: commission)}
   end
 
-  def handle_info(%{event: "line_items_changed", payload: line_items}, socket) do
-    {:noreply, assign(socket, commission: %{socket.assigns.commission | line_items: line_items})}
-  end
-
   def handle_info(%{event: "new_status", payload: status}, socket) do
     commission = %{socket.assigns.commission | status: status}
     {:noreply, assign(socket, commission: commission)}
@@ -74,58 +67,27 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   end
 
   @impl true
-  def handle_event("update_status", %{"status" => [new_status]}, socket) do
-    comm = %{socket.assigns.commission | tos_ok: true}
-
-    {:ok, {commission, _events}} =
-      Commissions.update_status(socket.assigns.current_user, comm, new_status)
-
-    {:noreply, socket |> assign(commission: commission)}
-  end
-
-  @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout
+    <CommissionLayout
       current_user={@current_user}
       flashes={@flash}
       studio={@studio}
       current_user_member?={@current_user_member?}
-      tab={:shop}
+      commission={@commission}
+      tab={:timeline}
     >
-      <div>
-        <h1 class="text-3xl p-4">{@commission.title}</h1>
-        <hr class="p-2">
-        <nav class="tabs">
-        </nav>
-        <div class="md:flex">
-          <div class="md:grow">
-            <Timeline
-              uri={@uri}
-              studio={@studio}
-              commission={@commission}
-              current_user={@current_user}
-              current_user_member?={@current_user_member?}
-            />
-            <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
-          </div>
-          <div>
-            <SummaryEditor
-              id="summary-editor"
-              current_user={@current_user}
-              commission={@commission}
-              allow_edits={@current_user_member?}
-            />
-            <Status commission={@commission} editable={@current_user_member?} change="update_status" />
-            {#if @current_user_member?}
-              <div class="block">
-                <InvoiceForm id="invoice" current_user={@current_user} commission={@commission} />
-              </div>
-            {/if}
-          </div>
-        </div>
+      <div class="p-2">
+        <Timeline
+          uri={@uri}
+          studio={@studio}
+          commission={@commission}
+          current_user={@current_user}
+          current_user_member?={@current_user_member?}
+        />
+        <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
       </div>
-    </StudioLayout>
+    </CommissionLayout>
     """
   end
 end
