@@ -12,7 +12,7 @@ defmodule BanchanWeb.Components.Markdown do
     content = md && HtmlSanitizeEx.markdown_html(Earmark.as_html!(md))
 
     ~F"""
-    <div class={"markdown", @class}>
+    <div class={"prose", @class}>
       {raw(content)}
     </div>
     """

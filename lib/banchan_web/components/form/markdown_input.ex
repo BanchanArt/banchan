@@ -57,7 +57,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
           </div>
           <div>
             {#if @previewing}
-              <div class="h-40 border-2 border-neutral rounded">
+              <div class="h-40 border-2 overflow-auto border-neutral rounded">
                 <div class="p-2 text-sm">
                   {#if @markdown == ""}
                     Nothing to preview
