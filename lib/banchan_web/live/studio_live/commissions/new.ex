@@ -240,13 +240,21 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
             <div class="md:col-span-2 md:order-4 md:row-span-2">
               <UploadInput upload={@uploads.attachment} cancel="cancel_upload" />
               <div class="pt-2">
-                <h3 class="font-bold text-xl">Commission Terms and Conditions</h3>
-                <Markdown content={@terms} />
+                <h3 class="py-4 font-bold text-xl">Commission Terms and Conditions</h3>
+                <div class="p-2 border-2 rounded border-neutral max-h-60 overflow-auto">
+                  <div class="p-2">
+                    <Markdown content={@terms} />
+                  </div>
+                </div>
               </div>
-              <Checkbox name={:tos_ok} opts={required: true}>
-                I have read and agree to these Terms and Conditions.
-              </Checkbox>
-              <Submit changeset={@changeset} />
+              <div class="p-2">
+                <Checkbox name={:tos_ok} opts={required: true}>
+                  I have read and agree to these Terms.
+                </Checkbox>
+              </div>
+              <div class="p-2">
+                <Submit changeset={@changeset} />
+              </div>
             </div>
           </div>
         </Form>
