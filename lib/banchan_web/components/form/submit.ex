@@ -15,7 +15,7 @@ defmodule BanchanWeb.Components.Form.Submit do
     <div class="field">
       <div class="control">
         <Submit
-          class={"btn text-center rounded-full py-1 px-5 btn-primary m-1", @class}
+          class={"btn text-center py-1 px-5 btn-primary m-1", @class}
           label={@label}
           opts={
             disabled: @changeset && (Enum.empty?(@changeset.changes) || !@changeset.valid?)
