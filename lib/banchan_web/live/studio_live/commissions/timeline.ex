@@ -9,10 +9,10 @@ defmodule BanchanWeb.StudioLive.Commissions.Timeline do
   alias BanchanWeb.StudioLive.Components.Commissions.{
     ActionBox,
     CommentBox,
+    CommissionLayout,
+    SummaryEditor,
     Timeline
   }
-
-  alias BanchanWeb.StudioLive.Components.Commissions.CommissionLayout
 
   import BanchanWeb.StudioLive.Helpers
 
@@ -78,28 +78,41 @@ defmodule BanchanWeb.StudioLive.Commissions.Timeline do
       commission={@commission}
       tab={:timeline}
     >
-      <div class="flex flex-col space-y-4">
-        <Timeline
-          uri={@uri}
-          studio={@studio}
-          commission={@commission}
-          current_user={@current_user}
-          current_user_member?={@current_user_member?}
-        />
-        {#if @current_user.id == @commission.client.id}
+      <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
+        <div class="flex flex-col md:order-2">
+          <div class="h-20 border-2 border-neutral rounded-box p-2">
+            {!-- #TODO --}
+            Latest draft goes here
+          </div>
+          {!-- TODO: Show current amount in escrow --}
+          <SummaryEditor
+            id="summary-editor"
+            current_user={@current_user}
+            commission={@commission}
+            allow_edits={@current_user_member?}
+          />
+        </div>
+        <div class="flex flex-col md:col-span-2 md:order-1">
+          <Timeline
+            uri={@uri}
+            studio={@studio}
+            commission={@commission}
+            current_user={@current_user}
+            current_user_member?={@current_user_member?}
+          />
           <ActionBox
             id="action-box"
             commission={@commission}
             current_user={@current_user}
             current_user_member?={@current_user_member?}
           />
-        {/if}
-        <CommentBox
-          id="comment-box"
-          commission={@commission}
-          actor={@current_user}
-          current_user_member?={@current_user_member?}
-        />
+          <CommentBox
+            id="comment-box"
+            commission={@commission}
+            actor={@current_user}
+            current_user_member?={@current_user_member?}
+          />
+        </div>
       </div>
     </CommissionLayout>
     """
