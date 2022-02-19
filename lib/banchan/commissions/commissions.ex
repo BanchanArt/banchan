@@ -10,6 +10,7 @@ defmodule Banchan.Commissions do
   alias Banchan.Commissions.{Commission, Event, EventAttachment, Invoice, LineItem}
   alias Banchan.Offerings
   alias Banchan.Offerings.OfferingOption
+  alias Banchan.Studios
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
@@ -184,10 +185,11 @@ defmodule Banchan.Commissions do
   def update_status(%User{} = actor, %Commission{} = commission, status) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        {:ok, commission} =
-          commission
-          |> Commission.changeset(%{status: status})
-          |> Repo.update()
+        changeset = Repo.reload!(commission) |> Commission.status_changeset(%{status: status})
+
+        check_status_transition!(actor, commission, changeset.changes.status)
+
+        {:ok, commission} = changeset |> Repo.update()
 
         {:ok, event} = create_event(:status, actor, commission, [], %{status: status})
 
@@ -206,6 +208,48 @@ defmodule Banchan.Commissions do
 
     ret
   end
+
+  defp check_status_transition!(
+         %User{} = actor,
+         %Commission{client_id: client_id, studio_id: studio_id, status: current_status},
+         new_status
+       ) do
+    {:ok, _} =
+      Repo.transaction(fn ->
+        actor_member? = Studios.is_user_in_studio(actor, %Studio{id: studio_id})
+
+        true =
+          status_transition_allowed?(
+            actor_member?,
+            client_id == actor.id,
+            current_status,
+            new_status
+          )
+      end)
+
+    :ok
+  end
+
+  # Transition changes studios can make
+  defp status_transition_allowed?(true, _, :submitted, :accepted), do: true
+  defp status_transition_allowed?(true, _, :accepted, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :in_progress, :paused), do: true
+  defp status_transition_allowed?(true, _, :in_progress, :waiting), do: true
+  defp status_transition_allowed?(true, _, :in_progress, :ready_for_review), do: true
+  defp status_transition_allowed?(true, _, :paused, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :paused, :waiting), do: true
+  defp status_transition_allowed?(true, _, :waiting, :paused), do: true
+  defp status_transition_allowed?(true, _, :waiting, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :ready_for_review, :in_progress), do: true
+
+  # Transition changes clients can make
+  defp status_transition_allowed?(_, true, :ready_for_review, :approved), do: true
+
+  # Either party can withdraw a commission (reimbursing the client)
+  defp status_transition_allowed?(_, _, _, :withdrawn), do: true
+
+  # Everything else is a no from me, Bob.
+  defp status_transition_allowed?(_, _, _, _), do: false
 
   def add_line_item(%User{} = actor, %Commission{} = commission, option) do
     {:ok, ret} =

@@ -124,7 +124,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
           {/if}
         </div>
         {#if !@changeset && (@current_user_member? || @current_user.id == @event.actor.id)}
-          <button type="button" :on-click="edit" class="ml-auto hover:underline">edit</button>
+          <button type="button" :on-click="edit" class="ml-auto hover:underline"><i class="fas fa-edit" /></button>
         {/if}
       </div>
 

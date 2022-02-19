@@ -122,7 +122,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           <Inputs form={form} for={:options} :let={index: index}>
             <div>
               <h4>Option
-                <Button is_primary={false} value={index} click="remove_option">Remove</Button>
+                <Button primary={false} value={index} click="remove_option">Remove</Button>
               </h4>
               <TextInput name={:name} opts={required: true} />
               <TextArea name={:description} opts={required: true} />

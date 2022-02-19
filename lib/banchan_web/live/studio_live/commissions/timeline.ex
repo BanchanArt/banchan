@@ -7,6 +7,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Timeline do
   alias Banchan.Commissions
 
   alias BanchanWeb.StudioLive.Components.Commissions.{
+    ActionBox,
     CommentBox,
     Timeline
   }
@@ -77,19 +78,29 @@ defmodule BanchanWeb.StudioLive.Commissions.Timeline do
       commission={@commission}
       tab={:timeline}
     >
-      <Timeline
-        uri={@uri}
-        studio={@studio}
-        commission={@commission}
-        current_user={@current_user}
-        current_user_member?={@current_user_member?}
-      />
-      <CommentBox
-        id="comment-box"
-        commission={@commission}
-        actor={@current_user}
-        current_user_member?={@current_user_member?}
-      />
+      <div class="flex flex-col space-y-4">
+        <Timeline
+          uri={@uri}
+          studio={@studio}
+          commission={@commission}
+          current_user={@current_user}
+          current_user_member?={@current_user_member?}
+        />
+        {#if @current_user.id == @commission.client.id}
+          <ActionBox
+            id="action-box"
+            commission={@commission}
+            current_user={@current_user}
+            current_user_member?={@current_user_member?}
+          />
+        {/if}
+        <CommentBox
+          id="comment-box"
+          commission={@commission}
+          actor={@current_user}
+          current_user_member?={@current_user_member?}
+        />
+      </div>
     </CommissionLayout>
     """
   end

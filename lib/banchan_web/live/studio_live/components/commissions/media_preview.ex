@@ -33,6 +33,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.MediaPreview do
     ~F"""
     <div class={"modal", "modal-open": @upload} :on-click="close">
       {#if @upload}
+        {!-- # TODO: Fix alignment --}
         <div class="max-w-fit max-h-fit m-10" :on-window-keydown="close" phx-key="Escape">
           {#if Uploads.image?(@upload)}
             <img
