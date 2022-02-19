@@ -41,7 +41,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommissionLayout do
             current_tab={@tab}
             to={Routes.studio_commissions_summary_path(Endpoint, :show, @studio.handle, @commission.public_id)}
           />
-          <TabButton label="Drafts" tab_name={:drafts} current_tab={@tab} to="#" />
         </nav>
         <div class="p-2">
           <#slot />
