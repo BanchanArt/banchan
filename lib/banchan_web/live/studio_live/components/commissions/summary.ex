@@ -13,6 +13,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
   prop offering, :struct
   prop add_item, :event
   prop remove_item, :event
+  prop deposited, :struct
 
   prop custom_changeset, :struct
   prop open_custom, :boolean, default: false
@@ -22,13 +23,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
 
   def render(assigns) do
     estimate =
-      Money.to_string(
-        Enum.reduce(
-          assigns.line_items,
-          # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-          Money.new(0, :USD),
-          fn item, acc -> Money.add(acc, item.amount) end
-        )
+      Enum.reduce(
+        assigns.line_items,
+        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
+        Money.new(0, :USD),
+        fn item, acc -> Money.add(acc, item.amount) end
       )
 
     ~F"""
@@ -60,10 +59,28 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
         {/for}
       </ul>
       <hr class="pt-2">
-      <div class="p-2 flex">
-        <div class="font-bold grow">Estimate:</div>
-        <div class="p-2">{estimate}</div>
-      </div>
+      {#if @deposited}
+        <div class="p-2 flex flex-col">
+          <div class="flex flex-row items-center">
+            <div class="font-bold grow">Total:</div>
+            <div class="p-2">{Money.to_string(estimate)}</div>
+          </div>
+          <hr class="p-2">
+          <div class="flex flex-row items-center">
+            <div class="font-bold grow">Deposited:</div>
+            <div class="p-2">{Money.to_string(@deposited)}</div>
+          </div>
+          <div class="flex flex-row items-center">
+            <div class="font-bold grow">Remaining Balance:</div>
+            <div class="p-2">{Money.to_string(Money.subtract(estimate, @deposited))}</div>
+          </div>
+        </div>
+      {#else}
+        <div class="p-2 flex">
+          <div class="font-bold grow">Estimate:</div>
+          <div class="p-2">{Money.to_string(estimate)}</div>
+        </div>
+      {/if}
       <hr class="pt-2">
       {#if @offering && Enum.any?(@offering.options)}
         <h5 class="text-xl p-2">Add-ons:</h5>

@@ -15,6 +15,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
   prop allow_edits, :boolean, required: true
 
   data custom_changeset, :struct
+  data deposited, :struct
   data open_custom, :boolean, default: false
 
   def update(assigns, socket) do
@@ -27,7 +28,9 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
         nil
       end
 
-    {:ok, socket |> assign(custom_changeset: custom_changeset)}
+    deposited = Commissions.deposited_amount(socket.assigns.commission)
+
+    {:ok, socket |> assign(custom_changeset: custom_changeset, deposited: deposited)}
   end
 
   @impl true
@@ -150,6 +153,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
       toggle_custom="toggle_custom"
       change_custom="change_custom"
       submit_custom="submit_custom"
+      deposited={@deposited}
     />
     """
   end

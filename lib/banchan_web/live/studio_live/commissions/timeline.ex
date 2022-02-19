@@ -100,6 +100,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Timeline do
             current_user={@current_user}
             current_user_member?={@current_user_member?}
           />
+          <div class="divider" />
           <ActionBox
             id="action-box"
             commission={@commission}
