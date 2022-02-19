@@ -14,7 +14,7 @@ defmodule BanchanWeb.Components.Nav do
     ~F"""
     <nav
       id="nav"
-      class="navbar bg-primary text-primary-content align-top w-full leading-snug m-0 p-0"
+      class="navbar bg-neutral text-neutral-content"
       role="navigation"
       aria-label="main navigation"
     >
