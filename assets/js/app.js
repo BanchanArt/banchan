@@ -4,7 +4,6 @@ import { Socket } from "phoenix"
 import topbar from "topbar"
 import Hooks from "./_hooks"
 import { LiveSocket } from "phoenix_live_view"
-import { themeChange } from 'theme-change'
 
 let Uploaders = {}
 
@@ -49,7 +48,13 @@ let liveSocket = new LiveSocket('/live', Socket, {
 window.Alpine = Alpine
 Alpine.start()
 
-themeChange()
+document.addEventListener("DOMContentLoaded", () => {
+  let theme = localStorage.getItem("theme")
+  if (!theme) {
+    theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+  }
+  document.documentElement.setAttribute("data-theme", theme);
+})
 
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })

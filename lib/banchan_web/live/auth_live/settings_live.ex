@@ -37,8 +37,8 @@ defmodule BanchanWeb.SettingsLive do
           <br>
           <h2 class="text-xl">Appearance</h2>
           <div class="flex flex-row items-center gap-4">
-            <span>Toggle Dark Mode:</span>
-            <input type="checkbox" class="toggle" data-toggle-theme="light,dark">
+            <span>Dark Mode:</span>
+            <input :hook="Theme" id="theme_toggle" :on-click="toggle_theme" type="checkbox" class="toggle">
           </div>
 
           <div
@@ -101,6 +101,10 @@ defmodule BanchanWeb.SettingsLive do
   end
 
   @impl true
+  def handle_event("toggle_theme", _, socket) do
+    {:noreply, socket |> push_event("toggle_theme", %{change_theme: true})}
+  end
+
   def handle_event("change_email", val, socket) do
     changeset =
       socket.assigns.current_user
