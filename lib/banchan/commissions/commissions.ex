@@ -249,6 +249,10 @@ defmodule Banchan.Commissions do
   # Everything else is a no from me, Bob.
   defp status_transition_allowed?(_, _, _, _), do: false
 
+  def commission_open?(%Commission{status: :withdrawn}), do: false
+  def commission_open?(%Commission{status: :approved}), do: false
+  def commission_open?(%Commission{}), do: true
+
   def add_line_item(%User{} = actor, %Commission{} = commission, option) do
     {:ok, ret} =
       Repo.transaction(fn ->

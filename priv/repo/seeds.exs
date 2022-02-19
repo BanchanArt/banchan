@@ -61,7 +61,7 @@
       %{
         name: "Base Price",
         description: "The commission itself.",
-        price: Money.new(0, :USD),
+        price: Money.new(10000, :USD),
         default: true,
         sticky: true
       },
@@ -98,10 +98,10 @@
       },
       %{
         name: "Extra Character",
-        description: "Add an extra characte to the commission.",
+        description: "Add an extra character to the commission.",
         price: Money.new(2500, :USD),
         multiple: true
       }
     ],
-    default_terms: "**No NFTs**. But also no derivative works."
+    terms: "**No NFTs**. But also no derivative works."
   })

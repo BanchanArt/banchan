@@ -129,7 +129,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
             opts={required: true, placeholder: "Write a comment"}
           />
           {#if @current_user_member?}
-            <UploadInput label="Upload drafts" upload={@uploads.attachment} cancel="cancel_upload" />
+            <UploadInput label="Upload draft files" upload={@uploads.attachment} cancel="cancel_upload" />
           {#else}
             <UploadInput label="Upload attachments" upload={@uploads.attachment} cancel="cancel_upload" />
           {/if}
