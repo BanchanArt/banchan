@@ -67,6 +67,10 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     {:noreply, assign(socket, commission: commission)}
   end
 
+  def handle_info(%{event: "line_items_changed", payload: line_items}, socket) do
+    {:noreply, socket |> assign(commission: %{socket.assigns.commission | line_items: line_items})}
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -80,7 +84,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     >
       <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
         <div class="flex flex-col md:order-2">
-          <div class="h-20 border-2 border-neutral rounded-box p-2">
+          <div class="h-20 border-2 border-neutral rounded-box p-2 mb-4">
             {!-- #TODO --}
             Latest draft goes here
           </div>

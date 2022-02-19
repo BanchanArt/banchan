@@ -88,6 +88,16 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
   end
 
   @impl true
+  def handle_event("close_custom", _, socket) do
+    {:noreply, assign(socket, open_custom: false)}
+  end
+
+  @impl true
+  def handle_event("nothing", _, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event(
         "change_custom",
         %{"line_item" => %{"name" => name, "description" => description, "amount" => amount}},
@@ -154,9 +164,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
       remove_item="remove_item"
       custom_changeset={@custom_changeset}
       open_custom={@open_custom}
+      close_custom="close_custom"
       toggle_custom="toggle_custom"
       change_custom="change_custom"
       submit_custom="submit_custom"
+      nothing="nothing"
       deposited={@deposited}
     />
     """

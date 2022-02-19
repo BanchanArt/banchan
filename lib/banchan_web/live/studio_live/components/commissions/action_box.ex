@@ -56,7 +56,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.ActionBox do
               This commission is actively being worked on.
               <div class="flex flex-col md:flex-row">
                 <Button class="flex-1" click="update_status" value="ready_for_review" label="Ready for Review" />
-                <Button class="flex-1" click="update_status" value="paused" label="Pause" />
+                <Button class="flex-1" click="update_status" value="paused" label="Pause Work" />
                 <Button class="flex-1" click="update_status" value="waiting" label="Wait for Customer" />
               </div>
             {#match :paused}

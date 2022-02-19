@@ -21,6 +21,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
   prop submit_custom, :event
   prop change_custom, :event
   prop toggle_custom, :event
+  prop close_custom, :event
+  prop nothing, :event
 
   def render(assigns) do
     estimate =
@@ -61,30 +63,30 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
       </ul>
       <div class="divider" />
       {#if @deposited}
-        <div class="p-2 flex flex-col">
-          <div class="flex flex-row items-center">
-            <div class="font-bold grow">Total:</div>
-            <div class="p-2">{Money.to_string(estimate)}</div>
-          </div>
-          <div class="divider" />
+        <div class="flex flex-row items-center">
+          <div class="font-bold grow">Total:</div>
+          <div class="px-2">{Money.to_string(estimate)}</div>
+        </div>
+        <div class="divider -py-2" />
+        <div class="px-2 flex flex-col gap-2">
           <div class="flex flex-row items-center">
             <div class="font-bold grow">Deposited:</div>
-            <div class="p-2">{Money.to_string(@deposited)}</div>
+            <div class="px-2">{Money.to_string(@deposited)}</div>
           </div>
           <div class="flex flex-row items-center">
             <div class="font-bold grow">Remaining Balance:</div>
-            <div class="p-2">{Money.to_string(Money.subtract(estimate, @deposited))}</div>
+            <div class="px-2">{Money.to_string(Money.subtract(estimate, @deposited))}</div>
           </div>
         </div>
       {#else}
-        <div class="p-2 flex">
+        <div class="px-2 flex">
           <div class="font-bold grow">Estimate:</div>
-          <div class="p-2">{Money.to_string(estimate)}</div>
+          <div class="">{Money.to_string(estimate)}</div>
         </div>
       {/if}
       <div class="divider" />
       {#if @offering && Enum.any?(@offering.options)}
-        <h5 class="text-xl p-2">Add-ons:</h5>
+        <h5 class="text-xl px-2">Add-ons:</h5>
         <ul class="flex flex-col">
           {#for {option, idx} <- Enum.with_index(@offering.options)}
             {#if option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
@@ -114,23 +116,30 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
           {/if}
         </ul>
         {#if @custom_changeset}
-          <Form
-            class={"flex flex-col space-y-2 modal", "modal-open": @open_custom}
-            for={@custom_changeset}
-            change={@change_custom}
-            submit={@submit_custom}
+          <div
+            class={"flex flex-col modal", "modal-open": @open_custom}
+            :on-click={@toggle_custom}
+            :on-window-keydown={@close_custom}
+            phx-key="Escape"
           >
-            <div class="modal-box flex flex-col gap-4">
-              <h3 class="text-xl font-bold">Add Custom Option</h3>
-              <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
-              <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
-              <TextInput name={:amount} label="Price" opts={required: true, placeholder: "$100.00"} />
-              <div class="modal-action">
-                <Button primary={false} click={@toggle_custom} label="Cancel" />
-                <Submit changeset={@custom_changeset} />
-              </div>
+            <div :on-click={@nothing} class="modal-box">
+              <Form
+                class="flex flex-col gap-2"
+                for={@custom_changeset}
+                change={@change_custom}
+                submit={@submit_custom}
+              >
+                <h3 class="text-xl font-bold">Add Custom Option</h3>
+                <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
+                <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
+                <TextInput name={:amount} label="Price" opts={required: true, placeholder: "$100.00"} />
+                <div class="modal-action">
+                  <Button primary={false} click={@toggle_custom} label="Cancel" />
+                  <Submit changeset={@custom_changeset} />
+                </div>
+              </Form>
             </div>
-          </Form>
+          </div>
         {/if}
       {/if}
     </div>
