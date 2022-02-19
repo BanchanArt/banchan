@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Commissions.Timeline do
+defmodule BanchanWeb.StudioLive.Commissions.Show do
   @moduledoc """
   Subpage for commissions themselves. This is where the good stuff happens.
   """

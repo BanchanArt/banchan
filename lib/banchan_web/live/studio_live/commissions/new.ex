@@ -166,7 +166,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
         {:noreply,
          redirect(socket,
            to:
-             Routes.studio_commissions_timeline_path(
+             Routes.studio_commissions_show_path(
                Endpoint,
                :show,
                socket.assigns.studio.handle,

@@ -14,7 +14,7 @@ defmodule BanchanWeb.DashboardLive.Components.DashboardResult do
 
   def render(assigns) do
     commission_url =
-      Routes.studio_commissions_timeline_path(
+      Routes.studio_commissions_show_path(
         Endpoint,
         :show,
         assigns.result.studio.handle,

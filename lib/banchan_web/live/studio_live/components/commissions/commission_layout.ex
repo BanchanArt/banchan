@@ -4,7 +4,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommissionLayout do
   """
   use BanchanWeb, :component
 
-  alias BanchanWeb.StudioLive.Components.{StudioLayout, TabButton}
+  alias BanchanWeb.StudioLive.Components.StudioLayout
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
@@ -26,22 +26,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommissionLayout do
       tab={:shop}
     >
       <div class="md:container md:mx-auto">
-        <h1 class="text-3xl p-4">{@commission.title}</h1>
-        <hr class="p-2">
-        <nav class="tabs px-2 flex flex-nowrap">
-          <TabButton
-            label="Timeline"
-            tab_name={:timeline}
-            current_tab={@tab}
-            to={Routes.studio_commissions_timeline_path(Endpoint, :show, @studio.handle, @commission.public_id)}
-          />
-          <TabButton
-            label="Summary"
-            tab_name={:summary}
-            current_tab={@tab}
-            to={Routes.studio_commissions_summary_path(Endpoint, :show, @studio.handle, @commission.public_id)}
-          />
-        </nav>
+        <h1 class="text-3xl pt-4 py-4">{@commission.title}</h1>
+        <div class="divider" />
         <div class="p-2">
           <#slot />
         </div>
