@@ -26,7 +26,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommissionLayout do
       tab={:shop}
     >
       <div class="md:container md:mx-auto">
-        <h1 class="text-3xl pt-4 py-4">{@commission.title}</h1>
+        <h1 class="text-3xl pt-4 px-4">{@commission.title}</h1>
         <div class="divider" />
         <div class="p-2">
           <#slot />
