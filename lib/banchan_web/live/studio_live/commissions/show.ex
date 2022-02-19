@@ -68,7 +68,8 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   end
 
   def handle_info(%{event: "line_items_changed", payload: line_items}, socket) do
-    {:noreply, socket |> assign(commission: %{socket.assigns.commission | line_items: line_items})}
+    {:noreply,
+     socket |> assign(commission: %{socket.assigns.commission | line_items: line_items})}
   end
 
   @impl true

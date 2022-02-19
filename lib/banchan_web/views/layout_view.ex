@@ -3,7 +3,7 @@ defmodule BanchanWeb.LayoutView do
 
   def render(_, assigns) do
     ~F"""
-    <!DOCTYPE html />
+    <!DOCTYPE html>
     <html lang="en" class="h-full bg-base-100" data-theme="">
       <head>
         <meta charset="utf-8">
