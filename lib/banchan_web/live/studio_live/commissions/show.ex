@@ -101,18 +101,20 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
             current_user_member?={@current_user_member?}
           />
           <div class="divider" />
-          <ActionBox
-            id="action-box"
-            commission={@commission}
-            current_user={@current_user}
-            current_user_member?={@current_user_member?}
-          />
-          <CommentBox
-            id="comment-box"
-            commission={@commission}
-            actor={@current_user}
-            current_user_member?={@current_user_member?}
-          />
+          <div class="flex flex-col gap-4">
+            <ActionBox
+              id="action-box"
+              commission={@commission}
+              current_user={@current_user}
+              current_user_member?={@current_user_member?}
+            />
+            <CommentBox
+              id="comment-box"
+              commission={@commission}
+              actor={@current_user}
+              current_user_member?={@current_user_member?}
+            />
+          </div>
         </div>
       </div>
     </CommissionLayout>
