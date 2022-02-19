@@ -61,16 +61,10 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.ActionBox do
               </div>
             {#match :paused}
               Ths studio has temporarily paused work on this commission.
-              <div class="flex flex-col md:flex-row">
-                <Button class="flex-1" click="update_status" value="in_progress" label="Resume" />
-                <Button class="flex-1" click="update_status" value="waiting" label="Wait for Customer" />
-              </div>
+              <Button click="update_status" value="in_progress" label="Resume" />
             {#match :waiting}
               The studio is waiting for your response before continuing work.
-              <div class="flex flex-col md:flex-row">
-                <Button class="flex-1" click="update_status" value="paused" label="Pause" />
-                <Button class="flex-1" click="update_status" value="in_progress" label="Resume" />
-              </div>
+              <Button click="update_status" value="in_progress" label="Resume" />
             {#match :ready_for_review}
               This commission has been marked for final review. The client will determine whether to close it out and pay out any money deposited so far.
               <Button click="update_status" value="in_progress" label="Return to In Progress" />
