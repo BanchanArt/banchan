@@ -6,6 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
 
   alias Surface.Components.Form
 
+  alias BanchanWeb.Components.Button
   alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
 
   prop line_items, :list, required: true
@@ -101,23 +102,34 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
               </li>
             {/if}
           {/for}
+          {#if @custom_changeset}
+            <li class="flex gap-2 p-2">
+              <button type="button" :on-click={@toggle_custom} class="w-8 text-xl fas fa-plus-circle" />
+              <div class="grow flex flex-col">
+                <div class="font-bold">Custom Option</div>
+                <div class="text-sm">Add a customized option to the summary.</div>
+              </div>
+              <div class="p-2">TBD</div>
+            </li>
+          {/if}
         </ul>
         {#if @custom_changeset}
-          <h2 class="text-2xl">Add Custom Option</h2>
           <Form
-            class="flex flex-col space-y-2"
+            class={"flex flex-col space-y-2 modal", "modal-open": @open_custom}
             for={@custom_changeset}
             change={@change_custom}
             submit={@submit_custom}
           >
-            <TextInput name={:name} show_label={false} opts={required: true, placeholder: "Name"} />
-            <TextArea
-              name={:description}
-              show_label={false}
-              opts={required: true, placeholder: "Description"}
-            />
-            <TextInput name={:amount} show_label={false} opts={required: true, placeholder: "Price"} />
-            <Submit changeset={@custom_changeset} />
+            <div class="modal-box flex flex-col gap-4">
+              <h3 class="text-xl font-bold">Add Custom Option</h3>
+              <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
+              <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
+              <TextInput name={:amount} label="Price" opts={required: true, placeholder: "$100.00"} />
+              <div class="modal-action">
+                <Button primary={false} click={@toggle_custom} label="Cancel" />
+                <Submit changeset={@custom_changeset} />
+              </div>
+            </div>
           </Form>
         {/if}
       {/if}

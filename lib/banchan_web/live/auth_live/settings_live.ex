@@ -38,7 +38,7 @@ defmodule BanchanWeb.SettingsLive do
           <h2 class="text-xl">Appearance</h2>
           <div class="flex flex-row items-center gap-4">
             <span>Toggle Dark Mode:</span>
-            <input type="checkbox" class="toggle" data-toggle-theme="light,dark" />
+            <input type="checkbox" class="toggle" data-toggle-theme="light,dark">
           </div>
 
           <div

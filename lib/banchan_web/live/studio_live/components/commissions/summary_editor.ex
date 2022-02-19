@@ -121,7 +121,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
           amount: moneyfy(amount)
         })
 
-      {:noreply, assign(socket, custom_changeset: %LineItem{} |> LineItem.custom_changeset(%{}))}
+      {:noreply,
+       assign(socket,
+         open_custom: false,
+         custom_changeset: %LineItem{} |> LineItem.custom_changeset(%{})
+       )}
     else
       # Deny the change. This shouldn't happen unless there's a bug, or
       # someone is trying to send us Shenanigans data.
