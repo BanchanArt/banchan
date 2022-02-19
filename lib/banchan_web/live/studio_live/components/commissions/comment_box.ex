@@ -9,10 +9,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Form.{MarkdownInput, Submit, UploadInput}
+  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
 
   prop commission, :struct, required: true
   prop actor, :struct, required: true
+  prop current_user_member?, :boolean, required: true
 
   data changeset, :struct
   data uploads, :map
@@ -39,6 +40,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
   end
 
   def handle_event("change", %{"event" => event}, socket) do
+    IO.inspect(event)
     changeset =
       %Event{
         type: :comment,
@@ -102,10 +104,24 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
             name={:text}
             show_label={false}
             class="w-full"
-            opts={required: true, placeholder: "Here's what I'd like..."}
+            opts={required: true, placeholder: "Write a comment"}
           />
-          <UploadInput upload={@uploads.attachment} cancel="cancel_upload" />
-          <Submit changeset={@changeset} label="Reply" />
+          {#if @current_user_member?}
+            <UploadInput label="Upload drafts" upload={@uploads.attachment} cancel="cancel_upload" />
+          {#else}
+            <UploadInput label="Upload attachments" upload={@uploads.attachment} cancel="cancel_upload" />
+          {/if}
+          {#if @current_user_member?}
+            <TextInput name={:amount} show_label={false} opts={placeholder: "Invoice Amount (optional)"} />
+              {#if Enum.empty?(@uploads.attachment.entries)}
+                <Submit changeset={@changeset} label="Post" />
+              {#else}
+                <Checkbox name={:payment_required} label="Require Payment to View Draft" />
+                <Submit changeset={@changeset} label="Submit Draft" />
+              {/if}
+          {#else}
+            <Submit changeset={@changeset} label="Post" />
+          {/if}
         </div>
       </Form>
     </div>

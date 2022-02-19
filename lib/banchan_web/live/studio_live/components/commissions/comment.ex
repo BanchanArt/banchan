@@ -11,7 +11,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
 
   alias BanchanWeb.Components.{Avatar, Button, UserHandle}
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
-  alias BanchanWeb.StudioLive.Components.Commissions.MediaPreview
+  alias BanchanWeb.StudioLive.Components.Commissions.{InvoiceBox, MediaPreview}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
@@ -216,6 +216,18 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
             {/for}
           </div>
         </div>
+      {/if}
+
+      {#if @event.invoice}
+        <hr class="p-2">
+        <InvoiceBox
+          id={"invoice-box-#{@event.public_id}"}
+          current_user={@current_user}
+          current_user_member?={@current_user_member?}
+          uri={@uri}
+          commission={@commission}
+          event={@event}
+        />
       {/if}
     </div>
     """

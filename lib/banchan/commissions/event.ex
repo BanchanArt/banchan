@@ -17,7 +17,6 @@ defmodule Banchan.Commissions.Event do
         :comment,
         :line_item_added,
         :line_item_removed,
-        :invoice,
         :payment_processed,
         :status
       ]

@@ -84,13 +84,12 @@ defmodule BanchanWeb.StudioLive.Commissions.Timeline do
         current_user={@current_user}
         current_user_member?={@current_user_member?}
       />
-      <div class="h-20 border-2 border-neutral rounded-box p-2">
-        {!-- #TODO --}
-        PLACEHOLDER: LatestDraft component?
-        ALSO: Current $amount in escrow?
-        ALSO ALSO: Move this to the side on md+ screens!
-      </div>
-      <CommentBox id="comment-box" commission={@commission} actor={@current_user} />
+      <CommentBox
+        id="comment-box"
+        commission={@commission}
+        actor={@current_user}
+        current_user_member?={@current_user_member?}
+      />
     </CommissionLayout>
     """
   end

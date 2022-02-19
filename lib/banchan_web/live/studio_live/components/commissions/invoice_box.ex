@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceEvent do
+defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
   @moduledoc """
   This is what shows up on the commission timeline when an artist asks for payment.
   """
@@ -92,7 +92,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceEvent do
 
   def render(assigns) do
     ~F"""
-    <div class="shadow-md bg-base-200 rounded-box">
+    <div>
       <div class="text-sm p-2 items-center flex">
         <div class="flex items-center space-x-1">
           <Avatar class="w-6" user={@event.actor} />
