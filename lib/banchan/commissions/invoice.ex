@@ -12,6 +12,7 @@ defmodule Banchan.Commissions.Invoice do
     field :tip, Money.Ecto.Composite.Type
     field :platform_fee, Money.Ecto.Composite.Type
     field :payout_available_on, :utc_datetime
+    field :required, :boolean
 
     field :status, Ecto.Enum,
       values: [
@@ -43,6 +44,13 @@ defmodule Banchan.Commissions.Invoice do
     |> validate_required([:amount])
   end
 
+  def creation_changeset(payment, attrs) do
+    payment
+    |> cast(attrs, [:amount, :required])
+    |> validate_money(:amount)
+    |> validate_required([:amount])
+  end
+
   @doc false
   def tip_changeset(payment, attrs) do
     payment
@@ -54,7 +62,15 @@ defmodule Banchan.Commissions.Invoice do
   @doc false
   def submit_changeset(payment, attrs) do
     payment
-    |> cast(attrs, [:amount, :tip, :platform_fee, :stripe_session_id, :checkout_url, :status])
+    |> cast(attrs, [
+      :amount,
+      :required,
+      :tip,
+      :platform_fee,
+      :stripe_session_id,
+      :checkout_url,
+      :status
+    ])
     |> validate_money(:tip)
     |> validate_money(:platform_fee)
     |> validate_required([

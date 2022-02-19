@@ -56,12 +56,19 @@ defmodule Banchan.Commissions.Event do
     |> validate_required([:amount])
   end
 
+  def comment_changeset(event, attrs) do
+    event
+    |> cast(attrs, [:text, :amount])
+    |> validate_money(:amount)
+    |> validate_required([:text])
+  end
+
   defp validate_money(changeset, field) do
     validate_change(changeset, field, fn
-      _, %Money{} -> []
+      _, %Money{amount: amount} when amount >= 0 -> []
       _, "" -> []
       _, nil -> []
-      _, _ -> [{field, "must be an amount"}]
+      _, _ -> [{field, "must be a non-negative amount"}]
     end)
   end
 end

@@ -548,21 +548,35 @@ defmodule Banchan.Commissions do
     Repo.delete!(event_attachment)
   end
 
-  def invoice(%User{} = actor, %Commission{} = commission, amount) do
-    {:ok, _} =
+  def invoice_paid?(%Invoice{status: :succeeded}), do: true
+  def invoice_paid?(%Invoice{status: :paid_out}), do: true
+  def invoice_paid?(%Invoice{}), do: false
+
+  def invoice(%User{} = actor, %Commission{} = commission, drafts, event_data) do
+    {:ok, ret} =
       Repo.transaction(fn ->
-        {:ok, event} = create_event(:invoice, actor, commission, [], %{amount: amount})
+        case create_event(:comment, actor, commission, drafts, event_data) do
+          {:error, error} ->
+            {:error, error}
 
-        {:ok, _} =
-          %Invoice{
-            commission: commission,
-            event: event
-          }
-          |> Invoice.amount_changeset(%{"amount" => amount})
-          |> Repo.insert()
+          {:ok, event} ->
+            case %Invoice{
+                   commission: commission,
+                   event: event
+                 }
+                 |> Invoice.creation_changeset(event_data)
+                 |> Repo.insert() do
+              {:error, error} ->
+                {:error, error}
 
-        send_event_update!(event.id)
+              {:ok, invoice} ->
+                send_event_update!(event.id)
+                {:ok, invoice}
+            end
+        end
       end)
+
+    ret
   end
 
   def process_payment!(

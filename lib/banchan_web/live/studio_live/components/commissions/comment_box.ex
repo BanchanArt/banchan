@@ -21,15 +21,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
   def mount(socket) do
     {:ok,
      socket
-     |> assign(
-       changeset:
-         Commissions.change_event(
-           %Event{
-             type: :comment
-           },
-           %{}
-         )
-     )
+     |> assign(changeset: Event.comment_changeset(%Event{}, %{}))
      # TODO: move max file size somewhere configurable.
      # TODO: constrain :accept?
      |> allow_upload(:attachment,
@@ -39,15 +31,10 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
      )}
   end
 
-  def handle_event("change", %{"event" => event}, socket) do
-    IO.inspect(event)
+  def handle_event("change", %{"event" => %{"amount" => amount} = event}, socket) do
     changeset =
-      %Event{
-        type: :comment,
-        actor: socket.assigns.actor,
-        commission: socket.assigns.commission
-      }
-      |> Commissions.change_event(event)
+      %Event{}
+      |> Event.comment_changeset(%{event | "amount" => moneyfy(amount)})
       |> Map.put(:action, :update)
 
     {:noreply, assign(socket, changeset: changeset)}
@@ -58,24 +45,36 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
     {:noreply, cancel_upload(socket, :attachment, ref)}
   end
 
-  def handle_event("add_comment", %{"event" => event}, socket) do
-    attachments =
-      consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
-        {:ok,
-         Commissions.make_attachment!(
+  def handle_event("add_comment", %{"event" => %{"amount" => amount} = event}, socket)
+      when amount != "" do
+    attachments = process_uploads(socket)
+
+    case Commissions.invoice(
            socket.assigns.actor,
-           path,
-           entry.client_type,
-           entry.client_name
+           socket.assigns.commission,
+           attachments,
+           %{event | "amount" => moneyfy(amount)}
+         ) do
+      {:ok, _event} ->
+        {:noreply,
+         assign(socket,
+           changeset: Event.comment_changeset(%Event{}, %{})
          )}
-      end)
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
+    end
+  end
+
+  def handle_event("add_comment", %{"event" => %{"text" => text}}, socket) do
+    attachments = process_uploads(socket)
 
     case Commissions.create_event(
            :comment,
            socket.assigns.actor,
            socket.assigns.commission,
            attachments,
-           event
+           %{"text" => text}
          ) do
       {:ok, _event} ->
         {:noreply,
@@ -91,6 +90,29 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
+    end
+  end
+
+  defp process_uploads(socket) do
+    consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
+      {:ok,
+       Commissions.make_attachment!(
+         socket.assigns.actor,
+         path,
+         entry.client_type,
+         entry.client_name
+       )}
+    end)
+  end
+
+  defp moneyfy(amount) do
+    # TODO: In the future, we can replace this :USD with a param and the DB will be fine.
+    case Money.parse(amount, :USD) do
+      {:ok, money} ->
+        money
+
+      :error ->
+        amount
     end
   end
 
@@ -113,12 +135,12 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
           {/if}
           {#if @current_user_member?}
             <TextInput name={:amount} show_label={false} opts={placeholder: "Invoice Amount (optional)"} />
-              {#if Enum.empty?(@uploads.attachment.entries)}
-                <Submit changeset={@changeset} label="Post" />
-              {#else}
-                <Checkbox name={:payment_required} label="Require Payment to View Draft" />
-                <Submit changeset={@changeset} label="Submit Draft" />
-              {/if}
+            {#if Enum.empty?(@uploads.attachment.entries)}
+              <Submit changeset={@changeset} label="Post" />
+            {#else}
+              <Checkbox name={:required} label="Require Payment to View Draft" />
+              <Submit changeset={@changeset} label="Submit Draft" />
+            {/if}
           {#else}
             <Submit changeset={@changeset} label="Post" />
           {/if}

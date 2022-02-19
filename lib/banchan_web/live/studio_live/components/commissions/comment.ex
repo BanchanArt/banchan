@@ -111,7 +111,14 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
         <div class="flex items-center space-x-1">
           <Avatar class="w-6" user={@event.actor} />
           <UserHandle user={@event.actor} />
-          <span>commented <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.</span>
+          <span>
+            {#if @event.invoice}
+              posted an invoice
+            {#else}
+              commented
+            {/if}
+            <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.
+          </span>
           {#if @event.inserted_at != @event.updated_at}
             <span class="text-xs italic">edited {fmt_time(@event.updated_at)}</span>
           {/if}
@@ -146,18 +153,65 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
       {#if Enum.any?(@event.attachments)}
         <hr>
         <div class="p-4">
-          <ul class="flex flex-wrap gap-4 p-2">
-            {#for attachment <- Enum.filter(@event.attachments, & &1.thumbnail)}
-              <li class="h-32 w-32">
-                <button
-                  class="relative"
-                  :on-click="open_preview"
-                  phx-value-key={attachment.upload.key}
-                  phx-value-bucket={attachment.upload.bucket}
-                >
-                  {#if Uploads.video?(attachment.upload)}
-                    <i class="fas fa-play text-4xl absolute top-10 left-10" />
-                  {/if}
+          {#if @event.invoice && @event.invoice.required && !Commissions.invoice_paid?(@event.invoice)}
+            Payment is required to view draft.
+          {#else}
+            <ul class="flex flex-wrap gap-4 p-2">
+              {#for attachment <- Enum.filter(@event.attachments, & &1.thumbnail)}
+                <li class="h-32 w-32">
+                  <button
+                    class="relative"
+                    :on-click="open_preview"
+                    phx-value-key={attachment.upload.key}
+                    phx-value-bucket={attachment.upload.bucket}
+                  >
+                    {#if Uploads.video?(attachment.upload)}
+                      <i class="fas fa-play text-4xl absolute top-10 left-10" />
+                    {/if}
+                    {#if @changeset}
+                      <a
+                        href="#"
+                        :on-click="remove_attachment"
+                        phx-value-attachment-idx={get_attachment_index(@event, attachment)}
+                        class="-top-2 -right-2 absolute"
+                      >
+                        <i class="fas fa-times-circle text-2xl" />
+                      </a>
+                    {/if}
+                    <img
+                      alt={attachment.upload.name}
+                      title={attachment.upload.name}
+                      class="rounded-box"
+                      src={Routes.commission_attachment_path(
+                        Endpoint,
+                        :thumbnail,
+                        @studio.handle,
+                        @commission.public_id,
+                        attachment.upload.key
+                      )}
+                    />
+                  </button>
+                </li>
+              {/for}
+            </ul>
+            <div class="flex flex-col p-2">
+              {#for attachment <- Enum.filter(@event.attachments, &(!&1.thumbnail))}
+                <div class="relative">
+                  <a
+                    class="relative"
+                    target="_blank"
+                    href={Routes.commission_attachment_path(
+                      Endpoint,
+                      :show,
+                      @studio.handle,
+                      @commission.public_id,
+                      attachment.upload.key
+                    )}
+                  >
+                    <div title={attachment.upload.name} class="border-2 p-4 m-1">
+                      <i class="float-right fas fa-file-download" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
+                    </div>
+                  </a>
                   {#if @changeset}
                     <a
                       href="#"
@@ -168,58 +222,15 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
                       <i class="fas fa-times-circle text-2xl" />
                     </a>
                   {/if}
-                  <img
-                    alt={attachment.upload.name}
-                    title={attachment.upload.name}
-                    class="rounded-box"
-                    src={Routes.commission_attachment_path(
-                      Endpoint,
-                      :thumbnail,
-                      @studio.handle,
-                      @commission.public_id,
-                      attachment.upload.key
-                    )}
-                  />
-                </button>
-              </li>
-            {/for}
-          </ul>
-          <div class="flex flex-col p-2">
-            {#for attachment <- Enum.filter(@event.attachments, &(!&1.thumbnail))}
-              <div class="relative">
-                <a
-                  class="relative"
-                  target="_blank"
-                  href={Routes.commission_attachment_path(
-                    Endpoint,
-                    :show,
-                    @studio.handle,
-                    @commission.public_id,
-                    attachment.upload.key
-                  )}
-                >
-                  <div title={attachment.upload.name} class="border-2 p-4 m-1">
-                    <i class="float-right fas fa-file-download" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
-                  </div>
-                </a>
-                {#if @changeset}
-                  <a
-                    href="#"
-                    :on-click="remove_attachment"
-                    phx-value-attachment-idx={get_attachment_index(@event, attachment)}
-                    class="-top-2 -right-2 absolute"
-                  >
-                    <i class="fas fa-times-circle text-2xl" />
-                  </a>
-                {/if}
-              </div>
-            {/for}
-          </div>
+                </div>
+              {/for}
+            </div>
+          {/if}
         </div>
       {/if}
 
       {#if @event.invoice}
-        <hr class="p-2">
+        <hr>
         <InvoiceBox
           id={"invoice-box-#{@event.public_id}"}
           current_user={@current_user}
