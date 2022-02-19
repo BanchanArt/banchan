@@ -35,12 +35,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.ActionBox do
               The studio is waiting for your response before continuing work.
             {#match :ready_for_review}
               This commission is ready for your final review. If you approve it, you agree to release all payments to the studio for payout.
-              <Button
-                class="md:max-w-xs md:place-self-end"
-                click="update_status"
-                value="approved"
-                label="Approve"
-              />
+              <Button click="update_status" value="approved" label="Approve" />
             {#match :approved}
               This commission has been approved. Funds will be paid out to the studio.
             {#match :withdrawn}
@@ -53,82 +48,32 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.ActionBox do
           {#case @commission.status}
             {#match :submitted}
               This commission has been submitted for acceptance. Accepting it will mark slots as used if you've configured them for this commission. By accepting this commission, this studio commits to working on it soon.
-              <Button
-                class="md:max-w-xs md:place-self-end"
-                click="update_status"
-                value="accepted"
-                label="Accept"
-              />
+              <Button click="update_status" value="accepted" label="Accept" />
             {#match :accepted}
               This studio has accepted this commission but has not begun work on it yet.
-              <Button
-                class="md:max-w-xs md:place-self-end"
-                click="update_status"
-                value="in_progress"
-                label="Mark as In Progress"
-              />
+              <Button click="update_status" value="in_progress" label="Mark as In Progress" />
             {#match :in_progress}
               This commission is actively being worked on.
-              <div class="flex flex-col">
-                <Button
-                  class="md:max-w-xs md:place-self-end"
-                  click="update_status"
-                  value="ready_for_review"
-                  label="Ready for Review"
-                />
-                <Button
-                  class="md:max-w-xs md:place-self-end"
-                  click="update_status"
-                  value="paused"
-                  label="Pause"
-                />
-                <Button
-                  class="md:max-w-xs md:place-self-end"
-                  click="update_status"
-                  value="waiting"
-                  label="Wait for Customer"
-                />
+              <div class="flex flex-col md:flex-row">
+                <Button class="flex-1" click="update_status" value="ready_for_review" label="Ready for Review" />
+                <Button class="flex-1" click="update_status" value="paused" label="Pause" />
+                <Button class="flex-1" click="update_status" value="waiting" label="Wait for Customer" />
               </div>
             {#match :paused}
               Ths studio has temporarily paused work on this commission.
-              <div class="flex flex-col">
-                <Button
-                  class="md:max-w-xs md:place-self-end"
-                  click="update_status"
-                  value="in_progress"
-                  label="Resume"
-                />
-                <Button
-                  class="md:max-w-xs md:place-self-end"
-                  click="update_status"
-                  value="waiting"
-                  label="Wait for Customer"
-                />
+              <div class="flex flex-col md:flex-row">
+                <Button class="flex-1" click="update_status" value="in_progress" label="Resume" />
+                <Button class="flex-1" click="update_status" value="waiting" label="Wait for Customer" />
               </div>
             {#match :waiting}
               The studio is waiting for your response before continuing work.
               <div class="flex flex-col md:flex-row">
-                <Button
-                  class="md:max-w-xs md:place-self-end"
-                  click="update_status"
-                  value="paused"
-                  label="Pause"
-                />
-                <Button
-                  class="md:max-w-xs md:place-self-end"
-                  click="update_status"
-                  value="in_progress"
-                  label="Resume"
-                />
+                <Button class="flex-1" click="update_status" value="paused" label="Pause" />
+                <Button class="flex-1" click="update_status" value="in_progress" label="Resume" />
               </div>
             {#match :ready_for_review}
               This commission has been marked for final review. The client will determine whether to close it out and pay out any money deposited so far.
-              <Button
-                class="md:max-w-xs md:place-self-end"
-                click="update_status"
-                value="in_progress"
-                label="Return to In Progress"
-              />
+              <Button click="update_status" value="in_progress" label="Return to In Progress" />
             {#match :withdrawn}
               This commission has been withdrawn. The client will be reimbursed for their deposit.
             {#match :approved}
