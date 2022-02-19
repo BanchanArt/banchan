@@ -53,7 +53,7 @@ defmodule BanchanWeb.DashboardLive do
     <Layout current_user={@current_user} flashes={@flash}>
       <div class="flex flex-col max-h-full grow">
         <h1 class="text-2xl p-2">Commission Dashboard</h1>
-        <hr>
+        <div class="divider" />
         <div class="flex-grow">
           <ul class="divide-y flex-grow flex flex-col">
             {#for result <- @results.entries}

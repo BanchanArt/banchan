@@ -128,9 +128,9 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
         {/if}
       </div>
 
-      <hr>
+      <div class="divider" />
 
-      <div class="content p-4 user-markdown">
+      <div class="content px-4 user-markdown">
         {#if @changeset}
           {!-- # TODO: fix styling when in edit mode --}
           <Form for={@changeset} change="change_edit" submit="submit_edit">
@@ -151,8 +151,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
       </div>
 
       {#if Enum.any?(@event.attachments)}
-        <hr>
-        <div class="p-4">
+        <div class="divider" />
+        <div class="px-4">
           {#if @event.invoice && @event.invoice.required && !Commissions.invoice_paid?(@event.invoice)}
             Payment is required to view draft.
           {#else}
@@ -230,7 +230,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
       {/if}
 
       {#if @event.invoice}
-        <hr>
+        <div class="divider" />
         <InvoiceBox
           id={"invoice-box-#{@event.public_id}"}
           current_user={@current_user}

@@ -92,70 +92,74 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
 
   def render(assigns) do
     ~F"""
-    <div class="p-4">
-      Invoice amount: {Money.to_string(@event.invoice.amount)}
-      <hr>
-      {#case @event.invoice.status}
-        {#match :pending}
-          {!-- #TODO: Improve this --}
-          {#if @current_user.id == @commission.client.id}
-            Payment Requested. Banchan holds all funds until a final draft is approved.
-            <Form for={@changeset} change="change" submit="submit">
-              <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
-              <div class="flex flex-row">
-                <Submit changeset={@changeset} label="Pay" />
-                {#if @current_user_member?}
-                  {!-- # TODO: This should be a Link so it's accessible. --}
-                  <Button click="force_expire" label="Cancel Payment" />
-                {/if}
-              </div>
-            </Form>
-          {#else}
-            Waiting for Payment
-            {#if @current_user_member?}
-              {!-- # TODO: This should be a Link so it's accessible. --}
-              <Button click="force_expire" label="Cancel Payment" />
-            {/if}
-          {/if}
-        {#match :submitted}
-          {!-- #TODO: Improve this --}
-          Payment session in progress.
-          <div class="flex flex-row">
+    <div>
+      <div class="px-4">
+        Invoice amount: {Money.to_string(@event.invoice.amount)}
+      </div>
+      <div class="divider" />
+      <div class="px-4 pb-4">
+        {#case @event.invoice.status}
+          {#match :pending}
+            {!-- #TODO: Improve this --}
             {#if @current_user.id == @commission.client.id}
-              {!-- # TODO: This should be a Link so it's accessible. --}
-              <Button click="continue_payment" label="Continue Payment" />
+              Payment Requested. Banchan holds all funds until a final draft is approved.
+              <Form for={@changeset} change="change" submit="submit">
+                <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
+                <div class="flex flex-row">
+                  <Submit changeset={@changeset} label="Pay" />
+                  {#if @current_user_member?}
+                    {!-- # TODO: This should be a Link so it's accessible. --}
+                    <Button click="force_expire" label="Cancel Payment" />
+                  {/if}
+                </div>
+              </Form>
+            {#else}
+              Waiting for Payment
+              {#if @current_user_member?}
+                {!-- # TODO: This should be a Link so it's accessible. --}
+                <Button click="force_expire" label="Cancel Payment" />
+              {/if}
             {/if}
-            {#if @current_user_member?}
-              {!-- # TODO: This should be a Link so it's accessible. --}
-              <Button click="force_expire" label="Cancel Payment" />
+          {#match :submitted}
+            {!-- #TODO: Improve this --}
+            Payment session in progress.
+            <div class="flex flex-row">
+              {#if @current_user.id == @commission.client.id}
+                {!-- # TODO: This should be a Link so it's accessible. --}
+                <Button click="continue_payment" label="Continue Payment" />
+              {/if}
+              {#if @current_user_member?}
+                {!-- # TODO: This should be a Link so it's accessible. --}
+                <Button click="force_expire" label="Cancel Payment" />
+              {/if}
+            </div>
+          {#match :expired}
+            {!-- #TODO: Improve this --}
+            Payment session has expired. Please submit another invoice.
+          {#match :succeeded}
+            {!-- #TODO: Improve this --}
+            <p>Yay it's paid! Banchan will hold on to funds until the final draft is approved.
+              Tip: {Money.to_string(@event.invoice.tip)}, Total Platform Fees: {Money.to_string(@event.invoice.platform_fee)}, Total for Studio: {Money.subtract(
+                Money.add(@event.invoice.tip, @event.invoice.amount),
+                @event.invoice.platform_fee
+              )}</p>
+            {#if @event.invoice.payout_available_on}
+              {!-- # TODO: show the full date/time on hover --}
+              <p>This payment will be available for payout {fmt_time(@event.invoice.payout_available_on)}</p>
             {/if}
-          </div>
-        {#match :expired}
-          {!-- #TODO: Improve this --}
-          Payment session has expired. Please submit another invoice.
-        {#match :succeeded}
-          {!-- #TODO: Improve this --}
-          <p>Yay it's paid! Banchan will hold on to funds until the final draft is approved.
-            Tip: {Money.to_string(@event.invoice.tip)}, Total Platform Fees: {Money.to_string(@event.invoice.platform_fee)}, Total for Studio: {Money.subtract(
-              Money.add(@event.invoice.tip, @event.invoice.amount),
-              @event.invoice.platform_fee
-            )}</p>
-          {#if @event.invoice.payout_available_on}
-            {!-- # TODO: show the full date/time on hover --}
-            <p>This payment will be available for payout {fmt_time(@event.invoice.payout_available_on)}</p>
-          {/if}
-        {#match :paid_out}
-          {!-- #TODO: Improve this --}
-          Funds have been paid out to the Studio.
-        {#match nil}
-          {!-- #TODO: Improve this --}
-          {!-- NOTE: This state happens for a very brief window of time
+          {#match :paid_out}
+            {!-- #TODO: Improve this --}
+            Funds have been paid out to the Studio.
+          {#match nil}
+            {!-- #TODO: Improve this --}
+            {!-- NOTE: This state happens for a very brief window of time
               between when the payment request event is created, and when the
               Invoice itself is created, where there _is_ no
               Invoice for the event. If it's anything but a quick flash,
               there's probably a bug. --}
-          Please Wait...
-      {/case}
+            Please Wait...
+        {/case}
+      </div>
     </div>
     """
   end

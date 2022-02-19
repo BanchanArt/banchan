@@ -59,14 +59,14 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
           </li>
         {/for}
       </ul>
-      <hr class="pt-2">
+      <div class="divider" />
       {#if @deposited}
         <div class="p-2 flex flex-col">
           <div class="flex flex-row items-center">
             <div class="font-bold grow">Total:</div>
             <div class="p-2">{Money.to_string(estimate)}</div>
           </div>
-          <hr class="p-2">
+          <div class="divider" />
           <div class="flex flex-row items-center">
             <div class="font-bold grow">Deposited:</div>
             <div class="p-2">{Money.to_string(@deposited)}</div>
@@ -82,7 +82,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
           <div class="p-2">{Money.to_string(estimate)}</div>
         </div>
       {/if}
-      <hr class="pt-2">
+      <div class="divider" />
       {#if @offering && Enum.any?(@offering.options)}
         <h5 class="text-xl p-2">Add-ons:</h5>
         <ul class="flex flex-col">
