@@ -84,7 +84,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
             {!-- #TODO --}
             Latest draft goes here
           </div>
-          {!-- TODO: Show current amount in escrow --}
+          {!-- # TODO: Show current amount in escrow --}
           <SummaryEditor
             id="summary-editor"
             current_user={@current_user}
@@ -92,6 +92,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
             allow_edits={@current_user_member?}
           />
         </div>
+        <div class="divider md:hidden" />
         <div class="flex flex-col md:col-span-2 md:order-1">
           <Timeline
             uri={@uri}
