@@ -36,24 +36,10 @@ defmodule BanchanWeb.SettingsLive do
           <h1 class="text-2xl">Account Settings</h1>
           <br>
           <h2 class="text-xl">Appearance</h2>
-          <select
-            data-choose-theme
-            class="select select-bordered select-secondary select-sm bg-primary-content text-primary outline-offset-0 w-96"
-            :hook="Theme"
-            id="themeChange"
-          >
-            <option disabled="disabled" selected="selected">Theme</option>
-            <option value="emerald">Emerald</option>
-            <option value="halloween">Halloween</option>
-            <option value="garden">Garden</option>
-            <option value="forest">Forest</option>
-            <option value="synthwave">Synthwave</option>
-            <option value="cupcake">Cupcake</option>
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
-            <option value="cmyk">cmyk</option>
-            <option value="dracula">dracula</option>
-          </select>
+          <div class="flex flex-row items-center gap-4">
+            <span>Toggle Dark Mode:</span>
+            <input type="checkbox" class="toggle" data-toggle-theme="light,dark" />
+          </div>
 
           <div
             tabindex="0"
