@@ -78,14 +78,12 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.ActionBox do
                 />
                 <Button
                   class="md:max-w-xs md:place-self-end"
-                  primary={false}
                   click="update_status"
                   value="paused"
                   label="Pause"
                 />
                 <Button
                   class="md:max-w-xs md:place-self-end"
-                  primary={false}
                   click="update_status"
                   value="waiting"
                   label="Wait for Customer"
