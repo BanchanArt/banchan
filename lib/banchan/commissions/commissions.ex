@@ -744,4 +744,26 @@ defmodule Banchan.Commissions do
       fn dep, acc -> Money.add(acc, dep.amount) end
     )
   end
+
+  def latest_draft(%Commission{} = commission) do
+    case from(
+           e in Event,
+           join: us in "users_studios",
+           join: c in Commission,
+           where:
+             e.type == :comment and
+               c.id == ^commission.id and
+               e.commission_id == c.id and
+               us.studio_id == c.studio_id and
+               e.actor_id == us.user_id,
+           select: e,
+           limit: 1,
+           order_by: e.inserted_at,
+           preload: [attachments: [:upload, :thumbnail]]
+         )
+         |> Repo.all() do
+      [] -> nil
+      [event] -> event
+    end
+  end
 end

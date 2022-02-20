@@ -40,6 +40,15 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
     {:noreply, assign(socket, changeset: changeset)}
   end
 
+  def handle_event("change", %{"event" => event}, socket) do
+    changeset =
+      %Event{}
+      |> Event.comment_changeset(event)
+      |> Map.put(:action, :update)
+
+    {:noreply, assign(socket, changeset: changeset)}
+  end
+
   @impl true
   def handle_event("cancel_upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :attachment, ref)}
