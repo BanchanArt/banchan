@@ -103,9 +103,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
     ~F"""
     <div class="shadow-md bg-base-200 rounded-box">
       <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} studio={@studio} />
-      <div class="text-sm p-2 items-center flex">
-        <div class="flex items-center space-x-1">
-          <Avatar class="w-6" user={@event.actor} />
+      <div class="flex flex-row text-sm p-2">
+        <div class="inline-flex grow items-baseline flex-wrap space-x-1">
+          <div class="self-center">
+            <Avatar class="w-6" user={@event.actor} />
+          </div>
           <UserHandle user={@event.actor} />
           <span>
             {#if @event.invoice}
