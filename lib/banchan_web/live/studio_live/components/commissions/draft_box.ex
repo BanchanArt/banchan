@@ -35,9 +35,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.DraftBox do
     ~F"""
     <div>
       {#if @attachments && !Enum.empty?(@attachments)}
-        <div class="border border-neutral rounded-box p-2 mb-4">
-          <h3 class="px-2 text-xl">Latest Draft</h3>
-          <div class="divider" />
+          <h3 class="px-2 pb-2 text-xl">Latest Draft</h3>
           <MediaPreview id="draft-preview" commission={@commission} studio={@studio} />
           <AttachmentBox
             commission={@commission}
@@ -45,7 +43,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.DraftBox do
             attachments={@attachments}
             open_preview="open_preview"
           />
-        </div>
       {/if}
     </div>
     """

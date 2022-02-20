@@ -63,7 +63,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
       </ul>
       <div class="divider" />
       {#if @deposited}
-        <div class="flex flex-row items-center">
+        <div class="px-2 flex flex-row items-center">
           <div class="font-bold grow">Total:</div>
           <div class="px-2">{Money.to_string(estimate)}</div>
         </div>
