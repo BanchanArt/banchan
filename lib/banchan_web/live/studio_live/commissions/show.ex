@@ -10,6 +10,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     ActionBox,
     CommentBox,
     CommissionLayout,
+    DraftBox,
     SummaryEditor,
     Timeline
   }
@@ -85,11 +86,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     >
       <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
         <div class="flex flex-col md:order-2">
-          <div class="h-20 border-2 border-neutral rounded-box p-2 mb-4">
-            {!-- #TODO --}
-            Latest draft goes here
-          </div>
-          {!-- # TODO: Show current amount in escrow --}
+          <DraftBox id="draft-box" commission={@commission} studio={@studio} />
           <SummaryEditor
             id="summary-editor"
             current_user={@current_user}
