@@ -7,7 +7,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   alias Banchan.Commissions
 
   alias BanchanWeb.StudioLive.Components.Commissions.{
-    ActionBox,
+    StatusBox,
     CommentBox,
     CommissionLayout,
     DraftBox,
@@ -106,7 +106,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
           />
           <div class="divider" />
           <div class="flex flex-col gap-4">
-            <ActionBox
+            <StatusBox
               id="action-box"
               commission={@commission}
               current_user={@current_user}

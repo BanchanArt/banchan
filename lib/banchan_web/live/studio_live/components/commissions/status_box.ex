@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Commissions.ActionBox do
+defmodule BanchanWeb.StudioLive.Components.Commissions.StatusBox do
   @moduledoc """
   Action box that changes behavior based on the commission's status.
   """
@@ -19,7 +19,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.ActionBox do
 
   def render(assigns) do
     ~F"""
-    <div class="p-4 flex flex-col divide-y w-full border border-neutral rounded-box">
+    <div class="p-4 flex flex-col gap-2 divide-y w-full border border-neutral rounded-box">
+      <div class="text-2xl">{Commissions.Common.humanize_status(@commission.status)}</div>
       {#if @current_user.id == @commission.client.id}
         <div class="flex flex-col">
           {#case @commission.status}
