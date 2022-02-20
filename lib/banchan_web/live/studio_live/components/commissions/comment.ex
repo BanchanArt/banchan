@@ -101,7 +101,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
 
   def render(assigns) do
     ~F"""
-    <div class="shadow-md bg-base-200 rounded-box">
+    <div class="shadow-md bg-base-200 rounded-box pb-4">
       <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} studio={@studio} />
       <div class="flex flex-row text-sm p-2">
         <div class="inline-flex grow items-baseline flex-wrap space-x-1">
@@ -126,7 +126,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
         {/if}
       </div>
 
-      <div class="divider" />
+      <hr class="pb-4 opacity-10 h-0.5">
 
       <div class="content px-4 user-markdown">
         {#if @changeset}
