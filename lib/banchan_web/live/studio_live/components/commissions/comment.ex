@@ -169,14 +169,14 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
       {#if @event.invoice}
         <div class="divider" />
         <div class="pb-4">
-        <InvoiceBox
-          id={"invoice-box-#{@event.public_id}"}
-          current_user={@current_user}
-          current_user_member?={@current_user_member?}
-          uri={@uri}
-          commission={@commission}
-          event={@event}
-        />
+          <InvoiceBox
+            id={"invoice-box-#{@event.public_id}"}
+            current_user={@current_user}
+            current_user_member?={@current_user_member?}
+            uri={@uri}
+            commission={@commission}
+            event={@event}
+          />
         </div>
       {/if}
     </div>
