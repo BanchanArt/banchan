@@ -6,7 +6,6 @@ defmodule BanchanWeb.StudioLive.Components.TabButton do
 
   alias Surface.Components.LiveRedirect
 
-  prop studio, :struct, required: true
   prop tab_name, :atom, required: true
   prop current_tab, :atom, required: true
   prop label, :string, required: true
@@ -18,15 +17,11 @@ defmodule BanchanWeb.StudioLive.Components.TabButton do
       label={@label}
       class={
         "tab",
-        "tab-bordered",
-        "bg-opacity-60",
+        "tab-lifted",
         "text-center",
-        "rounded-t-lg",
-        "text-secondary-content",
         "flex-1",
         "tab-active": @current_tab == @tab_name,
-        "bg-primary": @current_tab != @tab_name,
-        "bg-primary-focus": @current_tab == @tab_name
+        "bg-base-200": @current_tab != @tab_name
       }
       to={@to}
     />

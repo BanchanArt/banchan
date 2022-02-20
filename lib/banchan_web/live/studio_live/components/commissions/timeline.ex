@@ -6,7 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
 
   alias Banchan.Commissions.Common
 
-  alias BanchanWeb.StudioLive.Components.Commissions.{Comment, InvoiceEvent, TimelineItem}
+  alias BanchanWeb.StudioLive.Components.Commissions.{Comment, TimelineItem}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
@@ -26,36 +26,25 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
     event_chunks =
       Enum.chunk_by(
         assigns.commission.events,
-        &(&1.type == :comment || &1.type == :invoice)
+        &(&1.type == :comment)
       )
 
     ~F"""
     <div>
       {#for chunk <- event_chunks}
-        {#if List.first(chunk).type == :comment || List.first(chunk).type == :invoice}
-          <div class="flex flex-col space-y-2">
+        {#if List.first(chunk).type == :comment}
+          <div class="flex flex-col space-y-4">
             {#for event <- chunk}
               <article class="timeline-item" id={"event-#{event.public_id}"}>
-                {#if event.type == :comment}
-                  <Comment
-                    id={"event-#{event.public_id}"}
-                    uri={@uri}
-                    studio={@studio}
-                    event={event}
-                    commission={@commission}
-                    current_user={@current_user}
-                    current_user_member?={@current_user_member?}
-                  />
-                {#elseif event.type == :invoice}
-                  <InvoiceEvent
-                    id={"event-#{event.public_id}"}
-                    uri={@uri}
-                    current_user={@current_user}
-                    current_user_member?={@current_user_member?}
-                    commission={@commission}
-                    event={event}
-                  />
-                {/if}
+                <Comment
+                  id={"event-#{event.public_id}"}
+                  uri={@uri}
+                  studio={@studio}
+                  event={event}
+                  commission={@commission}
+                  current_user={@current_user}
+                  current_user_member?={@current_user_member?}
+                />
               </article>
             {/for}
           </div>

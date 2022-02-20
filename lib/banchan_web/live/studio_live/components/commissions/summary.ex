@@ -6,6 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
 
   alias Surface.Components.Form
 
+  alias BanchanWeb.Components.Button
   alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
 
   prop line_items, :list, required: true
@@ -13,22 +14,23 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
   prop offering, :struct
   prop add_item, :event
   prop remove_item, :event
+  prop deposited, :struct
 
   prop custom_changeset, :struct
   prop open_custom, :boolean, default: false
   prop submit_custom, :event
   prop change_custom, :event
   prop toggle_custom, :event
+  prop close_custom, :event
+  prop nothing, :event
 
   def render(assigns) do
     estimate =
-      Money.to_string(
-        Enum.reduce(
-          assigns.line_items,
-          # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-          Money.new(0, :USD),
-          fn item, acc -> Money.add(acc, item.amount) end
-        )
+      Enum.reduce(
+        assigns.line_items,
+        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
+        Money.new(0, :USD),
+        fn item, acc -> Money.add(acc, item.amount) end
       )
 
     ~F"""
@@ -59,14 +61,32 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
           </li>
         {/for}
       </ul>
-      <hr class="pt-2">
-      <div class="p-2 flex">
-        <div class="font-bold grow">Estimate:</div>
-        <div class="p-2">{estimate}</div>
-      </div>
-      <hr class="pt-2">
+      <div class="divider" />
+      {#if @deposited}
+        <div class="px-2 flex flex-row items-center">
+          <div class="font-bold grow">Total:</div>
+          <div class="px-2">{Money.to_string(estimate)}</div>
+        </div>
+        <div class="divider -py-2" />
+        <div class="px-2 flex flex-col gap-2">
+          <div class="flex flex-row items-center">
+            <div class="font-bold grow">Deposited:</div>
+            <div class="px-2">{Money.to_string(@deposited)}</div>
+          </div>
+          <div class="flex flex-row items-center">
+            <div class="font-bold grow">Remaining Balance:</div>
+            <div class="px-2">{Money.to_string(Money.subtract(estimate, @deposited))}</div>
+          </div>
+        </div>
+      {#else}
+        <div class="px-2 flex">
+          <div class="font-bold grow">Estimate:</div>
+          <div class="">{Money.to_string(estimate)}</div>
+        </div>
+      {/if}
+      <div class="divider" />
       {#if @offering && Enum.any?(@offering.options)}
-        <h5 class="text-xl p-2">Add-ons:</h5>
+        <h5 class="text-xl px-2">Add-ons:</h5>
         <ul class="flex flex-col">
           {#for {option, idx} <- Enum.with_index(@offering.options)}
             {#if option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
@@ -84,26 +104,42 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
               </li>
             {/if}
           {/for}
+          {#if @custom_changeset}
+            <li class="flex gap-2 p-2">
+              <button type="button" :on-click={@toggle_custom} class="w-8 text-xl fas fa-plus-circle" />
+              <div class="grow flex flex-col">
+                <div class="font-bold">Custom Option</div>
+                <div class="text-sm">Add a customized option to the summary.</div>
+              </div>
+              <div class="p-2">TBD</div>
+            </li>
+          {/if}
         </ul>
         {#if @custom_changeset}
-          <details open={@open_custom}>
-            <summary :on-click={@toggle_custom} class="text-2xl">Custom Option</summary>
-            <Form
-              class="flex flex-col space-y-2"
-              for={@custom_changeset}
-              change={@change_custom}
-              submit={@submit_custom}
-            >
-              <TextInput name={:name} show_label={false} opts={required: true, placeholder: "Name"} />
-              <TextArea
-                name={:description}
-                show_label={false}
-                opts={required: true, placeholder: "Description"}
-              />
-              <TextInput name={:amount} show_label={false} opts={required: true, placeholder: "Price"} />
-              <Submit changeset={@custom_changeset} />
-            </Form>
-          </details>
+          <div
+            class={"flex flex-col modal", "modal-open": @open_custom}
+            :on-click={@toggle_custom}
+            :on-window-keydown={@close_custom}
+            phx-key="Escape"
+          >
+            <div :on-click={@nothing} class="modal-box">
+              <Form
+                class="flex flex-col gap-2"
+                for={@custom_changeset}
+                change={@change_custom}
+                submit={@submit_custom}
+              >
+                <h3 class="text-xl font-bold">Add Custom Option</h3>
+                <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
+                <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
+                <TextInput name={:amount} label="Price" opts={required: true, placeholder: "$100.00"} />
+                <div class="modal-action">
+                  <Button primary={false} click={@toggle_custom} label="Cancel" />
+                  <Submit changeset={@custom_changeset} />
+                </div>
+              </Form>
+            </div>
+          </div>
         {/if}
       {/if}
     </div>

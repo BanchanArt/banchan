@@ -31,6 +31,13 @@ defmodule Banchan.Commissions.Commission do
   end
 
   @doc false
+  def status_changeset(commission, attrs) do
+    commission
+    |> cast(attrs, [:status])
+    |> validate_required([:status])
+  end
+
+  @doc false
   def changeset(commission, attrs) do
     commission
     |> cast(attrs, [:title, :description, :status, :tos_ok])

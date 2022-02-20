@@ -4,7 +4,16 @@ defmodule Banchan.Commissions.Common do
   used across the various `Banchan.Commissions` modules. It mainly exists to
   resolve compilation cycles.
   """
-  @status_values [:submitted, :accepted, :in_progress, :paused, :waiting, :closed]
+  @status_values [
+    :submitted,
+    :accepted,
+    :in_progress,
+    :paused,
+    :waiting,
+    :ready_for_review,
+    :approved,
+    :withdrawn
+  ]
 
   def status_values do
     @status_values
@@ -27,8 +36,14 @@ defmodule Banchan.Commissions.Common do
       :waiting ->
         "Waiting for Client"
 
-      :closed ->
-        "Closed"
+      :ready_for_review ->
+        "Ready for Review"
+
+      :approved ->
+        "Approved"
+
+      :withdrawn ->
+        "Withdrawn"
     end
   end
 

@@ -7,6 +7,7 @@ defmodule BanchanWeb.Components.Form.UploadInput do
   alias Surface.Components.LiveFileInput
 
   prop upload, :struct, required: true
+  prop label, :string, default: "Upload attachments"
   prop cancel, :event, required: true
 
   def render(assigns) do
@@ -31,7 +32,7 @@ defmodule BanchanWeb.Components.Form.UploadInput do
       phx-drop-target={@upload.ref}
     >
       <div class="absolute">
-        <span class="block font-normal">Upload attachments. <i class="fas fa-file-upload" /></span>
+        <span class="block font-normal">{@label} <i class="fas fa-file-upload" /></span>
       </div>
       <LiveFileInput class="h-full w-full opacity-0 hover:cursor-pointer" upload={@upload} />
     </div>

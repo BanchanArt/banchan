@@ -15,6 +15,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
   prop allow_edits, :boolean, required: true
 
   data custom_changeset, :struct
+  data deposited, :struct
   data open_custom, :boolean, default: false
 
   def update(assigns, socket) do
@@ -27,7 +28,9 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
         nil
       end
 
-    {:ok, socket |> assign(custom_changeset: custom_changeset)}
+    deposited = Commissions.deposited_amount(socket.assigns.commission)
+
+    {:ok, socket |> assign(custom_changeset: custom_changeset, deposited: deposited)}
   end
 
   @impl true
@@ -85,6 +88,16 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
   end
 
   @impl true
+  def handle_event("close_custom", _, socket) do
+    {:noreply, assign(socket, open_custom: false)}
+  end
+
+  @impl true
+  def handle_event("nothing", _, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event(
         "change_custom",
         %{"line_item" => %{"name" => name, "description" => description, "amount" => amount}},
@@ -118,7 +131,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
           amount: moneyfy(amount)
         })
 
-      {:noreply, assign(socket, custom_changeset: %LineItem{} |> LineItem.custom_changeset(%{}))}
+      {:noreply,
+       assign(socket,
+         open_custom: false,
+         custom_changeset: %LineItem{} |> LineItem.custom_changeset(%{})
+       )}
     else
       # Deny the change. This shouldn't happen unless there's a bug, or
       # someone is trying to send us Shenanigans data.
@@ -147,9 +164,12 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
       remove_item="remove_item"
       custom_changeset={@custom_changeset}
       open_custom={@open_custom}
+      close_custom="close_custom"
       toggle_custom="toggle_custom"
       change_custom="change_custom"
       submit_custom="submit_custom"
+      nothing="nothing"
+      deposited={@deposited}
     />
     """
   end

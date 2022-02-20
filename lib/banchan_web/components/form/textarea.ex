@@ -31,7 +31,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
           <Label class="label" />
         {/if}
       {/if}
-      <div class={"control", @wrapper_class}>
+      <div class={"control w-full", @wrapper_class}>
         <#slot name="left" />
         <InputContext :let={form: form, field: field}>
           <TextArea
@@ -40,6 +40,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
               "textarea-bordered",
               "textarea-primary",
               "h-40",
+              "w-full",
               @class,
               "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
             }

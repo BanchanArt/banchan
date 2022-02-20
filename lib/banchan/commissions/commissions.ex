@@ -10,6 +10,7 @@ defmodule Banchan.Commissions do
   alias Banchan.Commissions.{Commission, Event, EventAttachment, Invoice, LineItem}
   alias Banchan.Offerings
   alias Banchan.Offerings.OfferingOption
+  alias Banchan.Studios
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
@@ -184,10 +185,11 @@ defmodule Banchan.Commissions do
   def update_status(%User{} = actor, %Commission{} = commission, status) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        {:ok, commission} =
-          commission
-          |> Commission.changeset(%{status: status})
-          |> Repo.update()
+        changeset = Repo.reload!(commission) |> Commission.status_changeset(%{status: status})
+
+        check_status_transition!(actor, commission, changeset.changes.status)
+
+        {:ok, commission} = changeset |> Repo.update()
 
         {:ok, event} = create_event(:status, actor, commission, [], %{status: status})
 
@@ -206,6 +208,50 @@ defmodule Banchan.Commissions do
 
     ret
   end
+
+  defp check_status_transition!(
+         %User{} = actor,
+         %Commission{client_id: client_id, studio_id: studio_id, status: current_status},
+         new_status
+       ) do
+    {:ok, _} =
+      Repo.transaction(fn ->
+        actor_member? = Studios.is_user_in_studio(actor, %Studio{id: studio_id})
+
+        true =
+          status_transition_allowed?(
+            actor_member?,
+            client_id == actor.id,
+            current_status,
+            new_status
+          )
+      end)
+
+    :ok
+  end
+
+  # Transition changes studios can make
+  defp status_transition_allowed?(true, _, :submitted, :accepted), do: true
+  defp status_transition_allowed?(true, _, :accepted, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :in_progress, :paused), do: true
+  defp status_transition_allowed?(true, _, :in_progress, :waiting), do: true
+  defp status_transition_allowed?(true, _, :in_progress, :ready_for_review), do: true
+  defp status_transition_allowed?(true, _, :paused, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :waiting, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :ready_for_review, :in_progress), do: true
+
+  # Transition changes clients can make
+  defp status_transition_allowed?(_, true, :ready_for_review, :approved), do: true
+
+  # Either party can withdraw a commission (reimbursing the client)
+  defp status_transition_allowed?(_, _, _, :withdrawn), do: true
+
+  # Everything else is a no from me, Bob.
+  defp status_transition_allowed?(_, _, _, _), do: false
+
+  def commission_open?(%Commission{status: :withdrawn}), do: false
+  def commission_open?(%Commission{status: :approved}), do: false
+  def commission_open?(%Commission{}), do: true
 
   def add_line_item(%User{} = actor, %Commission{} = commission, option) do
     {:ok, ret} =
@@ -548,21 +594,35 @@ defmodule Banchan.Commissions do
     Repo.delete!(event_attachment)
   end
 
-  def invoice(%User{} = actor, %Commission{} = commission, amount) do
-    {:ok, _} =
+  def invoice_paid?(%Invoice{status: :succeeded}), do: true
+  def invoice_paid?(%Invoice{status: :paid_out}), do: true
+  def invoice_paid?(%Invoice{}), do: false
+
+  def invoice(%User{} = actor, %Commission{} = commission, drafts, event_data) do
+    {:ok, ret} =
       Repo.transaction(fn ->
-        {:ok, event} = create_event(:invoice, actor, commission, [], %{amount: amount})
+        case create_event(:comment, actor, commission, drafts, event_data) do
+          {:error, error} ->
+            {:error, error}
 
-        {:ok, _} =
-          %Invoice{
-            commission: commission,
-            event: event
-          }
-          |> Invoice.amount_changeset(%{"amount" => amount})
-          |> Repo.insert()
+          {:ok, event} ->
+            case %Invoice{
+                   commission: commission,
+                   event: event
+                 }
+                 |> Invoice.creation_changeset(event_data)
+                 |> Repo.insert() do
+              {:error, error} ->
+                {:error, error}
 
-        send_event_update!(event.id)
+              {:ok, invoice} ->
+                send_event_update!(event.id)
+                {:ok, invoice}
+            end
+        end
       end)
+
+    ret
   end
 
   def process_payment!(
@@ -665,5 +725,45 @@ defmodule Banchan.Commissions do
     # NOTE: We don't manually expire the invoice in the database here. That's
     # handled by process_payment_expired!/1 when the webhook fired.
     :ok
+  end
+
+  def deposited_amount(%Commission{} = commission) do
+    deposits =
+      from(
+        i in Invoice,
+        where:
+          i.commission_id == ^commission.id and (i.status == :paid_out or i.status == :succeeded),
+        select: i.amount
+      )
+      |> Repo.all()
+
+    Enum.reduce(
+      deposits,
+      # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
+      Money.new(0, :USD),
+      fn dep, acc -> Money.add(acc, dep.amount) end
+    )
+  end
+
+  def latest_draft(%Commission{} = commission) do
+    case from(
+           e in Event,
+           join: us in "users_studios",
+           join: c in Commission,
+           where:
+             e.type == :comment and
+               c.id == ^commission.id and
+               e.commission_id == c.id and
+               us.studio_id == c.studio_id and
+               e.actor_id == us.user_id,
+           select: e,
+           limit: 1,
+           order_by: e.inserted_at,
+           preload: [attachments: [:upload, :thumbnail]]
+         )
+         |> Repo.all() do
+      [] -> nil
+      [event] -> event
+    end
   end
 end

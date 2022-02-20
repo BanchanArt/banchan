@@ -45,7 +45,7 @@ defmodule BanchanWeb.StudioLive.Settings do
             <TextArea name={:default_terms} />
             <Submit changeset={@changeset} label="Save" />
           </Form>
-          <hr>
+          <div class="divider" />
           <h2 class="text-xl">Stripe Dashboard</h2>
           <Link
             label="Go to Dashboard"

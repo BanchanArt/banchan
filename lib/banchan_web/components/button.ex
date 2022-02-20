@@ -4,10 +4,10 @@ defmodule BanchanWeb.Components.Button do
   """
   use BanchanWeb, :component
 
-  prop is_primary, :boolean, default: true
+  prop primary, :boolean, default: true
   prop label, :string
   prop value, :any
-  prop click, :event, required: true
+  prop click, :event
   prop class, :css_class
 
   slot default
@@ -18,12 +18,11 @@ defmodule BanchanWeb.Components.Button do
       class={
         "btn",
         "text-center",
-        "rounded-full",
         "py-1",
         "px-5 m-1",
         @class,
-        "btn-primary": @is_primary,
-        "btn-secondary": !@is_primary
+        "btn-primary": @primary,
+        "btn-secondary": !@primary
       }
       value={@value}
       type="button"
