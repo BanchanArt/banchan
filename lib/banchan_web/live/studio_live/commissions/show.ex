@@ -7,10 +7,10 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   alias Banchan.Commissions
 
   alias BanchanWeb.StudioLive.Components.Commissions.{
-    StatusBox,
     CommentBox,
     CommissionLayout,
     DraftBox,
+    StatusBox,
     SummaryEditor,
     Timeline
   }
