@@ -89,7 +89,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
   def render(assigns) do
     ~F"""
     <div class="flex flex-col">
-      <div class="place-self-center">
+      <div class="place-self-center stats">
         <div class="stat">
           <div class="stat-title">Invoice</div>
           <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
