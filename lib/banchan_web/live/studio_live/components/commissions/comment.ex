@@ -168,6 +168,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
 
       {#if @event.invoice}
         <div class="divider" />
+        <div class="pb-4">
         <InvoiceBox
           id={"invoice-box-#{@event.public_id}"}
           current_user={@current_user}
@@ -176,6 +177,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
           commission={@commission}
           event={@event}
         />
+        </div>
       {/if}
     </div>
     """

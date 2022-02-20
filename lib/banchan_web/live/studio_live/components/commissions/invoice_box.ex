@@ -22,10 +22,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
   # punning off this for the changeset validation.
   data changeset, :struct, default: %Event{} |> Event.amount_changeset(%{})
 
-  defp fmt_time(time) do
-    Timex.format!(time, "{relative}", :relative)
-  end
-
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
   end
@@ -92,74 +88,72 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
 
   def render(assigns) do
     ~F"""
-    <div>
-      <div class="px-4">
-        Invoice amount: {Money.to_string(@event.invoice.amount)}
-      </div>
-      <div class="divider" />
-      <div class="px-4 pb-4">
-        {#case @event.invoice.status}
-          {#match :pending}
-            {!-- #TODO: Improve this --}
-            {#if @current_user.id == @commission.client.id}
-              Payment Requested. Banchan holds all funds until a final draft is approved.
-              <Form for={@changeset} change="change" submit="submit">
-                <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
-                <div class="flex flex-row">
+    <div class="flex flex-col">
+      <div class="stats place-self-center">
+        <div class="stat">
+          <div class="stat-title">Invoice</div>
+          <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+          {#case @event.invoice.status}
+            {#match :pending}
+              {#if @current_user.id == @commission.client.id}
+                <div class="stat-desc">Payment is requested.</div>
+                <Form for={@changeset} class="stat-actions" change="change" submit="submit">
+                  <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
                   <Submit changeset={@changeset} label="Pay" />
                   {#if @current_user_member?}
                     {!-- # TODO: This should be a Link so it's accessible. --}
                     <Button click="force_expire" label="Cancel Payment" />
                   {/if}
-                </div>
-              </Form>
-            {#else}
-              Waiting for Payment
-              {#if @current_user_member?}
-                {!-- # TODO: This should be a Link so it's accessible. --}
-                <Button click="force_expire" label="Cancel Payment" />
+                </Form>
+              {#else}
+                <div class="stat-desc">Waiting for Payment</div>
+                {#if @current_user_member?}
+                  <div class="stat-actions">
+                    {!-- # TODO: This should be a Link so it's accessible. --}
+                    <Button click="force_expire" label="Cancel Payment" />
+                  </div>
+                {/if}
               {/if}
-            {/if}
-          {#match :submitted}
-            {!-- #TODO: Improve this --}
-            Payment session in progress.
-            <div class="flex flex-row">
-              {#if @current_user.id == @commission.client.id}
-                {!-- # TODO: This should be a Link so it's accessible. --}
-                <Button click="continue_payment" label="Continue Payment" />
-              {/if}
-              {#if @current_user_member?}
-                {!-- # TODO: This should be a Link so it's accessible. --}
-                <Button click="force_expire" label="Cancel Payment" />
-              {/if}
-            </div>
-          {#match :expired}
-            {!-- #TODO: Improve this --}
-            Payment session has expired. Please submit another invoice.
-          {#match :succeeded}
-            {!-- #TODO: Improve this --}
-            <p>Yay it's paid! Banchan will hold on to funds until the final draft is approved.
-              Tip: {Money.to_string(@event.invoice.tip)}, Total Platform Fees: {Money.to_string(@event.invoice.platform_fee)}, Total for Studio: {Money.subtract(
-                Money.add(@event.invoice.tip, @event.invoice.amount),
-                @event.invoice.platform_fee
-              )}</p>
-            {#if @event.invoice.payout_available_on}
-              {!-- # TODO: show the full date/time on hover --}
-              <p>This payment will be available for payout {fmt_time(@event.invoice.payout_available_on)}</p>
-            {/if}
-          {#match :paid_out}
-            {!-- #TODO: Improve this --}
-            Funds have been paid out to the Studio.
-          {#match nil}
-            {!-- #TODO: Improve this --}
-            {!-- NOTE: This state happens for a very brief window of time
-              between when the payment request event is created, and when the
-              Invoice itself is created, where there _is_ no
-              Invoice for the event. If it's anything but a quick flash,
-              there's probably a bug. --}
-            Please Wait...
-        {/case}
+            {#match :submitted}
+              <div class="stat-desc">Payment session in progress.</div>
+              <div class="stat-actions">
+                {#if @current_user.id == @commission.client.id}
+                  {!-- # TODO: This should be a Link so it's accessible. --}
+                  <Button click="continue_payment" label="Continue Payment" />
+                {/if}
+                {#if @current_user_member?}
+                  {!-- # TODO: This should be a Link so it's accessible. --}
+                  <Button click="force_expire" label="Cancel Payment" />
+                {/if}
+              </div>
+            {#match :expired}
+              <div class="stat-desc">Payment session expired.</div>
+            {#match :succeeded}
+              <div class="stat-desc">Payment succeeded.</div>
+            {#match :paid_out}
+              <div class="stat-desc">Funds have been paid out.</div>
+            {#match nil}
+              {!-- NOTE: This state happens for a very brief window of time
+                between when the payment request event is created, and when the
+                Invoice itself is created, where there _is_ no
+                Invoice for the event. If it's anything but a quick flash,
+                there's probably a bug. --}
+              <div class="stat-desc">Please wait...</div>
+          {/case}
+        </div>
+        {#if @event.invoice.status == :succeeded || @event.invoice.status == :paid_out}
+          <div class="stat">
+            <div class="stat-title">Tip</div>
+            <div class="stat-value">{Money.to_string(@event.invoice.tip)}</div>
+            <div class="stat-desc">Thank you!</div>
+          </div>
+        {/if}
       </div>
+      {#if @event.invoice.status == :succeeded}
+        <span class="italic p-4 text-xs">
+          Note: Banchan.Art will hold all funds for this commission until a final draft is approved.
+        </span>
+      {/if}
     </div>
     """
   end
