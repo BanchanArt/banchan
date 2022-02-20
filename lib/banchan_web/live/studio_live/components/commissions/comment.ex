@@ -90,9 +90,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
   def handle_event("remove_attachment", %{"attachment-idx" => idx}, socket) do
     {index, ""} = Integer.parse(idx)
     attachment = Enum.fetch!(socket.assigns.event.attachments, index)
-    Commissions.delete_attachment!(attachment)
-    new_attachments = Enum.reject(socket.assigns.event.attachments, &(&1 == attachment))
-    {:noreply, socket |> assign(event: %{socket.assigns.event | attachments: new_attachments})}
+    Commissions.delete_attachment!(socket.assigns.commission, socket.assigns.event, attachment)
+    {:noreply, socket}
   end
 
   defp replace_fragment(uri, event) do
