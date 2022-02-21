@@ -59,7 +59,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.DraftBox do
 
   @impl true
   def handle_event("open_preview", %{"key" => key, "bucket" => bucket}, socket) do
-    if socket.assigns.current_user.id == socket.assigns.commission.user_id ||
+    if socket.assigns.current_user.id == socket.assigns.commission.client_id ||
          socket.assigns.current_user_member? do
       MediaPreview.open(
         "draft-preview",
