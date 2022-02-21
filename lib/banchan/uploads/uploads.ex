@@ -49,16 +49,17 @@ defmodule Banchan.Uploads do
 
   def save_file!(%User{} = user, src, type, file_name, bucket \\ get_bucket()) do
     key = gen_key()
-    local = Path.join([local_upload_dir(), bucket, key])
     size = File.stat!(src).size
-    File.mkdir_p!(Path.dirname(local))
-    File.cp!(src, local)
 
     if Mix.env() == :prod || System.get_env("AWS_REGION") do
-      local
+      src
       |> ExAws.S3.Upload.stream_file()
       |> ExAws.S3.upload(bucket, key)
       |> ExAws.request!()
+    else
+      local = Path.join([local_upload_dir(), bucket, key])
+      File.mkdir_p!(Path.dirname(local))
+      File.cp!(src, local)
     end
 
     %Upload{
