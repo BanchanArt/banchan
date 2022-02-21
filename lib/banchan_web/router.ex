@@ -6,13 +6,31 @@ defmodule BanchanWeb.Router do
 
   alias BanchanWeb.EnsureRolePlug
 
+  @host :banchan
+        |> Application.fetch_env!(BanchanWeb.Endpoint)
+        |> Keyword.fetch!(:url)
+        |> Keyword.fetch!(:host)
+
+  @content_security_policy (case Mix.env do
+    :prod  -> "default-src 'self';connect-src wss://#{@host};img-src 'self' blob:;"
+
+    _ -> "default-src 'self' 'unsafe-eval' 'unsafe-inline';" <>
+        "connect-src ws://#{@host}:*;" <>
+        "img-src 'self' blob: data:;"
+        "font-src data:;"
+  end)
+
   pipeline :browser do
     plug(:accepts, ["html"])
     plug(:fetch_session)
     plug(:fetch_live_flash)
     plug(:put_root_layout, {BanchanWeb.LayoutView, :root})
     plug(:protect_from_forgery)
-    plug(:put_secure_browser_headers)
+    # NB(zkat): unsafe-eval has to be enabled because webpack does it for its internals.
+    plug(:put_secure_browser_headers, %{
+      "content-security-policy" => @content_security_policy
+    })
+
     plug(:fetch_current_user)
   end
 
