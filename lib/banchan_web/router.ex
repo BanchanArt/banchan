@@ -12,7 +12,7 @@ defmodule BanchanWeb.Router do
         |> Keyword.fetch!(:host)
 
   @content_security_policy (case Mix.env do
-    :prod  -> "default-src 'self';connect-src wss://#{@host};img-src 'self' blob:;"
+    :prod  -> "default-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src wss://#{@host};img-src 'self' blob: data:; font-src data:;"
 
     _ -> "default-src 'self' 'unsafe-eval' 'unsafe-inline';" <>
         "connect-src ws://#{@host}:*;" <>
@@ -26,7 +26,6 @@ defmodule BanchanWeb.Router do
     plug(:fetch_live_flash)
     plug(:put_root_layout, {BanchanWeb.LayoutView, :root})
     plug(:protect_from_forgery)
-    # NB(zkat): unsafe-eval has to be enabled because webpack does it for its internals.
     plug(:put_secure_browser_headers, %{
       "content-security-policy" => @content_security_policy
     })
