@@ -12,8 +12,7 @@ defmodule BanchanWeb.DenizenLive.Show do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(%{"handle" => handle}, session, socket) do
-    socket = assign_defaults(session, socket, false)
+  def mount(%{"handle" => handle}, _session, socket) do
     user = Accounts.get_user_by_handle!(handle)
     studios = Studios.list_studios_for_user(user)
     {:ok, assign(socket, user: user, studios: studios)}

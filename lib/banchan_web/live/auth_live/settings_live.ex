@@ -13,9 +13,7 @@ defmodule BanchanWeb.SettingsLive do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(_params, session, socket) do
-    socket = assign_defaults(session, socket)
-
+  def mount(_params, _session, socket) do
     if socket.assigns.current_user do
       {:ok,
        assign(socket,

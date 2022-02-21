@@ -12,9 +12,7 @@ defmodule BanchanWeb.SetupMfaLive do
   alias BanchanWeb.Components.Layout
 
   @impl true
-  def mount(_params, session, socket) do
-    socket = assign_defaults(session, socket)
-
+  def mount(_params, _session, socket) do
     user = socket.assigns.current_user
 
     if user.totp_secret do

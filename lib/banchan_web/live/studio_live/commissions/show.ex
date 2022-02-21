@@ -18,8 +18,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
-  def mount(%{"commission_id" => commission_id} = params, session, socket) do
-    socket = assign_defaults(session, socket, true)
+  def mount(%{"commission_id" => commission_id} = params, _session, socket) do
     socket = assign_studio_defaults(params, socket, false, false)
 
     commission =

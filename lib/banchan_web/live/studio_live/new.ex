@@ -15,8 +15,7 @@ defmodule BanchanWeb.StudioLive.New do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(_params, session, socket) do
-    socket = assign_defaults(session, socket)
+  def mount(_params, _session, socket) do
     changeset = Studio.changeset(%Studio{}, %{})
     {:ok, assign(socket, changeset: changeset)}
   end

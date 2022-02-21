@@ -11,9 +11,7 @@ defmodule BanchanWeb.LoginLive do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(_params, session, socket) do
-    socket = assign_defaults(session, socket, false)
-
+  def mount(_params, _session, socket) do
     {:ok,
      assign(socket,
        changeset: User.login_changeset(%User{}, %{}),
