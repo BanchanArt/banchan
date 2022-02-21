@@ -1,27 +1,23 @@
 import "phoenix_html"
-import Alpine from "alpinejs"
-import { Socket } from "phoenix"
+import { Socket, LongPoll } from "phoenix"
 import topbar from "topbar"
 import Hooks from "./_hooks"
 import { LiveSocket } from "phoenix_live_view"
 
-let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket('/live', Socket, {
-    dom: {
-        onBeforeElUpdated(from, to) {
-            if (from.__x) {
-                window.Alpine.clone(from.__x, to)
-            }
-        }
-    },
+const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+const liveSocket = new LiveSocket('/live', Socket, {
     params: {
         _csrf_token: csrfToken
     },
     hooks: Hooks
 })
 
-window.Alpine = Alpine
-Alpine.start()
+liveSocket.socket.onError((_error, transport, establishedConnections) => {
+  if (transport === WebSocket && establishedConnections === 0) {
+    liveSocket.socket.replaceTransport(LongPoll);
+    liveSocket.socket.connect();
+  }
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   let theme = localStorage.getItem("theme")

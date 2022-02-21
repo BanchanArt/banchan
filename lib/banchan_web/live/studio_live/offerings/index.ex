@@ -15,8 +15,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Index do
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
-  def mount(params, session, socket) do
-    socket = assign_defaults(session, socket, true)
+  def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, true, false)
 
     offerings =

@@ -7,7 +7,11 @@ defmodule Banchan.Offerings do
   alias Banchan.Offerings.Offering
   alias Banchan.Repo
 
-  def new_offering(studio, attrs) do
+  def new_offering(_, false, _) do
+    {:error, :unauthorized}
+  end
+
+  def new_offering(studio, _current_user_member?, attrs) do
     %Offering{studio_id: studio.id}
     |> Offering.changeset(attrs)
     |> Repo.insert()
@@ -25,7 +29,11 @@ defmodule Banchan.Offerings do
     Offering.changeset(offering, attrs)
   end
 
-  def update_offering(%Offering{} = offering, attrs) do
+  def update_offering(_, false, _) do
+    {:error, :unauthorized}
+  end
+
+  def update_offering(%Offering{} = offering, _current_user_member?, attrs) do
     change_offering(offering, attrs) |> Repo.update()
   end
 

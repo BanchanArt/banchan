@@ -12,8 +12,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
-  def mount(%{"offering_type" => offering_type} = params, session, socket) do
-    socket = assign_defaults(session, socket, true)
+  def mount(%{"offering_type" => offering_type} = params, _session, socket) do
     socket = assign_studio_defaults(params, socket, true, false)
     offering = Offerings.get_offering_by_type!(offering_type, socket.assigns.current_user_member?)
     changeset = Offering.changeset(offering, %{})
@@ -43,7 +42,11 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
 
   @impl true
   def handle_info({"save", offering}, socket) do
-    case Offerings.update_offering(socket.assigns.offering, offering) do
+    case Offerings.update_offering(
+           socket.assigns.offering,
+           socket.assigns.current_user_member?,
+           offering
+         ) do
       {:ok, _offering} ->
         put_flash(socket, :info, "Offering updated")
 

@@ -12,8 +12,7 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
-  def mount(params, session, socket) do
-    socket = assign_defaults(session, socket, true)
+  def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, true, false)
     changeset = Offering.changeset(%Offering{}, %{})
 
@@ -47,7 +46,11 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
 
   @impl true
   def handle_info({"save", offering}, socket) do
-    case Offerings.new_offering(socket.assigns.studio, offering) do
+    case Offerings.new_offering(
+           socket.assigns.studio,
+           socket.assigns.current_user_member?,
+           offering
+         ) do
       {:ok, _offering} ->
         put_flash(socket, :info, "Offering created.")
 

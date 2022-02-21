@@ -10,12 +10,6 @@ defmodule BanchanWeb.DashboardLive do
   alias BanchanWeb.DashboardLive.Components.{DashboardPaginator, DashboardResult}
 
   @impl true
-  def mount(_params, session, socket) do
-    socket = assign_defaults(session, socket)
-    {:ok, socket}
-  end
-
-  @impl true
   def handle_params(params, _uri, socket) do
     {:noreply,
      socket

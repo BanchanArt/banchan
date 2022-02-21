@@ -20,6 +20,7 @@
 
 {:ok, studio} =
   Banchan.Studios.new_studio(
+    user,
     %Banchan.Studios.Studio{artists: [user]},
     "https://banchan.art/studios/kitteh-studio",
     %{
@@ -49,7 +50,7 @@
   )
 
 {:ok, _} =
-  Banchan.Offerings.new_offering(studio, %{
+  Banchan.Offerings.new_offering(studio, true, %{
     type: "illustration",
     index: 0,
     name: "Illustration",
@@ -80,7 +81,7 @@
   })
 
 {:ok, _} =
-  Banchan.Offerings.new_offering(studio, %{
+  Banchan.Offerings.new_offering(studio, true, %{
     type: "chibi",
     index: 1,
     name: "Chibi",

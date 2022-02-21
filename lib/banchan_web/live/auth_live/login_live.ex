@@ -3,6 +3,7 @@ defmodule BanchanWeb.LoginLive do
   Account Login
   """
   use BanchanWeb, :surface_view
+  on_mount BanchanWeb.UserLiveAuth
 
   alias Surface.Components.Form
 
@@ -11,9 +12,7 @@ defmodule BanchanWeb.LoginLive do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(_params, session, socket) do
-    socket = assign_defaults(session, socket, false)
-
+  def mount(_params, _session, socket) do
     {:ok,
      assign(socket,
        changeset: User.login_changeset(%User{}, %{}),

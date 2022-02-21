@@ -13,8 +13,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(%{"handle" => handle}, session, socket) do
-    socket = assign_defaults(session, socket)
+  def mount(%{"handle" => handle}, _session, socket) do
     user = Accounts.get_user_by_handle!(handle)
 
     {:ok,

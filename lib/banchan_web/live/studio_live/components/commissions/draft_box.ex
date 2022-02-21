@@ -9,6 +9,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.DraftBox do
 
   alias BanchanWeb.StudioLive.Components.Commissions.{AttachmentBox, MediaPreview}
 
+  prop current_user, :struct, required: true
+  prop current_user_member?, :boolean, required: true
   prop commission, :struct, required: true
   prop studio, :struct, required: true
 
@@ -18,17 +20,36 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.DraftBox do
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
     Commissions.subscribe_to_commission_events(socket.assigns.commission)
-    event = Commissions.latest_draft(socket.assigns.commission)
+
+    event =
+      Commissions.latest_draft(
+        socket.assigns.current_user,
+        socket.assigns.commission,
+        socket.assigns.current_user_member?
+      )
+
     {:ok, socket |> assign(attachments: event && event.attachments)}
   end
 
   def handle_info(%{event: "new_events", payload: _}, socket) do
-    event = Commissions.latest_draft(socket.assigns.commission)
+    event =
+      Commissions.latest_draft(
+        socket.assigns.current_user,
+        socket.assigns.commission,
+        socket.assigns.current_user_member?
+      )
+
     {:noreply, socket |> assign(attachments: event && event.attachments)}
   end
 
   def handle_info(%{event: "event_updated", payload: _}, socket) do
-    event = Commissions.latest_draft(socket.assigns.commission)
+    event =
+      Commissions.latest_draft(
+        socket.assigns.current_user,
+        socket.assigns.commission,
+        socket.assigns.current_user_member?
+      )
+
     {:noreply, socket |> assign(attachments: event && event.attachments)}
   end
 
@@ -38,10 +59,13 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.DraftBox do
 
   @impl true
   def handle_event("open_preview", %{"key" => key, "bucket" => bucket}, socket) do
-    MediaPreview.open(
-      "draft-preview",
-      Uploads.get_upload!(bucket, key)
-    )
+    if socket.assigns.current_user.id == socket.assigns.commission.user_id ||
+         socket.assigns.current_user_member? do
+      MediaPreview.open(
+        "draft-preview",
+        Uploads.get_upload!(bucket, key)
+      )
+    end
 
     {:noreply, socket}
   end

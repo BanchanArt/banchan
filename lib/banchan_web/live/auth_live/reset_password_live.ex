@@ -14,9 +14,7 @@ defmodule BanchanWeb.ResetPasswordLive do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(%{"token" => token}, session, socket) do
-    socket = assign_defaults(session, socket, false)
-
+  def mount(%{"token" => token}, _session, socket) do
     socket =
       if user = Accounts.get_user_by_reset_password_token(token) do
         socket |> assign(user: user, token: token, changeset: Accounts.change_user_password(user))

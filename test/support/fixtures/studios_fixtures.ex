@@ -16,9 +16,18 @@ defmodule Banchan.StudiosFixtures do
   end
 
   def studio_fixture(studio, attrs \\ %{}) do
+    {:ok, user} =
+      Banchan.Accounts.register_admin(%{
+        handle: "test-admin",
+        email: "test@example.com",
+        password: "foobarbazquux",
+        password_confirmation: "foobarbazquux"
+      })
+
     {:ok, studio} =
-      studio
-      |> Banchan.Studios.new_studio(
+      Banchan.Studios.new_studio(
+        user,
+        %{studio | artists: [user]},
         "http://localhost:4000/studios/#{studio.handle}",
         valid_studio_attributes(attrs)
       )

@@ -9,7 +9,7 @@ defmodule Banchan.Commissions do
   alias Banchan.Accounts.User
   alias Banchan.Commissions.{Commission, Event, EventAttachment, Invoice, LineItem}
   alias Banchan.Offerings
-  alias Banchan.Offerings.OfferingOption
+  alias Banchan.Offerings.{Offering, OfferingOption}
   alias Banchan.Studios
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
@@ -87,15 +87,6 @@ defmodule Banchan.Commissions do
   Gets a single commission for a studio.
 
   Raises `Ecto.NoResultsError` if the Commission does not exist.
-
-  ## Examples
-
-      iex> get_commission!(studio, "lkajweirj0")
-      %Commission{}
-
-      iex> get_commission!(studio, "oiwejoa13d")
-      ** (Ecto.NoResultsError)
-
   """
   def get_commission!(studio, public_id, current_user, current_user_member?) do
     Repo.one!(
@@ -129,7 +120,14 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_commission(actor, studio, offering, line_items, attachments, attrs \\ %{}) do
+  def create_commission(
+        %User{} = actor,
+        %Studio{} = studio,
+        %Offering{} = offering,
+        line_items,
+        attachments,
+        attrs \\ %{}
+      ) do
     {:ok, ret} =
       Repo.transaction(fn ->
         available_slot_count = Offerings.offering_available_slots(offering)
@@ -159,7 +157,9 @@ defmodule Banchan.Commissions do
     close = close_slots || close_proposals
 
     if close do
-      {:ok, _} = Offerings.update_offering(offering, %{open: false})
+      # NB(zkat): We pretend we're a studio member here because we're doing
+      # this on behalf of the studio. It's safe.
+      {:ok, _} = Offerings.update_offering(offering, true, %{open: false})
     end
   end
 
@@ -253,7 +253,11 @@ defmodule Banchan.Commissions do
   def commission_open?(%Commission{status: :approved}), do: false
   def commission_open?(%Commission{}), do: true
 
-  def add_line_item(%User{} = actor, %Commission{} = commission, option) do
+  def add_line_item(_, _, _, false) do
+    {:error, :not_studio_member}
+  end
+
+  def add_line_item(%User{} = actor, %Commission{} = commission, option, true) do
     {:ok, ret} =
       Repo.transaction(fn ->
         line_item =
@@ -311,7 +315,11 @@ defmodule Banchan.Commissions do
     ret
   end
 
-  def remove_line_item(%User{} = actor, %Commission{} = commission, line_item) do
+  def remove_line_item(_, _, _, false) do
+    {:error, :not_studio_member}
+  end
+
+  def remove_line_item(%User{} = actor, %Commission{} = commission, line_item, true) do
     {:ok, ret} =
       Repo.transaction(fn ->
         line_items = Enum.filter(commission.line_items, &(&1.id != line_item.id))
@@ -354,22 +362,6 @@ defmodule Banchan.Commissions do
   end
 
   @doc """
-  Deletes a commission.
-
-  ## Examples
-
-      iex> delete_commission(commission)
-      {:ok, %Commission{}}
-
-      iex> delete_commission(commission)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_commission(%Commission{} = commission) do
-    Repo.delete(commission)
-  end
-
-  @doc """
   Returns an `%Ecto.Changeset{}` for tracking commission changes.
 
   ## Examples
@@ -383,47 +375,30 @@ defmodule Banchan.Commissions do
   end
 
   @doc """
-  Returns the list of commission_events.
-
-  ## Examples
-
-      iex> list_commission_events()
-      [%Event{}, ...]
-
+  Creates a event.
   """
-  def list_commission_events(commission) do
-    Repo.all(from e in Event, where: e.commission_id == ^commission.id)
+  def create_event(type, actor, commission, current_user_member?, attachments, attrs \\ %{})
+
+  def create_event(
+        _type,
+        %User{id: user_id},
+        %Commission{client_id: client_id},
+        current_user_member?,
+        _,
+        _attrs
+      )
+      when user_id != client_id and current_user_member? == false do
+    {:error, :unauthorized}
   end
 
-  @doc """
-  Gets a single event.
-
-  Raises `Ecto.NoResultsError` if the Event does not exist.
-
-  ## Examples
-
-      iex> get_event!(123)
-      %Event{}
-
-      iex> get_event!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_event!(id), do: Repo.get!(Event, id)
-
-  @doc """
-  Creates a event.
-
-  ## Examples
-
-      iex> create_event(actor, commission, %{field: value})
-      {:ok, %Event{}}
-
-      iex> create_event(actor, commission, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_event(type, %User{} = actor, %Commission{} = commission, attachments, attrs \\ %{})
+  def create_event(
+        type,
+        %User{} = actor,
+        %Commission{} = commission,
+        _current_user_member?,
+        attachments,
+        attrs
+      )
       when is_atom(type) do
     ret =
       %Event{
@@ -613,7 +588,11 @@ defmodule Banchan.Commissions do
   def invoice_paid?(%Invoice{status: :paid_out}), do: true
   def invoice_paid?(%Invoice{}), do: false
 
-  def invoice(%User{} = actor, %Commission{} = commission, drafts, event_data) do
+  def invoice(_actor, _commission, false, _drafts, _event_data) do
+    {:error, :unauthorized}
+  end
+
+  def invoice(%User{} = actor, %Commission{} = commission, true, drafts, event_data) do
     {:ok, ret} =
       Repo.transaction(fn ->
         case create_event(:comment, actor, commission, drafts, event_data) do
@@ -640,7 +619,13 @@ defmodule Banchan.Commissions do
     ret
   end
 
+  def process_payment!(%User{id: user_id}, _, %Commission{client_id: client_id}, _, _)
+      when user_id != client_id do
+    {:error, :unauthorized}
+  end
+
   def process_payment!(
+        %User{},
         %Event{invoice: %Invoice{amount: amount} = invoice} = event,
         %Commission{} = commission,
         uri,
@@ -722,7 +707,11 @@ defmodule Banchan.Commissions do
     send_event_update!(invoice.event_id)
   end
 
-  def expire_payment!(%Invoice{id: id, stripe_session_id: nil}) do
+  def expire_payment!(_, false) do
+    {:error, :unauthorized}
+  end
+
+  def expire_payment!(%Invoice{id: id, stripe_session_id: nil}, _) do
     {1, [invoice]} =
       from(i in Invoice, where: i.id == ^id, select: i)
       |> Repo.update_all(set: [status: :expired])
@@ -730,7 +719,7 @@ defmodule Banchan.Commissions do
     send_event_update!(invoice.event_id)
   end
 
-  def expire_payment!(%Invoice{stripe_session_id: session_id}) do
+  def expire_payment!(%Invoice{stripe_session_id: session_id}, _) do
     {:ok, _} =
       Stripe.Request.new_request([])
       |> Stripe.Request.put_endpoint("checkout/sessions/#{session_id}/expire")
@@ -742,7 +731,16 @@ defmodule Banchan.Commissions do
     :ok
   end
 
-  def deposited_amount(%Commission{} = commission) do
+  def deposited_amount(
+        %User{id: user_id},
+        %Commission{client_id: client_id},
+        current_user_member?
+      )
+      when user_id != client_id and current_user_member? == false do
+    {:error, :unauthorized}
+  end
+
+  def deposited_amount(_, %Commission{} = commission, _) do
     deposits =
       from(
         i in Invoice,
@@ -760,7 +758,12 @@ defmodule Banchan.Commissions do
     )
   end
 
-  def latest_draft(%Commission{} = commission) do
+  def latest_draft(%User{id: user_id}, %Commission{client_id: client_id}, current_user_member?)
+      when user_id != client_id and current_user_member? == false do
+    {:error, :unauthorized}
+  end
+
+  def latest_draft(_, %Commission{} = commission, _) do
     case from(
            e in Event,
            join: us in "users_studios",

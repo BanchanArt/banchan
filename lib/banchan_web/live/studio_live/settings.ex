@@ -4,7 +4,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.{Form, Link}
+  alias Surface.Components.Form
 
   alias Banchan.Studios
   alias Banchan.Studios.Studio
@@ -16,8 +16,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
-  def mount(params, session, socket) do
-    socket = assign_defaults(session, socket, true)
+  def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, true, false)
     {:ok, assign(socket, changeset: Studio.changeset(socket.assigns.studio, %{}))}
   end
@@ -45,12 +44,6 @@ defmodule BanchanWeb.StudioLive.Settings do
             <TextArea name={:default_terms} />
             <Submit changeset={@changeset} label="Save" />
           </Form>
-          <div class="divider" />
-          <h2 class="text-xl">Stripe Dashboard</h2>
-          <Link
-            label="Go to Dashboard"
-            to={Routes.stripe_account_path(Endpoint, :redirect_to_dashboard, @studio.handle)}
-          />
         </div>
       </div>
     </StudioLayout>
@@ -70,7 +63,11 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   @impl true
   def handle_event("submit", val, socket) do
-    case Studios.update_studio_profile(socket.assigns.studio, val["studio"]) do
+    case Studios.update_studio_profile(
+           socket.assigns.studio,
+           socket.assigns.current_user_member?,
+           val["studio"]
+         ) do
       {:ok, studio} ->
         socket = assign(socket, changeset: Studio.changeset(studio, %{}), studio: studio)
         socket = put_flash(socket, :info, "Profile updated")

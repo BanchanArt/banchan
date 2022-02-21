@@ -13,13 +13,6 @@ defmodule BanchanWeb.ConfirmationLive do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(_params, session, socket) do
-    socket = assign_defaults(session, socket, false)
-
-    {:ok, socket}
-  end
-
-  @impl true
   def render(assigns) do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>

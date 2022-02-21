@@ -6,19 +6,6 @@ defmodule BanchanWeb.StripeAccountController do
 
   alias Banchan.Studios
 
-  def redirect_to_dashboard(conn, %{"handle" => handle}) do
-    studio = Studios.get_studio_by_handle!(handle)
-
-    if Studios.is_user_in_studio(conn.assigns.current_user, studio) do
-      conn
-      |> redirect(external: Studios.get_dashboard_login_link!(studio))
-    else
-      conn
-      |> resp(403, "Forbidden")
-      |> send_resp()
-    end
-  end
-
   def account_link(conn, %{"handle" => handle}) do
     studio = Studios.get_studio_by_handle!(handle)
 

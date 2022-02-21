@@ -18,8 +18,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
-  def mount(%{"commission_id" => commission_id} = params, session, socket) do
-    socket = assign_defaults(session, socket, true)
+  def mount(%{"commission_id" => commission_id} = params, _session, socket) do
     socket = assign_studio_defaults(params, socket, false, false)
 
     commission =
@@ -89,11 +88,18 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
     >
       <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
         <div class="flex flex-col md:order-2">
-          <DraftBox id="draft-box" commission={@commission} studio={@studio} />
+          <DraftBox
+            id="draft-box"
+            current_user={@current_user}
+            current_user_member?={@current_user_member?}
+            commission={@commission}
+            studio={@studio}
+          />
           <div class="divider" />
           <SummaryEditor
             id="summary-editor"
             current_user={@current_user}
+            current_user_member?={@current_user_member?}
             commission={@commission}
             allow_edits={@current_user_member?}
           />

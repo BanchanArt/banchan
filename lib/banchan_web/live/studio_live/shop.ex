@@ -14,8 +14,7 @@ defmodule BanchanWeb.StudioLive.Shop do
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
-  def mount(params, session, socket) do
-    socket = assign_defaults(session, socket, false)
+  def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, false, false)
     studio = socket.assigns.studio
     members = Studios.list_studio_members(studio)

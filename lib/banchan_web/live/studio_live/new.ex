@@ -15,8 +15,7 @@ defmodule BanchanWeb.StudioLive.New do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(_params, session, socket) do
-    socket = assign_defaults(session, socket)
+  def mount(_params, _session, socket) do
     changeset = Studio.changeset(%Studio{}, %{})
     {:ok, assign(socket, changeset: changeset)}
   end
@@ -69,6 +68,7 @@ defmodule BanchanWeb.StudioLive.New do
   @impl true
   def handle_event("submit", val, socket) do
     case Studios.new_studio(
+           socket.assigns.current_user,
            %Studio{artists: [socket.assigns.current_user]},
            Routes.studio_shop_url(Endpoint, :show, val["studio"]["handle"]),
            val["studio"]

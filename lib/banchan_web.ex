@@ -47,7 +47,6 @@ defmodule BanchanWeb do
   def surface_view do
     quote do
       use Surface.LiveView
-      import BanchanWeb.LiveHelpers
 
       alias Banchan.Accounts.User
 
@@ -71,7 +70,6 @@ defmodule BanchanWeb do
   def component do
     quote do
       use Surface.Component
-      import BanchanWeb.LiveHelpers
 
       unquote(view_helpers())
     end
@@ -80,7 +78,6 @@ defmodule BanchanWeb do
   def live_component do
     quote do
       use Surface.LiveComponent
-      import BanchanWeb.LiveHelpers
 
       unquote(view_helpers())
     end
