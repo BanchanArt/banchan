@@ -4,7 +4,6 @@ defmodule Banchan.Studios do
   """
   @dialyzer [
     {:nowarn_function, create_stripe_account: 1},
-    {:nowarn_function, get_dashboard_login_link!: 1},
     :no_return
   ]
 
@@ -12,6 +11,7 @@ defmodule Banchan.Studios do
 
   import Ecto.Query, warn: false
 
+  alias Banchan.Accounts.User
   alias Banchan.Offerings.Offering
   alias Banchan.Repo
   alias Banchan.Studios.Studio
@@ -38,14 +38,12 @@ defmodule Banchan.Studios do
 
   @doc """
   Updates the studio profile fields.
-
-  ## Examples
-
-      iex> update_studio_profile(studio, %{handle: ..., name: ..., ...})
-      {:ok, %Studio{}}
-
   """
-  def update_studio_profile(user, attrs) do
+  def update_studio_profile(_, false, _) do
+    {:error, :unauthorized}
+  end
+
+  def update_studio_profile(user, _, attrs) do
     user
     |> Studio.changeset(attrs)
     |> Repo.update()
@@ -59,7 +57,7 @@ defmodule Banchan.Studios do
       iex> new_studio(studio, %{handle: ..., name: ..., ...})
       {:ok, %Studio{}}
   """
-  def new_studio(studio, url, attrs) do
+  def new_studio(%User{}, studio, url, attrs) do
     changeset = studio |> Studio.changeset(attrs)
 
     changeset =
@@ -202,11 +200,6 @@ defmodule Banchan.Studios do
 
   def subscribe_to_stripe_state(%Studio{stripe_id: stripe_id}) do
     Phoenix.PubSub.subscribe(@pubsub, "studio_stripe_state:#{stripe_id}")
-  end
-
-  def get_dashboard_login_link!(%Studio{stripe_id: stripe_id}) do
-    {:ok, link} = Stripe.Account.create_login_link(stripe_id, %{})
-    link.url
   end
 
   defp create_stripe_account(studio_url) do

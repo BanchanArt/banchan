@@ -12,6 +12,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
 
   prop commission, :struct, required: true
   prop current_user, :struct, required: true
+  prop current_user_member?, :boolean, required: true
   prop allow_edits, :boolean, required: true
 
   data custom_changeset, :struct
@@ -28,7 +29,12 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
         nil
       end
 
-    deposited = Commissions.deposited_amount(socket.assigns.commission)
+    deposited =
+      Commissions.deposited_amount(
+        socket.assigns.current_user,
+        socket.assigns.commission,
+        socket.assigns.current_user_member?
+      )
 
     {:ok, socket |> assign(custom_changeset: custom_changeset, deposited: deposited)}
   end
@@ -57,7 +63,12 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
       {:noreply, socket}
     else
       {:ok, {_commission, _events}} =
-        Commissions.add_line_item(socket.assigns.current_user, commission, option)
+        Commissions.add_line_item(
+          socket.assigns.current_user,
+          commission,
+          option,
+          socket.assigns.current_user_member?
+        )
 
       {:noreply, socket}
     end
@@ -73,7 +84,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
         Commissions.remove_line_item(
           socket.assigns.current_user,
           socket.assigns.commission,
-          line_item
+          line_item,
+          socket.assigns.current_user_member?
         )
 
       {:noreply, socket}
@@ -125,11 +137,16 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
 
     if socket.assigns.allow_edits do
       {:ok, {_commission, _events}} =
-        Commissions.add_line_item(socket.assigns.current_user, commission, %{
-          name: name,
-          description: description,
-          amount: moneyfy(amount)
-        })
+        Commissions.add_line_item(
+          socket.assigns.current_user,
+          commission,
+          %{
+            name: name,
+            description: description,
+            amount: moneyfy(amount)
+          },
+          socket.assigns.current_user_member?
+        )
 
       {:noreply,
        assign(socket,

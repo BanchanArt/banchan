@@ -57,6 +57,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
     if changeset.valid? do
       url =
         Commissions.process_payment!(
+          socket.assigns.current_user,
           socket.assigns.event,
           socket.assigns.commission,
           replace_fragment(socket.assigns.uri, socket.assigns.event),
@@ -82,7 +83,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
 
   @impl true
   def handle_event("force_expire", _, socket) do
-    Commissions.expire_payment!(socket.assigns.event.invoice)
+    Commissions.expire_payment!(socket.assigns.event.invoice, socket.assigns.current_user_member?)
     {:noreply, socket}
   end
 

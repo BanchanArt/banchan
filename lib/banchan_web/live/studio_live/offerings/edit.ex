@@ -42,7 +42,11 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
 
   @impl true
   def handle_info({"save", offering}, socket) do
-    case Offerings.update_offering(socket.assigns.offering, offering) do
+    case Offerings.update_offering(
+           socket.assigns.offering,
+           socket.assigns.current_user_member?,
+           offering
+         ) do
       {:ok, _offering} ->
         put_flash(socket, :info, "Offering updated")
 

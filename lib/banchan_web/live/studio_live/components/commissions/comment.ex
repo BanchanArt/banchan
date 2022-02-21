@@ -37,10 +37,13 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
 
   @impl true
   def handle_event("open_preview", %{"key" => key, "bucket" => bucket}, socket) do
-    MediaPreview.open(
-      "preview-#{socket.assigns.event.public_id}",
-      Uploads.get_upload!(bucket, key)
-    )
+    if socket.assigns.current_user.id == socket.assigns.commission.user_id ||
+         socket.assigns.current_user_member? do
+      MediaPreview.open(
+        "preview-#{socket.assigns.event.public_id}",
+        Uploads.get_upload!(bucket, key)
+      )
+    end
 
     {:noreply, socket}
   end

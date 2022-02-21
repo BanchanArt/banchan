@@ -14,7 +14,7 @@ defmodule BanchanWeb.UserLiveAuth do
         find_current_user(session)
       end)
 
-    if auth == :users_only || auth == :admins_only && is_nil(socket.assigns.current_user) do
+    if auth == :users_only || (auth == :admins_only && is_nil(socket.assigns.current_user)) do
       {:halt,
        socket
        |> put_flash(:error, "You must log in to access this page.")

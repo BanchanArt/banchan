@@ -63,7 +63,11 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   @impl true
   def handle_event("submit", val, socket) do
-    case Studios.update_studio_profile(socket.assigns.studio, val["studio"]) do
+    case Studios.update_studio_profile(
+           socket.assigns.studio,
+           socket.assigns.current_user_member?,
+           val["studio"]
+         ) do
       {:ok, studio} ->
         socket = assign(socket, changeset: Studio.changeset(studio, %{}), studio: studio)
         socket = put_flash(socket, :info, "Profile updated")

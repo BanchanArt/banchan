@@ -61,6 +61,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
     case Commissions.invoice(
            socket.assigns.actor,
            socket.assigns.commission,
+           socket.assigns.current_user_member?,
            attachments,
            %{event | "amount" => moneyfy(amount)}
          ) do
@@ -82,6 +83,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
            :comment,
            socket.assigns.actor,
            socket.assigns.commission,
+           socket.assigns.current_user_member?,
            attachments,
            %{"text" => text}
          ) do

@@ -19,6 +19,7 @@ defmodule Banchan.CommissionsFixtures do
 
     {:ok, studio} =
       Banchan.Studios.new_studio(
+        user,
         %Banchan.Studios.Studio{artists: [user]},
         "http://localhost:4000/studios/test-studio",
         %{
@@ -29,7 +30,7 @@ defmodule Banchan.CommissionsFixtures do
       )
 
     {:ok, offering} =
-      Banchan.Offerings.new_offering(studio, %{
+      Banchan.Offerings.new_offering(studio, true, %{
         type: "illustration",
         index: 0,
         name: "Illustration",
