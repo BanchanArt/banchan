@@ -23,6 +23,7 @@ defmodule Banchan.StudiosFixtures do
         password: "foobarbazquux",
         password_confirmation: "foobarbazquux"
       })
+
     {:ok, studio} =
       Banchan.Studios.new_studio(
         user,
