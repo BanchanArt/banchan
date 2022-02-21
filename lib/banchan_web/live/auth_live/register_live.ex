@@ -3,6 +3,7 @@ defmodule BanchanWeb.RegisterLive do
   Account Registration
   """
   use BanchanWeb, :surface_view
+  on_mount BanchanWeb.UserLiveAuth
 
   alias Surface.Components.Form
 

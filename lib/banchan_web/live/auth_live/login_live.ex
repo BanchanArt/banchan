@@ -3,6 +3,7 @@ defmodule BanchanWeb.LoginLive do
   Account Login
   """
   use BanchanWeb, :surface_view
+  on_mount BanchanWeb.UserLiveAuth
 
   alias Surface.Components.Form
 
