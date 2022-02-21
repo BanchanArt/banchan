@@ -35,6 +35,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
 
     ~F"""
     <div class="flex flex-col">
+      {#if @offering}
+        <div class="px-2 text-2xl">{@offering.name}</div>
+        <div class="px-2 text-sm">{@offering.description}</div>
+        <div class="divider" />
+      {/if}
       <ul class="flex flex-col">
         {#for {item, idx} <- Enum.with_index(@line_items)}
           <li class="flex p-2 gap-2">
