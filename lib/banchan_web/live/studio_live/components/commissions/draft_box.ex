@@ -17,8 +17,23 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.DraftBox do
 
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
+    Commissions.subscribe_to_commission_events(socket.assigns.commission)
     event = Commissions.latest_draft(socket.assigns.commission)
     {:ok, socket |> assign(attachments: event && event.attachments)}
+  end
+
+  def handle_info(%{event: "new_events", payload: _}, socket) do
+    event = Commissions.latest_draft(socket.assigns.commission)
+    {:noreply, socket |> assign(attachments: event && event.attachments)}
+  end
+
+  def handle_info(%{event: "event_updated", payload: _}, socket) do
+    event = Commissions.latest_draft(socket.assigns.commission)
+    {:noreply, socket |> assign(attachments: event && event.attachments)}
+  end
+
+  def handle_info(_, socket) do
+    {:noreply, socket}
   end
 
   @impl true

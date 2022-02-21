@@ -589,9 +589,24 @@ defmodule Banchan.Commissions do
     }
   end
 
-  def delete_attachment!(%EventAttachment{} = event_attachment) do
+  def delete_attachment!(
+        %Commission{public_id: public_id},
+        %Event{} = event,
+        %EventAttachment{} = event_attachment
+      ) do
     # NOTE: This also deletes any associated uploads, because of the db ON DELETE
     Repo.delete!(event_attachment)
+    new_attachments = Enum.reject(event.attachments, &(&1.id == event_attachment.id))
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "commission:#{public_id}",
+      %Phoenix.Socket.Broadcast{
+        topic: "commission:#{public_id}",
+        event: "event_updated",
+        payload: %{event | attachments: new_attachments}
+      }
+    )
   end
 
   def invoice_paid?(%Invoice{status: :succeeded}), do: true
@@ -750,15 +765,17 @@ defmodule Banchan.Commissions do
            e in Event,
            join: us in "users_studios",
            join: c in Commission,
+           join: ea in EventAttachment,
            where:
              e.type == :comment and
                c.id == ^commission.id and
                e.commission_id == c.id and
                us.studio_id == c.studio_id and
-               e.actor_id == us.user_id,
+               e.actor_id == us.user_id and
+               ea.event_id == e.id,
            select: e,
            limit: 1,
-           order_by: e.inserted_at,
+           order_by: {:desc, e.inserted_at},
            preload: [attachments: [:upload, :thumbnail]]
          )
          |> Repo.all() do

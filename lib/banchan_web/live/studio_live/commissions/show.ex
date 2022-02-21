@@ -42,8 +42,11 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
 
   @impl true
   def handle_info(%{event: "new_events", payload: events}, socket) do
+    # TODO: I don't know why, but we sometimes get two `new_events` messages
+    # for a single event addition. So we have to dedup here just in case until
+    # that bug is... fixed? If it's even a bug vs something expected?
     events = socket.assigns.commission.events ++ events
-    events = events |> Enum.sort_by(& &1.inserted_at)
+    events = events |> Enum.sort_by(& &1.inserted_at) |> Enum.dedup_by(& &1.public_id)
     commission = %{socket.assigns.commission | events: events}
     {:noreply, assign(socket, commission: commission)}
   end

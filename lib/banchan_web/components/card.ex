@@ -41,7 +41,7 @@ defmodule BanchanWeb.Components.Card do
             {/if}
           </header>
         {/if}
-        <div class="flex flex-col flex-grow">
+        <div class="flex flex-col flex-grow p-4">
           <#slot />
         </div>
         {#if slot_assigned?(:footer)}

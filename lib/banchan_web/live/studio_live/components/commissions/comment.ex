@@ -90,9 +90,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
   def handle_event("remove_attachment", %{"attachment-idx" => idx}, socket) do
     {index, ""} = Integer.parse(idx)
     attachment = Enum.fetch!(socket.assigns.event.attachments, index)
-    Commissions.delete_attachment!(attachment)
-    new_attachments = Enum.reject(socket.assigns.event.attachments, &(&1 == attachment))
-    {:noreply, socket |> assign(event: %{socket.assigns.event | attachments: new_attachments})}
+    Commissions.delete_attachment!(socket.assigns.commission, socket.assigns.event, attachment)
+    {:noreply, socket}
   end
 
   defp replace_fragment(uri, event) do
@@ -101,7 +100,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
 
   def render(assigns) do
     ~F"""
-    <div class="shadow-md bg-base-200 rounded-box">
+    <div class="shadow-md bg-base-200 rounded-box pb-4">
       <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} studio={@studio} />
       <div class="flex flex-row text-sm p-2">
         <div class="inline-flex grow items-baseline flex-wrap space-x-1">
@@ -126,7 +125,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
         {/if}
       </div>
 
-      <div class="divider" />
+      <hr class="pb-4 opacity-10 h-0.5">
 
       <div class="content px-4 user-markdown">
         {#if @changeset}
