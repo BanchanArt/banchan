@@ -7,7 +7,7 @@ defmodule BanchanWeb.Router do
   alias BanchanWeb.EnsureRolePlug
 
   @host :banchan
-        |> Application.fetch_env!(BanchanWeb.Endpoint)
+        |> Application.compile_env!(BanchanWeb.Endpoint)
         |> Keyword.fetch!(:url)
         |> Keyword.fetch!(:host)
 
