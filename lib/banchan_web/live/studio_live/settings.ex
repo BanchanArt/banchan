@@ -4,7 +4,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.{Form, Link}
+  alias Surface.Components.Form
 
   alias Banchan.Studios
   alias Banchan.Studios.Studio
@@ -45,12 +45,6 @@ defmodule BanchanWeb.StudioLive.Settings do
             <TextArea name={:default_terms} />
             <Submit changeset={@changeset} label="Save" />
           </Form>
-          <div class="divider" />
-          <h2 class="text-xl">Stripe Dashboard</h2>
-          <Link
-            label="Go to Dashboard"
-            to={Routes.stripe_account_path(Endpoint, :redirect_to_dashboard, @studio.handle)}
-          />
         </div>
       </div>
     </StudioLayout>
