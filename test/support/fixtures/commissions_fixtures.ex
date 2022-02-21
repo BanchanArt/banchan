@@ -48,7 +48,7 @@ defmodule Banchan.CommissionsFixtures do
     {:ok, event} =
       attrs
       |> Enum.into(%{})
-      |> then(&Banchan.Commissions.create_event(:comment, user, commission, [], &1))
+      |> then(&Banchan.Commissions.create_event(:comment, user, commission, true, [], &1))
 
     event
   end

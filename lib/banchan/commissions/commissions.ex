@@ -191,7 +191,8 @@ defmodule Banchan.Commissions do
 
         {:ok, commission} = changeset |> Repo.update()
 
-        {:ok, event} = create_event(:status, actor, commission, [], %{status: status})
+        # current_user_member? is checked as part of check_status_transition!
+        {:ok, event} = create_event(:status, actor, commission, true, [], %{status: status})
 
         Phoenix.PubSub.broadcast!(
           @pubsub,
@@ -289,7 +290,7 @@ defmodule Banchan.Commissions do
 
           {:ok, commission} ->
             # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_added, actor, commission, [], %{
+            case create_event(:line_item_added, actor, commission, true, [], %{
                    amount: line_item.amount,
                    text: line_item.name
                  }) do
@@ -335,7 +336,7 @@ defmodule Banchan.Commissions do
 
           {:ok, commission} ->
             # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_removed, actor, commission, [], %{
+            case create_event(:line_item_removed, actor, commission, true, [], %{
                    amount: line_item.amount,
                    text: line_item.name
                  }) do
@@ -377,7 +378,7 @@ defmodule Banchan.Commissions do
   @doc """
   Creates a event.
   """
-  def create_event(type, actor, commission, current_user_member?, attachments, attrs \\ %{})
+  def create_event(type, actor, commission, current_user_member?, attachments, attrs)
 
   def create_event(
         _type,
@@ -595,7 +596,7 @@ defmodule Banchan.Commissions do
   def invoice(%User{} = actor, %Commission{} = commission, true, drafts, event_data) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        case create_event(:comment, actor, commission, drafts, event_data) do
+        case create_event(:comment, actor, commission, true, drafts, event_data) do
           {:error, error} ->
             {:error, error}
 
