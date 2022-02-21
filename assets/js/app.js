@@ -1,5 +1,5 @@
 import "phoenix_html"
-import { Socket } from "phoenix"
+import { Socket, LongPoll } from "phoenix"
 import topbar from "topbar"
 import Hooks from "./_hooks"
 import { LiveSocket } from "phoenix_live_view"
@@ -11,6 +11,13 @@ let liveSocket = new LiveSocket('/live', Socket, {
     },
     hooks: Hooks
 })
+
+liveSocket.socket.onError((_error, transport, establishedConnections) => {
+  if (transport === WebSocket && establishedConnections === 0) {
+    liveSocket.socket.replaceTransport(LongPoll);
+    liveSocket.socket.connect();
+  }
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   let theme = localStorage.getItem("theme")
