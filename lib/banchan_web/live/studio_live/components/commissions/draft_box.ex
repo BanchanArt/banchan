@@ -82,6 +82,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.DraftBox do
           attachments={@attachments}
           open_preview="open_preview"
         />
+      {#else}
+        <h3 class="px-2 pb-2 text-xl">No Drafts Yet</h3>
       {/if}
     </div>
     """
