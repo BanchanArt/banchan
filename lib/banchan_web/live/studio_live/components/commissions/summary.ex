@@ -91,7 +91,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Summary do
       {/if}
       <div class="divider" />
       {#if @offering && Enum.any?(@offering.options)}
-        <h5 class="text-xl px-2">Add-ons:</h5>
+        <h5 class="text-xl px-2">Add-ons</h5>
         <ul class="flex flex-col">
           {#for {option, idx} <- Enum.with_index(@offering.options)}
             {#if option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
