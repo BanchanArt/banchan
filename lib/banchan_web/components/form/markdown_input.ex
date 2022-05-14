@@ -113,6 +113,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
                 {/if}
               </div>
             {/if}
+            {#if @upload}
             <ul>
               {#for entry <- @upload.entries}
                 <li>
@@ -128,6 +129,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
             {#for err <- upload_errors(@upload)}
               <p>{error_to_string(err)}</p>
             {/for}
+            {/if}
           </div>
         </InputContext>
       </div>
