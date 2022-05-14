@@ -6,6 +6,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
 
   alias Surface.Components.Form.{ErrorTag, Field, Label, TextArea}
   alias Surface.Components.Form.Input.InputContext
+  alias Surface.Components.LiveFileInput
 
   alias BanchanWeb.Components.Markdown
 
@@ -15,7 +16,10 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   prop show_label, :boolean, default: true
   prop class, :css_class
   prop hook_id, :string, default: "markdown-input-wrapper-id"
+  prop upload, :struct
+  prop cancel_upload, :event
 
+  data dragging, :boolean, default: false
   data previewing, :boolean, default: false
   data markdown, :string, default: ""
 
@@ -36,6 +40,18 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   def handle_event("change", %{"value" => markdown}, socket) do
     {:noreply, assign(socket, markdown: markdown || "")}
   end
+
+  def handle_event("dragstart", _, socket) do
+    {:noreply, assign(socket, dragging: true)}
+  end
+
+  def handle_event("dragend", _, socket) do
+    {:noreply, assign(socket, dragging: false)}
+  end
+
+  def error_to_string(:too_large), do: "Too large"
+  def error_to_string(:too_many_files), do: "You have selected too many files"
+  def error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
 
   def render(assigns) do
     ~F"""
@@ -67,7 +83,11 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
                 </div>
               </div>
             {#else}
-              <div :hook="MarkdownInput" id={@hook_id}>
+              <div class="relative flex h-40 w-full"
+                   phx-drop-target={@upload && @upload.ref}
+                   :hook="MarkdownInput"
+                   id={@hook_id}
+                   >
                 <TextArea
                   class={
                     "textarea",
@@ -79,8 +99,35 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
                   }
                   opts={@opts}
                 />
+                {#if @upload}
+                  {#if @dragging}
+                    <div class="absolute h-full w-full opacity-25 bg-neutral border-dashed border-2" />
+                    <div class="absolute h-full w-full text-center my-auto">
+                      Drop Files Here <i class="fas fa-file-upload" />
+                    </div>
+                  {/if}
+                  <label class="absolute right-2 bottom-2">
+                    <i class="fas fa-file-upload text-2xl hover:cursor-pointer" />
+                    <LiveFileInput class="h-0 w-0 overflow-hidden" upload={@upload} />
+                  </label>
+                {/if}
               </div>
             {/if}
+            <ul>
+              {#for entry <- @upload.entries}
+                <li>
+                  <button type="button" class="text-2xl" :on-click={@cancel_upload} phx-value-ref={entry.ref}>&times;</button>
+                  {entry.client_name}
+                  <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
+                  {#for err <- upload_errors(@upload, entry)}
+                    <p>{error_to_string(err)}</p>
+                  {/for}
+                </li>
+              {/for}
+            </ul>
+            {#for err <- upload_errors(@upload)}
+              <p>{error_to_string(err)}</p>
+            {/for}
           </div>
         </InputContext>
       </div>

@@ -9,7 +9,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
+  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput}
 
   prop commission, :struct, required: true
   prop actor, :struct, required: true
@@ -137,13 +137,10 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
             name={:text}
             show_label={false}
             class="w-full"
+            upload={@uploads.attachment}
+            cancel_upload="cancel_upload"
             opts={required: true, placeholder: "Write a comment"}
           />
-          {#if @current_user_member?}
-            <UploadInput label="Upload draft files" upload={@uploads.attachment} cancel="cancel_upload" />
-          {#else}
-            <UploadInput label="Upload attachments" upload={@uploads.attachment} cancel="cancel_upload" />
-          {/if}
           {#if @current_user_member?}
             <TextInput name={:amount} show_label={false} opts={placeholder: "Invoice Amount (optional)"} />
             {#if Enum.empty?(@uploads.attachment.entries)}
