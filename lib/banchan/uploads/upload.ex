@@ -9,10 +9,10 @@ defmodule Banchan.Uploads.Upload do
 
   schema "uploads" do
     field :name, :string
-    field :bucket, :string, null: false
-    field :key, :string, null: false
+    field :bucket, :string
+    field :key, :string
     field :type, :string
-    field :size, :integer, null: false
+    field :size, :integer
 
     belongs_to :uploader, User
     timestamps()
