@@ -233,11 +233,12 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 name={:description}
                 show_label={false}
                 class="w-full"
+                upload={@uploads.attachment}
+                cancel_upload="cancel_upload"
                 opts={required: true, placeholder: "Here's what I'd like..."}
               />
             </div>
             <div class="md:col-span-2 md:order-4 md:row-span-2">
-              <UploadInput upload={@uploads.attachment} cancel="cancel_upload" />
               <div class="pt-2">
                 <h3 class="py-4 font-bold text-xl">Commission Terms and Conditions</h3>
                 <div class="p-2 border-2 rounded border-neutral max-h-60 overflow-auto">
