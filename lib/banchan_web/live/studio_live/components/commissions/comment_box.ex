@@ -6,6 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.Event
+  alias Banchan.Utils
 
   alias Surface.Components.Form
 
@@ -34,7 +35,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
   def handle_event("change", %{"event" => %{"amount" => amount} = event}, socket) do
     changeset =
       %Event{}
-      |> Event.comment_changeset(%{event | "amount" => moneyfy(amount)})
+      |> Event.comment_changeset(%{event | "amount" => Utils.moneyfy(amount)})
       |> Map.put(:action, :update)
 
     {:noreply, assign(socket, changeset: changeset)}
@@ -63,7 +64,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
            socket.assigns.commission,
            socket.assigns.current_user_member?,
            attachments,
-           %{event | "amount" => moneyfy(amount)}
+           %{event | "amount" => Utils.moneyfy(amount)}
          ) do
       {:ok, _event} ->
         {:noreply,
@@ -114,17 +115,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.CommentBox do
          entry.client_name
        )}
     end)
-  end
-
-  defp moneyfy(amount) do
-    # TODO: In the future, we can replace this :USD with a param and the DB will be fine.
-    case Money.parse(amount, :USD) do
-      {:ok, money} ->
-        money
-
-      :error ->
-        amount
-    end
   end
 
   def render(assigns) do

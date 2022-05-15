@@ -7,6 +7,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.LineItem
+  alias Banchan.Utils
 
   alias BanchanWeb.StudioLive.Components.Commissions.Summary
 
@@ -120,7 +121,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
       |> LineItem.custom_changeset(%{
         name: name,
         description: description,
-        amount: moneyfy(amount)
+        amount: Utils.moneyfy(amount)
       })
       |> Map.put(:action, :insert)
 
@@ -143,7 +144,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
           %{
             name: name,
             description: description,
-            amount: moneyfy(amount)
+            amount: Utils.moneyfy(amount)
           },
           socket.assigns.current_user_member?
         )
@@ -157,17 +158,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.SummaryEditor do
       # Deny the change. This shouldn't happen unless there's a bug, or
       # someone is trying to send us Shenanigans data.
       {:noreply, socket}
-    end
-  end
-
-  defp moneyfy(amount) do
-    # TODO: In the future, we can replace this :USD with a param and the DB will be fine.
-    case Money.parse(amount, :USD) do
-      {:ok, money} ->
-        money
-
-      :error ->
-        amount
     end
   end
 

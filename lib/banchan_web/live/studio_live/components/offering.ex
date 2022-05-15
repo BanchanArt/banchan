@@ -12,6 +12,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
+  alias Banchan.Utils
 
   alias BanchanWeb.Components.Button
   alias BanchanWeb.Components.Form.{Checkbox, Submit, TextArea, TextInput}
@@ -82,21 +83,10 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     Map.update(offering, "options", [], fn options ->
       Map.new(
         Enum.map(Enum.with_index(Map.values(options)), fn {opt, idx} ->
-          {to_string(idx), Map.update(opt, "price", "", &moneyfy/1)}
+          {to_string(idx), Map.update(opt, "price", "", &Utils.moneyfy/1)}
         end)
       )
     end)
-  end
-
-  defp moneyfy(base_price) do
-    # TODO: In the future, we can replace this :USD with a param and the DB will be fine.
-    case Money.parse(base_price, :USD) do
-      {:ok, money} ->
-        money
-
-      :error ->
-        base_price
-    end
   end
 
   def render(assigns) do

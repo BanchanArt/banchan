@@ -6,6 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.Event
+  alias Banchan.Utils
 
   alias Surface.Components.Form
 
@@ -26,22 +27,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
   end
 
-  defp moneyfy(amount) do
-    # TODO: In the future, we can replace this :USD with a param and the DB will be fine.
-    case Money.parse(amount, :USD) do
-      {:ok, money} ->
-        money
-
-      :error ->
-        amount
-    end
-  end
-
   @impl true
   def handle_event("change", %{"event" => %{"amount" => amount}}, socket) do
     changeset =
       %Event{}
-      |> Event.amount_changeset(%{"amount" => moneyfy(amount)})
+      |> Event.amount_changeset(%{"amount" => Utils.moneyfy(amount)})
       |> Map.put(:action, :insert)
 
     {:noreply, socket |> assign(:changeset, changeset)}
@@ -51,7 +41,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
   def handle_event("submit", %{"event" => %{"amount" => amount}}, socket) do
     changeset =
       %Event{}
-      |> Event.amount_changeset(%{"amount" => moneyfy(amount)})
+      |> Event.amount_changeset(%{"amount" => Utils.moneyfy(amount)})
       |> Map.put(:action, :insert)
 
     if changeset.valid? do
@@ -61,7 +51,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
           socket.assigns.event,
           socket.assigns.commission,
           replace_fragment(socket.assigns.uri, socket.assigns.event),
-          moneyfy(amount)
+          Utils.moneyfy(amount)
         )
 
       {:noreply, socket |> redirect(external: url)}
