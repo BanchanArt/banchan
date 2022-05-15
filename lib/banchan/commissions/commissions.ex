@@ -728,7 +728,7 @@ defmodule Banchan.Commissions do
       |> Stripe.Request.make_request()
 
     # NOTE: We don't manually expire the invoice in the database here. That's
-    # handled by process_payment_expired!/1 when the webhook fired.
+    # handled by process_payment_expired!/1 when the webhook fires.
     :ok
   end
 
