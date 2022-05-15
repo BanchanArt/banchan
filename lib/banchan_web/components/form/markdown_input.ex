@@ -83,11 +83,12 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
                 </div>
               </div>
             {#else}
-              <div class="relative flex h-40 w-full"
-                   phx-drop-target={@upload && @upload.ref}
-                   :hook="MarkdownInput"
-                   id={@hook_id}
-                   >
+              <div
+                class="relative flex h-40 w-full"
+                phx-drop-target={@upload && @upload.ref}
+                :hook="MarkdownInput"
+                id={@hook_id}
+              >
                 <TextArea
                   class={
                     "textarea",
@@ -114,21 +115,21 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
               </div>
             {/if}
             {#if @upload}
-            <ul>
-              {#for entry <- @upload.entries}
-                <li>
-                  <button type="button" class="text-2xl" :on-click={@cancel_upload} phx-value-ref={entry.ref}>&times;</button>
-                  {entry.client_name}
-                  <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
-                  {#for err <- upload_errors(@upload, entry)}
-                    <p>{error_to_string(err)}</p>
-                  {/for}
-                </li>
+              <ul>
+                {#for entry <- @upload.entries}
+                  <li>
+                    <button type="button" class="text-2xl" :on-click={@cancel_upload} phx-value-ref={entry.ref}>&times;</button>
+                    {entry.client_name}
+                    <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
+                    {#for err <- upload_errors(@upload, entry)}
+                      <p>{error_to_string(err)}</p>
+                    {/for}
+                  </li>
+                {/for}
+              </ul>
+              {#for err <- upload_errors(@upload)}
+                <p>{error_to_string(err)}</p>
               {/for}
-            </ul>
-            {#for err <- upload_errors(@upload)}
-              <p>{error_to_string(err)}</p>
-            {/for}
             {/if}
           </div>
         </InputContext>
