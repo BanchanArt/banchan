@@ -13,7 +13,6 @@ defmodule BanchanWeb.DashboardLive do
   def handle_params(params, _uri, socket) do
     {:noreply,
      socket
-     |> assign(:params, params)
      |> assign(
        :results,
        Commissions.list_commission_data_for_dashboard(
