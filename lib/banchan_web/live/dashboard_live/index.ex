@@ -33,8 +33,12 @@ defmodule BanchanWeb.DashboardLive do
   end
 
   defp page(%{"page" => page}) do
-    {page, ""} = Integer.parse(page)
-    page
+    case Integer.parse(page) do
+      {p, ""} ->
+        p
+      _ ->
+        1
+    end
   end
 
   defp page(_other) do
