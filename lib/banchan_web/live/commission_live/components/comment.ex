@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
+defmodule BanchanWeb.CommissionLive.Components.Commissions.Comment do
   @moduledoc """
   Component for commission page comments
   """
@@ -11,11 +11,10 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
 
   alias BanchanWeb.Components.{Avatar, Button, UserHandle}
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
-  alias BanchanWeb.StudioLive.Components.Commissions.{AttachmentBox, InvoiceBox, MediaPreview}
+  alias BanchanWeb.CommissionLive.Components.Commissions.{AttachmentBox, InvoiceBox, MediaPreview}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
-  prop studio, :struct, required: true
   prop commission, :struct, required: true
   prop event, :struct, required: true
   prop uri, :string, required: true
@@ -104,7 +103,7 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
   def render(assigns) do
     ~F"""
     <div class="shadow-md bg-base-200 rounded-box pb-4">
-      <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} studio={@studio} />
+      <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} />
       <div class="flex flex-row text-sm p-2">
         <div class="inline-flex grow items-baseline flex-wrap space-x-1">
           <div class="self-center">
@@ -159,7 +158,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Comment do
             <AttachmentBox
               editing={!is_nil(@changeset)}
               commission={@commission}
-              studio={@studio}
               attachments={@event.attachments}
               open_preview="open_preview"
               remove_attachment="remove_attachment"

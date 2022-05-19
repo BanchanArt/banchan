@@ -20,7 +20,7 @@ defmodule Banchan.Commissions do
   def list_commission_data_for_dashboard(%User{} = user, page, order \\ nil) do
     main_dashboard_query(user)
     |> dashboard_query_order_by(order)
-    |> Repo.paginate(page: page, page_size: 10)
+    |> Repo.paginate(page: page, page_size: 20)
   end
 
   defp main_dashboard_query(%User{} = user) do
@@ -88,12 +88,13 @@ defmodule Banchan.Commissions do
 
   Raises `Ecto.NoResultsError` if the Commission does not exist.
   """
-  def get_commission!(studio, public_id, current_user, current_user_member?) do
+  def get_commission!(public_id, current_user) do
     Repo.one!(
       from c in Commission,
         where:
-          c.studio_id == ^studio.id and c.public_id == ^public_id and
-            (^current_user_member? or c.client_id == ^current_user.id),
+          c.public_id == ^public_id and
+            (c.client_id == ^current_user.id or
+               ^current_user.id in subquery(studio_artists_query())),
         preload: [
           client: [],
           studio: [],
@@ -106,6 +107,10 @@ defmodule Banchan.Commissions do
 
   def subscribe_to_commission_events(%Commission{public_id: public_id}) do
     Phoenix.PubSub.subscribe(@pubsub, "commission:#{public_id}")
+  end
+
+  def unsubscribe_from_commission_events(%Commission{public_id: public_id}) do
+    Phoenix.PubSub.unsubscribe(@pubsub, "commission:#{public_id}")
   end
 
   @doc """
@@ -506,22 +511,19 @@ defmodule Banchan.Commissions do
   end
 
   # This one expects binaries for everything because it looks everything up in one fell swoop.
-  def get_attachment_if_allowed!(studio, commission, key, user) do
+  def get_attachment_if_allowed!(commission, key, user) do
     Repo.one!(
       from ea in EventAttachment,
-        join: s in Studio,
         join: ul in Upload,
         join: e in Event,
         join: c in Commission,
         select: ea,
         where:
-          s.handle == ^studio and
-            c.public_id == ^commission and
+          c.public_id == ^commission and
             ul.key == ^key and
             ea.upload_id == ul.id and
             e.id == ea.event_id and
             e.commission_id == c.id and
-            c.studio_id == s.id and
             (c.client_id == ^user.id or ^user.id in subquery(studio_artists_query())),
         preload: [:upload, :thumbnail]
     )

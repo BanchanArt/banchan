@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.StudioLayout do
+defmodule BanchanWeb.CommissionLive.Components.StudioLayout do
   @moduledoc """
   Shared layout component between the various Studio-related pages.
   """
@@ -6,7 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.TabButton
+  alias BanchanWeb.CommissionLive.Components.TabButton
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true

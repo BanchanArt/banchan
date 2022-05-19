@@ -1,4 +1,4 @@
-defmodule BanchanWeb.DashboardLive.Components.DashboardResult do
+defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
   @moduledoc """
   Component for displaying dashboard result rows.
   """
@@ -6,11 +6,12 @@ defmodule BanchanWeb.DashboardLive.Components.DashboardResult do
 
   alias Banchan.Commissions.Common
 
-  alias Surface.Components.LiveRedirect
+  alias Surface.Components.{LivePatch, LiveRedirect}
 
   alias BanchanWeb.Components.{Avatar, UserHandle}
 
   prop result, :struct, required: true
+  prop highlight, :boolean, default: false
 
   def render(assigns) do
     commission_url =
@@ -22,12 +23,12 @@ defmodule BanchanWeb.DashboardLive.Components.DashboardResult do
 
     ~F"""
     <div class="relative">
-      <LiveRedirect class="md:hidden absolute w-full h-full inset-0" to={commission_url} />
-      <div class="py-2 px-4">
-        <LiveRedirect class="text-2xl hover:text-secondary" to={commission_url}>
+      <LivePatch class="md:hidden absolute w-full h-full inset-0" to={commission_url} />
+      <div class={"py-2 px-4", "bg-base-300": @highlight}>
+        <LivePatch class="text-2xl hover:text-secondary" to={commission_url}>
           {@result.commission.title}
           <div class="badge badge-secondary badge-sm">{Common.humanize_status(@result.commission.status)}</div>
-        </LiveRedirect>
+        </LivePatch>
         <div class="text-sm text-left">
           <div class="inline-flex items-baseline space-x-0.5 flex-wrap">
             <span class="self-center">

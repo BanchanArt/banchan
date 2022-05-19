@@ -4,7 +4,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
   """
   use BanchanWeb, :surface_view
 
-  alias BanchanWeb.StudioLive.Components.StudioLayout
+  alias BanchanWeb.CommissionLive.Components.StudioLayout
   import BanchanWeb.StudioLive.Helpers
 
   @impl true

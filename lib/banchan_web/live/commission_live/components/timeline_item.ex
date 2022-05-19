@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Commissions.TimelineItem do
+defmodule BanchanWeb.CommissionLive.Components.Commissions.TimelineItem do
   @moduledoc """
   Timeline Item
   """

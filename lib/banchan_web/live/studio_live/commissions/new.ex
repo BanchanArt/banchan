@@ -13,8 +13,8 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   alias BanchanWeb.Components.Markdown
   alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.Commissions.Summary
-  alias BanchanWeb.StudioLive.Components.StudioLayout
+  alias BanchanWeb.CommissionLive.Components.Commissions.Summary
+  alias BanchanWeb.CommissionLive.Components.StudioLayout
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
@@ -165,10 +165,9 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
         {:noreply,
          redirect(socket,
            to:
-             Routes.studio_commissions_show_path(
+             Routes.commission_path(
                Endpoint,
                :show,
-               socket.assigns.studio.handle,
                created_commission.public_id
              )
          )}

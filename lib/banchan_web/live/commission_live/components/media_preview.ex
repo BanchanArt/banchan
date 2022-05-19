@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Commissions.MediaPreview do
+defmodule BanchanWeb.CommissionLive.Components.Commissions.MediaPreview do
   @moduledoc """
   Media previewer meant for attachments in the commission page
   """
@@ -10,7 +10,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.MediaPreview do
   alias Surface.Components.LiveRedirect
 
   prop commission, :struct, required: true
-  prop studio, :struct, required: true
 
   data upload, :struct, default: nil
 
@@ -42,7 +41,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.MediaPreview do
               src={Routes.commission_attachment_path(
                 Endpoint,
                 :show,
-                @studio.handle,
                 @commission.public_id,
                 @upload.key
               )}
@@ -56,7 +54,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.MediaPreview do
               src={Routes.commission_attachment_path(
                 Endpoint,
                 :show,
-                @studio.handle,
                 @commission.public_id,
                 @upload.key
               )}
@@ -73,7 +70,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.MediaPreview do
           to={Routes.commission_attachment_path(
             Endpoint,
             :show,
-            @studio.handle,
             @commission.public_id,
             @upload.key
           )}

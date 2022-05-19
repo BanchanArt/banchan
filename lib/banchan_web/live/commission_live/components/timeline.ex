@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
+defmodule BanchanWeb.CommissionLive.Components.Commissions.Timeline do
   @moduledoc """
   Main component for the Commission Page's timeline.
   """
@@ -6,11 +6,10 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
 
   alias Banchan.Commissions.Common
 
-  alias BanchanWeb.StudioLive.Components.Commissions.{Comment, TimelineItem}
+  alias BanchanWeb.CommissionLive.Components.Commissions.{Comment, TimelineItem}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
-  prop studio, :struct, required: true
   prop commission, :any, required: true
   prop uri, :string, required: true
 
@@ -39,7 +38,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.Timeline do
                 <Comment
                   id={"event-#{event.public_id}"}
                   uri={@uri}
-                  studio={@studio}
                   event={event}
                   commission={@commission}
                   current_user={@current_user}

@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Commissions.DraftBox do
+defmodule BanchanWeb.CommissionLive.Components.Commissions.DraftBox do
   @moduledoc """
   Component for rendering the latest submitted draft on the commission page
   """
@@ -7,12 +7,11 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.DraftBox do
   alias Banchan.Commissions
   alias Banchan.Uploads
 
-  alias BanchanWeb.StudioLive.Components.Commissions.{AttachmentBox, MediaPreview}
+  alias BanchanWeb.CommissionLive.Components.Commissions.{AttachmentBox, MediaPreview}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
   prop commission, :struct, required: true
-  prop studio, :struct, required: true
 
   data attachments, :list
   data previewing, :struct, default: nil
@@ -75,13 +74,8 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.DraftBox do
     <div>
       {#if @attachments && !Enum.empty?(@attachments)}
         <h3 class="px-2 pb-2 text-xl">Latest Draft</h3>
-        <MediaPreview id="draft-preview" commission={@commission} studio={@studio} />
-        <AttachmentBox
-          commission={@commission}
-          studio={@studio}
-          attachments={@attachments}
-          open_preview="open_preview"
-        />
+        <MediaPreview id="draft-preview" commission={@commission} />
+        <AttachmentBox commission={@commission} attachments={@attachments} open_preview="open_preview" />
       {#else}
         <h3 class="px-2 pb-2 text-xl">No Drafts Yet</h3>
       {/if}

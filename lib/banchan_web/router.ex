@@ -65,21 +65,24 @@ defmodule BanchanWeb.Router do
       live("/studios/:handle/offerings/new", StudioLive.Offerings.New, :new)
       live("/studios/:handle/offerings/edit/:offering_type", StudioLive.Offerings.Edit, :edit)
       live("/studios/:handle/commissions/new/:offering_type", StudioLive.Commissions.New, :new)
-      live("/studios/:handle/commissions/:commission_id", StudioLive.Commissions.Show, :show)
+      # live("/studios/:handle/commissions/:commission_id", StudioLive.Commissions.Show, :show)
 
       live("/dashboard", DashboardLive, :index)
+
+      live("/commissions", CommissionLive, :index)
+      live("/commissions/:commission_id", CommissionLive, :show)
 
       live("/settings", SettingsLive, :edit)
       live("/mfa_setup", SetupMfaLive, :edit)
 
       get(
-        "/studios/:handle/commissions/:commission_id/attachment/:key",
+        "/commissions/:commission_id/attachment/:key",
         CommissionAttachmentController,
         :show
       )
 
       get(
-        "/studios/:handle/commissions/:commission_id/attachment/:key/thumbnail",
+        "/commissions/:commission_id/attachment/:key/thumbnail",
         CommissionAttachmentController,
         :thumbnail
       )

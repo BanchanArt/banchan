@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.CommissionCard do
+defmodule BanchanWeb.CommissionLive.Components.CommissionCard do
   @moduledoc """
   Card component for commissions
   """

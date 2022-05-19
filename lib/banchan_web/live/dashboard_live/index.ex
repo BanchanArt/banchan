@@ -35,6 +35,7 @@ defmodule BanchanWeb.DashboardLive do
     case Integer.parse(page) do
       {p, ""} ->
         p
+
       _ ->
         1
     end

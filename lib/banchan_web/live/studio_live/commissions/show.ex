@@ -6,7 +6,7 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
 
   alias Banchan.Commissions
 
-  alias BanchanWeb.StudioLive.Components.Commissions.{
+  alias BanchanWeb.CommissionLive.Components.Commissions.{
     CommentBox,
     CommissionLayout,
     DraftBox,
@@ -23,10 +23,8 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
 
     commission =
       Commissions.get_commission!(
-        socket.assigns.studio,
         commission_id,
-        socket.assigns.current_user,
-        socket.assigns.current_user_member?
+        socket.assigns.current_user
       )
 
     Commissions.subscribe_to_commission_events(commission)
@@ -93,7 +91,6 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
             current_user={@current_user}
             current_user_member?={@current_user_member?}
             commission={@commission}
-            studio={@studio}
           />
           <div class="divider" />
           <SummaryEditor
@@ -108,7 +105,6 @@ defmodule BanchanWeb.StudioLive.Commissions.Show do
         <div class="flex flex-col md:col-span-2 md:order-1">
           <Timeline
             uri={@uri}
-            studio={@studio}
             commission={@commission}
             current_user={@current_user}
             current_user_member?={@current_user_member?}

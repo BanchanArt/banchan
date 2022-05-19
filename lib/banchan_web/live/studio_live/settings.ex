@@ -11,7 +11,7 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.StudioLayout
+  alias BanchanWeb.CommissionLive.Components.StudioLayout
 
   import BanchanWeb.StudioLive.Helpers
 

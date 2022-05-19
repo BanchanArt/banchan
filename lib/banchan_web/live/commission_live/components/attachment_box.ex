@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Commissions.AttachmentBox do
+defmodule BanchanWeb.CommissionLive.Components.Commissions.AttachmentBox do
   @moduledoc """
   Displays a flexbox of attachments for a commission.
   """
@@ -7,7 +7,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.AttachmentBox do
   alias Banchan.Uploads
 
   prop commission, :struct, required: true
-  prop studio, :struct, required: true
   prop attachments, :list, required: true
   prop editing, :boolean
 
@@ -50,7 +49,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.AttachmentBox do
                 src={Routes.commission_attachment_path(
                   Endpoint,
                   :thumbnail,
-                  @studio.handle,
                   @commission.public_id,
                   attachment.upload.key
                 )}
@@ -68,7 +66,6 @@ defmodule BanchanWeb.StudioLive.Components.Commissions.AttachmentBox do
               href={Routes.commission_attachment_path(
                 Endpoint,
                 :show,
-                @studio.handle,
                 @commission.public_id,
                 attachment.upload.key
               )}

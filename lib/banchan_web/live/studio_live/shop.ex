@@ -10,7 +10,7 @@ defmodule BanchanWeb.StudioLive.Shop do
 
   alias BanchanWeb.Components.Button
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.{CommissionCard, StudioLayout}
+  alias BanchanWeb.CommissionLive.Components.{CommissionCard, StudioLayout}
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
