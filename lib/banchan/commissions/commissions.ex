@@ -75,8 +75,8 @@ defmodule Banchan.Commissions do
       {ord, :studio_handle} ->
         query |> order_by([c, client, s], [{^ord, s.handle}])
 
-      {ord, field} ->
-        query |> order_by([{^ord, ^field}])
+      {ord, :updated_at} ->
+        query |> order_by([c, client, s, e], [{^ord, max(e.inserted_at)}])
 
       nil ->
         query

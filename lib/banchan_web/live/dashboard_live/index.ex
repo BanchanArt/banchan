@@ -29,7 +29,7 @@ defmodule BanchanWeb.DashboardLive do
   end
 
   defp sort(_other) do
-    {:asc, :id}
+    {:desc, :updated_at}
   end
 
   defp page(%{"page" => page}) do
