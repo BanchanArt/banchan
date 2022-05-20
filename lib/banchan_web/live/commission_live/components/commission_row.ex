@@ -36,12 +36,12 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
               by
             </div>
             <div class="self-center inline">
-              <Avatar link={false} user={@result.client} class="w-4" />
+              <Avatar link={false} user={@result.client} class="w-2.5" />
             </div>
             <div class="inline">
-              <strong title={@result.client.handle} class="font-bold">{@result.client.handle}</strong>
+              <strong title={@result.client.handle} class="font-bold">{@result.client.handle}</strong>.
             </div>
-            <div class="inline">
+            <div>
               Updated {Timex.format!(@result.updated_at, "{relative}", :relative)}.
             </div>
           </div>

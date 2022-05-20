@@ -31,10 +31,10 @@ defmodule BanchanWeb.Components.Nav do
         <ul class="menu horizontal">
           {#if @current_user}
             <li>
-              <LiveRedirect to={Routes.dashboard_path(Endpoint, :index)}>
+              <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
                 <span>
                   <i class="fa fa-palette" />
-                  Dashboard
+                  Commissions
                 </span>
               </LiveRedirect>
             </li>

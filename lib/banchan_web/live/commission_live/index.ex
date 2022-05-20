@@ -136,7 +136,7 @@ defmodule BanchanWeb.CommissionLive do
             </ul>
           </div>
           {#if @commission}
-            <div class="md:container md:mx-auto">
+            <div class="md:container md:basis-3/4">
               <h1 class="text-3xl pt-4 px-4">
                 <LivePatch class="md:hidden p-2" to={Routes.commission_path(Endpoint, :index)}>
                   <i class="fas fa-arrow-left text-2xl" />
