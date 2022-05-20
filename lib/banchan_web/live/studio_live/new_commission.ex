@@ -10,11 +10,11 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Markdown
-  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
-  alias BanchanWeb.Endpoint
   alias BanchanWeb.CommissionLive.Components.Commissions.Summary
   alias BanchanWeb.CommissionLive.Components.StudioLayout
+  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
+  alias BanchanWeb.Components.Markdown
+  alias BanchanWeb.Endpoint
   import BanchanWeb.StudioLive.Helpers
 
   @impl true

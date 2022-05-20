@@ -8,8 +8,8 @@ defmodule BanchanWeb.CommissionLive do
 
   alias Surface.Components.LivePatch
 
-  alias BanchanWeb.Components.Layout
   alias BanchanWeb.CommissionLive.Components.CommissionRow
+  alias BanchanWeb.Components.Layout
 
   alias BanchanWeb.CommissionLive.Components.Commissions.{
     CommentBox,

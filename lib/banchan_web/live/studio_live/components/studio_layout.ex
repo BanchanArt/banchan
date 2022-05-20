@@ -4,9 +4,9 @@ defmodule BanchanWeb.CommissionLive.Components.StudioLayout do
   """
   use BanchanWeb, :component
 
+  alias BanchanWeb.CommissionLive.Components.TabButton
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.CommissionLive.Components.TabButton
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true

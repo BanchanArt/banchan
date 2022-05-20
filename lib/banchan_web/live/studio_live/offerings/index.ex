@@ -10,8 +10,8 @@ defmodule BanchanWeb.StudioLive.Offerings.Index do
 
   alias Banchan.Offerings
 
-  alias BanchanWeb.Endpoint
   alias BanchanWeb.CommissionLive.Components.StudioLayout
+  alias BanchanWeb.Endpoint
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
