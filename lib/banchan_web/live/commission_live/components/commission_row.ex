@@ -6,9 +6,9 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
 
   alias Banchan.Commissions.Common
 
-  alias Surface.Components.{LivePatch, LiveRedirect}
+  alias Surface.Components.LivePatch
 
-  alias BanchanWeb.Components.{Avatar, UserHandle}
+  alias BanchanWeb.Components.Avatar
 
   prop result, :struct, required: true
   prop highlight, :boolean, default: false
@@ -22,37 +22,32 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
       )
 
     ~F"""
-    <div class="relative">
-      <LivePatch class="md:hidden absolute w-full h-full inset-0" to={commission_url} />
-      <div class={"py-2 px-4", "bg-base-300": @highlight}>
-        <LivePatch class="text-2xl hover:text-secondary" to={commission_url}>
+    <LivePatch class={"bg-base-300": @highlight} to={commission_url}>
+      <div class="py-2 px-4">
+        <div class="text-xl">
           {@result.commission.title}
           <div class="badge badge-secondary badge-sm">{Common.humanize_status(@result.commission.status)}</div>
-        </LivePatch>
-        <div class="text-sm text-left">
-          <div class="inline-flex items-baseline space-x-0.5 flex-wrap">
-            <span class="self-center">
+        </div>
+        <div class="text-xs text-left">
+          <div class="inline">
+            <div class="self-center inline">
               Submitted to
-              <LiveRedirect
-                to={Routes.studio_shop_path(Endpoint, :show, @result.studio.handle)}
-                class="font-bold hover:text-secondary"
-              >{@result.studio.name}</LiveRedirect>
+              <div class="inline font-bold">{@result.studio.name}</div>
               by
-            </span>
-            <div class="self-center">
-              <Avatar user={@result.client} class="w-4" />
             </div>
-            <UserHandle user={@result.client} />
-            <span>
-              {Timex.format!(@result.commission.inserted_at, "{relative}", :relative)}.
-            </span>
-            <div class="float-right">
+            <div class="self-center inline">
+              <Avatar link={false} user={@result.client} class="w-4" />
+            </div>
+            <div class="inline">
+              <strong title={@result.client.handle} class="font-bold">{@result.client.handle}</strong>
+            </div>
+            <div class="inline">
               Updated {Timex.format!(@result.updated_at, "{relative}", :relative)}.
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </LivePatch>
     """
   end
 end
