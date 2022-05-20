@@ -1,10 +1,10 @@
-defmodule BanchanWeb.StudioLive.Components.Commissions.CommissionLayout do
+defmodule BanchanWeb.CommissionLive.Components.Commissions.CommissionLayout do
   @moduledoc """
   Layout for commission and its various tabs.
   """
   use BanchanWeb, :component
 
-  alias BanchanWeb.StudioLive.Components.StudioLayout
+  alias BanchanWeb.CommissionLive.Components.StudioLayout
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true

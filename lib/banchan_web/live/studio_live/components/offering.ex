@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Offering do
+defmodule BanchanWeb.CommissionLive.Components.Offering do
   @moduledoc """
   Component for creating and editing Offerings.
   """

@@ -6,7 +6,7 @@ defmodule BanchanWeb.StudioLive.About do
 
   alias BanchanWeb.Components.Markdown
 
-  alias BanchanWeb.StudioLive.Components.StudioLayout
+  alias BanchanWeb.CommissionLive.Components.StudioLayout
   import BanchanWeb.StudioLive.Helpers
 
   @impl true

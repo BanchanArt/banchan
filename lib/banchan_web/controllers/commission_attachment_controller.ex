@@ -7,10 +7,9 @@ defmodule BanchanWeb.CommissionAttachmentController do
   alias Banchan.Commissions
   alias Banchan.Uploads
 
-  def show(conn, %{"handle" => studio_handle, "commission_id" => public_id, "key" => key}) do
+  def show(conn, %{"commission_id" => public_id, "key" => key}) do
     attachment =
       Commissions.get_attachment_if_allowed!(
-        studio_handle,
         public_id,
         key,
         conn.assigns.current_user
@@ -37,10 +36,9 @@ defmodule BanchanWeb.CommissionAttachmentController do
     )
   end
 
-  def thumbnail(conn, %{"handle" => studio_handle, "commission_id" => public_id, "key" => key}) do
+  def thumbnail(conn, %{"commission_id" => public_id, "key" => key}) do
     attachment =
       Commissions.get_attachment_if_allowed!(
-        studio_handle,
         public_id,
         key,
         conn.assigns.current_user

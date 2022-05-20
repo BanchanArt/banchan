@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.Commissions.InvoiceBox do
+defmodule BanchanWeb.CommissionLive.Components.Commissions.InvoiceBox do
   @moduledoc """
   This is what shows up on the commission timeline when an artist asks for payment.
   """
