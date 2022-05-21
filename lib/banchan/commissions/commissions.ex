@@ -313,7 +313,7 @@ defmodule Banchan.Commissions do
                   }
                 )
 
-                {:ok, {commission |> Repo.preload(line_items: [:option]), [event]}}
+                {:ok, {commission, [event]}}
             end
         end
       end)
