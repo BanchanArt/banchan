@@ -16,6 +16,10 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.TimelineItem do
     Timex.format!(time, "{relative}", :relative)
   end
 
+  defp fmt_abs_time(time) do
+    time |> Timex.to_datetime() |> Timex.format!("{RFC822}")
+  end
+
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
   end
@@ -31,7 +35,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.TimelineItem do
           <UserHandle user={@event.actor} />
         </div>
         <#slot />
-        <a class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.
+        <a title={"#{fmt_abs_time(@event.inserted_at)}"} class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.
       </div>
     </div>
     """
