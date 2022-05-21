@@ -87,7 +87,7 @@ defmodule BanchanWeb.CommissionLive do
     # for a single event addition. So we have to dedup here just in case until
     # that bug is... fixed? If it's even a bug vs something expected?
     events = socket.assigns.commission.events ++ events
-    events = events |> Enum.sort_by(& &1.inserted_at) |> Enum.dedup_by(& &1.public_id)
+    events = events |> Enum.dedup_by(& &1.public_id) |> Enum.sort(&(Timex.diff(&1.inserted_at, &2.inserted_at) < 0))
     commission = %{socket.assigns.commission | events: events}
     {:noreply, assign(socket, commission: commission)}
   end
