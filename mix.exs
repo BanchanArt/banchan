@@ -80,7 +80,7 @@ defmodule Banchan.MixProject do
       {:phoenix_live_reload, "~> 1.3.3", only: :dev},
       {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
       # Testing and static analysis
-      {:surface_formatter, "~> 0.7.5"},
+      {:surface_formatter, "~> 0.7.5", only: :dev},
       {:floki, ">= 0.27.0", only: :test},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.5", only: [:dev, :test], runime: false},
@@ -104,6 +104,7 @@ defmodule Banchan.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       "assets.deploy": [
+        "cmd --cd assets npm install",
         "cmd --cd assets npm run deploy:css",
         "esbuild default --minify",
         "phx.digest"

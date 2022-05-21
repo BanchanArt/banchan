@@ -29,7 +29,8 @@ config :banchan, Banchan.Mailer, adapter: Bamboo.TestAdapter
 # you can enable the server option below.
 config :banchan, BanchanWeb.Endpoint,
   http: [port: 4002],
-  server: false
+  server: false,
+  secret_key_base: "wE/ZQmiSLP77ZAfprMlRRB1D+JP9p2/wMrLhjVXyB8U6/JpoxWfWCsoE4bm3IoY/"
 
 # Print only warnings and errors during test
 config :logger, level: :warn

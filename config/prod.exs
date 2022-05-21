@@ -10,11 +10,9 @@ import Config
 # which you should run after static files are built and
 # before starting your production server.
 config :banchan, BanchanWeb.Endpoint,
-  # Uncomment when it's time to actually go live.
   url: [host: "dev.banchan.art", port: 443],
   cache_static_manifest: "priv/static/cache_manifest.json",
   force_ssl: [hsts: true, rewrite_on: [:x_forwarded_proto]],
-  secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE"),
   server: true
 
 # https: [
@@ -29,9 +27,8 @@ config :logger, level: :info
 
 config :banchan, Banchan.Repo,
   adapter: Ecto.Adapters.Postgres,
-  url: System.get_env("DATABASE_URL"),
   ssl: true,
-  # Free tier db only allows 4 connections. Rolling deploys need pool_size*(n+1) connections where n is the number of app replicas.
+  # Gigalixir free tier db only allows 4 connections. Rolling deploys need pool_size*(n+1) connections where n is the number of app replicas.
   pool_size: 2
 
 config :banchan, Banchan.Mailer,
@@ -74,7 +71,3 @@ config :banchan, Banchan.Mailer,
 #       force_ssl: [hsts: true]
 #
 # Check `Plug.SSL` for all available options in `force_ssl`.
-
-# Finally import the config/prod.secret.exs which loads secrets
-# and configuration from environment variables.
-import_config "prod.secret.exs"
