@@ -120,7 +120,11 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.Comment do
             {#else}
               commented
             {/if}
-            <a title={"#{fmt_abs_time(@event.inserted_at)}"} class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.
+            <a
+              title={"#{fmt_abs_time(@event.inserted_at)}"}
+              class="hover:underline"
+              href={replace_fragment(@uri, @event)}
+            >{fmt_time(@event.inserted_at)}</a>.
           </span>
           {#if @event.inserted_at != @event.updated_at}
             <span class="text-xs italic">edited {fmt_time(@event.updated_at)}</span>

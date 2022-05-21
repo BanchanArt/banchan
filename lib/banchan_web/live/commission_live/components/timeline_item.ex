@@ -35,7 +35,11 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.TimelineItem do
           <UserHandle user={@event.actor} />
         </div>
         <#slot />
-        <a title={"#{fmt_abs_time(@event.inserted_at)}"} class="hover:underline" href={replace_fragment(@uri, @event)}>{fmt_time(@event.inserted_at)}</a>.
+        <a
+          title={"#{fmt_abs_time(@event.inserted_at)}"}
+          class="hover:underline"
+          href={replace_fragment(@uri, @event)}
+        >{fmt_time(@event.inserted_at)}</a>.
       </div>
     </div>
     """
