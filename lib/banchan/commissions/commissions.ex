@@ -96,8 +96,6 @@ defmodule Banchan.Commissions do
             (c.client_id == ^current_user.id or
                ^current_user.id in subquery(studio_artists_query())),
         preload: [
-          client: [],
-          studio: [],
           events: [:actor, invoice: [], attachments: [:upload, :thumbnail]],
           line_items: [:option],
           offering: [:options]
@@ -587,6 +585,23 @@ defmodule Banchan.Commissions do
     )
   end
 
+  def add_comment(
+        %User{} = actor,
+        %Commission{} = commission,
+        current_user_member?,
+        attachments,
+        text
+      ) do
+    create_event(
+      :comment,
+      actor,
+      commission,
+      current_user_member?,
+      attachments,
+      %{"text" => text}
+    )
+  end
+
   def invoice_paid?(%Invoice{status: :succeeded}), do: true
   def invoice_paid?(%Invoice{status: :paid_out}), do: true
   def invoice_paid?(%Invoice{}), do: false
@@ -649,6 +664,7 @@ defmodule Banchan.Commissions do
       }
     ]
 
+    # TODO: this should be queried in-situ
     platform_fee = Money.multiply(Money.add(amount, tip), commission.studio.platform_fee)
 
     {:ok, session} =
@@ -744,21 +760,37 @@ defmodule Banchan.Commissions do
   end
 
   def deposited_amount(_, %Commission{} = commission, _) do
-    deposits =
-      from(
-        i in Invoice,
-        where:
-          i.commission_id == ^commission.id and (i.status == :paid_out or i.status == :succeeded),
-        select: i.amount
+    if Ecto.assoc_loaded?(commission.events) do
+      Enum.reduce(
+        commission.events,
+        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
+        Money.new(0, :USD),
+        fn event, acc ->
+          if event.invoice && event.invoice.status in [:succeeded, :paid_out] do
+            Money.add(acc, event.invoice.amount)
+          else
+            acc
+          end
+        end
       )
-      |> Repo.all()
+    else
+      deposits =
+        from(
+          i in Invoice,
+          where:
+            i.commission_id == ^commission.id and
+              (i.status == :paid_out or i.status == :succeeded),
+          select: i.amount
+        )
+        |> Repo.all()
 
-    Enum.reduce(
-      deposits,
-      # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-      Money.new(0, :USD),
-      fn dep, acc -> Money.add(acc, dep.amount) end
-    )
+      Enum.reduce(
+        deposits,
+        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
+        Money.new(0, :USD),
+        fn dep, acc -> Money.add(acc, dep.amount) end
+      )
+    end
   end
 
   def latest_draft(%User{id: user_id}, %Commission{client_id: client_id}, current_user_member?)

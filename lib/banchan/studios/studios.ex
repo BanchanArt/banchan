@@ -133,9 +133,9 @@ defmodule Banchan.Studios do
       iex> is_user_in_studio(user, studio)
       true
   """
-  def is_user_in_studio(user, studio) do
+  def is_user_in_studio(user, studio_id) do
     Repo.exists?(
-      from us in "users_studios", where: us.user_id == ^user.id and us.studio_id == ^studio.id
+      from us in "users_studios", where: us.user_id == ^user.id and us.studio_id == ^studio_id
     )
   end
 

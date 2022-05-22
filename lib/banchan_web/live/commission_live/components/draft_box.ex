@@ -14,42 +14,70 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.DraftBox do
   prop commission, :struct, required: true
 
   data attachments, :list
+  data loaded, :boolean, default: false
   data previewing, :struct, default: nil
 
   def update(assigns, socket) do
-    socket = socket |> assign(assigns)
-    Commissions.subscribe_to_commission_events(socket.assigns.commission)
+    current_comm = Map.get(socket.assigns, :commission)
+    new_comm = Map.get(assigns, :commission)
 
-    event =
-      Commissions.latest_draft(
-        socket.assigns.current_user,
-        socket.assigns.commission,
-        socket.assigns.current_user_member?
-      )
+    if socket.assigns.loaded &&
+         current_comm &&
+         new_comm &&
+         current_comm.public_id == new_comm.public_id do
+      socket = socket |> assign(assigns)
+      {:ok, socket}
+    else
+      socket =
+        if current_comm && (!new_comm || current_comm.public_id != new_comm.public_id) do
+          Commissions.unsubscribe_from_commission_events(current_comm)
+          socket |> assign(loaded: false)
+        else
+          socket
+        end
 
-    {:ok, socket |> assign(attachments: event && event.attachments)}
+      socket = socket |> assign(assigns)
+      Commissions.subscribe_to_commission_events(socket.assigns.commission)
+
+      event =
+        Commissions.latest_draft(
+          socket.assigns.current_user,
+          socket.assigns.commission,
+          socket.assigns.current_user_member?
+        )
+
+      {:ok, socket |> assign(attachments: event && event.attachments, loaded: true)}
+    end
   end
 
-  def handle_info(%{event: "new_events", payload: _}, socket) do
-    event =
-      Commissions.latest_draft(
-        socket.assigns.current_user,
-        socket.assigns.commission,
-        socket.assigns.current_user_member?
-      )
+  def handle_info(%{event: "new_events", payload: events}, socket) do
+    if Enum.any?(events, &(&1.type == :comment && !Enum.empty?(&1.attachments))) do
+      event =
+        Commissions.latest_draft(
+          socket.assigns.current_user,
+          socket.assigns.commission,
+          socket.assigns.current_user_member?
+        )
 
-    {:noreply, socket |> assign(attachments: event && event.attachments)}
+      {:noreply, socket |> assign(attachments: event && event.attachments)}
+    else
+      {:noreply, socket}
+    end
   end
 
-  def handle_info(%{event: "event_updated", payload: _}, socket) do
-    event =
-      Commissions.latest_draft(
-        socket.assigns.current_user,
-        socket.assigns.commission,
-        socket.assigns.current_user_member?
-      )
+  def handle_info(%{event: "event_updated", payload: events}, socket) do
+    if Enum.any?(events, &(&1.type == :comment && !Enum.empty?(&1.attachments))) do
+      event =
+        Commissions.latest_draft(
+          socket.assigns.current_user,
+          socket.assigns.commission,
+          socket.assigns.current_user_member?
+        )
 
-    {:noreply, socket |> assign(attachments: event && event.attachments)}
+      {:noreply, socket |> assign(attachments: event && event.attachments)}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_info(_, socket) do

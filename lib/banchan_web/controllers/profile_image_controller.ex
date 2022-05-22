@@ -38,6 +38,8 @@ defmodule BanchanWeb.ProfileImageController do
       "content-disposition",
       "attachment; filename=\"#{upload.name || upload.key}\""
     )
+    # 1 hour
+    |> put_resp_header("cache-control", "max-age=3600")
     |> put_resp_content_type(upload.type)
     |> send_chunked(200)
     |> then(

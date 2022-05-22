@@ -87,29 +87,37 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
+    pipe_through(:browser)
+
+    get("/go/:handle", DispatchController, :dispatch)
+
+    get("/denizens/:handle/pfp.jpeg", ProfileImageController, :pfp)
+    get("/denizens/:handle/pfp_thumb.jpeg", ProfileImageController, :thumb)
+    get("/denizens/:handle/header.jpeg", ProfileImageController, :header)
+
+    get("/studios/:handle/connect_to_stripe", StripeAccountController, :account_link)
+
+    get("/confirm/:token", UserConfirmationController, :confirm)
+
+    delete("/logout", UserSessionController, :delete)
+    get("/force_logout", UserSessionController, :force_logout)
+  end
+
+  scope "/", BanchanWeb do
     live_session :open, on_mount: BanchanWeb.UserLiveAuth do
       pipe_through(:browser)
 
       live("/", HomeLive, :index)
 
       live("/denizens/:handle", DenizenLive.Show, :show)
-      get("/denizens/:handle/pfp.jpeg", ProfileImageController, :pfp)
-      get("/denizens/:handle/pfp_thumb.jpeg", ProfileImageController, :thumb)
-      get("/denizens/:handle/header.jpeg", ProfileImageController, :header)
 
       live("/studios", StudioLive.Index, :index)
       live("/studios/:handle", StudioLive.Shop, :show)
       live("/studios/:handle/about", StudioLive.About, :show)
       live("/studios/:handle/portfolio", StudioLive.Portfolio, :show)
       live("/studios/:handle/qa", StudioLive.Qa, :show)
-      get("/studios/:handle/connect_to_stripe", StripeAccountController, :account_link)
 
       live("/confirm", ConfirmationLive, :show)
-      get("/confirm/:token", UserConfirmationController, :confirm)
-
-      delete("/logout", UserSessionController, :delete)
-      get("/force_logout", UserSessionController, :force_logout)
-      get("/go/:handle", DispatchController, :dispatch)
     end
   end
 

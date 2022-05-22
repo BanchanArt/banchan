@@ -80,13 +80,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.CommentBox do
   def handle_event("add_comment", %{"event" => %{"text" => text}}, socket) do
     attachments = process_uploads(socket)
 
-    case Commissions.create_event(
-           :comment,
+    case Commissions.add_comment(
            socket.assigns.actor,
            socket.assigns.commission,
            socket.assigns.current_user_member?,
            attachments,
-           %{"text" => text}
+           text
          ) do
       {:ok, _event} ->
         {:noreply,
