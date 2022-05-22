@@ -137,6 +137,7 @@ defmodule BanchanWeb.CommissionLive do
     ~F"""
     <Layout current_user={@current_user} flashes={@flash}>
       {#if !@connected}
+        {!-- # TODO: make this a proper loading screen --}
         Loading
       {#else}
         <div class="flex flex-col grow max-h-full">
