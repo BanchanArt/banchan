@@ -19,8 +19,11 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.SummaryEditor do
   data custom_changeset, :struct
   data deposited, :struct
   data open_custom, :boolean, default: false
+  data loaded, :boolean, default: false
 
   def update(assigns, socket) do
+    current_comm = Map.get(socket.assigns, :commission)
+    new_comm = Map.get(assigns, :commission)
     socket = socket |> assign(assigns)
 
     custom_changeset =
@@ -30,14 +33,44 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.SummaryEditor do
         nil
       end
 
-    deposited =
-      Commissions.deposited_amount(
-        socket.assigns.current_user,
-        socket.assigns.commission,
-        socket.assigns.current_user_member?
-      )
+    if socket.assigns.loaded do
+      {:ok, socket |> assign(custom_changeset: custom_changeset)}
+    else
+      socket =
+        if current_comm && (!new_comm || current_comm.public_id != new_comm.public_id) do
+          Commissions.unsubscribe_from_commission_events(current_comm)
+          socket |> assign(loaded: false)
+        else
+          socket
+        end
 
-    {:ok, socket |> assign(custom_changeset: custom_changeset, deposited: deposited)}
+      Commissions.subscribe_to_commission_events(socket.assigns.commission)
+
+      deposited =
+        Commissions.deposited_amount(
+          socket.assigns.current_user,
+          socket.assigns.commission,
+          socket.assigns.current_user_member?
+        )
+
+      {:ok,
+       socket |> assign(custom_changeset: custom_changeset, deposited: deposited, loaded: true)}
+    end
+  end
+
+  def handle_info(%{event: "event_updated", payload: event}, socket) do
+    if event.invoice do
+      deposited =
+        Commissions.deposited_amount(
+          socket.assigns.current_user,
+          socket.assigns.commission,
+          socket.assigns.current_user_member?
+        )
+
+      {:noreply, socket |> assign(deposited: deposited)}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true

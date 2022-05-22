@@ -86,7 +86,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.InvoiceBox do
           <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
           {#case @event.invoice.status}
             {#match :pending}
-              {#if @current_user.id == @commission.client.id}
+              {#if @current_user.id == @commission.client_id}
                 <div class="stat-desc">Payment is requested.</div>
                 <Form for={@changeset} class="stat-actions" change="change" submit="submit">
                   <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
@@ -108,7 +108,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.InvoiceBox do
             {#match :submitted}
               <div class="stat-desc">Payment session in progress.</div>
               <div class="stat-actions">
-                {#if @current_user.id == @commission.client.id}
+                {#if @current_user.id == @commission.client_id}
                   {!-- # TODO: This should be a Link so it's accessible. --}
                   <Button click="continue_payment" label="Continue Payment" />
                 {/if}
