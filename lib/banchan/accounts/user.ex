@@ -21,9 +21,9 @@ defmodule Banchan.Accounts.User do
     field :totp_secret, :binary
     field :totp_activated, :boolean
 
-    belongs_to :header_img, Upload, on_replace: :nilify
-    belongs_to :pfp_img, Upload, on_replace: :nilify
-    belongs_to :pfp_thumb, Upload, on_replace: :nilify
+    belongs_to :header_img, Upload, on_replace: :nilify, type: :binary_id
+    belongs_to :pfp_img, Upload, on_replace: :nilify, type: :binary_id
+    belongs_to :pfp_thumb, Upload, on_replace: :nilify, type: :binary_id
 
     many_to_many :studios, Banchan.Studios.Studio, join_through: "users_studios"
 

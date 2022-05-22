@@ -3,14 +3,15 @@ defmodule Banchan.Studios.Studio do
 
   use Ecto.Schema
   import Ecto.Changeset
+
   alias Banchan.Identities
+
+  alias Banchan.Uploads.Upload
 
   schema "studios" do
     field :name, :string
     field :handle, :string
     field :description, :string
-    field :header_img, :string
-    field :card_img, :string
     field :summary, :string
     field :default_terms, :string
 
@@ -20,6 +21,9 @@ defmodule Banchan.Studios.Studio do
 
     field :platform_fee, :decimal,
       default: Application.fetch_env!(:banchan, :default_platform_fee)
+
+    belongs_to :header_img, Upload, type: :binary_id
+    belongs_to :card_img, Upload, type: :binary_id
 
     many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
 
