@@ -56,7 +56,7 @@ defmodule BanchanWeb.CommissionLive do
             assign(socket,
               commission: comm,
               current_user_member?:
-                Studios.is_user_in_studio(socket.assigns.current_user, comm.studio_id)
+                Studios.is_user_in_studio(socket.assigns.current_user, %Studios.Studio{id: comm.studio_id})
             )
 
           _ ->

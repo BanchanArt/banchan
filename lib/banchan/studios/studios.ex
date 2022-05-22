@@ -32,7 +32,7 @@ defmodule Banchan.Studios do
     Repo.get_by!(Studio, handle: handle)
   end
 
-  def get_offering_by_type!(studio, type) do
+  def get_offering_by_type!(%Studio{} = studio, type) do
     Repo.get_by!(Offering, type: type, studio_id: studio.id)
   end
 
@@ -43,7 +43,7 @@ defmodule Banchan.Studios do
     {:error, :unauthorized}
   end
 
-  def update_studio_profile(user, _, attrs) do
+  def update_studio_profile(%User{} = user, _, attrs) do
     user
     |> Studio.changeset(attrs)
     |> Repo.update()
@@ -57,7 +57,7 @@ defmodule Banchan.Studios do
       iex> new_studio(studio, %{handle: ..., name: ..., ...})
       {:ok, %Studio{}}
   """
-  def new_studio(%User{}, studio, url, attrs) do
+  def new_studio(%User{}, %Studio{} = studio, url, attrs) do
     changeset = studio |> Studio.changeset(attrs)
 
     changeset =
@@ -90,7 +90,7 @@ defmodule Banchan.Studios do
       iex> list_studios_for_user(user)
       [%Studio{}, %Studio{}, %Studio{}]
   """
-  def list_studios_for_user(user) do
+  def list_studios_for_user(%User{} = user) do
     Repo.all(Ecto.assoc(user, :studios))
   end
 
@@ -102,7 +102,7 @@ defmodule Banchan.Studios do
       iex> list_studio_members(studio)
       [%User{}, %User{}, %User{}]
   """
-  def list_studio_members(studio) do
+  def list_studio_members(%Studio{} = studio) do
     Repo.all(Ecto.assoc(studio, :artists))
   end
 
@@ -116,7 +116,7 @@ defmodule Banchan.Studios do
       iex> list_studio_offerings(studio, current_studio_member?)
       [%Offering{}, %Offering{}, %Offering{}]
   """
-  def list_studio_offerings(studio, current_user_member?) do
+  def list_studio_offerings(%Studio{} = studio, current_user_member?) do
     Repo.all(
       from o in Ecto.assoc(studio, :offerings),
         where: ^current_user_member? or o.hidden == false,
@@ -133,9 +133,9 @@ defmodule Banchan.Studios do
       iex> is_user_in_studio(user, studio)
       true
   """
-  def is_user_in_studio(user, studio_id) do
+  def is_user_in_studio(%User{id: user_id}, %Studio{id: studio_id}) do
     Repo.exists?(
-      from us in "users_studios", where: us.user_id == ^user.id and us.studio_id == ^studio_id
+      from us in "users_studios", where: us.user_id == ^user_id and us.studio_id == ^studio_id
     )
   end
 
