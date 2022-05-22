@@ -43,6 +43,10 @@ defmodule Banchan.Uploads do
     end
   end
 
+  def get_by_id!(id) do
+    Repo.get!(Upload, id)
+  end
+
   def get_upload!(bucket, key) do
     Repo.one!(from u in Upload, where: u.bucket == ^bucket and u.key == ^key)
   end

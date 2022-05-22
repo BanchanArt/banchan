@@ -91,9 +91,7 @@ defmodule BanchanWeb.Router do
 
     get("/go/:handle", DispatchController, :dispatch)
 
-    get("/denizens/:handle/pfp.jpeg", ProfileImageController, :pfp)
-    get("/denizens/:handle/pfp_thumb.jpeg", ProfileImageController, :thumb)
-    get("/denizens/:handle/header.jpeg", ProfileImageController, :header)
+    get("/profile_images/:id/img.jpeg", ProfileImageController, :profile_image)
 
     get("/studios/:handle/connect_to_stripe", StripeAccountController, :account_link)
 

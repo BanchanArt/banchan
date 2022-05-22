@@ -4,7 +4,8 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
   def change do
     execute "CREATE EXTENSION IF NOT EXISTS citext", ""
 
-    create table(:uploads) do
+    create table(:uploads, primary_key: false) do
+      add :id, :uuid, primary_key: true
       add :name, :string
       add :bucket, :string, null: false
       add :key, :string, null: false
@@ -26,9 +27,9 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :bio, :string
       add :totp_secret, :binary
       add :totp_activated, :boolean
-      add :header_img_id, references(:uploads, on_delete: :nilify_all)
-      add :pfp_img_id, references(:uploads, on_delete: :nilify_all)
-      add :pfp_thumb_id, references(:uploads, on_delete: :nilify_all)
+      add :header_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
+      add :pfp_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
+      add :pfp_thumb_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       timestamps()
     end
 

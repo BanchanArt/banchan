@@ -7,6 +7,8 @@ defmodule Banchan.Uploads.Upload do
 
   alias Banchan.Accounts.User
 
+  @primary_key {:id, :binary_id, autogenerate: true}
+
   schema "uploads" do
     field :name, :string
     field :bucket, :string

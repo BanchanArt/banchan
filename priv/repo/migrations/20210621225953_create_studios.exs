@@ -7,8 +7,8 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :summary, :text
       add :handle, :citext, null: false
       add :description, :text
-      add :header_img, :string
-      add :card_img, :string
+      add :header_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
+      add :card_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :default_terms, :text
       add :stripe_id, :string
       add :stripe_charges_enabled, :boolean, default: false
