@@ -10,8 +10,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.CommissionLive.Components.Summary
-  alias BanchanWeb.CommissionLive.Components.StudioLayout
+  alias BanchanWeb.CommissionLive.Components.{StudioLayout, Summary}
   alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
   alias BanchanWeb.Components.Markdown
   alias BanchanWeb.Endpoint
