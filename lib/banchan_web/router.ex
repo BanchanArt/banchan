@@ -6,10 +6,7 @@ defmodule BanchanWeb.Router do
 
   alias BanchanWeb.EnsureRolePlug
 
-  @host :banchan
-        |> Application.compile_env!(BanchanWeb.Endpoint)
-        |> Keyword.fetch!(:url)
-        |> Keyword.fetch!(:host)
+  @host Application.compile_env!(:banchan, [BanchanWeb.Endpoint, :url, :host])
 
   @content_security_policy (case Mix.env() do
                               :prod ->
