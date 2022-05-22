@@ -11,7 +11,7 @@ defmodule BanchanWeb.CommissionLive do
   alias BanchanWeb.CommissionLive.Components.CommissionRow
   alias BanchanWeb.Components.Layout
 
-  alias BanchanWeb.CommissionLive.Components.Commissions.{
+  alias BanchanWeb.CommissionLive.Components.{
     CommentBox,
     DraftBox,
     StatusBox,

@@ -1,4 +1,4 @@
-defmodule BanchanWeb.CommissionLive.Components.Commissions.Timeline do
+defmodule BanchanWeb.CommissionLive.Components.Timeline do
   @moduledoc """
   Main component for the Commission Page's timeline.
   """
@@ -6,7 +6,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.Timeline do
 
   alias Banchan.Commissions.Common
 
-  alias BanchanWeb.CommissionLive.Components.Commissions.{Comment, TimelineItem}
+  alias BanchanWeb.CommissionLive.Components.{Comment, TimelineItem}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true

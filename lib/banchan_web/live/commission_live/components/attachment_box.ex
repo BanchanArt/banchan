@@ -1,4 +1,4 @@
-defmodule BanchanWeb.CommissionLive.Components.Commissions.AttachmentBox do
+defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
   @moduledoc """
   Displays a flexbox of attachments for a commission.
   """

@@ -1,4 +1,4 @@
-defmodule BanchanWeb.CommissionLive.Components.Commissions.Comment do
+defmodule BanchanWeb.CommissionLive.Components.Comment do
   @moduledoc """
   Component for commission page comments
   """
@@ -11,7 +11,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.Comment do
 
   alias BanchanWeb.Components.{Avatar, Button, UserHandle}
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
-  alias BanchanWeb.CommissionLive.Components.Commissions.{AttachmentBox, InvoiceBox, MediaPreview}
+  alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox, MediaPreview}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true

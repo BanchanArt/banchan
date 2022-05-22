@@ -1,4 +1,4 @@
-defmodule BanchanWeb.CommissionLive.Components.Commissions.StatusBox do
+defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   @moduledoc """
   Action box that changes behavior based on the commission's status.
   """

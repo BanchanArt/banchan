@@ -1,4 +1,4 @@
-defmodule BanchanWeb.CommissionLive.Components.Commissions.CommissionLayout do
+defmodule BanchanWeb.CommissionLive.Components.CommissionLayout do
   @moduledoc """
   Layout for commission and its various tabs.
   """

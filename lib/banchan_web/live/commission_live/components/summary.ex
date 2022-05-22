@@ -1,4 +1,4 @@
-defmodule BanchanWeb.CommissionLive.Components.Commissions.Summary do
+defmodule BanchanWeb.CommissionLive.Components.Summary do
   @moduledoc """
   Summary card for the Commissions Page sidebar
   """

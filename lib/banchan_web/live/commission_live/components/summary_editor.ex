@@ -1,4 +1,4 @@
-defmodule BanchanWeb.CommissionLive.Components.Commissions.SummaryEditor do
+defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   @moduledoc """
   This is a LiveComponent version of the Summary component that can handle
   summary state for an existing Commission.
@@ -9,7 +9,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.SummaryEditor do
   alias Banchan.Commissions.LineItem
   alias Banchan.Utils
 
-  alias BanchanWeb.CommissionLive.Components.Commissions.Summary
+  alias BanchanWeb.CommissionLive.Components.Summary
 
   prop commission, :struct, required: true
   prop current_user, :struct, required: true

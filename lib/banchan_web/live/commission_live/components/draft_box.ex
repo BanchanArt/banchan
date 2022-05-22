@@ -1,4 +1,4 @@
-defmodule BanchanWeb.CommissionLive.Components.Commissions.DraftBox do
+defmodule BanchanWeb.CommissionLive.Components.DraftBox do
   @moduledoc """
   Component for rendering the latest submitted draft on the commission page
   """
@@ -7,7 +7,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commissions.DraftBox do
   alias Banchan.Commissions
   alias Banchan.Uploads
 
-  alias BanchanWeb.CommissionLive.Components.Commissions.{AttachmentBox, MediaPreview}
+  alias BanchanWeb.CommissionLive.Components.{AttachmentBox, MediaPreview}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
