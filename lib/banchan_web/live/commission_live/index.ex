@@ -41,7 +41,7 @@ defmodule BanchanWeb.CommissionLive do
         case params do
           %{"commission_id" => commission_id} ->
             comm =
-              if Map.has_key?(socket.assigns, :commission) &&
+              if Map.has_key?(socket.assigns, :commission) && socket.assigns.commission &&
                    socket.assigns.commission.public_id == commission_id do
                 socket.assigns.commission
               else
