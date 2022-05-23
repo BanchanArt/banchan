@@ -1,0 +1,292 @@
+defmodule Banchan.Notifications do
+  @moduledoc """
+  Context module for notification-related operations.
+  """
+  alias Bamboo.Email
+  import Ecto.Query, warn: false
+
+  alias Banchan.Accounts.User
+  alias Banchan.Commissions.{Commission, Common, Event}
+  alias Banchan.Mailer
+
+  alias Banchan.Notifications.{
+    CommissionSubscription,
+    StudioSubscription,
+    UserNotification,
+    UserNotificationSettings
+  }
+
+  alias Banchan.Repo
+  alias Banchan.Studios.Studio
+
+  # Unfortunate, but necessary to create URLs for notifications.
+  alias BanchanWeb.Endpoint
+  alias BanchanWeb.Router.Helpers, as: Routes
+
+  @pubsub Banchan.PubSub
+
+  def new_commission(%Commission{} = commission) do
+    start(fn ->
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "commission",
+        %Phoenix.Socket.Broadcast{
+          topic: "commission",
+          event: "new_commission",
+          payload: commission
+        }
+      )
+
+      {:ok, _} =
+        Repo.transaction(fn ->
+          subs = studio_subscribers(%Studio{id: commission.studio_id})
+
+          notify_subscribers!(
+            subs,
+            %UserNotification{
+              type: "new_commission",
+              title: commission.title,
+              body: "A new commission has been submitted to your studio.",
+              url: Routes.commission_url(Endpoint, :show, commission.public_id),
+              read: false
+            }
+          )
+        end)
+    end)
+  end
+
+  def commission_event_updated(%Commission{} = commission, %Event{} = event) do
+    start(fn ->
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "commission:#{commission.public_id}",
+        %Phoenix.Socket.Broadcast{
+          topic: "commission:#{commission.public_id}",
+          event: "event_updated",
+          payload: event
+        }
+      )
+
+      # NOTE: No notifications in this case. event_updated is for things like
+      # edits, that we don't want to spam users with.
+    end)
+  end
+
+  def new_commission_events(%Commission{} = commission, events) do
+    start(fn ->
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "commission:#{commission.public_id}",
+        %Phoenix.Socket.Broadcast{
+          topic: "commission:#{commission.public_id}",
+          event: "new_events",
+          payload: events
+        }
+      )
+
+      {:ok, _} =
+        Repo.transaction(fn ->
+          subs = commission_subscribers(commission)
+
+          Enum.each(events, fn event ->
+            notify_subscribers!(
+              subs,
+              %UserNotification{
+                type: "new_event",
+                title: commission.title,
+                body: new_event_notification_body(event),
+                url: Routes.commission_url(Endpoint, :show, commission.public_id),
+                read: false
+              },
+              is_reply: true
+            )
+          end)
+        end)
+    end)
+  end
+
+  defp new_event_notification_body(%Event{
+         type: :comment,
+         actor: actor,
+         actor_id: actor_id,
+         text: body
+       }) do
+    %User{handle: handle} =
+      if Ecto.assoc_loaded?(actor) do
+        actor
+      else
+        Repo.one!(User, actor_id)
+      end
+
+    "#{handle} replied:\n\n#{body}"
+  end
+
+  defp new_event_notification_body(%Event{type: :line_item_added, amount: amount, text: text}) do
+    "A new line item has been added to this commission:\n\n#{text}: #{Money.to_string(amount)}"
+  end
+
+  defp new_event_notification_body(%Event{type: :line_item_removed, amount: amount, text: text}) do
+    "A line item has been removed from this commission:\n\n#{text}: #{Money.to_string(amount)}"
+  end
+
+  defp new_event_notification_body(%Event{type: :payment_processed, amount: amount}) do
+    "A payment for #{Money.to_string(amount)} has been successfully processed. It will be available for payout when the commission is completed and accepted."
+  end
+
+  defp new_event_notification_body(%Event{type: :status, status: status}) do
+    "The commission status has been changed to #{Common.humanize_status(status)}."
+  end
+
+  def commission_status_changed(%Commission{} = commission) do
+    start(fn ->
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "commission:#{commission.public_id}",
+        %Phoenix.Socket.Broadcast{
+          topic: "commission:#{commission.public_id}",
+          event: "new_status",
+          payload: commission.status
+        }
+      )
+
+      {:ok, _} =
+        Repo.transaction(fn ->
+          subs = commission_subscribers(commission)
+
+          notify_subscribers!(
+            subs,
+            %UserNotification{
+              type: "new_status",
+              title: commission.title,
+              body: "Commission status changed to #{Common.humanize_status(commission.status)}",
+              url: Routes.commission_url(Endpoint, :show, commission.public_id),
+              read: false
+            },
+            is_reply: true
+          )
+        end)
+    end)
+  end
+
+  def commission_line_items_changed(%Commission{} = commission) do
+    start(fn ->
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "commission:#{commission.public_id}",
+        %Phoenix.Socket.Broadcast{
+          topic: "commission:#{commission.public_id}",
+          event: "line_items_changed",
+          payload: commission.line_items
+        }
+      )
+
+      # NOTE: No notification here because new_events takes care of notifying
+      # about this already.
+    end)
+  end
+
+  def update_user_notification_settings(%User{id: user_id}, attrs) do
+    %UserNotificationSettings{
+      user_id: user_id,
+      updated_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    }
+    |> UserNotificationSettings.changeset(attrs)
+    |> Repo.insert(
+      on_conflict: {:replace_all_except, [:id, :inserted_at]},
+      conflict_target: [:user_id]
+    )
+  end
+
+  def subscribe_user!(%User{} = user, %Commission{} = comm) do
+    %CommissionSubscription{user: user, commission: comm} |> Repo.insert(on_conflict: :nothing)
+  end
+
+  def subscribe_user!(%User{id: user_id}, %Studio{id: studio_id}) do
+    %StudioSubscription{user_id: user_id, studio_id: studio_id}
+    |> Repo.insert(on_conflict: :nothing)
+  end
+
+  def unsubscribe_user!(%User{} = user, %Commission{} = comm) do
+    from(sub in CommissionSubscription,
+      where: sub.user_id == ^user.id and sub.commission_id == ^comm.id
+    )
+  end
+
+  def unsubscribe_user!(%User{} = user, %Studio{} = studio) do
+    from(sub in StudioSubscription, where: sub.user_id == ^user.id and sub.studio_id == ^studio.id)
+  end
+
+  defp start(task) do
+    Task.Supervisor.start_child(Banchan.NotificationTaskSupervisor, task)
+  end
+
+  defp notify_subscribers!(subs, %UserNotification{} = notification, opts \\ []) do
+    {:ok, _} =
+      Repo.transaction(fn ->
+        Enum.each(subs, fn %User{id: id, email: email, notification_settings: settings} ->
+          if settings.commission_web do
+            Repo.insert!(%{notification | user_id: id})
+          end
+
+          if settings.commission_email do
+            send_email(email, notification, opts)
+          end
+        end)
+      end)
+  end
+
+  defp send_email(email, %UserNotification{} = notification, opts) do
+    title =
+      if Keyword.get(opts, :is_reply, false) do
+        "Re: " <> notification.title
+      else
+        notification.title
+      end
+
+    {:safe, html_url} = Phoenix.HTML.html_escape(notification.url)
+
+    Email.new_email(
+      to: email,
+      from: "notifications@" <> (System.get_env("SENDGRID_DOMAIN") || "noreply.banchan.art"),
+      subject: title,
+      html_body: notification.body <> "\n\n<a href=\"#{html_url}\">Details</a>",
+      text_body: notification.body <> "\n\n" <> notification.url
+    )
+    |> Mailer.deliver_later!()
+  end
+
+  defp studio_subscribers(%Studio{} = studio) do
+    from(
+      u in User,
+      join: studio_sub in StudioSubscription,
+      left_join: settings in assoc(u, :notification_settings),
+      where: studio_sub.studio_id == ^studio.id and u.id == studio_sub.user_id,
+      distinct: u.id,
+      select: %User{
+        id: u.id,
+        email: u.email,
+        notification_settings: settings
+      }
+    )
+    |> Repo.stream()
+  end
+
+  defp commission_subscribers(%Commission{} = commission) do
+    from(
+      u in User,
+      join: comm_sub in CommissionSubscription,
+      join: studio_sub in StudioSubscription,
+      left_join: settings in assoc(u, :notification_settings),
+      where:
+        (comm_sub.commission_id == ^commission.id and u.id == comm_sub.user_id) or
+          (studio_sub.studio_id == ^commission.studio_id and u.id == studio_sub.user_id),
+      distinct: u.id,
+      select: %User{
+        id: u.id,
+        email: u.email,
+        notification_settings: settings
+      }
+    )
+    |> Repo.stream()
+  end
+end

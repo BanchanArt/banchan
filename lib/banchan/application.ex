@@ -14,7 +14,9 @@ defmodule Banchan.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Banchan.PubSub},
       # Start the Endpoint (http/https)
-      BanchanWeb.Endpoint
+      BanchanWeb.Endpoint,
+      # Start the Task supervisor for handling notifications
+      {Task.Supervisor, name: Banchan.NotificationTaskSupervisor}
       # Start a worker by calling: Banchan.Worker.start_link(arg)
       # {Banchan.Worker, arg}
     ]
