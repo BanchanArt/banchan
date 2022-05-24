@@ -69,6 +69,11 @@ defmodule BanchanWeb.Components.Notifications do
     {:noreply, socket |> assign(open: false)}
   end
 
+  @impl true
+  def handle_event("nothing", _, socket) do
+    {:noreply, socket}
+  end
+
   def render(assigns) do
     ~F"""
     <div class="relative">
@@ -83,27 +88,28 @@ defmodule BanchanWeb.Components.Notifications do
         </button>
       </div>
       {#if @open}
-        <ul class="translate-x-px translate-y-px origin-top right-0 absolute menu rounded-box shadow bg-base-100 p-2 w-60 z-50 divide-y">
-          {#for notification <- @notifications.entries}
-            <li>
-              <div class="flex flex-row">
-                <div class="indicator basis-1/6">
-                  {#if !notification.read}
-                    <span class="indicator-item indicator-center indicator-middle badge badge-xs badge-secondary" />
-                  {/if}
-                </div>
-                <a class="basis-4/6" href={notification.url}>
-                  <div>
-                    {notification.title}
+        <div class="translate-x-px translate-y-px origin-top right-0 absolute menu rounded-box shadow-2xl bg-base-300 p-2 w-80 z-50 divide-y text-base-content">
+          <ul>
+            {#for notification <- @notifications.entries}
+              <li class="relative">
+                <a class="flex flex-row" href={notification.url}>
+                  <div class="indicator basis-10/12">
+                    {#if !notification.read}
+                      <span class="indicator-item indicator-middle indicator-start badge badge-xs badge-secondary" />
+                    {/if}
+                    <div class="pl-6 flex flex-col">
+                      <div class="text-lg">{notification.title}</div>
+                      <div class="text-xs">{notification.body}</div>
+                    </div>
                   </div>
+                  <button type="button" :on-click="nothing" class="btn btn-ghost basis-2/12">
+                    <i class="fas fa-ellipsis-v" />
+                  </button>
                 </a>
-                <button type="button" class="btn btn-ghost basis-1/6">
-                  <i class="fas fa-ellipsis-v" />
-                </button>
-              </div>
-            </li>
-          {/for}
-        </ul>
+              </li>
+            {/for}
+          </ul>
+        </div>
       {/if}
     </div>
     """

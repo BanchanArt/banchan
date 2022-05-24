@@ -89,13 +89,17 @@ defmodule Banchan.Notifications do
           subs = commission_subscribers(commission)
 
           Enum.each(events, fn event ->
+            url =
+              Routes.commission_url(Endpoint, :show, commission.public_id)
+              |> replace_fragment(event)
+
             notify_subscribers!(
               subs,
               %UserNotification{
                 type: "new_event",
                 title: commission.title,
                 body: new_event_notification_body(event),
-                url: Routes.commission_url(Endpoint, :show, commission.public_id),
+                url: url,
                 read: false
               },
               is_reply: true
@@ -149,22 +153,8 @@ defmodule Banchan.Notifications do
         }
       )
 
-      {:ok, _} =
-        Repo.transaction(fn ->
-          subs = commission_subscribers(commission)
-
-          notify_subscribers!(
-            subs,
-            %UserNotification{
-              type: "new_status",
-              title: commission.title,
-              body: "Commission status changed to #{Common.humanize_status(commission.status)}",
-              url: Routes.commission_url(Endpoint, :show, commission.public_id),
-              read: false
-            },
-            is_reply: true
-          )
-        end)
+      # NOTE: No notifications in this case. event_updated is for things like
+      # edits, that we don't want to spam users with.
     end)
   end
 
@@ -183,6 +173,15 @@ defmodule Banchan.Notifications do
       # NOTE: No notification here because new_events takes care of notifying
       # about this already.
     end)
+  end
+
+  def mark_commission_notifications_read(%User{} = user, %Commission{} = comm) do
+    url = Routes.commission_url(Endpoint, :show, comm.public_id)
+
+    from(notification in UserNotification,
+      where: notification.user_id == ^user.id and notification.url == ^url
+    )
+    |> Repo.update_all(set: [read: true])
   end
 
   def update_user_notification_settings(%User{id: user_id}, attrs) do
@@ -321,5 +320,9 @@ defmodule Banchan.Notifications do
       }
     )
     |> Repo.stream()
+  end
+
+  defp replace_fragment(uri, event) do
+    URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
   end
 end
