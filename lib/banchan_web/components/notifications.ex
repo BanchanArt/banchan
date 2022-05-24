@@ -76,14 +76,14 @@ defmodule BanchanWeb.Components.Notifications do
 
   def render(assigns) do
     ~F"""
-    <div class="relative">
+    <div class="relative" :on-click-away="close_menu">
       <div class="indicator">
         {#if @notifications && @notifications.total_entries > 0}
           <span class="indicator-item indicator-bottom indicator-right badge badge-secondary">
             {@notifications.total_entries}
           </span>
         {/if}
-        <button type="button" :on-click-away="close_menu" :on-click="toggle_menu" class="btn btn-circle">
+        <button type="button" :on-click="toggle_menu" class="btn btn-circle">
           <i class="fas fa-bell" />
         </button>
       </div>
@@ -92,8 +92,8 @@ defmodule BanchanWeb.Components.Notifications do
           <ul>
             {#for notification <- @notifications.entries}
               <li class="relative">
-                <a class="flex flex-row" href={notification.url}>
-                  <div class="indicator basis-10/12">
+                <a href={notification.url} class="pr-8">
+                  <div class="indicator">
                     {#if !notification.read}
                       <span class="indicator-item indicator-middle indicator-start badge badge-xs badge-secondary" />
                     {/if}
@@ -102,10 +102,10 @@ defmodule BanchanWeb.Components.Notifications do
                       <div class="text-xs">{notification.body}</div>
                     </div>
                   </div>
-                  <button type="button" :on-click="nothing" class="btn btn-ghost basis-2/12">
-                    <i class="fas fa-ellipsis-v" />
-                  </button>
                 </a>
+                <button type="button" :on-click="nothing" class="btn btn-ghost btn-circle absolute right-0 inset-y-0 h-full">
+                  <i class="fas fa-ellipsis-v" />
+                </button>
               </li>
             {/for}
           </ul>
