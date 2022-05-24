@@ -59,6 +59,11 @@ defmodule BanchanWeb.StudioLive.Shop do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:ok, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <StudioLayout
@@ -67,6 +72,7 @@ defmodule BanchanWeb.StudioLive.Shop do
       studio={@studio}
       current_user_member?={@current_user_member?}
       tab={:shop}
+      uri={@uri}
     >
       {#if Studios.charges_enabled?(@studio)}
         <div class="flex flex-wrap pt-4 items-stretch">

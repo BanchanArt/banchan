@@ -19,9 +19,14 @@ defmodule BanchanWeb.DenizenLive.Show do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:ok, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
-    <Layout current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <section class="grid grid-cols-2 bg-secondary">
         <div class="col-span-12">
           <article class="ml-8">

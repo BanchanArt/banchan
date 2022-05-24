@@ -22,6 +22,11 @@ defmodule BanchanWeb.StudioLive.Settings do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:ok, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <StudioLayout
@@ -30,6 +35,7 @@ defmodule BanchanWeb.StudioLive.Settings do
       studio={@studio}
       current_user_member?={@current_user_member?}
       tab={:settings}
+      uri={@uri}
     >
       <div class="shadow bg-base-200 text-base-content">
         <div class="p-6">

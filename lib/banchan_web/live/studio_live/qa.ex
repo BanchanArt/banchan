@@ -14,6 +14,11 @@ defmodule BanchanWeb.StudioLive.Qa do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:ok, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <StudioLayout
@@ -22,6 +27,7 @@ defmodule BanchanWeb.StudioLive.Qa do
       studio={@studio}
       current_user_member?={@current_user_member?}
       tab={:qa}
+      uri={@uri}
     >
       Q&A goes here
     </StudioLayout>

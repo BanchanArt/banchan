@@ -32,9 +32,14 @@ defmodule BanchanWeb.SetupMfaLive do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:ok, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
-    <Layout current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <div class="shadow bg-base-200 text-base-content">
         {#if @qrcode_svg && !@totp_activated}
           <div class="p-6">

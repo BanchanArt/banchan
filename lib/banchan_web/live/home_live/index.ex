@@ -14,9 +14,14 @@ defmodule BanchanWeb.HomeLive do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:ok, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
-    <Layout current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <h1 class="text-3xl">Home</h1>
       <h2 class="text-lg">Commission Someone</h2>
       <div class="studio-list grid grid-cols-3 gap-3">

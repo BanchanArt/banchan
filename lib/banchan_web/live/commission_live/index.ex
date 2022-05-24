@@ -133,7 +133,7 @@ defmodule BanchanWeb.CommissionLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <div class="flex flex-col grow max-h-full">
         <div class="flex flex-row grow">
           <div class={"flex md:basis-1/4", "hidden md:flex": @commission}>

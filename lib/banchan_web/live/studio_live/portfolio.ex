@@ -14,6 +14,11 @@ defmodule BanchanWeb.StudioLive.Portfolio do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:ok, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <StudioLayout
@@ -22,6 +27,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
       studio={@studio}
       current_user_member?={@current_user_member?}
       tab={:portfolio}
+      uri={@uri}
     >
       Portfolio goes here
     </StudioLayout>

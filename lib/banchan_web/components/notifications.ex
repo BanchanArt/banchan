@@ -7,6 +7,7 @@ defmodule BanchanWeb.Components.Notifications do
   alias Banchan.Notifications
 
   prop current_user, :any, required: true
+  prop uri, :string, required: true
 
   data loaded, :boolean, default: false
   data open, :boolean, default: false

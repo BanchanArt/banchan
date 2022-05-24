@@ -13,12 +13,13 @@ defmodule BanchanWeb.CommissionLive.Components.StudioLayout do
   prop flashes, :string, required: true
   prop studio, :struct, required: true
   prop tab, :atom
+  prop uri, :string, required: true
 
   slot default
 
   def render(assigns) do
     ~F"""
-    <Layout current_user={@current_user} flashes={@flashes}>
+    <Layout uri={@uri} current_user={@current_user} flashes={@flashes}>
       <:hero>
         <section class="bg-secondary">
           <div class="ml-8 col-span-12">

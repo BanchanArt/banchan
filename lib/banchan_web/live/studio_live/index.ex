@@ -17,9 +17,14 @@ defmodule BanchanWeb.StudioLive.Index do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:ok, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
-    <Layout current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <h1 class="text-2xl">Studios</h1>
       <LiveRedirect to={Routes.studio_new_path(Endpoint, :new)}>
         <h2 class="text-center btn btn-sm btn-secondary rounded-full m-5">Create a new studio</h2>
