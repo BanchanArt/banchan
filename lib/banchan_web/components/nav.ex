@@ -6,6 +6,7 @@ defmodule BanchanWeb.Components.Nav do
 
   alias Surface.Components.LiveRedirect
 
+  alias BanchanWeb.Components.Notifications
   alias BanchanWeb.Endpoint
 
   prop current_user, :any
@@ -57,6 +58,10 @@ defmodule BanchanWeb.Components.Nav do
             </li>
           {/if}
         </ul>
+      </div>
+
+      <div class="flex-none">
+        <Notifications id="notifications" current_user={@current_user} />
       </div>
 
       <div class="flex-none gap-4 items-center">
