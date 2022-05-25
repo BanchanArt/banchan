@@ -29,7 +29,7 @@ defmodule BanchanWeb.RegisterLive do
 
   @impl true
   def handle_params(_params, uri, socket) do
-    {:ok, socket |> assign(uri: uri)}
+    {:noreply, socket |> assign(uri: uri)}
   end
 
   @impl true

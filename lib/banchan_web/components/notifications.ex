@@ -5,6 +5,7 @@ defmodule BanchanWeb.Components.Notifications do
   use BanchanWeb, :live_component
 
   alias Banchan.Notifications
+  alias Banchan.Notifications.UserNotification
 
   prop current_user, :any, required: true
   prop uri, :string, required: true
@@ -17,10 +18,15 @@ defmodule BanchanWeb.Components.Notifications do
     current_user = Map.get(socket.assigns, :current_user)
     new_user = Map.get(assigns, :current_user)
 
+    current_uri = Map.get(socket.assigns, :uri)
+    new_uri = Map.get(assigns, :uri)
+
     if socket.assigns.loaded &&
          current_user &&
          new_user &&
-         current_user.id == new_user.id do
+         current_user.id == new_user.id &&
+         current_uri ==
+           new_uri do
       socket = socket |> assign(assigns)
       {:ok, socket}
     else
@@ -43,12 +49,42 @@ defmodule BanchanWeb.Components.Notifications do
           nil
         end
 
+      parsed_uri = URI.parse(new_uri)
+      query = URI.decode_query(parsed_uri.query || "")
+      notification_ref = Map.get(query, "notification_ref")
+
+      if new_user && notification_ref do
+        Notifications.mark_notification_read(new_user, notification_ref)
+
+        query = Map.delete(query, "notification_ref")
+
+        new_query =
+          if Enum.empty?(query) do
+            nil
+          else
+            URI.encode_query(query)
+          end
+
+        internal_patch_to(
+          URI.to_string(%{
+            parsed_uri
+            | query: new_query,
+              host: nil,
+              authority: nil,
+              userinfo: nil,
+              scheme: nil,
+              port: nil
+          }),
+          replace: true
+        )
+      end
+
       {:ok, socket |> assign(notifications: notifications, loaded: true)}
     end
   end
 
   def handle_info(%{event: "new_notification", payload: notification}, socket) do
-    notifications = socket.asigns.notifications
+    notifications = socket.assigns.notifications
 
     {:noreply,
      assign(socket,
@@ -58,6 +94,23 @@ defmodule BanchanWeb.Components.Notifications do
            entries: [notification | Enum.drop(notifications.entries, -1)]
        }
      )}
+  end
+
+  def handle_info(%{event: "notification_read", payload: notification_ref}, socket) do
+    notifications = socket.assigns.notifications
+
+    if notifications do
+      {:noreply,
+       assign(socket,
+         notifications: %{
+           notifications
+           | total_entries: notifications.total_entries - 1,
+             entries: Enum.reject(notifications.entries, &(&1.ref == notification_ref))
+         }
+       )}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
@@ -70,9 +123,16 @@ defmodule BanchanWeb.Components.Notifications do
     {:noreply, socket |> assign(open: false)}
   end
 
-  @impl true
-  def handle_event("nothing", _, socket) do
-    {:noreply, socket}
+  defp annotated_url(%UserNotification{} = notification) do
+    parsed = URI.parse(notification.url)
+
+    query =
+      parsed.query ||
+        ""
+        |> URI.decode_query(%{"notification_ref" => notification.ref})
+        |> URI.encode_query()
+
+    URI.to_string(%{parsed | query: query})
   end
 
   def render(assigns) do
@@ -93,7 +153,7 @@ defmodule BanchanWeb.Components.Notifications do
           <ul>
             {#for notification <- @notifications.entries}
               <li class="relative">
-                <a href={notification.url} class="pr-8">
+                <a href={annotated_url(notification)} class="pr-8">
                   <div class="indicator">
                     {#if !notification.read}
                       <span class="indicator-item indicator-middle indicator-start badge badge-xs badge-secondary" />
@@ -104,7 +164,7 @@ defmodule BanchanWeb.Components.Notifications do
                     </div>
                   </div>
                 </a>
-                <button type="button" :on-click="nothing" class="btn btn-ghost btn-circle absolute right-0 inset-y-0 h-full">
+                <button type="button" class="btn btn-ghost btn-circle absolute right-0 inset-y-0 h-full">
                   <i class="fas fa-ellipsis-v" />
                 </button>
               </li>

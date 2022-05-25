@@ -39,6 +39,11 @@ defmodule BanchanWeb.CommissionLive do
     socket =
       case params do
         %{"commission_id" => commission_id} ->
+          # NOTE: Phoenix LiveView's push_patch has an obnoxious bug with fragments, so
+          # we have to manually remove them here.
+          # See: https://github.com/phoenixframework/phoenix_live_view/issues/2041
+          commission_id = Regex.replace(~r/#.*$/, commission_id, "")
+
           comm =
             if Map.has_key?(socket.assigns, :commission) && socket.assigns.commission &&
                  socket.assigns.commission.public_id == commission_id do

@@ -52,6 +52,10 @@ defmodule BanchanWeb do
 
       unquote(view_helpers())
 
+      def handle_info({:_internal_patch_to, url, opts}, socket) do
+        {:noreply, push_patch(socket, [{:to, url} | opts])}
+      end
+
       @impl true
       def handle_info(%{event: "logout_user", payload: %{user: %User{id: id}}}, socket) do
         case socket.assigns.current_user do
@@ -118,6 +122,10 @@ defmodule BanchanWeb do
       alias BanchanWeb.Router.Helpers, as: Routes
 
       import Surface
+
+      defp internal_patch_to(url, opts) do
+        send(self(), {:_internal_patch_to, url, opts})
+      end
     end
   end
 

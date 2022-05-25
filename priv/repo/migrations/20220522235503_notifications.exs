@@ -23,7 +23,8 @@ defmodule Banchan.Repo.Migrations.Notifications do
     create index(:studio_subscriptions, [:studio_id])
 
     create table(:user_notifications) do
-      add :user_id, references(:users, on_delete: :delete_all)
+      add :ref, :string, null: false
+      add :user_id, references(:users, on_delete: :delete_all), null: false
       add :type, :string, null: false
       add :title, :text, null: false
       add :body, :text, null: false
@@ -34,6 +35,7 @@ defmodule Banchan.Repo.Migrations.Notifications do
     end
 
     create index(:user_notifications, [:user_id])
+    create unique_index(:user_notifications, [:ref, :user_id])
 
     create table(:user_notification_settings) do
       add :user_id, references(:users, on_delete: :delete_all)

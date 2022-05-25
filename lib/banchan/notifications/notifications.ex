@@ -175,13 +175,21 @@ defmodule Banchan.Notifications do
     end)
   end
 
-  def mark_commission_notifications_read(%User{} = user, %Commission{} = comm) do
-    url = Routes.commission_url(Endpoint, :show, comm.public_id)
-
+  def mark_notification_read(%User{} = user, notification_ref) do
     from(notification in UserNotification,
-      where: notification.user_id == ^user.id and notification.url == ^url
+      where: notification.user_id == ^user.id and notification.ref == ^notification_ref
     )
     |> Repo.update_all(set: [read: true])
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "notification:#{user.handle}",
+      %Phoenix.Socket.Broadcast{
+        topic: "notification:#{user.handle}",
+        event: "notification_read",
+        payload: notification_ref
+      }
+    )
   end
 
   def update_user_notification_settings(%User{id: user_id}, attrs) do
