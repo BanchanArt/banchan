@@ -56,7 +56,16 @@ defmodule BanchanWeb do
         {:noreply, push_patch(socket, [{:to, url} | opts])}
       end
 
-      @impl true
+      def handle_info(%{event: "new_notification", payload: notification}, socket) do
+        BanchanWeb.Components.Notifications.new_notification("notifications", notification)
+        {:noreply, socket}
+      end
+
+      def handle_info(%{event: "notification_read", payload: notification_ref}, socket) do
+        BanchanWeb.Components.Notifications.notification_read("notifications", notification_ref)
+        {:noreply, socket}
+      end
+
       def handle_info(%{event: "logout_user", payload: %{user: %User{id: id}}}, socket) do
         case socket.assigns.current_user do
           %User{id: ^id} ->
@@ -126,6 +135,7 @@ defmodule BanchanWeb do
       defp internal_patch_to(url, opts) do
         send(self(), {:_internal_patch_to, url, opts})
       end
+
     end
   end
 

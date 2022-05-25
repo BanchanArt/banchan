@@ -14,6 +14,14 @@ defmodule BanchanWeb.Components.Notifications do
   data open, :boolean, default: false
   data notifications, :struct
 
+  def update(%{new_notification: notification}, socket) do
+    {:ok, on_new_notification(notification, socket)}
+  end
+
+  def update(%{notification_read: notification_ref}, socket) do
+    {:ok, on_notification_read(notification_ref, socket)}
+  end
+
   def update(assigns, socket) do
     current_user = Map.get(socket.assigns, :current_user)
     new_user = Map.get(assigns, :current_user)
@@ -27,8 +35,8 @@ defmodule BanchanWeb.Components.Notifications do
          current_user.id == new_user.id &&
          current_uri ==
            new_uri do
-      socket = socket |> assign(assigns)
-      {:ok, socket}
+
+      {:ok, socket |> assign(assigns)}
     else
       socket =
         if current_user && (!new_user || current_user.id != new_user.id) do
@@ -41,10 +49,10 @@ defmodule BanchanWeb.Components.Notifications do
       socket = socket |> assign(assigns)
 
       notifications =
-        if socket.assigns.current_user do
-          Notifications.subscribe_to_notifications(socket.assigns.current_user)
+        if new_user do
+          Notifications.subscribe_to_notifications(new_user)
 
-          Notifications.user_notifications(socket.assigns.current_user, 0)
+          Notifications.unread_notifications(new_user, 0)
         else
           nil
         end
@@ -83,33 +91,39 @@ defmodule BanchanWeb.Components.Notifications do
     end
   end
 
-  def handle_info(%{event: "new_notification", payload: notification}, socket) do
-    notifications = socket.assigns.notifications
-
-    {:noreply,
-     assign(socket,
-       notifications: %{
-         notifications
-         | total_entries: notifications.total_entries + 1,
-           entries: [notification | Enum.drop(notifications.entries, -1)]
-       }
-     )}
+  def new_notification(component_id, notification) do
+    send_update(__MODULE__, id: component_id, new_notification: notification)
   end
 
-  def handle_info(%{event: "notification_read", payload: notification_ref}, socket) do
+  defp on_new_notification(notification, socket) do
+    notifications = socket.assigns.notifications
+
+    assign(socket,
+      notifications: %{
+        notifications
+        | total_entries: notifications.total_entries + 1,
+          entries: [notification | Enum.drop(notifications.entries, -1)]
+      }
+    )
+  end
+
+  def notification_read(component_id, notification_ref) do
+    send_update(__MODULE__, id: component_id, notification_read: notification_ref)
+  end
+
+  defp on_notification_read(notification_ref, socket) do
     notifications = socket.assigns.notifications
 
     if notifications do
-      {:noreply,
        assign(socket,
          notifications: %{
            notifications
            | total_entries: notifications.total_entries - 1,
              entries: Enum.reject(notifications.entries, &(&1.ref == notification_ref))
          }
-       )}
+       )
     else
-      {:noreply, socket}
+      socket
     end
   end
 

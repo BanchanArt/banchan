@@ -223,21 +223,21 @@ defmodule Banchan.Notifications do
     from(sub in StudioSubscription, where: sub.user_id == ^user.id and sub.studio_id == ^studio.id)
   end
 
-  def user_notifications(%User{} = user, page) do
+  def unread_notifications(%User{} = user, page) do
     from(
       n in UserNotification,
-      where: n.user_id == ^user.id,
+      where: n.user_id == ^user.id and n.read == false,
       order_by: {:desc, n.updated_at}
     )
     |> Repo.paginate(page: page, page_size: 10)
   end
 
   def subscribe_to_notifications(%User{} = user) do
-    Phoenix.PubSub.subscribe(@pubsub, "notifications:#{user.handle}")
+    Phoenix.PubSub.subscribe(@pubsub, "notification:#{user.handle}")
   end
 
   def unsubscribe_from_notifications(%User{} = user) do
-    Phoenix.PubSub.unsubscribe(@pubsub, "notifications:#{user.handle}")
+    Phoenix.PubSub.unsubscribe(@pubsub, "notification:#{user.handle}")
   end
 
   defp start(task) do
@@ -323,6 +323,7 @@ defmodule Banchan.Notifications do
       distinct: u.id,
       select: %User{
         id: u.id,
+        handle: u.handle,
         email: u.email,
         notification_settings: settings
       }
