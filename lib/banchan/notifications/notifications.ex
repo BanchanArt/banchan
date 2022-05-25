@@ -254,8 +254,7 @@ defmodule Banchan.Notifications do
                              notification_settings: settings
                            } ->
           if settings.commission_web do
-            notification = %{notification | user_id: id}
-            Repo.insert!(notification)
+            notification = Repo.insert!(%{notification | user_id: id}, returning: [:ref])
 
             Phoenix.PubSub.broadcast!(
               @pubsub,

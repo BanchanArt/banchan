@@ -26,16 +26,35 @@ defmodule BanchanWeb.Components.Notifications do
     current_user = Map.get(socket.assigns, :current_user)
     new_user = Map.get(assigns, :current_user)
 
-    current_uri = Map.get(socket.assigns, :uri)
-    new_uri = Map.get(assigns, :uri)
+    current_uri = IO.inspect(Map.get(socket.assigns, :uri))
+    new_uri = IO.inspect(Map.get(assigns, :uri))
+
+    old_parsed_uri =
+      if current_uri do
+        URI.parse(current_uri)
+      else
+        nil
+      end
+
+    parsed_uri = URI.parse(new_uri)
 
     if socket.assigns.loaded &&
          current_user &&
          new_user &&
          current_user.id == new_user.id &&
-         current_uri ==
-           new_uri do
+         current_uri &&
+         %{
+           old_parsed_uri
+           | query:
+               case Map.delete(URI.decode_query(old_parsed_uri.query), "notification_ref") do
+                 %{} ->
+                    nil
 
+                 other ->
+                   URI.encode_query(other)
+               end,
+             fragment: nil
+         } == %{parsed_uri | fragment: nil} do
       {:ok, socket |> assign(assigns)}
     else
       socket =
@@ -57,21 +76,19 @@ defmodule BanchanWeb.Components.Notifications do
           nil
         end
 
-      parsed_uri = URI.parse(new_uri)
       query = URI.decode_query(parsed_uri.query || "")
       notification_ref = Map.get(query, "notification_ref")
+      query = Map.delete(query, "notification_ref")
+
+      new_query =
+        if Enum.empty?(query) do
+          nil
+        else
+          URI.encode_query(query)
+        end
 
       if new_user && notification_ref do
         Notifications.mark_notification_read(new_user, notification_ref)
-
-        query = Map.delete(query, "notification_ref")
-
-        new_query =
-          if Enum.empty?(query) do
-            nil
-          else
-            URI.encode_query(query)
-          end
 
         internal_patch_to(
           URI.to_string(%{
@@ -102,7 +119,7 @@ defmodule BanchanWeb.Components.Notifications do
       notifications: %{
         notifications
         | total_entries: notifications.total_entries + 1,
-          entries: [notification | Enum.drop(notifications.entries, -1)]
+          entries: [notification | notifications.entries]
       }
     )
   end
@@ -112,16 +129,17 @@ defmodule BanchanWeb.Components.Notifications do
   end
 
   defp on_notification_read(notification_ref, socket) do
+    IO.inspect("!!!!Notification read!!!!")
     notifications = socket.assigns.notifications
 
     if notifications do
-       assign(socket,
-         notifications: %{
-           notifications
-           | total_entries: notifications.total_entries - 1,
-             entries: Enum.reject(notifications.entries, &(&1.ref == notification_ref))
-         }
-       )
+      assign(socket,
+        notifications: %{
+          notifications
+          | total_entries: notifications.total_entries - 1,
+            entries: Enum.reject(notifications.entries, &(&1.ref == notification_ref))
+        }
+      )
     else
       socket
     end

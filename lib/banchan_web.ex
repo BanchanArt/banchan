@@ -135,7 +135,6 @@ defmodule BanchanWeb do
       defp internal_patch_to(url, opts) do
         send(self(), {:_internal_patch_to, url, opts})
       end
-
     end
   end
 
