@@ -4,6 +4,8 @@ defmodule BanchanWeb.Components.Notifications do
   """
   use BanchanWeb, :live_component
 
+  alias Surface.Components.LiveRedirect
+
   alias Banchan.Notifications
   alias Banchan.Notifications.UserNotification
 
@@ -46,7 +48,7 @@ defmodule BanchanWeb.Components.Notifications do
          %{
            old_parsed_uri
            | query:
-               case Map.delete(URI.decode_query(old_parsed_uri.query), "notification_ref") do
+               case Map.delete(URI.decode_query(old_parsed_uri.query || ""), "notification_ref") do
                  %{} ->
                    nil
 
@@ -184,7 +186,7 @@ defmodule BanchanWeb.Components.Notifications do
           <ul>
             {#for notification <- @notifications.entries}
               <li class="relative">
-                <a href={annotated_url(notification)} class="pr-8">
+                <LiveRedirect to={annotated_url(notification)} class="pr-8">
                   <div class="indicator">
                     {#if !notification.read}
                       <span class="indicator-item indicator-middle indicator-start badge badge-xs badge-secondary" />
@@ -194,7 +196,7 @@ defmodule BanchanWeb.Components.Notifications do
                       <div class="text-xs">{notification.body}</div>
                     </div>
                   </div>
-                </a>
+                </LiveRedirect>
                 <button type="button" class="btn btn-ghost btn-circle absolute right-0 inset-y-0 h-full">
                   <i class="fas fa-ellipsis-v" />
                 </button>
