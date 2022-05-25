@@ -26,8 +26,8 @@ defmodule BanchanWeb.Components.Notifications do
     current_user = Map.get(socket.assigns, :current_user)
     new_user = Map.get(assigns, :current_user)
 
-    current_uri = IO.inspect(Map.get(socket.assigns, :uri))
-    new_uri = IO.inspect(Map.get(assigns, :uri))
+    current_uri = Map.get(socket.assigns, :uri)
+    new_uri = Map.get(assigns, :uri)
 
     old_parsed_uri =
       if current_uri do
@@ -48,7 +48,7 @@ defmodule BanchanWeb.Components.Notifications do
            | query:
                case Map.delete(URI.decode_query(old_parsed_uri.query), "notification_ref") do
                  %{} ->
-                    nil
+                   nil
 
                  other ->
                    URI.encode_query(other)
@@ -129,7 +129,6 @@ defmodule BanchanWeb.Components.Notifications do
   end
 
   defp on_notification_read(notification_ref, socket) do
-    IO.inspect("!!!!Notification read!!!!")
     notifications = socket.assigns.notifications
 
     if notifications do
