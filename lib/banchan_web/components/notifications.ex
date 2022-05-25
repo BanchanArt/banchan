@@ -28,6 +28,7 @@ defmodule BanchanWeb.Components.Notifications do
     {:ok, on_all_notifications_read(socket)}
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def update(assigns, socket) do
     current_user = Map.get(socket.assigns, :current_user)
     new_user = Map.get(assigns, :current_user)
