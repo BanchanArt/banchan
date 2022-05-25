@@ -25,7 +25,12 @@ defmodule Banchan.Notifications do
 
   @pubsub Banchan.PubSub
 
-  def new_commission(%Commission{} = commission) do
+  # Whether to notify the actor themself of actions they take.
+  # This is mostly intended to be used for testing the notification
+  # system during development.
+  @notify_actor false
+
+  def new_commission(%Commission{} = commission, actor \\ nil) do
     start(fn ->
       Phoenix.PubSub.broadcast!(
         @pubsub,
@@ -42,6 +47,7 @@ defmodule Banchan.Notifications do
           subs = studio_subscribers(%Studio{id: commission.studio_id})
 
           notify_subscribers!(
+            actor,
             subs,
             %UserNotification{
               type: "new_commission",
@@ -55,7 +61,7 @@ defmodule Banchan.Notifications do
     end)
   end
 
-  def commission_event_updated(%Commission{} = commission, %Event{} = event) do
+  def commission_event_updated(%Commission{} = commission, %Event{} = event, _actor \\ nil) do
     start(fn ->
       Phoenix.PubSub.broadcast!(
         @pubsub,
@@ -72,7 +78,7 @@ defmodule Banchan.Notifications do
     end)
   end
 
-  def new_commission_events(%Commission{} = commission, events) do
+  def new_commission_events(%Commission{} = commission, events, actor \\ nil) do
     start(fn ->
       Phoenix.PubSub.broadcast!(
         @pubsub,
@@ -94,6 +100,7 @@ defmodule Banchan.Notifications do
               |> replace_fragment(event)
 
             notify_subscribers!(
+              actor,
               subs,
               %UserNotification{
                 type: "new_event",
@@ -141,7 +148,7 @@ defmodule Banchan.Notifications do
     "The commission status has been changed to #{Common.humanize_status(status)}."
   end
 
-  def commission_status_changed(%Commission{} = commission) do
+  def commission_status_changed(%Commission{} = commission, _actor \\ nil) do
     start(fn ->
       Phoenix.PubSub.broadcast!(
         @pubsub,
@@ -158,7 +165,7 @@ defmodule Banchan.Notifications do
     end)
   end
 
-  def commission_line_items_changed(%Commission{} = commission) do
+  def commission_line_items_changed(%Commission{} = commission, _actor \\ nil) do
     start(fn ->
       Phoenix.PubSub.broadcast!(
         @pubsub,
@@ -244,7 +251,7 @@ defmodule Banchan.Notifications do
     Task.Supervisor.start_child(Banchan.NotificationTaskSupervisor, task)
   end
 
-  defp notify_subscribers!(subs, %UserNotification{} = notification, opts \\ []) do
+  defp notify_subscribers!(actor, subs, %UserNotification{} = notification, opts \\ []) do
     {:ok, _} =
       Repo.transaction(fn ->
         Enum.each(subs, fn %User{
@@ -253,7 +260,7 @@ defmodule Banchan.Notifications do
                              email: email,
                              notification_settings: settings
                            } ->
-          if settings.commission_web do
+          if settings.commission_web && ((actor && actor.id != id) || @notify_actor) do
             notification = Repo.insert!(%{notification | user_id: id}, returning: [:ref])
 
             Phoenix.PubSub.broadcast!(
@@ -267,7 +274,7 @@ defmodule Banchan.Notifications do
             )
           end
 
-          if settings.commission_email do
+          if settings.commission_email && ((actor && actor.id != id) || @notify_actor) do
             send_email(email, notification, opts)
           end
         end)

@@ -186,7 +186,7 @@ defmodule Banchan.Commissions do
          |> Repo.insert() do
       {:ok, %Commission{} = commission} ->
         Notifications.subscribe_user!(actor, commission)
-        Notifications.new_commission(commission)
+        Notifications.new_commission(commission, actor)
         {:ok, commission}
 
       {:error, err} ->
@@ -206,7 +206,7 @@ defmodule Banchan.Commissions do
         # current_user_member? is checked as part of check_status_transition!
         {:ok, event} = create_event(:status, actor, commission, true, [], %{status: status})
 
-        Notifications.commission_status_changed(commission)
+        Notifications.commission_status_changed(commission, actor)
 
         {:ok, {commission, [event]}}
       end)
@@ -302,7 +302,7 @@ defmodule Banchan.Commissions do
                 {:error, err}
 
               {:ok, event} ->
-                Notifications.commission_line_items_changed(commission)
+                Notifications.commission_line_items_changed(commission, actor)
                 {:ok, {commission, [event]}}
             end
         end
@@ -339,7 +339,7 @@ defmodule Banchan.Commissions do
                 {:error, err}
 
               {:ok, event} ->
-                Notifications.commission_line_items_changed(commission)
+                Notifications.commission_line_items_changed(commission, actor)
                 {:ok, {commission, [event]}}
             end
         end
@@ -399,7 +399,7 @@ defmodule Banchan.Commissions do
 
     case ret do
       {:ok, event} ->
-        Notifications.new_commission_events(commission, [%{event | invoice: nil}])
+        Notifications.new_commission_events(commission, [%{event | invoice: nil}], actor)
 
       _ ->
         nil
@@ -459,7 +459,7 @@ defmodule Banchan.Commissions do
     Event.text_changeset(event, attrs)
   end
 
-  def send_event_update!(event_id) do
+  def send_event_update!(event_id, actor \\ nil) do
     event =
       from(e in Event,
         where: e.id == ^event_id,
@@ -472,7 +472,7 @@ defmodule Banchan.Commissions do
       from(c in Commission, where: c.id == ^event.commission_id)
       |> Repo.one!()
 
-    Notifications.commission_event_updated(commission, event)
+    Notifications.commission_event_updated(commission, event, actor)
   end
 
   # This one expects binaries for everything because it looks everything up in one fell swoop.
@@ -533,6 +533,7 @@ defmodule Banchan.Commissions do
   end
 
   def delete_attachment!(
+        %User{} = actor,
         %Commission{} = commission,
         %Event{} = event,
         %EventAttachment{} = event_attachment
@@ -541,7 +542,7 @@ defmodule Banchan.Commissions do
     Repo.delete!(event_attachment)
     new_attachments = Enum.reject(event.attachments, &(&1.id == event_attachment.id))
 
-    Notifications.commission_event_updated(commission, %{event | attachments: new_attachments})
+    Notifications.commission_event_updated(commission, %{event | attachments: new_attachments}, actor)
   end
 
   def add_comment(
@@ -587,7 +588,7 @@ defmodule Banchan.Commissions do
                 {:error, error}
 
               {:ok, invoice} ->
-                send_event_update!(event.id)
+                send_event_update!(event.id, actor)
                 {:ok, invoice}
             end
         end
@@ -602,7 +603,7 @@ defmodule Banchan.Commissions do
   end
 
   def process_payment!(
-        %User{},
+        %User{} = actor,
         %Event{invoice: %Invoice{amount: amount} = invoice} = event,
         %Commission{} = commission,
         uri,
@@ -651,7 +652,7 @@ defmodule Banchan.Commissions do
     })
     |> Repo.update!()
 
-    send_event_update!(event.id)
+    send_event_update!(event.id, actor)
 
     session.url
   end
