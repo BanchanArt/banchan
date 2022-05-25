@@ -10,6 +10,7 @@ defmodule Banchan.Notifications.CommissionSubscription do
   schema "commission_subscriptions" do
     belongs_to :user, User
     belongs_to :commission, Commission
+    field :silenced, :boolean
     timestamps()
   end
 end

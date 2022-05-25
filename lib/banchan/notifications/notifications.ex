@@ -228,23 +228,45 @@ defmodule Banchan.Notifications do
     )
   end
 
+  def user_subscribed?(%User{} = user, %Commission{} = commission) do
+    from(sub in CommissionSubscription,
+      where:
+        sub.user_id == ^user.id and sub.commission_id == ^commission.id and sub.silenced != true
+    )
+    |> Repo.exists?()
+  end
+
+  def user_subscribed?(%User{} = user, %Studio{} = studio) do
+    from(sub in StudioSubscription,
+      where: sub.user_id == ^user.id and sub.studio_id == ^studio.id and sub.silenced != true
+    )
+    |> Repo.exists?()
+  end
+
   def subscribe_user!(%User{} = user, %Commission{} = comm) do
-    %CommissionSubscription{user: user, commission: comm} |> Repo.insert(on_conflict: :nothing)
+    %CommissionSubscription{user: user, commission: comm, silenced: false}
+    |> Repo.insert(
+      on_conflict: {:replace, [:silenced]},
+      conflict_target: [:user_id, :commission_id]
+    )
   end
 
   def subscribe_user!(%User{id: user_id}, %Studio{id: studio_id}) do
-    %StudioSubscription{user_id: user_id, studio_id: studio_id}
-    |> Repo.insert(on_conflict: :nothing)
+    %StudioSubscription{user_id: user_id, studio_id: studio_id, silenced: false}
+    |> Repo.insert(on_conflict: {:replace, [:silenced]}, conflict_target: [:user_id, :studio_id])
   end
 
   def unsubscribe_user!(%User{} = user, %Commission{} = comm) do
-    from(sub in CommissionSubscription,
-      where: sub.user_id == ^user.id and sub.commission_id == ^comm.id
+    %CommissionSubscription{user: user, commission: comm, silenced: true}
+    |> Repo.insert(
+      on_conflict: {:replace, [:silenced]},
+      conflict_target: [:user_id, :commission_id]
     )
   end
 
   def unsubscribe_user!(%User{} = user, %Studio{} = studio) do
-    from(sub in StudioSubscription, where: sub.user_id == ^user.id and sub.studio_id == ^studio.id)
+    %StudioSubscription{user: user, studio: studio, silenced: true}
+    |> Repo.insert(on_conflict: {:replace, [:silenced]}, conflict_target: [:user_id, :studio_id])
   end
 
   def unread_notifications(%User{} = user, page) do
@@ -323,7 +345,9 @@ defmodule Banchan.Notifications do
       u in User,
       join: studio_sub in StudioSubscription,
       left_join: settings in assoc(u, :notification_settings),
-      where: studio_sub.studio_id == ^studio.id and u.id == studio_sub.user_id,
+      where:
+        studio_sub.studio_id == ^studio.id and u.id == studio_sub.user_id and
+          studio_sub.silenced != true,
       distinct: u.id,
       select: %User{
         id: u.id,
@@ -341,8 +365,11 @@ defmodule Banchan.Notifications do
       join: studio_sub in StudioSubscription,
       left_join: settings in assoc(u, :notification_settings),
       where:
-        (comm_sub.commission_id == ^commission.id and u.id == comm_sub.user_id) or
-          (studio_sub.studio_id == ^commission.studio_id and u.id == studio_sub.user_id),
+        ((comm_sub.commission_id == ^commission.id and u.id == comm_sub.user_id) or
+           (studio_sub.studio_id == ^commission.studio_id and u.id == studio_sub.user_id)) and
+          (comm_sub.silenced != true or
+             (studio_sub.studio_id != ^commission.studio_id and u.id != studio_sub.user_id and
+                studio_sub.silenced != true)),
       distinct: u.id,
       select: %User{
         id: u.id,

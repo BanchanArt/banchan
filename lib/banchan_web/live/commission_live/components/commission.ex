@@ -17,7 +17,9 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
   prop commission, :struct, required: true
+  prop subscribed?, :boolean, required: true
   prop uri, :string, required: true
+  prop toggle_subscribed, :event, required: true
 
   def render(assigns) do
     ~F"""
@@ -38,6 +40,14 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               current_user_member?={@current_user_member?}
               commission={@commission}
             />
+            <div class="divider" />
+            <button type="button" :on-click={@toggle_subscribed} class="btn btn-primary btn-sm">
+              {#if @subscribed?}
+                Unsubscribe
+              {#else}
+                Subscribe
+              {/if}
+            </button>
             <div class="divider" />
             <SummaryEditor
               id="summary-editor"

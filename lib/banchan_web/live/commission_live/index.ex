@@ -4,7 +4,7 @@ defmodule BanchanWeb.CommissionLive do
   """
   use BanchanWeb, :surface_view
 
-  alias Banchan.{Commissions, Studios}
+  alias Banchan.{Commissions, Notifications, Studios}
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
   alias BanchanWeb.Components.Layout
@@ -51,6 +51,7 @@ defmodule BanchanWeb.CommissionLive do
 
           assign(socket,
             commission: comm,
+            subscribed?: Notifications.user_subscribed?(socket.assigns.current_user, comm),
             current_user_member?:
               Studios.is_user_in_studio(socket.assigns.current_user, %Studios.Studio{
                 id: comm.studio_id
@@ -128,6 +129,17 @@ defmodule BanchanWeb.CommissionLive do
   end
 
   @impl true
+  def handle_event("toggle_subscribed", _, socket) do
+    if socket.assigns.subscribed? do
+      Notifications.unsubscribe_user!(socket.assigns.current_user, socket.assigns.commission)
+    else
+      Notifications.subscribe_user!(socket.assigns.current_user, socket.assigns.commission)
+    end
+
+    {:noreply, assign(socket, subscribed?: !socket.assigns.subscribed?)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
@@ -150,7 +162,9 @@ defmodule BanchanWeb.CommissionLive do
               uri={@uri}
               current_user={@current_user}
               commission={@commission}
+              subscribed?={@subscribed?}
               current_user_member?={@current_user_member?}
+              toggle_subscribed="toggle_subscribed"
             />
           {/if}
         </div>

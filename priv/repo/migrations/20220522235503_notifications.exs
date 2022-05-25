@@ -5,6 +5,7 @@ defmodule Banchan.Repo.Migrations.Notifications do
     create table(:commission_subscriptions) do
       add :user_id, references(:users, on_delete: :delete_all)
       add :commission_id, references(:commissions, on_delete: :delete_all)
+      add :silenced, :boolean, default: false
 
       timestamps()
     end
@@ -15,6 +16,7 @@ defmodule Banchan.Repo.Migrations.Notifications do
     create table(:studio_subscriptions) do
       add :user_id, references(:users, on_delete: :delete_all)
       add :studio_id, references(:studios, on_delete: :delete_all)
+      add :silenced, :boolean, default: false
 
       timestamps()
     end

@@ -122,13 +122,17 @@ defmodule BanchanWeb.Components.Notifications do
   defp on_new_notification(notification, socket) do
     notifications = socket.assigns.notifications
 
-    assign(socket,
-      notifications: %{
-        notifications
-        | total_entries: notifications.total_entries + 1,
-          entries: [notification | notifications.entries]
-      }
-    )
+    if notifications do
+      assign(socket,
+        notifications: %{
+          notifications
+          | total_entries: notifications.total_entries + 1,
+            entries: [notification | notifications.entries]
+        }
+      )
+    else
+      socket
+    end
   end
 
   def notification_read(component_id, notification_ref) do
@@ -156,7 +160,19 @@ defmodule BanchanWeb.Components.Notifications do
   end
 
   def on_all_notifications_read(socket) do
-    assign(socket, notifications: nil)
+    notifications = socket.assigns.notifications
+
+    if notifications do
+      assign(socket,
+        notifications: %{
+          notifications
+          | total_entries: 0,
+            entries: []
+        }
+      )
+    else
+      socket
+    end
   end
 
   @impl true

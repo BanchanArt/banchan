@@ -10,6 +10,7 @@ defmodule Banchan.Notifications.StudioSubscription do
   schema "studio_subscriptions" do
     belongs_to :user, User
     belongs_to :studio, Studio
+    field :silenced, :boolean
     timestamps()
   end
 end
