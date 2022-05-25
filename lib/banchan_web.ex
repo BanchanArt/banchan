@@ -50,6 +50,8 @@ defmodule BanchanWeb do
 
       unquote(view_helpers())
 
+      alias Banchan.Accounts.User
+
       def handle_info({:_internal_patch_to, url, opts}, socket) do
         {:noreply, push_patch(socket, [{:to, url} | opts])}
       end
@@ -73,7 +75,7 @@ defmodule BanchanWeb do
       end
 
       # credo:disable-for-next-line Credo.Check.Design.AliasUsage
-      def handle_info(%{event: "logout_user", payload: %{user: %Banchan.Accounts.User{id: id}}}, socket) do
+      def handle_info(%{event: "logout_user", payload: %{user: %User{id: id}}}, socket) do
         case socket.assigns.current_user do
           %User{id: ^id} ->
             {:noreply,

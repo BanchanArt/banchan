@@ -1,9 +1,9 @@
 defmodule BanchanWeb.UserSessionController do
   use BanchanWeb, :controller
 
-  alias Phoenix.LiveView
-
   alias Banchan.Accounts
+  alias BanchanWeb.Endpoint
+  alias BanchanWeb.Router.Helpers, as: Routes
   alias BanchanWeb.UserAuth
 
   def create(conn, %{"user" => user_params}) do
@@ -13,14 +13,14 @@ defmodule BanchanWeb.UserSessionController do
       if user.totp_activated == true && !NimbleTOTP.valid?(user.totp_secret, mfa_token) do
         conn
         |> put_flash(:error, "Invalid email, password, or MFA token")
-        |> LiveView.Controller.live_render(BanchanWeb.LoginLive)
+        |> redirect(to: Routes.login_path(Endpoint, :new))
       else
         UserAuth.log_in_user(conn, user, user_params)
       end
     else
       conn
       |> put_flash(:error, "Invalid email, password, or MFA token")
-      |> LiveView.Controller.live_render(BanchanWeb.LoginLive)
+      |> redirect(to: Routes.login_path(Endpoint, :new))
     end
   end
 
