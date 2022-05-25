@@ -542,7 +542,11 @@ defmodule Banchan.Commissions do
     Repo.delete!(event_attachment)
     new_attachments = Enum.reject(event.attachments, &(&1.id == event_attachment.id))
 
-    Notifications.commission_event_updated(commission, %{event | attachments: new_attachments}, actor)
+    Notifications.commission_event_updated(
+      commission,
+      %{event | attachments: new_attachments},
+      actor
+    )
   end
 
   def add_comment(

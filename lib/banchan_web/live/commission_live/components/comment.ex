@@ -96,7 +96,14 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
   def handle_event("remove_attachment", %{"attachment-idx" => idx}, socket) do
     {index, ""} = Integer.parse(idx)
     attachment = Enum.fetch!(socket.assigns.event.attachments, index)
-    Commissions.delete_attachment!(socket.assigns.current_user, socket.assigns.commission, socket.assigns.event, attachment)
+
+    Commissions.delete_attachment!(
+      socket.assigns.current_user,
+      socket.assigns.commission,
+      socket.assigns.event,
+      attachment
+    )
+
     {:noreply, socket}
   end
 

@@ -24,6 +24,10 @@ defmodule BanchanWeb.Components.Notifications do
     {:ok, on_notification_read(notification_ref, socket)}
   end
 
+  def update(%{all_notifications_read: true}, socket) do
+    {:ok, on_all_notifications_read(socket)}
+  end
+
   def update(assigns, socket) do
     current_user = Map.get(socket.assigns, :current_user)
     new_user = Map.get(assigns, :current_user)
@@ -146,6 +150,20 @@ defmodule BanchanWeb.Components.Notifications do
     end
   end
 
+  def all_notifications_read(component_id) do
+    send_update(__MODULE__, id: component_id, all_notifications_read: true)
+  end
+
+  def on_all_notifications_read(socket) do
+    assign(socket, notifications: nil)
+  end
+
+  @impl true
+  def handle_event("mark_all_as_read", _, socket) do
+    Notifications.mark_all_as_read(socket.assigns.current_user)
+    {:noreply, socket |> assign(open: false)}
+  end
+
   @impl true
   def handle_event("toggle_menu", _, socket) do
     {:noreply, socket |> assign(open: !socket.assigns.open)}
@@ -183,26 +201,35 @@ defmodule BanchanWeb.Components.Notifications do
       </div>
       {#if @open}
         <div class="translate-x-px translate-y-px origin-top right-0 absolute menu rounded-box shadow-2xl bg-base-300 p-2 w-80 z-50 divide-y text-base-content">
-          <ul>
-            {#for notification <- @notifications.entries}
-              <li class="relative">
-                <LiveRedirect to={annotated_url(notification)} class="pr-8">
-                  <div class="indicator">
-                    {#if !notification.read}
-                      <span class="indicator-item indicator-middle indicator-start badge badge-xs badge-secondary" />
-                    {/if}
-                    <div class="pl-6 flex flex-col">
-                      <div class="text-lg">{notification.title}</div>
-                      <div class="text-xs">{notification.body}</div>
-                    </div>
-                  </div>
-                </LiveRedirect>
-                <button type="button" class="btn btn-ghost btn-circle absolute right-0 inset-y-0 h-full">
-                  <i class="fas fa-ellipsis-v" />
+          {#if !@notifications || Enum.empty?(@notifications.entries)}
+            <div class="px-8 m-2">No notifications</div>
+          {#else}
+            <ul>
+              <li>
+                <button :on-click="mark_all_as_read" class="pl-10" type="button">
+                  Mark All as Read
                 </button>
               </li>
-            {/for}
-          </ul>
+              <li class="menu-title">
+                <hr>
+              </li>
+              {#for notification <- @notifications.entries}
+                <li class="relative">
+                  <LiveRedirect to={annotated_url(notification)}>
+                    <div class="indicator">
+                      {#if !notification.read}
+                        <span class="indicator-item indicator-middle indicator-start badge badge-xs badge-secondary" />
+                      {/if}
+                      <div class="pl-6 flex flex-col">
+                        <div class="text-lg">{notification.title}</div>
+                        <div class="text-xs">{notification.body}</div>
+                      </div>
+                    </div>
+                  </LiveRedirect>
+                </li>
+              {/for}
+            </ul>
+          {/if}
         </div>
       {/if}
     </div>

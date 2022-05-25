@@ -66,6 +66,11 @@ defmodule BanchanWeb do
         {:noreply, socket}
       end
 
+      def handle_info(%{event: "all_notifications_read"}, socket) do
+        BanchanWeb.Components.Notifications.all_notifications_read("notifications")
+        {:noreply, socket}
+      end
+
       def handle_info(%{event: "logout_user", payload: %{user: %User{id: id}}}, socket) do
         case socket.assigns.current_user do
           %User{id: ^id} ->

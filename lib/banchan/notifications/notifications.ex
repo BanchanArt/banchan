@@ -182,6 +182,23 @@ defmodule Banchan.Notifications do
     end)
   end
 
+  def mark_all_as_read(%User{} = user) do
+    from(notification in UserNotification,
+      where: notification.user_id == ^user.id
+    )
+    |> Repo.update_all(set: [read: true])
+
+    Phoenix.PubSub.broadcast!(
+      @pubsub,
+      "notification:#{user.handle}",
+      %Phoenix.Socket.Broadcast{
+        topic: "notification:#{user.handle}",
+        event: "all_notifications_read",
+        payload: nil
+      }
+    )
+  end
+
   def mark_notification_read(%User{} = user, notification_ref) do
     from(notification in UserNotification,
       where: notification.user_id == ^user.id and notification.ref == ^notification_ref
@@ -236,7 +253,7 @@ defmodule Banchan.Notifications do
       where: n.user_id == ^user.id and n.read == false,
       order_by: {:desc, n.updated_at}
     )
-    |> Repo.paginate(page: page, page_size: 10)
+    |> Repo.paginate(page: page, page_size: 20)
   end
 
   def subscribe_to_notifications(%User{} = user) do
