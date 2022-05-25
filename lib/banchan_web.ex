@@ -48,8 +48,6 @@ defmodule BanchanWeb do
     quote do
       use Surface.LiveView
 
-      alias Banchan.Accounts.User
-
       unquote(view_helpers())
 
       def handle_info({:_internal_patch_to, url, opts}, socket) do
@@ -57,21 +55,25 @@ defmodule BanchanWeb do
       end
 
       def handle_info(%{event: "new_notification", payload: notification}, socket) do
+        # credo:disable-for-next-line Credo.Check.Design.AliasUsage
         BanchanWeb.Components.Notifications.new_notification("notifications", notification)
         {:noreply, socket}
       end
 
       def handle_info(%{event: "notification_read", payload: notification_ref}, socket) do
+        # credo:disable-for-next-line Credo.Check.Design.AliasUsage
         BanchanWeb.Components.Notifications.notification_read("notifications", notification_ref)
         {:noreply, socket}
       end
 
       def handle_info(%{event: "all_notifications_read"}, socket) do
+        # credo:disable-for-next-line Credo.Check.Design.AliasUsage
         BanchanWeb.Components.Notifications.all_notifications_read("notifications")
         {:noreply, socket}
       end
 
-      def handle_info(%{event: "logout_user", payload: %{user: %User{id: id}}}, socket) do
+      # credo:disable-for-next-line Credo.Check.Design.AliasUsage
+      def handle_info(%{event: "logout_user", payload: %{user: %Banchan.Accounts.User{id: id}}}, socket) do
         case socket.assigns.current_user do
           %User{id: ^id} ->
             {:noreply,
