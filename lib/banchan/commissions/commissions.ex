@@ -390,8 +390,8 @@ defmodule Banchan.Commissions do
     ret =
       %Event{
         type: type,
-        commission: commission,
-        actor: actor,
+        commission_id: commission.id,
+        actor_id: actor.id,
         attachments: attachments
       }
       |> Event.changeset(attrs)
@@ -628,8 +628,9 @@ defmodule Banchan.Commissions do
       }
     ]
 
-    # TODO: this should be queried in-situ
-    platform_fee = Money.multiply(Money.add(amount, tip), commission.studio.platform_fee)
+    {stripe_id, platform_fee} = from(studio in Studio, where: studio.id == ^commission.studio_id, select: {studio.stripe_id, studio.platform_fee})
+      |> Repo.one!()
+    platform_fee = Money.multiply(Money.add(amount, tip), platform_fee)
 
     {:ok, session} =
       Stripe.Session.create(%{
@@ -641,7 +642,7 @@ defmodule Banchan.Commissions do
         payment_intent_data: %{
           application_fee_amount: platform_fee.amount,
           transfer_data: %{
-            destination: commission.studio.stripe_id
+            destination: stripe_id
           }
         }
       })
@@ -680,7 +681,7 @@ defmodule Banchan.Commissions do
             ]
           )
 
-        event = Repo.one!(Event, invoice.event_id)
+        event = Repo.get!(Event, invoice.event_id)
 
         create_event(
           :payment_processed,

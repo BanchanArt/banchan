@@ -241,7 +241,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 class="w-full"
                 upload={@uploads.attachment}
                 cancel_upload="cancel_upload"
-                opts={required: true, placeholder: "Here's what I'd like...", value: @template}
+                opts={required: true, placeholder: "Here's what I'd like...", value: Map.get(@changeset.changes, :description, @template)}
               />
             </div>
             <div class="md:col-span-2 md:order-4 md:row-span-2">
