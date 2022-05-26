@@ -32,7 +32,7 @@ defmodule BanchanWeb.Components.Layout do
         </section>
         <footer class="footer p-10 bg-neutral text-neutral-content">
           <div>
-            <span class="footer-title">Company</span>
+            <span class="footer-title">Co-op</span>
             {!-- # TODO: Fill these out --}
             <a href="#" class="link link-hover">About us</a>
             <a href="#" class="link link-hover">Contact</a>

@@ -21,12 +21,12 @@ defmodule BanchanWeb.Components.Nav do
       aria-label="main navigation"
     >
       <div class="flex-1">
-        <a href="/">
+        <LiveRedirect to={Routes.home_path(Endpoint, :index)}>
           <img
             src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
             class="inline-block object-scale-down h-12 p-1 rounded-full"
           /> Banchan Art
-        </a>
+        </LiveRedirect>
       </div>
 
       <div class="flex-none hidden md:block">
