@@ -12,6 +12,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :max_proposals, :integer
       add :index, :integer
       add :terms, :text
+      add :template, :text
 
       add :studio_id, references(:studios), null: false
 

@@ -103,6 +103,7 @@ defmodule BanchanWeb.CommissionLive.Components.Offering do
         <TextInput name={:type} opts={required: true} />
         <TextArea name={:description} opts={required: true} />
         <TextArea name={:terms} />
+        <TextArea name={:template} />
         <TextInput name={:slots} />
         <TextInput name={:max_proposals} />
         <Checkbox name={:open} label="Show as Open" />

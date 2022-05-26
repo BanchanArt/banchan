@@ -14,6 +14,7 @@ defmodule Banchan.Studios.Studio do
     field :description, :string
     field :summary, :string
     field :default_terms, :string
+    field :default_template, :string
 
     field :stripe_id, :string
     field :stripe_charges_enabled, :boolean
@@ -35,8 +36,10 @@ defmodule Banchan.Studios.Studio do
   @doc false
   def changeset(studio, attrs) do
     studio
-    |> cast(attrs, [:name, :handle, :description, :summary, :default_terms])
+    |> cast(attrs, [:name, :handle, :description, :summary, :default_terms, :default_template])
     |> validate_required([:name, :handle])
+    |> validate_markdown(:default_terms)
+    |> validate_markdown(:default_template)
     |> validate_handle_unique(:handle)
   end
 
@@ -46,6 +49,16 @@ defmodule Banchan.Studios.Studio do
         []
       else
         [{current_field, "already exists"}]
+      end
+    end)
+  end
+
+  defp validate_markdown(changeset, field) do
+    validate_change(changeset, field, fn _, data ->
+      if data == HtmlSanitizeEx.markdown_html(data) do
+        []
+      else
+        [{field, "Disallowed HTML detected. Some tags, like <script>, are not allowed."}]
       end
     end)
   end

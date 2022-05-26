@@ -13,7 +13,6 @@ defmodule BanchanWeb.StudioLive.Settings do
   alias BanchanWeb.CommissionLive.Components.StudioLayout
   alias BanchanWeb.Components.Button
   alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
-  alias BanchanWeb.Endpoint
 
   import BanchanWeb.StudioLive.Helpers
 
@@ -54,11 +53,7 @@ defmodule BanchanWeb.StudioLive.Settings do
       {:ok, studio} ->
         socket = assign(socket, changeset: Studio.changeset(studio, %{}), studio: studio)
         socket = put_flash(socket, :info, "Profile updated")
-
-        {:noreply,
-         push_redirect(socket,
-           to: Routes.studio_shop_path(Endpoint, :show, studio.handle)
-         )}
+        {:noreply, socket}
 
       other ->
         other
@@ -108,6 +103,7 @@ defmodule BanchanWeb.StudioLive.Settings do
             <TextArea name={:description} opts={required: true} />
             <TextArea name={:summary} />
             <TextArea name={:default_terms} />
+            <TextArea name={:default_template} />
             <Submit changeset={@changeset} label="Save" />
           </Form>
         </div>

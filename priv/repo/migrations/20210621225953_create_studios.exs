@@ -10,6 +10,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :header_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :card_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :default_terms, :text
+      add :default_template, :text
       add :stripe_id, :string
       add :stripe_charges_enabled, :boolean, default: false
       add :stripe_details_submitted, :boolean, default: false

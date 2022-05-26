@@ -22,6 +22,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     offering = Offerings.get_offering_by_type!(offering_type, socket.assigns.current_user_member?)
 
     terms = offering.terms || socket.assigns.studio.default_terms || ""
+    template = offering.template || socket.assigns.studio.default_template
 
     if offering.open do
       default_items =
@@ -43,6 +44,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
          changeset: Commission.changeset(%Commission{}, %{}),
          line_items: default_items,
          offering: offering,
+         template: template,
          terms: terms
        )
        # TODO: move max file size somewhere configurable.
@@ -239,7 +241,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 class="w-full"
                 upload={@uploads.attachment}
                 cancel_upload="cancel_upload"
-                opts={required: true, placeholder: "Here's what I'd like..."}
+                opts={required: true, placeholder: "Here's what I'd like...", value: @template}
               />
             </div>
             <div class="md:col-span-2 md:order-4 md:row-span-2">

@@ -44,8 +44,8 @@ defmodule Banchan.Studios do
     {:error, :unauthorized}
   end
 
-  def update_studio_profile(%User{} = user, _, attrs) do
-    user
+  def update_studio_profile(%Studio{} = studio, _, attrs) do
+    studio
     |> Studio.changeset(attrs)
     |> Repo.update()
   end

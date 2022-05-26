@@ -18,6 +18,7 @@ defmodule Banchan.Offerings.Offering do
     field :max_proposals, :integer
     field :hidden, :boolean, default: true
     field :terms, :string
+    field :template, :string
 
     belongs_to :studio, Studio
     has_many :options, OfferingOption, on_replace: :delete_if_exists
@@ -37,7 +38,8 @@ defmodule Banchan.Offerings.Offering do
       :slots,
       :max_proposals,
       :hidden,
-      :terms
+      :terms,
+      :template
     ])
     |> cast_assoc(:options)
     |> validate_format(:type, ~r/^[0-9a-z-]+$/,
@@ -46,6 +48,7 @@ defmodule Banchan.Offerings.Offering do
     |> validate_number(:slots, greater_than: 0)
     |> validate_number(:max_proposals, greater_than: 0)
     |> validate_markdown(:terms)
+    |> validate_markdown(:template)
     |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])
   end
