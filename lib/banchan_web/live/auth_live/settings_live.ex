@@ -215,13 +215,13 @@ defmodule BanchanWeb.SettingsLive do
               Notifications
             </div>
             <div class="collapse-content">
+              <h2 class="text-lg">Commissions</h2>
               <Form
                 class="col-span-auto"
                 for={@notification_settings_changeset}
                 change="change_notification_settings"
                 submit="submit_notification_settings"
               >
-                <h2 class="text-lg">Commissions</h2>
                 <Checkbox name={:commission_email} label="Email" />
                 <Checkbox name={:commission_web} label="Web" />
                 <Submit changeset={@notification_settings_changeset} label="Save" />

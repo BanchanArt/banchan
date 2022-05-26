@@ -17,8 +17,11 @@ defmodule BanchanWeb.Components.Form.Checkbox do
 
   def render(assigns) do
     ~F"""
-    <Field class="field" name={@name}>
-      <Label class={"checkbox is-large control", @wrapper_class}>
+    <Field class="form-control" name={@name}>
+      <Label class={"label cursor-pointer", @wrapper_class}>
+        <div class="label-text">
+          <#slot>{@label}</#slot>
+        </div>
         <InputContext :let={form: form, field: field}>
           <Checkbox
             class={
@@ -31,7 +34,6 @@ defmodule BanchanWeb.Components.Form.Checkbox do
             opts={@opts}
           />
         </InputContext>
-        <#slot>{@label}</#slot>
       </Label>
       <ErrorTag class="help is-danger" />
     </Field>
