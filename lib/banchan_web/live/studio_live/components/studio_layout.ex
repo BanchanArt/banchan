@@ -61,6 +61,13 @@ defmodule BanchanWeb.CommissionLive.Components.StudioLayout do
               />
               {#if @current_user_member?}
                 <TabButton
+                  label="Payouts"
+                  tab_name={:payouts}
+                  current_tab={@tab}
+                  to={Routes.studio_payouts_path(Endpoint, :show, @studio.handle)}
+                />
+
+                <TabButton
                   label="Settings"
                   tab_name={:settings}
                   current_tab={@tab}

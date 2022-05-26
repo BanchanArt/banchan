@@ -162,6 +162,31 @@ defmodule Banchan.Studios do
     link.url
   end
 
+  def get_stripe_balance!(%Studio{} = studio) do
+    {:ok, balance} = Stripe.Balance.retrieve(headers: %{"Stripe-Account" => studio.stripe_id})
+    balance
+  end
+
+  def payout_studio!(%Studio{} = studio) do
+    balance = get_stripe_balance!(studio)
+
+    Enum.each(balance.available, fn avail ->
+      if avail.amount > 0 do
+        {:ok, _} =
+          Stripe.Payout.create(
+            %{
+              amount: avail.amount,
+              currency: avail.currency,
+              statement_descriptor: "Banchan Art"
+            },
+            headers: %{"Stripe-Account" => studio.stripe_id}
+          )
+      end
+    end)
+
+    :ok
+  end
+
   def charges_enabled?(%Studio{} = studio, refresh \\ false) do
     if refresh do
       {:ok, acct} = Stripe.Account.retrieve(studio.stripe_id)
