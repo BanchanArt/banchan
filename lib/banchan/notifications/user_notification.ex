@@ -12,7 +12,9 @@ defmodule Banchan.Notifications.UserNotification do
     belongs_to :user, User
     field :type, :string
     field :title, :string
-    field :body, :string
+    field :short_body, :string
+    field :text_body, :string
+    field :html_body, :string
     field :url, :string
     field :read, :boolean
     timestamps()

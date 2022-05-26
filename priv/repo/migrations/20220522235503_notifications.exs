@@ -29,8 +29,10 @@ defmodule Banchan.Repo.Migrations.Notifications do
       add :user_id, references(:users, on_delete: :delete_all), null: false
       add :type, :string, null: false
       add :title, :text, null: false
-      add :body, :text, null: false
-      add :url, :string, null: false
+      add :short_body, :text
+      add :text_body, :text
+      add :html_body, :text
+      add :url, :string
       add :read, :boolean, default: false
 
       timestamps()

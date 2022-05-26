@@ -46,14 +46,18 @@ defmodule Banchan.Notifications do
         Repo.transaction(fn ->
           subs = studio_subscribers(%Studio{id: commission.studio_id})
 
+          url = Routes.commission_url(Endpoint, :show, commission.public_id)
+          {:safe, safe_url} = Phoenix.HTML.html_escape(url)
           notify_subscribers!(
             actor,
             subs,
             %UserNotification{
               type: "new_commission",
               title: commission.title,
-              body: "A new commission has been submitted to your studio.",
-              url: Routes.commission_url(Endpoint, :show, commission.public_id),
+              short_body: "A new commission has been submitted to your studio.",
+              text_body: "A new commission has been submitted to your studio.\n\n#{url}",
+              html_body: "<p>A new commission has been submitted to your studio.</p><p><a href=\"#{safe_url}\">View it</a></p>",
+              url: url,
               read: false
             }
           )
@@ -99,13 +103,19 @@ defmodule Banchan.Notifications do
               Routes.commission_url(Endpoint, :show, commission.public_id)
               |> replace_fragment(event)
 
+            body = new_event_notification_body(event)
+            {:safe, safe_body} = Phoenix.HTML.html_escape(body)
+            {:safe, safe_url} = Phoenix.HTML.html_escape(url)
+
             notify_subscribers!(
               actor,
               subs,
               %UserNotification{
                 type: "new_event",
                 title: commission.title,
-                body: new_event_notification_body(event),
+                short_body: body,
+                text_body: "#{body}\n\n#{url}",
+                html_body: "<p>#{safe_body}</p><p><a href=\"#{safe_url}\">View it</a></p>",
                 url: url,
                 read: false
               },
@@ -331,14 +341,12 @@ defmodule Banchan.Notifications do
         notification.title
       end
 
-    {:safe, html_url} = Phoenix.HTML.html_escape(notification.url)
-
     Email.new_email(
       to: email,
       from: "notifications@" <> (System.get_env("SENDGRID_DOMAIN") || "noreply.banchan.art"),
       subject: title,
-      html_body: notification.body <> "\n\n<a href=\"#{html_url}\">Details</a>",
-      text_body: notification.body <> "\n\n" <> notification.url
+      html_body: notification.html_body,
+      text_body: notification.text_body
     )
     |> Mailer.deliver_later!()
   end

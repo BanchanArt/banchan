@@ -240,7 +240,7 @@ defmodule BanchanWeb.Components.Notifications do
                       {/if}
                       <div class="pl-6 flex flex-col">
                         <div class="text-lg">{notification.title}</div>
-                        <div class="text-xs">{notification.body}</div>
+                        <div class="text-xs">{notification.short_body}</div>
                       </div>
                     </div>
                   </LiveRedirect>
