@@ -216,10 +216,13 @@ defmodule Banchan.Notifications do
     )
   end
 
+  def get_notification_settings(%User{} = user) do
+    Repo.one(from(settings in UserNotificationSettings, where: settings.user_id == ^user.id))
+  end
+
   def update_user_notification_settings(%User{id: user_id}, attrs) do
     %UserNotificationSettings{
-      user_id: user_id,
-      updated_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+      user_id: user_id
     }
     |> UserNotificationSettings.changeset(attrs)
     |> Repo.insert(
