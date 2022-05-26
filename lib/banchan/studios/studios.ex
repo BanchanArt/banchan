@@ -244,6 +244,10 @@ defmodule Banchan.Studios do
       Stripe.Account.create(%{
         type: "express",
         settings: %{payouts: %{schedule: %{interval: "manual"}}},
+        # TODO: this should only be done for _international_ accounts.
+        # tos_acceptance: %{
+        #   service_agreement: "recipient"
+        # },
         business_profile: %{
           # Digital Media
           mcc: "7333",
