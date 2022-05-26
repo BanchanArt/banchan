@@ -76,6 +76,7 @@ defmodule BanchanWeb.Components.Notifications do
 
       notifications =
         if new_user do
+          Notifications.unsubscribe_from_notifications(new_user)
           Notifications.subscribe_to_notifications(new_user)
 
           Notifications.unread_notifications(new_user, 0)
