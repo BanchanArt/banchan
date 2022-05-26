@@ -28,8 +28,8 @@ defmodule BanchanWeb.CommissionLive.Components.StudioLayout do
             </p>
             <p class="text-base text-secondary-content flex-grow">
               {@studio.description}
-              {!-- TODO: add in follow functionality --}
-              <a href="/" class="btn glass btn-sm text-center rounded-full px-2 py-0" label="Follow">Follow</a>
+              {!-- # TODO: add in follow functionality --}
+              <button type="button" class="btn glass btn-sm text-center rounded-full px-2 py-0" label="Follow">Follow</button>
             </p>
             <br>
           </div>
