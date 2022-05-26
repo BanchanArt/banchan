@@ -144,8 +144,8 @@ defmodule BanchanWeb.CommissionLive do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <div class="flex flex-col grow max-h-full">
-        <div class="flex flex-row grow">
-          <div class={"flex md:basis-1/4", "hidden md:flex": @commission}>
+        <div class="flex flex-row grow md:grow-0">
+          <div class={"flex grow md:grow-0 md:basis-1/4", "hidden md:flex": @commission}>
             <ul class="divide-y flex-grow flex flex-col">
               {#for result <- @results.entries}
                 <li>
