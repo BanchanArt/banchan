@@ -68,6 +68,11 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:noreply, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def handle_event("cancel_upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :attachment, ref)}
   end
@@ -202,6 +207,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
       studio={@studio}
       current_user_member?={@current_user_member?}
       tab={:shop}
+      uri={@uri}
     >
       <div class="flex flex-col space-y-2 md:container md:mx-auto p-2">
         <h1 class="text-3xl px-2">{@offering.name}</h1>

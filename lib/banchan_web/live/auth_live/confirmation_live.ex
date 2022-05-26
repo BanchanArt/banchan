@@ -13,9 +13,14 @@ defmodule BanchanWeb.ConfirmationLive do
   alias BanchanWeb.Endpoint
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:noreply, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
-    <Layout current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <div class="shadow bg-base-200 text-base-content">
         <div class="p-6">
           <h1 class="text-2xl">Resend confirmation instructions</h1>

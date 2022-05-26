@@ -8,6 +8,7 @@ defmodule Banchan.Commissions do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.{Commission, Event, EventAttachment, Invoice, LineItem}
+  alias Banchan.Notifications
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
   alias Banchan.Studios
@@ -167,22 +168,30 @@ defmodule Banchan.Commissions do
   end
 
   defp insert_commission(actor, studio, offering, line_items, attachments, attrs) do
-    %Commission{
-      studio: studio,
-      offering: offering,
-      client: actor,
-      line_items: line_items,
-      events: [
-        %{
-          actor: actor,
-          type: :comment,
-          text: Map.get(attrs, "description", ""),
-          attachments: attachments
-        }
-      ]
-    }
-    |> Commission.changeset(attrs)
-    |> Repo.insert()
+    case %Commission{
+           studio: studio,
+           offering: offering,
+           client: actor,
+           line_items: line_items,
+           events: [
+             %{
+               actor: actor,
+               type: :comment,
+               text: Map.get(attrs, "description", ""),
+               attachments: attachments
+             }
+           ]
+         }
+         |> Commission.changeset(attrs)
+         |> Repo.insert() do
+      {:ok, %Commission{} = commission} ->
+        Notifications.subscribe_user!(actor, commission)
+        Notifications.new_commission(commission, actor)
+        {:ok, commission}
+
+      {:error, err} ->
+        {:error, err}
+    end
   end
 
   def update_status(%User{} = actor, %Commission{} = commission, status) do
@@ -197,15 +206,7 @@ defmodule Banchan.Commissions do
         # current_user_member? is checked as part of check_status_transition!
         {:ok, event} = create_event(:status, actor, commission, true, [], %{status: status})
 
-        Phoenix.PubSub.broadcast!(
-          @pubsub,
-          "commission:#{commission.public_id}",
-          %Phoenix.Socket.Broadcast{
-            topic: "commission:#{commission.public_id}",
-            event: "new_status",
-            payload: commission.status
-          }
-        )
+        Notifications.commission_status_changed(commission, actor)
 
         {:ok, {commission, [event]}}
       end)
@@ -301,16 +302,7 @@ defmodule Banchan.Commissions do
                 {:error, err}
 
               {:ok, event} ->
-                Phoenix.PubSub.broadcast!(
-                  @pubsub,
-                  "commission:#{commission.public_id}",
-                  %Phoenix.Socket.Broadcast{
-                    topic: "commission:#{commission.public_id}",
-                    event: "line_items_changed",
-                    payload: commission.line_items
-                  }
-                )
-
+                Notifications.commission_line_items_changed(commission, actor)
                 {:ok, {commission, [event]}}
             end
         end
@@ -347,16 +339,7 @@ defmodule Banchan.Commissions do
                 {:error, err}
 
               {:ok, event} ->
-                Phoenix.PubSub.broadcast!(
-                  @pubsub,
-                  "commission:#{commission.public_id}",
-                  %Phoenix.Socket.Broadcast{
-                    topic: "commission:#{commission.public_id}",
-                    event: "line_items_changed",
-                    payload: commission.line_items
-                  }
-                )
-
+                Notifications.commission_line_items_changed(commission, actor)
                 {:ok, {commission, [event]}}
             end
         end
@@ -416,15 +399,7 @@ defmodule Banchan.Commissions do
 
     case ret do
       {:ok, event} ->
-        Phoenix.PubSub.broadcast!(
-          @pubsub,
-          "commission:#{commission.public_id}",
-          %Phoenix.Socket.Broadcast{
-            topic: "commission:#{commission.public_id}",
-            event: "new_events",
-            payload: [%{event | invoice: nil}]
-          }
-        )
+        Notifications.new_commission_events(commission, [%{event | invoice: nil}], actor)
 
       _ ->
         nil
@@ -484,7 +459,7 @@ defmodule Banchan.Commissions do
     Event.text_changeset(event, attrs)
   end
 
-  def send_event_update!(event_id) do
+  def send_event_update!(event_id, actor \\ nil) do
     event =
       from(e in Event,
         where: e.id == ^event_id,
@@ -493,19 +468,11 @@ defmodule Banchan.Commissions do
       )
       |> Repo.one!()
 
-    public_id =
-      from(c in Commission, where: c.id == ^event.commission_id, select: c.public_id)
+    commission =
+      from(c in Commission, where: c.id == ^event.commission_id)
       |> Repo.one!()
 
-    Phoenix.PubSub.broadcast!(
-      @pubsub,
-      "commission:#{public_id}",
-      %Phoenix.Socket.Broadcast{
-        topic: "commission:#{public_id}",
-        event: "event_updated",
-        payload: event
-      }
-    )
+    Notifications.commission_event_updated(commission, event, actor)
   end
 
   # This one expects binaries for everything because it looks everything up in one fell swoop.
@@ -566,7 +533,8 @@ defmodule Banchan.Commissions do
   end
 
   def delete_attachment!(
-        %Commission{public_id: public_id},
+        %User{} = actor,
+        %Commission{} = commission,
         %Event{} = event,
         %EventAttachment{} = event_attachment
       ) do
@@ -574,14 +542,10 @@ defmodule Banchan.Commissions do
     Repo.delete!(event_attachment)
     new_attachments = Enum.reject(event.attachments, &(&1.id == event_attachment.id))
 
-    Phoenix.PubSub.broadcast!(
-      @pubsub,
-      "commission:#{public_id}",
-      %Phoenix.Socket.Broadcast{
-        topic: "commission:#{public_id}",
-        event: "event_updated",
-        payload: %{event | attachments: new_attachments}
-      }
+    Notifications.commission_event_updated(
+      commission,
+      %{event | attachments: new_attachments},
+      actor
     )
   end
 
@@ -628,7 +592,7 @@ defmodule Banchan.Commissions do
                 {:error, error}
 
               {:ok, invoice} ->
-                send_event_update!(event.id)
+                send_event_update!(event.id, actor)
                 {:ok, invoice}
             end
         end
@@ -643,7 +607,7 @@ defmodule Banchan.Commissions do
   end
 
   def process_payment!(
-        %User{},
+        %User{} = actor,
         %Event{invoice: %Invoice{amount: amount} = invoice} = event,
         %Commission{} = commission,
         uri,
@@ -692,7 +656,7 @@ defmodule Banchan.Commissions do
     })
     |> Repo.update!()
 
-    send_event_update!(event.id)
+    send_event_update!(event.id, actor)
 
     session.url
   end
@@ -705,16 +669,33 @@ defmodule Banchan.Commissions do
 
     {:ok, available_on} = DateTime.from_unix(available_on)
 
-    {1, [invoice]} =
-      from(i in Invoice, where: i.stripe_session_id == ^session.id, select: i)
-      |> Repo.update_all(
-        set: [
-          status: :succeeded,
-          payout_available_on: available_on
-        ]
-      )
+    {:ok, _} =
+      Repo.transaction(fn ->
+        {1, [invoice]} =
+          from(i in Invoice, where: i.stripe_session_id == ^session.id, select: i)
+          |> Repo.update_all(
+            set: [
+              status: :succeeded,
+              payout_available_on: available_on
+            ]
+          )
 
-    send_event_update!(invoice.event_id)
+        event = Repo.one!(Event, invoice.event_id)
+
+        create_event(
+          :payment_processed,
+          %User{id: event.actor_id},
+          %Commission{id: event.commission_id},
+          true,
+          [],
+          %{
+            amount: invoice.amount
+          }
+        )
+
+        send_event_update!(invoice.event_id)
+      end)
+
     :ok
   end
 

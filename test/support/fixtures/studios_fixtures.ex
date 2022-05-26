@@ -26,7 +26,6 @@ defmodule Banchan.StudiosFixtures do
 
     {:ok, studio} =
       Banchan.Studios.new_studio(
-        user,
         %{studio | artists: [user]},
         "http://localhost:4000/studios/#{studio.handle}",
         valid_studio_attributes(attrs)

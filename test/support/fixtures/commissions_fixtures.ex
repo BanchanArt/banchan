@@ -19,7 +19,6 @@ defmodule Banchan.CommissionsFixtures do
 
     {:ok, studio} =
       Banchan.Studios.new_studio(
-        user,
         %Banchan.Studios.Studio{artists: [user]},
         "http://localhost:4000/studios/test-studio",
         %{

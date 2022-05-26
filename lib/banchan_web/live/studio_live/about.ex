@@ -16,6 +16,11 @@ defmodule BanchanWeb.StudioLive.About do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:noreply, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <StudioLayout
@@ -24,6 +29,7 @@ defmodule BanchanWeb.StudioLive.About do
       studio={@studio}
       current_user_member?={@current_user_member?}
       tab={:about}
+      uri={@uri}
     >
       <Markdown content={@studio.summary} />
     </StudioLayout>

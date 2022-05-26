@@ -19,6 +19,19 @@ defmodule Banchan.Commissions.Common do
     @status_values
   end
 
+  @event_types [
+    # No added/edited/removed variant because these are mutable.
+    :comment,
+    :line_item_added,
+    :line_item_removed,
+    :payment_processed,
+    :status
+  ]
+
+  def event_types do
+    @event_types
+  end
+
   def humanize_status(status) do
     case status do
       :submitted ->

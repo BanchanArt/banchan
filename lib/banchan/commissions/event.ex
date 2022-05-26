@@ -11,16 +11,7 @@ defmodule Banchan.Commissions.Event do
   schema "commission_events" do
     field :public_id, :string, autogenerate: {Common, :gen_public_id, []}
 
-    field :type, Ecto.Enum,
-      values: [
-        # No added/edited/removed variant because these are mutable.
-        :comment,
-        :line_item_added,
-        :line_item_removed,
-        :payment_processed,
-        :status
-      ]
-
+    field :type, Ecto.Enum, values: Common.event_types()
     field :text, :string
     field :amount, Money.Ecto.Composite.Type
 

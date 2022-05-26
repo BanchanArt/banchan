@@ -4,20 +4,12 @@ defmodule BanchanWeb.CommissionLive do
   """
   use BanchanWeb, :surface_view
 
-  alias Banchan.{Commissions, Studios}
-
-  alias Surface.Components.LivePatch
+  alias Banchan.{Commissions, Notifications, Studios}
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
   alias BanchanWeb.Components.Layout
 
-  alias BanchanWeb.CommissionLive.Components.{
-    CommentBox,
-    DraftBox,
-    StatusBox,
-    SummaryEditor,
-    Timeline
-  }
+  alias BanchanWeb.CommissionLive.Components.Commission
 
   @impl true
   def handle_params(params, uri, socket) do
@@ -39,6 +31,11 @@ defmodule BanchanWeb.CommissionLive do
     socket =
       case params do
         %{"commission_id" => commission_id} ->
+          # NOTE: Phoenix LiveView's push_patch has an obnoxious bug with fragments, so
+          # we have to manually remove them here.
+          # See: https://github.com/phoenixframework/phoenix_live_view/issues/2041
+          commission_id = Regex.replace(~r/#.*$/, commission_id, "")
+
           comm =
             if Map.has_key?(socket.assigns, :commission) && socket.assigns.commission &&
                  socket.assigns.commission.public_id == commission_id do
@@ -54,6 +51,7 @@ defmodule BanchanWeb.CommissionLive do
 
           assign(socket,
             commission: comm,
+            subscribed?: Notifications.user_subscribed?(socket.assigns.current_user, comm),
             current_user_member?:
               Studios.is_user_in_studio(socket.assigns.current_user, %Studios.Studio{
                 id: comm.studio_id
@@ -131,9 +129,20 @@ defmodule BanchanWeb.CommissionLive do
   end
 
   @impl true
+  def handle_event("toggle_subscribed", _, socket) do
+    if socket.assigns.subscribed? do
+      Notifications.unsubscribe_user!(socket.assigns.current_user, socket.assigns.commission)
+    else
+      Notifications.subscribe_user!(socket.assigns.current_user, socket.assigns.commission)
+    end
+
+    {:noreply, assign(socket, subscribed?: !socket.assigns.subscribed?)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
-    <Layout current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <div class="flex flex-col grow max-h-full">
         <div class="flex flex-row grow">
           <div class={"flex md:basis-1/4", "hidden md:flex": @commission}>
@@ -149,59 +158,14 @@ defmodule BanchanWeb.CommissionLive do
             </ul>
           </div>
           {#if @commission}
-            <div class="md:container md:basis-3/4">
-              <h1 class="text-3xl pt-4 px-4">
-                <LivePatch class="md:hidden p-2" to={Routes.commission_path(Endpoint, :index)}>
-                  <i class="fas fa-arrow-left text-2xl" />
-                </LivePatch>
-                {@commission.title}
-              </h1>
-              <div class="divider" />
-              <div class="p-2">
-                <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
-                  <div class="flex flex-col md:order-2">
-                    <DraftBox
-                      id="draft-box"
-                      current_user={@current_user}
-                      current_user_member?={@current_user_member?}
-                      commission={@commission}
-                    />
-                    <div class="divider" />
-                    <SummaryEditor
-                      id="summary-editor"
-                      current_user={@current_user}
-                      current_user_member?={@current_user_member?}
-                      commission={@commission}
-                      allow_edits={@current_user_member?}
-                    />
-                  </div>
-                  <div class="divider md:hidden" />
-                  <div class="flex flex-col md:col-span-2 md:order-1">
-                    <Timeline
-                      uri={@uri}
-                      commission={@commission}
-                      current_user={@current_user}
-                      current_user_member?={@current_user_member?}
-                    />
-                    <div class="divider" />
-                    <div class="flex flex-col gap-4">
-                      <StatusBox
-                        id="action-box"
-                        commission={@commission}
-                        current_user={@current_user}
-                        current_user_member?={@current_user_member?}
-                      />
-                      <CommentBox
-                        id="comment-box"
-                        commission={@commission}
-                        actor={@current_user}
-                        current_user_member?={@current_user_member?}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Commission
+              uri={@uri}
+              current_user={@current_user}
+              commission={@commission}
+              subscribed?={@subscribed?}
+              current_user_member?={@current_user_member?}
+              toggle_subscribed="toggle_subscribed"
+            />
           {/if}
         </div>
       </div>

@@ -18,9 +18,14 @@
     password_confirmation: "foobarbazquux"
   })
 
+{:ok, _} =
+  Banchan.Notifications.update_user_notification_settings(user, %{
+    commission_email: true,
+    commission_web: true
+  })
+
 {:ok, studio} =
   Banchan.Studios.new_studio(
-    user,
     %Banchan.Studios.Studio{artists: [user]},
     "https://banchan.art/studios/kitteh-studio",
     %{

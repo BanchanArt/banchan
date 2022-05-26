@@ -5,7 +5,7 @@ defmodule Banchan.Accounts.User do
   import Ecto.Changeset
 
   alias Banchan.Identities
-
+  alias Banchan.Notifications.{UserNotification, UserNotificationSettings}
   alias Banchan.Uploads.Upload
 
   @derive {Inspect, except: [:password]}
@@ -24,6 +24,10 @@ defmodule Banchan.Accounts.User do
     belongs_to :header_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :pfp_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :pfp_thumb, Upload, on_replace: :nilify, type: :binary_id
+
+    has_one :notification_settings, UserNotificationSettings
+
+    has_many :notifications, UserNotification
 
     many_to_many :studios, Banchan.Studios.Studio, join_through: "users_studios"
 

@@ -30,14 +30,12 @@ defmodule BanchanWeb.CommissionLive.Components.DraftBox do
     else
       socket =
         if current_comm && (!new_comm || current_comm.public_id != new_comm.public_id) do
-          Commissions.unsubscribe_from_commission_events(current_comm)
           socket |> assign(loaded: false)
         else
           socket
         end
 
       socket = socket |> assign(assigns)
-      Commissions.subscribe_to_commission_events(socket.assigns.commission)
 
       event =
         Commissions.latest_draft(

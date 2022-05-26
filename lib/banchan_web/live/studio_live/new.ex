@@ -21,9 +21,14 @@ defmodule BanchanWeb.StudioLive.New do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    {:noreply, socket |> assign(uri: uri)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
-    <Layout current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <div class="shadow bg-base-200 text-base-content">
         <div class="p-6">
           <h1 class="text-2xl">New Studio</h1>
@@ -68,7 +73,6 @@ defmodule BanchanWeb.StudioLive.New do
   @impl true
   def handle_event("submit", val, socket) do
     case Studios.new_studio(
-           socket.assigns.current_user,
            %Studio{artists: [socket.assigns.current_user]},
            Routes.studio_shop_url(Endpoint, :show, val["studio"]["handle"]),
            val["studio"]

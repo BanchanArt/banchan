@@ -12,6 +12,7 @@ defmodule Banchan.Studios do
   import Ecto.Query, warn: false
 
   alias Banchan.Accounts.User
+  alias Banchan.Notifications
   alias Banchan.Offerings.Offering
   alias Banchan.Repo
   alias Banchan.Studios.Studio
@@ -57,7 +58,7 @@ defmodule Banchan.Studios do
       iex> new_studio(studio, %{handle: ..., name: ..., ...})
       {:ok, %Studio{}}
   """
-  def new_studio(%User{}, %Studio{} = studio, url, attrs) do
+  def new_studio(%Studio{artists: artists} = studio, url, attrs) do
     changeset = studio |> Studio.changeset(attrs)
 
     changeset =
@@ -67,7 +68,17 @@ defmodule Banchan.Studios do
         changeset
       end
 
-    changeset |> Repo.insert()
+    case changeset |> Repo.insert() do
+      {:ok, studio} ->
+        Repo.transaction(fn ->
+          Enum.each(artists, &Notifications.subscribe_user!(&1, studio))
+        end)
+
+        {:ok, studio}
+
+      {:error, err} ->
+        {:error, err}
+    end
   end
 
   @doc """

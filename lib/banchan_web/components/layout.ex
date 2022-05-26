@@ -12,6 +12,7 @@ defmodule BanchanWeb.Components.Layout do
 
   prop current_user, :any
   prop flashes, :string
+  prop uri, :string, required: true
 
   slot hero
   slot default
@@ -21,7 +22,7 @@ defmodule BanchanWeb.Components.Layout do
     <div class="drawer drawer-end h-screen w-full">
       <input type="checkbox" id="drawer-toggle" class="drawer-toggle">
       <div class="drawer-content h-screen flex flex-col">
-        <Nav current_user={@current_user} />
+        <Nav uri={@uri} current_user={@current_user} />
         {#if slot_assigned?(:hero)}
           <#slot name="hero" />
         {/if}

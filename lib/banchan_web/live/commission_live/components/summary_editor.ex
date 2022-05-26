@@ -38,13 +38,10 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
     else
       socket =
         if current_comm && (!new_comm || current_comm.public_id != new_comm.public_id) do
-          Commissions.unsubscribe_from_commission_events(current_comm)
           socket |> assign(loaded: false)
         else
           socket
         end
-
-      Commissions.subscribe_to_commission_events(socket.assigns.commission)
 
       deposited =
         Commissions.deposited_amount(

@@ -1,6 +1,8 @@
 defmodule BanchanWeb.UserSessionControllerTest do
   use BanchanWeb.ConnCase, async: true
 
+  import Phoenix.LiveViewTest
+
   import Banchan.AccountsFixtures
 
   setup do
@@ -106,9 +108,13 @@ defmodule BanchanWeb.UserSessionControllerTest do
           }
         })
 
-      response = html_response(conn, 200)
-      assert response =~ "Log in</h1>"
-      assert response =~ "Invalid email, password, or MFA token"
+      response = html_response(conn, 302)
+      assert response =~ "redirected"
+
+      {"location", loc} = Enum.find(conn.resp_headers, fn {k, _} -> k == "location" end)
+      {:ok, _, html} = live(conn, loc)
+      assert html =~ "Log in</h1>"
+      assert html =~ "Invalid email, password, or MFA token"
     end
 
     test "emits error message with valid credentials no MFA", %{conn: conn, user_mfa: user} do
@@ -121,9 +127,13 @@ defmodule BanchanWeb.UserSessionControllerTest do
           }
         })
 
-      response = html_response(conn, 200)
-      assert response =~ "Log in</h1>"
-      assert response =~ "Invalid email, password, or MFA token"
+      response = html_response(conn, 302)
+      assert response =~ "redirected"
+
+      {"location", loc} = Enum.find(conn.resp_headers, fn {k, _} -> k == "location" end)
+      {:ok, _, html} = live(conn, loc)
+      assert html =~ "Log in</h1>"
+      assert html =~ "Invalid email, password, or MFA token"
     end
 
     test "emits error message with valid credentials wrong MFA", %{conn: conn, user_mfa: user} do
@@ -136,9 +146,13 @@ defmodule BanchanWeb.UserSessionControllerTest do
           }
         })
 
-      response = html_response(conn, 200)
-      assert response =~ "Log in</h1>"
-      assert response =~ "Invalid email, password, or MFA token"
+      response = html_response(conn, 302)
+      assert response =~ "redirected"
+
+      {"location", loc} = Enum.find(conn.resp_headers, fn {k, _} -> k == "location" end)
+      {:ok, _, html} = live(conn, loc)
+      assert html =~ "Log in</h1>"
+      assert html =~ "Invalid email, password, or MFA token"
     end
   end
 
