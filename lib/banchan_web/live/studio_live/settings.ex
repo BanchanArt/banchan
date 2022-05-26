@@ -115,5 +115,4 @@ defmodule BanchanWeb.StudioLive.Settings do
     </StudioLayout>
     """
   end
-
 end

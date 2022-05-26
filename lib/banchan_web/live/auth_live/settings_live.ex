@@ -44,11 +44,12 @@ defmodule BanchanWeb.SettingsLive do
     {:noreply,
      socket
      |> push_event("set_theme", %{
-       theme: if val["value"] do
-        "dark"
-       else
-        "light"
-       end
+       theme:
+         if val["value"] do
+           "dark"
+         else
+           "light"
+         end
      })}
   end
 
