@@ -48,6 +48,7 @@ defmodule Banchan.Notifications do
 
           url = Routes.commission_url(Endpoint, :show, commission.public_id)
           {:safe, safe_url} = Phoenix.HTML.html_escape(url)
+
           notify_subscribers!(
             actor,
             subs,
@@ -56,7 +57,8 @@ defmodule Banchan.Notifications do
               title: commission.title,
               short_body: "A new commission has been submitted to your studio.",
               text_body: "A new commission has been submitted to your studio.\n\n#{url}",
-              html_body: "<p>A new commission has been submitted to your studio.</p><p><a href=\"#{safe_url}\">View it</a></p>",
+              html_body:
+                "<p>A new commission has been submitted to your studio.</p><p><a href=\"#{safe_url}\">View it</a></p>",
               url: url,
               read: false
             }
