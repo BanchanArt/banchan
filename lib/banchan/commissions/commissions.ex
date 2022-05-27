@@ -628,8 +628,13 @@ defmodule Banchan.Commissions do
       }
     ]
 
-    {stripe_id, platform_fee} = from(studio in Studio, where: studio.id == ^commission.studio_id, select: {studio.stripe_id, studio.platform_fee})
+    {stripe_id, platform_fee} =
+      from(studio in Studio,
+        where: studio.id == ^commission.studio_id,
+        select: {studio.stripe_id, studio.platform_fee}
+      )
       |> Repo.one!()
+
     platform_fee = Money.multiply(Money.add(amount, tip), platform_fee)
 
     {:ok, session} =
