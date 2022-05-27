@@ -223,11 +223,33 @@ defmodule Banchan.Studios do
       results
       |> Enum.split_with(&(&1.comm_status == "approved"))
 
+    released =
+      released
+      |> Enum.map(&Money.subtract(Money.add(&1.charged, &1.tips), &1.fees))
+
+    held_back =
+      held_back
+      |> Enum.map(&Money.subtract(Money.add(&1.charged, &1.tips), &1.fees))
+
+    available =
+      released
+      |> Enum.map(fn rel ->
+        from_stripe =
+          Enum.find(stripe_available, Money.new(0, rel.currency), &(&1.currency == rel.currency))
+
+        if from_stripe.amount > rel.amount do
+          Money.subtract(rel, from_stripe)
+        else
+          Money.new(0, rel.currency)
+        end
+      end)
+
     %{
       stripe_available: stripe_available,
       stripe_pending: stripe_pending,
       held_back: held_back,
-      released: released
+      released: released,
+      available: available
     }
   end
 

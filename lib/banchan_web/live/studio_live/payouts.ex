@@ -44,7 +44,24 @@ defmodule BanchanWeb.StudioLive.Payouts do
       uri={@uri}
     >
       <div class="mx-auto">
-        <div class="stats">
+        <div class="stats stats-vertical">
+          <div class="stat">
+            <div class="stat-title">
+              Available for Payout
+            </div>
+            <div class="stat-value">
+              {Enum.join(
+                Enum.map(
+                  @balance.available,
+                  &Money.to_string/1
+                ),
+                " + "
+              )}
+            </div>
+            <div class="stat-desc">
+              Approved for release and ready on Stripe.
+            </div>
+          </div>
           <div class="stat">
             <div class="stat-title">
               Released from Commissions
@@ -53,7 +70,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
               {Enum.join(
                 Enum.map(
                   @balance.released,
-                  &Money.to_string(Money.subtract(Money.add(&1.charged, &1.tips), &1.fees))
+                  &Money.to_string/1
                 ),
                 " + "
               )}
@@ -70,7 +87,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
               {Enum.join(
                 Enum.map(
                   @balance.held_back,
-                  &Money.to_string(Money.subtract(Money.add(&1.charged, &1.tips), &1.fees))
+                  &Money.to_string/1
                 ),
                 " + "
               )}
@@ -93,7 +110,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
               )}
             </div>
             <div class="stat-desc">
-              Waiting for Stripe availability.
+              Includes both for released and pending payments.
             </div>
           </div>
         </div>
