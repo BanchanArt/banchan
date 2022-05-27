@@ -9,14 +9,13 @@ defmodule BanchanWeb.StudioLive.Payouts do
   alias Banchan.Studios
 
   alias BanchanWeb.CommissionLive.Components.StudioLayout
-  alias BanchanWeb.Components.Button
 
   def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, true, false)
 
     {:ok,
      socket
-     |> assign(balance: Studios.get_stripe_balance!(socket.assigns.studio))}
+     |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
   end
 
   @impl true
@@ -30,7 +29,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
     {:noreply,
      socket
-     |> assign(balance: Studios.get_stripe_balance!(socket.assigns.studio))}
+     |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
   end
 
   @impl true
@@ -48,36 +47,53 @@ defmodule BanchanWeb.StudioLive.Payouts do
         <div class="stats">
           <div class="stat">
             <div class="stat-title">
-              Ready for Payout
+              Released from Commissions
             </div>
             <div class="stat-value">
               {Enum.join(
                 Enum.map(
-                  @balance.available,
-                  &Money.to_string(Money.new(&1.amount, String.to_existing_atom(String.upcase(&1.currency))))
+                  @balance.released,
+                  &Money.to_string(Money.subtract(Money.add(&1.charged, &1.tips), &1.fees))
                 ),
                 " + "
               )}
             </div>
-            <div class="stat-actions">
-              <Button click="pay_me">Pay Me Now</Button>
+            <div class="stat-desc">
+              Approved for release by clients.
             </div>
           </div>
           <div class="stat">
             <div class="stat-title">
-              Pending
+              Held by Banchan
             </div>
             <div class="stat-value">
               {Enum.join(
                 Enum.map(
-                  @balance.pending,
-                  &Money.to_string(Money.new(&1.amount, String.to_existing_atom(String.upcase(&1.currency))))
+                  @balance.held_back,
+                  &Money.to_string(Money.subtract(Money.add(&1.charged, &1.tips), &1.fees))
                 ),
                 " + "
               )}
             </div>
-            <div class="stat-actions">
-              <Button>Stripe Dashboard</Button>
+            <div class="stat-desc">
+              Paid into Banchan but not released.
+            </div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">
+              Pending on Stripe
+            </div>
+            <div class="stat-value">
+              {Enum.join(
+                Enum.map(
+                  @balance.stripe_pending,
+                  &Money.to_string(&1)
+                ),
+                " + "
+              )}
+            </div>
+            <div class="stat-desc">
+              Waiting for Stripe availability.
             </div>
           </div>
         </div>

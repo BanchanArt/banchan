@@ -12,6 +12,7 @@ defmodule Banchan.Studios do
   import Ecto.Query, warn: false
 
   alias Banchan.Accounts.User
+  alias Banchan.Commissions.{Commission, Invoice}
   alias Banchan.Notifications
   alias Banchan.Offerings.Offering
   alias Banchan.Repo
@@ -162,9 +163,73 @@ defmodule Banchan.Studios do
     link.url
   end
 
-  def get_stripe_balance!(%Studio{} = studio) do
+  defp get_stripe_balance!(%Studio{} = studio) do
     {:ok, balance} = Stripe.Balance.retrieve(headers: %{"Stripe-Account" => studio.stripe_id})
     balance
+  end
+
+  def get_banchan_balance!(%Studio{} = studio) do
+    stripe_balance = get_stripe_balance!(studio)
+
+    stripe_available =
+      stripe_balance.available
+      |> Enum.map(&Money.new(&1.amount, String.to_atom(String.upcase(&1.currency))))
+      |> Enum.sort()
+
+    stripe_pending =
+      stripe_balance.pending
+      |> Enum.map(&Money.new(&1.amount, String.to_atom(String.upcase(&1.currency))))
+      |> Enum.sort()
+
+    results =
+      from(i in Invoice,
+        join: c in Commission,
+        where:
+          i.commission_id == c.id and
+            c.studio_id == ^studio.id and
+            i.status == :succeeded,
+        group_by: [
+          fragment("case when c1.status = 'approved' then 'approved' else 'pending' end"),
+          fragment("(c0.amount).currency"),
+          fragment("(c0.tip).currency"),
+          fragment("(c0.platform_fee).currency")
+        ],
+        select: %{
+          comm_status:
+            type(
+              fragment("case when c1.status = 'approved' then 'approved' else 'pending' end"),
+              :string
+            ),
+          charged:
+            type(
+              fragment("(sum((c0.amount).amount), (c0.amount).currency)"),
+              Money.Ecto.Composite.Type
+            ),
+          tips:
+            type(
+              fragment("(sum((c0.tip).amount), (c0.tip).currency)"),
+              Money.Ecto.Composite.Type
+            ),
+          fees:
+            type(
+              fragment(
+                "(sum((c0.platform_fee).amount), (c0.platform_fee).currency)"
+              ),
+              Money.Ecto.Composite.Type
+            )
+        }
+      )
+      |> Repo.all()
+
+      {released, held_back} = results
+      |> Enum.split_with(& &1.comm_status == "approved")
+
+    %{
+      stripe_available: stripe_available,
+      stripe_pending: stripe_pending,
+      held_back: held_back,
+      released: released
+    }
   end
 
   def payout_studio!(%Studio{} = studio) do
