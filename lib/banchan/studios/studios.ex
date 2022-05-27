@@ -212,17 +212,16 @@ defmodule Banchan.Studios do
             ),
           fees:
             type(
-              fragment(
-                "(sum((c0.platform_fee).amount), (c0.platform_fee).currency)"
-              ),
+              fragment("(sum((c0.platform_fee).amount), (c0.platform_fee).currency)"),
               Money.Ecto.Composite.Type
             )
         }
       )
       |> Repo.all()
 
-      {released, held_back} = results
-      |> Enum.split_with(& &1.comm_status == "approved")
+    {released, held_back} =
+      results
+      |> Enum.split_with(&(&1.comm_status == "approved"))
 
     %{
       stripe_available: stripe_available,
