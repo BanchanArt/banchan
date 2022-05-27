@@ -390,8 +390,8 @@ defmodule Banchan.Commissions do
     ret =
       %Event{
         type: type,
-        commission_id: commission.id,
-        actor_id: actor.id,
+        commission: commission,
+        actor: actor,
         attachments: attachments
       }
       |> Event.changeset(attrs)
@@ -685,8 +685,8 @@ defmodule Banchan.Commissions do
 
         create_event(
           :payment_processed,
-          %User{id: event.actor_id},
-          %Commission{id: event.commission_id},
+          Repo.reload!(%User{id: event.actor_id}),
+          Repo.reload!(%Commission{id: event.commission_id}),
           true,
           [],
           %{
