@@ -10,13 +10,14 @@ defmodule Banchan.Studios do
   @pubsub Banchan.PubSub
 
   import Ecto.Query, warn: false
+  require Logger
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.{Commission, Invoice}
   alias Banchan.Notifications
   alias Banchan.Offerings.Offering
   alias Banchan.Repo
-  alias Banchan.Studios.Studio
+  alias Banchan.Studios.{Payout, Studio}
 
   @doc """
   Gets a studio by its handle.
@@ -163,13 +164,9 @@ defmodule Banchan.Studios do
     link.url
   end
 
-  defp get_stripe_balance!(%Studio{} = studio) do
-    {:ok, balance} = Stripe.Balance.retrieve(headers: %{"Stripe-Account" => studio.stripe_id})
-    balance
-  end
-
   def get_banchan_balance!(%Studio{} = studio) do
-    stripe_balance = get_stripe_balance!(studio)
+    {:ok, stripe_balance} =
+      Stripe.Balance.retrieve(headers: %{"Stripe-Account" => studio.stripe_id})
 
     stripe_available =
       stripe_balance.available
@@ -254,19 +251,85 @@ defmodule Banchan.Studios do
   end
 
   def payout_studio!(%Studio{} = studio) do
-    balance = get_stripe_balance!(studio)
+    {:ok, balance} = Stripe.Balance.retrieve(headers: %{"Stripe-Account" => studio.stripe_id})
 
     Enum.each(balance.available, fn avail ->
       if avail.amount > 0 do
-        {:ok, _} =
-          Stripe.Payout.create(
-            %{
-              amount: avail.amount,
-              currency: avail.currency,
-              statement_descriptor: "Banchan Art"
-            },
-            headers: %{"Stripe-Account" => studio.stripe_id}
+        currency_str = String.upcase(avail.currency)
+        currency = String.to_atom(currency_str)
+
+        {invoice_ids, invoice_count, total} =
+          from(i in Invoice,
+            join: c in Commission,
+            where:
+              c.studio_id == ^studio.id and i.status == :succeeded and is_nil(i.payout_id) and
+                fragment("(c0.amount).currency = ?::char(3)", ^currency_str),
+            order_by: {:asc, i.updated_at}
           )
+          |> Repo.all()
+          |> Enum.reduce_while({[], 0, Money.new(0, currency)}, fn invoice,
+                                                                   {invoice_ids, invoice_count,
+                                                                    total} = acc ->
+            invoice_total =
+              Money.subtract(Money.add(invoice.amount, invoice.tip), invoice.platform_fee)
+
+            if invoice_total.amount + total.amount > avail.amount do
+              {:halt, acc}
+            else
+              {:cont,
+               {[invoice.id | invoice_ids], invoice_count + 1, Money.add(total, invoice_total)}}
+            end
+          end)
+
+        if total.amount > 0 do
+          # TODO: friendly error messaging for users.
+          {:ok, stripe_payout} =
+            Stripe.Payout.create(
+              %{
+                amount: total.amount,
+                currency: avail.currency,
+                statement_descriptor: "banchan.art payout"
+              },
+              headers: %{"Stripe-Account" => studio.stripe_id}
+            )
+
+          # TODO: What happens if this transaction fails?? We've already
+          # created a Stripe transaction...
+          case Repo.transaction(fn ->
+                 payout =
+                   %Payout{
+                     stripe_payout_id: stripe_payout.id,
+                     status: String.to_atom(stripe_payout.status),
+                     amount: total,
+                     studio_id: studio.id
+                   }
+                   |> Repo.insert!()
+
+                 from(i in Invoice,
+                   where: i.id in ^invoice_ids
+                 )
+                 |> Repo.update_all(set: [payout_id: payout.id])
+               end) do
+            {:ok, {^invoice_count, _}} ->
+              :ok
+
+            {:ok, _} ->
+              Logger.error(%{
+                message: "Wrong number of Invoice rows updated after payout",
+                error: %{}
+              })
+
+            {:error, err} ->
+              Logger.error(%{message: "Failed to update database after payout", error: err})
+
+              {:ok, _} =
+                Stripe.Payout.cancel(stripe_payout.id,
+                  headers: %{"Stripe-Account" => studio.stripe_id}
+                )
+
+              raise "Error writing payout information to db."
+          end
+        end
       end
     end)
 

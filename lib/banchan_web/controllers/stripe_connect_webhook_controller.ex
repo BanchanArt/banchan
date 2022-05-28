@@ -4,6 +4,8 @@ defmodule BanchanWeb.StripeConnectWebhookController do
   """
   use BanchanWeb, :controller
 
+  require Logger
+
   alias Banchan.Commissions
   alias Banchan.Studios
 
@@ -46,8 +48,10 @@ defmodule BanchanWeb.StripeConnectWebhookController do
     |> send_resp()
   end
 
-  defp handle_event(%Stripe.Event{}, conn) do
-    # TODO: Do we want to log anything about events we got that we're not handling?
+  # TODO: Handle payout events.
+  defp handle_event(%Stripe.Event{type: type}, conn) do
+    Logger.debug("unhandled_event: #{type}")
+
     conn
     |> resp(200, "OK")
     |> send_resp()

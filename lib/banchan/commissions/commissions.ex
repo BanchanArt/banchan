@@ -566,9 +566,7 @@ defmodule Banchan.Commissions do
     )
   end
 
-  def invoice_paid?(%Invoice{status: :succeeded}), do: true
-  def invoice_paid?(%Invoice{status: :paid_out}), do: true
-  def invoice_paid?(%Invoice{}), do: false
+  def invoice_paid?(%Invoice{status: status}), do: status == :succeeded
 
   def invoice(_actor, _commission, false, _drafts, _event_data) do
     {:error, :unauthorized}
@@ -753,7 +751,7 @@ defmodule Banchan.Commissions do
         # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
         Money.new(0, :USD),
         fn event, acc ->
-          if event.invoice && event.invoice.status in [:succeeded, :paid_out] do
+          if event.invoice && event.invoice.status == :succeeded do
             Money.add(acc, event.invoice.amount)
           else
             acc
@@ -766,7 +764,7 @@ defmodule Banchan.Commissions do
           i in Invoice,
           where:
             i.commission_id == ^commission.id and
-              (i.status == :paid_out or i.status == :succeeded),
+              i.status == :succeeded,
           select: i.amount
         )
         |> Repo.all()

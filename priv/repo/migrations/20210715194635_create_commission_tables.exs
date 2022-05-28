@@ -94,7 +94,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     create index(:event_attachments, [:upload_id])
 
     create table(:commission_invoices) do
-      add :stripe_session_id, :text
+      add :stripe_session_id, :string
       add :checkout_url, :text
       add :status, :string, null: false
       add :tip, :money_with_currency
@@ -104,6 +104,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :commission_id, references(:commissions, on_delete: :nothing)
       add :client_id, references(:users, on_delete: :nothing)
       add :event_id, references(:commission_events, on_delete: :nothing)
+      add :payout_id, references(:studio_payouts, on_delete: :nothing)
       add :payout_available_on, :utc_datetime
 
       timestamps()

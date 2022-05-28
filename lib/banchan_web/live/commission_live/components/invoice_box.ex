@@ -121,8 +121,6 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-desc">Payment session expired.</div>
             {#match :succeeded}
               <div class="stat-desc">Payment succeeded.</div>
-            {#match :paid_out}
-              <div class="stat-desc">Funds have been paid out.</div>
             {#match nil}
               {!-- NOTE: This state happens for a very brief window of time
                 between when the payment request event is created, and when the
@@ -132,7 +130,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-desc">Please wait...</div>
           {/case}
         </div>
-        {#if @event.invoice.status == :succeeded || @event.invoice.status == :paid_out}
+        {#if @event.invoice.status == :succeeded}
           <div class="stat">
             <div class="stat-title">Tip</div>
             <div class="stat-value">{Money.to_string(@event.invoice.tip)}</div>

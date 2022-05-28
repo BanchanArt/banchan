@@ -22,5 +22,12 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :user_id, references(:users), null: false
       add :studio_id, references(:studios), null: false
     end
+
+    create table(:studio_payouts) do
+      add :stripe_payout_id, :string, null: false
+      add :amount, :money_with_currency, null: false
+      add :status, :string, null: false
+      add :studio_id, references(:studios), null: false
+    end
   end
 end
