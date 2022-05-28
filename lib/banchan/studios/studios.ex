@@ -250,69 +250,50 @@ defmodule Banchan.Studios do
     }
   end
 
-  def payout_studio!(%Studio{} = studio) do
+  def payout_studio(%Studio{} = studio) do
     {:ok, balance} = Stripe.Balance.retrieve(headers: %{"Stripe-Account" => studio.stripe_id})
 
-    Enum.each(balance.available, &payout_available!/1)
-
-    :ok
-  end
-
-  defp payout_available!(avail) do
-    if avail.amount > 0 do
-      {invoice_ids, invoice_count, total} = invoice_details(studio)
-
-      if total.amount > 0 do
-        # TODO: friendly error messaging for users.
-        {:ok, stripe_payout} =
-          Stripe.Payout.create(
-            %{
-              amount: total.amount,
-              currency: avail.currency,
-              statement_descriptor: "banchan.art payout"
-            },
-            headers: %{"Stripe-Account" => studio.stripe_id}
-          )
-
-        case create_payout!(studio, stripe_payout, total) do
-          {:ok, {^invoice_count, _}} ->
-            :ok
-
-          {:ok, _} ->
-            Logger.error(%{
-              message: "Wrong number of Invoice rows updated after payout",
-              error: %{}
-            })
-
-          {:error, err} ->
-            Logger.error(%{message: "Failed to update database after payout", error: err})
-
-            {:ok, _} =
-              Stripe.Payout.cancel(stripe_payout.id,
-                headers: %{"Stripe-Account" => studio.stripe_id}
-              )
-
-            raise "Error writing payout information to db."
-        end
-      end
+    try do
+      {:ok, Enum.map(balance.available, &payout_available!(studio, &1))}
+    rescue
+      e in Stripe.Error ->
+        Logger.error("Stripe error during payout: #{e.message}")
+        {:error, e.user_message}
+    catch
+      {:error, err} ->
+        {:error, err}
     end
   end
 
-  defp invoice_details(%Studio{} = studio) do
-    currency_str = String.upcase(avail.currency)
-    currency = String.to_atom(currency_str)
+  defp payout_available!(%Studio{} = studio, avail) do
+    avail = Money.new(avail.amount, String.to_atom(String.upcase(avail.currency)))
 
+    if avail.amount > 0 do
+      {invoice_ids, invoice_count, total} = invoice_details(studio, avail)
+
+      if total.amount > 0 do
+        create_payout!(studio, invoice_ids, invoice_count, total)
+        total
+      else
+        Money.new(0, avail.currency)
+      end
+    else
+      Money.new(0, avail.currency)
+    end
+  end
+
+  defp invoice_details(%Studio{} = studio, avail) do
     from(i in Invoice,
       join: c in Commission,
       where:
         c.studio_id == ^studio.id and i.status == :succeeded and is_nil(i.payout_id) and
-          fragment("(c0.amount).currency = ?::char(3)", ^currency_str),
+          fragment("(c0.amount).currency = ?::char(3)", ^avail.currency),
       order_by: {:asc, i.updated_at}
     )
     |> Repo.all()
-    |> Enum.reduce_while({[], 0, Money.new(0, currency)}, fn invoice,
-                                                             {invoice_ids, invoice_count, total} =
-                                                               acc ->
+    |> Enum.reduce_while({[], 0, Money.new(0, avail.currency)}, fn invoice,
+                                                                   {invoice_ids, invoice_count,
+                                                                    total} = acc ->
       invoice_total = Money.subtract(Money.add(invoice.amount, invoice.tip), invoice.platform_fee)
 
       if invoice_total.amount + total.amount > avail.amount do
@@ -323,23 +304,67 @@ defmodule Banchan.Studios do
     end)
   end
 
-  defp create_payout!(%Studio{} = studio, stripe_payout, %Money{} = total) do
-    # TODO: What happens if this transaction fails?? We've already
-    # created a Stripe transaction...
-    Repo.transaction(fn ->
-      payout =
-        %Payout{
-          stripe_payout_id: stripe_payout.id,
-          status: String.to_atom(stripe_payout.status),
-          amount: total,
-          studio_id: studio.id
-        }
-        |> Repo.insert!()
+  defp create_payout!(%Studio{} = studio, invoice_ids, invoice_count, %Money{} = total) do
+    {:ok, stripe_payout} =
+      case Stripe.Payout.create(
+             %{
+               amount: total.amount,
+               currency: String.downcase(Atom.to_string(total.currency)),
+               statement_descriptor: "banchan.art payout"
+             },
+             headers: %{"Stripe-Account" => studio.stripe_id}
+           ) do
+        {:ok, stripe_payout} ->
+          {:ok, stripe_payout}
 
-      from(i in Invoice,
-        where: i.id in ^invoice_ids
-      )
-      |> Repo.update_all(set: [payout_id: payout.id])
+        {:error, %Stripe.Error{} = error} ->
+          # NOTE: This will get rescued further up for a proper {:error, err} return.
+          raise error
+      end
+
+    Repo.transaction(fn ->
+      case %Payout{
+             stripe_payout_id: stripe_payout.id,
+             status: String.to_atom(stripe_payout.status),
+             amount: total,
+             studio_id: studio.id
+           }
+           |> Repo.insert() do
+        {:ok, payout} ->
+          case from(i in Invoice,
+                 where: i.id in ^invoice_ids
+               )
+               |> Repo.update_all(set: [payout_id: payout.id]) do
+            {:ok, {^invoice_count, _}} ->
+              :ok
+
+            {:ok, {unexpected_count, _}} ->
+              Logger.error(%{
+                message:
+                  "Wrong number of Invoice rows updated after payout (expected: #{invoice_count}, actual: #{unexpected_count})",
+                error: %{}
+              })
+
+              # NOTE: This will get caught further up for a proper {:error, err} return.
+              throw({:error, "Payout failed due to an internal error."})
+          end
+
+        {:error, err} ->
+          Logger.error(%{message: "Failed to update database after payout", error: err})
+
+          case Stripe.Payout.cancel(stripe_payout.id,
+                 headers: %{"Stripe-Account" => studio.stripe_id}
+               ) do
+            {:ok} ->
+              :ok
+
+            {:error, %Stripe.Error{} = err} ->
+              raise err
+          end
+
+          # NOTE: This will get caught further up for a proper {:error, err} return.
+          throw({:error, "Payout failed due to an internal error."})
+      end
     end)
   end
 

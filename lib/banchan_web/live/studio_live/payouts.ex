@@ -25,11 +25,22 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   @impl true
   def handle_event("pay_me", _, socket) do
-    Studios.payout_studio!(socket.assigns.studio)
+    case Studios.payout_studio(socket.assigns.studio) do
+      {:ok, _payouts} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :success,
+           "Payouts sent! It may be a few days before they arrive in your account."
+         )
+         |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
 
-    {:noreply,
-     socket
-     |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
+      {:error, user_msg} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, user_msg)
+         |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
+    end
   end
 
   @impl true
