@@ -8,6 +8,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   alias Banchan.Studios
 
+  alias BanchanWeb.Components.Button
   alias BanchanWeb.CommissionLive.Components.StudioLayout
 
   def mount(params, _session, socket) do
@@ -24,7 +25,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
   end
 
   @impl true
-  def handle_event("pay_me", _, socket) do
+  def handle_event("fypm", _, socket) do
     case Studios.payout_studio(socket.assigns.studio) do
       {:ok, _payouts} ->
         {:noreply,
@@ -43,6 +44,11 @@ defmodule BanchanWeb.StudioLive.Payouts do
     end
   end
 
+  defp payout_possible?(available) do
+    !Enum.empty?(available) &&
+      Enum.all?(available, &(&1.amount > 0))
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -51,79 +57,53 @@ defmodule BanchanWeb.StudioLive.Payouts do
       flashes={@flash}
       studio={@studio}
       current_user_member?={@current_user_member?}
-      tab={:settings}
+      tab={:payouts}
       uri={@uri}
     >
       <div class="mx-auto">
-        <div class="stats stats-vertical">
-          <div class="stat">
-            <div class="stat-title">
-              Available for Payout
-            </div>
-            <div class="stat-value">
-              {Enum.join(
-                Enum.map(
-                  @balance.available,
-                  &Money.to_string/1
-                ),
-                " + "
-              )}
-            </div>
-            <div class="stat-desc">
-              Approved for release and ready on Stripe.
-            </div>
+        <h2 class="text-xl">Available for Payout</h2>
+        <div class="flex flex-col">
+          <div class="stats stats-horizontal">
+            {#for avail <- @balance.available}
+              {#if avail.amount > 0}
+                <div class="stat">
+                  <div class="stat-value">{Money.to_string(avail)}</div>
+                </div>
+              {/if}
+            {/for}
+            {#if !payout_possible?(@balance.available)}
+              <div class="stat">
+                <div class="stat-value">{Money.to_string(Money.new(0, :USD))}</div>
+              </div>
+            {/if}
           </div>
-          <div class="stat">
-            <div class="stat-title">
-              Released from Commissions
+          <Button click="fypm" disabled={!payout_possible?(@balance.available)}>Pay Out</Button>
+        </div>
+
+        <h2 class="text-xl">Waiting for Approval</h2>
+        <div class="stats stats-horizontal">
+          {#for held <- @balance.held_back}
+            <div class="stat">
+              <div class="stat-value">{Money.to_string(held)}</div>
             </div>
-            <div class="stat-value">
-              {Enum.join(
-                Enum.map(
-                  @balance.released,
-                  &Money.to_string/1
-                ),
-                " + "
-              )}
+          {#else}
+            <div class="stat">
+              <div class="stat-value">{Money.to_string(Money.new(0, :USD))}</div>
             </div>
-            <div class="stat-desc">
-              Approved for release by clients.
+          {/for}
+        </div>
+
+        <h2 class="text-xl">On the Way</h2>
+        <div class="stats stats-horizontal">
+          {#for otw <- @balance.on_the_way}
+            <div class="stat">
+              <div class="stat-value">{Money.to_string(otw)}</div>
             </div>
-          </div>
-          <div class="stat">
-            <div class="stat-title">
-              Held by Banchan
+          {#else}
+            <div class="stat">
+              <div class="stat-value">{Money.to_string(Money.new(0, :USD))}</div>
             </div>
-            <div class="stat-value">
-              {Enum.join(
-                Enum.map(
-                  @balance.held_back,
-                  &Money.to_string/1
-                ),
-                " + "
-              )}
-            </div>
-            <div class="stat-desc">
-              Paid into Banchan but not released.
-            </div>
-          </div>
-          <div class="stat">
-            <div class="stat-title">
-              Pending on Stripe
-            </div>
-            <div class="stat-value">
-              {Enum.join(
-                Enum.map(
-                  @balance.stripe_pending,
-                  &Money.to_string(&1)
-                ),
-                " + "
-              )}
-            </div>
-            <div class="stat-desc">
-              Includes both for released and pending payments.
-            </div>
-          </div>
+          {/for}
         </div>
       </div>
     </StudioLayout>

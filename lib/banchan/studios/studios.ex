@@ -180,21 +180,31 @@ defmodule Banchan.Studios do
 
     results =
       from(i in Invoice,
-        join: c in Commission,
+        join: c in assoc(i, :commission),
+        left_join: p in assoc(i, :payout),
         where:
-          i.commission_id == c.id and
-            c.studio_id == ^studio.id and
+          c.studio_id == ^studio.id and
             i.status == :succeeded,
         group_by: [
-          fragment("case when c1.status = 'approved' then 'approved' else 'pending' end"),
+          fragment(
+            "CASE WHEN c0.payout_id IS NOT NULL AND (s2.status = 'pending' OR s2.status = 'in_transit') THEN 'on_the_way'
+                  WHEN c1.status = 'approved' THEN 'released'
+                  ELSE 'pending'
+             END"
+          ),
           fragment("(c0.amount).currency"),
           fragment("(c0.tip).currency"),
           fragment("(c0.platform_fee).currency")
         ],
         select: %{
-          comm_status:
+          status:
             type(
-              fragment("case when c1.status = 'approved' then 'approved' else 'pending' end"),
+              fragment(
+                "CASE WHEN c0.payout_id IS NOT NULL AND (s2.status = 'pending' OR s2.status = 'in_transit') THEN 'on_the_way'
+                  WHEN c1.status = 'approved' THEN 'released'
+                  ELSE 'pending'
+             END"
+              ),
               :string
             ),
           charged:
@@ -216,9 +226,21 @@ defmodule Banchan.Studios do
       )
       |> Repo.all()
 
-    {released, held_back} =
+    {released, held_back, on_the_way} =
       results
-      |> Enum.split_with(&(&1.comm_status == "approved"))
+      |> Enum.reduce({[], [], []}, fn %{status: status} = res,
+                                      {released, held_back, on_the_way} ->
+        case status do
+          "released" ->
+            {[res | released], held_back, on_the_way}
+
+          "pending" ->
+            {released, [res | held_back], on_the_way}
+
+          "on_the_way" ->
+            {released, held_back, [res | on_the_way]}
+        end
+      end)
 
     released =
       released
@@ -228,24 +250,35 @@ defmodule Banchan.Studios do
       held_back
       |> Enum.map(&Money.subtract(Money.add(&1.charged, &1.tips), &1.fees))
 
+    on_the_way =
+      on_the_way
+      |> Enum.map(&Money.subtract(Money.add(&1.charged, &1.tips), &1.fees))
+
     available =
       released
       |> Enum.map(fn rel ->
         from_stripe =
           Enum.find(stripe_available, Money.new(0, rel.currency), &(&1.currency == rel.currency))
+        IO.inspect(from_stripe)
+        IO.inspect(rel)
 
-        if from_stripe.amount > rel.amount do
-          Money.subtract(rel, from_stripe)
-        else
+        cond do
+          from_stripe.amount >= rel.amount ->
+            rel
+          from_stripe.amount < rel.amount ->
+            from_stripe
+          true ->
           Money.new(0, rel.currency)
         end
       end)
 
+    IO.inspect(stripe_balance)
     %{
       stripe_available: stripe_available,
       stripe_pending: stripe_pending,
       held_back: held_back,
       released: released,
+      on_the_way: on_the_way,
       available: available
     }
   end
@@ -254,6 +287,7 @@ defmodule Banchan.Studios do
     {:ok, balance} = Stripe.Balance.retrieve(headers: %{"Stripe-Account" => studio.stripe_id})
 
     try do
+      # TODO: notifications!
       {:ok, Enum.map(balance.available, &payout_available!(studio, &1))}
     rescue
       e in Stripe.Error ->
@@ -283,11 +317,13 @@ defmodule Banchan.Studios do
   end
 
   defp invoice_details(%Studio{} = studio, avail) do
+    currency_str = Atom.to_string(avail.currency)
+
     from(i in Invoice,
       join: c in Commission,
       where:
         c.studio_id == ^studio.id and i.status == :succeeded and is_nil(i.payout_id) and
-          fragment("(c0.amount).currency = ?::char(3)", ^avail.currency),
+          fragment("(c0.amount).currency = ?::char(3)", ^currency_str),
       order_by: {:asc, i.updated_at}
     )
     |> Repo.all()
@@ -322,6 +358,7 @@ defmodule Banchan.Studios do
           raise error
       end
 
+    # TODO: This is racy af
     Repo.transaction(fn ->
       case %Payout{
              stripe_payout_id: stripe_payout.id,
@@ -329,16 +366,17 @@ defmodule Banchan.Studios do
              amount: total,
              studio_id: studio.id
            }
-           |> Repo.insert() do
+           |> Repo.insert(returning: [:id]) do
         {:ok, payout} ->
           case from(i in Invoice,
                  where: i.id in ^invoice_ids
                )
                |> Repo.update_all(set: [payout_id: payout.id]) do
-            {:ok, {^invoice_count, _}} ->
+            {^invoice_count, _} ->
               :ok
 
-            {:ok, {unexpected_count, _}} ->
+            {unexpected_count, _} ->
+              # TODO: OK BUT WHY
               Logger.error(%{
                 message:
                   "Wrong number of Invoice rows updated after payout (expected: #{invoice_count}, actual: #{unexpected_count})",
@@ -366,6 +404,17 @@ defmodule Banchan.Studios do
           throw({:error, "Payout failed due to an internal error."})
       end
     end)
+  end
+
+  def process_payout_updated!(payout) do
+    IO.inspect("New payout status: #{payout.status}")
+
+    from(p in Payout,
+      where: p.stripe_payout_id == ^payout.id
+    )
+    |> Repo.update_all(set: [status: String.to_atom(payout.status)])
+
+    :ok
   end
 
   def charges_enabled?(%Studio{} = studio, refresh \\ false) do
