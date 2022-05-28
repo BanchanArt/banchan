@@ -253,87 +253,94 @@ defmodule Banchan.Studios do
   def payout_studio!(%Studio{} = studio) do
     {:ok, balance} = Stripe.Balance.retrieve(headers: %{"Stripe-Account" => studio.stripe_id})
 
-    Enum.each(balance.available, fn avail ->
-      if avail.amount > 0 do
-        currency_str = String.upcase(avail.currency)
-        currency = String.to_atom(currency_str)
-
-        {invoice_ids, invoice_count, total} =
-          from(i in Invoice,
-            join: c in Commission,
-            where:
-              c.studio_id == ^studio.id and i.status == :succeeded and is_nil(i.payout_id) and
-                fragment("(c0.amount).currency = ?::char(3)", ^currency_str),
-            order_by: {:asc, i.updated_at}
-          )
-          |> Repo.all()
-          |> Enum.reduce_while({[], 0, Money.new(0, currency)}, fn invoice,
-                                                                   {invoice_ids, invoice_count,
-                                                                    total} = acc ->
-            invoice_total =
-              Money.subtract(Money.add(invoice.amount, invoice.tip), invoice.platform_fee)
-
-            if invoice_total.amount + total.amount > avail.amount do
-              {:halt, acc}
-            else
-              {:cont,
-               {[invoice.id | invoice_ids], invoice_count + 1, Money.add(total, invoice_total)}}
-            end
-          end)
-
-        if total.amount > 0 do
-          # TODO: friendly error messaging for users.
-          {:ok, stripe_payout} =
-            Stripe.Payout.create(
-              %{
-                amount: total.amount,
-                currency: avail.currency,
-                statement_descriptor: "banchan.art payout"
-              },
-              headers: %{"Stripe-Account" => studio.stripe_id}
-            )
-
-          # TODO: What happens if this transaction fails?? We've already
-          # created a Stripe transaction...
-          case Repo.transaction(fn ->
-                 payout =
-                   %Payout{
-                     stripe_payout_id: stripe_payout.id,
-                     status: String.to_atom(stripe_payout.status),
-                     amount: total,
-                     studio_id: studio.id
-                   }
-                   |> Repo.insert!()
-
-                 from(i in Invoice,
-                   where: i.id in ^invoice_ids
-                 )
-                 |> Repo.update_all(set: [payout_id: payout.id])
-               end) do
-            {:ok, {^invoice_count, _}} ->
-              :ok
-
-            {:ok, _} ->
-              Logger.error(%{
-                message: "Wrong number of Invoice rows updated after payout",
-                error: %{}
-              })
-
-            {:error, err} ->
-              Logger.error(%{message: "Failed to update database after payout", error: err})
-
-              {:ok, _} =
-                Stripe.Payout.cancel(stripe_payout.id,
-                  headers: %{"Stripe-Account" => studio.stripe_id}
-                )
-
-              raise "Error writing payout information to db."
-          end
-        end
-      end
-    end)
+    Enum.each(balance.available, &payout_available!/1)
 
     :ok
+  end
+
+  defp payout_available!(avail) do
+    if avail.amount > 0 do
+      {invoice_ids, invoice_count, total} = invoice_details(studio)
+
+      if total.amount > 0 do
+        # TODO: friendly error messaging for users.
+        {:ok, stripe_payout} =
+          Stripe.Payout.create(
+            %{
+              amount: total.amount,
+              currency: avail.currency,
+              statement_descriptor: "banchan.art payout"
+            },
+            headers: %{"Stripe-Account" => studio.stripe_id}
+          )
+
+        case create_payout!(studio, stripe_payout, total) do
+          {:ok, {^invoice_count, _}} ->
+            :ok
+
+          {:ok, _} ->
+            Logger.error(%{
+              message: "Wrong number of Invoice rows updated after payout",
+              error: %{}
+            })
+
+          {:error, err} ->
+            Logger.error(%{message: "Failed to update database after payout", error: err})
+
+            {:ok, _} =
+              Stripe.Payout.cancel(stripe_payout.id,
+                headers: %{"Stripe-Account" => studio.stripe_id}
+              )
+
+            raise "Error writing payout information to db."
+        end
+      end
+    end
+  end
+
+  defp invoice_details(%Studio{} = studio) do
+    currency_str = String.upcase(avail.currency)
+    currency = String.to_atom(currency_str)
+
+    from(i in Invoice,
+      join: c in Commission,
+      where:
+        c.studio_id == ^studio.id and i.status == :succeeded and is_nil(i.payout_id) and
+          fragment("(c0.amount).currency = ?::char(3)", ^currency_str),
+      order_by: {:asc, i.updated_at}
+    )
+    |> Repo.all()
+    |> Enum.reduce_while({[], 0, Money.new(0, currency)}, fn invoice,
+                                                             {invoice_ids, invoice_count, total} =
+                                                               acc ->
+      invoice_total = Money.subtract(Money.add(invoice.amount, invoice.tip), invoice.platform_fee)
+
+      if invoice_total.amount + total.amount > avail.amount do
+        {:halt, acc}
+      else
+        {:cont, {[invoice.id | invoice_ids], invoice_count + 1, Money.add(total, invoice_total)}}
+      end
+    end)
+  end
+
+  defp create_payout!(%Studio{} = studio, stripe_payout, %Money{} = total) do
+    # TODO: What happens if this transaction fails?? We've already
+    # created a Stripe transaction...
+    Repo.transaction(fn ->
+      payout =
+        %Payout{
+          stripe_payout_id: stripe_payout.id,
+          status: String.to_atom(stripe_payout.status),
+          amount: total,
+          studio_id: studio.id
+        }
+        |> Repo.insert!()
+
+      from(i in Invoice,
+        where: i.id in ^invoice_ids
+      )
+      |> Repo.update_all(set: [payout_id: payout.id])
+    end)
   end
 
   def charges_enabled?(%Studio{} = studio, refresh \\ false) do
