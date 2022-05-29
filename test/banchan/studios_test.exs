@@ -138,6 +138,46 @@ defmodule Banchan.StudiosTest do
     end
   end
 
-  describe "payouts and such" do
+  describe "stripe state" do
+    test "charges_enabled?" do
+      studio = studio_fixture(%Studio{
+        stripe_charges_enabled: false
+      })
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_account, fn _ ->
+        {:ok, %Stripe.Account{charges_enabled: true}}
+      end)
+
+      assert Studios.charges_enabled?(studio) == false
+      assert Studios.charges_enabled?(studio, true) == true
+    end
+
+    test "update_stripe_state" do
+      studio = studio_fixture(%Studio{})
+      Studios.subscribe_to_stripe_state(studio)
+
+      Studios.update_stripe_state(studio.stripe_id, %Stripe.Account{
+        charges_enabled: true,
+        details_submitted: true
+      })
+
+      from_db = Repo.get!(Studio, studio.id)
+      assert from_db.stripe_charges_enabled == true
+      assert from_db.stripe_details_submitted == true
+
+      topic = "studio_stripe_state:#{studio.stripe_id}"
+      assert_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "charges_state_changed",
+        payload: true
+      }
+      assert_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "details_submitted_changed",
+        payload: true
+      }
+      Studios.unsubscribe_from_stripe_state(studio)
+    end
   end
 end

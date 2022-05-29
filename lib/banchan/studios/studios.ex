@@ -484,6 +484,10 @@ defmodule Banchan.Studios do
     Phoenix.PubSub.subscribe(@pubsub, "studio_stripe_state:#{stripe_id}")
   end
 
+  def unsubscribe_from_stripe_state(%Studio{stripe_id: stripe_id}) do
+    Phoenix.PubSub.unsubscribe(@pubsub, "studio_stripe_state:#{stripe_id}")
+  end
+
   defp create_stripe_account(studio_url) do
     # NOTE: I don't know why dialyzer complains about this. It works just fine.
     {:ok, acct} =
