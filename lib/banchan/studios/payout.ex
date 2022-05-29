@@ -5,10 +5,7 @@ defmodule Banchan.Studios.Payout do
   use Ecto.Schema
 
   schema "studio_payouts" do
-    # https://stripe.com/docs/api/payouts/object#payout_object-id
     field :stripe_payout_id, :string
-
-    # https://stripe.com/docs/api/payouts/object#payout_object-amount
     field :amount, Money.Ecto.Composite.Type
 
     # https://stripe.com/docs/api/payouts/object#payout_object-status
@@ -21,6 +18,9 @@ defmodule Banchan.Studios.Payout do
         :failed
       ],
       default: :pending
+
+    field :failure_code, :string
+    field :failure_message, :string
 
     belongs_to :studio, Banchan.Studios.Studio
   end

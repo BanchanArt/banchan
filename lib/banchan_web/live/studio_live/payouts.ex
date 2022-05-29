@@ -8,8 +8,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   alias Banchan.Studios
 
-  alias BanchanWeb.Components.Button
   alias BanchanWeb.CommissionLive.Components.StudioLayout
+  alias BanchanWeb.Components.Button
 
   def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, true, false)

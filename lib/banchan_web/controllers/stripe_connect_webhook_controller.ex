@@ -48,8 +48,8 @@ defmodule BanchanWeb.StripeConnectWebhookController do
     |> send_resp()
   end
 
-  # TODO: Handle payout events.
-  defp handle_event(%Stripe.Event{type: "payout.updated"} = event, conn) do
+  defp handle_event(%Stripe.Event{type: "payout." <> type} = event, conn) do
+    Logger.debug("Got a new payout event of type payout.#{type}. Updating database.")
     Studios.process_payout_updated!(event.data.object)
 
     conn

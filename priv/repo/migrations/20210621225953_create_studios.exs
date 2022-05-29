@@ -27,6 +27,8 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :stripe_payout_id, :string, null: false
       add :amount, :money_with_currency, null: false
       add :status, :string, null: false
+      add :failure_code, :string
+      add :failure_message, :text
       add :studio_id, references(:studios), null: false
     end
   end

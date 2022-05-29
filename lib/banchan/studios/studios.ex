@@ -13,7 +13,7 @@ defmodule Banchan.Studios do
   require Logger
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions.{Commission, Invoice}
+  alias Banchan.Commissions.Invoice
   alias Banchan.Notifications
   alias Banchan.Offerings.Offering
   alias Banchan.Repo
@@ -186,12 +186,12 @@ defmodule Banchan.Studios do
           c.studio_id == ^studio.id and
             i.status == :succeeded,
         group_by: [
-          fragment(
-            "CASE WHEN c0.payout_id IS NOT NULL AND (s2.status = 'pending' OR s2.status = 'in_transit') THEN 'on_the_way'
-                  WHEN c1.status = 'approved' THEN 'released'
-                  ELSE 'pending'
-             END"
-          ),
+          fragment("CASE WHEN s2.status = 'pending' OR s2.status = 'in_transit' THEN 'on_the_way'
+                  WHEN s2.status = 'paid' THEN 'paid'
+                  WHEN s2.status = 'failed' THEN 'failed'
+                  WHEN c1.status = 'approved' AND c0.payout_id IS NULL THEN 'released'
+                  ELSE 'held_back'
+                END"),
           fragment("(c0.amount).currency"),
           fragment("(c0.tip).currency"),
           fragment("(c0.platform_fee).currency")
@@ -200,10 +200,12 @@ defmodule Banchan.Studios do
           status:
             type(
               fragment(
-                "CASE WHEN c0.payout_id IS NOT NULL AND (s2.status = 'pending' OR s2.status = 'in_transit') THEN 'on_the_way'
-                  WHEN c1.status = 'approved' THEN 'released'
-                  ELSE 'pending'
-             END"
+                "CASE WHEN s2.status = 'pending' OR s2.status = 'in_transit' THEN 'on_the_way'
+                  WHEN s2.status = 'paid' THEN 'paid'
+                  WHEN s2.status = 'failed' THEN 'failed'
+                  WHEN c1.status = 'approved' AND c0.payout_id IS NULL THEN 'released'
+                  ELSE 'held_back'
+                END"
               ),
               :string
             ),
@@ -226,61 +228,62 @@ defmodule Banchan.Studios do
       )
       |> Repo.all()
 
-    {released, held_back, on_the_way} =
-      results
-      |> Enum.reduce({[], [], []}, fn %{status: status} = res,
-                                      {released, held_back, on_the_way} ->
-        case status do
-          "released" ->
-            {[res | released], held_back, on_the_way}
+    {released, held_back, on_the_way, paid, failed} = get_net_values(results)
 
-          "pending" ->
-            {released, [res | held_back], on_the_way}
+    available = get_released_available(stripe_available, released)
 
-          "on_the_way" ->
-            {released, held_back, [res | on_the_way]}
-        end
-      end)
-
-    released =
-      released
-      |> Enum.map(&Money.subtract(Money.add(&1.charged, &1.tips), &1.fees))
-
-    held_back =
-      held_back
-      |> Enum.map(&Money.subtract(Money.add(&1.charged, &1.tips), &1.fees))
-
-    on_the_way =
-      on_the_way
-      |> Enum.map(&Money.subtract(Money.add(&1.charged, &1.tips), &1.fees))
-
-    available =
-      released
-      |> Enum.map(fn rel ->
-        from_stripe =
-          Enum.find(stripe_available, Money.new(0, rel.currency), &(&1.currency == rel.currency))
-        IO.inspect(from_stripe)
-        IO.inspect(rel)
-
-        cond do
-          from_stripe.amount >= rel.amount ->
-            rel
-          from_stripe.amount < rel.amount ->
-            from_stripe
-          true ->
-          Money.new(0, rel.currency)
-        end
-      end)
-
-    IO.inspect(stripe_balance)
     %{
       stripe_available: stripe_available,
       stripe_pending: stripe_pending,
       held_back: held_back,
       released: released,
       on_the_way: on_the_way,
+      paid: paid,
+      failed: failed,
       available: available
     }
+  end
+
+  def get_net_values(results) do
+    Enum.reduce(results, {[], [], [], [], []}, fn %{status: status} = res,
+                                                  {released, held_back, on_the_way, paid, failed} ->
+      net = Money.subtract(Money.add(res.charged, res.tips), res.fees)
+
+      case status do
+        "released" ->
+          {[net | released], held_back, on_the_way, paid, failed}
+
+        "held_back" ->
+          {released, [net | held_back], on_the_way, paid, failed}
+
+        "on_the_way" ->
+          {released, held_back, [net | on_the_way], paid, failed}
+
+        "paid" ->
+          {released, held_back, on_the_way, [net | paid], failed}
+
+        "failed" ->
+          {released, held_back, on_the_way, paid, [net | failed]}
+      end
+    end)
+  end
+
+  def get_released_available(stripe_available, released) do
+    Enum.map(released, fn rel ->
+      from_stripe =
+        Enum.find(stripe_available, Money.new(0, rel.currency), &(&1.currency == rel.currency))
+
+      cond do
+        from_stripe.amount >= rel.amount ->
+          rel
+
+        from_stripe.amount < rel.amount ->
+          from_stripe
+
+        true ->
+          Money.new(0, rel.currency)
+      end
+    end)
   end
 
   def payout_studio(%Studio{} = studio) do
@@ -318,12 +321,14 @@ defmodule Banchan.Studios do
 
   defp invoice_details(%Studio{} = studio, avail) do
     currency_str = Atom.to_string(avail.currency)
+    now = NaiveDateTime.utc_now()
 
     from(i in Invoice,
-      join: c in Commission,
+      join: c in assoc(i, :commission),
       where:
         c.studio_id == ^studio.id and i.status == :succeeded and is_nil(i.payout_id) and
-          fragment("(c0.amount).currency = ?::char(3)", ^currency_str),
+          fragment("(c0.amount).currency = ?::char(3)", ^currency_str) and
+          i.payout_available_on < ^now,
       order_by: {:asc, i.updated_at}
     )
     |> Repo.all()
@@ -383,6 +388,8 @@ defmodule Banchan.Studios do
                 error: %{}
               })
 
+              cancel_payout!(studio, stripe_payout.id)
+
               # NOTE: This will get caught further up for a proper {:error, err} return.
               throw({:error, "Payout failed due to an internal error."})
           end
@@ -390,15 +397,7 @@ defmodule Banchan.Studios do
         {:error, err} ->
           Logger.error(%{message: "Failed to update database after payout", error: err})
 
-          case Stripe.Payout.cancel(stripe_payout.id,
-                 headers: %{"Stripe-Account" => studio.stripe_id}
-               ) do
-            {:ok} ->
-              :ok
-
-            {:error, %Stripe.Error{} = err} ->
-              raise err
-          end
+          cancel_payout!(studio, stripe_payout.id)
 
           # NOTE: This will get caught further up for a proper {:error, err} return.
           throw({:error, "Payout failed due to an internal error."})
@@ -406,13 +405,29 @@ defmodule Banchan.Studios do
     end)
   end
 
-  def process_payout_updated!(payout) do
-    IO.inspect("New payout status: #{payout.status}")
+  defp cancel_payout!(%Studio{} = studio, payout_id) do
+    case Stripe.Payout.cancel(payout_id,
+           headers: %{"Stripe-Account" => studio.stripe_id}
+         ) do
+      {:ok} ->
+        :ok
 
+      {:error, %Stripe.Error{} = err} ->
+        raise err
+    end
+  end
+
+  def process_payout_updated!(payout) do
     from(p in Payout,
       where: p.stripe_payout_id == ^payout.id
     )
-    |> Repo.update_all(set: [status: String.to_atom(payout.status)])
+    |> Repo.update_all(
+      set: [
+        status: String.to_atom(payout.status),
+        failure_code: payout.failure_code,
+        failure_message: payout.failure_message
+      ]
+    )
 
     :ok
   end
