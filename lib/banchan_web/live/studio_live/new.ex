@@ -16,7 +16,7 @@ defmodule BanchanWeb.StudioLive.New do
 
   @impl true
   def mount(_params, _session, socket) do
-    changeset = Studio.changeset(%Studio{}, %{})
+    changeset = Studio.profile_changeset(%Studio{}, %{})
     {:ok, assign(socket, changeset: changeset)}
   end
 
@@ -63,7 +63,7 @@ defmodule BanchanWeb.StudioLive.New do
 
     changeset =
       %Studio{}
-      |> Studio.changeset(studio)
+      |> Studio.profile_changeset(studio)
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)

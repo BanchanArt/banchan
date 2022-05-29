@@ -42,14 +42,16 @@ defmodule Banchan.Studios do
   @doc """
   Updates the studio profile fields.
   """
+  def update_studio_profile(studio, current_user_member?, attrs)
+
   def update_studio_profile(_, false, _) do
     {:error, :unauthorized}
   end
 
   def update_studio_profile(%Studio{} = studio, _, attrs) do
     studio
-    |> Studio.changeset(attrs)
-    |> Repo.update()
+    |> Studio.profile_changeset(attrs)
+    |> Repo.update(returning: true)
   end
 
   @doc """
@@ -61,7 +63,7 @@ defmodule Banchan.Studios do
       {:ok, %Studio{}}
   """
   def new_studio(%Studio{artists: artists} = studio, url, attrs) do
-    changeset = studio |> Studio.changeset(attrs)
+    changeset = studio |> Studio.profile_changeset(attrs)
 
     changeset =
       if changeset.valid? do

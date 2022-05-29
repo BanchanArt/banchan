@@ -21,7 +21,7 @@ defmodule Banchan.StudiosTest do
       existing_studio = studio_fixture(%Studio{})
 
       changeset =
-        Studio.changeset(
+        Studio.profile_changeset(
           %Studio{},
           %{name: "valid name", handle: existing_studio.handle}
         )
@@ -33,7 +33,7 @@ defmodule Banchan.StudiosTest do
       user = user_fixture()
 
       changeset =
-        Studio.changeset(
+        Studio.profile_changeset(
           %Studio{},
           %{name: "valid name", handle: user.handle}
         )
@@ -80,6 +80,78 @@ defmodule Banchan.StudiosTest do
 
         assert subscribers == [user.id]
       end)
+    end
+  end
+
+  describe "updating" do
+    test "update studio profile" do
+      studio = studio_fixture(%Studio{})
+
+      attrs = %{
+        name: "new name",
+        handle: "new-handle",
+        description: "new description",
+        summary: "new summary",
+        default_terms: "new terms",
+        default_template: "new template"
+      }
+
+      {:error, :unauthorized} =
+        Studios.update_studio_profile(
+          studio,
+          false,
+          attrs
+        )
+
+      from_db = Repo.get!(Studio, studio.id) |> Repo.preload(:artists)
+      assert from_db.name != attrs.name
+
+      {:ok, studio} =
+        Studios.update_studio_profile(
+          studio,
+          true,
+          attrs
+        )
+
+      assert studio.name == "new name"
+      assert studio.handle == "new-handle"
+      assert studio.description == "new description"
+      assert studio.summary == "new summary"
+      assert studio.default_terms == "new terms"
+      assert studio.default_template == "new template"
+
+      from_db = Repo.get!(Studio, studio.id) |> Repo.preload(:artists)
+      assert from_db == studio
+    end
+
+    test "update_stripe_state" do
+      studio = studio_fixture(%Studio{})
+      Studios.subscribe_to_stripe_state(studio)
+
+      Studios.update_stripe_state(studio.stripe_id, %Stripe.Account{
+        charges_enabled: true,
+        details_submitted: true
+      })
+
+      from_db = Repo.get!(Studio, studio.id)
+      assert from_db.stripe_charges_enabled == true
+      assert from_db.stripe_details_submitted == true
+
+      topic = "studio_stripe_state:#{studio.stripe_id}"
+
+      assert_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "charges_state_changed",
+        payload: true
+      }
+
+      assert_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "details_submitted_changed",
+        payload: true
+      }
+
+      Studios.unsubscribe_from_stripe_state(studio)
     end
   end
 
@@ -138,11 +210,12 @@ defmodule Banchan.StudiosTest do
     end
   end
 
-  describe "stripe state" do
+  describe "charges and payouts" do
     test "charges_enabled?" do
-      studio = studio_fixture(%Studio{
-        stripe_charges_enabled: false
-      })
+      studio =
+        studio_fixture(%Studio{
+          stripe_charges_enabled: false
+        })
 
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_account, fn _ ->
@@ -151,33 +224,6 @@ defmodule Banchan.StudiosTest do
 
       assert Studios.charges_enabled?(studio) == false
       assert Studios.charges_enabled?(studio, true) == true
-    end
-
-    test "update_stripe_state" do
-      studio = studio_fixture(%Studio{})
-      Studios.subscribe_to_stripe_state(studio)
-
-      Studios.update_stripe_state(studio.stripe_id, %Stripe.Account{
-        charges_enabled: true,
-        details_submitted: true
-      })
-
-      from_db = Repo.get!(Studio, studio.id)
-      assert from_db.stripe_charges_enabled == true
-      assert from_db.stripe_details_submitted == true
-
-      topic = "studio_stripe_state:#{studio.stripe_id}"
-      assert_receive %Phoenix.Socket.Broadcast{
-        topic: ^topic,
-        event: "charges_state_changed",
-        payload: true
-      }
-      assert_receive %Phoenix.Socket.Broadcast{
-        topic: ^topic,
-        event: "details_submitted_changed",
-        payload: true
-      }
-      Studios.unsubscribe_from_stripe_state(studio)
     end
   end
 end
