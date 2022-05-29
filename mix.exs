@@ -80,6 +80,7 @@ defmodule Banchan.MixProject do
       {:phoenix_live_reload, "~> 1.3.3", only: :dev},
       {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
       # Testing and static analysis
+      {:mox, "~> 1.0.1", only: :test},
       {:surface_formatter, "~> 0.7.5", only: :dev},
       {:floki, ">= 0.27.0", only: :test},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},

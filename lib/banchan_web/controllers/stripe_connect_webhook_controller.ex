@@ -13,7 +13,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
     [sig] = get_req_header(conn, "stripe-signature")
 
     {:ok, %Stripe.Event{} = event} =
-      Stripe.Webhook.construct_event(
+      stripe_mod().construct_webhook_event(
         conn.assigns.raw_body,
         sig,
         Application.fetch_env!(:stripity_stripe, :endpoint_secret)
@@ -63,5 +63,9 @@ defmodule BanchanWeb.StripeConnectWebhookController do
     conn
     |> resp(200, "OK")
     |> send_resp()
+  end
+
+  defp stripe_mod() do
+    Application.get_env(:banchan, :stripe_mod)
   end
 end

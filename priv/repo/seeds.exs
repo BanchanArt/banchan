@@ -10,6 +10,17 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
+if Mix.env() == :test do
+  import Mox
+
+  Mox.defmock(Banchan.StripeAPI.Mock, for: Banchan.StripeAPI.Base)
+
+  Banchan.StripeAPI.Mock
+  |> expect(:create_account, fn _ ->
+    {:ok, %Stripe.Account{id: "mock_account#{System.unique_integer()}"}}
+  end)
+end
+
 {:ok, user} =
   Banchan.Accounts.register_admin(%{
     handle: "zkat",

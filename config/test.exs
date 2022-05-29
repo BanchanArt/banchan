@@ -3,6 +3,9 @@ import Config
 # Only in tests, remove the complexity from the password hashing algorithm
 config :pbkdf2_elixir, :rounds, 1
 
+config :banchan,
+  stripe_mod: Banchan.StripeAPI.Mock
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used

@@ -154,7 +154,7 @@ defmodule Banchan.Studios do
 
   def get_onboarding_link(%Studio{} = studio, return_url, refresh_url) do
     {:ok, link} =
-      Stripe.AccountLink.create(%{
+      stripe_mod().create_account_link(%{
         account: studio.stripe_id,
         type: "account_onboarding",
         return_url: return_url,
@@ -166,7 +166,7 @@ defmodule Banchan.Studios do
 
   def get_banchan_balance!(%Studio{} = studio) do
     {:ok, stripe_balance} =
-      Stripe.Balance.retrieve(headers: %{"Stripe-Account" => studio.stripe_id})
+      stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id})
 
     stripe_available =
       stripe_balance.available
@@ -244,7 +244,7 @@ defmodule Banchan.Studios do
     }
   end
 
-  def get_net_values(results) do
+  defp get_net_values(results) do
     Enum.reduce(results, {[], [], [], [], []}, fn %{status: status} = res,
                                                   {released, held_back, on_the_way, paid, failed} ->
       net = Money.subtract(Money.add(res.charged, res.tips), res.fees)
@@ -268,7 +268,7 @@ defmodule Banchan.Studios do
     end)
   end
 
-  def get_released_available(stripe_available, released) do
+  defp get_released_available(stripe_available, released) do
     Enum.map(released, fn rel ->
       from_stripe =
         Enum.find(stripe_available, Money.new(0, rel.currency), &(&1.currency == rel.currency))
@@ -287,7 +287,8 @@ defmodule Banchan.Studios do
   end
 
   def payout_studio(%Studio{} = studio) do
-    {:ok, balance} = Stripe.Balance.retrieve(headers: %{"Stripe-Account" => studio.stripe_id})
+    {:ok, balance} =
+      stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id})
 
     try do
       # TODO: notifications!
@@ -347,7 +348,7 @@ defmodule Banchan.Studios do
 
   defp create_payout!(%Studio{} = studio, invoice_ids, invoice_count, %Money{} = total) do
     {:ok, stripe_payout} =
-      case Stripe.Payout.create(
+      case stripe_mod().create_payout(
              %{
                amount: total.amount,
                currency: String.downcase(Atom.to_string(total.currency)),
@@ -406,10 +407,10 @@ defmodule Banchan.Studios do
   end
 
   defp cancel_payout!(%Studio{} = studio, payout_id) do
-    case Stripe.Payout.cancel(payout_id,
+    case stripe_mod().cancel_payout(payout_id,
            headers: %{"Stripe-Account" => studio.stripe_id}
          ) do
-      {:ok} ->
+      {:ok, _} ->
         :ok
 
       {:error, %Stripe.Error{} = err} ->
@@ -434,7 +435,7 @@ defmodule Banchan.Studios do
 
   def charges_enabled?(%Studio{} = studio, refresh \\ false) do
     if refresh do
-      {:ok, acct} = Stripe.Account.retrieve(studio.stripe_id)
+      {:ok, acct} = stripe_mod().retrieve_account(studio.stripe_id)
 
       if acct.charges_enabled != studio.stripe_charges_enabled do
         update_stripe_state(studio.stripe_id, acct)
@@ -486,7 +487,7 @@ defmodule Banchan.Studios do
   defp create_stripe_account(studio_url) do
     # NOTE: I don't know why dialyzer complains about this. It works just fine.
     {:ok, acct} =
-      Stripe.Account.create(%{
+      stripe_mod().create_account(%{
         type: "express",
         settings: %{payouts: %{schedule: %{interval: "manual"}}},
         # TODO: this should only be done for _international_ accounts.
@@ -502,5 +503,9 @@ defmodule Banchan.Studios do
       })
 
     acct.id
+  end
+
+  defp stripe_mod() do
+    Application.get_env(:banchan, :stripe_mod)
   end
 end
