@@ -353,7 +353,7 @@ defmodule Banchan.Notifications do
     |> Mailer.deliver_later!()
   end
 
-  defp studio_subscribers(%Studio{} = studio) do
+  def studio_subscribers(%Studio{} = studio) do
     from(
       u in User,
       join: studio_sub in StudioSubscription,
@@ -371,7 +371,7 @@ defmodule Banchan.Notifications do
     |> Repo.stream()
   end
 
-  defp commission_subscribers(%Commission{} = commission) do
+  def commission_subscribers(%Commission{} = commission) do
     from(
       u in User,
       join: comm_sub in CommissionSubscription,

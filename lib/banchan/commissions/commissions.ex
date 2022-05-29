@@ -221,7 +221,7 @@ defmodule Banchan.Commissions do
        ) do
     {:ok, _} =
       Repo.transaction(fn ->
-        actor_member? = Studios.is_user_in_studio(actor, %Studio{id: studio_id})
+        actor_member? = Studios.is_user_in_studio?(actor, %Studio{id: studio_id})
 
         true =
           status_transition_allowed?(

@@ -143,16 +143,16 @@ defmodule Banchan.Studios do
 
   ## Examples
 
-      iex> is_user_in_studio(user, studio)
+      iex> is_user_in_studio?(user, studio)
       true
   """
-  def is_user_in_studio(%User{id: user_id}, %Studio{id: studio_id}) do
+  def is_user_in_studio?(%User{id: user_id}, %Studio{id: studio_id}) do
     Repo.exists?(
       from us in "users_studios", where: us.user_id == ^user_id and us.studio_id == ^studio_id
     )
   end
 
-  def get_onboarding_link(%Studio{} = studio, return_url, refresh_url) do
+  def get_onboarding_link!(%Studio{} = studio, return_url, refresh_url) do
     {:ok, link} =
       stripe_mod().create_account_link(%{
         account: studio.stripe_id,
@@ -497,8 +497,7 @@ defmodule Banchan.Studios do
         business_profile: %{
           # Digital Media
           mcc: "7333",
-          # Just to make our lives easier.
-          url: String.replace(studio_url, "http://localhost:4000", "https://banchan.art")
+          url: studio_url
         }
       })
 

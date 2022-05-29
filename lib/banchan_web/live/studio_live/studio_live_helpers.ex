@@ -15,7 +15,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
 
     current_user_member? =
       socket.assigns.current_user &&
-        Studios.is_user_in_studio(socket.assigns.current_user, studio)
+        Studios.is_user_in_studio?(socket.assigns.current_user, studio)
 
     cond do
       requires_stripe && !Studios.charges_enabled?(studio, false) ->

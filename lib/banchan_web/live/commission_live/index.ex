@@ -53,7 +53,7 @@ defmodule BanchanWeb.CommissionLive do
             commission: comm,
             subscribed?: Notifications.user_subscribed?(socket.assigns.current_user, comm),
             current_user_member?:
-              Studios.is_user_in_studio(socket.assigns.current_user, %Studios.Studio{
+              Studios.is_user_in_studio?(socket.assigns.current_user, %Studios.Studio{
                 id: comm.studio_id
               })
           )
