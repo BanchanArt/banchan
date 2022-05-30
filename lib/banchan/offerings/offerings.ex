@@ -34,7 +34,7 @@ defmodule Banchan.Offerings do
   end
 
   def update_offering(%Offering{} = offering, _current_user_member?, attrs) do
-    change_offering(offering, attrs) |> Repo.update()
+    change_offering(offering, attrs) |> Repo.update(returning: true)
   end
 
   def offering_base_price(%Offering{} = offering) do
@@ -48,43 +48,33 @@ defmodule Banchan.Offerings do
     end
   end
 
-  def offering_available_slots(%Offering{slots: nil}) do
-    nil
-  end
-
   def offering_available_slots(%Offering{} = offering) do
-    used_slots =
-      Repo.one(
-        from c in Banchan.Commissions.Commission,
-          where: c.offering_id == ^offering.id,
-          where: c.status != :withdrawn and c.status != :approved and c.status != :submitted,
-          select: count(c)
+    Repo.one(
+      from(c in Banchan.Commissions.Commission,
+        join: o in assoc(c, :offering),
+        where: o.id == ^offering.id,
+        where: c.status != :withdrawn and c.status != :approved and c.status != :submitted,
+        group_by: [c.offering_id, o.slots],
+        select:
+          fragment(
+            "CASE WHEN o1.slots IS NULL THEN NULL WHEN COUNT(c0) > o1.slots THEN 0 ELSE o1.slots - count(c0) END"
+          )
       )
-
-    if used_slots > offering.slots do
-      0
-    else
-      offering.slots - used_slots
-    end
-  end
-
-  def offering_available_proposals(%Offering{max_proposals: nil}) do
-    nil
+    )
   end
 
   def offering_available_proposals(%Offering{} = offering) do
-    used_proposals =
-      Repo.one(
-        from c in Banchan.Commissions.Commission,
-          where: c.offering_id == ^offering.id,
-          where: c.status == :submitted,
-          select: count(c)
+    Repo.one(
+      from(c in Banchan.Commissions.Commission,
+        join: o in assoc(c, :offering),
+        where: o.id == ^offering.id,
+        where: c.status == :submitted,
+        group_by: [c.offering_id, o.max_proposals],
+        select:
+          fragment(
+            "CASE WHEN o1.max_proposals IS NULL THEN NULL WHEN COUNT(c0) > o1.max_proposals THEN 0 ELSE o1.max_proposals - count(c0) END"
+          )
       )
-
-    if used_proposals > offering.max_proposals do
-      0
-    else
-      offering.max_proposals - used_proposals
-    end
+    )
   end
 end

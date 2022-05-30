@@ -249,6 +249,7 @@ defmodule Banchan.Commissions do
   # Transition changes studios can make
   defp status_transition_allowed?(true, _, :submitted, :accepted), do: true
   defp status_transition_allowed?(true, _, :accepted, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :accepted, :ready_for_review), do: true
   defp status_transition_allowed?(true, _, :in_progress, :paused), do: true
   defp status_transition_allowed?(true, _, :in_progress, :waiting), do: true
   defp status_transition_allowed?(true, _, :in_progress, :ready_for_review), do: true
