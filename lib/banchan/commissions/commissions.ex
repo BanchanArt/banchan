@@ -104,6 +104,17 @@ defmodule Banchan.Commissions do
     )
   end
 
+  # TODO: maybe this is too wide a net? We can separate this into user-level
+  # and studio-level subscriptions, though it will mean multiple calls to
+  # these subscription functions.
+  def subscribe_to_new_commissions() do
+    Phoenix.PubSub.subscribe(@pubsub, "commission")
+  end
+
+  def unsubscribe_from_new_commissions() do
+    Phoenix.PubSub.unsubscribe(@pubsub, "commission")
+  end
+
   def subscribe_to_commission_events(%Commission{public_id: public_id}) do
     Phoenix.PubSub.subscribe(@pubsub, "commission:#{public_id}")
   end
