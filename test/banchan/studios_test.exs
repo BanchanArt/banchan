@@ -18,7 +18,8 @@ defmodule Banchan.StudiosTest do
 
   describe "validation" do
     test "cannot use an existing handle" do
-      existing_studio = studio_fixture(%Studio{})
+      user = user_fixture()
+      existing_studio = studio_fixture([user])
 
       changeset =
         Studio.profile_changeset(
@@ -85,7 +86,8 @@ defmodule Banchan.StudiosTest do
 
   describe "updating" do
     test "update studio profile" do
-      studio = studio_fixture(%Studio{})
+      user = user_fixture()
+      studio = studio_fixture([user])
 
       attrs = %{
         name: "new name",
@@ -121,11 +123,17 @@ defmodule Banchan.StudiosTest do
       assert studio.default_template == "new template"
 
       from_db = Repo.get!(Studio, studio.id) |> Repo.preload(:artists)
-      assert from_db == studio
+      assert studio.name == from_db.name
+      assert studio.handle == from_db.handle
+      assert studio.description == from_db.description
+      assert studio.summary == from_db.summary
+      assert studio.default_terms == from_db.default_terms
+      assert studio.default_template == from_db.default_template
     end
 
     test "update_stripe_state" do
-      studio = studio_fixture(%Studio{})
+      user = user_fixture()
+      studio = studio_fixture([user])
       Studios.subscribe_to_stripe_state(studio)
 
       Studios.update_stripe_state(studio.stripe_id, %Stripe.Account{
@@ -157,7 +165,8 @@ defmodule Banchan.StudiosTest do
 
   describe "listing" do
     test "list all studios" do
-      studio = studio_fixture(%Studio{})
+      user = user_fixture()
+      studio = studio_fixture([user])
 
       assert studio.id in Enum.map(Studios.list_studios(), & &1.id)
     end
@@ -191,7 +200,8 @@ defmodule Banchan.StudiosTest do
 
   describe "onboarding" do
     test "create onboarding link" do
-      studio = studio_fixture(%Studio{})
+      user = user_fixture()
+      studio = studio_fixture([user])
       link_url = "http://link_url"
 
       Banchan.StripeAPI.Mock
@@ -212,18 +222,20 @@ defmodule Banchan.StudiosTest do
 
   describe "charges and payouts" do
     test "charges_enabled?" do
-      studio =
-        studio_fixture(%Studio{
-          stripe_charges_enabled: false
-        })
+      user = user_fixture()
+      studio = studio_fixture([user])
+
+      Studios.update_stripe_state(studio.stripe_id, %Stripe.Account{
+        charges_enabled: true
+      })
 
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_account, fn _ ->
         {:ok, %Stripe.Account{charges_enabled: true}}
       end)
 
-      assert Studios.charges_enabled?(studio) == false
-      assert Studios.charges_enabled?(studio, true) == true
+      assert !Studios.charges_enabled?(studio)
+      assert Studios.charges_enabled?(studio, true)
     end
   end
 end
