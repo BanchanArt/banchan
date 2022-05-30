@@ -71,7 +71,7 @@ defmodule Banchan.CommissionsFixtures do
     }
   end
 
-  def succeed_mock_payment(
+  def succeed_mock_payment!(
         %Stripe.Session{} = session,
         available_on \\ DateTime.add(DateTime.utc_now(), -2)
       ) do

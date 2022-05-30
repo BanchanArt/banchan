@@ -330,6 +330,7 @@ defmodule Banchan.Studios do
       join: c in assoc(i, :commission),
       where:
         c.studio_id == ^studio.id and i.status == :succeeded and is_nil(i.payout_id) and
+          c.status == :approved and
           fragment("(c0.amount).currency = ?::char(3)", ^currency_str) and
           i.payout_available_on < ^now,
       order_by: {:asc, i.updated_at}
@@ -338,7 +339,10 @@ defmodule Banchan.Studios do
     |> Enum.reduce_while({[], 0, Money.new(0, avail.currency)}, fn invoice,
                                                                    {invoice_ids, invoice_count,
                                                                     total} = acc ->
-      invoice_total = Money.subtract(Money.add(invoice.amount, invoice.tip), invoice.platform_fee)
+      invoice_total =
+        invoice.amount
+        |> Money.add(invoice.tip)
+        |> Money.subtract(invoice.platform_fee)
 
       if invoice_total.amount + total.amount > avail.amount do
         {:halt, acc}

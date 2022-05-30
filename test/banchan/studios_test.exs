@@ -7,12 +7,15 @@ defmodule Banchan.StudiosTest do
   import Mox
 
   import Banchan.AccountsFixtures
+  import Banchan.CommissionsFixtures
   import Banchan.StudiosFixtures
 
+  alias Banchan.Commissions
+  alias Banchan.Commissions.Invoice
   alias Banchan.Notifications
   alias Banchan.Repo
   alias Banchan.Studios
-  alias Banchan.Studios.Studio
+  alias Banchan.Studios.{Payout, Studio}
 
   setup :verify_on_exit!
 
@@ -236,6 +239,123 @@ defmodule Banchan.StudiosTest do
 
       assert !Studios.charges_enabled?(studio)
       assert Studios.charges_enabled?(studio, true)
+    end
+
+    test "basic payout" do
+      commission = commission_fixture()
+      client = commission.client
+      studio = commission.studio
+      amount = Money.new(420, :USD)
+      tip = Money.new(69, :USD)
+
+      banchan_fee =
+        amount
+        |> Money.add(tip)
+        |> Money.multiply(studio.platform_fee)
+
+      net =
+        amount
+        |> Money.add(tip)
+        |> Money.subtract(banchan_fee)
+        |> Money.multiply(2)
+
+      # Two successful invoices and one expired one
+      invoice =
+        invoice_fixture(client, commission, %{
+          "amount" => amount,
+          "text" => "please give me money :("
+        })
+
+      sess = checkout_session_fixture(invoice, tip)
+      succeed_mock_payment!(sess)
+
+      invoice =
+        invoice_fixture(client, commission, %{
+          "amount" => amount,
+          "text" => "please give me money :("
+        })
+
+      sess = checkout_session_fixture(invoice, tip)
+      succeed_mock_payment!(sess)
+
+      invoice =
+        invoice_fixture(client, commission, %{
+          "amount" => Money.new(10_000, :USD),
+          "text" => "please give me money :("
+        })
+
+      Commissions.expire_payment!(invoice, true)
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, 3, fn opts ->
+        assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
+
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: net.amount
+             }
+           ],
+           pending: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ]
+         }}
+      end)
+
+      balance = Studios.get_banchan_balance!(studio)
+
+      assert [net] == balance.stripe_available
+      assert [Money.new(0, :USD)] == balance.stripe_pending
+      assert [net] == balance.held_back
+      assert [] == balance.released
+      assert [] == balance.on_the_way
+      assert [] == balance.paid
+      assert [] == balance.failed
+      assert [] == balance.available
+
+      assert {:ok, [Money.new(0, :USD)]} == Studios.payout_studio(studio)
+
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :accepted)
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :ready_for_review)
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :approved)
+
+      stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:create_payout, fn params, opts ->
+        assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
+
+        assert %{
+                 amount: net.amount,
+                 currency: "usd",
+                 statement_descriptor: "banchan.art payout"
+               } == params
+
+        # For this test, we simulate the payout completing instantly. We'll
+        # deal with on_the_way and such in other tests.
+        {:ok, %Stripe.Payout{id: stripe_payout_id, status: "paid"}}
+      end)
+
+      assert {:ok, [net]} == Studios.payout_studio(studio)
+
+      payout = from(p in Payout, where: p.studio_id == ^studio.id) |> Repo.one!()
+
+      paid_invoices =
+        from(i in Invoice, where: i.commission_id == ^commission.id and i.status == :succeeded)
+        |> Repo.all()
+
+      assert Enum.all?(paid_invoices, &(&1.payout_id == payout.id))
+
+      expired_invoices =
+        from(i in Invoice, where: i.commission_id == ^commission.id and i.status == :expired)
+        |> Repo.all()
+
+      assert Enum.all?(expired_invoices, &is_nil(&1.payout_id))
     end
   end
 end
