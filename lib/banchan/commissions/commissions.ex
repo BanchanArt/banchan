@@ -107,11 +107,11 @@ defmodule Banchan.Commissions do
   # TODO: maybe this is too wide a net? We can separate this into user-level
   # and studio-level subscriptions, though it will mean multiple calls to
   # these subscription functions.
-  def subscribe_to_new_commissions() do
+  def subscribe_to_new_commissions do
     Phoenix.PubSub.subscribe(@pubsub, "commission")
   end
 
-  def unsubscribe_from_new_commissions() do
+  def unsubscribe_from_new_commissions do
     Phoenix.PubSub.unsubscribe(@pubsub, "commission")
   end
 
@@ -796,7 +796,7 @@ defmodule Banchan.Commissions do
     end
   end
 
-  defp stripe_mod() do
+  defp stripe_mod do
     Application.get_env(:banchan, :stripe_mod)
   end
 end

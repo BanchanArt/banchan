@@ -9,10 +9,10 @@ defmodule Banchan.StudiosTest do
   import Banchan.AccountsFixtures
   import Banchan.StudiosFixtures
 
-  alias Banchan.Studios
-  alias Banchan.Studios.Studio
   alias Banchan.Notifications
   alias Banchan.Repo
+  alias Banchan.Studios
+  alias Banchan.Studios.Studio
 
   setup :verify_on_exit!
 

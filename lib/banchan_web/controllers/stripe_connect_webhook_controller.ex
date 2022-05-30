@@ -65,7 +65,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
     |> send_resp()
   end
 
-  defp stripe_mod() do
+  defp stripe_mod do
     Application.get_env(:banchan, :stripe_mod)
   end
 end

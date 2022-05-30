@@ -314,8 +314,11 @@ defmodule Banchan.Notifications do
                              email: email,
                              notification_settings: settings
                            } ->
-          if (!settings || settings.commission_web) &&
-               ((actor && actor.id != id) || @notify_actor) do
+          notify_actor = (actor && actor.id != id) || @notify_actor
+
+          web_setting = is_nil(settings) || settings.commission_web
+
+          if web_setting && notify_actor do
             notification = Repo.insert!(%{notification | user_id: id}, returning: [:ref])
 
             Phoenix.PubSub.broadcast!(
@@ -329,8 +332,9 @@ defmodule Banchan.Notifications do
             )
           end
 
-          if (!settings || settings.commission_email) &&
-               ((actor && actor.id != id) || @notify_actor) do
+          email_setting = is_nil(settings) || settings.commission_email
+
+          if email_setting && notify_actor do
             send_email(email, notification, opts)
           end
         end)

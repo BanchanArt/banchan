@@ -23,7 +23,7 @@ defmodule Banchan.StudiosFixtures do
     })
   end
 
-  defp stripe_account_mock() do
+  defp stripe_account_mock do
     Banchan.StripeAPI.Mock
     |> expect(:create_account, fn _ ->
       {:ok, %Stripe.Account{id: "stripe-mock-id#{System.unique_integer()}"}}
