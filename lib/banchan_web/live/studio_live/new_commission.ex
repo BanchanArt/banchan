@@ -41,7 +41,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
       {:ok,
        socket
        |> assign(
-         changeset: Commission.changeset(%Commission{}, %{}),
+         changeset: Commission.creation_changeset(%Commission{}, %{}),
          line_items: default_items,
          offering: offering,
          template: template,
@@ -104,7 +104,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   def handle_event("change", %{"commission" => commission}, socket) do
     changeset =
       %Commission{}
-      |> Commissions.change_commission(commission)
+      |> Commission.creation_changeset(commission)
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)

@@ -182,7 +182,7 @@ defmodule Banchan.Commissions do
              }
            ]
          }
-         |> Commission.changeset(attrs)
+         |> Commission.creation_changeset(attrs)
          |> Repo.insert() do
       {:ok, %Commission{} = commission} ->
         Notifications.subscribe_user!(actor, commission)
@@ -284,9 +284,7 @@ defmodule Banchan.Commissions do
           end
 
         case commission
-             |> Commission.changeset(%{
-               tos_ok: true
-             })
+             |> Commission.update_changeset()
              |> Ecto.Changeset.put_assoc(:line_items, commission.line_items ++ [line_item])
              |> Repo.update() do
           {:error, err} ->
@@ -321,9 +319,7 @@ defmodule Banchan.Commissions do
         line_items = Enum.filter(commission.line_items, &(&1.id != line_item.id))
 
         case commission
-             |> Commission.changeset(%{
-               tos_ok: true
-             })
+             |> Commission.update_changeset()
              |> Ecto.Changeset.put_assoc(:line_items, line_items)
              |> Repo.update() do
           {:error, err} ->
@@ -346,19 +342,6 @@ defmodule Banchan.Commissions do
       end)
 
     ret
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking commission changes.
-
-  ## Examples
-
-      iex> change_commission(commission)
-      %Ecto.Changeset{data: %Commission{}}
-
-  """
-  def change_commission(%Commission{} = commission, attrs \\ %{}) do
-    Commission.changeset(commission, attrs)
   end
 
   @doc """
