@@ -576,6 +576,7 @@ defmodule Banchan.Commissions do
 
           {:ok, event} ->
             case %Invoice{
+                   client_id: commission.client_id,
                    commission: commission,
                    event: event
                  }
