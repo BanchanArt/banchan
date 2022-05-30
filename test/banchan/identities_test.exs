@@ -8,7 +8,6 @@ defmodule Banchan.IdentitiesTest do
   import Banchan.StudiosFixtures
 
   alias Banchan.Identities
-  alias Banchan.Studios.Studio
 
   describe "get_user_or_studio_by_handle/1" do
     test "returns an error tuple when neither user or studio exists" do
