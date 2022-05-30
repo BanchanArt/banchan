@@ -17,6 +17,15 @@ defmodule Banchan.CommissionsTest do
 
   setup :verify_on_exit!
 
+  setup do
+    on_exit(fn ->
+      for pid <- Task.Supervisor.children(Banchan.NotificationTaskSupervisor) do
+        ref = Process.monitor(pid)
+        assert_receive {:DOWN, ^ref, _, _, _}, 1000
+      end
+    end)
+  end
+
   describe "commissions" do
     test "get_commission!/2 returns the commission with given id" do
       commission = commission_fixture()
