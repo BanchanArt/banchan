@@ -258,7 +258,13 @@ defmodule Banchan.CommissionsTest do
       end)
       |> expect(:retrieve_balance_transaction, fn id, _ ->
         assert txn_id == id
-        {:ok, %{available_on: DateTime.to_unix(available_on), amount: Money.add(amount, tip).amount, currency: "usd"}}
+
+        {:ok,
+         %{
+           available_on: DateTime.to_unix(available_on),
+           amount: Money.add(amount, tip).amount,
+           currency: "usd"
+         }}
       end)
 
       Commissions.subscribe_to_commission_events(commission)
@@ -276,7 +282,7 @@ defmodule Banchan.CommissionsTest do
 
       commission = commission |> Repo.reload() |> Repo.preload(:events)
 
-      processed_event = Enum.find(commission.events, & &1.type == :payment_processed)
+      processed_event = Enum.find(commission.events, &(&1.type == :payment_processed))
 
       assert processed_event
       assert processed_event.commission_id == commission.id
@@ -301,7 +307,39 @@ defmodule Banchan.CommissionsTest do
         event: "event_updated",
         payload: %Event{type: :comment, id: ^iid}
       }
+    end
 
+    test "process payment expired" do
+      commission = commission_fixture()
+      user = commission.client
+
+      amount = Money.new(420, :USD)
+      tip = Money.new(69, :USD)
+
+      invoice =
+        invoice_fixture(user, commission, %{
+          "amount" => amount,
+          "text" => "Send help."
+        })
+
+      sess = checkout_session_fixture(invoice, tip)
+
+      Commissions.subscribe_to_commission_events(commission)
+
+      Commissions.process_payment_expired!(sess)
+
+      invoice = invoice |> Repo.reload() |> Repo.preload(:event)
+
+      assert :expired == invoice.status
+
+      topic = "commission:#{commission.public_id}"
+      iid = invoice.event.id
+
+      assert_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "event_updated",
+        payload: %Event{type: :comment, id: ^iid}
+      }
     end
   end
 end
