@@ -12,7 +12,7 @@ defmodule Banchan.CommissionsTest do
   import Banchan.StudiosFixtures
 
   alias Banchan.Commissions
-  alias Banchan.Commissions.Event
+  alias Banchan.Commissions.{Event, Invoice}
   alias Banchan.Notifications
   alias Banchan.Offerings
 
@@ -305,8 +305,12 @@ defmodule Banchan.CommissionsTest do
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
-        payload: %Event{type: :comment, id: ^iid}
+        payload: %Event{type: :comment, id: ^iid, invoice: %Invoice{status: :succeeded}}
       }
+
+      assert_raise RuntimeError, fn ->
+        Commissions.expire_payment!(invoice, true)
+      end
     end
 
     test "process payment expired" do
@@ -338,8 +342,93 @@ defmodule Banchan.CommissionsTest do
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
-        payload: %Event{type: :comment, id: ^iid}
+        payload: %Event{type: :comment, id: ^iid, invoice: %Invoice{status: :expired}}
       }
+
+      assert_raise RuntimeError, fn ->
+        Commissions.expire_payment!(invoice, true)
+      end
+    end
+
+    test "manually expire already-started payment" do
+      commission = commission_fixture()
+      user = commission.client
+
+      amount = Money.new(420, :USD)
+      tip = Money.new(69, :USD)
+
+      invoice =
+        invoice_fixture(user, commission, %{
+          "amount" => amount,
+          "text" => "Send help."
+        })
+
+      sess = checkout_session_fixture(invoice, tip)
+      invoice = invoice |> Repo.reload()
+
+      Commissions.subscribe_to_commission_events(commission)
+
+      assert {:error, :unauthorized} == Commissions.expire_payment!(invoice, false)
+
+      Banchan.StripeAPI.Mock
+      |> expect(:expire_payment, fn sess_id ->
+        assert sess_id == sess.id
+        :ok
+      end)
+
+      assert :ok == Commissions.expire_payment!(invoice, true)
+
+      invoice = invoice |> Repo.reload() |> Repo.preload(:event)
+
+      # Manual payment expiry relies on Stripe hitting our webhook after the fact
+
+      assert :submitted == invoice.status
+
+      topic = "commission:#{commission.public_id}"
+      iid = invoice.event.id
+
+      refute_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "event_updated",
+        payload: %Event{type: :comment, id: ^iid, invoice: %Invoice{status: :expired}}
+      }
+    end
+
+    test "manually expire pending payment" do
+      commission = commission_fixture()
+      user = commission.client
+
+      amount = Money.new(420, :USD)
+
+      invoice =
+        invoice_fixture(user, commission, %{
+          "amount" => amount,
+          "text" => "Send help."
+        })
+
+      invoice = invoice |> Repo.reload()
+
+      Commissions.subscribe_to_commission_events(commission)
+
+      assert {:error, :unauthorized} == Commissions.expire_payment!(invoice, false)
+      assert :ok == Commissions.expire_payment!(invoice, true)
+
+      invoice = invoice |> Repo.reload() |> Repo.preload(:event)
+
+      assert :expired == invoice.status
+
+      topic = "commission:#{commission.public_id}"
+      iid = invoice.event.id
+
+      assert_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "event_updated",
+        payload: %Event{type: :comment, id: ^iid, invoice: %Invoice{status: :expired}}
+      }
+
+      assert_raise RuntimeError, fn ->
+        Commissions.expire_payment!(invoice, true)
+      end
     end
   end
 end

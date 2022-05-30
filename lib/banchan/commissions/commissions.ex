@@ -703,29 +703,45 @@ defmodule Banchan.Commissions do
   end
 
   def process_payment_expired!(session) do
+    # NOTE: This will crash (intentionally) if we try to expire an
+    # already-succeeded payment. This should never happen, though, because it
+    # doesn't make sense that Stripe would tell us that a payment succeeded
+    # then tell us it's expired. So this crash is a good just-in-case.
     {1, [invoice]} =
-      from(i in Invoice, where: i.stripe_session_id == ^session.id, select: i)
+      from(i in Invoice,
+        where: i.stripe_session_id == ^session.id and i.status != :succeeded,
+        select: i
+      )
       |> Repo.update_all(set: [status: :expired])
 
     send_event_update!(invoice.event_id)
   end
+
+  def expire_payment!(invoice, current_user_member?)
 
   def expire_payment!(_, false) do
     {:error, :unauthorized}
   end
 
-  def expire_payment!(%Invoice{id: id, stripe_session_id: nil}, _) do
+  def expire_payment!(%Invoice{id: id, stripe_session_id: nil, status: :pending}, _) do
+    # NOTE: This will crash (intentionally) if we try to expire an already-succeeded payment.
     {1, [invoice]} =
-      from(i in Invoice, where: i.id == ^id, select: i)
+      from(i in Invoice, where: i.id == ^id and i.status != :succeeded, select: i)
       |> Repo.update_all(set: [status: :expired])
 
     send_event_update!(invoice.event_id)
+    :ok
   end
 
-  def expire_payment!(%Invoice{stripe_session_id: session_id}, _) do
+  def expire_payment!(%Invoice{stripe_session_id: session_id, status: :submitted}, _)
+      when session_id != nil do
     # NOTE: We don't manually expire the invoice in the database here. That's
     # handled by process_payment_expired!/1 when the webhook fires.
     :ok = stripe_mod().expire_payment(session_id)
+  end
+
+  def expire_payment!(%Invoice{}, _) do
+    raise "Tried to expire an invoice in an invalid state. Reload the invoice and try again. Otherwise, this is a bug."
   end
 
   def deposited_amount(

@@ -48,7 +48,7 @@ defmodule Banchan.CommissionsFixtures do
 
   def checkout_session_fixture(%Invoice{} = invoice, %Money{} = tip) do
     commission = (invoice |> Repo.preload(:commission)).commission
-    event = (invoice |> Repo.preload([event: [:invoice]])).event
+    event = (invoice |> Repo.preload(event: [:invoice])).event
     client = (invoice |> Repo.preload(:client)).client
     checkout_uri = "https://stripe-mock-checkout-uri"
     sess_id = "stripe-mock-session-id#{System.unique_integer()}"
