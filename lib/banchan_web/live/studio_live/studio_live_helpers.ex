@@ -5,6 +5,9 @@ defmodule BanchanWeb.StudioLive.Helpers do
   """
   import Phoenix.LiveView
 
+  import Ecto.Query
+
+  alias Banchan.Accounts.User
   alias Banchan.Studios
 
   alias BanchanWeb.Endpoint
@@ -25,7 +28,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
         |> redirect(to: Routes.studio_shop_path(Endpoint, :show, handle))
 
       current_member && !current_user_member? ->
-        throw(Ecto.NoResultsError)
+        raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
 
       true ->
         socket
