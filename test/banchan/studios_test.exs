@@ -141,7 +141,7 @@ defmodule Banchan.StudiosTest do
       studio = studio_fixture([user])
       Studios.subscribe_to_stripe_state(studio)
 
-      Studios.update_stripe_state(studio.stripe_id, %Stripe.Account{
+      Studios.update_stripe_state!(studio.stripe_id, %Stripe.Account{
         charges_enabled: true,
         details_submitted: true
       })
@@ -230,7 +230,7 @@ defmodule Banchan.StudiosTest do
       user = user_fixture()
       studio = studio_fixture([user])
 
-      Studios.update_stripe_state(studio.stripe_id, %Stripe.Account{
+      Studios.update_stripe_state!(studio.stripe_id, %Stripe.Account{
         charges_enabled: true
       })
 
@@ -701,6 +701,17 @@ defmodule Banchan.StudiosTest do
       assert :failed == payout.status
       assert :account_closed == payout.failure_code
       assert "The bank account has been closed" == payout.failure_message
+    end
+
+    test "payout does not exist in our db yet (but might've been created already on Stripe" do
+      assert_raise Ecto.NoResultsError, fn ->
+        Studios.process_payout_updated!(%Stripe.Payout{
+          id: "random-stripe-payout-id#{System.unique_integer()}",
+          status: "canceled",
+          failure_code: nil,
+          failure_message: nil
+        })
+      end
     end
 
     test "canceled payout" do
