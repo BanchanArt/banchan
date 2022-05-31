@@ -374,7 +374,9 @@ defmodule Banchan.Studios do
           throw(error)
       end
 
-    # TODO: This is racy af
+    # NOTE: the payout_updated webhook might fire before the following
+    # transaction completes. In that case, we're going to 404, which should
+    # make it so Stripe retries the webhook later.
     {:ok, ret} =
       Repo.transaction(fn ->
         case %Payout{
@@ -438,7 +440,7 @@ defmodule Banchan.Studios do
   end
 
   def process_payout_updated!(%Stripe.Payout{} = payout) do
-    from(p in Payout,
+    case from(p in Payout,
       where: p.stripe_payout_id == ^payout.id
     )
     |> Repo.update_all(
@@ -447,9 +449,15 @@ defmodule Banchan.Studios do
         failure_code: payout.failure_code,
         failure_message: payout.failure_message
       ]
-    )
-
-    :ok
+    ) do
+      # No need for checking for > 1. There's a unique index on
+      # stripe_payout_id. But we crash here if that happens, just in case we
+      # oopsies in the future.
+      {1, _} ->
+        :ok
+      {0, _} ->
+        raise Ecto.NoResultsError, "No Payout found with id #{payout.id}"
+    end
   end
 
   def charges_enabled?(%Studio{} = studio, refresh \\ false) do
