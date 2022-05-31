@@ -7,9 +7,10 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
   alias Banchan.Offerings
   alias Banchan.Offerings.Offering
 
-  alias BanchanWeb.CommissionLive.Components
-  alias BanchanWeb.Endpoint
   import BanchanWeb.StudioLive.Helpers
+
+  alias BanchanWeb.Endpoint
+  alias BanchanWeb.StudioLive.Components
 
   @impl true
   def mount(%{"offering_type" => offering_type} = params, _session, socket) do

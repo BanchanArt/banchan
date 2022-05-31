@@ -7,8 +7,9 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   alias Banchan.Offerings
   alias Banchan.Offerings.Offering
 
-  alias BanchanWeb.CommissionLive.Components
   alias BanchanWeb.Endpoint
+  alias BanchanWeb.StudioLive.Components
+
   import BanchanWeb.StudioLive.Helpers
 
   @impl true
