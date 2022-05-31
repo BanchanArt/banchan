@@ -397,32 +397,43 @@ defmodule Banchan.Studios do
                   "Wrong number of invoices associated with new Payout (expected: #{invoice_count}, actual: ${actual_count}"
               })
 
-              cancel_payout!(studio, stripe_payout.id)
-              throw({:error, "Payout failed due to an internal error."})
+              case cancel_payout(studio, stripe_payout.id) do
+                :ok ->
+                  # NOTE: This will get caught further up for a proper {:error, err} return.
+                  throw({:error, "Payout failed due to an internal error."})
+
+                {:error, err} ->
+                  throw({:error, err})
+              end
             end
 
           {:error, err} ->
             Logger.error(%{message: "Failed to update database after payout", error: err})
 
-            cancel_payout!(studio, stripe_payout.id)
+            case cancel_payout(studio, stripe_payout.id) do
+              :ok ->
+                # NOTE: This will get caught further up for a proper {:error, err} return.
+                throw({:error, "Payout failed due to an internal error."})
 
-            # NOTE: This will get caught further up for a proper {:error, err} return.
-            throw({:error, "Payout failed due to an internal error."})
+              {:error, err} ->
+                throw({:error, err})
+            end
         end
       end)
 
     ret
   end
 
-  defp cancel_payout!(%Studio{} = studio, payout_id) do
+  def cancel_payout(%Studio{} = studio, payout_id) do
     case stripe_mod().cancel_payout(payout_id,
            headers: %{"Stripe-Account" => studio.stripe_id}
          ) do
-      {:ok, _} ->
+      {:ok, %Stripe.Payout{id: ^payout_id, status: "canceled"}} ->
+        # NOTE: db is updated on process_payout_updated, so we don't do it here.
         :ok
 
       {:error, %Stripe.Error{} = err} ->
-        throw(err)
+        {:error, err}
     end
   end
 
