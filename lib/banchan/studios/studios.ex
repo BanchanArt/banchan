@@ -357,21 +357,21 @@ defmodule Banchan.Studios do
   end
 
   defp create_stripe_payout!(%Studio{} = studio, %Money{} = total) do
-      case stripe_mod().create_payout(
-             %{
-               amount: total.amount,
-               currency: String.downcase(Atom.to_string(total.currency)),
-               statement_descriptor: "banchan.art payout"
-             },
-             headers: %{"Stripe-Account" => studio.stripe_id}
-           ) do
-        {:ok, stripe_payout} ->
-          {:ok, stripe_payout}
+    case stripe_mod().create_payout(
+           %{
+             amount: total.amount,
+             currency: String.downcase(Atom.to_string(total.currency)),
+             statement_descriptor: "banchan.art payout"
+           },
+           headers: %{"Stripe-Account" => studio.stripe_id}
+         ) do
+      {:ok, stripe_payout} ->
+        {:ok, stripe_payout}
 
-        {:error, %Stripe.Error{} = error} ->
-          # NOTE: This will get rescued further up for a proper {:error, err} return.
-          throw(error)
-      end
+      {:error, %Stripe.Error{} = error} ->
+        # NOTE: This will get rescued further up for a proper {:error, err} return.
+        throw(error)
+    end
   end
 
   defp create_payout!(%Studio{} = studio, invoice_ids, invoice_count, %Money{} = total) do
