@@ -430,7 +430,7 @@ defmodule Banchan.Studios do
     )
     |> Repo.update_all(
       set: [
-        status: String.to_atom(payout.status),
+        status: payout.status,
         failure_code: payout.failure_code,
         failure_message: payout.failure_message
       ]

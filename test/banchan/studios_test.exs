@@ -6,6 +6,8 @@ defmodule Banchan.StudiosTest do
 
   import Mox
 
+  import ExUnit.CaptureLog
+
   import Banchan.AccountsFixtures
   import Banchan.CommissionsFixtures
   import Banchan.StudiosFixtures
@@ -593,7 +595,9 @@ defmodule Banchan.StudiosTest do
         {:error, stripe_err}
       end)
 
-      assert {:error, stripe_err} == Studios.payout_studio(studio)
+      {result, log} = with_log(fn -> Studios.payout_studio(studio) end)
+      assert {:error, stripe_err} == result
+      assert log =~ "[error] Stripe error during payout: Log me?\n"
 
       assert [] == from(p in Payout, where: p.studio_id == ^studio.id) |> Repo.all()
 
@@ -621,6 +625,95 @@ defmodule Banchan.StudiosTest do
       assert [] == balance.paid
       assert [] == balance.failed
       assert [net] == balance.available
+    end
+
+    test "delayed payout failure" do
+      commission = commission_fixture()
+      client = commission.client
+      studio = commission.studio
+      amount = Money.new(420, :USD)
+      tip = Money.new(69, :USD)
+
+      banchan_fee =
+        amount
+        |> Money.add(tip)
+        |> Money.multiply(studio.platform_fee)
+
+      net =
+        amount
+        |> Money.add(tip)
+        |> Money.subtract(banchan_fee)
+
+      # Two successful invoices and one expired one
+      invoice =
+        invoice_fixture(client, commission, %{
+          "amount" => amount,
+          "text" => "please give me money :("
+        })
+
+      sess = checkout_session_fixture(invoice, tip)
+      succeed_mock_payment!(sess)
+
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :accepted)
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :ready_for_review)
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :approved)
+
+      stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, 2, fn _ ->
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: net.amount
+             }
+           ],
+           pending: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ]
+         }}
+      end)
+      |> expect(:create_payout, fn _, _ ->
+        {:ok, %Stripe.Payout{id: stripe_payout_id, status: "pending"}}
+      end)
+
+      # Initial requests succeed. Payout is now "pending"
+      assert {:ok, [net]} == Studios.payout_studio(studio)
+
+      payout = from(p in Payout, where: p.studio_id == ^studio.id) |> Repo.one!()
+
+      # TODO: Does your stripe available balance get drained in between
+      # initial request and eventual failure?
+
+      Studios.process_payout_updated!(%Stripe.Payout{
+        id: payout.stripe_payout_id,
+        status: "failed",
+        failure_code: "account_closed",
+        failure_message: "The bank account has been closed"
+      })
+
+      balance = Studios.get_banchan_balance!(studio)
+
+      # TODO: check that failed payouts do indeed go back to available.
+      assert [net] == balance.stripe_available
+      assert [Money.new(0, :USD)] == balance.stripe_pending
+      assert [] == balance.held_back
+      assert [] == balance.released
+      assert [] == balance.on_the_way
+      assert [] == balance.paid
+      assert [net] == balance.failed
+      assert [] == balance.available
+
+      payout = payout |> Repo.reload()
+
+      assert :failed == payout.status
+      assert :account_closed == payout.failure_code
+      assert "The bank account has been closed" == payout.failure_message
     end
   end
 end

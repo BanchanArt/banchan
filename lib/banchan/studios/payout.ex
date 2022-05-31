@@ -19,7 +19,26 @@ defmodule Banchan.Studios.Payout do
       ],
       default: :pending
 
-    field :failure_code, :string
+    # https://stripe.com/docs/api/payouts/failures
+    field :failure_code, Ecto.Enum,
+      values: [
+        :account_closed,
+        :account_frozen,
+        :bank_account_restricted,
+        :bank_ownership_changed,
+        :could_not_process,
+        :debit_not_authorized,
+        :declined,
+        :insufficient_funds,
+        :invalid_account_number,
+        :incorrect_account_holder_name,
+        :incorrect_account_holder_address,
+        :incorrect_account_holder_tax_id,
+        :invalid_currency,
+        :no_account,
+        :unsupported_card
+      ]
+
     field :failure_message, :string
 
     belongs_to :studio, Banchan.Studios.Studio
