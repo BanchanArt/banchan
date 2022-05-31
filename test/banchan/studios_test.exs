@@ -317,10 +317,9 @@ defmodule Banchan.StudiosTest do
       assert [] == balance.released
       assert [] == balance.on_the_way
       assert [] == balance.paid
-      assert [] == balance.failed
       assert [] == balance.available
 
-      assert {:ok, [Money.new(0, :USD)]} == Studios.payout_studio(studio)
+      assert {:ok, []} == Studios.payout_studio(studio)
 
       {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :accepted)
       {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :ready_for_review)
@@ -341,21 +340,31 @@ defmodule Banchan.StudiosTest do
         {:ok, %Stripe.Payout{id: stripe_payout_id, status: "pending"}}
       end)
 
-      assert {:ok, [net]} == Studios.payout_studio(studio)
+      {:ok, [%Payout{amount: ^net, status: :pending}]} = Studios.payout_studio(studio)
 
-      payout = from(p in Payout, where: p.studio_id == ^studio.id) |> Repo.one!()
+      payout =
+        from(p in Payout, where: p.studio_id == ^studio.id)
+        |> Repo.one!()
+        |> Repo.preload(:invoices)
 
       paid_invoices =
-        from(i in Invoice, where: i.commission_id == ^commission.id and i.status == :succeeded)
+        from(i in Invoice,
+          where: i.commission_id == ^commission.id and i.status == :succeeded,
+          select: i.id
+        )
         |> Repo.all()
+        |> Enum.sort()
 
-      assert Enum.all?(paid_invoices, &(&1.payout_id == payout.id))
+      assert paid_invoices == payout.invoices |> Enum.map(& &1.id) |> Enum.sort()
 
-      expired_invoices =
-        from(i in Invoice, where: i.commission_id == ^commission.id and i.status == :expired)
-        |> Repo.all()
+      expired_invoice =
+        from(i in Invoice,
+          where: i.commission_id == ^commission.id and i.status == :expired,
+          select: i.id
+        )
+        |> Repo.one!()
 
-      assert Enum.all?(expired_invoices, &is_nil(&1.payout_id))
+      assert !Enum.find(payout.invoices, &(&1.id == expired_invoice))
 
       # Payout funds are marked as on_the_way until we get notified by stripe
       # that the payment has been completed.
@@ -367,7 +376,6 @@ defmodule Banchan.StudiosTest do
       assert [] == balance.released
       assert [net] == balance.on_the_way
       assert [] == balance.paid
-      assert [] == balance.failed
       assert [] == balance.available
 
       Banchan.StripeAPI.Mock
@@ -406,7 +414,6 @@ defmodule Banchan.StudiosTest do
       assert [] == balance.released
       assert [] == balance.on_the_way
       assert [net] == balance.paid
-      assert [] == balance.failed
       assert [] == balance.available
     end
 
@@ -467,17 +474,16 @@ defmodule Banchan.StudiosTest do
       assert [] == balance.released
       assert [] == balance.on_the_way
       assert [] == balance.paid
-      assert [] == balance.failed
       assert [] == balance.available
 
-      assert {:ok, [Money.new(0, :USD)]} == Studios.payout_studio(studio)
+      assert {:ok, []} == Studios.payout_studio(studio)
 
       {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :accepted)
       {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :ready_for_review)
       {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :approved)
 
       # No money available on Stripe yet, so no payout happens.
-      assert {:ok, [Money.new(0, :USD)]} == Studios.payout_studio(studio)
+      assert {:ok, []} == Studios.payout_studio(studio)
 
       balance = Studios.get_banchan_balance!(studio)
 
@@ -487,7 +493,6 @@ defmodule Banchan.StudiosTest do
       assert [net] == balance.released
       assert [] == balance.on_the_way
       assert [] == balance.paid
-      assert [] == balance.failed
 
       # This might be a bit weird, but it's fine, and we should always account for this case anyway.
       assert [Money.new(0, :USD)] == balance.available
@@ -526,7 +531,6 @@ defmodule Banchan.StudiosTest do
       assert [net] == balance.released
       assert [] == balance.on_the_way
       assert [] == balance.paid
-      assert [] == balance.failed
       assert [net] == balance.available
     end
 
@@ -601,18 +605,6 @@ defmodule Banchan.StudiosTest do
 
       assert [] == from(p in Payout, where: p.studio_id == ^studio.id) |> Repo.all()
 
-      paid_invoices =
-        from(i in Invoice, where: i.commission_id == ^commission.id and i.status == :succeeded)
-        |> Repo.all()
-
-      assert Enum.all?(paid_invoices, &is_nil(&1.payout_id))
-
-      expired_invoices =
-        from(i in Invoice, where: i.commission_id == ^commission.id and i.status == :expired)
-        |> Repo.all()
-
-      assert Enum.all?(expired_invoices, &is_nil(&1.payout_id))
-
       # We don't mark them as failed when the failure was immediate. They just
       # stay "released".
       balance = Studios.get_banchan_balance!(studio)
@@ -623,7 +615,6 @@ defmodule Banchan.StudiosTest do
       assert [net] == balance.released
       assert [] == balance.on_the_way
       assert [] == balance.paid
-      assert [] == balance.failed
       assert [net] == balance.available
     end
 
@@ -682,8 +673,8 @@ defmodule Banchan.StudiosTest do
         {:ok, %Stripe.Payout{id: stripe_payout_id, status: "pending"}}
       end)
 
-      # Initial requests succeed. Payout is now "pending"
-      assert {:ok, [net]} == Studios.payout_studio(studio)
+      # Initial requests succeeded. Payout is now "pending"
+      {:ok, [%Payout{amount: ^net, status: :pending}]} = Studios.payout_studio(studio)
 
       payout = from(p in Payout, where: p.studio_id == ^studio.id) |> Repo.one!()
 
@@ -699,15 +690,13 @@ defmodule Banchan.StudiosTest do
 
       balance = Studios.get_banchan_balance!(studio)
 
-      # TODO: check that failed payouts do indeed go back to available.
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
       assert [] == balance.held_back
-      assert [] == balance.released
+      assert [net] == balance.released
       assert [] == balance.on_the_way
       assert [] == balance.paid
-      assert [net] == balance.failed
-      assert [] == balance.available
+      assert [net] == balance.available
 
       payout = payout |> Repo.reload()
 

@@ -30,7 +30,8 @@ defmodule Banchan.Commissions.Invoice do
     belongs_to :commission, Banchan.Commissions.Commission
     belongs_to :client, Banchan.Accounts.User
     belongs_to :event, Banchan.Commissions.Event
-    belongs_to :payout, Banchan.Studios.Payout
+
+    many_to_many :payouts, Banchan.Studios.Payout, join_through: "invoices_payouts"
 
     timestamps()
   end

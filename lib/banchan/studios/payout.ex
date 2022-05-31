@@ -42,5 +42,7 @@ defmodule Banchan.Studios.Payout do
     field :failure_message, :string
 
     belongs_to :studio, Banchan.Studios.Studio
+
+    many_to_many :invoices, Banchan.Commissions.Invoice, join_through: "invoices_payouts"
   end
 end

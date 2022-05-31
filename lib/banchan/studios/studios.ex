@@ -183,15 +183,14 @@ defmodule Banchan.Studios do
     results =
       from(i in Invoice,
         join: c in assoc(i, :commission),
-        left_join: p in assoc(i, :payout),
+        left_join: p in assoc(i, :payouts),
         where:
           c.studio_id == ^studio.id and
             i.status == :succeeded,
         group_by: [
           fragment("CASE WHEN s2.status = 'pending' OR s2.status = 'in_transit' THEN 'on_the_way'
                   WHEN s2.status = 'paid' THEN 'paid'
-                  WHEN s2.status = 'failed' THEN 'failed'
-                  WHEN c1.status = 'approved' AND c0.payout_id IS NULL THEN 'released'
+                  WHEN c1.status = 'approved' THEN 'released'
                   ELSE 'held_back'
                 END"),
           fragment("(c0.amount).currency"),
@@ -204,8 +203,7 @@ defmodule Banchan.Studios do
               fragment(
                 "CASE WHEN s2.status = 'pending' OR s2.status = 'in_transit' THEN 'on_the_way'
                   WHEN s2.status = 'paid' THEN 'paid'
-                  WHEN s2.status = 'failed' THEN 'failed'
-                  WHEN c1.status = 'approved' AND c0.payout_id IS NULL THEN 'released'
+                  WHEN c1.status = 'approved' THEN 'released'
                   ELSE 'held_back'
                 END"
               ),
@@ -230,7 +228,7 @@ defmodule Banchan.Studios do
       )
       |> Repo.all()
 
-    {released, held_back, on_the_way, paid, failed} = get_net_values(results)
+    {released, held_back, on_the_way, paid} = get_net_values(results)
 
     available = get_released_available(stripe_available, released)
 
@@ -241,31 +239,27 @@ defmodule Banchan.Studios do
       released: released,
       on_the_way: on_the_way,
       paid: paid,
-      failed: failed,
       available: available
     }
   end
 
   defp get_net_values(results) do
-    Enum.reduce(results, {[], [], [], [], []}, fn %{status: status} = res,
-                                                  {released, held_back, on_the_way, paid, failed} ->
+    Enum.reduce(results, {[], [], [], []}, fn %{status: status} = res,
+                                              {released, held_back, on_the_way, paid} ->
       net = Money.subtract(Money.add(res.charged, res.tips), res.fees)
 
       case status do
         "released" ->
-          {[net | released], held_back, on_the_way, paid, failed}
+          {[net | released], held_back, on_the_way, paid}
 
         "held_back" ->
-          {released, [net | held_back], on_the_way, paid, failed}
+          {released, [net | held_back], on_the_way, paid}
 
         "on_the_way" ->
-          {released, held_back, [net | on_the_way], paid, failed}
+          {released, held_back, [net | on_the_way], paid}
 
         "paid" ->
-          {released, held_back, on_the_way, [net | paid], failed}
-
-        "failed" ->
-          {released, held_back, on_the_way, paid, [net | failed]}
+          {released, held_back, on_the_way, [net | paid]}
       end
     end)
   end
@@ -294,7 +288,16 @@ defmodule Banchan.Studios do
 
     try do
       # TODO: notifications!
-      {:ok, Enum.map(balance.available, &payout_available!(studio, &1))}
+      {:ok,
+       Enum.reduce(balance.available, [], fn avail, acc ->
+         case payout_available!(studio, avail) do
+           {:ok, nil} ->
+             acc
+
+           {:ok, %Payout{} = payout} ->
+             [payout | acc]
+         end
+       end)}
     catch
       %Stripe.Error{} = e ->
         Logger.error("Stripe error during payout: #{e.message}")
@@ -313,12 +316,11 @@ defmodule Banchan.Studios do
 
       if total.amount > 0 do
         create_payout!(studio, invoice_ids, invoice_count, total)
-        total
       else
-        Money.new(0, avail.currency)
+        {:ok, nil}
       end
     else
-      Money.new(0, avail.currency)
+      {:ok, nil}
     end
   end
 
@@ -328,8 +330,10 @@ defmodule Banchan.Studios do
 
     from(i in Invoice,
       join: c in assoc(i, :commission),
+      left_join: p in assoc(i, :payouts),
       where:
-        c.studio_id == ^studio.id and i.status == :succeeded and is_nil(i.payout_id) and
+        c.studio_id == ^studio.id and i.status == :succeeded and
+          (is_nil(p.id) or p.status not in [:pending, :in_transit, :paid]) and
           c.status == :approved and
           fragment("(c0.amount).currency = ?::char(3)", ^currency_str) and
           i.payout_available_on < ^now,
@@ -371,45 +375,43 @@ defmodule Banchan.Studios do
       end
 
     # TODO: This is racy af
-    Repo.transaction(fn ->
-      case %Payout{
-             stripe_payout_id: stripe_payout.id,
-             status: String.to_atom(stripe_payout.status),
-             amount: total,
-             studio_id: studio.id
-           }
-           |> Repo.insert(returning: [:id]) do
-        {:ok, payout} ->
-          case from(i in Invoice,
-                 where: i.id in ^invoice_ids
-               )
-               |> Repo.update_all(set: [payout_id: payout.id]) do
-            {^invoice_count, _} ->
-              :ok
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        case %Payout{
+               stripe_payout_id: stripe_payout.id,
+               status: String.to_atom(stripe_payout.status),
+               amount: total,
+               studio_id: studio.id,
+               invoices: from(i in Invoice, where: i.id in ^invoice_ids) |> Repo.all()
+             }
+             |> Repo.insert(returning: [:id]) do
+          {:ok, payout} ->
+            payout = payout |> Repo.preload(:invoices)
+            actual_count = Enum.count(payout.invoices)
 
-            {unexpected_count, _} ->
-              # TODO: OK BUT WHY
+            if actual_count == invoice_count do
+              {:ok, payout}
+            else
               Logger.error(%{
                 message:
-                  "Wrong number of Invoice rows updated after payout (expected: #{invoice_count}, actual: #{unexpected_count})",
-                error: %{}
+                  "Wrong number of invoices associated with new Payout (expected: #{invoice_count}, actual: ${actual_count}"
               })
 
               cancel_payout!(studio, stripe_payout.id)
-
-              # NOTE: This will get caught further up for a proper {:error, err} return.
               throw({:error, "Payout failed due to an internal error."})
-          end
+            end
 
-        {:error, err} ->
-          Logger.error(%{message: "Failed to update database after payout", error: err})
+          {:error, err} ->
+            Logger.error(%{message: "Failed to update database after payout", error: err})
 
-          cancel_payout!(studio, stripe_payout.id)
+            cancel_payout!(studio, stripe_payout.id)
 
-          # NOTE: This will get caught further up for a proper {:error, err} return.
-          throw({:error, "Payout failed due to an internal error."})
-      end
-    end)
+            # NOTE: This will get caught further up for a proper {:error, err} return.
+            throw({:error, "Payout failed due to an internal error."})
+        end
+      end)
+
+    ret
   end
 
   defp cancel_payout!(%Studio{} = studio, payout_id) do

@@ -104,7 +104,6 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :commission_id, references(:commissions, on_delete: :nothing)
       add :client_id, references(:users, on_delete: :nothing)
       add :event_id, references(:commission_events, on_delete: :nothing)
-      add :payout_id, references(:studio_payouts, on_delete: :nothing)
       add :payout_available_on, :utc_datetime
 
       timestamps()
@@ -114,5 +113,12 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     create index(:commission_invoices, [:commission_id])
     create index(:commission_invoices, [:client_id])
     create index(:commission_invoices, [:event_id])
+
+    create table(:invoices_payouts) do
+      add :invoice_id, references(:commission_invoices), null: false
+      add :payout_id, references(:studio_payouts), null: false
+    end
+
+    create unique_index(:invoices_payouts, [:invoice_id, :payout_id])
   end
 end
