@@ -356,8 +356,7 @@ defmodule Banchan.Studios do
     end)
   end
 
-  defp create_payout!(%Studio{} = studio, invoice_ids, invoice_count, %Money{} = total) do
-    {:ok, stripe_payout} =
+  defp create_stripe_payout!(%Studio{} = studio, %Money{} = total) do
       case stripe_mod().create_payout(
              %{
                amount: total.amount,
@@ -373,7 +372,10 @@ defmodule Banchan.Studios do
           # NOTE: This will get rescued further up for a proper {:error, err} return.
           throw(error)
       end
+  end
 
+  defp create_payout!(%Studio{} = studio, invoice_ids, invoice_count, %Money{} = total) do
+    {:ok, stripe_payout} = create_stripe_payout!(studio, total)
     # NOTE: the payout_updated webhook might fire before the following
     # transaction completes. In that case, we're going to 404, which should
     # make it so Stripe retries the webhook later.
