@@ -287,7 +287,7 @@ defmodule Banchan.StudiosTest do
       Commissions.expire_payment!(invoice, true)
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_balance, 3, fn opts ->
+      |> expect(:retrieve_balance, 4, fn opts ->
         assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
 
         {:ok,
@@ -336,9 +336,7 @@ defmodule Banchan.StudiosTest do
                  statement_descriptor: "banchan.art payout"
                } == params
 
-        # For this test, we simulate the payout completing instantly. We'll
-        # deal with on_the_way and such in other tests.
-        {:ok, %Stripe.Payout{id: stripe_payout_id, status: "paid"}}
+        {:ok, %Stripe.Payout{id: stripe_payout_id, status: "pending"}}
       end)
 
       assert {:ok, [net]} == Studios.payout_studio(studio)
@@ -356,6 +354,273 @@ defmodule Banchan.StudiosTest do
         |> Repo.all()
 
       assert Enum.all?(expired_invoices, &is_nil(&1.payout_id))
+
+      # Payout funds are marked as on_the_way until we get notified by stripe
+      # that the payment has been completed.
+      balance = Studios.get_banchan_balance!(studio)
+
+      assert [net] == balance.stripe_available
+      assert [Money.new(0, :USD)] == balance.stripe_pending
+      assert [] == balance.held_back
+      assert [] == balance.released
+      assert [net] == balance.on_the_way
+      assert [] == balance.paid
+      assert [] == balance.failed
+      assert [] == balance.available
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, 1, fn opts ->
+        assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
+
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ],
+           pending: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ]
+         }}
+      end)
+
+      Studios.process_payout_updated!(%Stripe.Payout{
+        id: payout.stripe_payout_id,
+        status: "paid",
+        failure_code: nil,
+        failure_message: nil
+      })
+
+      balance = Studios.get_banchan_balance!(studio)
+
+      assert [Money.new(0, :USD)] == balance.stripe_available
+      assert [Money.new(0, :USD)] == balance.stripe_pending
+      assert [] == balance.held_back
+      assert [] == balance.released
+      assert [] == balance.on_the_way
+      assert [net] == balance.paid
+      assert [] == balance.failed
+      assert [] == balance.available
+    end
+
+    test "stripe pending vs released -> available" do
+      commission = commission_fixture()
+      client = commission.client
+      studio = commission.studio
+      amount = Money.new(420, :USD)
+      tip = Money.new(69, :USD)
+
+      banchan_fee =
+        amount
+        |> Money.add(tip)
+        |> Money.multiply(studio.platform_fee)
+
+      net =
+        amount
+        |> Money.add(tip)
+        |> Money.subtract(banchan_fee)
+
+      invoice =
+        invoice_fixture(client, commission, %{
+          "amount" => amount,
+          "text" => "please give me money :("
+        })
+
+      sess = checkout_session_fixture(invoice, tip)
+      succeed_mock_payment!(sess)
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, 4, fn opts ->
+        assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
+
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ],
+           # We've "released" funds from the commission, but the funds are
+           # still pending their waiting period on stripe.
+           pending: [
+             %{
+               currency: "usd",
+               amount: net.amount
+             }
+           ]
+         }}
+      end)
+
+      balance = Studios.get_banchan_balance!(studio)
+
+      assert [Money.new(0, :USD)] == balance.stripe_available
+      assert [net] == balance.stripe_pending
+      assert [net] == balance.held_back
+      assert [] == balance.released
+      assert [] == balance.on_the_way
+      assert [] == balance.paid
+      assert [] == balance.failed
+      assert [] == balance.available
+
+      assert {:ok, [Money.new(0, :USD)]} == Studios.payout_studio(studio)
+
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :accepted)
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :ready_for_review)
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :approved)
+
+      # No money available on Stripe yet, so no payout happens.
+      assert {:ok, [Money.new(0, :USD)]} == Studios.payout_studio(studio)
+
+      balance = Studios.get_banchan_balance!(studio)
+
+      assert [Money.new(0, :USD)] == balance.stripe_available
+      assert [net] == balance.stripe_pending
+      assert [] == balance.held_back
+      assert [net] == balance.released
+      assert [] == balance.on_the_way
+      assert [] == balance.paid
+      assert [] == balance.failed
+
+      # This might be a bit weird, but it's fine, and we should always account for this case anyway.
+      assert [Money.new(0, :USD)] == balance.available
+
+      # Make them available!
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, 1, fn opts ->
+        assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
+
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: net.amount
+             }
+           ],
+           # We've "released" funds from the commission, but the funds are
+           # still pending their waiting period on stripe.
+           pending: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ]
+         }}
+      end)
+
+      # Payout funds are marked as on_the_way until we get notified by stripe
+      # that the payment has been completed.
+      balance = Studios.get_banchan_balance!(studio)
+
+      assert [net] == balance.stripe_available
+      assert [Money.new(0, :USD)] == balance.stripe_pending
+      assert [] == balance.held_back
+      assert [net] == balance.released
+      assert [] == balance.on_the_way
+      assert [] == balance.paid
+      assert [] == balance.failed
+      assert [net] == balance.available
+    end
+
+    test "immediate failed payout" do
+      commission = commission_fixture()
+      client = commission.client
+      studio = commission.studio
+      amount = Money.new(420, :USD)
+      tip = Money.new(69, :USD)
+
+      banchan_fee =
+        amount
+        |> Money.add(tip)
+        |> Money.multiply(studio.platform_fee)
+
+      net =
+        amount
+        |> Money.add(tip)
+        |> Money.subtract(banchan_fee)
+
+      invoice =
+        invoice_fixture(client, commission, %{
+          "amount" => amount,
+          "text" => "please give me money :("
+        })
+
+      sess = checkout_session_fixture(invoice, tip)
+      succeed_mock_payment!(sess)
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, 2, fn opts ->
+        assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
+
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: net.amount
+             }
+           ],
+           pending: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ]
+         }}
+      end)
+
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :accepted)
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :ready_for_review)
+      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :approved)
+
+      stripe_err = %Stripe.Error{
+        source: %{},
+        code: :amount_too_large,
+        message: "Log me?",
+        user_message: "Oops, something went wrong with your payout :("
+      }
+
+      Banchan.StripeAPI.Mock
+      |> expect(:create_payout, fn _, _ ->
+        # TODO: What are the actual possible value here? Need to test by hand. Sigh.
+        # TODO: Assert that we're actually logging a message here
+        {:error, stripe_err}
+      end)
+
+      assert {:error, stripe_err} == Studios.payout_studio(studio)
+
+      assert [] == from(p in Payout, where: p.studio_id == ^studio.id) |> Repo.all()
+
+      paid_invoices =
+        from(i in Invoice, where: i.commission_id == ^commission.id and i.status == :succeeded)
+        |> Repo.all()
+
+      assert Enum.all?(paid_invoices, &is_nil(&1.payout_id))
+
+      expired_invoices =
+        from(i in Invoice, where: i.commission_id == ^commission.id and i.status == :expired)
+        |> Repo.all()
+
+      assert Enum.all?(expired_invoices, &is_nil(&1.payout_id))
+
+      # We don't mark them as failed when the failure was immediate. They just
+      # stay "released".
+      balance = Studios.get_banchan_balance!(studio)
+
+      assert [net] == balance.stripe_available
+      assert [Money.new(0, :USD)] == balance.stripe_pending
+      assert [] == balance.held_back
+      assert [net] == balance.released
+      assert [] == balance.on_the_way
+      assert [] == balance.paid
+      assert [] == balance.failed
+      assert [net] == balance.available
     end
   end
 end

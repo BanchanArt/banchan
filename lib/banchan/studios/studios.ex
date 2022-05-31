@@ -295,11 +295,11 @@ defmodule Banchan.Studios do
     try do
       # TODO: notifications!
       {:ok, Enum.map(balance.available, &payout_available!(studio, &1))}
-    rescue
-      e in Stripe.Error ->
-        Logger.error("Stripe error during payout: #{e.message}")
-        {:error, e.user_message}
     catch
+      %Stripe.Error{} = e ->
+        Logger.error("Stripe error during payout: #{e.message}")
+        {:error, e}
+
       {:error, err} ->
         {:error, err}
     end
@@ -367,7 +367,7 @@ defmodule Banchan.Studios do
 
         {:error, %Stripe.Error{} = error} ->
           # NOTE: This will get rescued further up for a proper {:error, err} return.
-          raise error
+          throw(error)
       end
 
     # TODO: This is racy af
@@ -420,11 +420,11 @@ defmodule Banchan.Studios do
         :ok
 
       {:error, %Stripe.Error{} = err} ->
-        raise err
+        throw(err)
     end
   end
 
-  def process_payout_updated!(payout) do
+  def process_payout_updated!(%Stripe.Payout{} = payout) do
     from(p in Payout,
       where: p.stripe_payout_id == ^payout.id
     )
