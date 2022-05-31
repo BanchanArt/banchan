@@ -2,7 +2,7 @@ defmodule Banchan.CommissionsTest do
   @moduledoc """
   Tests for Commissions-related functionality.
   """
-  use Banchan.DataCase
+  use Banchan.DataCase, async: true
 
   import Mox
 

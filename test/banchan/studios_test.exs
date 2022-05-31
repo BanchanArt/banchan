@@ -2,7 +2,7 @@ defmodule Banchan.StudiosTest do
   @moduledoc """
   Tests for Studios-related functionality.
   """
-  use Banchan.DataCase
+  use Banchan.DataCase, async: true
 
   import Mox
 
