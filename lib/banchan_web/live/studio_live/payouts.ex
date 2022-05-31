@@ -12,11 +12,15 @@ defmodule BanchanWeb.StudioLive.Payouts do
   alias BanchanWeb.Components.Button
 
   def mount(params, _session, socket) do
-    socket = assign_studio_defaults(params, socket, true, false)
+    socket = assign_studio_defaults(params, socket, true, true)
 
-    {:ok,
-     socket
-     |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
+    if socket.redirected do
+      {:ok, socket}
+    else
+      {:ok,
+       socket
+       |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
+    end
   end
 
   @impl true
@@ -62,7 +66,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
     >
       <div class="mx-auto">
         <h2 class="text-xl">Available for Payout</h2>
-        <div class="flex flex-col">
+        <div id="available" class="flex flex-col">
           <div class="stats stats-horizontal">
             {#for avail <- @balance.available}
               {#if avail.amount > 0}
@@ -81,7 +85,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
         </div>
 
         <h2 class="text-xl">Waiting for Approval</h2>
-        <div class="stats stats-horizontal">
+        <div id="held-back" class="stats stats-horizontal">
           {#for held <- @balance.held_back}
             <div class="stat">
               <div class="stat-value">{Money.to_string(held)}</div>
@@ -94,7 +98,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
         </div>
 
         <h2 class="text-xl">On the Way</h2>
-        <div class="stats stats-horizontal">
+        <div id="on-the-way" class="stats stats-horizontal">
           {#for otw <- @balance.on_the_way}
             <div class="stat">
               <div class="stat-value">{Money.to_string(otw)}</div>

@@ -21,14 +21,14 @@ defmodule BanchanWeb.StudioLive.Helpers do
         Studios.is_user_in_studio?(socket.assigns.current_user, studio)
 
     cond do
+      current_member && !current_user_member? ->
+        raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
+
       requires_stripe && !Studios.charges_enabled?(studio, false) ->
         socket
         |> assign(studio: studio, current_user_member?: current_user_member?)
         |> put_flash(:error, "This studio is not ready to accept commissions yet.")
         |> redirect(to: Routes.studio_shop_path(Endpoint, :show, handle))
-
-      current_member && !current_user_member? ->
-        raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
 
       true ->
         socket
