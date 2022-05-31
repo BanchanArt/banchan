@@ -11,6 +11,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
   describe "listing payouts" do
     setup do
       commission = commission_fixture()
+
       %{
         commission: commission,
         client: commission.client,
@@ -20,7 +21,8 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
     end
 
     test "redirects if logged out", %{conn: conn, studio: studio} do
-      {:error, {:redirect, info}} = live(conn, Routes.studio_payouts_path(conn, :show, studio.handle))
+      {:error, {:redirect, info}} =
+        live(conn, Routes.studio_payouts_path(conn, :show, studio.handle))
 
       assert info.to =~ Routes.login_path(conn, :new)
     end
@@ -35,10 +37,8 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
   end
 
   describe "view stats" do
-
   end
 
   describe "trigger payout" do
-
   end
 end
