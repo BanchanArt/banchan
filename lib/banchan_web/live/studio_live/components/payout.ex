@@ -5,11 +5,19 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   """
   use BanchanWeb, :component
 
-  alias Surface.Components.LivePatch
+  alias Surface.Components.{LivePatch, LiveRedirect}
+
+  alias Banchan.Studios.Payout
+
+  alias BanchanWeb.Components.{Avatar, UserHandle}
 
   prop studio, :struct, required: true
   prop payout, :struct, required: true
   prop cancel_payout, :event, required: true
+
+  defp replace_fragment(uri, event) do
+    URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
+  end
 
   def render(assigns) do
     ~F"""
@@ -21,19 +29,48 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
         >
           <i class="fas fa-arrow-left text-2xl" />
         </LivePatch>
-        <div class="flex flex-col">
-          Payout - {Money.to_string(@payout.amount)}
-          <h3
-            class="text-xl"
-            title={@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}
-          >
-            Requested {@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
-          </h3>
+        <div class="flex flex-row">
+          <div>Payout - {Money.to_string(@payout.amount)}</div>
+          <div class="badge badge-secondary badge-md">{Payout.humanize_status(@payout.status)}</div>
         </div>
       </h1>
-      <ul class="text-md pt-4 px-4">
-        <li>Invoice1</li>
-        <li>Invoice2</li>
+      <div class="divider" />
+      <h3
+        class="px-4 text-md"
+        title={@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}
+      >
+        <div class="inline">
+          <div class="self-center inline">
+            Initiated by
+          </div>
+          <div class="self-center inline">
+            <Avatar user={@payout.actor} class="w-4" />
+          </div>
+          <div class="inline">
+            <UserHandle user={@payout.actor} />
+          </div>
+        </div>
+        {@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}.
+      </h3>
+      <div class="px-4">
+        <div>Expected arrival: {@payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}. (# TODO: timezone issue)</div>
+        <div>Method: {@payout.method}</div>
+        <div>Type: {@payout.type}</div>
+        {#if @payout.failure_code}
+          <div>Failure: {@payout.failure_message}</div>
+        {/if}
+      </div>
+      <ul class="text-md pt-4 px-4 list-disc">
+        {#for invoice <- @payout.invoices}
+          <li>
+            {!-- NOTE: Using an href here because apparently LiveRedirect isn't properly moving to the anchor. Probably the delay in commission loading?? --}
+            <a href={replace_fragment(
+              Routes.commission_path(Endpoint, :show, invoice.commission.public_id),
+              invoice.event
+            )}>Invoice (link)</a>:
+            Amount: {Money.to_string(invoice.amount)}, Tip: {Money.to_string(invoice.tip)}, Platform Fees: {Money.to_string(invoice.platform_fee)}, Net: {invoice.amount |> Money.add(invoice.tip) |> Money.subtract(invoice.platform_fee)}, <LiveRedirect to={Routes.commission_path(Endpoint, :show, invoice.commission.public_id)}>Commission (link)</LiveRedirect>
+          </li>
+        {/for}
       </ul>
     </div>
     """

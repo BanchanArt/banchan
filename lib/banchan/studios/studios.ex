@@ -283,7 +283,10 @@ defmodule Banchan.Studios do
   end
 
   def get_payout!(public_id) when is_binary(public_id) do
-    from(p in Payout, where: p.public_id == ^public_id)
+    from(p in Payout,
+      where: p.public_id == ^public_id,
+      preload: [:actor, [invoices: [:commission, :event]]]
+    )
     |> Repo.one!()
   end
 

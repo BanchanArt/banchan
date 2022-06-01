@@ -6,6 +6,8 @@ defmodule BanchanWeb.StudioLive.Components.PayoutRow do
 
   alias Surface.Components.LivePatch
 
+  alias Banchan.Studios.Payout
+
   prop studio, :struct, required: true
   prop payout, :struct, required: true
   prop highlight, :boolean, default: false
@@ -20,19 +22,22 @@ defmodule BanchanWeb.StudioLive.Components.PayoutRow do
       )
 
     ~F"""
-    <LivePatch class={"bg-base-300": @highlight} to={payout_url}>
-      <div class="py-2 px-4">
-        <div class="text-xl">
-          {Money.to_string(@payout.amount)}
+    <div class={"bg-base-200": @highlight}>
+      <LivePatch to={payout_url}>
+        <div class="py-2 px-4">
+          <div class="text-xl">
+            {Money.to_string(@payout.amount)}
+            <div class="badge badge-secondary badge-sm">{Payout.humanize_status(@payout.status)}</div>
+          </div>
+          <div
+            class="text-xs text-left"
+            title={@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}
+          >
+            {@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
+          </div>
         </div>
-        <div
-          class="text-xs text-left"
-          title={@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}
-        >
-          {@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
-        </div>
-      </div>
-    </LivePatch>
+      </LivePatch>
+    </div>
     """
   end
 end
