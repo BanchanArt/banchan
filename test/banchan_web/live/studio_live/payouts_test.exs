@@ -9,8 +9,6 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
   import Banchan.CommissionsFixtures
 
-  alias Banchan.Commissions
-  alias Banchan.Repo
   alias Banchan.Studios
 
   defp mock_balance(studio, available, pending, n \\ 2) do
@@ -112,7 +110,6 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
     test "Shows available balance", %{
       conn: conn,
       client: client,
-      artist: artist,
       studio: studio,
       commission: commission
     } do
@@ -131,7 +128,6 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
     test "Displays multiple balance currencies reasonably", %{
       conn: conn,
       client: client,
-      artist: artist,
       studio: studio,
       commission: commission
     } do

@@ -296,7 +296,7 @@ defmodule Banchan.Studios do
     |> Repo.paginate(page: page, page_size: 20)
   end
 
-  def payout_studio(%Studio{} = studio) do
+  def payout_studio(%User{} = actor, %Studio{} = studio) do
     {:ok, balance} =
       stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id})
 
@@ -304,7 +304,7 @@ defmodule Banchan.Studios do
       # TODO: notifications!
       {:ok,
        Enum.reduce(balance.available, [], fn avail, acc ->
-         case payout_available!(studio, avail) do
+         case payout_available!(actor, studio, avail) do
            {:ok, nil} ->
              acc
 
@@ -322,14 +322,14 @@ defmodule Banchan.Studios do
     end
   end
 
-  defp payout_available!(%Studio{} = studio, avail) do
+  defp payout_available!(%User{} = actor, %Studio{} = studio, avail) do
     avail = Money.new(avail.amount, String.to_atom(String.upcase(avail.currency)))
 
     if avail.amount > 0 do
       {invoice_ids, invoice_count, total} = invoice_details(studio, avail)
 
       if total.amount > 0 do
-        create_payout!(studio, invoice_ids, invoice_count, total)
+        create_payout!(actor, studio, invoice_ids, invoice_count, total)
       else
         {:ok, nil}
       end
@@ -370,25 +370,13 @@ defmodule Banchan.Studios do
     end)
   end
 
-  defp create_stripe_payout!(%Studio{} = studio, %Money{} = total) do
-    case stripe_mod().create_payout(
-           %{
-             amount: total.amount,
-             currency: String.downcase(Atom.to_string(total.currency)),
-             statement_descriptor: "banchan.art payout"
-           },
-           headers: %{"Stripe-Account" => studio.stripe_id}
-         ) do
-      {:ok, stripe_payout} ->
-        {:ok, stripe_payout}
-
-      {:error, %Stripe.Error{} = error} ->
-        # NOTE: This will get rescued further up for a proper {:error, err} return.
-        throw(error)
-    end
-  end
-
-  defp create_payout!(%Studio{} = studio, invoice_ids, invoice_count, %Money{} = total) do
+  defp create_payout!(
+         %User{} = actor,
+         %Studio{} = studio,
+         invoice_ids,
+         invoice_count,
+         %Money{} = total
+       ) do
     {:ok, stripe_payout} = create_stripe_payout!(studio, total)
     # NOTE: the payout_updated webhook might fire before the following
     # transaction completes. In that case, we're going to 404, which should
@@ -398,8 +386,13 @@ defmodule Banchan.Studios do
         case %Payout{
                stripe_payout_id: stripe_payout.id,
                status: String.to_atom(stripe_payout.status),
+               type: String.to_atom(stripe_payout.type),
+               method: String.to_atom(stripe_payout.method),
+               arrival_date:
+                 stripe_payout.arrival_date |> DateTime.from_unix!() |> DateTime.to_naive(),
                amount: total,
                studio_id: studio.id,
+               actor_id: actor.id,
                invoices: from(i in Invoice, where: i.id in ^invoice_ids) |> Repo.all()
              }
              |> Repo.insert(returning: [:id]) do
@@ -442,6 +435,24 @@ defmodule Banchan.Studios do
     ret
   end
 
+  defp create_stripe_payout!(%Studio{} = studio, %Money{} = total) do
+    case stripe_mod().create_payout(
+           %{
+             amount: total.amount,
+             currency: String.downcase(Atom.to_string(total.currency)),
+             statement_descriptor: "banchan.art payout"
+           },
+           headers: %{"Stripe-Account" => studio.stripe_id}
+         ) do
+      {:ok, stripe_payout} ->
+        {:ok, stripe_payout}
+
+      {:error, %Stripe.Error{} = error} ->
+        # NOTE: This will get rescued further up for a proper {:error, err} return.
+        throw(error)
+    end
+  end
+
   def cancel_payout(%Studio{} = studio, payout_id) do
     case stripe_mod().cancel_payout(payout_id,
            headers: %{"Stripe-Account" => studio.stripe_id}
@@ -466,7 +477,10 @@ defmodule Banchan.Studios do
            set: [
              status: payout.status,
              failure_code: payout.failure_code,
-             failure_message: payout.failure_message
+             failure_message: payout.failure_message,
+             arrival_date: payout.arrival_date |> DateTime.from_unix!() |> DateTime.to_naive(),
+             method: payout.method,
+             type: payout.type
            ]
          ) do
       # No need for checking for > 1. There's a unique index on

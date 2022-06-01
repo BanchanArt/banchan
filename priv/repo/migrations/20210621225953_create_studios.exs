@@ -33,8 +33,12 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :stripe_payout_id, :string, null: false
       add :amount, :money_with_currency, null: false
       add :status, :string, null: false
+      add :arrival_date, :naive_datetime
+      add :method, :string
+      add :type, :string
       add :failure_code, :string
       add :failure_message, :text
+      add :actor_id, references(:users), null: false
       add :studio_id, references(:studios), null: false
       timestamps()
     end

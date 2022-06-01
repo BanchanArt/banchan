@@ -44,7 +44,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   @impl true
   def handle_event("fypm", _, socket) do
-    case Studios.payout_studio(socket.assigns.studio) do
+    case Studios.payout_studio(socket.assigns.current_user, socket.assigns.studio) do
       {:ok, _payouts} ->
         {:noreply,
          socket

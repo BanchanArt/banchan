@@ -8,6 +8,9 @@ defmodule Banchan.Studios.Payout do
     field :public_id, :string, autogenerate: {Banchan.Commissions.Common, :gen_public_id, []}
     field :stripe_payout_id, :string
     field :amount, Money.Ecto.Composite.Type
+    field :arrival_date, :naive_datetime
+    field :method, Ecto.Enum, values: [:standard, :instant]
+    field :type, Ecto.Enum, values: [:card, :bank_account]
 
     # https://stripe.com/docs/api/payouts/object#payout_object-status
     field :status, Ecto.Enum,
@@ -42,6 +45,7 @@ defmodule Banchan.Studios.Payout do
 
     field :failure_message, :string
 
+    belongs_to :actor, Banchan.Accounts.User
     belongs_to :studio, Banchan.Studios.Studio
 
     many_to_many :invoices, Banchan.Commissions.Invoice, join_through: "invoices_payouts"
