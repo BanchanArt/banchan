@@ -118,9 +118,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
     } do
       mock_balance(studio, [Money.new(39_124, :USD)], [])
       payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
-      Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
-      Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
-      Commissions.update_status(client, commission |> Repo.reload(), :approved)
+      approve_commission(commission)
 
       {:ok, page_live, _html} =
         live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
@@ -140,9 +138,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       mock_balance(studio, [Money.new(39_060, :USD), Money.new(64, :JPY)], [])
       payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(0, :USD))
       payment_fixture(client, commission, Money.new(69, :JPY), Money.new(0, :JPY))
-      Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
-      Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
-      Commissions.update_status(client, commission |> Repo.reload(), :approved)
+      approve_commission(commission)
 
       {:ok, page_live, _html} =
         live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))

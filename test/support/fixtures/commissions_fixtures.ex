@@ -121,4 +121,13 @@ defmodule Banchan.CommissionsFixtures do
 
     session
   end
+
+  def approve_commission(%Commission{} = commission) do
+    commission = Repo.reload(commission)
+    artist = commission |> Repo.preload(:artists) |> Enum.at(0)
+    client = commission.client
+    Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
+    Commissions.update_status(artist, commission |> Repo.reload(), :ready_to_review)
+    Commissions.update_status(client, commission |> Repo.reload(), :approved)
+  end
 end
