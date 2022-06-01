@@ -663,10 +663,10 @@ defmodule Banchan.Commissions do
 
   def process_payment_succeeded!(session) do
     {:ok, %{charges: %{data: [%{balance_transaction: txn_id}]}}} =
-      stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, %{})
+      stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, [])
 
     {:ok, %{available_on: available_on, amount: amt, currency: curr}} =
-      stripe_mod().retrieve_balance_transaction(txn_id, %{})
+      stripe_mod().retrieve_balance_transaction(txn_id, [])
 
     amount = Money.new(amt, String.to_atom(String.upcase(curr)))
 
