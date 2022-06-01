@@ -9,6 +9,8 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
   import Banchan.CommissionsFixtures
 
+  alias Banchan.Commissions
+  alias Banchan.Repo
   alias Banchan.Studios
 
   defp mock_balance(studio, available, pending, n \\ 2) do
@@ -52,7 +54,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
   describe "base page behaviors" do
     test "redirects if logged out", %{conn: conn, studio: studio} do
       {:error, {:redirect, info}} =
-        live(conn, Routes.studio_payouts_path(conn, :show, studio.handle))
+        live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
 
       assert info.to =~ Routes.login_path(conn, :new)
     end
@@ -61,7 +63,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       conn = log_in_user(conn, artist)
 
       {:error, {:redirect, info}} =
-        result = live(conn, Routes.studio_payouts_path(conn, :show, studio.handle))
+        result = live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
 
       assert info.to =~ Routes.studio_shop_path(conn, :show, studio.handle)
 
@@ -78,7 +80,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       conn = log_in_user(conn, client)
 
       assert_raise Ecto.NoResultsError, fn ->
-        live(conn, Routes.studio_payouts_path(conn, :show, studio.handle))
+        live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
       end
     end
   end
@@ -96,23 +98,59 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       %{conn: log_in_user(conn, artist)}
     end
 
-    test "shows default stats if no commissions or payouts", %{conn: conn, studio: studio} do
+    test "Shows defaults for available balance", %{conn: conn, studio: studio} do
       mock_balance(studio, [], [])
 
-      # TODO: This should be a separate, dedicated path (like with the Commissions page)
-      {:ok, page_live, _html} = live(conn, Routes.studio_payouts_path(conn, :show, studio.handle))
+      {:ok, page_live, _html} =
+        live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
 
       assert page_live
              |> element("#available")
              |> render() =~ "$0.00"
+    end
+
+    test "Shows available balance", %{
+      conn: conn,
+      client: client,
+      artist: artist,
+      studio: studio,
+      commission: commission
+    } do
+      mock_balance(studio, [Money.new(39_124, :USD)], [])
+      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
+      Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
+      Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
+      Commissions.update_status(client, commission |> Repo.reload(), :approved)
+
+      {:ok, page_live, _html} =
+        live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
 
       assert page_live
-             |> element("#held-back")
-             |> render() =~ "$0.00"
+             |> element("#available")
+             |> render() =~ "$391.24"
+    end
 
-      assert page_live
-             |> element("#on-the-way")
-             |> render() =~ "$0.00"
+    test "Displays multiple balance currencies reasonably", %{
+      conn: conn,
+      client: client,
+      artist: artist,
+      studio: studio,
+      commission: commission
+    } do
+      mock_balance(studio, [Money.new(39_060, :USD), Money.new(64, :JPY)], [])
+      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(0, :USD))
+      payment_fixture(client, commission, Money.new(69, :JPY), Money.new(0, :JPY))
+      Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
+      Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
+      Commissions.update_status(client, commission |> Repo.reload(), :approved)
+
+      {:ok, page_live, _html} =
+        live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
+
+      rendered = page_live |> element("#available") |> render()
+
+      assert rendered =~ "$390.60"
+      assert rendered =~ "¥64"
     end
   end
 

@@ -29,14 +29,17 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
     create unique_index(:users_studios, [:user_id, :studio_id])
 
     create table(:studio_payouts) do
+      add :public_id, :string, null: false
       add :stripe_payout_id, :string, null: false
       add :amount, :money_with_currency, null: false
       add :status, :string, null: false
       add :failure_code, :string
       add :failure_message, :text
       add :studio_id, references(:studios), null: false
+      timestamps()
     end
 
+    create unique_index(:studio_payouts, [:public_id])
     create unique_index(:studio_payouts, [:stripe_payout_id])
     create index(:studio_payouts, [:studio_id])
   end

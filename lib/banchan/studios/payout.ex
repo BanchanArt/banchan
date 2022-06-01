@@ -5,6 +5,7 @@ defmodule Banchan.Studios.Payout do
   use Ecto.Schema
 
   schema "studio_payouts" do
+    field :public_id, :string, autogenerate: {Banchan.Commissions.Common, :gen_public_id, []}
     field :stripe_payout_id, :string
     field :amount, Money.Ecto.Composite.Type
 
@@ -44,5 +45,7 @@ defmodule Banchan.Studios.Payout do
     belongs_to :studio, Banchan.Studios.Studio
 
     many_to_many :invoices, Banchan.Commissions.Invoice, join_through: "invoices_payouts"
+
+    timestamps()
   end
 end

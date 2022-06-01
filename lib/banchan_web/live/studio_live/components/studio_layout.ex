@@ -64,7 +64,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                   label="Payouts"
                   tab_name={:payouts}
                   current_tab={@tab}
-                  to={Routes.studio_payouts_path(Endpoint, :show, @studio.handle)}
+                  to={Routes.studio_payouts_path(Endpoint, :index, @studio.handle)}
                 />
 
                 <TabButton

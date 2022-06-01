@@ -282,6 +282,20 @@ defmodule Banchan.Studios do
     end)
   end
 
+  def get_payout!(public_id) when is_binary(public_id) do
+    from(p in Payout, where: p.public_id == ^public_id)
+    |> Repo.one!()
+  end
+
+  def list_payouts(%Studio{} = studio, page) do
+    from(
+      p in Payout,
+      where: p.studio_id == ^studio.id,
+      order_by: {:desc, p.inserted_at}
+    )
+    |> Repo.paginate(page: page, page_size: 20)
+  end
+
   def payout_studio(%Studio{} = studio) do
     {:ok, balance} =
       stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id})

@@ -97,4 +97,28 @@ defmodule Banchan.CommissionsFixtures do
   def expire_mock_payment(%Stripe.Session{} = session) do
     Commissions.process_payment_expired!(session)
   end
+
+  def payment_fixture(
+        %User{} = actor,
+        %Commission{} = commission,
+        %Money{} = amount,
+        %Money{} = tip,
+        succeed \\ true
+      ) do
+    invoice =
+      invoice_fixture(actor, commission, %{
+        "amount" => amount,
+        "text" => "Please pay me :("
+      })
+
+    session = checkout_session_fixture(invoice, tip)
+
+    if succeed do
+      succeed_mock_payment!(session)
+    else
+      expire_mock_payment(session)
+    end
+
+    session
+  end
 end
