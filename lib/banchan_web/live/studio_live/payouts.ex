@@ -43,6 +43,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
       {:noreply,
        socket
        |> assign(uri: uri)
+       |> assign(pending: false)
+       |> assign(page: page(params))
        |> assign(payout: payout)
        |> assign(results: results)
        |> assign(balance: balance)}
@@ -51,22 +53,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   @impl true
   def handle_event("fypm", _, socket) do
-    case Studios.payout_studio(socket.assigns.current_user, socket.assigns.studio) do
-      {:ok, [payout | _]} ->
-        {:noreply,
-         socket
-         |> put_flash(
-           :success,
-           "Payouts sent! They should arrive in your account #{payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}."
-         )
-         |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
-
-      {:error, user_msg} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, user_msg)
-         |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
-    end
+    send(self(), "process_fypm")
+    {:noreply, socket |> assign(pending: true)}
   end
 
   def handle_event("cancel_payout", _, socket) do
@@ -79,10 +67,36 @@ defmodule BanchanWeb.StudioLive.Payouts do
     end
   end
 
+  def handle_info("process_fypm", socket) do
+    case Studios.payout_studio(socket.assigns.current_user, socket.assigns.studio) do
+      {:ok, [payout, _ | _]} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :info,
+           "Payouts sent! They should be in your account(s) starting #{payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}."
+         )}
+
+      {:ok, [payout | _]} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :info,
+           "Payout sent! It should be in your account #{payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}."
+         )}
+
+      {:error, user_msg} ->
+        {:noreply,
+         socket
+         |> assign(pending: false)
+         |> put_flash(:error, user_msg)}
+    end
+  end
+
   def handle_info(%{event: "payout_updated", payload: payout}, socket) do
     new_payout =
       if socket.assigns.payout && socket.assigns.payout.id == payout.id do
-        Studios.get_payout!(payout.public_id)
+        payout
       else
         socket.assigns.payout
       end
@@ -100,12 +114,18 @@ defmodule BanchanWeb.StudioLive.Payouts do
             end
           end)
 
-        %{socket.assigns.results | entries: new_entries}
+        Task.async(fn -> %{socket.assigns.results | entries: new_entries} end)
       else
-        socket.assigns.results
+        Task.async(fn -> Studios.list_payouts(socket.assigns.studio, socket.assigns.page) end)
       end
 
-    {:noreply, socket |> assign(payout: new_payout, results: new_results)}
+    new_balance = Task.async(fn -> Studios.get_banchan_balance!(socket.assigns.studio) end)
+
+    [new_results, new_balance] = Task.await_many([new_results, new_balance])
+
+    {:noreply,
+     socket
+     |> assign(payout: new_payout, results: new_results, balance: new_balance, pending: false)}
   end
 
   defp payout_possible?(available) do
@@ -158,8 +178,14 @@ defmodule BanchanWeb.StudioLive.Payouts do
                   </div>
                 {/if}
               </div>
-              <Button click="fypm" disabled={!payout_possible?(@balance.available)}>Pay Out</Button>
+              <Button click="fypm" disabled={@pending || !payout_possible?(@balance.available)}>
+                {#if @pending}
+                  <i class="px-2 fas fa-spinner animate-spin" />
+                {/if}
+                Pay Out
+              </Button>
               <div class="divider" />
+              <h2 class="text-lg">Payout History</h2>
               <ul class="divide-y flex-grow flex flex-col">
                 {#for payout <- @results.entries}
                   <li>

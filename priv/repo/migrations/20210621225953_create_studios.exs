@@ -30,7 +30,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
 
     create table(:studio_payouts) do
       add :public_id, :string, null: false
-      add :stripe_payout_id, :string, null: false
+      add :stripe_payout_id, :string
       add :amount, :money_with_currency, null: false
       add :status, :string, null: false
       add :arrival_date, :naive_datetime

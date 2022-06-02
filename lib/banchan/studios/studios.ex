@@ -380,19 +380,9 @@ defmodule Banchan.Studios do
          invoice_count,
          %Money{} = total
        ) do
-    {:ok, stripe_payout} = create_stripe_payout!(studio, total)
-    # NOTE: the payout_updated webhook might fire before the following
-    # transaction completes. In that case, we're going to 404, which should
-    # make it so Stripe retries the webhook later.
     {:ok, ret} =
       Repo.transaction(fn ->
         case %Payout{
-               stripe_payout_id: stripe_payout.id,
-               status: String.to_atom(stripe_payout.status),
-               type: String.to_atom(stripe_payout.type),
-               method: String.to_atom(stripe_payout.method),
-               arrival_date:
-                 stripe_payout.arrival_date |> DateTime.from_unix!() |> DateTime.to_naive(),
                amount: total,
                studio_id: studio.id,
                actor_id: actor.id,
@@ -411,31 +401,23 @@ defmodule Banchan.Studios do
                   "Wrong number of invoices associated with new Payout (expected: #{invoice_count}, actual: ${actual_count}"
               })
 
-              case cancel_payout(studio, stripe_payout.id) do
-                :ok ->
-                  # NOTE: This will get caught further up for a proper {:error, err} return.
-                  throw({:error, "Payout failed due to an internal error."})
-
-                {:error, err} ->
-                  throw({:error, err})
-              end
+              throw({:error, "Payout failed due to an internal error."})
             end
 
           {:error, err} ->
-            Logger.error(%{message: "Failed to update database after payout", error: err})
-
-            case cancel_payout(studio, stripe_payout.id) do
-              :ok ->
-                # NOTE: This will get caught further up for a proper {:error, err} return.
-                throw({:error, "Payout failed due to an internal error."})
-
-              {:error, err} ->
-                throw({:error, err})
-            end
+            Logger.error(%{message: "Failed to insert payout row into database", error: err})
+            throw({:error, "Payout failed due to an internal error."})
         end
       end)
 
-    ret
+    case ret do
+      {:ok, payout} ->
+        {:ok, stripe_payout} = create_stripe_payout!(studio, total)
+        process_payout_updated!(stripe_payout, payout.id)
+
+      {:error, err} ->
+        {:error, err}
+    end
   end
 
   defp create_stripe_payout!(%Studio{} = studio, %Money{} = total) do
@@ -484,12 +466,16 @@ defmodule Banchan.Studios do
     Phoenix.PubSub.unsubscribe(@pubsub, "payout:#{studio.handle}")
   end
 
-  def process_payout_updated!(%Stripe.Payout{} = payout) do
+  def process_payout_updated!(%Stripe.Payout{} = payout, id \\ nil) do
     query =
-      from(p in Payout,
-        where: p.stripe_payout_id == ^payout.id,
-        select: p
-      )
+      if id do
+        from(p in Payout, where: p.id == ^id, select: p)
+      else
+        from(p in Payout,
+          where: p.stripe_payout_id == ^payout.id,
+          select: p
+        )
+      end
 
     case query
          |> Repo.update_all(
@@ -502,12 +488,9 @@ defmodule Banchan.Studios do
              type: payout.type
            ]
          ) do
-      # No need for checking for > 1. There's a unique index on
-      # stripe_payout_id. But we crash here if that happens, just in case we
-      # oopsies in the future.
       {1, [payout]} ->
         Notifications.payout_updated(payout |> Repo.preload(:studio))
-        :ok
+        {:ok, payout}
 
       {0, _} ->
         raise Ecto.NoResultsError, queryable: query
