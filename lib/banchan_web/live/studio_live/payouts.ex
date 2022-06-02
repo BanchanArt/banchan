@@ -29,18 +29,23 @@ defmodule BanchanWeb.StudioLive.Payouts do
             # we have to manually remove them here.
             # See: https://github.com/phoenixframework/phoenix_live_view/issues/2041
             payout_id = Regex.replace(~r/#.*$/, payout_id, "")
-            Studios.get_payout!(payout_id)
+            Task.async(fn -> Studios.get_payout!(payout_id) end)
 
           _ ->
-            nil
+            Task.async(fn -> nil end)
         end
+
+      results = Task.async(fn -> Studios.list_payouts(socket.assigns.studio, page(params)) end)
+      balance = Task.async(fn -> Studios.get_banchan_balance!(socket.assigns.studio) end)
+
+      [payout, results, balance] = Task.await_many([payout, results, balance])
 
       {:noreply,
        socket
        |> assign(uri: uri)
        |> assign(payout: payout)
-       |> assign(results: Studios.list_payouts(socket.assigns.studio, page(params)))
-       |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
+       |> assign(results: results)
+       |> assign(balance: balance)}
     end
   end
 
