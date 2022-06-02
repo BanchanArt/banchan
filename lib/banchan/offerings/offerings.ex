@@ -4,6 +4,7 @@ defmodule Banchan.Offerings do
   """
   import Ecto.Query, warn: false
 
+  alias Banchan.Commissions.Commission
   alias Banchan.Offerings.Offering
   alias Banchan.Repo
 
@@ -49,32 +50,60 @@ defmodule Banchan.Offerings do
   end
 
   def offering_available_slots(%Offering{} = offering) do
-    Repo.one(
-      from(c in Banchan.Commissions.Commission,
-        join: o in assoc(c, :offering),
-        where: o.id == ^offering.id,
-        where: c.status != :withdrawn and c.status != :approved and c.status != :submitted,
-        group_by: [c.offering_id, o.slots],
-        select:
-          fragment(
-            "CASE WHEN o1.slots IS NULL THEN NULL WHEN COUNT(c0) > o1.slots THEN 0 ELSE o1.slots - count(c0) END"
-          )
+    {slots, count} =
+      Repo.one(
+        from(o in Offering,
+          left_join:
+            comms in subquery(
+              from(c in Commission,
+                where:
+                  c.offering_id == ^offering.id and
+                    (c.status != :withdrawn and c.status != :approved and c.status != :submitted)
+              )
+            ),
+          where: o.id == ^offering.id,
+          group_by: [o.id, o.slots],
+          select: {o.slots, count(comms)}
+        )
       )
-    )
+
+    cond do
+      is_nil(slots) ->
+        nil
+
+      count > slots ->
+        0
+
+      true ->
+        slots - count
+    end
   end
 
   def offering_available_proposals(%Offering{} = offering) do
-    Repo.one(
-      from(c in Banchan.Commissions.Commission,
-        join: o in assoc(c, :offering),
-        where: o.id == ^offering.id,
-        where: c.status == :submitted,
-        group_by: [c.offering_id, o.max_proposals],
-        select:
-          fragment(
-            "CASE WHEN o1.max_proposals IS NULL THEN NULL WHEN COUNT(c0) > o1.max_proposals THEN 0 ELSE o1.max_proposals - count(c0) END"
-          )
+    {max, count} =
+      Repo.one(
+        from(o in Offering,
+          left_join:
+            comms in subquery(
+              from(c in Commission,
+                where: c.offering_id == ^offering.id and c.status == :submitted
+              )
+            ),
+          where: o.id == ^offering.id,
+          group_by: [o.id, o.max_proposals],
+          select: {o.max_proposals, count(comms)}
+        )
       )
-    )
+
+    cond do
+      is_nil(max) ->
+        nil
+
+      count > max ->
+        0
+
+      true ->
+        max - count
+    end
   end
 end

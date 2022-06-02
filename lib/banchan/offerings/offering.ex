@@ -5,6 +5,7 @@ defmodule Banchan.Offerings.Offering do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Banchan.Commissions.Commission
   alias Banchan.Offerings.OfferingOption
   alias Banchan.Studios.Studio
 
@@ -21,6 +22,7 @@ defmodule Banchan.Offerings.Offering do
     field :template, :string
 
     belongs_to :studio, Studio
+    has_many :commissions, Commission
     has_many :options, OfferingOption, on_replace: :delete_if_exists
 
     timestamps()
