@@ -9,7 +9,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
 
   alias Banchan.Studios.Payout
 
-  alias BanchanWeb.Components.{Avatar, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Button, UserHandle}
 
   prop studio, :struct, required: true
   prop payout, :struct, required: true
@@ -53,12 +53,13 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
         {@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}.
       </h3>
       <div class="px-4">
-        <div>Expected arrival: {@payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}. (# TODO: timezone issue)</div>
+        <div title={@payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>Expected arrival: {@payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}.</div>
         <div>Method: {@payout.method}</div>
         <div>Type: {@payout.type}</div>
         {#if @payout.failure_code}
           <div>Failure: {@payout.failure_message}</div>
         {/if}
+        <Button class="cancel-payout" click={@cancel_payout} disabled={Payout.done?(@payout)}>Cancel</Button>
       </div>
       <ul class="text-md pt-4 px-4 list-disc">
         {#for invoice <- @payout.invoices}

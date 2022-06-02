@@ -461,18 +461,34 @@ defmodule Banchan.Studios do
            headers: %{"Stripe-Account" => studio.stripe_id}
          ) do
       {:ok, %Stripe.Payout{id: ^payout_id, status: "canceled"}} ->
-        # NOTE: db is updated on process_payout_updated, so we don't do it here.
+        # NOTE: db is updated on process_payout_updated, so we don't do it
+        # here, particularly because we might not event have a payout entry in
+        # our db at all (this function can get called when insertions fail).
         :ok
 
       {:error, %Stripe.Error{} = err} ->
+        Logger.warn(%{
+          message: "Failed to cancel payout #{payout_id}: #{err.message}",
+          code: err.code
+        })
+
         {:error, err}
     end
+  end
+
+  def subscribe_to_payout_events(%Studio{} = studio) do
+    Phoenix.PubSub.subscribe(@pubsub, "payout:#{studio.handle}")
+  end
+
+  def unsubscribe_from_payout_events(%Studio{} = studio) do
+    Phoenix.PubSub.unsubscribe(@pubsub, "payout:#{studio.handle}")
   end
 
   def process_payout_updated!(%Stripe.Payout{} = payout) do
     query =
       from(p in Payout,
-        where: p.stripe_payout_id == ^payout.id
+        where: p.stripe_payout_id == ^payout.id,
+        select: p
       )
 
     case query
@@ -489,7 +505,8 @@ defmodule Banchan.Studios do
       # No need for checking for > 1. There's a unique index on
       # stripe_payout_id. But we crash here if that happens, just in case we
       # oopsies in the future.
-      {1, _} ->
+      {1, [payout]} ->
+        Notifications.payout_updated(payout |> Repo.preload(:studio))
         :ok
 
       {0, _} ->

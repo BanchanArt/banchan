@@ -744,7 +744,6 @@ defmodule Banchan.StudiosTest do
 
     test "canceled payout" do
       commission = commission_fixture()
-      client = commission.client
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
       amount = Money.new(420, :USD)
@@ -770,9 +769,7 @@ defmodule Banchan.StudiosTest do
       sess = checkout_session_fixture(invoice, tip)
       succeed_mock_payment!(sess)
 
-      {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
-      {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
-      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :approved)
+      approve_commission(commission)
 
       stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
 
@@ -844,6 +841,95 @@ defmodule Banchan.StudiosTest do
       payout = payout |> Repo.reload()
 
       assert :canceled == payout.status
+    end
+
+    test "payout cancellation error" do
+      commission = commission_fixture()
+      studio = commission.studio
+      artist = Enum.at(studio.artists, 0)
+      amount = Money.new(420, :USD)
+      tip = Money.new(69, :USD)
+
+      banchan_fee =
+        amount
+        |> Money.add(tip)
+        |> Money.multiply(studio.platform_fee)
+
+      net =
+        amount
+        |> Money.add(tip)
+        |> Money.subtract(banchan_fee)
+
+      # Two successful invoices and one expired one
+      invoice =
+        invoice_fixture(artist, commission, %{
+          "amount" => amount,
+          "text" => "please give me money :("
+        })
+
+      sess = checkout_session_fixture(invoice, tip)
+      succeed_mock_payment!(sess)
+
+      approve_commission(commission)
+
+      stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, fn _ ->
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: net.amount
+             }
+           ],
+           pending: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ]
+         }}
+      end)
+      |> expect(:create_payout, fn _, _ ->
+        {:ok,
+         %Stripe.Payout{
+           id: stripe_payout_id,
+           status: "pending",
+           arrival_date: DateTime.utc_now() |> DateTime.to_unix(),
+           type: "card",
+           method: "standard"
+         }}
+      end)
+      |> expect(:cancel_payout, fn payout_id, opts ->
+        assert payout_id == stripe_payout_id
+        assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
+
+        {:error,
+         %Stripe.Error{
+           message: "internal message",
+           user_message: "external message",
+           code: :unknown_error,
+           extra: %{},
+           request_id: "whatever",
+           source: :stripe
+         }}
+      end)
+
+      {:ok, [%Payout{amount: ^net, status: :pending} = payout]} =
+        Studios.payout_studio(artist, studio)
+
+      log =
+        capture_log([level: :debug], fn ->
+          {:error,
+           %Stripe.Error{
+             source: :stripe
+           }} = Studios.cancel_payout(studio, payout.stripe_payout_id)
+        end)
+
+      assert log =~ "internal message"
+      assert log =~ "unknown_error"
     end
   end
 end

@@ -27,30 +27,33 @@ defmodule Banchan.OfferingsTest do
       assert nil == Offerings.offering_available_slots(offering)
 
       # Can freely create commissions
-      {:ok, _comm} = Commissions.create_commission(
-        client,
-        studio,
-        offering,
-        [],
-        [],
-        %{
-          title: "some title",
-          description: "Some Description",
-          tos_ok: true
-        }
-      )
-      {:ok, _comm} = Commissions.create_commission(
-        client,
-        studio,
-        offering,
-        [],
-        [],
-        %{
-          title: "some title",
-          description: "Some Description",
-          tos_ok: true
-        }
-      )
+      {:ok, _comm} =
+        Commissions.create_commission(
+          client,
+          studio,
+          offering,
+          [],
+          [],
+          %{
+            title: "some title",
+            description: "Some Description",
+            tos_ok: true
+          }
+        )
+
+      {:ok, _comm} =
+        Commissions.create_commission(
+          client,
+          studio,
+          offering,
+          [],
+          [],
+          %{
+            title: "some title",
+            description: "Some Description",
+            tos_ok: true
+          }
+        )
     end
 
     test "with slot limit" do
@@ -120,18 +123,19 @@ defmodule Banchan.OfferingsTest do
       assert 0 == Offerings.offering_available_slots(offering)
 
       # Creating new commissions is blocked.
-      assert {:error, :no_slots_available} == Commissions.create_commission(
-        client,
-        studio,
-        offering,
-        [],
-        [],
-        %{
-          title: "some title",
-          description: "Some Description",
-          tos_ok: true
-        }
-      )
+      assert {:error, :no_slots_available} ==
+               Commissions.create_commission(
+                 client,
+                 studio,
+                 offering,
+                 [],
+                 [],
+                 %{
+                   title: "some title",
+                   description: "Some Description",
+                   tos_ok: true
+                 }
+               )
 
       # Overflow is fine. Just get 0 back.
       Commissions.update_status(artist, comm4, :accepted)
@@ -142,19 +146,19 @@ defmodule Banchan.OfferingsTest do
       assert 0 == Offerings.offering_available_slots(offering)
 
       # Still can't make that comm...
-      assert {:error, :no_slots_available} == Commissions.create_commission(
-        client,
-        studio,
-        offering,
-        [],
-        [],
-        %{
-          title: "some title",
-          description: "Some Description",
-          tos_ok: true
-        }
-      )
-
+      assert {:error, :no_slots_available} ==
+               Commissions.create_commission(
+                 client,
+                 studio,
+                 offering,
+                 [],
+                 [],
+                 %{
+                   title: "some title",
+                   description: "Some Description",
+                   tos_ok: true
+                 }
+               )
 
       # Give back slots one by one.
       Commissions.update_status(artist, comm2 |> Repo.reload(), :ready_for_review)
@@ -162,18 +166,19 @@ defmodule Banchan.OfferingsTest do
       assert 1 == Offerings.offering_available_slots(offering)
 
       # Now we can make comms again!
-      {:ok, _comm} = Commissions.create_commission(
-        client,
-        studio,
-        offering,
-        [],
-        [],
-        %{
-          title: "some title",
-          description: "Some Description",
-          tos_ok: true
-        }
-      )
+      {:ok, _comm} =
+        Commissions.create_commission(
+          client,
+          studio,
+          offering,
+          [],
+          [],
+          %{
+            title: "some title",
+            description: "Some Description",
+            tos_ok: true
+          }
+        )
 
       Commissions.update_status(artist, comm3 |> Repo.reload(), :ready_for_review)
       Commissions.update_status(client, comm3 |> Repo.reload(), :approved)
@@ -200,30 +205,33 @@ defmodule Banchan.OfferingsTest do
       assert nil == Offerings.offering_available_proposals(offering)
 
       # Can freely create commissions
-      {:ok, _comm} = Commissions.create_commission(
-        client,
-        studio,
-        offering,
-        [],
-        [],
-        %{
-          title: "some title",
-          description: "Some Description",
-          tos_ok: true
-        }
-      )
-      {:ok, _comm} = Commissions.create_commission(
-        client,
-        studio,
-        offering,
-        [],
-        [],
-        %{
-          title: "some title",
-          description: "Some Description",
-          tos_ok: true
-        }
-      )
+      {:ok, _comm} =
+        Commissions.create_commission(
+          client,
+          studio,
+          offering,
+          [],
+          [],
+          %{
+            title: "some title",
+            description: "Some Description",
+            tos_ok: true
+          }
+        )
+
+      {:ok, _comm} =
+        Commissions.create_commission(
+          client,
+          studio,
+          offering,
+          [],
+          [],
+          %{
+            title: "some title",
+            description: "Some Description",
+            tos_ok: true
+          }
+        )
     end
 
     test "with proposal limit" do
@@ -292,18 +300,19 @@ defmodule Banchan.OfferingsTest do
       assert 0 == Offerings.offering_available_proposals(offering)
 
       # Creating new commissions is blocked.
-      assert {:error, :no_proposals_available} == Commissions.create_commission(
-        client,
-        studio,
-        offering,
-        [],
-        [],
-        %{
-          title: "some title",
-          description: "Some Description",
-          tos_ok: true
-        }
-      )
+      assert {:error, :no_proposals_available} ==
+               Commissions.create_commission(
+                 client,
+                 studio,
+                 offering,
+                 [],
+                 [],
+                 %{
+                   title: "some title",
+                   description: "Some Description",
+                   tos_ok: true
+                 }
+               )
 
       # Now we accept each new commission
       Commissions.update_status(artist, comm2, :accepted)

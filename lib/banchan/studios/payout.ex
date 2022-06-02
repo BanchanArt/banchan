@@ -8,8 +8,6 @@ defmodule Banchan.Studios.Payout do
     field :public_id, :string, autogenerate: {Banchan.Commissions.Common, :gen_public_id, []}
     field :stripe_payout_id, :string
     field :amount, Money.Ecto.Composite.Type
-    # TODO: Are we doing the right thing with timezones here? I can't tell.
-    # Should we move to DateTime instead of NaiveDateTime after all?...
     field :arrival_date, :naive_datetime
     field :method, Ecto.Enum, values: [:standard, :instant]
     field :type, Ecto.Enum, values: [:card, :bank_account]
@@ -60,4 +58,9 @@ defmodule Banchan.Studios.Payout do
   def humanize_status(:canceled), do: "Canceled"
   def humanize_status(:paid), do: "Paid"
   def humanize_status(:failed), do: "Failed"
+
+  def done?(%__struct__{status: status}) when status == :pending or status == :in_transit,
+    do: false
+
+  def done?(_), do: true
 end

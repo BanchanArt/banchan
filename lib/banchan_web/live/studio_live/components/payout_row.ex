@@ -22,7 +22,7 @@ defmodule BanchanWeb.StudioLive.Components.PayoutRow do
       )
 
     ~F"""
-    <div class={"bg-base-200": @highlight}>
+    <div class={"payout-row", "bg-base-200": @highlight}>
       <LivePatch to={payout_url}>
         <div class="py-2 px-4">
           <div class="text-xl">

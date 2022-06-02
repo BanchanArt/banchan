@@ -20,6 +20,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
     if socket.redirected do
       {:noreply, socket}
     else
+      Studios.subscribe_to_payout_events(socket.assigns.studio)
+
       payout =
         case params do
           %{"payout_id" => payout_id} ->
@@ -60,6 +62,45 @@ defmodule BanchanWeb.StudioLive.Payouts do
          |> put_flash(:error, user_msg)
          |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
     end
+  end
+
+  def handle_event("cancel_payout", _, socket) do
+    case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
+      :ok ->
+        {:noreply, socket |> put_flash(:info, "Payout canceled")}
+
+      {:error, err} ->
+        {:noreply, socket |> put_flash(:error, "Failed to cancel payout: #{err.user_message}")}
+    end
+  end
+
+  def handle_info(%{event: "payout_updated", payload: payout}, socket) do
+    payout =
+      if socket.assigns.payout.id == payout.id do
+        Studios.get_payout!(payout.public_id)
+      else
+        socket.assigns.payout
+      end
+
+    in_result = Enum.find(socket.assigns.results.entries, &(&1.id == payout.id))
+
+    results =
+      if in_result do
+        new_entries =
+          Enum.map(socket.assigns.results.entries, fn entry ->
+            if entry.id == payout.id do
+              payout
+            else
+              entry
+            end
+          end)
+
+        %{socket.assigns.results | entries: new_entries}
+      else
+        socket.assigns.results
+      end
+
+    {:noreply, socket |> assign(payout: payout, results: results)}
   end
 
   defp payout_possible?(available) do
@@ -127,7 +168,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
               </ul>
             </div>
           </div>
-          <div class="md:container md:basis-3/4">
+          <div class="md:container md:basis-3/4 payout">
             {#if @payout}
               <Payout studio={@studio} payout={@payout} cancel_payout="cancel_payout" />
             {/if}
