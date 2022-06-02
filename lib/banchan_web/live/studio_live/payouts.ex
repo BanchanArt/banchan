@@ -47,12 +47,12 @@ defmodule BanchanWeb.StudioLive.Payouts do
   @impl true
   def handle_event("fypm", _, socket) do
     case Studios.payout_studio(socket.assigns.current_user, socket.assigns.studio) do
-      {:ok, _payouts} ->
+      {:ok, [payout | _]} ->
         {:noreply,
          socket
          |> put_flash(
            :success,
-           "Payouts sent! It may be a few days before they arrive in your account."
+           "Payouts sent! They should arrive in your account #{payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}."
          )
          |> assign(balance: Studios.get_banchan_balance!(socket.assigns.studio))}
 
@@ -75,8 +75,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
   end
 
   def handle_info(%{event: "payout_updated", payload: payout}, socket) do
-    payout =
-      if socket.assigns.payout.id == payout.id do
+    new_payout =
+      if socket.assigns.payout && socket.assigns.payout.id == payout.id do
         Studios.get_payout!(payout.public_id)
       else
         socket.assigns.payout
@@ -84,7 +84,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
     in_result = Enum.find(socket.assigns.results.entries, &(&1.id == payout.id))
 
-    results =
+    new_results =
       if in_result do
         new_entries =
           Enum.map(socket.assigns.results.entries, fn entry ->
@@ -100,7 +100,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
         socket.assigns.results
       end
 
-    {:noreply, socket |> assign(payout: payout, results: results)}
+    {:noreply, socket |> assign(payout: new_payout, results: new_results)}
   end
 
   defp payout_possible?(available) do
