@@ -19,12 +19,7 @@ defmodule Banchan.CommissionsTest do
   setup :verify_on_exit!
 
   setup do
-    on_exit(fn ->
-      for pid <- Task.Supervisor.children(Banchan.NotificationTaskSupervisor) do
-        ref = Process.monitor(pid)
-        assert_receive {:DOWN, ^ref, _, _, _}, 1000
-      end
-    end)
+    on_exit(fn -> Notifications.wait_for_notifications() end)
   end
 
   describe "commissions" do

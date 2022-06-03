@@ -412,15 +412,23 @@ defmodule Banchan.Studios do
 
     case ret do
       {:ok, payout} ->
-        {:ok, stripe_payout} = create_stripe_payout!(studio, total)
-        process_payout_updated!(stripe_payout, payout.id)
-
+        case create_stripe_payout(studio, total) do
+          {:ok, stripe_payout} ->
+            process_payout_updated!(stripe_payout, payout.id)
+          {:error, err} ->
+            Logger.error(%{message: "Failed to create Stripe payout", error: err})
+            process_payout_updated!(%Stripe.Payout{
+             status: :failed,
+             arrival_date: DateTime.utc_now() |> DateTime.to_unix()
+            }, payout.id)
+            throw(err)
+        end
       {:error, err} ->
         {:error, err}
     end
   end
 
-  defp create_stripe_payout!(%Studio{} = studio, %Money{} = total) do
+  defp create_stripe_payout(%Studio{} = studio, %Money{} = total) do
     case stripe_mod().create_payout(
            %{
              amount: total.amount,
@@ -433,8 +441,7 @@ defmodule Banchan.Studios do
         {:ok, stripe_payout}
 
       {:error, %Stripe.Error{} = error} ->
-        # NOTE: This will get rescued further up for a proper {:error, err} return.
-        throw(error)
+        {:error, error}
     end
   end
 
@@ -468,7 +475,7 @@ defmodule Banchan.Studios do
 
   def process_payout_updated!(%Stripe.Payout{} = payout, id \\ nil) do
     query =
-      if id do
+      if !is_nil(id) do
         from(p in Payout, where: p.id == ^id, select: p)
       else
         from(p in Payout,
@@ -480,6 +487,7 @@ defmodule Banchan.Studios do
     case query
          |> Repo.update_all(
            set: [
+             stripe_payout_id: payout.id,
              status: payout.status,
              failure_code: payout.failure_code,
              failure_message: payout.failure_message,
@@ -489,7 +497,7 @@ defmodule Banchan.Studios do
            ]
          ) do
       {1, [payout]} ->
-        Notifications.payout_updated(payout |> Repo.preload(:studio))
+        Notifications.payout_updated(payout |> Repo.preload([:studio, :actor, [invoices: [:commission, :event]]]))
         {:ok, payout}
 
       {0, _} ->

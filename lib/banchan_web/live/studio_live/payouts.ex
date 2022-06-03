@@ -53,7 +53,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   @impl true
   def handle_event("fypm", _, socket) do
-    send(self(), "process_fypm")
+    send(self(), :process_fypm)
     {:noreply, socket |> assign(pending: true)}
   end
 
@@ -67,7 +67,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
     end
   end
 
-  def handle_info("process_fypm", socket) do
+  def handle_info(:process_fypm, socket) do
     case Studios.payout_studio(socket.assigns.current_user, socket.assigns.studio) do
       {:ok, [payout, _ | _]} ->
         {:noreply,

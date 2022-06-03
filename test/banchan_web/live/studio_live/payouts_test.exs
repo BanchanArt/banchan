@@ -42,6 +42,8 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
   setup do
     commission = commission_fixture()
 
+    on_exit(fn -> Notifications.wait_for_notifications() end)
+
     %{
       commission: commission,
       client: commission.client,
@@ -168,7 +170,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       commission: commission
     } do
       net = Money.new(39_124, :USD)
-      mock_balance(studio, [net], [])
+      mock_balance(studio, [net], [], 4)
       payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 

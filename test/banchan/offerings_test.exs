@@ -10,7 +10,12 @@ defmodule Banchan.OfferingsTest do
   import Banchan.StudiosFixtures
 
   alias Banchan.Commissions
+  alias Banchan.Notifications
   alias Banchan.Offerings
+
+  setup do
+    on_exit(fn -> Notifications.wait_for_notifications() end)
+  end
 
   describe "offering slots" do
     test "with no slot limit" do
