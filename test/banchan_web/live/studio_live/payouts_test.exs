@@ -321,19 +321,19 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
         assert page_live
                |> element(".flash-container")
                |> render() =~ "Payout failed: external message"
-
-        assert page_live
-               |> element(".payout-row .amount")
-               |> render() =~ "$391.24"
-
-        assert page_live
-               |> element(".payout-row .badge")
-               |> render() =~ "Failed"
-
-        refute page_live
-               |> element("#available button")
-               |> render() =~ "disabled=\"disabled\""
       end)
+
+      assert page_live
+             |> element(".payout-row .amount")
+             |> render() =~ "$391.24"
+
+      assert page_live
+             |> element(".payout-row .badge")
+             |> render() =~ "Failed"
+
+      refute page_live
+             |> element("#available button")
+             |> render() =~ "disabled=\"disabled\""
     end
   end
 
