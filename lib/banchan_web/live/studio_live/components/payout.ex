@@ -13,6 +13,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
 
   prop studio, :struct, required: true
   prop payout, :struct, required: true
+  prop cancel_pending, :boolean, default: false
   prop cancel_payout, :event, required: true
 
   defp replace_fragment(uri, event) do
@@ -59,7 +60,16 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
         {#if @payout.failure_code}
           <div>Failure: {@payout.failure_message}</div>
         {/if}
-        <Button class="cancel-payout" click={@cancel_payout} disabled={Payout.done?(@payout)}>Cancel</Button>
+        <Button
+          class="cancel-payout"
+          click={@cancel_payout}
+          disabled={@cancel_pending || !@payout.stripe_payout_id || Payout.done?(@payout)}
+        >
+          {#if @cancel_pending}
+            <i class="px-2 fas fa-spinner animate-spin" />
+          {/if}
+          Cancel
+        </Button>
       </div>
       <ul class="text-md pt-4 px-4 list-disc">
         {#for invoice <- @payout.invoices}

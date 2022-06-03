@@ -290,7 +290,7 @@ defmodule Banchan.Studios do
     |> Repo.one!()
   end
 
-  def list_payouts(%Studio{} = studio, page) do
+  def list_payouts(%Studio{} = studio, page \\ 1) do
     from(
       p in Payout,
       where: p.studio_id == ^studio.id,

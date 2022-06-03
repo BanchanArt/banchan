@@ -43,7 +43,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
       {:noreply,
        socket
        |> assign(uri: uri)
-       |> assign(pending: false)
+       |> assign(fypm_pending: false)
+       |> assign(cancel_pending: false)
        |> assign(page: page(params))
        |> assign(payout: payout)
        |> assign(results: results)
@@ -54,17 +55,12 @@ defmodule BanchanWeb.StudioLive.Payouts do
   @impl true
   def handle_event("fypm", _, socket) do
     send(self(), :process_fypm)
-    {:noreply, socket |> assign(pending: true)}
+    {:noreply, socket |> assign(fypm_pending: true)}
   end
 
   def handle_event("cancel_payout", _, socket) do
-    case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
-      :ok ->
-        {:noreply, socket |> put_flash(:info, "Payout canceled")}
-
-      {:error, err} ->
-        {:noreply, socket |> put_flash(:error, "Failed to cancel payout: #{err.user_message}")}
-    end
+    send(self(), :process_cancel_payout)
+    {:noreply, socket |> assign(cancel_pending: true)}
   end
 
   def handle_info(:process_fypm, socket) do
@@ -88,14 +84,29 @@ defmodule BanchanWeb.StudioLive.Payouts do
       {:error, %Stripe.Error{user_message: user_message}} ->
         {:noreply,
          socket
-         |> assign(pending: false)
+         |> assign(fypm_pending: false)
          |> put_flash(:error, "Payout failed: #{user_message}")}
 
       {:error, _err} ->
         {:noreply,
          socket
-         |> assign(pending: false)
+         |> assign(fypm_pending: false)
          |> put_flash(:error, "Payout failed due to an internal error.")}
+    end
+  end
+
+  def handle_info(:process_cancel_payout, socket) do
+    case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
+      :ok ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Payout canceled")}
+
+      {:error, err} ->
+        {:noreply,
+         socket
+         |> assign(cancel_pending: false)
+         |> put_flash(:error, "Failed to cancel payout: #{err.user_message}")}
     end
   end
 
@@ -131,7 +142,13 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
     {:noreply,
      socket
-     |> assign(payout: new_payout, results: new_results, balance: new_balance, pending: false)}
+     |> assign(
+       payout: new_payout,
+       results: new_results,
+       balance: new_balance,
+       fypm_pending: false,
+       cancel_pending: false
+     )}
   end
 
   defp payout_possible?(available) do
@@ -184,8 +201,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
                   </div>
                 {/if}
               </div>
-              <Button click="fypm" disabled={@pending || !payout_possible?(@balance.available)}>
-                {#if @pending}
+              <Button click="fypm" disabled={@fypm_pending || !payout_possible?(@balance.available)}>
+                {#if @fypm_pending}
                   <i class="px-2 fas fa-spinner animate-spin" />
                 {/if}
                 Pay Out
@@ -207,7 +224,12 @@ defmodule BanchanWeb.StudioLive.Payouts do
           </div>
           <div class="md:container md:basis-3/4 payout">
             {#if @payout}
-              <Payout studio={@studio} payout={@payout} cancel_payout="cancel_payout" />
+              <Payout
+                studio={@studio}
+                payout={@payout}
+                cancel_pending={@cancel_pending}
+                cancel_payout="cancel_payout"
+              />
             {/if}
           </div>
         </div>
