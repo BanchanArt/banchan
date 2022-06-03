@@ -39,7 +39,9 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
               {Money.to_string(@payout.amount)}
             {/if}
           </div>
-          <div class="badge badge-secondary badge-md">{Payout.humanize_status(@payout.status)}</div>
+          {#if !@data_pending}
+            <div class="badge badge-secondary badge-md">{Payout.humanize_status(@payout.status)}</div>
+          {/if}
         </div>
       </h1>
       <div class="divider" />

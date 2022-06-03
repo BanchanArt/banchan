@@ -36,6 +36,13 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
       send(self(), :load_data)
 
+      payout =
+        if is_nil(payout_id) do
+          nil
+        else
+          Map.get(socket.assigns, :payout, nil)
+        end
+
       {:noreply,
        socket
        |> assign(uri: uri)
@@ -44,7 +51,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
        |> assign(fypm_pending: false)
        |> assign(cancel_pending: false)
        |> assign(page: page(params))
-       |> assign(payout: Map.get(socket.assigns, :payout, nil))
+       |> assign(payout: payout)
        |> assign(results: Map.get(socket.assigns, :results, nil))
        |> assign(balance: Map.get(socket.assigns, :balance, nil))}
     end
@@ -249,7 +256,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
             </div>
           </div>
           <div class="md:container md:basis-3/4 payout">
-            {#if @payout}
+            {#if @payout_id}
               <Payout
                 studio={@studio}
                 payout={@payout}
