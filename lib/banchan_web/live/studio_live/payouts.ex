@@ -22,33 +22,31 @@ defmodule BanchanWeb.StudioLive.Payouts do
     else
       Studios.subscribe_to_payout_events(socket.assigns.studio)
 
-      payout =
+      payout_id =
         case params do
           %{"payout_id" => payout_id} ->
             # NOTE: Phoenix LiveView's push_patch has an obnoxious bug with fragments, so
             # we have to manually remove them here.
             # See: https://github.com/phoenixframework/phoenix_live_view/issues/2041
-            payout_id = Regex.replace(~r/#.*$/, payout_id, "")
-            Task.async(fn -> Studios.get_payout!(payout_id) end)
+            Regex.replace(~r/#.*$/, payout_id, "")
 
           _ ->
-            Task.async(fn -> nil end)
+            nil
         end
 
-      results = Task.async(fn -> Studios.list_payouts(socket.assigns.studio, page(params)) end)
-      balance = Task.async(fn -> Studios.get_banchan_balance!(socket.assigns.studio) end)
-
-      [payout, results, balance] = Task.await_many([payout, results, balance])
+      send(self(), :load_data)
 
       {:noreply,
        socket
        |> assign(uri: uri)
+       |> assign(payout_id: payout_id)
+       |> assign(data_pending: true)
        |> assign(fypm_pending: false)
        |> assign(cancel_pending: false)
        |> assign(page: page(params))
-       |> assign(payout: payout)
-       |> assign(results: results)
-       |> assign(balance: balance)}
+       |> assign(payout: Map.get(socket.assigns, :payout, nil))
+       |> assign(results: Map.get(socket.assigns, :results, nil))
+       |> assign(balance: Map.get(socket.assigns, :balance, nil))}
     end
   end
 
@@ -61,6 +59,29 @@ defmodule BanchanWeb.StudioLive.Payouts do
   def handle_event("cancel_payout", _, socket) do
     send(self(), :process_cancel_payout)
     {:noreply, socket |> assign(cancel_pending: true)}
+  end
+
+  def handle_info(:load_data, socket) do
+    payout =
+      if socket.assigns.payout_id do
+        Task.async(fn -> Studios.get_payout!(socket.assigns.payout_id) end)
+      else
+        Task.async(fn -> nil end)
+      end
+
+    results =
+      Task.async(fn -> Studios.list_payouts(socket.assigns.studio, socket.assigns.page) end)
+
+    balance = Task.async(fn -> Studios.get_banchan_balance!(socket.assigns.studio) end)
+
+    [payout, results, balance] = Task.await_many([payout, results, balance])
+
+    {:noreply,
+     socket
+     |> assign(data_pending: false)
+     |> assign(payout: payout)
+     |> assign(results: results)
+     |> assign(balance: balance)}
   end
 
   def handle_info(:process_fypm, socket) do
@@ -183,42 +204,47 @@ defmodule BanchanWeb.StudioLive.Payouts do
     >
       <div class="flex flex-col grow max-h-full">
         <div class="flex flex-row grow md:grow-0">
-          <div class={"flex flex-col grow md:grow-0 md:basis-1/4 sidebar", "hidden md:flex": @payout}>
+          <div class={"flex flex-col grow md:grow-0 md:basis-1/4 sidebar", "hidden md:flex": @payout_id}>
             <div id="available" class="flex flex-col">
               <div class="stats stats-horizontal">
-                {#for avail <- @balance.available}
-                  {#if avail.amount > 0}
-                    <div class="stat">
-                      <div class="stat-value">{Money.to_string(avail)}</div>
-                      <div class="stat-desc">Available for Payout</div>
-                    </div>
-                  {/if}
-                {/for}
-                {#if !payout_possible?(@balance.available)}
+                {#if @balance}
+                  {#for avail <- @balance.available}
+                    {#if avail.amount > 0}
+                      <div class="stat">
+                        <div class="stat-value">{Money.to_string(avail)}</div>
+                        <div class="stat-desc">Available for Payout</div>
+                      </div>
+                    {/if}
+                  {/for}
+                {/if}
+                {#if is_nil(@balance) || !payout_possible?(@balance.available)}
                   <div class="stat">
                     <div class="stat-value">{Money.to_string(Money.new(0, :USD))}</div>
                     <div class="stat-desc">Available for Payout</div>
                   </div>
                 {/if}
               </div>
-              <Button click="fypm" disabled={@fypm_pending || !payout_possible?(@balance.available)}>
+              <Button
+                click="fypm"
+                disabled={@fypm_pending || is_nil(@balance) || !payout_possible?(@balance.available)}
+              >
                 {#if @fypm_pending}
                   <i class="px-2 fas fa-spinner animate-spin" />
                 {/if}
                 Pay Out
               </Button>
               <div class="divider" />
-              <h2 class="text-lg">Payout History</h2>
-              <ul class="payout-rows divide-y flex-grow flex flex-col">
-                {#for payout <- @results.entries}
-                  <li>
-                    <PayoutRow
-                      studio={@studio}
-                      payout={payout}
-                      highlight={@payout && @payout.public_id == payout.public_id}
-                    />
-                  </li>
-                {/for}
+              <ul class="payout-rows menu menu-compact">
+                <li class="menu-title"><span>Payout History
+                    {#if @data_pending}
+                      <i class="fas fa-spinner animate-spin" />
+                    {/if}
+                  </span></li>
+                {#if @results}
+                  {#for payout <- @results.entries}
+                    <PayoutRow studio={@studio} payout={payout} highlight={@payout_id == payout.public_id} />
+                  {/for}
+                {/if}
               </ul>
             </div>
           </div>
@@ -227,6 +253,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
               <Payout
                 studio={@studio}
                 payout={@payout}
+                data_pending={@data_pending}
                 cancel_pending={@cancel_pending}
                 cancel_payout="cancel_payout"
               />

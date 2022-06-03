@@ -13,7 +13,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
   alias Banchan.Notifications
   alias Banchan.Studios
 
-  defp mock_balance(studio, available, pending, n \\ 2) do
+  defp mock_balance(studio, available, pending, n \\ 1) do
     Banchan.StripeAPI.Mock
     |> expect(:retrieve_balance, n, fn opts ->
       assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
@@ -103,7 +103,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       })
 
       net = Money.new(39_124, :USD)
-      mock_balance(studio, [net], [], 4)
+      mock_balance(studio, [net], [], 3)
       payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 
@@ -263,7 +263,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       commission: commission
     } do
       net = Money.new(39_124, :USD)
-      mock_balance(studio, [net], [], 4)
+      mock_balance(studio, [net], [], 2)
       payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
 
       {:ok, page_live, _html} =
@@ -291,7 +291,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       commission: commission
     } do
       net = Money.new(39_124, :USD)
-      mock_balance(studio, [net], [], 3)
+      mock_balance(studio, [net], [], 2)
       payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 
@@ -360,7 +360,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       commission: commission
     } do
       net = Money.new(39_124, :USD)
-      mock_balance(studio, [net], [], 3)
+      mock_balance(studio, [net], [], 2)
       payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 
@@ -449,7 +449,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       commission: commission
     } do
       net = Money.new(39_124, :USD)
-      mock_balance(studio, [net], [], 2)
+      mock_balance(studio, [net], [])
       payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 
@@ -505,7 +505,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       commission: commission
     } do
       net = Money.new(39_124, :USD)
-      mock_balance(studio, [net], [], 3)
+      mock_balance(studio, [net], [], 2)
       payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 

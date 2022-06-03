@@ -22,8 +22,8 @@ defmodule BanchanWeb.StudioLive.Components.PayoutRow do
       )
 
     ~F"""
-    <div class={"payout-row", "bg-base-200": @highlight}>
-      <LivePatch to={payout_url}>
+    <li class={"payout-row", bordered: @highlight}>
+      <LivePatch class="grow" to={payout_url}>
         <div class="py-2 px-4">
           <div class="amount text-xl">
             {Money.to_string(@payout.amount)}
@@ -37,7 +37,7 @@ defmodule BanchanWeb.StudioLive.Components.PayoutRow do
           </div>
         </div>
       </LivePatch>
-    </div>
+    </li>
     """
   end
 end
