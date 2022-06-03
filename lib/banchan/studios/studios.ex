@@ -475,13 +475,16 @@ defmodule Banchan.Studios do
 
   def process_payout_updated!(%Stripe.Payout{} = payout, id \\ nil) do
     query =
-      if !is_nil(id) do
-        from(p in Payout, where: p.id == ^id, select: p)
-      else
-        from(p in Payout,
-          where: p.stripe_payout_id == ^payout.id,
-          select: p
-        )
+      cond do
+        !is_nil(id) ->
+          from(p in Payout, where: p.id == ^id, select: p)
+        !is_nil(payout.id) ->
+          from(p in Payout,
+            where: p.stripe_payout_id == ^payout.id,
+            select: p
+          )
+        true ->
+          throw({:error, "Invalid process_payout_updated! call"})
       end
 
     case query
