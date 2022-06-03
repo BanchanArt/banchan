@@ -25,7 +25,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
     <div>
       <h1 class="flex flex-row text-3xl pt-4 px-4">
         <LivePatch
-          class="md:hidden p-2"
+          class="go-back md:hidden p-2"
           to={Routes.studio_payouts_path(Endpoint, :index, @studio.handle)}
         >
           <i class="fas fa-arrow-left text-2xl" />

@@ -183,7 +183,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
     >
       <div class="flex flex-col grow max-h-full">
         <div class="flex flex-row grow md:grow-0">
-          <div class={"flex flex-col grow md:grow-0 md:basis-1/4", "hidden md:flex": @payout}>
+          <div class={"flex flex-col grow md:grow-0 md:basis-1/4 sidebar", "hidden md:flex": @payout}>
             <div id="available" class="flex flex-col">
               <div class="stats stats-horizontal">
                 {#for avail <- @balance.available}

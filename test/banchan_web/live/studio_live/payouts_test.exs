@@ -87,6 +87,100 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
         live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
       end
     end
+
+    test "can navigate to and from listing", %{
+      conn: conn,
+      artist: artist,
+      client: client,
+      studio: studio,
+      commission: commission
+    } do
+      conn = log_in_user(conn, artist)
+
+      Studios.update_stripe_state!(studio.stripe_id, %Stripe.Account{
+        charges_enabled: true,
+        details_submitted: true
+      })
+
+      net = Money.new(39_124, :USD)
+      mock_balance(studio, [net], [], 4)
+      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
+      approve_commission(commission)
+
+      stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, fn _ ->
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: net.amount
+             }
+           ],
+           pending: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ]
+         }}
+      end)
+      |> expect(:create_payout, fn _, _ ->
+        {:ok,
+         %Stripe.Payout{
+           id: stripe_payout_id,
+           status: "pending",
+           arrival_date: DateTime.utc_now() |> DateTime.to_unix(),
+           type: "card",
+           method: "standard"
+         }}
+      end)
+
+      {:ok, [payout]} = Studios.payout_studio(artist, studio)
+
+      {:ok, page_live, _html} =
+        live(conn, Routes.studio_payouts_path(conn, :show, studio.handle, payout.public_id))
+
+      assert page_live
+             |> element(".sidebar")
+             # Sidebar gets hidden on mobile when there's a payout selected
+             |> render() =~ "hidden md:flex"
+
+      page_live
+      |> element(".go-back")
+      |> render_click()
+
+      assert_patch(page_live, Routes.studio_payouts_path(conn, :index, studio.handle))
+
+      refute page_live
+             |> element(".payout")
+             |> render() =~ "Payout"
+
+      refute page_live
+             |> element(".sidebar")
+             # Sidebar becomes main screen on mobile when there's no payout selected
+             |> render() =~ "hidden md:flex"
+
+      page_live
+      |> element(".payout-row > *")
+      |> render_click()
+
+      assert_patch(
+        page_live,
+        Routes.studio_payouts_path(conn, :show, studio.handle, payout.public_id)
+      )
+
+      assert page_live
+             |> element(".payout")
+             |> render() =~ "Payout"
+
+      assert page_live
+             |> element(".sidebar")
+             # Sidebar becomes main screen on mobile when there's no payout selected
+             |> render() =~ "hidden md:flex"
+    end
   end
 
   describe "listing payouts" do
