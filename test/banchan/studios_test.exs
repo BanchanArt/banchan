@@ -616,7 +616,8 @@ defmodule Banchan.StudiosTest do
       assert {:error, stripe_err} == result
       assert log =~ "[error] Stripe error during payout: Log me?\n"
 
-      [%Payout{status: :failed, stripe_payout_id: nil}] = from(p in Payout, where: p.studio_id == ^studio.id) |> Repo.all()
+      [%Payout{status: :failed, stripe_payout_id: nil}] =
+        from(p in Payout, where: p.studio_id == ^studio.id) |> Repo.all()
 
       # We don't mark them as failed when the failure was immediate. They just
       # stay "released".

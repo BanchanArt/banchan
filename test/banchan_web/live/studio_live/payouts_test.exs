@@ -4,6 +4,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
   """
   use BanchanWeb.ConnCase, async: true
 
+  import ExUnit.CaptureLog
   import Mox
   import Phoenix.LiveViewTest
 
@@ -38,6 +39,8 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
        }}
     end)
   end
+
+  setup :verify_on_exit!
 
   setup do
     commission = commission_fixture()
@@ -150,6 +153,188 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
   end
 
   describe "trigger payout" do
+    setup %{conn: conn, studio: studio, artist: artist} do
+      Studios.update_stripe_state!(studio.stripe_id, %Stripe.Account{
+        charges_enabled: true,
+        details_submitted: true
+      })
+
+      %{conn: log_in_user(conn, artist)}
+    end
+
+    test "payout button disabled if no balance", %{
+      conn: conn,
+      client: client,
+      studio: studio,
+      commission: commission
+    } do
+      net = Money.new(39_124, :USD)
+      mock_balance(studio, [net], [], 4)
+      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
+
+      {:ok, page_live, _html} =
+        live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
+
+      assert page_live
+             |> element("#available button")
+             |> render() =~ "disabled=\"disabled\""
+
+      approve_commission(commission)
+
+      # We don't support live-updating the page (yet?)
+      {:ok, page_live, _html} =
+        live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
+
+      refute page_live
+             |> element("#available button")
+             |> render() =~ "disabled=\"disabled\""
+    end
+
+    test "payout button triggers a payout", %{
+      conn: conn,
+      client: client,
+      studio: studio,
+      commission: commission
+    } do
+      net = Money.new(39_124, :USD)
+      mock_balance(studio, [net], [], 3)
+      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
+      approve_commission(commission)
+
+      stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, fn _ ->
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: net.amount
+             }
+           ],
+           pending: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ]
+         }}
+      end)
+      |> expect(:create_payout, fn _, _ ->
+        {:ok,
+         %Stripe.Payout{
+           id: stripe_payout_id,
+           status: "pending",
+           arrival_date: DateTime.utc_now() |> DateTime.to_unix(),
+           type: "card",
+           method: "standard"
+         }}
+      end)
+
+      {:ok, page_live, _html} =
+        live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
+
+      refute page_live
+             |> element(".payout-rows")
+             |> render() =~ "$391.24"
+
+      assert page_live
+             |> element("#available button")
+             # disabled immediately
+             |> render_click() =~ "disabled=\"disabled\""
+
+      assert page_live
+             |> element("#available button")
+             |> render() =~ "spinner"
+
+      Notifications.wait_for_notifications()
+
+      assert page_live
+             |> element(".flash-container")
+             |> render() =~ "Payout sent!"
+
+      assert page_live
+             |> element(".payout-row")
+             |> render() =~ "$391.24"
+    end
+
+    test "failed payouts report stripe errors", %{
+      conn: conn,
+      client: client,
+      studio: studio,
+      commission: commission
+    } do
+      net = Money.new(39_124, :USD)
+      mock_balance(studio, [net], [], 3)
+      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
+      approve_commission(commission)
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, fn _ ->
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: net.amount
+             }
+           ],
+           pending: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ]
+         }}
+      end)
+      |> expect(:create_payout, fn _, _ ->
+        {:error,
+         %Stripe.Error{
+           message: "internal message",
+           user_message: "external message",
+           code: :unknown_error,
+           extra: %{},
+           request_id: "whatever",
+           source: :stripe
+         }}
+      end)
+
+      {:ok, page_live, _html} =
+        live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
+
+      refute page_live
+             |> element(".payout-rows")
+             |> render() =~ "$391.24"
+
+      # TODO: This silences the console, but I couldn't get it to actually
+      # capture the log output. As of this comment, there's definitely a line
+      # in the logs about this, though!
+      capture_log([async: true], fn ->
+        assert page_live
+               |> element("#available button")
+               # disabled immediately
+               |> render_click() =~ "disabled=\"disabled\""
+
+        Notifications.wait_for_notifications()
+
+        assert page_live
+               |> element(".flash-container")
+               |> render() =~ "Payout failed: external message"
+
+        assert page_live
+               |> element(".payout-row .amount")
+               |> render() =~ "$391.24"
+
+        assert page_live
+               |> element(".payout-row .badge")
+               |> render() =~ "Failed"
+
+        refute page_live
+               |> element("#available button")
+               |> render() =~ "disabled=\"disabled\""
+      end)
+    end
   end
 
   describe "cancel payout" do
@@ -170,7 +355,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       commission: commission
     } do
       net = Money.new(39_124, :USD)
-      mock_balance(studio, [net], [], 4)
+      mock_balance(studio, [net], [], 3)
       payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 

@@ -85,11 +85,17 @@ defmodule BanchanWeb.StudioLive.Payouts do
            "Payout sent! It should be in your account #{payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}."
          )}
 
-      {:error, user_msg} ->
+      {:error, %Stripe.Error{user_message: user_message}} ->
         {:noreply,
          socket
          |> assign(pending: false)
-         |> put_flash(:error, user_msg)}
+         |> put_flash(:error, "Payout failed: #{user_message}")}
+
+      {:error, _err} ->
+        {:noreply,
+         socket
+         |> assign(pending: false)
+         |> put_flash(:error, "Payout failed due to an internal error.")}
     end
   end
 
@@ -186,7 +192,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
               </Button>
               <div class="divider" />
               <h2 class="text-lg">Payout History</h2>
-              <ul class="divide-y flex-grow flex flex-col">
+              <ul class="payout-rows divide-y flex-grow flex flex-col">
                 {#for payout <- @results.entries}
                   <li>
                     <PayoutRow

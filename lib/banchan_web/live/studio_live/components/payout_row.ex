@@ -25,7 +25,7 @@ defmodule BanchanWeb.StudioLive.Components.PayoutRow do
     <div class={"payout-row", "bg-base-200": @highlight}>
       <LivePatch to={payout_url}>
         <div class="py-2 px-4">
-          <div class="text-xl">
+          <div class="amount text-xl">
             {Money.to_string(@payout.amount)}
             <div class="badge badge-secondary badge-sm">{Payout.humanize_status(@payout.status)}</div>
           </div>

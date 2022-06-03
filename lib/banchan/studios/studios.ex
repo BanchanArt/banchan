@@ -321,6 +321,7 @@ defmodule Banchan.Studios do
         {:error, e}
 
       {:error, err} ->
+        Logger.error(%{message: "Internal error during payout", error: err})
         {:error, err}
     end
   end
@@ -415,14 +416,21 @@ defmodule Banchan.Studios do
         case create_stripe_payout(studio, total) do
           {:ok, stripe_payout} ->
             process_payout_updated!(stripe_payout, payout.id)
+
           {:error, err} ->
             Logger.error(%{message: "Failed to create Stripe payout", error: err})
-            process_payout_updated!(%Stripe.Payout{
-             status: :failed,
-             arrival_date: DateTime.utc_now() |> DateTime.to_unix()
-            }, payout.id)
+
+            process_payout_updated!(
+              %Stripe.Payout{
+                status: :failed,
+                arrival_date: DateTime.utc_now() |> DateTime.to_unix()
+              },
+              payout.id
+            )
+
             throw(err)
         end
+
       {:error, err} ->
         {:error, err}
     end
@@ -478,11 +486,13 @@ defmodule Banchan.Studios do
       cond do
         !is_nil(id) ->
           from(p in Payout, where: p.id == ^id, select: p)
+
         !is_nil(payout.id) ->
           from(p in Payout,
             where: p.stripe_payout_id == ^payout.id,
             select: p
           )
+
         true ->
           throw({:error, "Invalid process_payout_updated! call"})
       end
@@ -500,7 +510,11 @@ defmodule Banchan.Studios do
            ]
          ) do
       {1, [payout]} ->
-        Notifications.payout_updated(payout |> Repo.preload([:studio, :actor, [invoices: [:commission, :event]]]))
+        Notifications.payout_updated(
+          payout
+          |> Repo.preload([:studio, :actor, [invoices: [:commission, :event]]])
+        )
+
         {:ok, payout}
 
       {0, _} ->
