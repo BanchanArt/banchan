@@ -49,7 +49,6 @@ defmodule BanchanWeb.StudioLive.Payouts do
        |> assign(payout_id: payout_id)
        |> assign(data_pending: true)
        |> assign(fypm_pending: false)
-       |> assign(cancel_pending: false)
        |> assign(page: page(params))
        |> assign(payout: payout)
        |> assign(results: Map.get(socket.assigns, :results, nil))
@@ -61,11 +60,6 @@ defmodule BanchanWeb.StudioLive.Payouts do
   def handle_event("fypm", _, socket) do
     send(self(), :process_fypm)
     {:noreply, socket |> assign(fypm_pending: true)}
-  end
-
-  def handle_event("cancel_payout", _, socket) do
-    send(self(), :process_cancel_payout)
-    {:noreply, socket |> assign(cancel_pending: true)}
   end
 
   def handle_info(:load_data, socket) do
@@ -123,21 +117,6 @@ defmodule BanchanWeb.StudioLive.Payouts do
     end
   end
 
-  def handle_info(:process_cancel_payout, socket) do
-    case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
-      :ok ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Payout canceled")}
-
-      {:error, err} ->
-        {:noreply,
-         socket
-         |> assign(cancel_pending: false)
-         |> put_flash(:error, "Failed to cancel payout: #{err.user_message}")}
-    end
-  end
-
   def handle_info(%{event: "payout_updated", payload: payout}, socket) do
     new_payout =
       if socket.assigns.payout && socket.assigns.payout.id == payout.id do
@@ -174,8 +153,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
        payout: new_payout,
        results: new_results,
        balance: new_balance,
-       fypm_pending: false,
-       cancel_pending: false
+       fypm_pending: false
      )}
   end
 
@@ -252,13 +230,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
           </div>
           {#if @payout_id}
             <div class="px-4 md:container basis-full md:basis-3/4 payout">
-              <Payout
-                studio={@studio}
-                payout={@payout}
-                data_pending={@data_pending}
-                cancel_pending={@cancel_pending}
-                cancel_payout="cancel_payout"
-              />
+              <Payout id="payout" studio={@studio} payout={@payout} data_pending={@data_pending} />
             </div>
           {/if}
         </div>

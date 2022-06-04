@@ -3,10 +3,11 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   Individual Payout display component. Shows a list of invoices related to
   commissions that were paid out as part of this Payout.
   """
-  use BanchanWeb, :component
+  use BanchanWeb, :live_component
 
   alias Surface.Components.{LivePatch, LiveRedirect}
 
+  alias Banchan.Studios
   alias Banchan.Studios.Payout
 
   alias BanchanWeb.Components.{Avatar, Button, UserHandle}
@@ -14,16 +15,99 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   prop studio, :struct, required: true
   prop payout, :struct, required: true
   prop data_pending, :boolean, default: false
-  prop cancel_pending, :boolean, default: false
-  prop cancel_payout, :event, required: true
+
+  data modal_open, :boolean, default: false
+  data cancel_pending, :boolean, default: false
+
+  def update(assigns, socket) do
+    socket =
+      case Map.get(assigns, :add_flash, nil) do
+        {type, msg} ->
+          socket |> put_flash(type, msg)
+
+        nil ->
+          socket
+      end
+
+    {:ok,
+     socket
+     |> assign(cancel_pending: false)
+     |> assign(assigns)}
+  end
+
+  def handle_event("toggle_modal", _, socket) do
+    {:noreply, socket |> assign(modal_open: !socket.assigns.modal_open)}
+  end
+
+  def handle_event("close_modal", _, socket) do
+    {:noreply, socket |> assign(modal_open: false)}
+  end
+
+  def handle_event("nothing", _, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("cancel_payout", _, socket) do
+    Task.Supervisor.start_child(
+      Banchan.TaskSupervisor,
+      fn ->
+        case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
+          :ok ->
+            send_update(
+              __MODULE__,
+              id: "payout",
+              modal_open: false,
+              add_flash: {:info, "Payout cancelled."}
+            )
+
+          {:error, err} ->
+            send_update(
+              __MODULE__,
+              id: "payout",
+              cancel_pending: false,
+              modal_open: false,
+              add_flash: {:error, "Failed to cancel payout: #{err.user_message}"}
+            )
+        end
+      end,
+      restart: :transient
+    )
+
+    {:noreply, socket |> assign(cancel_pending: true)}
+  end
 
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
   end
 
   def render(assigns) do
+    cancel_disabled =
+      !assigns.payout || assigns.cancel_pending || !assigns.payout.stripe_payout_id ||
+        Payout.done?(assigns.payout)
+
     ~F"""
     <div class="flex flex-col">
+      {!-- Cancellation modal --}
+      <div
+        class={"modal", "modal-open": @modal_open}
+        :on-click="toggle_modal"
+        :on-window-keydown="close_modal"
+        phx-key="Escape"
+      >
+        <div :on-click="nothing" class="modal-box relative">
+          <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click="close_modal">✕</div>
+          <h3 class="text-lg font-bold">Confirm Cancellation</h3>
+          <p class="py-4">Are you sure you want to cancel this payout? Note that the payout may have already completed (or failed).</p>
+          <div class="modal-action">
+            <Button
+              disabled={!@modal_open || cancel_disabled}
+              class={"cancel-payout btn-error", loading: @cancel_pending}
+              click="cancel_payout"
+            >Confirm</Button>
+          </div>
+        </div>
+      </div>
+      {!-- Header --}
       <h1 class="text-3xl pt-4 px-4">
         <LivePatch
           class="go-back md:hidden p-2"
@@ -67,16 +151,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
               <div>Failure: {@payout.failure_message}</div>
             {/if}
           </div>
-          <Button
-            class="cancel-payout btn-warning mt-4"
-            click={@cancel_payout}
-            disabled={@cancel_pending || !@payout.stripe_payout_id || Payout.done?(@payout)}
-          >
-            {#if @cancel_pending}
-              <i class="fas fa-spinner animate-spin" />
-            {/if}
-            Cancel
-          </Button>
+          <Button disabled={cancel_disabled} click="toggle_modal" class="open-modal modal-button btn-error">Cancel</Button>
         </div>
         <div class="divider">Invoices</div>
         <div class="menu divide-y-2 divide-neutral-content divide-opacity-10 pb-4">

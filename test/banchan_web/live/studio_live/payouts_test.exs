@@ -550,10 +550,19 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       {:ok, page_live, _html} =
         live(conn, Routes.studio_payouts_path(conn, :show, studio.handle, payout.public_id))
 
+      # Make sure the cancel confirmation button itself is disabled if the modal is closed.
+      assert page_live
+             |> element(".cancel-payout")
+             |> render() =~ "disabled=\"disabled\""
+
+      page_live
+      |> element(".open-modal")
+      |> render_click()
+
       assert page_live
              |> element(".cancel-payout")
              # Immediately starts spinner
-             |> render_click() =~ "fa-spinner"
+             |> render_click() =~ "loading"
 
       assert page_live
              |> element(".cancel-payout")
@@ -587,12 +596,16 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
              |> render() =~ "Canceled"
 
       assert page_live
+             |> element(".open-modal")
+             |> render() =~ "disabled=\"disabled\""
+
+      assert page_live
              |> element(".cancel-payout")
              |> render() =~ "disabled=\"disabled\""
 
       refute page_live
              |> element(".cancel-payout")
-             |> render() =~ "fa-spinner"
+             |> render() =~ "loading"
     end
   end
 end
