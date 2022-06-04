@@ -12,6 +12,7 @@ defmodule Banchan.Commissions.Commission do
     field :title, :string
     field :description, :string
     field :tos_ok, :boolean, virtual: true
+    field :archived, :boolean, default: false
 
     field :status, Ecto.Enum,
       values: Common.status_values(),

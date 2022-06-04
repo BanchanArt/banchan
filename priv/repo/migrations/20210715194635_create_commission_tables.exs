@@ -39,6 +39,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :public_id, :string, null: false
       add :title, :string, null: false
       add :description, :text
+      add :archived, :boolean, null: false
       add :status, :string, null: false
       add :studio_id, references(:studios, on_delete: :nilify_all)
       add :client_id, references(:users, on_delete: :nilify_all)
