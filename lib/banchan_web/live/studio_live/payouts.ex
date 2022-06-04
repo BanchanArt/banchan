@@ -211,7 +211,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
     >
       <div class="flex flex-col grow max-h-full">
         <div class="flex flex-row grow md:grow-0">
-          <div class={"flex flex-col grow md:grow-0 md:basis-1/4 sidebar", "hidden md:flex": @payout_id}>
+          <div class={"flex flex-col basis-full md:basis-1/4 px-4 sidebar", "hidden md:flex": @payout_id}>
             <div id="available" class="flex flex-col">
               <div class="stats stats-horizontal">
                 {#if @balance}
@@ -240,13 +240,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
                 {/if}
                 Pay Out
               </Button>
-              <div class="divider" />
-              <ul class="payout-rows menu menu-compact">
-                <li class="menu-title"><span>Payout History
-                    {#if @data_pending}
-                      <i class="fas fa-spinner animate-spin" />
-                    {/if}
-                  </span></li>
+              <div class="divider">History</div>
+              <ul class="payout-rows divide-y-2 divide-base-content divide-opacity-10 menu menu-compact">
                 {#if @results}
                   {#for payout <- @results.entries}
                     <PayoutRow studio={@studio} payout={payout} highlight={@payout_id == payout.public_id} />
@@ -255,8 +250,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
               </ul>
             </div>
           </div>
-          <div class="md:container md:basis-3/4 payout">
-            {#if @payout_id}
+          {#if @payout_id}
+            <div class="px-4 md:container basis-full md:basis-3/4 payout">
               <Payout
                 studio={@studio}
                 payout={@payout}
@@ -264,8 +259,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
                 cancel_pending={@cancel_pending}
                 cancel_payout="cancel_payout"
               />
-            {/if}
-          </div>
+            </div>
+          {/if}
         </div>
       </div>
     </StudioLayout>
