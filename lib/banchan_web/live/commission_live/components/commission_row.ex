@@ -22,7 +22,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
       )
 
     ~F"""
-    <div class={"bg-base-200": @highlight}>
+    <li class={bordered: @highlight}>
       <LivePatch to={commission_url}>
         <div class="py-2 px-4">
           <div class="text-xl">
@@ -49,7 +49,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
           </div>
         </div>
       </LivePatch>
-    </div>
+    </li>
     """
   end
 end

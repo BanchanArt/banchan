@@ -148,12 +148,10 @@ defmodule BanchanWeb.CommissionLive do
           <div class={"flex flex-col px-4 sidebar basis-full md:basis-1/4", "hidden md:flex": @commission}>
             <ul class="divide-y-2 divide-neutral-content divide-opacity-10 menu menu-compact">
               {#for result <- @results.entries}
-                <li>
-                  <CommissionRow
-                    result={result}
-                    highlight={@commission && @commission.public_id == result.commission.public_id}
-                  />
-                </li>
+                <CommissionRow
+                  result={result}
+                  highlight={@commission && @commission.public_id == result.commission.public_id}
+                />
               {/for}
             </ul>
           </div>
