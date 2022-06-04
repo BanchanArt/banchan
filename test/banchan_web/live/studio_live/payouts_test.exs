@@ -155,8 +155,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       assert_patch(page_live, Routes.studio_payouts_path(conn, :index, studio.handle))
 
       refute page_live
-             |> element(".payout")
-             |> render() =~ "Payout"
+             |> has_element?(".payout")
 
       refute page_live
              |> element(".sidebar")
