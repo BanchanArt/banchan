@@ -145,8 +145,8 @@ defmodule BanchanWeb.CommissionLive do
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <div class="flex flex-col grow max-h-full">
         <div class="flex flex-row grow md:grow-0">
-          <div class={"flex grow md:grow-0 md:basis-1/4", "hidden md:flex": @commission}>
-            <ul class="divide-y flex-grow flex flex-col">
+          <div class={"flex flex-col px-4 sidebar basis-full md:basis-1/4", "hidden md:flex": @commission}>
+            <ul class="divide-y-2 divide-neutral-content divide-opacity-10 menu menu-compact">
               {#for result <- @results.entries}
                 <li>
                   <CommissionRow
@@ -157,8 +157,8 @@ defmodule BanchanWeb.CommissionLive do
               {/for}
             </ul>
           </div>
-          <div class="md:container md:basis-3/4">
-            {#if @commission}
+          {#if @commission}
+            <div class="md:container basis-full md:basis-3/4">
               <Commission
                 uri={@uri}
                 current_user={@current_user}
@@ -167,8 +167,8 @@ defmodule BanchanWeb.CommissionLive do
                 current_user_member?={@current_user_member?}
                 toggle_subscribed="toggle_subscribed"
               />
-            {/if}
-          </div>
+            </div>
+          {/if}
         </div>
       </div>
     </Layout>

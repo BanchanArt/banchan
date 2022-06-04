@@ -19,7 +19,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
 
   def render(assigns) do
     ~F"""
-    <div class="p-4 flex flex-col gap-2 divide-y w-full border border-neutral rounded-box">
+    <div class="p-4 flex flex-col gap-2 divide-y-2 divide-neutral-content divide-opacity-10 w-full border border-neutral rounded-box">
       <div class="text-2xl">{Commissions.Common.humanize_status(@commission.status)}</div>
       {#if @current_user.id == @commission.client_id}
         <div class="flex flex-col">
