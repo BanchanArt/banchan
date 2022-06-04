@@ -100,7 +100,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
           <p class="py-4">Are you sure you want to cancel this payout? Note that the payout may have already completed (or failed).</p>
           <div class="modal-action">
             <Button
-              disabled={!@modal_open || cancel_disabled}
+              disabled={!@modal_open || cancel_disabled || @cancel_pending}
               class={"cancel-payout btn-error", loading: @cancel_pending}
               click="cancel_payout"
             >Confirm</Button>
