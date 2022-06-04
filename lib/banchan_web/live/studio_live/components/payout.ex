@@ -108,7 +108,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
         </div>
       </div>
       {!-- Header --}
-      <h1 class="text-3xl pt-4 px-4">
+      <h1 class="text-3xl py-4 px-4 border-b-2 border-neutral-content bg-base-100 border-opacity-10">
         <LivePatch
           class="go-back md:hidden p-2"
           to={Routes.studio_payouts_path(Endpoint, :index, @studio.handle)}
@@ -120,9 +120,8 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
           <div class="badge badge-secondary badge-lg">{Payout.humanize_status(@payout.status)}</div>
         {/if}
       </h1>
-      <div class="divider" />
       {#if !@data_pending}
-        <div class="flex flex-col px-4">
+        <div class="flex flex-col pt-4 px-4">
           {#if @data_pending}
             <i class="fas fa-spinner animate-spin" />
           {#else}

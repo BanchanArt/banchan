@@ -24,13 +24,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   def render(assigns) do
     ~F"""
     <div>
-      <h1 class="text-3xl pt-4 px-4">
-        <LivePatch class="md:hidden p-2" to={Routes.commission_path(Endpoint, :index)}>
+      <h1 class="text-3xl pt-4 px-4 sticky top-0 bg-base-100 z-10 border-b-2 border-neutral-content border-opacity-10">
+        <LivePatch class="md:hidden px-2 py-4" to={Routes.commission_path(Endpoint, :index)}>
           <i class="fas fa-arrow-left text-2xl" />
         </LivePatch>
         {@commission.title}
       </h1>
-      <div class="divider" />
       <div class="p-2">
         <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
           <div class="flex flex-col md:order-2">
