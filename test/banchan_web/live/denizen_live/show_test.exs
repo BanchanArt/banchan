@@ -7,9 +7,12 @@ defmodule BanchanWeb.DenizenLive.ShowTest do
   import Banchan.AccountsFixtures
   import Phoenix.LiveViewTest
 
+  alias Banchan.Notifications
+
   alias BanchanWeb.Router.Helpers, as: Routes
 
   setup do
+    on_exit(fn -> Notifications.wait_for_notifications() end)
     %{user: user_fixture()}
   end
 

@@ -10,11 +10,13 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.CommissionLive.Components.{StudioLayout, Summary}
+  import BanchanWeb.StudioLive.Helpers
+
+  alias BanchanWeb.CommissionLive.Components.Summary
   alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
   alias BanchanWeb.Components.Markdown
   alias BanchanWeb.Endpoint
-  import BanchanWeb.StudioLive.Helpers
+  alias BanchanWeb.StudioLive.Components.StudioLayout
 
   @impl true
   def mount(%{"offering_type" => offering_type} = params, _session, socket) do
@@ -41,7 +43,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
       {:ok,
        socket
        |> assign(
-         changeset: Commission.changeset(%Commission{}, %{}),
+         changeset: Commission.creation_changeset(%Commission{}, %{}),
          line_items: default_items,
          offering: offering,
          template: template,
@@ -104,7 +106,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   def handle_event("change", %{"commission" => commission}, socket) do
     changeset =
       %Commission{}
-      |> Commissions.change_commission(commission)
+      |> Commission.creation_changeset(commission)
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)

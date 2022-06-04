@@ -151,6 +151,4 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
 
       - name: Run test
-        env:
-          STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}
         run: mix test --trace --slowest 10

@@ -8,10 +8,11 @@ defmodule BanchanWeb.StudioLive.Shop do
 
   alias Surface.Components.LiveRedirect
 
+  import BanchanWeb.StudioLive.Helpers
+
   alias BanchanWeb.Components.Button
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.CommissionLive.Components.{CommissionCard, StudioLayout}
-  import BanchanWeb.StudioLive.Helpers
+  alias BanchanWeb.StudioLive.Components.{CommissionCard, StudioLayout}
 
   @impl true
   def mount(params, _session, socket) do

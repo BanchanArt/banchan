@@ -9,6 +9,7 @@ defmodule BanchanWeb.Components.Button do
   prop value, :any
   prop click, :event
   prop class, :css_class
+  prop disabled, :boolean, default: false
 
   slot default
 
@@ -26,6 +27,7 @@ defmodule BanchanWeb.Components.Button do
       }
       value={@value}
       type="button"
+      disabled={@disabled}
       :on-click={@click}
     >{@label}<#slot /></button>
     """

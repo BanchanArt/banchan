@@ -4,6 +4,7 @@ defmodule Banchan.Offerings do
   """
   import Ecto.Query, warn: false
 
+  alias Banchan.Commissions.Commission
   alias Banchan.Offerings.Offering
   alias Banchan.Repo
 
@@ -34,7 +35,7 @@ defmodule Banchan.Offerings do
   end
 
   def update_offering(%Offering{} = offering, _current_user_member?, attrs) do
-    change_offering(offering, attrs) |> Repo.update()
+    change_offering(offering, attrs) |> Repo.update(returning: true)
   end
 
   def offering_base_price(%Offering{} = offering) do
@@ -48,43 +49,61 @@ defmodule Banchan.Offerings do
     end
   end
 
-  def offering_available_slots(%Offering{slots: nil}) do
-    nil
-  end
-
   def offering_available_slots(%Offering{} = offering) do
-    used_slots =
+    {slots, count} =
       Repo.one(
-        from c in Banchan.Commissions.Commission,
-          where: c.offering_id == ^offering.id,
-          where: c.status != :withdrawn and c.status != :approved and c.status != :submitted,
-          select: count(c)
+        from(o in Offering,
+          left_join:
+            comms in subquery(
+              from(c in Commission,
+                where:
+                  c.offering_id == ^offering.id and
+                    (c.status != :withdrawn and c.status != :approved and c.status != :submitted)
+              )
+            ),
+          where: o.id == ^offering.id,
+          group_by: [o.id, o.slots],
+          select: {o.slots, count(comms)}
+        )
       )
 
-    if used_slots > offering.slots do
-      0
-    else
-      offering.slots - used_slots
+    cond do
+      is_nil(slots) ->
+        nil
+
+      count > slots ->
+        0
+
+      true ->
+        slots - count
     end
   end
 
-  def offering_available_proposals(%Offering{max_proposals: nil}) do
-    nil
-  end
-
   def offering_available_proposals(%Offering{} = offering) do
-    used_proposals =
+    {max, count} =
       Repo.one(
-        from c in Banchan.Commissions.Commission,
-          where: c.offering_id == ^offering.id,
-          where: c.status == :submitted,
-          select: count(c)
+        from(o in Offering,
+          left_join:
+            comms in subquery(
+              from(c in Commission,
+                where: c.offering_id == ^offering.id and c.status == :submitted
+              )
+            ),
+          where: o.id == ^offering.id,
+          group_by: [o.id, o.max_proposals],
+          select: {o.max_proposals, count(comms)}
+        )
       )
 
-    if used_proposals > offering.max_proposals do
-      0
-    else
-      offering.max_proposals - used_proposals
+    cond do
+      is_nil(max) ->
+        nil
+
+      count > max ->
+        0
+
+      true ->
+        max - count
     end
   end
 end

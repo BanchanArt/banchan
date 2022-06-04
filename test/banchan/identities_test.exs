@@ -8,7 +8,6 @@ defmodule Banchan.IdentitiesTest do
   import Banchan.StudiosFixtures
 
   alias Banchan.Identities
-  alias Banchan.Studios.Studio
 
   describe "get_user_or_studio_by_handle/1" do
     test "returns an error tuple when neither user or studio exists" do
@@ -22,7 +21,8 @@ defmodule Banchan.IdentitiesTest do
     end
 
     test "returns the studio if the handle exists" do
-      studio = studio_fixture(%Studio{})
+      user = user_fixture()
+      studio = studio_fixture([user])
       {:ok, found} = Identities.get_user_or_studio_by_handle(studio.handle)
       assert found.id == studio.id
     end
@@ -35,7 +35,9 @@ defmodule Banchan.IdentitiesTest do
     end
 
     test "returns false if there is a studio with the same handle" do
-      studio = studio_fixture(%Studio{handle: "plugh"})
+      user = user_fixture()
+      studio = studio_fixture([user], %{handle: "plugh"})
+      assert "plugh" == studio.handle
       refute Identities.validate_uniqueness_of_handle(studio.handle)
     end
 

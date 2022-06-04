@@ -30,12 +30,8 @@ defmodule Banchan.DataCase do
   end
 
   setup tags do
-    :ok = Sandbox.checkout(Banchan.Repo)
-
-    unless tags[:async] do
-      Sandbox.mode(Banchan.Repo, {:shared, self()})
-    end
-
+    pid = Sandbox.start_owner!(Banchan.Repo, shared: not tags[:async])
+    on_exit(fn -> Sandbox.stop_owner(pid) end)
     :ok
   end
 

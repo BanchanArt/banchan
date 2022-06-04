@@ -53,7 +53,7 @@ defmodule BanchanWeb.CommissionLive do
             commission: comm,
             subscribed?: Notifications.user_subscribed?(socket.assigns.current_user, comm),
             current_user_member?:
-              Studios.is_user_in_studio(socket.assigns.current_user, %Studios.Studio{
+              Studios.is_user_in_studio?(socket.assigns.current_user, %Studios.Studio{
                 id: comm.studio_id
               })
           )
@@ -157,16 +157,18 @@ defmodule BanchanWeb.CommissionLive do
               {/for}
             </ul>
           </div>
-          {#if @commission}
-            <Commission
-              uri={@uri}
-              current_user={@current_user}
-              commission={@commission}
-              subscribed?={@subscribed?}
-              current_user_member?={@current_user_member?}
-              toggle_subscribed="toggle_subscribed"
-            />
-          {/if}
+          <div class="md:container md:basis-3/4">
+            {#if @commission}
+              <Commission
+                uri={@uri}
+                current_user={@current_user}
+                commission={@commission}
+                subscribed?={@subscribed?}
+                current_user_member?={@current_user_member?}
+                toggle_subscribed="toggle_subscribed"
+              />
+            {/if}
+          </div>
         </div>
       </div>
     </Layout>

@@ -10,11 +10,11 @@ defmodule BanchanWeb.StudioLive.Settings do
   alias Banchan.Studios
   alias Banchan.Studios.Studio
 
-  alias BanchanWeb.CommissionLive.Components.StudioLayout
+  import BanchanWeb.StudioLive.Helpers
+
   alias BanchanWeb.Components.Button
   alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
-
-  import BanchanWeb.StudioLive.Helpers
+  alias BanchanWeb.StudioLive.Components.StudioLayout
 
   @impl true
   def mount(params, _session, socket) do
@@ -22,7 +22,7 @@ defmodule BanchanWeb.StudioLive.Settings do
 
     {:ok,
      assign(socket,
-       changeset: Studio.changeset(socket.assigns.studio, %{}),
+       changeset: Studio.profile_changeset(socket.assigns.studio, %{}),
        subscribed?:
          Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.studio)
      )}
@@ -51,7 +51,7 @@ defmodule BanchanWeb.StudioLive.Settings do
            val["studio"]
          ) do
       {:ok, studio} ->
-        socket = assign(socket, changeset: Studio.changeset(studio, %{}), studio: studio)
+        socket = assign(socket, changeset: Studio.profile_changeset(studio, %{}), studio: studio)
         socket = put_flash(socket, :info, "Profile updated")
         {:noreply, socket}
 
@@ -63,7 +63,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   def handle_event("change", val, socket) do
     changeset =
       socket.assigns.studio
-      |> Studio.changeset(val["studio"])
+      |> Studio.profile_changeset(val["studio"])
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)

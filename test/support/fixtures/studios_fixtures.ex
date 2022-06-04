@@ -5,29 +5,38 @@ defmodule Banchan.StudiosFixtures do
   """
   @dialyzer [:no_return]
 
-  def unique_studio_name, do: "studio#{System.unique_integer()}"
-  def unique_studio_handle, do: "studio#{System.unique_integer()}"
+  import Mox
+
+  alias Banchan.Studios.Studio
+
+  def unique_stripe_id, do: "stripe-id#{System.unique_integer()}"
+  def unique_studio_email, do: "studio#{System.unique_integer()}@example.com"
+  def unique_studio_handle, do: "studio-handle#{System.unique_integer()}"
+  def unique_studio_name, do: "studio-name#{:rand.uniform(100_000)}"
 
   def valid_studio_attributes(attrs \\ %{}) do
+    name = "studio#{System.unique_integer()}"
+
     Enum.into(attrs, %{
-      name: unique_studio_name(),
-      handle: unique_studio_handle()
+      name: name,
+      handle: name <> "-handle"
     })
   end
 
-  def studio_fixture(studio, attrs \\ %{}) do
-    {:ok, user} =
-      Banchan.Accounts.register_admin(%{
-        handle: "test-admin",
-        email: "test@example.com",
-        password: "foobarbazquux",
-        password_confirmation: "foobarbazquux"
-      })
+  defp stripe_account_mock do
+    Banchan.StripeAPI.Mock
+    |> expect(:create_account, fn _ ->
+      {:ok, %Stripe.Account{id: "stripe-mock-id#{System.unique_integer()}"}}
+    end)
+  end
+
+  def studio_fixture(artists, attrs \\ %{}) do
+    stripe_account_mock()
 
     {:ok, studio} =
       Banchan.Studios.new_studio(
-        %{studio | artists: [user]},
-        "http://localhost:4000/studios/#{studio.handle}",
+        %Studio{artists: artists},
+        "http://localhost:4000/studios/#{Map.get(attrs, :handle, "studio#{System.unique_integer()}")}",
         valid_studio_attributes(attrs)
       )
 

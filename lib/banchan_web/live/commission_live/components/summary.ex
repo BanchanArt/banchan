@@ -127,7 +127,8 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
             :on-window-keydown={@close_custom}
             phx-key="Escape"
           >
-            <div :on-click={@nothing} class="modal-box">
+            <div :on-click={@nothing} class="modal-box relative">
+              <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click={@close_custom}>✕</div>
               <Form
                 class="flex flex-col gap-2"
                 for={@custom_changeset}

@@ -4,6 +4,8 @@ defmodule BanchanWeb.StripeConnectWebhookController do
   """
   use BanchanWeb, :controller
 
+  require Logger
+
   alias Banchan.Commissions
   alias Banchan.Studios
 
@@ -11,7 +13,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
     [sig] = get_req_header(conn, "stripe-signature")
 
     {:ok, %Stripe.Event{} = event} =
-      Stripe.Webhook.construct_event(
+      stripe_mod().construct_webhook_event(
         conn.assigns.raw_body,
         sig,
         Application.fetch_env!(:stripity_stripe, :endpoint_secret)
@@ -21,7 +23,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
   end
 
   defp handle_event(%Stripe.Event{type: "account.updated"} = event, conn) do
-    Studios.update_stripe_state(event.account, event.data.object)
+    Studios.update_stripe_state!(event.account, event.data.object)
 
     conn
     |> resp(200, "OK")
@@ -46,10 +48,24 @@ defmodule BanchanWeb.StripeConnectWebhookController do
     |> send_resp()
   end
 
-  defp handle_event(%Stripe.Event{}, conn) do
-    # TODO: Do we want to log anything about events we got that we're not handling?
+  defp handle_event(%Stripe.Event{type: "payout." <> type} = event, conn) do
+    Logger.debug("Got a new payout event of type payout.#{type}. Updating database.")
+    Studios.process_payout_updated!(event.data.object)
+
     conn
     |> resp(200, "OK")
     |> send_resp()
+  end
+
+  defp handle_event(%Stripe.Event{type: type}, conn) do
+    Logger.debug("unhandled_event: #{type}")
+
+    conn
+    |> resp(200, "OK")
+    |> send_resp()
+  end
+
+  defp stripe_mod do
+    Application.get_env(:banchan, :stripe_mod)
   end
 end

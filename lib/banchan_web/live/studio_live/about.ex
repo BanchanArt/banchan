@@ -6,8 +6,9 @@ defmodule BanchanWeb.StudioLive.About do
 
   alias BanchanWeb.Components.Markdown
 
-  alias BanchanWeb.CommissionLive.Components.StudioLayout
   import BanchanWeb.StudioLive.Helpers
+
+  alias BanchanWeb.StudioLive.Components.StudioLayout
 
   @impl true
   def mount(params, _session, socket) do

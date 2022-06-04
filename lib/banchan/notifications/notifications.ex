@@ -17,7 +17,7 @@ defmodule Banchan.Notifications do
   }
 
   alias Banchan.Repo
-  alias Banchan.Studios.Studio
+  alias Banchan.Studios.{Payout, Studio}
 
   # Unfortunate, but necessary to create URLs for notifications.
   alias BanchanWeb.Endpoint
@@ -64,6 +64,20 @@ defmodule Banchan.Notifications do
             }
           )
         end)
+    end)
+  end
+
+  def payout_updated(%Payout{} = payout, _actor \\ nil) do
+    start(fn ->
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "payout:#{payout.studio.handle}",
+        %Phoenix.Socket.Broadcast{
+          topic: "payout:#{payout.studio.handle}",
+          event: "payout_updated",
+          payload: payout
+        }
+      )
     end)
   end
 
@@ -301,6 +315,18 @@ defmodule Banchan.Notifications do
     Phoenix.PubSub.unsubscribe(@pubsub, "notification:#{user.handle}")
   end
 
+  def wait_for_notifications do
+    Task.Supervisor.children(Banchan.NotificationTaskSupervisor)
+    |> Enum.map(&Process.monitor/1)
+    |> Enum.each(fn ref ->
+      receive do
+        # Order doesn't matter
+        {:DOWN, ^ref, _, _, _} ->
+          nil
+      end
+    end)
+  end
+
   defp start(task) do
     Task.Supervisor.start_child(Banchan.NotificationTaskSupervisor, task)
   end
@@ -314,7 +340,11 @@ defmodule Banchan.Notifications do
                              email: email,
                              notification_settings: settings
                            } ->
-          if settings.commission_web && ((actor && actor.id != id) || @notify_actor) do
+          notify_actor = (actor && actor.id != id) || @notify_actor
+
+          web_setting = is_nil(settings) || settings.commission_web
+
+          if web_setting && notify_actor do
             notification = Repo.insert!(%{notification | user_id: id}, returning: [:ref])
 
             Phoenix.PubSub.broadcast!(
@@ -328,7 +358,9 @@ defmodule Banchan.Notifications do
             )
           end
 
-          if settings.commission_email && ((actor && actor.id != id) || @notify_actor) do
+          email_setting = is_nil(settings) || settings.commission_email
+
+          if email_setting && notify_actor do
             send_email(email, notification, opts)
           end
         end)
@@ -353,7 +385,7 @@ defmodule Banchan.Notifications do
     |> Mailer.deliver_later!()
   end
 
-  defp studio_subscribers(%Studio{} = studio) do
+  def studio_subscribers(%Studio{} = studio) do
     from(
       u in User,
       join: studio_sub in StudioSubscription,
@@ -371,7 +403,7 @@ defmodule Banchan.Notifications do
     |> Repo.stream()
   end
 
-  defp commission_subscribers(%Commission{} = commission) do
+  def commission_subscribers(%Commission{} = commission) do
     from(
       u in User,
       join: comm_sub in CommissionSubscription,

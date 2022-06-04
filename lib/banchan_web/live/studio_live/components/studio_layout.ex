@@ -1,12 +1,12 @@
-defmodule BanchanWeb.CommissionLive.Components.StudioLayout do
+defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   @moduledoc """
   Shared layout component between the various Studio-related pages.
   """
   use BanchanWeb, :component
 
-  alias BanchanWeb.CommissionLive.Components.TabButton
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
+  alias BanchanWeb.StudioLive.Components.TabButton
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
@@ -60,6 +60,13 @@ defmodule BanchanWeb.CommissionLive.Components.StudioLayout do
                 to={Routes.studio_qa_path(Endpoint, :show, @studio.handle)}
               />
               {#if @current_user_member?}
+                <TabButton
+                  label="Payouts"
+                  tab_name={:payouts}
+                  current_tab={@tab}
+                  to={Routes.studio_payouts_path(Endpoint, :index, @studio.handle)}
+                />
+
                 <TabButton
                   label="Settings"
                   tab_name={:settings}

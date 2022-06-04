@@ -104,6 +104,17 @@ defmodule Banchan.Commissions do
     )
   end
 
+  # TODO: maybe this is too wide a net? We can separate this into user-level
+  # and studio-level subscriptions, though it will mean multiple calls to
+  # these subscription functions.
+  def subscribe_to_new_commissions do
+    Phoenix.PubSub.subscribe(@pubsub, "commission")
+  end
+
+  def unsubscribe_from_new_commissions do
+    Phoenix.PubSub.unsubscribe(@pubsub, "commission")
+  end
+
   def subscribe_to_commission_events(%Commission{public_id: public_id}) do
     Phoenix.PubSub.subscribe(@pubsub, "commission:#{public_id}")
   end
@@ -182,7 +193,7 @@ defmodule Banchan.Commissions do
              }
            ]
          }
-         |> Commission.changeset(attrs)
+         |> Commission.creation_changeset(attrs)
          |> Repo.insert() do
       {:ok, %Commission{} = commission} ->
         Notifications.subscribe_user!(actor, commission)
@@ -221,7 +232,7 @@ defmodule Banchan.Commissions do
        ) do
     {:ok, _} =
       Repo.transaction(fn ->
-        actor_member? = Studios.is_user_in_studio(actor, %Studio{id: studio_id})
+        actor_member? = Studios.is_user_in_studio?(actor, %Studio{id: studio_id})
 
         true =
           status_transition_allowed?(
@@ -238,6 +249,7 @@ defmodule Banchan.Commissions do
   # Transition changes studios can make
   defp status_transition_allowed?(true, _, :submitted, :accepted), do: true
   defp status_transition_allowed?(true, _, :accepted, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :accepted, :ready_for_review), do: true
   defp status_transition_allowed?(true, _, :in_progress, :paused), do: true
   defp status_transition_allowed?(true, _, :in_progress, :waiting), do: true
   defp status_transition_allowed?(true, _, :in_progress, :ready_for_review), do: true
@@ -284,9 +296,7 @@ defmodule Banchan.Commissions do
           end
 
         case commission
-             |> Commission.changeset(%{
-               tos_ok: true
-             })
+             |> Commission.update_changeset()
              |> Ecto.Changeset.put_assoc(:line_items, commission.line_items ++ [line_item])
              |> Repo.update() do
           {:error, err} ->
@@ -321,9 +331,7 @@ defmodule Banchan.Commissions do
         line_items = Enum.filter(commission.line_items, &(&1.id != line_item.id))
 
         case commission
-             |> Commission.changeset(%{
-               tos_ok: true
-             })
+             |> Commission.update_changeset()
              |> Ecto.Changeset.put_assoc(:line_items, line_items)
              |> Repo.update() do
           {:error, err} ->
@@ -346,19 +354,6 @@ defmodule Banchan.Commissions do
       end)
 
     ret
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking commission changes.
-
-  ## Examples
-
-      iex> change_commission(commission)
-      %Ecto.Changeset{data: %Commission{}}
-
-  """
-  def change_commission(%Commission{} = commission, attrs \\ %{}) do
-    Commission.changeset(commission, attrs)
   end
 
   @doc """
@@ -566,9 +561,7 @@ defmodule Banchan.Commissions do
     )
   end
 
-  def invoice_paid?(%Invoice{status: :succeeded}), do: true
-  def invoice_paid?(%Invoice{status: :paid_out}), do: true
-  def invoice_paid?(%Invoice{}), do: false
+  def invoice_paid?(%Invoice{status: status}), do: status == :succeeded
 
   def invoice(_actor, _commission, false, _drafts, _event_data) do
     {:error, :unauthorized}
@@ -583,6 +576,7 @@ defmodule Banchan.Commissions do
 
           {:ok, event} ->
             case %Invoice{
+                   client_id: commission.client_id,
                    commission: commission,
                    event: event
                  }
@@ -638,7 +632,7 @@ defmodule Banchan.Commissions do
     platform_fee = Money.multiply(Money.add(amount, tip), platform_fee)
 
     {:ok, session} =
-      Stripe.Session.create(%{
+      stripe_mod().create_session(%{
         payment_method_types: ["card"],
         mode: "payment",
         cancel_url: uri,
@@ -669,9 +663,12 @@ defmodule Banchan.Commissions do
 
   def process_payment_succeeded!(session) do
     {:ok, %{charges: %{data: [%{balance_transaction: txn_id}]}}} =
-      Stripe.PaymentIntent.retrieve(session.payment_intent, %{})
+      stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, [])
 
-    {:ok, %{available_on: available_on}} = Stripe.BalanceTransaction.retrieve(txn_id)
+    {:ok, %{available_on: available_on, amount: amt, currency: curr}} =
+      stripe_mod().retrieve_balance_transaction(txn_id, [])
+
+    amount = Money.new(amt, String.to_atom(String.upcase(curr)))
 
     {:ok, available_on} = DateTime.from_unix(available_on)
 
@@ -695,7 +692,7 @@ defmodule Banchan.Commissions do
           true,
           [],
           %{
-            amount: invoice.amount
+            amount: amount
           }
         )
 
@@ -706,35 +703,45 @@ defmodule Banchan.Commissions do
   end
 
   def process_payment_expired!(session) do
+    # NOTE: This will crash (intentionally) if we try to expire an
+    # already-succeeded payment. This should never happen, though, because it
+    # doesn't make sense that Stripe would tell us that a payment succeeded
+    # then tell us it's expired. So this crash is a good just-in-case.
     {1, [invoice]} =
-      from(i in Invoice, where: i.stripe_session_id == ^session.id, select: i)
+      from(i in Invoice,
+        where: i.stripe_session_id == ^session.id and i.status != :succeeded,
+        select: i
+      )
       |> Repo.update_all(set: [status: :expired])
 
     send_event_update!(invoice.event_id)
   end
+
+  def expire_payment!(invoice, current_user_member?)
 
   def expire_payment!(_, false) do
     {:error, :unauthorized}
   end
 
-  def expire_payment!(%Invoice{id: id, stripe_session_id: nil}, _) do
+  def expire_payment!(%Invoice{id: id, stripe_session_id: nil, status: :pending}, _) do
+    # NOTE: This will crash (intentionally) if we try to expire an already-succeeded payment.
     {1, [invoice]} =
-      from(i in Invoice, where: i.id == ^id, select: i)
+      from(i in Invoice, where: i.id == ^id and i.status != :succeeded, select: i)
       |> Repo.update_all(set: [status: :expired])
 
     send_event_update!(invoice.event_id)
+    :ok
   end
 
-  def expire_payment!(%Invoice{stripe_session_id: session_id}, _) do
-    {:ok, _} =
-      Stripe.Request.new_request([])
-      |> Stripe.Request.put_endpoint("checkout/sessions/#{session_id}/expire")
-      |> Stripe.Request.put_method(:post)
-      |> Stripe.Request.make_request()
-
+  def expire_payment!(%Invoice{stripe_session_id: session_id, status: :submitted}, _)
+      when session_id != nil do
     # NOTE: We don't manually expire the invoice in the database here. That's
     # handled by process_payment_expired!/1 when the webhook fires.
-    :ok
+    :ok = stripe_mod().expire_payment(session_id)
+  end
+
+  def expire_payment!(%Invoice{}, _) do
+    raise "Tried to expire an invoice in an invalid state. Reload the invoice and try again. Otherwise, this is a bug."
   end
 
   def deposited_amount(
@@ -753,7 +760,7 @@ defmodule Banchan.Commissions do
         # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
         Money.new(0, :USD),
         fn event, acc ->
-          if event.invoice && event.invoice.status in [:succeeded, :paid_out] do
+          if event.invoice && event.invoice.status == :succeeded do
             Money.add(acc, event.invoice.amount)
           else
             acc
@@ -766,7 +773,7 @@ defmodule Banchan.Commissions do
           i in Invoice,
           where:
             i.commission_id == ^commission.id and
-              (i.status == :paid_out or i.status == :succeeded),
+              i.status == :succeeded,
           select: i.amount
         )
         |> Repo.all()
@@ -807,5 +814,9 @@ defmodule Banchan.Commissions do
       [] -> nil
       [event] -> event
     end
+  end
+
+  defp stripe_mod do
+    Application.get_env(:banchan, :stripe_mod)
   end
 end

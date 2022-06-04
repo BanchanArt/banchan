@@ -20,6 +20,7 @@ import Config
 
 config :banchan,
   namespace: Banchan,
+  stripe_mod: Banchan.StripeAPI,
   ecto_repos: [Banchan.Repo],
   upload_dir: Path.expand("../priv/uploads", __DIR__),
   default_platform_fee: System.get_env("BANCHAN_PLATFORM_FEE") || 0.07

@@ -23,15 +23,15 @@ defmodule Banchan.Commissions.Invoice do
         # Checkout session has expired.
         :expired,
         # Payment succeeded.
-        :succeeded,
-        # Payment amount has been paid out to Studio.
-        :paid_out
+        :succeeded
       ],
       default: :pending
 
     belongs_to :commission, Banchan.Commissions.Commission
     belongs_to :client, Banchan.Accounts.User
     belongs_to :event, Banchan.Commissions.Event
+
+    many_to_many :payouts, Banchan.Studios.Payout, join_through: "invoices_payouts"
 
     timestamps()
   end

@@ -23,7 +23,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
 
   def render(assigns) do
     ~F"""
-    <div class="md:container md:basis-3/4">
+    <div>
       <h1 class="text-3xl pt-4 px-4">
         <LivePatch class="md:hidden p-2" to={Routes.commission_path(Endpoint, :index)}>
           <i class="fas fa-arrow-left text-2xl" />

@@ -18,9 +18,33 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       timestamps()
     end
 
+    create unique_index(:studios, [:handle])
+    create unique_index(:studios, [:stripe_id])
+
     create table(:users_studios, primary_key: false) do
       add :user_id, references(:users), null: false
       add :studio_id, references(:studios), null: false
     end
+
+    create unique_index(:users_studios, [:user_id, :studio_id])
+
+    create table(:studio_payouts) do
+      add :public_id, :string, null: false
+      add :stripe_payout_id, :string
+      add :amount, :money_with_currency, null: false
+      add :status, :string, null: false
+      add :arrival_date, :naive_datetime
+      add :method, :string
+      add :type, :string
+      add :failure_code, :string
+      add :failure_message, :text
+      add :actor_id, references(:users), null: false
+      add :studio_id, references(:studios), null: false
+      timestamps()
+    end
+
+    create unique_index(:studio_payouts, [:public_id])
+    create unique_index(:studio_payouts, [:stripe_payout_id])
+    create index(:studio_payouts, [:studio_id])
   end
 end

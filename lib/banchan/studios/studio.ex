@@ -34,7 +34,7 @@ defmodule Banchan.Studios.Studio do
   end
 
   @doc false
-  def changeset(studio, attrs) do
+  def profile_changeset(studio, attrs) do
     studio
     |> cast(attrs, [:name, :handle, :description, :summary, :default_terms, :default_template])
     |> validate_required([:name, :handle])

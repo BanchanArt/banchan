@@ -9,10 +9,17 @@ defmodule Banchan.AccountsFixtures do
   def valid_user_password, do: "hello world!"
 
   def valid_user_attributes(attrs \\ %{}) do
+    name = "user#{System.unique_integer()}"
+    handle = name <> "-handle"
+    email = name <> "@example.com"
+    pw = valid_user_password()
+
     Enum.into(attrs, %{
-      email: unique_user_email(),
-      handle: unique_user_handle(),
-      password: valid_user_password()
+      email: email,
+      name: name,
+      handle: handle,
+      password: pw,
+      password_confirmation: pw
     })
   end
 
