@@ -48,6 +48,19 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       timestamps()
     end
 
+    execute """
+    ALTER TABLE commissions ADD COLUMN search_vector tsvector
+      GENERATED ALWAYS AS (
+        setweight(to_tsvector('banchan_fts', status), 'A') ||
+        setweight(to_tsvector('banchan_fts', title), 'B') ||
+        setweight(to_tsvector('banchan_fts', coalesce(description, '')), 'C')
+      ) STORED;
+    """
+
+    execute """
+    CREATE INDEX commissions_search_idx ON commissions USING GIN (search_vector);
+    """
+
     create index(:commissions, [:offering_id])
     create index(:commissions, [:studio_id])
     create index(:commissions, [:client_id])
@@ -65,6 +78,15 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
 
       timestamps()
     end
+
+    execute """
+    ALTER TABLE commission_events ADD COLUMN search_vector tsvector
+      GENERATED ALWAYS AS (to_tsvector('banchan_fts', coalesce(text, ''))) STORED;
+    """
+
+    execute """
+    CREATE INDEX commission_events_search_idx ON commission_events USING GIN (search_vector);
+    """
 
     create index(:commission_events, [:commission_id])
     create index(:commission_events, [:actor_id])
