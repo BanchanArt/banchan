@@ -29,14 +29,13 @@ defmodule Banchan.Commissions do
 
   def list_commission_data_for_dashboard(
         %User{} = user,
-        page,
         %CommissionFilter{} = filter,
-        order \\ nil
+        page,
+        page_size \\ 10
       ) do
     main_dashboard_query(user)
-    |> dashboard_query_order_by(order)
     |> dashboard_query_filter(filter)
-    |> Repo.paginate(page: page, page_size: 20)
+    |> Repo.paginate(page: page, page_size: page_size)
   end
 
   defp main_dashboard_query(%User{} = user) do
@@ -49,6 +48,7 @@ defmodule Banchan.Commissions do
           (c.client_id == ^user.id or
              ^user.id in subquery(studio_artists_query())),
       group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name],
+      order_by: {:desc, max(e.inserted_at)},
       select: %{
         commission: %Commission{
           id: c.id,
@@ -79,22 +79,6 @@ defmodule Banchan.Commissions do
       join: c in Commission,
       where: u.id == us.user_id and s.id == us.studio_id and c.studio_id == s.id,
       select: u.id
-  end
-
-  defp dashboard_query_order_by(query, order) do
-    case order do
-      {ord, :client_handle} ->
-        query |> order_by([c, client], [{^ord, client.handle}])
-
-      {ord, :studio_handle} ->
-        query |> order_by([c, client, s], [{^ord, s.handle}])
-
-      {ord, :updated_at} ->
-        query |> order_by([c, client, s, e], [{^ord, max(e.inserted_at)}])
-
-      nil ->
-        query
-    end
   end
 
   defp dashboard_query_filter(query, %CommissionFilter{} = filter) do

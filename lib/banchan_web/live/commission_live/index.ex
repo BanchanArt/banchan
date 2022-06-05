@@ -38,17 +38,15 @@ defmodule BanchanWeb.CommissionLive do
 
     socket =
       socket
-      |> assign(page: page(params))
-      |> assign(sort: sort(params))
+      |> assign(page: 1)
       |> assign(status_options: @status_options)
       |> assign(filter_open: Map.get(socket.assigns, :filter_open, false))
       |> assign(
         :results,
         Commissions.list_commission_data_for_dashboard(
           socket.assigns.current_user,
-          page(params),
           Ecto.Changeset.apply_changes(socket.assigns.filter),
-          sort(params)
+          1
         )
       )
 
@@ -87,28 +85,6 @@ defmodule BanchanWeb.CommissionLive do
       end
 
     {:noreply, socket |> assign(:uri, uri)}
-  end
-
-  defp sort(%{"by" => field, "dir" => direction}) when direction in ~w(asc desc) do
-    {String.to_existing_atom(direction), String.to_existing_atom(field)}
-  end
-
-  defp sort(_other) do
-    {:desc, :updated_at}
-  end
-
-  defp page(%{"page" => page}) do
-    case Integer.parse(page) do
-      {p, ""} ->
-        p
-
-      _ ->
-        1
-    end
-  end
-
-  defp page(_other) do
-    1
   end
 
   @impl true
@@ -169,13 +145,13 @@ defmodule BanchanWeb.CommissionLive do
     socket =
       if changeset.valid? do
         socket
+        |> assign(page: 1)
         |> assign(
           :results,
           Commissions.list_commission_data_for_dashboard(
             socket.assigns.current_user,
-            socket.assigns.page,
             Ecto.Changeset.apply_changes(changeset),
-            socket.assigns.sort
+            1
           )
         )
       else
@@ -187,6 +163,32 @@ defmodule BanchanWeb.CommissionLive do
 
   def handle_event("toggle_filter", _, socket) do
     {:noreply, assign(socket, filter_open: !socket.assigns.filter_open)}
+  end
+
+  def handle_event("load_more", _, socket) do
+    if socket.assigns.results.total_entries >
+         socket.assigns.page * socket.assigns.results.page_size do
+      {:noreply, socket |> assign(page: socket.assigns.page + 1) |> fetch()}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  defp fetch(%{assigns: %{results: results, page: page, filter: changeset}} = socket) do
+    socket
+    |> assign(
+      :results,
+      %{
+        results
+        | entries:
+            results.entries ++
+              Commissions.list_commission_data_for_dashboard(
+                socket.assigns.current_user,
+                Ecto.Changeset.apply_changes(changeset),
+                page
+              ).entries
+      }
+    )
   end
 
   @impl true
@@ -235,6 +237,7 @@ defmodule BanchanWeb.CommissionLive do
                 />
               {/for}
             </ul>
+            <div :hook="InfiniteScroll" id="commission-infinite-scroll" data-page={@page} />
           </div>
           {#if @commission}
             <div class="md:container basis-full md:basis-3/4">
