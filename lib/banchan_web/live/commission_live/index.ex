@@ -4,12 +4,24 @@ defmodule BanchanWeb.CommissionLive do
   """
   use BanchanWeb, :surface_view
 
+  alias Surface.Components.Form
+  alias Surface.Components.Form.{Field, Submit}
+  alias Surface.Components.Form.TextInput, as: SurfaceTextInput
+
   alias Banchan.{Commissions, Notifications, Studios}
+  alias Banchan.Commissions.CommissionFilter
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
+  alias BanchanWeb.Components.Form.{Checkbox, MultipleSelect, TextInput}
   alias BanchanWeb.Components.Layout
 
   alias BanchanWeb.CommissionLive.Components.Commission
+
+  @status_options [
+    {nil, nil}
+    | Commissions.Common.status_values()
+      |> Enum.map(&{Commissions.Common.humanize_status(&1), &1})
+  ]
 
   @impl true
   def handle_params(params, uri, socket) do
@@ -20,10 +32,22 @@ defmodule BanchanWeb.CommissionLive do
     socket =
       socket
       |> assign(
+        :filter,
+        Map.get(socket.assigns, :filter, CommissionFilter.changeset(%CommissionFilter{}))
+      )
+
+    socket =
+      socket
+      |> assign(page: page(params))
+      |> assign(sort: sort(params))
+      |> assign(status_options: @status_options)
+      |> assign(filter_open: Map.get(socket.assigns, :filter_open, false))
+      |> assign(
         :results,
         Commissions.list_commission_data_for_dashboard(
           socket.assigns.current_user,
           page(params),
+          Ecto.Changeset.apply_changes(socket.assigns.filter),
           sort(params)
         )
       )
@@ -139,6 +163,32 @@ defmodule BanchanWeb.CommissionLive do
     {:noreply, assign(socket, subscribed?: !socket.assigns.subscribed?)}
   end
 
+  def handle_event("filter", %{"commission_filter" => filter}, socket) do
+    changeset = CommissionFilter.changeset(%CommissionFilter{}, filter)
+
+    socket =
+      if changeset.valid? do
+        socket
+        |> assign(
+          :results,
+          Commissions.list_commission_data_for_dashboard(
+            socket.assigns.current_user,
+            socket.assigns.page,
+            Ecto.Changeset.apply_changes(changeset),
+            socket.assigns.sort
+          )
+        )
+      else
+        socket
+      end
+
+    {:noreply, assign(socket, filter: changeset)}
+  end
+
+  def handle_event("toggle_filter", _, socket) do
+    {:noreply, assign(socket, filter_open: !socket.assigns.filter_open)}
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -146,6 +196,37 @@ defmodule BanchanWeb.CommissionLive do
       <div class="flex flex-col grow max-h-full">
         <div class="flex flex-row grow md:grow-0">
           <div class={"flex flex-col px-4 sidebar basis-full md:basis-1/4", "hidden md:flex": @commission}>
+            <h1 class="text-2xl font-bold mb-4">
+              Commissions
+            </h1>
+            <Form for={@filter} submit="filter" class="form-control">
+              <div class="input-group">
+                <button :on-click="toggle_filter" type="button" class="btn btn-square btn-primary"><i class="fas fa-filter" /></button>
+                <Field name={:search}>
+                  <SurfaceTextInput class="input input-bordered w-full" />
+                </Field>
+                <Submit class="btn btn-square btn-primary">
+                  <i class="fas fa-search" />
+                </Submit>
+              </div>
+              <div class={"collapse rounded-box", "collapse-open": @filter_open, "collapse-close": !@filter_open}>
+                <div class="collapse-content">
+                  <div class="flex flex-col">
+                    <h2 class="text-xl pt-4">
+                      Additional Filters
+                    </h2>
+                    <div class="divider" />
+                    <TextInput name={:client} />
+                    <TextInput name={:studio} />
+                    <MultipleSelect class="" name={:statuses} options={@status_options} />
+                    <div class="py-2">
+                      <Checkbox label="Show Archived" name={:show_archived} />
+                    </div>
+                    <Submit label="Apply" class="btn btn-square btn-primary w-full" />
+                  </div>
+                </div>
+              </div>
+            </Form>
             <ul class="divide-y-2 divide-neutral-content divide-opacity-10 menu menu-compact">
               {#for result <- @results.entries}
                 <CommissionRow

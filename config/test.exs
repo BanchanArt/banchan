@@ -16,14 +16,22 @@ config :banchan, Banchan.Repo,
   password: "postgres",
   database: "banchan_test#{System.get_env("MIX_TEST_PARTITION")}",
   hostname: "localhost",
-  pool: Ecto.Adapters.SQL.Sandbox
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: 10
 
 if System.get_env("GITHUB_ACTIONS") do
   config :banchan, Banchan.Repo,
     username: System.get_env("POSTGRES_USER"),
     password: System.get_env("POSTGRES_PASSWORD"),
     database: "banchan_test#{System.get_env("MIX_TEST_PARTITION")}",
-    hostname: "localhost"
+    hostname: "localhost",
+    pool: Ecto.Adapters.SQL.Sandbox,
+    pool_size: 10,
+    # NOTE: For some reason, this was needed on Github Actions once we started
+    # adding generated columns (for full text search). I don't know if this is
+    # expected, but removing this should make tests fail pretty spectacularly
+    # (but only on Github!) if you want to take a look.
+    queue_target: 1000
 end
 
 config :banchan, Banchan.Mailer, adapter: Bamboo.TestAdapter

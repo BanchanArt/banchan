@@ -18,6 +18,39 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       timestamps()
     end
 
+    execute(
+      fn ->
+        repo().query!(
+          """
+          ALTER TABLE studios ADD COLUMN search_vector tsvector
+            GENERATED ALWAYS AS (
+              setweight(to_tsvector('banchan_fts', handle), 'A') ||
+              setweight(to_tsvector('banchan_fts', name), 'B')
+            ) STORED;
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!(
+          """
+          CREATE INDEX studios_search_idx ON users USING GIN (search_vector);
+          """,
+          [],
+          log: :info
+        )
+      end,
+      fn ->
+        repo().query!(
+          """
+          DROP INDEX studios_search_idx;
+          """,
+          [],
+          log: :info
+        )
+      end
+    )
+
     create unique_index(:studios, [:handle])
     create unique_index(:studios, [:stripe_id])
 

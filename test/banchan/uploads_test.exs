@@ -1,5 +1,5 @@
 defmodule Banchan.UploadsTest do
-  use Banchan.DataCase
+  use Banchan.DataCase, async: true
 
   alias Banchan.Uploads
 
