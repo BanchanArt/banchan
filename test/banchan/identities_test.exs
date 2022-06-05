@@ -2,7 +2,7 @@ defmodule Banchan.IdentitiesTest do
   @moduledoc """
   Tests for Accounts/User-related functionality.
   """
-  use Banchan.DataCase
+  use Banchan.DataCase, async: true
 
   import Banchan.AccountsFixtures
   import Banchan.StudiosFixtures

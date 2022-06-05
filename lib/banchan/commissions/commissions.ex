@@ -7,7 +7,16 @@ defmodule Banchan.Commissions do
   alias Banchan.Repo
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions.{Commission, Event, EventAttachment, Invoice, LineItem}
+
+  alias Banchan.Commissions.{
+    Commission,
+    CommissionFilter,
+    Event,
+    EventAttachment,
+    Invoice,
+    LineItem
+  }
+
   alias Banchan.Notifications
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
@@ -18,21 +27,25 @@ defmodule Banchan.Commissions do
 
   @pubsub Banchan.PubSub
 
-  def list_commission_data_for_dashboard(%User{} = user, page, order \\ nil) do
+  def list_commission_data_for_dashboard(
+        %User{} = user,
+        page,
+        %CommissionFilter{} = filter,
+        order \\ nil
+      ) do
     main_dashboard_query(user)
     |> dashboard_query_order_by(order)
+    |> dashboard_query_filter(filter)
     |> Repo.paginate(page: page, page_size: 20)
   end
 
   defp main_dashboard_query(%User{} = user) do
     from s in Studio,
-      join: client in User,
       join: c in Commission,
-      join: e in Event,
+      join: client in assoc(c, :client),
+      join: e in assoc(c, :events),
       where:
-        c.id == e.commission_id and
-          c.studio_id == s.id and
-          c.client_id == client.id and
+        c.studio_id == s.id and
           (c.client_id == ^user.id or
              ^user.id in subquery(studio_artists_query())),
       group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name],
@@ -81,6 +94,77 @@ defmodule Banchan.Commissions do
 
       nil ->
         query
+    end
+  end
+
+  defp dashboard_query_filter(query, %CommissionFilter{} = filter) do
+    query
+    |> filter_search(filter)
+    |> filter_client(filter)
+    |> filter_studio(filter)
+    |> filter_statuses(filter)
+    |> filter_show_archived(filter)
+  end
+
+  defp filter_search(query, %CommissionFilter{} = filter) do
+    if is_nil(filter.search) || filter.search == "" do
+      query
+    else
+      query
+      |> where(
+        [s, c, client, e],
+        fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", c.search_vector, ^filter.search)
+      )
+      |> where(
+        [s, c, client, e],
+        fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", e.search_vector, ^filter.search)
+      )
+    end
+  end
+
+  defp filter_client(query, %CommissionFilter{} = filter) do
+    if is_nil(filter.client) || filter.client == "" do
+      query
+    else
+      query
+      |> where(
+        [s, c, client, e],
+        fragment(
+          "? @@ websearch_to_tsquery('banchan_fts', ?)",
+          client.search_vector,
+          ^filter.client
+        )
+      )
+    end
+  end
+
+  defp filter_studio(query, %CommissionFilter{} = filter) do
+    if is_nil(filter.studio) || filter.studio == "" do
+      query
+    else
+      query
+      |> where(
+        [s, c, client, e],
+        fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", s.search_vector, ^filter.studio)
+      )
+    end
+  end
+
+  defp filter_statuses(query, %CommissionFilter{} = filter) do
+    if is_nil(filter.statuses) || Enum.empty?(filter.statuses) do
+      query
+    else
+      query
+      |> where([s, c, client, e], c.status in ^filter.statuses)
+    end
+  end
+
+  defp filter_show_archived(query, %CommissionFilter{} = filter) do
+    if filter.show_archived do
+      query
+    else
+      query
+      |> where([s, c, client, e], not c.archived)
     end
   end
 

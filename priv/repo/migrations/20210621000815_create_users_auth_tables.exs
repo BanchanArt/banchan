@@ -33,6 +33,39 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       timestamps()
     end
 
+    execute(
+      fn ->
+        repo().query!(
+          """
+          ALTER TABLE users ADD COLUMN search_vector tsvector
+            GENERATED ALWAYS AS (
+              setweight(to_tsvector('banchan_fts', handle), 'A') ||
+              setweight(to_tsvector('banchan_fts', coalesce(name, '')), 'B')
+            ) STORED;
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!(
+          """
+          CREATE INDEX users_search_idx ON users USING GIN (search_vector);
+          """,
+          [],
+          log: :info
+        )
+      end,
+      fn ->
+        repo().query!(
+          """
+          DROP INDEX users_search_idx;
+          """,
+          [],
+          log: :info
+        )
+      end
+    )
+
     create unique_index(:users, [:email])
     create unique_index(:users, [:handle])
 
