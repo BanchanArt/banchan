@@ -28,6 +28,8 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
               You have submitted this commission. Please wait while the studio decides whether to accept it.
             {#match :accepted}
               The studio has accepted this commission and has committed to working on it.
+            {#match :rejected}
+              The studio has rejected this commission.
             {#match :in_progress}
               The studio has begun work on this commission. Keep an eye out for drafts!
             {#match :paused}
@@ -38,7 +40,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
               This commission is ready for your final review. If you approve it, you agree to release all payments to the studio for payout.
               <Button click="update_status" value="approved" label="Approve" />
             {#match :approved}
-              This commission has been approved. Funds will be paid out to the studio.
+              This commission has been approved. Funds will be released to the studio.
             {#match :withdrawn}
               This commission has been withdrawn. Any funds you've deposited will be reimbursed.
           {/case}
@@ -56,6 +58,8 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
                 <Button class="flex-1" click="update_status" value="in_progress" label="Mark as In Progress" />
                 <Button class="flex-1" click="update_status" value="ready_for_review" label="Ready for Review" />
               </div>
+            {#match :rejected}
+              This studio has rejected this commission and will not be working on it.
             {#match :in_progress}
               This commission is actively being worked on.
               <div class="flex flex-col md:flex-row">
