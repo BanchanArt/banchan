@@ -24,7 +24,6 @@ defmodule Banchan.Commissions do
   alias Banchan.Studios
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
-  alias Banchan.Uploads.Upload
 
   @pubsub Banchan.PubSub
 
@@ -43,13 +42,14 @@ defmodule Banchan.Commissions do
     from s in Studio,
       join: c in Commission,
       on: c.studio_id == s.id,
+      join: artist in assoc(s, :artists),
+      left_join: a in CommissionArchived,
+      on: a.commission_id == c.id and a.user_id == ^user.id,
       join: client in assoc(c, :client),
       join: e in assoc(c, :events),
-      left_join: a in CommissionArchived,
-      on: [user_id: ^user.id, commission_id: c.id],
       where:
         c.client_id == ^user.id or
-          ^user.id in subquery(studio_artists_query()),
+          artist.id == ^user.id,
       group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name, a.archived],
       order_by: {:desc, max(e.inserted_at)},
       select: %{
@@ -100,7 +100,7 @@ defmodule Banchan.Commissions do
     else
       query
       |> where(
-        [s, c, client, e],
+        [s, c, artist, archived, client, e],
         fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", c.search_vector, ^filter.search)
         or
         fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", e.search_vector, ^filter.search)
@@ -114,7 +114,7 @@ defmodule Banchan.Commissions do
     else
       query
       |> where(
-        [s, c, client, e],
+        [s, c, artist, archived, client, e],
         fragment(
           "? @@ websearch_to_tsquery('banchan_fts', ?)",
           client.search_vector,
@@ -130,7 +130,7 @@ defmodule Banchan.Commissions do
     else
       query
       |> where(
-        [s, c, client, e],
+        [s, c, artist, archived, client, e],
         fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", s.search_vector, ^filter.studio)
       )
     end
@@ -141,7 +141,7 @@ defmodule Banchan.Commissions do
       query
     else
       query
-      |> where([s, c, client, e], c.status in ^filter.statuses)
+      |> where([s, c, artist, archived, client, e], c.status in ^filter.statuses)
     end
   end
 
@@ -150,7 +150,7 @@ defmodule Banchan.Commissions do
       query
     else
       query
-      |> where([s, c, client, e, archived], archived.archived != true)
+      |> where([s, c, artist, archived, client, e], not coalesce(archived.archived, false))
     end
   end
 
