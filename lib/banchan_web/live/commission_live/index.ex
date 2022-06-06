@@ -18,7 +18,7 @@ defmodule BanchanWeb.CommissionLive do
   alias BanchanWeb.CommissionLive.Components.Commission
 
   @status_options [
-    {nil, nil}
+    {"Any", nil}
     | Commissions.Common.status_values()
       |> Enum.map(&{Commissions.Common.humanize_status(&1), &1})
   ]
