@@ -18,8 +18,10 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   prop current_user_member?, :boolean, required: true
   prop commission, :struct, required: true
   prop subscribed?, :boolean, required: true
+  prop archived?, :boolean, required: true
   prop uri, :string, required: true
   prop toggle_subscribed, :event, required: true
+  prop toggle_archived, :event, required: true
 
   def render(assigns) do
     ~F"""
@@ -29,6 +31,9 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           <i class="fas fa-arrow-left text-2xl" />
         </LivePatch>
         {@commission.title}
+        {#if @archived?}
+          <div class="badge badge-warning badge-lg">Archived</div>
+        {/if}
       </h1>
       <div class="p-2">
         <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
@@ -55,6 +60,14 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               commission={@commission}
               allow_edits={@current_user_member?}
             />
+            <div class="divider" />
+            <button type="button" :on-click={@toggle_archived} class="btn btn-sm w-full">
+              {#if @archived?}
+                Unarchive
+              {#else}
+                Archive
+              {/if}
+            </button>
           </div>
           <div class="divider md:hidden" />
           <div class="flex flex-col md:col-span-2 md:order-1">

@@ -28,6 +28,9 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
           <div class="text-xl">
             {@result.commission.title}
             <div class="badge badge-secondary badge-sm">{Common.humanize_status(@result.commission.status)}</div>
+            {#if @result.archived}
+              <div class="badge badge-warning badge-sm">Archived</div>
+            {/if}
           </div>
           <div class="text-xs text-left">
             <div class="inline">

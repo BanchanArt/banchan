@@ -39,7 +39,6 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :public_id, :string, null: false
       add :title, :string, null: false
       add :description, :text
-      add :archived, :boolean, null: false
       add :status, :string, null: false
       add :studio_id, references(:studios, on_delete: :nilify_all)
       add :client_id, references(:users, on_delete: :nilify_all)
@@ -85,6 +84,16 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     create index(:commissions, [:studio_id])
     create index(:commissions, [:client_id])
     create unique_index(:commissions, [:public_id, :studio_id])
+
+    create table(:commission_archived) do
+      add :user_id, references(:users, on_delete: :delete_all)
+      add :commission_id, references(:commissions, on_delete: :delete_all)
+      add :archived, :boolean, null: false
+
+      timestamps()
+    end
+
+    create unique_index(:commission_archived, [:user_id, :commission_id])
 
     create table(:commission_events) do
       add :public_id, :string, null: false

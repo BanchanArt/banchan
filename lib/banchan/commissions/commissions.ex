@@ -10,6 +10,7 @@ defmodule Banchan.Commissions do
 
   alias Banchan.Commissions.{
     Commission,
+    CommissionArchived,
     CommissionFilter,
     Event,
     EventAttachment,
@@ -41,13 +42,15 @@ defmodule Banchan.Commissions do
   defp main_dashboard_query(%User{} = user) do
     from s in Studio,
       join: c in Commission,
+      on: c.studio_id == s.id,
       join: client in assoc(c, :client),
       join: e in assoc(c, :events),
+      left_join: a in CommissionArchived,
+      on: [user_id: ^user.id, commission_id: c.id],
       where:
-        c.studio_id == s.id and
-          (c.client_id == ^user.id or
-             ^user.id in subquery(studio_artists_query())),
-      group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name],
+        c.client_id == ^user.id or
+          ^user.id in subquery(studio_artists_query()),
+      group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name, a.archived],
       order_by: {:desc, max(e.inserted_at)},
       select: %{
         commission: %Commission{
@@ -68,6 +71,7 @@ defmodule Banchan.Commissions do
           handle: s.handle,
           name: s.name
         },
+        archived: coalesce(a.archived, false),
         updated_at: max(e.inserted_at)
       }
   end
@@ -148,7 +152,7 @@ defmodule Banchan.Commissions do
       query
     else
       query
-      |> where([s, c, client, e], not c.archived)
+      |> where([s, c, client, e, archived], archived.archived != true)
     end
   end
 
@@ -271,6 +275,23 @@ defmodule Banchan.Commissions do
       {:error, err} ->
         {:error, err}
     end
+  end
+
+  def archived?(%User{} = user, %Commission{} = commission) do
+    from(archived in CommissionArchived,
+      where:
+        archived.user_id == ^user.id and archived.commission_id == ^commission.id and
+          archived.archived != false
+    )
+    |> Repo.exists?()
+  end
+
+  def update_archived(%User{} = actor, %Commission{} = commission, archived?) do
+    %CommissionArchived{user: actor, commission: commission, archived: archived?}
+    |> Repo.insert(
+      on_conflict: {:replace, [:archived]},
+      conflict_target: [:user_id, :commission_id]
+    )
   end
 
   def update_status(%User{} = actor, %Commission{} = commission, status) do

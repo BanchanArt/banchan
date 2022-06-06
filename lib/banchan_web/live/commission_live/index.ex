@@ -73,6 +73,7 @@ defmodule BanchanWeb.CommissionLive do
 
           assign(socket,
             commission: comm,
+            archived?: Commissions.archived?(socket.assigns.current_user, comm),
             subscribed?: Notifications.user_subscribed?(socket.assigns.current_user, comm),
             current_user_member?:
               Studios.is_user_in_studio?(socket.assigns.current_user, %Studios.Studio{
@@ -137,6 +138,17 @@ defmodule BanchanWeb.CommissionLive do
     end
 
     {:noreply, assign(socket, subscribed?: !socket.assigns.subscribed?)}
+  end
+
+  def handle_event("toggle_archived", _, socket) do
+    {:ok, _} =
+      Commissions.update_archived(
+        socket.assigns.current_user,
+        socket.assigns.commission,
+        !socket.assigns.archived?
+      )
+
+    {:noreply, assign(socket, archived?: !socket.assigns.archived?)}
   end
 
   def handle_event("filter", %{"commission_filter" => filter}, socket) do
@@ -252,8 +264,10 @@ defmodule BanchanWeb.CommissionLive do
                 current_user={@current_user}
                 commission={@commission}
                 subscribed?={@subscribed?}
+                archived?={@archived?}
                 current_user_member?={@current_user_member?}
                 toggle_subscribed="toggle_subscribed"
+                toggle_archived="toggle_archived"
               />
             </div>
           {/if}
