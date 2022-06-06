@@ -357,7 +357,7 @@ defmodule Banchan.StudiosTest do
 
       paid_invoices =
         from(i in Invoice,
-          where: i.commission_id == ^commission.id and i.status == :succeeded,
+          where: i.commission_id == ^commission.id and i.status == :released,
           select: i.id
         )
         |> Repo.all()

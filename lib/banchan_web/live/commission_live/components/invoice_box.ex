@@ -77,6 +77,31 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
     {:noreply, socket}
   end
 
+  def handle_event("refund", _, socket) do
+    case Commissions.refund_payment(
+           socket.assigns.current_user,
+           socket.assigns.commission,
+           socket.assigns.event.invoice,
+           socket.assigns.current_user_member?
+         ) do
+      {:ok, _} ->
+        {:noreply, socket}
+
+      {:error, error} ->
+        {:noreply, socket |> put_flash(:error, "Error processing refund: #{error.user_message}")}
+    end
+  end
+
+  def handle_event("release", _, socket) do
+    Commissions.release_payment!(
+      socket.assigns.current_user,
+      socket.assigns.commission,
+      socket.assigns.event.invoice
+    )
+
+    {:noreply, socket}
+  end
+
   def render(assigns) do
     ~F"""
     <div class="flex flex-col">
@@ -121,6 +146,18 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-desc">Payment session expired.</div>
             {#match :succeeded}
               <div class="stat-desc">Payment succeeded.</div>
+              <div class="stat-actions">
+                {#if @current_user_member?}
+                  <Button class="btn-warning" click="refund" label="Refund Payment" />
+                {/if}
+                {#if @current_user.id == @commission.client_id}
+                  <Button class="btn-success" click="release" label="Release Now" />
+                {/if}
+              </div>
+            {#match :released}
+              <div class="stat-desc">Payment released to studio.</div>
+            {#match :refunded}
+              <div class="stat-desc">Payment has been refunded to client.</div>
             {#match nil}
               {!-- NOTE: This state happens for a very brief window of time
                 between when the payment request event is created, and when the
@@ -130,7 +167,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-desc">Please wait...</div>
           {/case}
         </div>
-        {#if @event.invoice.status == :succeeded}
+        {#if @event.invoice.status == :succeeded || @event.invoice.status == :released}
           <div class="stat">
             <div class="stat-title">Tip</div>
             <div class="stat-value">{Money.to_string(@event.invoice.tip)}</div>
@@ -141,6 +178,10 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       {#if @event.invoice.status == :succeeded}
         <span class="italic p-4 text-xs">
           Note: Banchan.Art will hold all funds for this commission until a final draft is approved.
+        </span>
+      {#elseif @event.invoice.status == :released}
+        <span class="italic p-4 text-xs">
+          Note: Banchan.Art has released these funds to the studio for payout.
         </span>
       {/if}
     </div>

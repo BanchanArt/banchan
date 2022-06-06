@@ -201,37 +201,39 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
           </thead>
           <tbody>
             {#for invoice <- @payout.invoices}
-              <td class="text-lg">
-                <LiveRedirect
-                  class="link"
-                  to={Routes.commission_path(Endpoint, :show, invoice.commission.public_id)}
-                >{invoice.commission.title}</LiveRedirect>
-                (<a
-                  class="link"
-                  href={replace_fragment(
-                    Routes.commission_path(Endpoint, :show, invoice.commission.public_id),
-                    invoice.event
-                  )}
-                >invoice</a>)
-              </td>
-              <td>
-                {invoice.updated_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
-              </td>
-              <td class="text-success">
-                {invoice.amount
-                |> Money.add(invoice.tip)
-                |> Money.subtract(invoice.platform_fee)
-                |> Money.to_string()}
-              </td>
-              <td>
-                {Money.to_string(invoice.amount)}
-              </td>
-              <td>
-                {Money.to_string(invoice.tip)}
-              </td>
-              <td>
-                {Money.to_string(invoice.platform_fee)}
-              </td>
+              <tr>
+                <td class="text-lg">
+                  <LiveRedirect
+                    class="link"
+                    to={Routes.commission_path(Endpoint, :show, invoice.commission.public_id)}
+                  >{invoice.commission.title}</LiveRedirect>
+                  (<a
+                    class="link"
+                    href={replace_fragment(
+                      Routes.commission_path(Endpoint, :show, invoice.commission.public_id),
+                      invoice.event
+                    )}
+                  >invoice</a>)
+                </td>
+                <td>
+                  {invoice.updated_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
+                </td>
+                <td class="text-success">
+                  {invoice.amount
+                  |> Money.add(invoice.tip)
+                  |> Money.subtract(invoice.platform_fee)
+                  |> Money.to_string()}
+                </td>
+                <td>
+                  {Money.to_string(invoice.amount)}
+                </td>
+                <td>
+                  {Money.to_string(invoice.tip)}
+                </td>
+                <td>
+                  {Money.to_string(invoice.platform_fee)}
+                </td>
+              </tr>
             {/for}
           </tbody>
         </table>

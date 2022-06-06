@@ -22,8 +22,12 @@ defmodule Banchan.Commissions.Invoice do
         :submitted,
         # Checkout session has expired.
         :expired,
+        # Payment succeeded but was then refunded
+        :refunded,
         # Payment succeeded.
-        :succeeded
+        :succeeded,
+        # Invoice has succeeded and been released for payout
+        :released
       ],
       default: :pending
 
