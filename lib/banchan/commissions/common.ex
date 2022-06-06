@@ -7,6 +7,7 @@ defmodule Banchan.Commissions.Common do
   @status_values [
     :submitted,
     :accepted,
+    :rejected,
     :in_progress,
     :paused,
     :waiting,
@@ -39,6 +40,9 @@ defmodule Banchan.Commissions.Common do
 
       :accepted ->
         "Accepted"
+
+      :rejected ->
+        "Rejected"
 
       :paused ->
         "Paused"

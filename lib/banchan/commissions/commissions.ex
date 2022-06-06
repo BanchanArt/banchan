@@ -337,6 +337,7 @@ defmodule Banchan.Commissions do
 
   # Transition changes studios can make
   defp status_transition_allowed?(true, _, :submitted, :accepted), do: true
+  defp status_transition_allowed?(true, _, :submitted, :rejected), do: true
   defp status_transition_allowed?(true, _, :accepted, :in_progress), do: true
   defp status_transition_allowed?(true, _, :accepted, :ready_for_review), do: true
   defp status_transition_allowed?(true, _, :in_progress, :paused), do: true
@@ -345,6 +346,9 @@ defmodule Banchan.Commissions do
   defp status_transition_allowed?(true, _, :paused, :in_progress), do: true
   defp status_transition_allowed?(true, _, :waiting, :in_progress), do: true
   defp status_transition_allowed?(true, _, :ready_for_review, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :approved, :accepted), do: true
+  defp status_transition_allowed?(true, _, :withdrawn, :accepted), do: true
+  defp status_transition_allowed?(true, _, :rejected, :accepted), do: true
 
   # Transition changes clients can make
   defp status_transition_allowed?(_, true, :ready_for_review, :approved), do: true
@@ -356,6 +360,7 @@ defmodule Banchan.Commissions do
   defp status_transition_allowed?(_, _, _, _), do: false
 
   def commission_open?(%Commission{status: :withdrawn}), do: false
+  def commission_open?(%Commission{status: :rejected}), do: false
   def commission_open?(%Commission{status: :approved}), do: false
   def commission_open?(%Commission{}), do: true
 
