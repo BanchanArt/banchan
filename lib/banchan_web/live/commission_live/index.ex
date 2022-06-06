@@ -178,7 +178,13 @@ defmodule BanchanWeb.CommissionLive do
   end
 
   def handle_event("withdraw", _, socket) do
-    {:ok, _} = Commissions.update_status(socket.assigns.current_user, socket.assigns.commission, "withdrawn")
+    {:ok, _} =
+      Commissions.update_status(
+        socket.assigns.current_user,
+        socket.assigns.commission,
+        "withdrawn"
+      )
+
     {:noreply, socket}
   end
 

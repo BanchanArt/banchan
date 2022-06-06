@@ -69,7 +69,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
                 Archive
               {/if}
             </button>
-            <button disabled={@commission.status == :withdrawn} type="button" :on-click={@withdraw} class="btn btn-sm my-2 w-full">
+            <button
+              disabled={@commission.status == :withdrawn}
+              type="button"
+              :on-click={@withdraw}
+              class="btn btn-sm my-2 w-full"
+            >
               Withdraw
             </button>
           </div>
