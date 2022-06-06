@@ -76,15 +76,6 @@ defmodule Banchan.Commissions do
       }
   end
 
-  defp studio_artists_query do
-    from s in Studio,
-      join: u in User,
-      join: us in "users_studios",
-      join: c in Commission,
-      where: u.id == us.user_id and s.id == us.studio_id and c.studio_id == s.id,
-      select: u.id
-  end
-
   defp dashboard_query_filter(query, %CommissionFilter{} = filter) do
     query
     |> filter_search(filter)
@@ -162,10 +153,12 @@ defmodule Banchan.Commissions do
   def get_commission!(public_id, current_user) do
     Repo.one!(
       from c in Commission,
+      join: s in assoc(c, :studio),
+      join: artist in assoc(s, :artists),
         where:
           c.public_id == ^public_id and
             (c.client_id == ^current_user.id or
-               ^current_user.id in subquery(studio_artists_query())),
+               ^current_user.id == artist.id),
         preload: [
           events: [:actor, invoice: [], attachments: [:upload, :thumbnail]],
           line_items: [:option],
@@ -566,17 +559,16 @@ defmodule Banchan.Commissions do
   def get_attachment_if_allowed!(commission, key, user) do
     Repo.one!(
       from ea in EventAttachment,
-        join: ul in Upload,
-        join: e in Event,
-        join: c in Commission,
+        join: ul in assoc(ea, :upload),
+        join: e in assoc(ea, :event),
+        join: c in assoc(e, :commission),
+        join: s in assoc(c, :studio),
+        join: artist in assoc(s, :artists),
         select: ea,
         where:
           c.public_id == ^commission and
             ul.key == ^key and
-            ea.upload_id == ul.id and
-            e.id == ea.event_id and
-            e.commission_id == c.id and
-            (c.client_id == ^user.id or ^user.id in subquery(studio_artists_query())),
+            (c.client_id == ^user.id or artist.id == ^user.id),
         preload: [:upload, :thumbnail]
     )
   end
