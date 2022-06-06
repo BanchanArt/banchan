@@ -92,9 +92,8 @@ defmodule Banchan.Commissions do
       query
       |> where(
         [s, c, artist, archived, client, e],
-        fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", c.search_vector, ^filter.search)
-        or
-        fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", e.search_vector, ^filter.search)
+        fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", c.search_vector, ^filter.search) or
+          fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", e.search_vector, ^filter.search)
       )
     end
   end
@@ -153,8 +152,8 @@ defmodule Banchan.Commissions do
   def get_commission!(public_id, current_user) do
     Repo.one!(
       from c in Commission,
-      join: s in assoc(c, :studio),
-      join: artist in assoc(s, :artists),
+        join: s in assoc(c, :studio),
+        join: artist in assoc(s, :artists),
         where:
           c.public_id == ^public_id and
             (c.client_id == ^current_user.id or
