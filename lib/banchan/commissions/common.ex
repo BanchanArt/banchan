@@ -33,36 +33,15 @@ defmodule Banchan.Commissions.Common do
     @event_types
   end
 
-  def humanize_status(status) do
-    case status do
-      :submitted ->
-        "Submitted"
-
-      :accepted ->
-        "Accepted"
-
-      :rejected ->
-        "Rejected"
-
-      :paused ->
-        "Paused"
-
-      :in_progress ->
-        "In Progress"
-
-      :waiting ->
-        "Waiting for Client"
-
-      :ready_for_review ->
-        "Ready for Review"
-
-      :approved ->
-        "Approved"
-
-      :withdrawn ->
-        "Withdrawn"
-    end
-  end
+  def humanize_status(:submitted), do: "Submitted"
+  def humanize_status(:accepted), do: "Accepted"
+  def humanize_status(:rejected), do: "Rejected"
+  def humanize_status(:paused), do: "Paused"
+  def humanize_status(:in_progress), do: "In Progress"
+  def humanize_status(:waiting), do: "Waiting for Client"
+  def humanize_status(:ready_for_review), do: "Ready for Review"
+  def humanize_status(:approved), do: "Approved"
+  def humanize_status(:withdrawn), do: "Withdrawn"
 
   def gen_public_id do
     random_string(10)
