@@ -235,6 +235,12 @@ defmodule BanchanWeb.CommissionLive do
                   result={result}
                   highlight={@commission && @commission.public_id == result.commission.public_id}
                 />
+              {#else}
+                <li>
+                  <div class="py-2 px-4 text-xl">
+                    No Results
+                  </div>
+                </li>
               {/for}
             </ul>
             <div :hook="InfiniteScroll" id="commission-infinite-scroll" data-page={@page} />
