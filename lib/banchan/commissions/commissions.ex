@@ -102,9 +102,7 @@ defmodule Banchan.Commissions do
       |> where(
         [s, c, client, e],
         fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", c.search_vector, ^filter.search)
-      )
-      |> where(
-        [s, c, client, e],
+        or
         fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", e.search_vector, ^filter.search)
       )
     end
