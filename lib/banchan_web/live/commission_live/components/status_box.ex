@@ -40,9 +40,10 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
               This commission is ready for your final review. If you approve it, you agree to release all payments to the studio for payout.
               <Button click="update_status" value="approved" label="Approve" />
             {#match :approved}
-              This commission has been approved. Funds will be released to the studio.
+              This commission has been approved. All deposits will be released to the studio.
             {#match :withdrawn}
-              This commission has been withdrawn. Any funds you've deposited will be reimbursed.
+              This commission has been withdrawn. You may request a refund of deposited but unreleased funds from the studio, separately.
+              <Button click="update_status" value="submitted" label="Submit Again" />
           {/case}
         </div>
       {/if}
@@ -77,9 +78,11 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
               This commission has been marked for final review. The client will determine whether to close it out and pay out any money deposited so far.
               <Button click="update_status" value="in_progress" label="Return to In Progress" />
             {#match :withdrawn}
-              This commission has been withdrawn. The client will be reimbursed for their deposit.
+              This commission has been withdrawn. It is recommended that you refund any deposits to the client.
+              <Button click="update_status" value="accepted" label="Reopen" />
             {#match :approved}
-              This commission has been approved by the client. Funds will be paid out to the studio.
+              This commission has been approved by the client. Any deposits will be released to you for payout once available.
+              <Button click="update_status" value="accepted" label="Reopen" />
           {/case}
         </div>
       {/if}

@@ -22,6 +22,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   prop uri, :string, required: true
   prop toggle_subscribed, :event, required: true
   prop toggle_archived, :event, required: true
+  prop withdraw, :event, required: true
 
   def render(assigns) do
     ~F"""
@@ -61,12 +62,15 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               allow_edits={@current_user_member?}
             />
             <div class="divider" />
-            <button type="button" :on-click={@toggle_archived} class="btn btn-sm w-full">
+            <button type="button" :on-click={@toggle_archived} class="btn btn-sm my-2 w-full">
               {#if @archived?}
                 Unarchive
               {#else}
                 Archive
               {/if}
+            </button>
+            <button disabled={@commission.status == :withdrawn} type="button" :on-click={@withdraw} class="btn btn-sm my-2 w-full">
+              Withdraw
             </button>
           </div>
           <div class="divider md:hidden" />

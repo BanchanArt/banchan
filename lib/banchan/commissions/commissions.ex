@@ -326,6 +326,8 @@ defmodule Banchan.Commissions do
   end
 
   # Transition changes studios can make
+  defp status_transition_allowed?(artist?, client?, from, to)
+
   defp status_transition_allowed?(true, _, :submitted, :accepted), do: true
   defp status_transition_allowed?(true, _, :submitted, :rejected), do: true
   defp status_transition_allowed?(true, _, :accepted, :in_progress), do: true
@@ -342,6 +344,7 @@ defmodule Banchan.Commissions do
 
   # Transition changes clients can make
   defp status_transition_allowed?(_, true, :ready_for_review, :approved), do: true
+  defp status_transition_allowed?(_, true, :withdrawn, :submitted), do: true
 
   # Either party can withdraw a commission (reimbursing the client)
   defp status_transition_allowed?(_, _, _, :withdrawn), do: true
