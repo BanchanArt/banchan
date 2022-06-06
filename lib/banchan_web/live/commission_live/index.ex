@@ -177,6 +177,17 @@ defmodule BanchanWeb.CommissionLive do
     {:noreply, assign(socket, filter_open: !socket.assigns.filter_open)}
   end
 
+  def handle_event("withdraw", _, socket) do
+    {:ok, _} =
+      Commissions.update_status(
+        socket.assigns.current_user,
+        socket.assigns.commission,
+        "withdrawn"
+      )
+
+    {:noreply, socket}
+  end
+
   def handle_event("load_more", _, socket) do
     if socket.assigns.results.total_entries >
          socket.assigns.page * socket.assigns.results.page_size do
@@ -268,6 +279,7 @@ defmodule BanchanWeb.CommissionLive do
                 current_user_member?={@current_user_member?}
                 toggle_subscribed="toggle_subscribed"
                 toggle_archived="toggle_archived"
+                withdraw="withdraw"
               />
             </div>
           {/if}

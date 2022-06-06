@@ -53,17 +53,13 @@ defmodule Banchan.Offerings do
     {slots, count} =
       Repo.one(
         from(o in Offering,
-          left_join:
-            comms in subquery(
-              from(c in Commission,
-                where:
-                  c.offering_id == ^offering.id and
-                    (c.status != :withdrawn and c.status != :approved and c.status != :submitted)
-              )
-            ),
+          left_join: c in Commission,
+          on:
+            c.offering_id == o.id and
+              c.status not in [:withdrawn, :approved, :submitted, :rejected],
           where: o.id == ^offering.id,
           group_by: [o.id, o.slots],
-          select: {o.slots, count(comms)}
+          select: {o.slots, count(c)}
         )
       )
 
@@ -83,15 +79,11 @@ defmodule Banchan.Offerings do
     {max, count} =
       Repo.one(
         from(o in Offering,
-          left_join:
-            comms in subquery(
-              from(c in Commission,
-                where: c.offering_id == ^offering.id and c.status == :submitted
-              )
-            ),
+          left_join: c in Commission,
+          on: c.offering_id == o.id and c.status == :submitted,
           where: o.id == ^offering.id,
           group_by: [o.id, o.max_proposals],
-          select: {o.max_proposals, count(comms)}
+          select: {o.max_proposals, count(c)}
         )
       )
 
