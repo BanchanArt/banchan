@@ -8,11 +8,21 @@ defmodule Banchan.Commissions.Invoice do
   schema "commission_invoices" do
     field :stripe_session_id, :string
     field :checkout_url, :string
+    field :stripe_refund_id, :string
     field :amount, Money.Ecto.Composite.Type
     field :tip, Money.Ecto.Composite.Type
     field :platform_fee, Money.Ecto.Composite.Type
     field :payout_available_on, :utc_datetime
     field :required, :boolean
+
+    field :refund_status, Ecto.Enum,
+      values: [
+        :pending,
+        :succeeded,
+        :failed,
+        :canceled,
+        :requires_action
+      ]
 
     field :status, Ecto.Enum,
       values: [

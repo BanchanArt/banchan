@@ -125,8 +125,10 @@ defmodule Banchan.CommissionsTest do
       {:ok, _comm3} = Commissions.update_status(user, comm3, :accepted)
       assert {:error, :no_slots_available} == new_comm.()
     end
+  end
 
-    test "invoice" do
+  describe "invoices" do
+    test "basic invoice" do
       commission = commission_fixture()
       amount = Money.new(420, :USD)
 

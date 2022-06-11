@@ -80,7 +80,6 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   def handle_event("refund", _, socket) do
     case Commissions.refund_payment(
            socket.assigns.current_user,
-           socket.assigns.commission,
            socket.assigns.event.invoice,
            socket.assigns.current_user_member?
          ) do
@@ -88,6 +87,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         {:noreply, socket}
 
       {:error, error} ->
+        # TODO: why isn't this appearing?
         {:noreply, socket |> put_flash(:error, "Error processing refund: #{error.user_message}")}
     end
   end
@@ -143,6 +143,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 {/if}
               </div>
             {#match :expired}
+              {!-- # TODO: Better, more obvious display for when something's expired --}
               <div class="stat-desc">Payment session expired.</div>
             {#match :succeeded}
               <div class="stat-desc">Payment succeeded.</div>
@@ -157,6 +158,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
             {#match :released}
               <div class="stat-desc">Payment released to studio.</div>
             {#match :refunded}
+              {!-- # TODO: better, more obvious display for refunds... --}
               <div class="stat-desc">Payment has been refunded to client.</div>
             {#match nil}
               {!-- NOTE: This state happens for a very brief window of time

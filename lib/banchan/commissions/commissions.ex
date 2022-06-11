@@ -4,6 +4,8 @@ defmodule Banchan.Commissions do
   """
 
   import Ecto.Query, warn: false
+  require Logger
+
   alias Banchan.Repo
 
   alias Banchan.Accounts.User
@@ -870,17 +872,50 @@ defmodule Banchan.Commissions do
     raise "Tried to expire an invoice in an invalid state. Reload the invoice and try again. Otherwise, this is a bug."
   end
 
-  def refund_payment(actor, commission, invoice, current_user_member?)
+  def refund_payment(actor, invoice, current_user_member?)
 
-  def refund_payment(_, _, _, false) do
+  def refund_payment(_, _, false) do
     {:error, :unauthorized}
   end
 
-  def refund_payment(%User{} = actor, %Commission{} = commission, %Invoice{} = invoice, _) do
+  def refund_payment(%User{} = _actor, %Invoice{} = invoice, _) do
+    # TODO: record the actor somewhere, for auditing purposes.
+    case refund_payment_on_stripe(invoice) do
+      {:ok, %Stripe.Refund{status: "failed"} = refund} ->
+        Logger.error(%{message: "Refund failed", refund: refund})
+        process_refund_updated!(refund, invoice.id)
+        {:error, {:failed, refund.failure_reason}}
+
+      {:ok, %Stripe.Refund{status: "canceled"} = refund} ->
+        Logger.error(%{message: "Refund canceled", refund: refund})
+        process_refund_updated!(refund, invoice.id)
+        {:error, :canceled}
+
+      {:ok, %Stripe.Refund{status: "requires_action"} = refund} ->
+        Logger.info(%{message: "Refund requires action", refund: refund})
+        # This should eventually succeed asynchronously.
+        process_refund_updated!(refund, invoice.id)
+        {:ok, :requires_action}
+
+      {:ok, %Stripe.Refund{status: "succeeded"} = refund} ->
+        process_refund_updated!(refund, invoice.id)
+        {:ok, :succeeded}
+
+      {:ok, %Stripe.Refund{status: "pending"} = refund} ->
+        process_refund_updated!(refund, invoice.id)
+        {:ok, :pending}
+
+      {:error, %Stripe.Error{} = err} ->
+        {:error, err}
+    end
+  end
+
+  defp refund_payment_on_stripe(%Invoice{} = invoice) do
     case stripe_mod().retrieve_session(invoice.stripe_session_id, []) do
       {:ok, session} ->
         case stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, []) do
           {:ok, %{charges: %{data: [%{id: charge_id}]}}} ->
+            # https://stripe.com/docs/connect/destination-charges#issuing-refunds
             case stripe_mod().create_refund(
                    %{
                      charge: charge_id,
@@ -889,36 +924,77 @@ defmodule Banchan.Commissions do
                    },
                    []
                  ) do
-              {:ok, _} ->
-                {1, _} =
-                  from(i in Invoice, where: i.id == ^invoice.id and i.status == :succeeded)
-                  |> Repo.update_all(set: [status: :refunded])
-
-                from(e in Event,
-                  join: i in assoc(e, :invoice),
-                  where:
-                    i.id == ^invoice.id and i.status == :refunded and
-                      e.commission_id == ^commission.id,
-                  select: e,
-                  preload: [:actor, invoice: [], attachments: [:upload, :thumbnail]]
-                )
-                |> Repo.all()
-                |> Enum.each(fn ev ->
-                  Notifications.commission_event_updated(commission, ev, actor)
-                end)
-
-                {:ok, %{invoice | status: :refunded}}
+              {:ok, refund} ->
+                {:ok, refund}
 
               {:error, err} ->
+                Logger.error(%{message: "Refund failed.", error: err})
                 {:error, err}
             end
 
           {:error, err} ->
+            Logger.error(%{
+              message: "Failed to retrieve payment intent while refunding.",
+              error: err
+            })
+
             {:error, err}
         end
 
       {:error, err} ->
+        Logger.error(%{message: "Failed to retrieve session while refunding.", error: err})
         {:error, err}
+    end
+  end
+
+  def process_refund_updated!(%Stripe.Refund{} = refund, invoice_id \\ nil) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        assignments =
+          case refund.status do
+            "succeeded" -> [status: :refunded, refund_status: :succeeded]
+            "failed" -> [refund_status: :failed]
+            "canceled" -> [refund_status: :canceled]
+            "pending" -> [refund_status: :pending]
+            "requires_action" -> [refund_status: :requires_action]
+          end
+
+        update_res =
+          cond do
+            !is_nil(invoice_id) ->
+              from(i in Invoice, where: i.id == ^invoice_id, select: i.id)
+
+            true ->
+              from(i in Invoice, where: i.stripe_refund_id == ^refund.id, select: i.id)
+          end
+          |> Repo.update_all(set: assignments)
+
+        case update_res do
+          {1, [invoice_id]} ->
+            case from(e in Event,
+                   join: i in assoc(e, :invoice),
+                   where: i.id == ^invoice_id,
+                   select: e,
+                   preload: [:actor, :commission, invoice: [], attachments: [:upload, :thumbnail]]
+                 ) |> Repo.one() do
+              %Event{} = ev -> {:ok, ev}
+              nil -> {:error, :event_not_found}
+            end
+
+          {0, _} ->
+            {:error, :invoice_not_found}
+        end
+      end)
+
+    case ret do
+      {:ok, event} ->
+        # TODO: we need the actual actor that initiated the refund here, not the original invoice actor.
+        Notifications.commission_event_updated(event.commission, event, event.actor)
+        {:ok, event.invoice}
+
+      {:error, err} ->
+        Logger.error(%{message: "Failed to update invoice status to refunded", error: err})
+        {:error, :internal_error}
     end
   end
 
