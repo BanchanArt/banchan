@@ -53,22 +53,20 @@ defmodule Banchan.CommissionsFixtures do
     checkout_uri = "https://stripe-mock-checkout-uri"
     sess_id = "stripe-mock-session-id#{System.unique_integer()}"
 
-    Banchan.StripeAPI.Mock
-    |> expect(:create_session, fn _sess ->
-      {:ok,
-       %Stripe.Session{
-         id: sess_id,
-         url: checkout_uri
-       }}
-    end)
-
-    Commissions.process_payment!(client, event, commission, checkout_uri, tip)
-
-    %Stripe.Session{
+    sess = %Stripe.Session{
       id: sess_id,
       url: checkout_uri,
       payment_intent: "stripe-mock-payment-intent-id#{System.unique_integer()}"
     }
+
+    Banchan.StripeAPI.Mock
+    |> expect(:create_session, fn _sess ->
+      {:ok, sess}
+    end)
+
+    Commissions.process_payment!(client, event, commission, checkout_uri, tip)
+
+    sess
   end
 
   def succeed_mock_payment!(

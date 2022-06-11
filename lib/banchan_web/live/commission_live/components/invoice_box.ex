@@ -90,7 +90,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           event: event,
           current_user_member?: current_user_member?
         }
-      }) do
+      } = socket) do
     me = self()
 
     Task.Supervisor.start_child(
@@ -142,7 +142,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   def handle_event("release", _, %{
         assigns: %{id: id, current_user: current_user, commission: commission, event: event}
-      }) do
+      } = socket) do
     me = self()
 
     Task.Supervisor.start_child(

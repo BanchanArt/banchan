@@ -914,7 +914,7 @@ defmodule Banchan.Commissions do
     case stripe_mod().retrieve_session(invoice.stripe_session_id, []) do
       {:ok, session} ->
         case stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, []) do
-          {:ok, %{charges: %{data: [%{id: charge_id}]}}} ->
+          {:ok, %Stripe.PaymentIntent{charges: %{data: [%{id: charge_id}]}}} ->
             # https://stripe.com/docs/connect/destination-charges#issuing-refunds
             case stripe_mod().create_refund(
                    %{

@@ -427,5 +427,73 @@ defmodule Banchan.CommissionsTest do
         Commissions.expire_payment!(invoice, true)
       end
     end
+
+    test "release payment without approving commission" do
+    end
+
+    test "refund payment before approval" do
+      commission = commission_fixture()
+      studio = commission.studio
+      artist = Enum.at(studio.artists, 0)
+      amount = Money.new(420, :USD)
+      tip = Money.new(69, :USD)
+
+      invoice =
+        invoice_fixture(artist, commission, %{
+          "amount" => amount,
+          "text" => "Send help."
+        })
+
+      Commissions.subscribe_to_commission_events(commission)
+      topic = "commission:#{commission.public_id}"
+
+      sess = checkout_session_fixture(invoice, tip)
+      succeed_mock_payment!(sess)
+
+      invoice = invoice |> Repo.reload() |> Repo.preload(:event)
+
+      assert {:error, :unauthorized} == Commissions.refund_payment(artist, invoice, false)
+
+      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_session, fn sid, _opts ->
+        assert sess.id == sid
+        {:ok, sess}
+      end)
+      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
+        assert sess.payment_intent == intent_id
+        {:ok, %Stripe.PaymentIntent{
+          id: intent_id,
+          charges: %{
+            data: [
+              %{id: charge_id}
+            ]
+          }
+        }}
+      end)
+      |> expect(:create_refund, fn params, _opts ->
+        assert charge_id == params.charge
+        assert true == params.reverse_transfer
+        assert true == params.refund_application_fee
+        {:ok, %Stripe.Refund{status: "succeeded"}}
+      end)
+
+      assert {:ok, :succeeded} = Commissions.refund_payment(artist, invoice, true)
+
+      iid = invoice.event.id
+      assert_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "event_updated",
+        payload: %Event{
+          type: :comment,
+          id: ^iid,
+          invoice: %Invoice{status: :refunded}
+        }
+      }
+    end
+
+    test "refund payment after approval" do
+    end
   end
 end
