@@ -743,6 +743,11 @@ defmodule Banchan.StudiosTest do
       end
     end
 
+    test "payout with insufficient funds" do
+      # TODO: Payout with insufficient funds should fail
+      # TODO: Payout with negative balance should fail
+    end
+
     test "canceled payout" do
       commission = commission_fixture()
       studio = commission.studio

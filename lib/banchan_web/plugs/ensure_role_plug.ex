@@ -28,6 +28,7 @@ defmodule BanchanWeb.EnsureRolePlug do
   def call(conn, roles) do
     user_token = get_session(conn, :user_token)
     user = user_token && Accounts.get_user_by_session_token(user_token)
+
     if is_nil(user) do
       maybe_halt(false, conn)
     else

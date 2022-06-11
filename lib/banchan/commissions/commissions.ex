@@ -329,7 +329,7 @@ defmodule Banchan.Commissions do
     {1, _} =
       from(i in Invoice,
         join: c in assoc(i, :commission),
-        where: i.id == ^invoice.id and c.client_id == ^actor.id
+        where: i.id == ^invoice.id and c.client_id == ^actor.id and i.status == :succeeded
       )
       |> Repo.update_all(set: [status: :released])
 
@@ -1007,8 +1007,7 @@ defmodule Banchan.Commissions do
 
     case ret do
       {:ok, event} ->
-        # TODO: we need the actual actor that initiated the refund here, not the original invoice actor.
-        Notifications.commission_event_updated(event.commission, event, event.actor)
+        Notifications.commission_event_updated(event.commission, event)
         {:ok, event.invoice}
 
       {:error, err} ->

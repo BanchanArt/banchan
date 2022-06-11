@@ -69,6 +69,8 @@ defmodule Banchan.CommissionsTest do
         assert subscribers == [user.id]
       end)
 
+      Notifications.wait_for_notifications()
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: "commission",
         event: "new_commission",
@@ -291,6 +293,8 @@ defmodule Banchan.CommissionsTest do
 
       topic = "commission:#{commission.public_id}"
 
+      Notifications.wait_for_notifications()
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "new_events",
@@ -299,6 +303,8 @@ defmodule Banchan.CommissionsTest do
 
       invoice_event = invoice.event |> Repo.reload()
       iid = invoice_event.id
+
+      Notifications.wait_for_notifications()
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
@@ -336,6 +342,8 @@ defmodule Banchan.CommissionsTest do
 
       topic = "commission:#{commission.public_id}"
       iid = invoice.event.id
+
+      Notifications.wait_for_notifications()
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
@@ -418,6 +426,8 @@ defmodule Banchan.CommissionsTest do
       topic = "commission:#{commission.public_id}"
       iid = invoice.event.id
 
+      Notifications.wait_for_notifications()
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
@@ -430,6 +440,64 @@ defmodule Banchan.CommissionsTest do
     end
 
     test "release payment without approving commission" do
+      commission = commission_fixture()
+      studio = commission.studio
+      client = commission.client
+      artist = Enum.at(studio.artists, 0)
+      amount = Money.new(420, :USD)
+      tip = Money.new(69, :USD)
+
+      invoice =
+        invoice_fixture(artist, commission, %{
+          "amount" => amount,
+          "text" => "Send help."
+        })
+
+      Commissions.subscribe_to_commission_events(commission)
+      topic = "commission:#{commission.public_id}"
+
+      sess = checkout_session_fixture(invoice, tip)
+      succeed_mock_payment!(sess)
+
+      invoice = invoice |> Repo.reload() |> Repo.preload(:event)
+      iid = invoice.id
+      eid = invoice.event.id
+
+      assert_raise MatchError, fn ->
+        Commissions.release_payment!(artist, commission, invoice)
+      end
+
+      invoice = invoice |> Repo.reload()
+
+      # No change to status.
+      assert :succeeded == invoice.status
+
+      Notifications.wait_for_notifications()
+
+      refute_received %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "event_updated",
+        payload: %Event{type: :comment, id: ^eid, invoice: %Invoice{id: ^iid, status: :released}}
+      }
+
+      Commissions.release_payment!(client, commission, invoice)
+
+      invoice = invoice |> Repo.reload()
+
+      assert :released == invoice.status
+
+      Notifications.wait_for_notifications()
+
+      assert_received %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "event_updated",
+        payload: %Event{type: :comment, id: ^eid, invoice: %Invoice{id: ^iid, status: :released}}
+      }
+
+      # Can't re-release once it's been released.
+      assert_raise MatchError, fn ->
+        Commissions.release_payment!(artist, commission, invoice)
+      end
     end
 
     test "refund payment before approval - success" do
@@ -494,6 +562,8 @@ defmodule Banchan.CommissionsTest do
               }} = Commissions.refund_payment(artist, invoice, true)
 
       eid = invoice.event.id
+
+      Notifications.wait_for_notifications()
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
@@ -628,6 +698,8 @@ defmodule Banchan.CommissionsTest do
 
       assert log =~ "unknown"
 
+      Notifications.wait_for_notifications()
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
@@ -661,6 +733,8 @@ defmodule Banchan.CommissionsTest do
                 refund_failure_reason: nil,
                 status: :refunded
               }} = Commissions.process_refund_updated(refund)
+
+      Notifications.wait_for_notifications()
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
@@ -732,6 +806,8 @@ defmodule Banchan.CommissionsTest do
                 status: :succeeded
               }} = Commissions.refund_payment(artist, invoice, true)
 
+      Notifications.wait_for_notifications()
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
@@ -756,6 +832,8 @@ defmodule Banchan.CommissionsTest do
                 refund_failure_reason: nil,
                 status: :refunded
               }} = Commissions.process_refund_updated(refund)
+
+      Notifications.wait_for_notifications()
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
@@ -827,6 +905,8 @@ defmodule Banchan.CommissionsTest do
                 status: :succeeded
               }} = Commissions.refund_payment(artist, invoice, true)
 
+      Notifications.wait_for_notifications()
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
@@ -851,6 +931,8 @@ defmodule Banchan.CommissionsTest do
                 refund_failure_reason: nil,
                 status: :refunded
               }} = Commissions.process_refund_updated(refund)
+
+      Notifications.wait_for_notifications()
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
@@ -927,6 +1009,8 @@ defmodule Banchan.CommissionsTest do
 
       assert log =~ "canceled"
 
+      Notifications.wait_for_notifications()
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
@@ -951,6 +1035,8 @@ defmodule Banchan.CommissionsTest do
                 refund_failure_reason: nil,
                 status: :refunded
               }} = Commissions.process_refund_updated(refund)
+
+      Notifications.wait_for_notifications()
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
