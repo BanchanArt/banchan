@@ -83,22 +83,29 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
     {:noreply, socket}
   end
 
-  def handle_event("refund", _, socket) do
+  def handle_event("refund", _, %{
+        assigns: %{
+          id: id,
+          current_user: current_user,
+          event: event,
+          current_user_member?: current_user_member?
+        }
+      }) do
     me = self()
 
     Task.Supervisor.start_child(
       Banchan.TaskSupervisor,
       fn ->
         case Commissions.refund_payment(
-               socket.assigns.current_user,
-               socket.assigns.event.invoice,
-               socket.assigns.current_user_member?
+               current_user,
+               event.invoice,
+               current_user_member?
              ) do
           {:ok, _} ->
             send_update(
               me,
               __MODULE__,
-              id: socket.assigns.id,
+              id: id,
               refund_modal_open: false,
               refund_pending: false,
               add_flash: {:info, "Payment refunded"}
@@ -109,7 +116,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
             send_update(
               me,
               __MODULE__,
-              id: socket.assigns.id,
+              id: id,
               refund_pending: false,
               refund_modal_open: false,
               add_flash: {:error, "Failed to refund payment: #{error.user_message}"}
@@ -120,7 +127,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
             send_update(
               me,
               __MODULE__,
-              id: socket.assigns.id,
+              id: id,
               refund_pending: false,
               refund_modal_open: false,
               add_flash: {:error, "Refund failed."}
@@ -133,22 +140,24 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
     {:noreply, socket |> assign(refund_pending: true)}
   end
 
-  def handle_event("release", _, socket) do
+  def handle_event("release", _, %{
+        assigns: %{id: id, current_user: current_user, commission: commission, event: event}
+      }) do
     me = self()
 
     Task.Supervisor.start_child(
       Banchan.TaskSupervisor,
       fn ->
         Commissions.release_payment!(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          socket.assigns.event.invoice
+          current_user,
+          commission,
+          event.invoice
         )
 
         send_update(
           me,
           __MODULE__,
-          id: socket.assigns.id,
+          id: id,
           release_pending: false,
           release_modal_open: false,
           add_flash: {:info, "Payment released to studio"}
