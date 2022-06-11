@@ -27,11 +27,14 @@ defmodule BanchanWeb.EnsureRolePlug do
   @spec call(Conn.t(), atom() | [atom()]) :: Conn.t()
   def call(conn, roles) do
     user_token = get_session(conn, :user_token)
-
-    (user_token &&
-       Accounts.get_user_by_session_token(user_token))
-    |> has_role?(roles)
-    |> maybe_halt(conn)
+    user = user_token && Accounts.get_user_by_session_token(user_token)
+    if is_nil(user) do
+      maybe_halt(false, conn)
+    else
+      user
+      |> has_role?(roles)
+      |> maybe_halt(conn)
+    end
   end
 
   defp has_role?(user, roles) when is_list(roles), do: Enum.any?(roles, &has_role?(user, &1))
