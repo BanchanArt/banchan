@@ -104,7 +104,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               add_flash: {:info, "Payment refunded"}
             )
 
-          {:error, error} ->
+          {:error, %Stripe.Error{} = error} ->
             # TODO: Why isn' this appearing?
             send_update(
               me,
@@ -112,7 +112,18 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               id: socket.assigns.id,
               refund_pending: false,
               refund_modal_open: false,
-              add_flash: {:error, "Failed to cancel payout: #{error.user_message}"}
+              add_flash: {:error, "Failed to refund payment: #{error.user_message}"}
+            )
+
+          {:error, _} ->
+            # TODO: Why isn' this appearing?
+            send_update(
+              me,
+              __MODULE__,
+              id: socket.assigns.id,
+              refund_pending: false,
+              refund_modal_open: false,
+              add_flash: {:error, "Refund failed."}
             )
         end
       end,
@@ -128,7 +139,6 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
     Task.Supervisor.start_child(
       Banchan.TaskSupervisor,
       fn ->
-        # TODO: Make this return {:ok, _} or {:error, _} instead
         Commissions.release_payment!(
           socket.assigns.current_user,
           socket.assigns.commission,
