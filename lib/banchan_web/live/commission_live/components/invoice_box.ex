@@ -105,6 +105,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                event.invoice,
                current_user_member?
              ) do
+          # TODO: failed refunds and other statuses?
           {:ok, _} ->
             send_update(
               me,
@@ -112,11 +113,11 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               id: id,
               refund_modal_open: false,
               refund_pending: false,
+              # TODO: flashes
               add_flash: {:info, "Payment refunded"}
             )
 
           {:error, %Stripe.Error{} = error} ->
-            # TODO: Why isn' this appearing?
             send_update(
               me,
               __MODULE__,

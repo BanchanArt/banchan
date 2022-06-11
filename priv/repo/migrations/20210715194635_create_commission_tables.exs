@@ -171,6 +171,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :stripe_session_id, :string
       add :stripe_refund_id, :string
       add :refund_status, :string
+      add :refund_failure_reason, :string
       add :status, :string, null: false
       add :tip, :money_with_currency
       add :amount, :money_with_currency, null: false

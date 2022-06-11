@@ -24,6 +24,13 @@ defmodule Banchan.Commissions.Invoice do
         :requires_action
       ]
 
+    field :refund_failure_reason, Ecto.Enum,
+      values: [
+        :lost_or_stolen_card,
+        :expired_or_canceled_card,
+        :unknown
+      ]
+
     field :status, Ecto.Enum,
       values: [
         # Studio has requested payment. No other action taken.

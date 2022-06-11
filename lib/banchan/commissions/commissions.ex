@@ -951,19 +951,32 @@ defmodule Banchan.Commissions do
         assignments =
           case refund.status do
             "succeeded" ->
-              [status: :refunded, refund_status: :succeeded, stripe_refund_id: refund.id]
+              [
+                status: :refunded,
+                refund_status: :succeeded,
+                stripe_refund_id: refund.id,
+                refund_failure_reason: nil
+              ]
 
             "failed" ->
-              [refund_status: :failed, stripe_refund_id: refund.id]
+              [
+                refund_status: :failed,
+                stripe_refund_id: refund.id,
+                refund_failure_reason: refund.failure_reason
+              ]
 
             "canceled" ->
-              [refund_status: :canceled, stripe_refund_id: refund.id]
+              [refund_status: :canceled, stripe_refund_id: refund.id, refund_failure_reason: nil]
 
             "pending" ->
-              [refund_status: :pending, stripe_refund_id: refund.id]
+              [refund_status: :pending, stripe_refund_id: refund.id, refund_failure_reason: nil]
 
             "requires_action" ->
-              [refund_status: :requires_action, stripe_refund_id: refund.id]
+              [
+                refund_status: :requires_action,
+                stripe_refund_id: refund.id,
+                refund_failure_reason: nil
+              ]
           end
 
         update_res =

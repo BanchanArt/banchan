@@ -564,6 +564,94 @@ defmodule Banchan.CommissionsTest do
       assert log =~ "bad request"
     end
 
+    test "refund payment before approval - refund failed" do
+      commission = commission_fixture()
+      studio = commission.studio
+      artist = Enum.at(studio.artists, 0)
+      amount = Money.new(420, :USD)
+      tip = Money.new(69, :USD)
+
+      invoice =
+        invoice_fixture(artist, commission, %{
+          "amount" => amount,
+          "text" => "Send help."
+        })
+
+      sess = checkout_session_fixture(invoice, tip)
+      succeed_mock_payment!(sess)
+
+      invoice = invoice |> Repo.reload() |> Repo.preload(:event)
+
+      assert {:error, :unauthorized} == Commissions.refund_payment(artist, invoice, false)
+
+      refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
+      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_session, fn sid, _opts ->
+        assert sess.id == sid
+        {:ok, sess}
+      end)
+      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
+        assert sess.payment_intent == intent_id
+
+        {:ok,
+         %Stripe.PaymentIntent{
+           id: intent_id,
+           charges: %{
+             data: [
+               %{id: charge_id}
+             ]
+           }
+         }}
+      end)
+      |> expect(:create_refund, fn _params, _opts ->
+        {:ok, %Stripe.Refund{id: refund_id, status: "failed", failure_reason: "unknown"}}
+      end)
+
+      Commissions.subscribe_to_commission_events(commission)
+      topic = "commission:#{commission.public_id}"
+
+      iid = invoice.id
+      eid = invoice.event.id
+
+      log =
+        capture_log([level: :error], fn ->
+          assert {:ok,
+                  %Invoice{
+                    id: ^iid,
+                    refund_status: :failed,
+                    refund_failure_reason: :unknown,
+                    status: :succeeded
+                  }} = Commissions.refund_payment(artist, invoice, true)
+        end)
+
+      assert log =~ "unknown"
+
+      assert_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "event_updated",
+        payload: %Event{
+          type: :comment,
+          id: ^eid,
+          invoice: %Invoice{
+            status: :succeeded,
+            refund_status: :failed,
+            refund_failure_reason: :unknown
+          }
+        }
+      }
+
+      invoice = invoice |> Repo.reload()
+
+      assert %Invoice{
+               id: ^iid,
+               refund_status: :failed,
+               refund_failure_reason: :unknown,
+               status: :succeeded
+             } = invoice
+    end
+
     test "refund payment before approval - refund pending" do
       commission = commission_fixture()
       studio = commission.studio
