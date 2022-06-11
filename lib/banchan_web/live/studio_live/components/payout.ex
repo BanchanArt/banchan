@@ -48,22 +48,26 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   end
 
   def handle_event("cancel_payout", _, socket) do
+    me = self()
     Task.Supervisor.start_child(
       Banchan.TaskSupervisor,
       fn ->
         case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
           :ok ->
             send_update(
+              me,
               __MODULE__,
-              id: "payout",
+              id: socket.assigns.id,
               modal_open: false,
+              cancel_pending: false,
               add_flash: {:info, "Payout cancelled."}
             )
 
           {:error, err} ->
             send_update(
+              me,
               __MODULE__,
-              id: "payout",
+              id: socket.assigns.id,
               cancel_pending: false,
               modal_open: false,
               add_flash: {:error, "Failed to cancel payout: #{err.user_message}"}

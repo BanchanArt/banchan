@@ -23,6 +23,12 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   # punning off this for the changeset validation.
   data changeset, :struct, default: %Event{} |> Event.amount_changeset(%{})
 
+  data release_pending, :boolean, default: false
+  data release_modal_open, :boolean, default: false
+
+  data refund_pending, :boolean, default: false
+  data refund_modal_open, :boolean, default: false
+
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
   end
@@ -78,33 +84,135 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   end
 
   def handle_event("refund", _, socket) do
-    case Commissions.refund_payment(
-           socket.assigns.current_user,
-           socket.assigns.event.invoice,
-           socket.assigns.current_user_member?
-         ) do
-      {:ok, _} ->
-        {:noreply, socket}
+    me = self()
+    Task.Supervisor.start_child(
+      Banchan.TaskSupervisor,
+      fn ->
+        case Commissions.refund_payment(
+               socket.assigns.current_user,
+               socket.assigns.event.invoice,
+               socket.assigns.current_user_member?
+             ) do
+          {:ok, _} ->
+            send_update(
+              me,
+              __MODULE__,
+              id: socket.assigns.id,
+              refund_modal_open: false,
+              refund_pending: false,
+              add_flash: {:info, "Payment refunded"}
+            )
 
-      {:error, error} ->
-        # TODO: why isn't this appearing?
-        {:noreply, socket |> put_flash(:error, "Error processing refund: #{error.user_message}")}
-    end
+          {:error, error} ->
+            # TODO: Why isn' this appearing?
+            send_update(
+              me,
+              __MODULE__,
+              id: socket.assigns.id,
+              refund_pending: false,
+              refund_modal_open: false,
+              add_flash: {:error, "Failed to cancel payout: #{error.user_message}"}
+            )
+        end
+      end,
+      restart: :transient
+    )
+
+    {:noreply, socket |> assign(refund_pending: true)}
   end
 
   def handle_event("release", _, socket) do
-    Commissions.release_payment!(
-      socket.assigns.current_user,
-      socket.assigns.commission,
-      socket.assigns.event.invoice
+    me = self()
+    Task.Supervisor.start_child(
+      Banchan.TaskSupervisor,
+      fn ->
+        # TODO: Make this return {:ok, _} or {:error, _} instead
+        Commissions.release_payment!(
+          socket.assigns.current_user,
+          socket.assigns.commission,
+          socket.assigns.event.invoice
+        )
+
+        send_update(
+          me,
+          __MODULE__,
+          id: socket.assigns.id,
+          release_pending: false,
+          release_modal_open: false,
+          add_flash: {:info, "Payment released to studio"}
+        )
+      end
     )
 
+    {:noreply, socket |> assign(release_pending: true)}
+  end
+
+  def handle_event("toggle_release_modal", _, socket) do
+    {:noreply, socket |> assign(release_modal_open: !socket.assigns.release_modal_open)}
+  end
+
+  def handle_event("close_release_modal", _, socket) do
+    {:noreply, socket |> assign(release_modal_open: false)}
+  end
+
+  def handle_event("toggle_refund_modal", _, socket) do
+    {:noreply, socket |> assign(refund_modal_open: !socket.assigns.refund_modal_open)}
+  end
+
+  def handle_event("close_refund_modal", _, socket) do
+    {:noreply, socket |> assign(refund_modal_open: false)}
+  end
+
+  def handle_event("nothing", _, socket) do
     {:noreply, socket}
   end
 
   def render(assigns) do
     ~F"""
     <div class="flex flex-col">
+      {!-- Refund confirmation modal --}
+      <div
+        class={"modal", "modal-open": @refund_modal_open}
+        :on-click="toggle_refund_modal"
+        :on-window-keydown="close_refund_modal"
+        phx-key="Escape"
+      >
+        <div :on-click="nothing" class="modal-box relative">
+          <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click="close_refund_modal">✕</div>
+          <h3 class="text-lg font-bold">Confirm Refund</h3>
+          <p class="py-4">Are you sure you want to refund this payment?</p>
+          <div class="modal-action">
+            <Button
+              disabled={!@refund_modal_open || @refund_pending}
+              class={"refund-btn btn-warning", loading: @refund_pending}
+              click="refund"
+            >Confirm</Button>
+          </div>
+        </div>
+      </div>
+
+      {!-- Release confirmation modal --}
+      <div
+        class={"modal", "modal-open": @release_modal_open}
+        :on-click="toggle_release_modal"
+        :on-window-keydown="close_release_modal"
+        phx-key="Escape"
+      >
+        <div :on-click="nothing" class="modal-box relative">
+          <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click="close_release_modal">✕</div>
+          <h3 class="text-lg font-bold">Confirm Fund Release</h3>
+          <p class="py-4">Funds will be made available immediately to the studio, instead of waiting until the commission is approved.</p>
+          <div class="modal-action">
+            <Button
+              disabled={!@release_modal_open || @release_pending}
+              class={"release-btn btn-success", loading: @release_pending}
+              click="release"
+            >Confirm</Button>
+          </div>
+        </div>
+      </div>
+
+      {!-- Invoice box --}
       <div class="place-self-center stats stats-vertical md:stats-horizontal">
         <div class="stat">
           <div class="stat-title">Invoice</div>
@@ -149,10 +257,18 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-desc">Payment succeeded.</div>
               <div class="stat-actions">
                 {#if @current_user_member?}
-                  <Button class="btn-warning" click="refund" label="Refund Payment" />
+                  <Button
+                    label="Refund Payment"
+                    click="toggle_refund_modal"
+                    class="open-refund-modal modal-button btn-warning"
+                  />
                 {/if}
                 {#if @current_user.id == @commission.client_id}
-                  <Button class="btn-success" click="release" label="Release Now" />
+                  <Button
+                    label="Release Now"
+                    click="toggle_release_modal"
+                    class="open-release-modal modal-button btn-success"
+                  />
                 {/if}
               </div>
             {#match :released}

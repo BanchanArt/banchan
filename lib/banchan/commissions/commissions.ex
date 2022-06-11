@@ -976,7 +976,8 @@ defmodule Banchan.Commissions do
                    where: i.id == ^invoice_id,
                    select: e,
                    preload: [:actor, :commission, invoice: [], attachments: [:upload, :thumbnail]]
-                 ) |> Repo.one() do
+                 )
+                 |> Repo.one() do
               %Event{} = ev -> {:ok, ev}
               nil -> {:error, :event_not_found}
             end
