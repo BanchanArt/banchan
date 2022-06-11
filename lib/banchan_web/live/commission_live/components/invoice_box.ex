@@ -85,6 +85,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   def handle_event("refund", _, socket) do
     me = self()
+
     Task.Supervisor.start_child(
       Banchan.TaskSupervisor,
       fn ->
@@ -123,6 +124,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   def handle_event("release", _, socket) do
     me = self()
+
     Task.Supervisor.start_child(
       Banchan.TaskSupervisor,
       fn ->

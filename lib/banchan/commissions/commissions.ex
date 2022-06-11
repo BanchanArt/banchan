@@ -947,6 +947,9 @@ defmodule Banchan.Commissions do
     end
   end
 
+  # Disabling because honestly, refactoring this one is pointless.
+  #
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def process_refund_updated!(%Stripe.Refund{} = refund, invoice_id \\ nil) do
     {:ok, ret} =
       Repo.transaction(fn ->
@@ -960,12 +963,10 @@ defmodule Banchan.Commissions do
           end
 
         update_res =
-          cond do
-            !is_nil(invoice_id) ->
-              from(i in Invoice, where: i.id == ^invoice_id, select: i.id)
-
-            true ->
-              from(i in Invoice, where: i.stripe_refund_id == ^refund.id, select: i.id)
+          if is_nil(invoice_id) do
+            from(i in Invoice, where: i.stripe_refund_id == ^refund.id, select: i.id)
+          else
+            from(i in Invoice, where: i.id == ^invoice_id, select: i.id)
           end
           |> Repo.update_all(set: assignments)
 

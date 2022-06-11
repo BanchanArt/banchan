@@ -49,6 +49,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
 
   def handle_event("cancel_payout", _, socket) do
     me = self()
+
     Task.Supervisor.start_child(
       Banchan.TaskSupervisor,
       fn ->
