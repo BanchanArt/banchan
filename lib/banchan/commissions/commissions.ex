@@ -883,27 +883,22 @@ defmodule Banchan.Commissions do
     case refund_payment_on_stripe(invoice) do
       {:ok, %Stripe.Refund{status: "failed"} = refund} ->
         Logger.error(%{message: "Refund failed", refund: refund})
-        process_refund_updated!(refund, invoice.id)
-        {:error, {:failed, refund.failure_reason}}
+        process_refund_updated(refund, invoice.id)
 
       {:ok, %Stripe.Refund{status: "canceled"} = refund} ->
         Logger.error(%{message: "Refund canceled", refund: refund})
-        process_refund_updated!(refund, invoice.id)
-        {:error, :canceled}
+        process_refund_updated(refund, invoice.id)
 
       {:ok, %Stripe.Refund{status: "requires_action"} = refund} ->
         Logger.info(%{message: "Refund requires action", refund: refund})
         # This should eventually succeed asynchronously.
-        process_refund_updated!(refund, invoice.id)
-        {:ok, :requires_action}
+        process_refund_updated(refund, invoice.id)
 
       {:ok, %Stripe.Refund{status: "succeeded"} = refund} ->
-        process_refund_updated!(refund, invoice.id)
-        {:ok, :succeeded}
+        process_refund_updated(refund, invoice.id)
 
       {:ok, %Stripe.Refund{status: "pending"} = refund} ->
-        process_refund_updated!(refund, invoice.id)
-        {:ok, :pending}
+        process_refund_updated(refund, invoice.id)
 
       {:error, %Stripe.Error{} = err} ->
         {:error, err}
@@ -950,16 +945,25 @@ defmodule Banchan.Commissions do
   # Disabling because honestly, refactoring this one is pointless.
   #
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def process_refund_updated!(%Stripe.Refund{} = refund, invoice_id \\ nil) do
+  def process_refund_updated(%Stripe.Refund{} = refund, invoice_id \\ nil) do
     {:ok, ret} =
       Repo.transaction(fn ->
         assignments =
           case refund.status do
-            "succeeded" -> [status: :refunded, refund_status: :succeeded]
-            "failed" -> [refund_status: :failed]
-            "canceled" -> [refund_status: :canceled]
-            "pending" -> [refund_status: :pending]
-            "requires_action" -> [refund_status: :requires_action]
+            "succeeded" ->
+              [status: :refunded, refund_status: :succeeded, stripe_refund_id: refund.id]
+
+            "failed" ->
+              [refund_status: :failed, stripe_refund_id: refund.id]
+
+            "canceled" ->
+              [refund_status: :canceled, stripe_refund_id: refund.id]
+
+            "pending" ->
+              [refund_status: :pending, stripe_refund_id: refund.id]
+
+            "requires_action" ->
+              [refund_status: :requires_action, stripe_refund_id: refund.id]
           end
 
         update_res =
