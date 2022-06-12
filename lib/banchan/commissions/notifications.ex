@@ -41,6 +41,29 @@ defmodule Banchan.Commissions.Notifications do
     )
   end
 
+  def subscribers(%Commission{} = commission) do
+    from(
+      u in User,
+      join: comm_sub in CommissionSubscription,
+      join: studio_sub in StudioSubscription,
+      left_join: settings in assoc(u, :notification_settings),
+      where:
+        ((comm_sub.commission_id == ^commission.id and u.id == comm_sub.user_id) or
+           (studio_sub.studio_id == ^commission.studio_id and u.id == studio_sub.user_id)) and
+          (comm_sub.silenced != true or
+             (studio_sub.studio_id != ^commission.studio_id and u.id != studio_sub.user_id and
+                studio_sub.silenced != true)),
+      distinct: u.id,
+      select: %User{
+        id: u.id,
+        handle: u.handle,
+        email: u.email,
+        notification_settings: settings
+      }
+    )
+    |> Repo.stream()
+  end
+
   def new_commission(%Commission{} = commission, actor \\ nil) do
     Notifications.with_task(fn ->
       Phoenix.PubSub.broadcast!(
@@ -203,29 +226,6 @@ defmodule Banchan.Commissions.Notifications do
       # NOTE: No notification here because new_events takes care of notifying
       # about this already.
     end)
-  end
-
-  def subscribers(%Commission{} = commission) do
-    from(
-      u in User,
-      join: comm_sub in CommissionSubscription,
-      join: studio_sub in StudioSubscription,
-      left_join: settings in assoc(u, :notification_settings),
-      where:
-        ((comm_sub.commission_id == ^commission.id and u.id == comm_sub.user_id) or
-           (studio_sub.studio_id == ^commission.studio_id and u.id == studio_sub.user_id)) and
-          (comm_sub.silenced != true or
-             (studio_sub.studio_id != ^commission.studio_id and u.id != studio_sub.user_id and
-                studio_sub.silenced != true)),
-      distinct: u.id,
-      select: %User{
-        id: u.id,
-        handle: u.handle,
-        email: u.email,
-        notification_settings: settings
-      }
-    )
-    |> Repo.stream()
   end
 
   defp replace_fragment(uri, event) do
