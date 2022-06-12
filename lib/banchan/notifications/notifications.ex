@@ -20,7 +20,7 @@ defmodule Banchan.Notifications do
   # Whether to notify the actor themself of actions they take.
   # This is mostly intended to be used for testing the notification
   # system during development.
-  @notify_actor true
+  @notify_actor false
 
   def mark_all_as_read(%User{} = user) do
     from(notification in UserNotification,
@@ -71,7 +71,7 @@ defmodule Banchan.Notifications do
     )
   end
 
-  def unread_notifications(%User{} = user, page) do
+  def unread_notifications(%User{} = user, page \\ 1) do
     from(
       n in UserNotification,
       where: n.user_id == ^user.id and n.read == false,
@@ -104,6 +104,8 @@ defmodule Banchan.Notifications do
     Task.Supervisor.start_child(Banchan.NotificationTaskSupervisor, task)
   end
 
+  # Not bothering with this one.
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def notify_subscribers!(actor, subs, %UserNotification{} = notification, opts \\ []) do
     {:ok, _} =
       Repo.transaction(fn ->
@@ -117,7 +119,7 @@ defmodule Banchan.Notifications do
 
           web_setting = is_nil(settings) || settings.commission_web
 
-          if web_setting && notify_actor do
+          if web_setting && (!actor || notify_actor) do
             notification = Repo.insert!(%{notification | user_id: id}, returning: [:ref])
 
             Phoenix.PubSub.broadcast!(
@@ -133,7 +135,7 @@ defmodule Banchan.Notifications do
 
           email_setting = is_nil(settings) || settings.commission_email
 
-          if email_setting && notify_actor do
+          if email_setting && (!actor || notify_actor) do
             send_email(email, notification, opts)
           end
         end)

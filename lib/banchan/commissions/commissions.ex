@@ -1014,8 +1014,8 @@ defmodule Banchan.Commissions do
 
     case ret do
       {:ok, event} ->
-        Notifications.commission_event_updated(event.commission, event)
-        Notifications.invoice_refund_updated(event.commission, event)
+        Notifications.invoice_refund_updated(event.commission, event, actor)
+        Notifications.commission_event_updated(event.commission, event, actor)
         {:ok, event.invoice}
 
       {:error, err} ->

@@ -480,6 +480,9 @@ defmodule Banchan.CommissionsTest do
         payload: %Event{type: :comment, id: ^eid, invoice: %Invoice{id: ^iid, status: :released}}
       }
 
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
+
       Commissions.release_payment!(client, commission, invoice)
 
       invoice = invoice |> Repo.reload()
@@ -494,6 +497,11 @@ defmodule Banchan.CommissionsTest do
         payload: %Event{type: :comment, id: ^eid, invoice: %Invoice{id: ^iid, status: :released}}
       }
 
+      assert [] == Notifications.unread_notifications(client).entries
+
+      assert [%{short_body: "An invoice has been released before commission approval."}] =
+               Notifications.unread_notifications(artist).entries
+
       # Can't re-release once it's been released.
       assert_raise MatchError, fn ->
         Commissions.release_payment!(artist, commission, invoice)
@@ -502,6 +510,7 @@ defmodule Banchan.CommissionsTest do
 
     test "refund payment before approval - success" do
       commission = commission_fixture()
+      client = commission.client
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
       amount = Money.new(420, :USD)
@@ -551,6 +560,9 @@ defmodule Banchan.CommissionsTest do
         {:ok, %Stripe.Refund{id: refund_id, status: "succeeded"}}
       end)
 
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
+
       iid = invoice.id
       artist_id = artist.id
 
@@ -567,6 +579,11 @@ defmodule Banchan.CommissionsTest do
 
       Notifications.wait_for_notifications()
 
+      assert [] == Notifications.unread_notifications(artist).entries
+
+      assert [%{short_body: "A refund has been successfully processed."}] =
+               Notifications.unread_notifications(client).entries
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
@@ -580,6 +597,7 @@ defmodule Banchan.CommissionsTest do
 
     test "refund payment before approval - refund api request failed" do
       commission = commission_fixture()
+      client = commission.client
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
       amount = Money.new(420, :USD)
@@ -595,6 +613,9 @@ defmodule Banchan.CommissionsTest do
       succeed_mock_payment!(sess)
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
+
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
 
       assert {:error, :unauthorized} == Commissions.refund_payment(artist, invoice, false)
 
@@ -634,10 +655,14 @@ defmodule Banchan.CommissionsTest do
         end)
 
       assert log =~ "bad request"
+
+      assert [] == Notifications.unread_notifications(artist).entries
+      assert [] == Notifications.unread_notifications(client).entries
     end
 
     test "refund payment before approval - refund failed" do
       commission = commission_fixture()
+      client = commission.client
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
       amount = Money.new(420, :USD)
@@ -653,6 +678,9 @@ defmodule Banchan.CommissionsTest do
       succeed_mock_payment!(sess)
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
+
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
 
       assert {:error, :unauthorized} == Commissions.refund_payment(artist, invoice, false)
 
@@ -702,6 +730,14 @@ defmodule Banchan.CommissionsTest do
 
       Notifications.wait_for_notifications()
 
+      assert [] == Notifications.unread_notifications(artist).entries
+
+      assert [%{short_body: "A refund attempt has failed."}] =
+               Notifications.unread_notifications(client).entries
+
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
@@ -737,6 +773,12 @@ defmodule Banchan.CommissionsTest do
               }} = Commissions.process_refund_updated(refund, nil)
 
       Notifications.wait_for_notifications()
+
+      assert [%{short_body: "A refund has been successfully processed."}] =
+               Notifications.unread_notifications(artist).entries
+
+      assert [%{short_body: "A refund has been successfully processed."}] =
+               Notifications.unread_notifications(client).entries
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
@@ -850,6 +892,7 @@ defmodule Banchan.CommissionsTest do
 
     test "refund payment before approval - refund requires action" do
       commission = commission_fixture()
+      client = commission.client
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
       amount = Money.new(420, :USD)
@@ -867,6 +910,9 @@ defmodule Banchan.CommissionsTest do
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
       assert {:error, :unauthorized} == Commissions.refund_payment(artist, invoice, false)
+
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
       charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
@@ -909,6 +955,14 @@ defmodule Banchan.CommissionsTest do
 
       Notifications.wait_for_notifications()
 
+      assert [] == Notifications.unread_notifications(artist).entries
+
+      assert [%{short_body: "A refund requires further action."}] =
+               Notifications.unread_notifications(client).entries
+
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
@@ -936,6 +990,12 @@ defmodule Banchan.CommissionsTest do
 
       Notifications.wait_for_notifications()
 
+      assert [%{short_body: "A refund has been successfully processed."}] =
+               Notifications.unread_notifications(artist).entries
+
+      assert [%{short_body: "A refund has been successfully processed."}] =
+               Notifications.unread_notifications(client).entries
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
@@ -949,6 +1009,7 @@ defmodule Banchan.CommissionsTest do
 
     test "refund payment before approval - refund canceled" do
       commission = commission_fixture()
+      client = commission.client
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
       amount = Money.new(420, :USD)
@@ -962,6 +1023,9 @@ defmodule Banchan.CommissionsTest do
 
       sess = checkout_session_fixture(invoice, tip)
       succeed_mock_payment!(sess)
+
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
@@ -1013,6 +1077,14 @@ defmodule Banchan.CommissionsTest do
 
       Notifications.wait_for_notifications()
 
+      assert [] == Notifications.unread_notifications(artist).entries
+
+      assert [%{short_body: "A refund has been canceled."}] =
+               Notifications.unread_notifications(client).entries
+
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
+
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "event_updated",
@@ -1039,6 +1111,12 @@ defmodule Banchan.CommissionsTest do
               }} = Commissions.process_refund_updated(refund, nil)
 
       Notifications.wait_for_notifications()
+
+      assert [%{short_body: "A refund has been successfully processed."}] =
+               Notifications.unread_notifications(artist).entries
+
+      assert [%{short_body: "A refund has been successfully processed."}] =
+               Notifications.unread_notifications(client).entries
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
