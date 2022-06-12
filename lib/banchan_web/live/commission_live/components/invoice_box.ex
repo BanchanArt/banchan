@@ -209,7 +209,10 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           phx-key="Escape"
         >
           <div :on-click="nothing" class="modal-box relative">
-            <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click="close_refund_modal">✕</div>
+            <div
+              class="close-modal btn btn-sm btn-circle absolute right-2 top-2"
+              :on-click="close_refund_modal"
+            >✕</div>
             <h3 class="text-lg font-bold">Confirm Refund</h3>
             <p class="py-4">Are you sure you want to refund this payment?</p>
             <div class="modal-action">
@@ -309,7 +312,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-desc">Payment released to studio.</div>
             {#match :refunded}
               {!-- # TODO: better, more obvious display for refunds... --}
-              <div class="stat-desc">Payment has been refunded to client.</div>
+              <div class="stat-desc">Payment has been refunded to the client.</div>
             {#match nil}
               {!-- NOTE: This state happens for a very brief window of time
                 between when the payment request event is created, and when the
@@ -319,7 +322,8 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-desc">Please wait...</div>
           {/case}
         </div>
-        {#if @event.invoice.status == :succeeded || @event.invoice.status == :released}
+        {#if @event.invoice.status == :succeeded || @event.invoice.status == :released ||
+            @event.invoice.status == :refunded}
           <div class="stat">
             <div class="stat-title">Tip</div>
             <div class="stat-value">{Money.to_string(@event.invoice.tip)}</div>

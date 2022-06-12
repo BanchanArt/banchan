@@ -285,7 +285,130 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
   end
 
   describe "refunding an invoice" do
-    test "successful refund" do
+    test "successful refund", %{
+      conn: conn,
+      artist: artist,
+      client: client,
+      commission: commission
+    } do
+      amount = Money.new(42_000, :USD)
+      tip = Money.new(6900, :USD)
+
+      session = payment_fixture(artist, commission, amount, tip)
+
+      client_conn = log_in_user(conn, client)
+      artist_conn = log_in_user(conn, artist)
+
+      {:ok, client_page_live, _html} =
+        live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
+
+      {:ok, artist_page_live, _html} =
+        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+
+      refute artist_page_live
+             |> render() =~ "Confirm Refund"
+
+      refute artist_page_live
+             |> has_element?(".invoice-box .modal")
+
+      refute client_page_live
+             |> has_element?(".invoice-box .open-refund-modal")
+
+      refute client_page_live
+             |> has_element?(".invoice-box .modal")
+
+      artist_page_live
+      |> element(".invoice-box .open-refund-modal")
+      |> render_click()
+
+      refute client_page_live
+             |> has_element?(".invoice-box .modal")
+
+      modal =
+        artist_page_live
+        |> element(".invoice-box .modal.modal-open")
+        |> render()
+
+      assert modal =~ "Confirm Refund"
+      assert modal =~ "Are you sure you want to refund this payment?"
+      assert modal =~ ~r/<button[^<]+Confirm</
+
+      artist_page_live
+      |> element(".invoice-box .modal .close-modal")
+      |> render_click()
+
+      refute artist_page_live
+             |> has_element?(".invoice-box .modal")
+
+      artist_page_live
+      |> element(".invoice-box .open-refund-modal")
+      |> render_click()
+
+      assert artist_page_live
+             |> has_element?(".invoice-box .modal")
+
+      intent_id = "stripe_intent_mock_id#{System.unique_integer()}"
+      charge_id = "stripe_charge_mock_id#{System.unique_integer()}"
+      refund_id = "stripe_refund_mock_id#{System.unique_integer()}"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_session, fn id, _opts ->
+        assert session.id == id
+        {:ok, %Stripe.Session{id: id, payment_intent: intent_id}}
+      end)
+      |> expect(:retrieve_payment_intent, fn id, _params, _opts ->
+        assert intent_id == id
+        {:ok, %Stripe.PaymentIntent{id: id, charges: %{data: [%{id: charge_id}]}}}
+      end)
+      |> expect(:create_refund, fn params, _opts ->
+        assert charge_id == params.charge
+        assert true == params.reverse_transfer
+        assert true == params.refund_application_fee
+        {:ok, %Stripe.Refund{id: refund_id, status: "succeeded"}}
+      end)
+
+      # TODO: Test loading state
+      artist_page_live
+      |> element(".invoice-box .modal .refund-btn")
+      |> render_click()
+
+      Notifications.wait_for_notifications()
+
+      refute artist_page_live
+             |> has_element?(".invoice-box .modal")
+
+      invoice_box =
+        artist_page_live
+        |> element(".invoice-box")
+        |> render()
+
+      assert invoice_box =~ "$420.00"
+      assert invoice_box =~ "$69.00"
+      assert invoice_box =~ "Payment has been refunded to the client"
+
+      refute artist_page_live
+             |> has_element?(".invoice-box .open-refund-modal")
+
+      invoice_box =
+        client_page_live
+        |> element(".invoice-box")
+        |> render()
+
+      assert invoice_box =~ "$420.00"
+      assert invoice_box =~ "$69.00"
+      assert invoice_box =~ "Payment has been refunded to the client"
+
+      refute client_page_live
+             |> has_element?(".invoice-box .open-refund-modal")
+    end
+
+    test "refund pending after submission" do
+    end
+
+    test "refund canceled" do
+    end
+
+    test "refund needs further action" do
     end
 
     test "refunding after release" do
