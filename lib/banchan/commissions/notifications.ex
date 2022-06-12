@@ -187,6 +187,7 @@ defmodule Banchan.Commissions.Notifications do
   end
 
   defp new_event_notification_body(%Event{type: :payment_processed, amount: amount}) do
+    # TODO: Add tip amount
     "A payment for #{Money.to_string(amount)} has been successfully processed. It will be available for payout when the commission is completed and accepted."
   end
 
@@ -226,6 +227,92 @@ defmodule Banchan.Commissions.Notifications do
       # NOTE: No notification here because new_events takes care of notifying
       # about this already.
     end)
+  end
+
+  def invoice_released(%Commission{} = commission, %Event{} = event, actor \\ nil) do
+    # No need for a broadcast. That's already being handled by commission_event_updated
+    Notifications.with_task(fn ->
+      {:ok, _} =
+        Repo.transaction(fn ->
+          subs = subscribers(commission)
+
+          url =
+            Routes.commission_url(Endpoint, :show, commission.public_id)
+            |> replace_fragment(event)
+
+          body = "An invoice has been released before commission approval."
+          {:safe, safe_url} = Phoenix.HTML.html_escape(url)
+
+          Notifications.notify_subscribers!(
+            actor,
+            subs,
+            %Notifications.UserNotification{
+              type: "invoice_released",
+              title: commission.title,
+              short_body: body,
+              text_body: "#{body}\n\n#{url}",
+              html_body: "<p>#{body}</p><p><a href=\"#{safe_url}\">View it</a></p>",
+              url: url,
+              read: false
+            },
+            is_reply: true
+          )
+        end)
+    end)
+  end
+
+  def invoice_refund_updated(%Commission{} = commission, %Event{} = event, actor \\ nil) do
+    # No need for a broadcast. That's already being handled by commission_event_updated
+    Notifications.with_task(fn ->
+      {:ok, _} =
+        Repo.transaction(fn ->
+          subs = subscribers(commission)
+
+          url =
+            Routes.commission_url(Endpoint, :show, commission.public_id)
+            |> replace_fragment(event)
+
+          body = refund_updated_body(event.invoice.refund_status)
+          {:safe, safe_url} = Phoenix.HTML.html_escape(url)
+
+          Notifications.notify_subscribers!(
+            actor,
+            subs,
+            %Notifications.UserNotification{
+              type: "invoice_refunded",
+              title: commission.title,
+              short_body: body,
+              text_body: "#{body}\n\n#{url}",
+              html_body: "<p>#{body}</p><p><a href=\"#{safe_url}\">View it</a></p>",
+              url: url,
+              read: false
+            },
+            is_reply: true
+          )
+        end)
+    end)
+  end
+
+  defp refund_updated_body(refund_status)
+
+  defp refund_updated_body(:pending) do
+    "A refund has been submitted and is currently pending."
+  end
+
+  defp refund_updated_body(:succeeded) do
+    "A refund has been successfully processed."
+  end
+
+  defp refund_updated_body(:failed) do
+    "A refund attempt has failed."
+  end
+
+  defp refund_updated_body(:canceled) do
+    "A refund has been canceled."
+  end
+
+  defp refund_updated_body(:requires_action) do
+    "A refund requires further action."
   end
 
   defp replace_fragment(uri, event) do

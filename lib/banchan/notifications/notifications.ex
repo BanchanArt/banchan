@@ -20,7 +20,7 @@ defmodule Banchan.Notifications do
   # Whether to notify the actor themself of actions they take.
   # This is mostly intended to be used for testing the notification
   # system during development.
-  @notify_actor false
+  @notify_actor true
 
   def mark_all_as_read(%User{} = user) do
     from(notification in UserNotification,

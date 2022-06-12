@@ -341,6 +341,7 @@ defmodule Banchan.Commissions do
       )
       |> Repo.one!()
 
+    Notifications.invoice_released(commission, ev, actor)
     Notifications.commission_event_updated(commission, ev, actor)
 
     :ok
@@ -1008,6 +1009,7 @@ defmodule Banchan.Commissions do
     case ret do
       {:ok, event} ->
         Notifications.commission_event_updated(event.commission, event)
+        Notifications.invoice_refund_updated(event.commission, event)
         {:ok, event.invoice}
 
       {:error, err} ->
