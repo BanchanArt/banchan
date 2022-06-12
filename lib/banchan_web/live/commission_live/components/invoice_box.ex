@@ -99,16 +99,19 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
            current_user_member?
          ) do
       {:ok, _} ->
-        {:noreply, socket
-          |> assign(refund_modal_open: false, refund_error_message: nil)}
+        {:noreply,
+         socket
+         |> assign(refund_modal_open: false, refund_error_message: nil)}
 
       {:error, %Stripe.Error{} = error} ->
-        {:noreply, socket
-          |> assign(refund_error_message: "Failed to refund payment: #{error.user_message}")}
+        {:noreply,
+         socket
+         |> assign(refund_error_message: "Failed to refund payment: #{error.user_message}")}
 
       {:error, _} ->
-        {:noreply, socket
-          |> assign(refund_error_message: "Refund failed.")}
+        {:noreply,
+         socket
+         |> assign(refund_error_message: "Refund failed.")}
     end
   end
 
@@ -119,14 +122,13 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           assigns: %{current_user: current_user, commission: commission, event: event}
         } = socket
       ) do
+    Commissions.release_payment!(
+      current_user,
+      commission,
+      event.invoice
+    )
 
-        Commissions.release_payment!(
-          current_user,
-          commission,
-          event.invoice
-        )
-
-        {:noreply, socket |> assign(release_modal_open: false)}
+    {:noreply, socket |> assign(release_modal_open: false)}
   end
 
   def handle_event("toggle_release_modal", _, socket) do
@@ -173,11 +175,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
             {/if}
             <p class="py-4">Are you sure you want to refund this payment?</p>
             <div class="modal-action">
-              <Button
-                disabled={!@refund_modal_open}
-                class="refund-btn btn-warning"
-                click="refund"
-              >Confirm</Button>
+              <Button disabled={!@refund_modal_open} class="refund-btn btn-warning" click="refund">Confirm</Button>
             </div>
           </div>
         </div>
@@ -196,11 +194,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
             <h3 class="text-lg font-bold">Confirm Fund Release</h3>
             <p class="py-4">Funds will be made available immediately to the studio, instead of waiting until the commission is approved.</p>
             <div class="modal-action">
-              <Button
-                disabled={!@release_modal_open}
-                class="release-btn btn-success"
-                click="release"
-              >Confirm</Button>
+              <Button disabled={!@release_modal_open} class="release-btn btn-success" click="release">Confirm</Button>
             </div>
           </div>
         </div>

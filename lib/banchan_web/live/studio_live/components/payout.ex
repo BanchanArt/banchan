@@ -17,7 +17,6 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   prop data_pending, :boolean, default: false
 
   data modal_open, :boolean, default: false
-  data cancel_pending, :boolean, default: false
 
   def update(assigns, socket) do
     socket =
@@ -31,7 +30,6 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
 
     {:ok,
      socket
-     |> assign(cancel_pending: false)
      |> assign(assigns)}
   end
 
@@ -48,37 +46,17 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   end
 
   def handle_event("cancel_payout", _, socket) do
-    me = self()
+    case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
+      :ok ->
+        # TODO: add message
+        # add_flash: {:info, "Payout cancelled."}
+        {:noreply, socket |> assign(modal_open: false)}
 
-    Task.Supervisor.start_child(
-      Banchan.TaskSupervisor,
-      fn ->
-        case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
-          :ok ->
-            send_update(
-              me,
-              __MODULE__,
-              id: socket.assigns.id,
-              modal_open: false,
-              cancel_pending: false,
-              add_flash: {:info, "Payout cancelled."}
-            )
-
-          {:error, err} ->
-            send_update(
-              me,
-              __MODULE__,
-              id: socket.assigns.id,
-              cancel_pending: false,
-              modal_open: false,
-              add_flash: {:error, "Failed to cancel payout: #{err.user_message}"}
-            )
-        end
-      end,
-      restart: :transient
-    )
-
-    {:noreply, socket |> assign(cancel_pending: true)}
+      {:error, err} ->
+        # TODO: Show this message
+        {:noreply,
+         socket |> assign(modal_error_message: "Failed to cancel payout: #{err.user_message}")}
+    end
   end
 
   defp replace_fragment(uri, event) do
@@ -87,7 +65,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
 
   def render(assigns) do
     cancel_disabled =
-      !assigns.payout || assigns.cancel_pending || !assigns.payout.stripe_payout_id ||
+      !assigns.payout || !assigns.payout.stripe_payout_id ||
         Payout.done?(assigns.payout)
 
     ~F"""
@@ -105,8 +83,8 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
           <p class="py-4">Are you sure you want to cancel this payout? Note that the payout may have already completed (or failed).</p>
           <div class="modal-action">
             <Button
-              disabled={!@modal_open || cancel_disabled || @cancel_pending}
-              class={"cancel-payout btn-error", loading: @cancel_pending}
+              disabled={!@modal_open || cancel_disabled}
+              class="cancel-payout btn-error"
               click="cancel_payout"
             >Confirm</Button>
           </div>

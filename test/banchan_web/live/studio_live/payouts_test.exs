@@ -559,15 +559,9 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       |> element(".open-modal")
       |> render_click()
 
-      assert page_live
-             |> element(".cancel-payout")
-             # Immediately starts spinner
-             |> render_click() =~ "loading"
-
-      assert page_live
-             |> element(".cancel-payout")
-             # Also immediately disables the payout button
-             |> render() =~ "disabled=\"disabled\""
+      page_live
+      |> element(".cancel-payout")
+      |> render_click()
 
       assert page_live
              |> element(".payout-row .badge")

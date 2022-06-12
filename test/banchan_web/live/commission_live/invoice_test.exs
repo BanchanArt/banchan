@@ -444,13 +444,14 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
          }}
       end)
 
-      log = capture_log([level: :error], fn ->
-        artist_page_live
-        |> element(".invoice-box .modal .refund-btn")
-        |> render_click()
+      log =
+        capture_log([level: :error], fn ->
+          artist_page_live
+          |> element(".invoice-box .modal .refund-btn")
+          |> render_click()
 
-        Notifications.wait_for_notifications()
-      end)
+          Notifications.wait_for_notifications()
+        end)
 
       assert log =~ internal_error
       assert log =~ user_error
