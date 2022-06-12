@@ -351,8 +351,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       charge_id = "stripe_charge_mock_id#{System.unique_integer()}"
       refund_id = "stripe_refund_mock_id#{System.unique_integer()}"
 
-      me = self()
-
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_session, fn id, _opts ->
         assert session.id == id
@@ -366,7 +364,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         assert charge_id == params.charge
         assert true == params.reverse_transfer
         assert true == params.refund_application_fee
-        send(me, :keep_going)
         {:ok, %Stripe.Refund{id: refund_id, status: "succeeded"}}
       end)
 
@@ -375,15 +372,10 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .modal .refund-btn")
       |> render_click()
 
-      receive do
-        :keep_going -> nil
-      after
-        1_000 -> nil
-      end
-
       Notifications.wait_for_notifications()
 
-      # ???
+      # ??? This is needed for CI to pass ???
+      # I guess the has_element? doesn't actually ping the live view properly.
       artist_page_live |> render()
 
       refute artist_page_live
