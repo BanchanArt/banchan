@@ -727,7 +727,73 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
   end
 
   describe "releasing an invoice" do
-    test "successfully releasing invoice" do
+    test "successfully releasing invoice", %{
+      conn: conn,
+      artist: artist,
+      client: client,
+      commission: commission
+    } do
+      amount = Money.new(42_000, :USD)
+      tip = Money.new(6900, :USD)
+
+      payment_fixture(artist, commission, amount, tip)
+
+      client_conn = log_in_user(conn, client)
+      artist_conn = log_in_user(conn, artist)
+
+      {:ok, client_page_live, _html} =
+        live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
+
+      {:ok, artist_page_live, _html} =
+        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+
+      refute artist_page_live
+             |> has_element?(".invoice-box .open-release-modal")
+
+      client_page_live
+      |> element(".invoice-box .open-release-modal")
+      |> render_click()
+
+      modal =
+        client_page_live
+        |> element(".invoice-box .modal.modal-open")
+        |> render()
+
+      assert modal =~ "Confirm Fund Release"
+      assert modal =~ "Funds will be made available immediately"
+      assert modal =~ ~r/<button[^<]+Confirm</
+
+      client_page_live
+      |> element(".invoice-box .modal .close-modal")
+      |> render_click()
+
+      refute client_page_live
+             |> has_element?(".invoice-box .modal")
+
+      client_page_live
+      |> element(".invoice-box .open-release-modal")
+      |> render_click()
+
+      client_page_live
+      |> element(".invoice-box .modal .release-btn")
+      |> render_click()
+
+      refute client_page_live
+             |> has_element?(".invoice-box .modal")
+
+      invoice_box =
+        client_page_live
+        |> element(".invoice-box")
+        |> render()
+
+      invoice_box =~ "Payment released to studio"
+
+      invoice_box =
+        artist_page_live
+        |> element(".invoice-box")
+        |> render()
+
+      invoice_box =~ "Payment released to studio"
     end
   end
 end

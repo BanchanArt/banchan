@@ -190,7 +190,10 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           phx-key="Escape"
         >
           <div :on-click="nothing" class="modal-box relative">
-            <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click="close_release_modal">✕</div>
+            <div
+              class="btn btn-sm btn-circle close-modal absolute right-2 top-2"
+              :on-click="close_release_modal"
+            >✕</div>
             <h3 class="text-lg font-bold">Confirm Fund Release</h3>
             <p class="py-4">Funds will be made available immediately to the studio, instead of waiting until the commission is approved.</p>
             <div class="modal-action">
