@@ -8,8 +8,8 @@ defmodule BanchanWeb.CommissionLive do
   alias Surface.Components.Form.{Field, Submit}
   alias Surface.Components.Form.TextInput, as: SurfaceTextInput
 
-  alias Banchan.{Commissions, Notifications, Studios}
-  alias Banchan.Commissions.CommissionFilter
+  alias Banchan.{Commissions, Studios}
+  alias Banchan.Commissions.{CommissionFilter, Notifications}
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
   alias BanchanWeb.Components.Form.{Checkbox, MultipleSelect, TextInput}

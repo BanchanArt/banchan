@@ -14,7 +14,6 @@ defmodule Banchan.StudiosTest do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.Invoice
-  alias Banchan.Notifications
   alias Banchan.Repo
   alias Banchan.Studios
   alias Banchan.Studios.{Payout, Studio}
@@ -81,7 +80,7 @@ defmodule Banchan.StudiosTest do
       Repo.transaction(fn ->
         subscribers =
           studio
-          |> Notifications.studio_subscribers()
+          |> Studios.Notifications.subscribers()
           |> Enum.map(& &1.id)
 
         assert subscribers == [user.id]

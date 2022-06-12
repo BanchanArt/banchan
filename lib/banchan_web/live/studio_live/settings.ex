@@ -6,9 +6,8 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   alias Surface.Components.Form
 
-  alias Banchan.Notifications
   alias Banchan.Studios
-  alias Banchan.Studios.Studio
+  alias Banchan.Studios.{Notifications, Studio}
 
   import BanchanWeb.StudioLive.Helpers
 

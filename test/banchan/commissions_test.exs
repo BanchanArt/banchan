@@ -63,7 +63,7 @@ defmodule Banchan.CommissionsTest do
       Repo.transaction(fn ->
         subscribers =
           commission
-          |> Notifications.commission_subscribers()
+          |> Commissions.Notifications.subscribers()
           |> Enum.map(& &1.id)
 
         assert subscribers == [user.id]

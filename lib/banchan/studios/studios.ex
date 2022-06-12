@@ -14,10 +14,9 @@ defmodule Banchan.Studios do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Invoice
-  alias Banchan.Notifications
   alias Banchan.Offerings.Offering
   alias Banchan.Repo
-  alias Banchan.Studios.{Payout, Studio}
+  alias Banchan.Studios.{Notifications, Payout, Studio}
 
   @doc """
   Gets a studio by its handle.

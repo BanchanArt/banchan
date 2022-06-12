@@ -17,10 +17,10 @@ defmodule Banchan.Commissions do
     Event,
     EventAttachment,
     Invoice,
-    LineItem
+    LineItem,
+    Notifications
   }
 
-  alias Banchan.Notifications
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
   alias Banchan.Studios

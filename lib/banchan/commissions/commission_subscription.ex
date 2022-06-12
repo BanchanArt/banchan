@@ -1,4 +1,4 @@
-defmodule Banchan.Notifications.CommissionSubscription do
+defmodule Banchan.Commissions.CommissionSubscription do
   @moduledoc """
   User subscriptions to commission events.
   """
