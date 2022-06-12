@@ -880,6 +880,26 @@ defmodule Banchan.Commissions do
   end
 
   def refund_payment(%User{} = actor, %Invoice{} = invoice, _) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        invoice = invoice |> Repo.reload()
+
+        if invoice.status != :succeeded do
+          Logger.error(%{
+            message: "Attempted to refund an invoice that wasn't :succeeded.",
+            invoice: invoice
+          })
+
+          {:error, :invoice_not_refundable}
+        else
+          process_refund_payment(actor, invoice)
+        end
+      end)
+
+    ret
+  end
+
+  defp process_refund_payment(%User{} = actor, %Invoice{} = invoice) do
     case refund_payment_on_stripe(invoice) do
       {:ok, %Stripe.Refund{status: "failed"} = refund} ->
         Logger.error(%{message: "Refund failed", refund: refund})
@@ -988,9 +1008,12 @@ defmodule Banchan.Commissions do
 
         update_res =
           if is_nil(invoice_id) do
-            from(i in Invoice, where: i.stripe_refund_id == ^refund.id, select: i.id)
+            from(i in Invoice,
+              where: i.status == :succeeded and i.stripe_refund_id == ^refund.id,
+              select: i.id
+            )
           else
-            from(i in Invoice, where: i.id == ^invoice_id, select: i.id)
+            from(i in Invoice, where: i.status == :succeeded and i.id == ^invoice_id, select: i.id)
           end
           |> Repo.update_all(set: assignments)
 
