@@ -257,7 +257,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 <div class="stat-desc">Payment is requested.</div>
                 <Form for={@changeset} class="stat-actions" change="change" submit="submit">
                   <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
-                  <Submit changeset={@changeset} label="Pay" />
+                  <Submit class="pay-invoice" changeset={@changeset} label="Pay" />
                   {#if @current_user_member?}
                     {!-- # TODO: This should be a Link so it's accessible. --}
                     <Button class="cancel-payment-request" click="force_expire" label="Cancel Payment Request" />
@@ -277,11 +277,11 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-actions">
                 {#if @current_user.id == @commission.client_id}
                   {!-- # TODO: This should be a Link so it's accessible. --}
-                  <Button click="continue_payment" label="Continue Payment" />
+                  <Button class="continue-payment" click="continue_payment" label="Continue Payment" />
                 {/if}
                 {#if @current_user_member?}
                   {!-- # TODO: This should be a Link so it's accessible. --}
-                  <Button class="cancel-payment-request" click="force_expire" label="Cancel Payment" />
+                  <Button class="cancel-payment-request" click="force_expire" label="Cancel Payment Request" />
                 {/if}
               </div>
             {#match :expired}
