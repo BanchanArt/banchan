@@ -383,6 +383,9 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
 
       Notifications.wait_for_notifications()
 
+      # ???
+      artist_page_live |> render()
+
       refute artist_page_live
              |> has_element?(".invoice-box .modal")
 
