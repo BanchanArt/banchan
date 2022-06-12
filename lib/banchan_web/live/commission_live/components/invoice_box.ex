@@ -173,7 +173,12 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
             {#if @refund_error_message}
               <p class="alert alert-danger" role="alert">{@refund_error_message}</p>
             {/if}
-            <p class="py-4">Are you sure you want to refund this payment?</p>
+            <p class="py-4">
+              Are you sure you want to refund this payment?
+              <p class="font-bold text-warning">
+                WARNING: The Stripe portion of the platform fee can't be reimbursed, but Banchan's portion will be returned.
+              </p>
+            </p>
             <div class="modal-action">
               <Button disabled={!@refund_modal_open} class="refund-btn btn-warning" click="refund">Confirm</Button>
             </div>
