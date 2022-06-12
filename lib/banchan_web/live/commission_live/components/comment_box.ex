@@ -118,7 +118,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
 
   def render(assigns) do
     ~F"""
-    <div class="message-box">
+    <div id={@id} class="message-box">
       <Form
         for={@changeset}
         change="change"

@@ -199,48 +199,52 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   def render(assigns) do
     ~F"""
-    <div class="flex flex-col">
+    <div class="flex flex-col invoice-box">
       {!-- Refund confirmation modal --}
-      <div
-        class={"modal", "modal-open": @refund_modal_open}
-        :on-click="toggle_refund_modal"
-        :on-window-keydown="close_refund_modal"
-        phx-key="Escape"
-      >
-        <div :on-click="nothing" class="modal-box relative">
-          <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click="close_refund_modal">✕</div>
-          <h3 class="text-lg font-bold">Confirm Refund</h3>
-          <p class="py-4">Are you sure you want to refund this payment?</p>
-          <div class="modal-action">
-            <Button
-              disabled={!@refund_modal_open || @refund_pending}
-              class={"refund-btn btn-warning", loading: @refund_pending}
-              click="refund"
-            >Confirm</Button>
+      {#if @refund_modal_open}
+        <div
+          class="modal modal-open"
+          :on-click="toggle_refund_modal"
+          :on-window-keydown="close_refund_modal"
+          phx-key="Escape"
+        >
+          <div :on-click="nothing" class="modal-box relative">
+            <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click="close_refund_modal">✕</div>
+            <h3 class="text-lg font-bold">Confirm Refund</h3>
+            <p class="py-4">Are you sure you want to refund this payment?</p>
+            <div class="modal-action">
+              <Button
+                disabled={!@refund_modal_open || @refund_pending}
+                class={"refund-btn btn-warning", loading: @refund_pending}
+                click="refund"
+              >Confirm</Button>
+            </div>
           </div>
         </div>
-      </div>
+      {/if}
 
       {!-- Release confirmation modal --}
-      <div
-        class={"modal", "modal-open": @release_modal_open}
-        :on-click="toggle_release_modal"
-        :on-window-keydown="close_release_modal"
-        phx-key="Escape"
-      >
-        <div :on-click="nothing" class="modal-box relative">
-          <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click="close_release_modal">✕</div>
-          <h3 class="text-lg font-bold">Confirm Fund Release</h3>
-          <p class="py-4">Funds will be made available immediately to the studio, instead of waiting until the commission is approved.</p>
-          <div class="modal-action">
-            <Button
-              disabled={!@release_modal_open || @release_pending}
-              class={"release-btn btn-success", loading: @release_pending}
-              click="release"
-            >Confirm</Button>
+      {#if @release_modal_open}
+        <div
+          class="modal modal-open"
+          :on-click="toggle_release_modal"
+          :on-window-keydown="close_release_modal"
+          phx-key="Escape"
+        >
+          <div :on-click="nothing" class="modal-box relative">
+            <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click="close_release_modal">✕</div>
+            <h3 class="text-lg font-bold">Confirm Fund Release</h3>
+            <p class="py-4">Funds will be made available immediately to the studio, instead of waiting until the commission is approved.</p>
+            <div class="modal-action">
+              <Button
+                disabled={!@release_modal_open || @release_pending}
+                class={"release-btn btn-success", loading: @release_pending}
+                click="release"
+              >Confirm</Button>
+            </div>
           </div>
         </div>
-      </div>
+      {/if}
 
       {!-- Invoice box --}
       <div class="place-self-center stats stats-vertical md:stats-horizontal">
@@ -256,7 +260,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                   <Submit changeset={@changeset} label="Pay" />
                   {#if @current_user_member?}
                     {!-- # TODO: This should be a Link so it's accessible. --}
-                    <Button click="force_expire" label="Cancel Payment" />
+                    <Button class="cancel-payment-request" click="force_expire" label="Cancel Payment Request" />
                   {/if}
                 </Form>
               {#else}
@@ -264,7 +268,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 {#if @current_user_member?}
                   <div class="stat-actions">
                     {!-- # TODO: This should be a Link so it's accessible. --}
-                    <Button click="force_expire" label="Cancel Payment" />
+                    <Button class="cancel-payment-request" click="force_expire" label="Cancel Payment Request" />
                   </div>
                 {/if}
               {/if}
@@ -277,7 +281,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 {/if}
                 {#if @current_user_member?}
                   {!-- # TODO: This should be a Link so it's accessible. --}
-                  <Button click="force_expire" label="Cancel Payment" />
+                  <Button class="cancel-payment-request" click="force_expire" label="Cancel Payment" />
                 {/if}
               </div>
             {#match :expired}
