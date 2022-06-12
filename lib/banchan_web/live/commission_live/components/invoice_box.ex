@@ -195,7 +195,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               :on-click="close_release_modal"
             >✕</div>
             <h3 class="text-lg font-bold">Confirm Fund Release</h3>
-            <p class="py-4">Funds will be made available immediately to the studio, instead of waiting until the commission is approved.</p>
+            <p class="py-4">Funds will be made available immediately to the studio, instead of waiting until the commission is approved. <p class="font-bold text-warning">WARNING: You will not be able to request a refund once released.</p></p>
             <div class="modal-action">
               <Button disabled={!@release_modal_open} class="release-btn btn-success" click="release">Confirm</Button>
             </div>
