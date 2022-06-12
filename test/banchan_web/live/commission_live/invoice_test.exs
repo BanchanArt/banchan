@@ -584,10 +584,142 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       assert invoice_box =~ "Payment has been refunded to the client"
     end
 
-    test "refund canceled" do
+    test "refund canceled", %{
+      conn: conn,
+      artist: artist,
+      client: client,
+      commission: commission
+    } do
+      amount = Money.new(42_000, :USD)
+      tip = Money.new(6900, :USD)
+
+      session = payment_fixture(artist, commission, amount, tip)
+
+      client_conn = log_in_user(conn, client)
+      artist_conn = log_in_user(conn, artist)
+
+      {:ok, client_page_live, _html} =
+        live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
+
+      {:ok, artist_page_live, _html} =
+        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+
+      artist_page_live
+      |> element(".invoice-box .open-refund-modal")
+      |> render_click()
+
+      intent_id = "stripe_intent_mock_id#{System.unique_integer()}"
+      charge_id = "stripe_charge_mock_id#{System.unique_integer()}"
+      refund_id = "stripe_refund_mock_id#{System.unique_integer()}"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_session, fn id, _opts ->
+        assert session.id == id
+        {:ok, %Stripe.Session{id: id, payment_intent: intent_id}}
+      end)
+      |> expect(:retrieve_payment_intent, fn id, _params, _opts ->
+        assert intent_id == id
+        {:ok, %Stripe.PaymentIntent{id: id, charges: %{data: [%{id: charge_id}]}}}
+      end)
+      |> expect(:create_refund, fn _params, _opts ->
+        {:ok, %Stripe.Refund{id: refund_id, status: "pending"}}
+      end)
+
+      artist_page_live
+      |> element(".invoice-box .modal .refund-btn")
+      |> render_click()
+
+      Commissions.process_refund_updated(%Stripe.Refund{id: refund_id, status: "canceled"})
+
+      Notifications.wait_for_notifications()
+
+      invoice_box =
+        artist_page_live
+        |> element(".invoice-box")
+        |> render()
+
+      assert invoice_box =~ "$420.00"
+      assert invoice_box =~ "$69.00"
+      assert invoice_box =~ "A refund was submitted but was canceled"
+
+      invoice_box =
+        client_page_live
+        |> element(".invoice-box")
+        |> render()
+
+      assert invoice_box =~ "$420.00"
+      assert invoice_box =~ "$69.00"
+      assert invoice_box =~ "A refund was submitted but was canceled"
     end
 
-    test "refund needs further action" do
+    test "refund needs further action", %{
+      conn: conn,
+      artist: artist,
+      client: client,
+      commission: commission
+    } do
+      amount = Money.new(42_000, :USD)
+      tip = Money.new(6900, :USD)
+
+      session = payment_fixture(artist, commission, amount, tip)
+
+      client_conn = log_in_user(conn, client)
+      artist_conn = log_in_user(conn, artist)
+
+      {:ok, client_page_live, _html} =
+        live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
+
+      {:ok, artist_page_live, _html} =
+        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+
+      artist_page_live
+      |> element(".invoice-box .open-refund-modal")
+      |> render_click()
+
+      intent_id = "stripe_intent_mock_id#{System.unique_integer()}"
+      charge_id = "stripe_charge_mock_id#{System.unique_integer()}"
+      refund_id = "stripe_refund_mock_id#{System.unique_integer()}"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_session, fn id, _opts ->
+        assert session.id == id
+        {:ok, %Stripe.Session{id: id, payment_intent: intent_id}}
+      end)
+      |> expect(:retrieve_payment_intent, fn id, _params, _opts ->
+        assert intent_id == id
+        {:ok, %Stripe.PaymentIntent{id: id, charges: %{data: [%{id: charge_id}]}}}
+      end)
+      |> expect(:create_refund, fn _params, _opts ->
+        {:ok, %Stripe.Refund{id: refund_id, status: "pending"}}
+      end)
+
+      artist_page_live
+      |> element(".invoice-box .modal .refund-btn")
+      |> render_click()
+
+      Commissions.process_refund_updated(%Stripe.Refund{id: refund_id, status: "requires_action"})
+
+      Notifications.wait_for_notifications()
+
+      invoice_box =
+        artist_page_live
+        |> element(".invoice-box")
+        |> render()
+
+      assert invoice_box =~ "$420.00"
+      assert invoice_box =~ "$69.00"
+      assert invoice_box =~ "A refund was submitted but requires further action."
+      refute invoice_box =~ "Please check your email"
+
+      invoice_box =
+        client_page_live
+        |> element(".invoice-box")
+        |> render()
+
+      assert invoice_box =~ "$420.00"
+      assert invoice_box =~ "$69.00"
+      assert invoice_box =~ "A refund was submitted but requires further action."
+      assert invoice_box =~ "Please check your email"
     end
 
     test "refunding after release" do

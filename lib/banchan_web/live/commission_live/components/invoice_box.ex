@@ -298,9 +298,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                   for an unknown reason. Please reach out to support.
               {/case}
             {#match :canceled}
-              This refund was canceled.
+              A refund was submitted but was canceled.
             {#match :requires_action}
-              This refund requires further action.
+              A refund was submitted but requires further action.
               {#if @current_user.id == @commission.client_id}
                 Stripe will contact you for next steps, if they haven't already. Please check your email.
               {/if}
