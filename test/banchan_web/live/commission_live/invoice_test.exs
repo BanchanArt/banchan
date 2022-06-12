@@ -561,7 +561,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       assert invoice_box =~ "$69.00"
       assert invoice_box =~ "A refund is pending"
 
-      Commissions.process_refund_updated(%Stripe.Refund{id: refund_id, status: "succeeded"})
+      Commissions.process_refund_updated(%Stripe.Refund{id: refund_id, status: "succeeded"}, nil)
 
       Notifications.wait_for_notifications()
 
@@ -629,7 +629,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .modal .refund-btn")
       |> render_click()
 
-      Commissions.process_refund_updated(%Stripe.Refund{id: refund_id, status: "canceled"})
+      Commissions.process_refund_updated(%Stripe.Refund{id: refund_id, status: "canceled"}, nil)
 
       Notifications.wait_for_notifications()
 
@@ -697,7 +697,10 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .modal .refund-btn")
       |> render_click()
 
-      Commissions.process_refund_updated(%Stripe.Refund{id: refund_id, status: "requires_action"})
+      Commissions.process_refund_updated(
+        %Stripe.Refund{id: refund_id, status: "requires_action"},
+        nil
+      )
 
       Notifications.wait_for_notifications()
 
@@ -767,11 +770,14 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .modal .refund-btn")
       |> render_click()
 
-      Commissions.process_refund_updated(%Stripe.Refund{
-        id: refund_id,
-        status: "failed",
-        failure_reason: "lost_or_stolen_card"
-      })
+      Commissions.process_refund_updated(
+        %Stripe.Refund{
+          id: refund_id,
+          status: "failed",
+          failure_reason: "lost_or_stolen_card"
+        },
+        nil
+      )
 
       Notifications.wait_for_notifications()
 

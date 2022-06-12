@@ -552,13 +552,15 @@ defmodule Banchan.CommissionsTest do
       end)
 
       iid = invoice.id
+      artist_id = artist.id
 
       assert {:ok,
               %Invoice{
                 id: ^iid,
                 stripe_refund_id: ^refund_id,
                 status: :refunded,
-                refund_status: :succeeded
+                refund_status: :succeeded,
+                refunded_by_id: ^artist_id
               }} = Commissions.refund_payment(artist, invoice, true)
 
       eid = invoice.event.id
@@ -732,7 +734,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Commissions.process_refund_updated(refund)
+              }} = Commissions.process_refund_updated(refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -831,7 +833,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Commissions.process_refund_updated(refund)
+              }} = Commissions.process_refund_updated(refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -930,7 +932,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Commissions.process_refund_updated(refund)
+              }} = Commissions.process_refund_updated(refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -1034,7 +1036,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Commissions.process_refund_updated(refund)
+              }} = Commissions.process_refund_updated(refund, nil)
 
       Notifications.wait_for_notifications()
 

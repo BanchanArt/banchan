@@ -48,6 +48,7 @@ defmodule Banchan.Commissions.Invoice do
       ],
       default: :pending
 
+    belongs_to :refunded_by, Banchan.Accounts.User
     belongs_to :commission, Banchan.Commissions.Commission
     belongs_to :client, Banchan.Accounts.User
     belongs_to :event, Banchan.Commissions.Event

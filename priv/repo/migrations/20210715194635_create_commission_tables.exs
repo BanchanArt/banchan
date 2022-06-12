@@ -177,6 +177,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :amount, :money_with_currency, null: false
       add :platform_fee, :money_with_currency
       add :required, :boolean, default: false
+      add :refunded_by_id, references(:users, on_delete: :nothing)
       add :commission_id, references(:commissions, on_delete: :nothing)
       add :client_id, references(:users, on_delete: :nothing)
       add :event_id, references(:commission_events, on_delete: :nothing)

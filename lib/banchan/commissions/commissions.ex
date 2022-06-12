@@ -879,27 +879,26 @@ defmodule Banchan.Commissions do
     {:error, :unauthorized}
   end
 
-  def refund_payment(%User{} = _actor, %Invoice{} = invoice, _) do
-    # TODO: record the actor somewhere, for auditing purposes.
+  def refund_payment(%User{} = actor, %Invoice{} = invoice, _) do
     case refund_payment_on_stripe(invoice) do
       {:ok, %Stripe.Refund{status: "failed"} = refund} ->
         Logger.error(%{message: "Refund failed", refund: refund})
-        process_refund_updated(refund, invoice.id)
+        process_refund_updated(refund, invoice.id, actor)
 
       {:ok, %Stripe.Refund{status: "canceled"} = refund} ->
         Logger.error(%{message: "Refund canceled", refund: refund})
-        process_refund_updated(refund, invoice.id)
+        process_refund_updated(refund, invoice.id, actor)
 
       {:ok, %Stripe.Refund{status: "requires_action"} = refund} ->
         Logger.info(%{message: "Refund requires action", refund: refund})
         # This should eventually succeed asynchronously.
-        process_refund_updated(refund, invoice.id)
+        process_refund_updated(refund, invoice.id, actor)
 
       {:ok, %Stripe.Refund{status: "succeeded"} = refund} ->
-        process_refund_updated(refund, invoice.id)
+        process_refund_updated(refund, invoice.id, actor)
 
       {:ok, %Stripe.Refund{status: "pending"} = refund} ->
-        process_refund_updated(refund, invoice.id)
+        process_refund_updated(refund, invoice.id, actor)
 
       {:error, %Stripe.Error{} = err} ->
         {:error, err}
@@ -946,7 +945,7 @@ defmodule Banchan.Commissions do
   # Disabling because honestly, refactoring this one is pointless.
   #
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def process_refund_updated(%Stripe.Refund{} = refund, invoice_id \\ nil) do
+  def process_refund_updated(%Stripe.Refund{} = refund, invoice_id, actor \\ nil) do
     {:ok, ret} =
       Repo.transaction(fn ->
         assignments =
@@ -978,6 +977,13 @@ defmodule Banchan.Commissions do
                 stripe_refund_id: refund.id,
                 refund_failure_reason: nil
               ]
+          end
+
+        assignments =
+          if is_nil(actor) do
+            assignments
+          else
+            assignments ++ [refunded_by_id: actor.id]
           end
 
         update_res =

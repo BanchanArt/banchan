@@ -58,7 +58,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
   end
 
   defp handle_event(%Stripe.Event{type: "charge.refund.updated"} = event, conn) do
-    {:ok, _} = Commissions.process_refund_updated(event.data.object)
+    {:ok, _} = Commissions.process_refund_updated(event.data.object, nil)
 
     conn
     |> resp(200, "OK")
