@@ -24,3 +24,35 @@ $fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
   --navbar-padding: 0.5rem;    /* default padding for navbar */
   --border-btn: 5px;          /* default border size for button */
 }
+
+.phx-click-loading {
+  @apply loading;
+}
+
+.phx-change-loading {
+  @apply loading;
+}
+
+.phx-submit-loading {
+  @apply loading;
+}
+
+.phx-focus-loading {
+  @apply loading;
+}
+
+.phx-blur-loading {
+  @apply loading;
+}
+
+.phx-keydown-loading {
+  @apply loading;
+}
+
+.phx-keyup-loading {
+  @apply loading;
+}
+
+.phx-loading {
+  @apply loading;
+}

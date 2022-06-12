@@ -23,11 +23,10 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   # punning off this for the changeset validation.
   data changeset, :struct, default: %Event{} |> Event.amount_changeset(%{})
 
-  data release_pending, :boolean, default: false
   data release_modal_open, :boolean, default: false
 
-  data refund_pending, :boolean, default: false
   data refund_modal_open, :boolean, default: false
+  data refund_error_message, :string
 
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
@@ -88,93 +87,46 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         _,
         %{
           assigns: %{
-            id: id,
             current_user: current_user,
             event: event,
             current_user_member?: current_user_member?
           }
         } = socket
       ) do
-    me = self()
+    case Commissions.refund_payment(
+           current_user,
+           event.invoice,
+           current_user_member?
+         ) do
+      {:ok, _} ->
+        {:noreply, socket
+          |> assign(refund_modal_open: false, refund_error_message: nil)}
 
-    Task.Supervisor.start_child(
-      Banchan.TaskSupervisor,
-      fn ->
-        case Commissions.refund_payment(
-               current_user,
-               event.invoice,
-               current_user_member?
-             ) do
-          # TODO: failed refunds and other statuses?
-          {:ok, _} ->
-            send_update(
-              me,
-              __MODULE__,
-              id: id,
-              refund_modal_open: false,
-              refund_pending: false,
-              # TODO: flashes
-              add_flash: {:info, "Payment refunded"}
-            )
+      {:error, %Stripe.Error{} = error} ->
+        {:noreply, socket
+          |> assign(refund_error_message: "Failed to refund payment: #{error.user_message}")}
 
-          {:error, %Stripe.Error{} = error} ->
-            send_update(
-              me,
-              __MODULE__,
-              id: id,
-              refund_pending: false,
-              refund_modal_open: false,
-              add_flash: {:error, "Failed to refund payment: #{error.user_message}"}
-            )
-
-          {:error, _} ->
-            # TODO: Why isn' this appearing?
-            send_update(
-              me,
-              __MODULE__,
-              id: id,
-              refund_pending: false,
-              refund_modal_open: false,
-              add_flash: {:error, "Refund failed."}
-            )
-        end
-      end,
-      restart: :transient
-    )
-
-    {:noreply, socket |> assign(refund_pending: true)}
+      {:error, _} ->
+        {:noreply, socket
+          |> assign(refund_error_message: "Refund failed.")}
+    end
   end
 
   def handle_event(
         "release",
         _,
         %{
-          assigns: %{id: id, current_user: current_user, commission: commission, event: event}
+          assigns: %{current_user: current_user, commission: commission, event: event}
         } = socket
       ) do
-    me = self()
 
-    Task.Supervisor.start_child(
-      Banchan.TaskSupervisor,
-      fn ->
         Commissions.release_payment!(
           current_user,
           commission,
           event.invoice
         )
 
-        send_update(
-          me,
-          __MODULE__,
-          id: id,
-          release_pending: false,
-          release_modal_open: false,
-          add_flash: {:info, "Payment released to studio"}
-        )
-      end
-    )
-
-    {:noreply, socket |> assign(release_pending: true)}
+        {:noreply, socket |> assign(release_modal_open: false)}
   end
 
   def handle_event("toggle_release_modal", _, socket) do
@@ -186,11 +138,13 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   end
 
   def handle_event("toggle_refund_modal", _, socket) do
-    {:noreply, socket |> assign(refund_modal_open: !socket.assigns.refund_modal_open)}
+    {:noreply,
+     socket
+     |> assign(refund_error_message: nil, refund_modal_open: !socket.assigns.refund_modal_open)}
   end
 
   def handle_event("close_refund_modal", _, socket) do
-    {:noreply, socket |> assign(refund_modal_open: false)}
+    {:noreply, socket |> assign(refund_error_message: nil, refund_modal_open: false)}
   end
 
   def handle_event("nothing", _, socket) do
@@ -214,11 +168,14 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               :on-click="close_refund_modal"
             >✕</div>
             <h3 class="text-lg font-bold">Confirm Refund</h3>
+            {#if @refund_error_message}
+              <p class="alert alert-danger" role="alert">{@refund_error_message}</p>
+            {/if}
             <p class="py-4">Are you sure you want to refund this payment?</p>
             <div class="modal-action">
               <Button
-                disabled={!@refund_modal_open || @refund_pending}
-                class={"refund-btn btn-warning", loading: @refund_pending}
+                disabled={!@refund_modal_open}
+                class="refund-btn btn-warning"
                 click="refund"
               >Confirm</Button>
             </div>
@@ -240,8 +197,8 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
             <p class="py-4">Funds will be made available immediately to the studio, instead of waiting until the commission is approved.</p>
             <div class="modal-action">
               <Button
-                disabled={!@release_modal_open || @release_pending}
-                class={"release-btn btn-success", loading: @release_pending}
+                disabled={!@release_modal_open}
+                class="release-btn btn-success"
                 click="release"
               >Confirm</Button>
             </div>
@@ -331,7 +288,32 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           </div>
         {/if}
       </div>
-      {#if @event.invoice.status == :succeeded}
+      {#if !is_nil(@event.invoice.refund_status)}
+        <span class="italic p-4 text-xs">
+          {#case @event.invoice.refund_status}
+            {#match :pending}
+              A refund is pending for this payment.
+            {#match :failed}
+              Refund failed
+              {#case @event.invoice.refund_failure_reason}
+                {#match :lost_or_stolen_card}
+                  due to a lost or stolen card.
+                {#match :expired_or_canceled_card}
+                  due to an expired or canceled card.
+                {#match :unknown}
+                  for an unknown reason. Please reach out to support.
+              {/case}
+            {#match :canceled}
+              This refund was canceled.
+            {#match :requires_action}
+              This refund requires further action.
+              {#if @current_user.id == @commission.client_id}
+                Stripe will contact you for next steps, if they haven't already. Please check your email.
+              {/if}
+            {#match _}
+          {/case}
+        </span>
+      {#elseif @event.invoice.status == :succeeded}
         <span class="italic p-4 text-xs">
           Note: Banchan.Art will hold all funds for this commission until a final draft is approved.
         </span>

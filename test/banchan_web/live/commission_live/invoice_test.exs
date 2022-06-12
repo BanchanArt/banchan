@@ -4,6 +4,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
   """
   use BanchanWeb.ConnCase, async: true
 
+  import ExUnit.CaptureLog
   import Mox
   import Phoenix.LiveViewTest
 
@@ -367,7 +368,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         {:ok, %Stripe.Refund{id: refund_id, status: "succeeded"}}
       end)
 
-      # TODO: Test loading state
       artist_page_live
       |> element(".invoice-box .modal .refund-btn")
       |> render_click()
@@ -404,6 +404,92 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
 
       refute client_page_live
              |> has_element?(".invoice-box .open-refund-modal")
+    end
+
+    test "refund failed", %{
+      conn: conn,
+      artist: artist,
+      client: client,
+      commission: commission
+    } do
+      amount = Money.new(42_000, :USD)
+      tip = Money.new(6900, :USD)
+
+      payment_fixture(artist, commission, amount, tip)
+
+      client_conn = log_in_user(conn, client)
+      artist_conn = log_in_user(conn, artist)
+
+      {:ok, client_page_live, _html} =
+        live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
+
+      {:ok, artist_page_live, _html} =
+        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+
+      artist_page_live
+      |> element(".invoice-box .open-refund-modal")
+      |> render_click()
+
+      user_error = "Something bad happened"
+      internal_error = "Something went poorly internally"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_session, fn _id, _opts ->
+        {:error,
+         %Stripe.Error{
+           code: :request_failed,
+           source: :stripe,
+           message: internal_error,
+           user_message: user_error
+         }}
+      end)
+
+      log = capture_log([level: :error], fn ->
+        artist_page_live
+        |> element(".invoice-box .modal .refund-btn")
+        |> render_click()
+
+        Notifications.wait_for_notifications()
+      end)
+
+      assert log =~ internal_error
+      assert log =~ user_error
+
+      modal =
+        artist_page_live
+        |> element(".invoice-box .modal.modal-open")
+        |> render()
+
+      assert modal =~ "Confirm Refund"
+      assert modal =~ "Are you sure you want to refund this payment?"
+
+      assert modal =~ user_error
+      refute modal =~ internal_error
+      assert modal =~ ~r/<button[^<]+Confirm</
+      refute modal =~ ~r/<button[^>]disabled/
+
+      artist_page_live
+      |> element(".invoice-box .modal .close-modal")
+      |> render_click()
+
+      invoice_box =
+        artist_page_live
+        |> element(".invoice-box")
+        |> render()
+
+      assert invoice_box =~ "$420.00"
+      assert invoice_box =~ "$69.00"
+      # Request errors don't change invoice box state.
+      refute invoice_box =~ "Refund failed"
+
+      invoice_box =
+        client_page_live
+        |> element(".invoice-box")
+        |> render()
+
+      assert invoice_box =~ "$420.00"
+      assert invoice_box =~ "$69.00"
+      refute invoice_box =~ "Refund failed"
     end
 
     test "refund pending after submission" do
