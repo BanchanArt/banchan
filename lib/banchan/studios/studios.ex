@@ -14,10 +14,9 @@ defmodule Banchan.Studios do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Invoice
-  alias Banchan.Notifications
   alias Banchan.Offerings.Offering
   alias Banchan.Repo
-  alias Banchan.Studios.{Payout, Studio}
+  alias Banchan.Studios.{Notifications, Payout, Studio}
 
   @doc """
   Gets a studio by its handle.
@@ -186,42 +185,40 @@ defmodule Banchan.Studios do
         left_join: p in assoc(i, :payouts),
         where:
           c.studio_id == ^studio.id and
-            i.status == :succeeded,
+            (i.status == :succeeded or i.status == :released),
         group_by: [
-          fragment("CASE WHEN s2.status = 'pending' OR s2.status = 'in_transit' THEN 'on_the_way'
-                  WHEN s2.status = 'paid' THEN 'paid'
-                  WHEN c1.status = 'approved' THEN 'released'
+          fragment("CASE WHEN ? = 'pending' OR ? = 'in_transit' THEN 'on_the_way'
+                  WHEN ? = 'paid' THEN 'paid'
+                  WHEN ? = 'released' THEN 'released'
                   ELSE 'held_back'
-                END"),
-          fragment("(c0.amount).currency"),
-          fragment("(c0.tip).currency"),
-          fragment("(c0.platform_fee).currency")
+                END", p.status, p.status, p.status, i.status),
+          fragment("(?).currency", i.amount),
+          fragment("(?).currency", i.tip),
+          fragment("(?).currency", i.platform_fee)
         ],
         select: %{
           status:
             type(
-              fragment(
-                "CASE WHEN s2.status = 'pending' OR s2.status = 'in_transit' THEN 'on_the_way'
-                  WHEN s2.status = 'paid' THEN 'paid'
-                  WHEN c1.status = 'approved' THEN 'released'
+              fragment("CASE WHEN ? = 'pending' OR ? = 'in_transit' THEN 'on_the_way'
+                  WHEN ? = 'paid' THEN 'paid'
+                  WHEN ? = 'released' THEN 'released'
                   ELSE 'held_back'
-                END"
-              ),
+                END", p.status, p.status, p.status, i.status),
               :string
             ),
           charged:
             type(
-              fragment("(sum((c0.amount).amount), (c0.amount).currency)"),
+              fragment("(sum((?).amount), (?).currency)", i.amount, i.amount),
               Money.Ecto.Composite.Type
             ),
           tips:
             type(
-              fragment("(sum((c0.tip).amount), (c0.tip).currency)"),
+              fragment("(sum((?).amount), (?).currency)", i.tip, i.tip),
               Money.Ecto.Composite.Type
             ),
           fees:
             type(
-              fragment("(sum((c0.platform_fee).amount), (c0.platform_fee).currency)"),
+              fragment("(sum((?).amount), (?).currency)", i.platform_fee, i.platform_fee),
               Money.Ecto.Composite.Type
             )
         }
@@ -350,9 +347,8 @@ defmodule Banchan.Studios do
       join: c in assoc(i, :commission),
       left_join: p in assoc(i, :payouts),
       where:
-        c.studio_id == ^studio.id and i.status == :succeeded and
+        c.studio_id == ^studio.id and i.status == :released and
           (is_nil(p.id) or p.status not in [:pending, :in_transit, :paid]) and
-          c.status == :approved and
           fragment("(c0.amount).currency = ?::char(3)", ^currency_str) and
           i.payout_available_on < ^now,
       order_by: {:asc, i.updated_at}

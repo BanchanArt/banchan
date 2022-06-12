@@ -115,6 +115,7 @@ defmodule Banchan.MixProject do
         "cmd --cd assets npm install",
         "ecto.reset"
       ],
+      fmt: ["format"],
       test: ["ecto.reset --quiet", "test"],
       quality: [
         "compile --all-warnings --warnings-as-errors",

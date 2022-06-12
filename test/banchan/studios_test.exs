@@ -14,7 +14,6 @@ defmodule Banchan.StudiosTest do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.Invoice
-  alias Banchan.Notifications
   alias Banchan.Repo
   alias Banchan.Studios
   alias Banchan.Studios.{Payout, Studio}
@@ -81,7 +80,7 @@ defmodule Banchan.StudiosTest do
       Repo.transaction(fn ->
         subscribers =
           studio
-          |> Notifications.studio_subscribers()
+          |> Studios.Notifications.subscribers()
           |> Enum.map(& &1.id)
 
         assert subscribers == [user.id]
@@ -357,7 +356,7 @@ defmodule Banchan.StudiosTest do
 
       paid_invoices =
         from(i in Invoice,
-          where: i.commission_id == ^commission.id and i.status == :succeeded,
+          where: i.commission_id == ^commission.id and i.status == :released,
           select: i.id
         )
         |> Repo.all()
@@ -741,6 +740,11 @@ defmodule Banchan.StudiosTest do
           method: "standard"
         })
       end
+    end
+
+    test "payout with insufficient funds" do
+      # TODO: Payout with insufficient funds should fail
+      # TODO: Payout with negative balance should fail
     end
 
     test "canceled payout" do

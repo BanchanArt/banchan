@@ -1,4 +1,4 @@
-defmodule Banchan.Notifications.StudioSubscription do
+defmodule Banchan.Studios.StudioSubscription do
   @moduledoc """
   User subscriptions to commission events, at the studio level.
   """

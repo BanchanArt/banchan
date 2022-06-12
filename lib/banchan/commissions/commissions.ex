@@ -4,6 +4,8 @@ defmodule Banchan.Commissions do
   """
 
   import Ecto.Query, warn: false
+  require Logger
+
   alias Banchan.Repo
 
   alias Banchan.Accounts.User
@@ -15,10 +17,10 @@ defmodule Banchan.Commissions do
     Event,
     EventAttachment,
     Invoice,
-    LineItem
+    LineItem,
+    Notifications
   }
 
-  alias Banchan.Notifications
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
   alias Banchan.Studios
@@ -293,6 +295,25 @@ defmodule Banchan.Commissions do
 
         {:ok, commission} = changeset |> Repo.update()
 
+        if commission.status == :approved do
+          # Release any successful deposits.
+          from(i in Invoice,
+            where: i.commission_id == ^commission.id and i.status == :succeeded
+          )
+          |> Repo.update_all(set: [status: :released])
+
+          from(e in Event,
+            join: i in assoc(e, :invoice),
+            where: i.commission_id == ^commission.id and i.status == :released,
+            select: e,
+            preload: [:actor, invoice: [], attachments: [:upload, :thumbnail]]
+          )
+          |> Repo.all()
+          |> Enum.each(fn ev ->
+            Notifications.commission_event_updated(commission, ev, actor)
+          end)
+        end
+
         # current_user_member? is checked as part of check_status_transition!
         {:ok, event} = create_event(:status, actor, commission, true, [], %{status: status})
 
@@ -302,6 +323,28 @@ defmodule Banchan.Commissions do
       end)
 
     ret
+  end
+
+  def release_payment!(%User{} = actor, %Commission{} = commission, %Invoice{} = invoice) do
+    {1, _} =
+      from(i in Invoice,
+        join: c in assoc(i, :commission),
+        where: i.id == ^invoice.id and c.client_id == ^actor.id and i.status == :succeeded
+      )
+      |> Repo.update_all(set: [status: :released])
+
+    ev =
+      from(e in Event,
+        where: e.id == ^invoice.event_id,
+        select: e,
+        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail]]
+      )
+      |> Repo.one!()
+
+    Notifications.invoice_released(commission, ev, actor)
+    Notifications.commission_event_updated(commission, ev, actor)
+
+    :ok
   end
 
   defp check_status_transition!(
@@ -828,6 +871,180 @@ defmodule Banchan.Commissions do
 
   def expire_payment!(%Invoice{}, _) do
     raise "Tried to expire an invoice in an invalid state. Reload the invoice and try again. Otherwise, this is a bug."
+  end
+
+  def refund_payment(actor, invoice, current_user_member?)
+
+  def refund_payment(_, _, false) do
+    {:error, :unauthorized}
+  end
+
+  def refund_payment(%User{} = actor, %Invoice{} = invoice, _) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        invoice = invoice |> Repo.reload()
+
+        if invoice.status != :succeeded do
+          Logger.error(%{
+            message: "Attempted to refund an invoice that wasn't :succeeded.",
+            invoice: invoice
+          })
+
+          {:error, :invoice_not_refundable}
+        else
+          process_refund_payment(actor, invoice)
+        end
+      end)
+
+    ret
+  end
+
+  defp process_refund_payment(%User{} = actor, %Invoice{} = invoice) do
+    case refund_payment_on_stripe(invoice) do
+      {:ok, %Stripe.Refund{status: "failed"} = refund} ->
+        Logger.error(%{message: "Refund failed", refund: refund})
+        process_refund_updated(refund, invoice.id, actor)
+
+      {:ok, %Stripe.Refund{status: "canceled"} = refund} ->
+        Logger.error(%{message: "Refund canceled", refund: refund})
+        process_refund_updated(refund, invoice.id, actor)
+
+      {:ok, %Stripe.Refund{status: "requires_action"} = refund} ->
+        Logger.info(%{message: "Refund requires action", refund: refund})
+        # This should eventually succeed asynchronously.
+        process_refund_updated(refund, invoice.id, actor)
+
+      {:ok, %Stripe.Refund{status: "succeeded"} = refund} ->
+        process_refund_updated(refund, invoice.id, actor)
+
+      {:ok, %Stripe.Refund{status: "pending"} = refund} ->
+        process_refund_updated(refund, invoice.id, actor)
+
+      {:error, %Stripe.Error{} = err} ->
+        {:error, err}
+    end
+  end
+
+  defp refund_payment_on_stripe(%Invoice{} = invoice) do
+    case stripe_mod().retrieve_session(invoice.stripe_session_id, []) do
+      {:ok, session} ->
+        case stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, []) do
+          {:ok, %Stripe.PaymentIntent{charges: %{data: [%{id: charge_id}]}}} ->
+            # https://stripe.com/docs/connect/destination-charges#issuing-refunds
+            case stripe_mod().create_refund(
+                   %{
+                     charge: charge_id,
+                     reverse_transfer: true,
+                     refund_application_fee: true
+                   },
+                   []
+                 ) do
+              {:ok, refund} ->
+                {:ok, refund}
+
+              {:error, err} ->
+                Logger.error(%{message: "Refund failed.", error: err})
+                {:error, err}
+            end
+
+          {:error, err} ->
+            Logger.error(%{
+              message: "Failed to retrieve payment intent while refunding.",
+              error: err
+            })
+
+            {:error, err}
+        end
+
+      {:error, err} ->
+        Logger.error(%{message: "Failed to retrieve session while refunding.", error: err})
+        {:error, err}
+    end
+  end
+
+  # Disabling because honestly, refactoring this one is pointless.
+  #
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def process_refund_updated(%Stripe.Refund{} = refund, invoice_id, actor \\ nil) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        assignments =
+          case refund.status do
+            "succeeded" ->
+              [
+                status: :refunded,
+                refund_status: :succeeded,
+                stripe_refund_id: refund.id,
+                refund_failure_reason: nil
+              ]
+
+            "failed" ->
+              [
+                refund_status: :failed,
+                stripe_refund_id: refund.id,
+                refund_failure_reason: refund.failure_reason
+              ]
+
+            "canceled" ->
+              [refund_status: :canceled, stripe_refund_id: refund.id, refund_failure_reason: nil]
+
+            "pending" ->
+              [refund_status: :pending, stripe_refund_id: refund.id, refund_failure_reason: nil]
+
+            "requires_action" ->
+              [
+                refund_status: :requires_action,
+                stripe_refund_id: refund.id,
+                refund_failure_reason: nil
+              ]
+          end
+
+        assignments =
+          if is_nil(actor) do
+            assignments
+          else
+            assignments ++ [refunded_by_id: actor.id]
+          end
+
+        update_res =
+          if is_nil(invoice_id) do
+            from(i in Invoice,
+              where: i.status == :succeeded and i.stripe_refund_id == ^refund.id,
+              select: i.id
+            )
+          else
+            from(i in Invoice, where: i.status == :succeeded and i.id == ^invoice_id, select: i.id)
+          end
+          |> Repo.update_all(set: assignments)
+
+        case update_res do
+          {1, [invoice_id]} ->
+            case from(e in Event,
+                   join: i in assoc(e, :invoice),
+                   where: i.id == ^invoice_id,
+                   select: e,
+                   preload: [:actor, :commission, invoice: [], attachments: [:upload, :thumbnail]]
+                 )
+                 |> Repo.one() do
+              %Event{} = ev -> {:ok, ev}
+              nil -> {:error, :event_not_found}
+            end
+
+          {0, _} ->
+            {:error, :invoice_not_found}
+        end
+      end)
+
+    case ret do
+      {:ok, event} ->
+        Notifications.invoice_refund_updated(event.commission, event, actor)
+        Notifications.commission_event_updated(event.commission, event, actor)
+        {:ok, event.invoice}
+
+      {:error, err} ->
+        Logger.error(%{message: "Failed to update invoice status to refunded", error: err})
+        {:error, :internal_error}
+    end
   end
 
   def deposited_amount(

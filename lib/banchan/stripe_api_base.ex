@@ -31,4 +31,8 @@ defmodule Banchan.StripeAPI.Base do
               signature :: String.t(),
               endpoint_secret :: String.t()
             ) :: {:ok, Stripe.Event.t()} | {:error, Stripe.Error.t()}
+  @callback create_refund(params :: %{}, opts :: Stripe.options()) ::
+              {:ok, Stripe.Refund.t()} | {:error, Stripe.Error.t()}
+  @callback retrieve_session(id :: Stripe.id(), opts :: Stripe.options()) ::
+              {:ok, Stripe.Session.t()} | {:error, Stripe.Error.t()}
 end

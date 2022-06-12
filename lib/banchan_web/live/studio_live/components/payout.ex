@@ -17,7 +17,6 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   prop data_pending, :boolean, default: false
 
   data modal_open, :boolean, default: false
-  data cancel_pending, :boolean, default: false
 
   def update(assigns, socket) do
     socket =
@@ -31,7 +30,6 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
 
     {:ok,
      socket
-     |> assign(cancel_pending: false)
      |> assign(assigns)}
   end
 
@@ -48,32 +46,17 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   end
 
   def handle_event("cancel_payout", _, socket) do
-    Task.Supervisor.start_child(
-      Banchan.TaskSupervisor,
-      fn ->
-        case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
-          :ok ->
-            send_update(
-              __MODULE__,
-              id: "payout",
-              modal_open: false,
-              add_flash: {:info, "Payout cancelled."}
-            )
+    case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
+      :ok ->
+        # TODO: add message
+        # add_flash: {:info, "Payout cancelled."}
+        {:noreply, socket |> assign(modal_open: false)}
 
-          {:error, err} ->
-            send_update(
-              __MODULE__,
-              id: "payout",
-              cancel_pending: false,
-              modal_open: false,
-              add_flash: {:error, "Failed to cancel payout: #{err.user_message}"}
-            )
-        end
-      end,
-      restart: :transient
-    )
-
-    {:noreply, socket |> assign(cancel_pending: true)}
+      {:error, err} ->
+        # TODO: Show this message
+        {:noreply,
+         socket |> assign(modal_error_message: "Failed to cancel payout: #{err.user_message}")}
+    end
   end
 
   defp replace_fragment(uri, event) do
@@ -82,7 +65,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
 
   def render(assigns) do
     cancel_disabled =
-      !assigns.payout || assigns.cancel_pending || !assigns.payout.stripe_payout_id ||
+      !assigns.payout || !assigns.payout.stripe_payout_id ||
         Payout.done?(assigns.payout)
 
     ~F"""
@@ -100,8 +83,8 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
           <p class="py-4">Are you sure you want to cancel this payout? Note that the payout may have already completed (or failed).</p>
           <div class="modal-action">
             <Button
-              disabled={!@modal_open || cancel_disabled || @cancel_pending}
-              class={"cancel-payout btn-error", loading: @cancel_pending}
+              disabled={!@modal_open || cancel_disabled}
+              class="cancel-payout btn-error"
               click="cancel_payout"
             >Confirm</Button>
           </div>
@@ -201,37 +184,39 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
           </thead>
           <tbody>
             {#for invoice <- @payout.invoices}
-              <td class="text-lg">
-                <LiveRedirect
-                  class="link"
-                  to={Routes.commission_path(Endpoint, :show, invoice.commission.public_id)}
-                >{invoice.commission.title}</LiveRedirect>
-                (<a
-                  class="link"
-                  href={replace_fragment(
-                    Routes.commission_path(Endpoint, :show, invoice.commission.public_id),
-                    invoice.event
-                  )}
-                >invoice</a>)
-              </td>
-              <td>
-                {invoice.updated_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
-              </td>
-              <td class="text-success">
-                {invoice.amount
-                |> Money.add(invoice.tip)
-                |> Money.subtract(invoice.platform_fee)
-                |> Money.to_string()}
-              </td>
-              <td>
-                {Money.to_string(invoice.amount)}
-              </td>
-              <td>
-                {Money.to_string(invoice.tip)}
-              </td>
-              <td>
-                {Money.to_string(invoice.platform_fee)}
-              </td>
+              <tr>
+                <td class="text-lg">
+                  <LiveRedirect
+                    class="link"
+                    to={Routes.commission_path(Endpoint, :show, invoice.commission.public_id)}
+                  >{invoice.commission.title}</LiveRedirect>
+                  (<a
+                    class="link"
+                    href={replace_fragment(
+                      Routes.commission_path(Endpoint, :show, invoice.commission.public_id),
+                      invoice.event
+                    )}
+                  >invoice</a>)
+                </td>
+                <td>
+                  {invoice.updated_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
+                </td>
+                <td class="text-success">
+                  {invoice.amount
+                  |> Money.add(invoice.tip)
+                  |> Money.subtract(invoice.platform_fee)
+                  |> Money.to_string()}
+                </td>
+                <td>
+                  {Money.to_string(invoice.amount)}
+                </td>
+                <td>
+                  {Money.to_string(invoice.tip)}
+                </td>
+                <td>
+                  {Money.to_string(invoice.platform_fee)}
+                </td>
+              </tr>
             {/for}
           </tbody>
         </table>

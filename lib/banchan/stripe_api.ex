@@ -64,4 +64,14 @@ defmodule Banchan.StripeAPI do
   def construct_webhook_event(raw_body, signature, endpoint_secret) do
     Stripe.Webhook.construct_event(raw_body, signature, endpoint_secret)
   end
+
+  @impl Banchan.StripeAPI.Base
+  def create_refund(params, opts) do
+    Stripe.Refund.create(params, opts)
+  end
+
+  @impl Banchan.StripeAPI.Base
+  def retrieve_session(id, opts) do
+    Stripe.Session.retrieve(id, opts)
+  end
 end
