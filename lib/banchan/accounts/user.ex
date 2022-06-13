@@ -72,7 +72,7 @@ defmodule Banchan.Accounts.User do
   """
   def registration_test_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:handle, :email, :password, :totp_secret, :totp_activated])
+    |> cast(attrs, [:handle, :email, :password, :confirmed_at, :totp_secret, :totp_activated])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
     |> validate_email()

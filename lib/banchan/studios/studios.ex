@@ -62,25 +62,29 @@ defmodule Banchan.Studios do
       {:ok, %Studio{}}
   """
   def new_studio(%Studio{artists: artists} = studio, url, attrs) do
-    changeset = studio |> Studio.profile_changeset(attrs)
+    if Enum.any?(artists, &is_nil(&1.confirmed_at)) do
+      {:error, :unconfirmed_artist}
+    else
+      changeset = studio |> Studio.profile_changeset(attrs)
 
-    changeset =
-      if changeset.valid? do
-        %{changeset | data: %{studio | stripe_id: create_stripe_account(url)}}
-      else
-        changeset
+      changeset =
+        if changeset.valid? do
+          %{changeset | data: %{studio | stripe_id: create_stripe_account(url)}}
+        else
+          changeset
+        end
+
+      case changeset |> Repo.insert() do
+        {:ok, studio} ->
+          Repo.transaction(fn ->
+            Enum.each(artists, &Notifications.subscribe_user!(&1, studio))
+          end)
+
+          {:ok, studio}
+
+        {:error, err} ->
+          {:error, err}
       end
-
-    case changeset |> Repo.insert() do
-      {:ok, studio} ->
-        Repo.transaction(fn ->
-          Enum.each(artists, &Notifications.subscribe_user!(&1, studio))
-        end)
-
-        {:ok, studio}
-
-      {:error, err} ->
-        {:error, err}
     end
   end
 

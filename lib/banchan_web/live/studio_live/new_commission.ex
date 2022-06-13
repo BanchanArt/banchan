@@ -26,48 +26,63 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     terms = offering.terms || socket.assigns.studio.default_terms || ""
     template = offering.template || socket.assigns.studio.default_template
 
-    if offering.open do
-      default_items =
-        offering.options
-        |> Enum.filter(& &1.default)
-        |> Enum.map(fn option ->
-          %LineItem{
-            option: option,
-            amount: option.price || Money.new(0, :USD),
-            name: option.name,
-            description: option.description,
-            sticky: option.sticky
-          }
-        end)
+    cond do
+      is_nil(socket.assigns.current_user.confirmed_at) ->
+        socket =
+          put_flash(
+            socket,
+            :warning,
+            "You must verify your email address before requesting a commission."
+          )
 
-      {:ok,
-       socket
-       |> assign(
-         changeset: Commission.creation_changeset(%Commission{}, %{}),
-         line_items: default_items,
-         offering: offering,
-         template: template,
-         terms: terms
-       )
-       # TODO: move max file size somewhere configurable.
-       # TODO: constrain :accept?
-       |> allow_upload(:attachment,
-         accept: :any,
-         max_entries: 10,
-         max_file_size: 25_000_000
-       )}
-    else
-      socket =
-        put_flash(
-          socket,
-          :error,
-          "This commission offering is currently unavailable."
-        )
+        {:ok,
+         push_redirect(socket,
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
 
-      {:ok,
-       push_redirect(socket,
-         to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
-       )}
+      offering.open ->
+        default_items =
+          offering.options
+          |> Enum.filter(& &1.default)
+          |> Enum.map(fn option ->
+            %LineItem{
+              option: option,
+              amount: option.price || Money.new(0, :USD),
+              name: option.name,
+              description: option.description,
+              sticky: option.sticky
+            }
+          end)
+
+        {:ok,
+         socket
+         |> assign(
+           changeset: Commission.creation_changeset(%Commission{}, %{}),
+           line_items: default_items,
+           offering: offering,
+           template: template,
+           terms: terms
+         )
+         # TODO: move max file size somewhere configurable.
+         # TODO: constrain :accept?
+         |> allow_upload(:attachment,
+           accept: :any,
+           max_entries: 10,
+           max_file_size: 25_000_000
+         )}
+
+      true ->
+        socket =
+          put_flash(
+            socket,
+            :error,
+            "This commission offering is currently unavailable."
+          )
+
+        {:ok,
+         push_redirect(socket,
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
     end
   end
 

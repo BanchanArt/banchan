@@ -215,6 +215,9 @@ defmodule Banchan.Commissions do
         maybe_close_offering(offering, available_slot_count, available_proposal_count)
 
         cond do
+          is_nil(actor.confirmed_at) ->
+            {:error, :not_confirmed}
+
           !is_nil(available_slot_count) && available_slot_count <= 0 ->
             {:error, :no_slots_available}
 

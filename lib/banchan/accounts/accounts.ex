@@ -109,7 +109,7 @@ defmodule Banchan.Accounts do
   @doc """
   The same as above, but used for testing purposes only!
 
-  This is used so that MFA settings can be set instantly.
+  This is used so that MFA settings and confirmed_at can be set instantly.
   """
   def register_user_test(attrs) do
     %User{}
@@ -466,7 +466,7 @@ defmodule Banchan.Accounts do
     end
   end
 
-  defp confirm_user_multi(user) do
+  def confirm_user_multi(user) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.confirm_changeset(user))
     |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, ["confirm"]))

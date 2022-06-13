@@ -6,7 +6,7 @@ defmodule BanchanWeb.UserConfirmationControllerTest do
   import Banchan.AccountsFixtures
 
   setup do
-    %{user: user_fixture()}
+    %{user: unconfirmed_user_fixture()}
   end
 
   describe "/confirm" do

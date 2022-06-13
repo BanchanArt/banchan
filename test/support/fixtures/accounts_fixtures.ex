@@ -24,6 +24,18 @@ defmodule Banchan.AccountsFixtures do
   end
 
   def user_fixture(attrs \\ %{}) do
+    confirmed_at = NaiveDateTime.utc_now()
+
+    {:ok, user} =
+      attrs
+      |> Enum.into(%{confirmed_at: confirmed_at})
+      |> valid_user_attributes()
+      |> Banchan.Accounts.register_user_test()
+
+    user
+  end
+
+  def unconfirmed_user_fixture(attrs \\ %{}) do
     {:ok, user} =
       attrs
       |> valid_user_attributes()

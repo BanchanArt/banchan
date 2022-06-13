@@ -7,7 +7,7 @@ defmodule BanchanWeb.ConfirmationLiveTest do
   alias Banchan.Repo
 
   setup do
-    %{user: user_fixture()}
+    %{user: unconfirmed_user_fixture()}
   end
 
   test "sends a new confirmation token", %{conn: conn, user: user} do

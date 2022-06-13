@@ -16,8 +16,22 @@ defmodule BanchanWeb.StudioLive.New do
 
   @impl true
   def mount(_params, _session, socket) do
-    changeset = Studio.profile_changeset(%Studio{}, %{})
-    {:ok, assign(socket, changeset: changeset)}
+    if is_nil(socket.assigns.current_user.confirmed_at) do
+      socket =
+        put_flash(
+          socket,
+          :warning,
+          "You must verify your email address before creating your own studio."
+        )
+
+      {:ok,
+       push_redirect(socket,
+         to: Routes.studio_index_path(Endpoint, :index)
+       )}
+    else
+      changeset = Studio.profile_changeset(%Studio{}, %{})
+      {:ok, assign(socket, changeset: changeset)}
+    end
   end
 
   @impl true

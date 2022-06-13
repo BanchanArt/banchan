@@ -14,7 +14,7 @@ defmodule Banchan.AccountsTest do
     end
 
     test "returns the user if the email exists" do
-      %{id: id} = user = user_fixture()
+      %{id: id} = user = unconfirmed_user_fixture()
       assert %User{id: ^id} = Accounts.get_user_by_handle!(user.handle)
     end
   end
@@ -25,7 +25,7 @@ defmodule Banchan.AccountsTest do
     end
 
     test "returns the user if the email exists" do
-      %{id: id} = user = user_fixture()
+      %{id: id} = user = unconfirmed_user_fixture()
       assert %User{id: ^id} = Accounts.get_user_by_email(user.email)
     end
   end
@@ -36,12 +36,12 @@ defmodule Banchan.AccountsTest do
     end
 
     test "does not return the user if the password is not valid" do
-      user = user_fixture()
+      user = unconfirmed_user_fixture()
       refute Accounts.get_user_by_email_and_password(user.email, "invalid")
     end
 
     test "returns the user if the email and password are valid" do
-      %{id: id} = user = user_fixture()
+      %{id: id} = user = unconfirmed_user_fixture()
 
       assert %User{id: ^id} =
                Accounts.get_user_by_email_and_password(user.email, valid_user_password())
@@ -75,7 +75,7 @@ defmodule Banchan.AccountsTest do
     end
 
     test "validates email uniqueness" do
-      %{email: email} = user_fixture()
+      %{email: email} = unconfirmed_user_fixture()
       {:error, changeset} = Accounts.register_user(%{email: email})
       assert "has already been taken" in errors_on(changeset).email
 
@@ -152,7 +152,7 @@ defmodule Banchan.AccountsTest do
 
   describe "update_user_handle/3" do
     setup do
-      %{user: user_fixture()}
+      %{user: unconfirmed_user_fixture()}
     end
 
     test "validates handle", %{user: user} do
@@ -185,7 +185,7 @@ defmodule Banchan.AccountsTest do
 
   describe "apply_user_email/3" do
     setup do
-      %{user: user_fixture()}
+      %{user: unconfirmed_user_fixture()}
     end
 
     test "validates email", %{user: user} do
@@ -205,7 +205,7 @@ defmodule Banchan.AccountsTest do
     end
 
     test "validates email uniqueness", %{user: user} do
-      %{email: email} = user_fixture()
+      %{email: email} = unconfirmed_user_fixture()
 
       {:error, changeset} =
         Accounts.apply_user_email(user, valid_user_password(), %{email: email})
@@ -230,7 +230,7 @@ defmodule Banchan.AccountsTest do
 
   describe "deliver_update_email_instructions/3" do
     setup do
-      %{user: user_fixture()}
+      %{user: unconfirmed_user_fixture()}
     end
 
     test "sends token through notification", %{user: user} do
@@ -249,7 +249,7 @@ defmodule Banchan.AccountsTest do
 
   describe "update_user_email/2" do
     setup do
-      user = user_fixture()
+      user = unconfirmed_user_fixture()
       email = unique_user_email()
 
       token =
@@ -310,7 +310,7 @@ defmodule Banchan.AccountsTest do
 
   describe "update_user_password/3" do
     setup do
-      %{user: user_fixture()}
+      %{user: unconfirmed_user_fixture()}
     end
 
     test "validates password", %{user: user} do
@@ -366,7 +366,7 @@ defmodule Banchan.AccountsTest do
 
   describe "update_user_profile/2" do
     setup do
-      %{user: user_fixture()}
+      %{user: unconfirmed_user_fixture()}
     end
 
     test "validates profile", %{user: user} do
@@ -398,7 +398,7 @@ defmodule Banchan.AccountsTest do
 
   describe "generate_user_session_token/1" do
     setup do
-      %{user: user_fixture()}
+      %{user: unconfirmed_user_fixture()}
     end
 
     test "generates a token", %{user: user} do
@@ -410,7 +410,7 @@ defmodule Banchan.AccountsTest do
       assert_raise Ecto.ConstraintError, fn ->
         Repo.insert!(%UserToken{
           token: user_token.token,
-          user_id: user_fixture().id,
+          user_id: unconfirmed_user_fixture().id,
           context: "session"
         })
       end
@@ -419,7 +419,7 @@ defmodule Banchan.AccountsTest do
 
   describe "get_user_by_session_token/1" do
     setup do
-      user = user_fixture()
+      user = unconfirmed_user_fixture()
       token = Accounts.generate_user_session_token(user)
       %{user: user, token: token}
     end
@@ -441,7 +441,7 @@ defmodule Banchan.AccountsTest do
 
   describe "delete_session_token/1" do
     test "deletes the token" do
-      user = user_fixture()
+      user = unconfirmed_user_fixture()
       token = Accounts.generate_user_session_token(user)
       assert Accounts.delete_session_token(token) == :ok
       refute Accounts.get_user_by_session_token(token)
@@ -450,7 +450,7 @@ defmodule Banchan.AccountsTest do
 
   describe "deliver_user_confirmation_instructions/2" do
     setup do
-      %{user: user_fixture()}
+      %{user: unconfirmed_user_fixture()}
     end
 
     test "sends token through notification", %{user: user} do
@@ -469,7 +469,7 @@ defmodule Banchan.AccountsTest do
 
   describe "confirm_user/1" do
     setup do
-      user = user_fixture()
+      user = unconfirmed_user_fixture()
 
       token =
         extract_user_token(fn url ->
@@ -503,7 +503,7 @@ defmodule Banchan.AccountsTest do
 
   describe "deliver_user_reset_password_instructions/2" do
     setup do
-      %{user: user_fixture()}
+      %{user: unconfirmed_user_fixture()}
     end
 
     test "sends token through notification", %{user: user} do
@@ -522,7 +522,7 @@ defmodule Banchan.AccountsTest do
 
   describe "get_user_by_reset_password_token/1" do
     setup do
-      user = user_fixture()
+      user = unconfirmed_user_fixture()
 
       token =
         extract_user_token(fn url ->
@@ -551,7 +551,7 @@ defmodule Banchan.AccountsTest do
 
   describe "reset_user_password/2" do
     setup do
-      %{user: user_fixture()}
+      %{user: unconfirmed_user_fixture()}
     end
 
     test "validates password", %{user: user} do

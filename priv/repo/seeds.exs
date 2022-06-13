@@ -27,6 +27,10 @@ end
     password_confirmation: "foobarbazquux"
   })
 
+{:ok, _} = Banchan.Repo.transaction(Banchan.Accounts.confirm_user_multi(user))
+
+user = user |> Banchan.Repo.reload()
+
 {:ok, _} =
   Banchan.Notifications.update_user_notification_settings(user, %{
     commission_email: true,
