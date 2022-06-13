@@ -30,6 +30,9 @@ defmodule BanchanWeb.StudioLive.Shop do
         nil
       end
 
+    # TODO: This page does a TON of requests right now (partly because of
+    # CommissionCard). This should be replaced with a single "general" query
+    # that picks up everything we need for this listing.
     {:ok,
      assign(socket,
        members: members,
@@ -79,7 +82,12 @@ defmodule BanchanWeb.StudioLive.Shop do
         <div class="flex flex-wrap pt-4 items-stretch">
           {#for offering <- @offerings}
             <div class="md:basis-1/2 p-2 max-w-sm flex flex-grow flex-col">
-              <CommissionCard studio={@studio} offering={offering} />
+              <CommissionCard
+                id={"offering-" <> offering.type}
+                current_user={@current_user}
+                studio={@studio}
+                offering={offering}
+              />
             </div>
           {#else}
             This shop has no offerings currently available. Check back in later!

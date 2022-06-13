@@ -17,6 +17,45 @@ defmodule Banchan.OfferingsTest do
     on_exit(fn -> Notifications.wait_for_notifications() end)
   end
 
+  describe "offering notifications" do
+    test "notify offering and studio subscribers when an offering opens" do
+      client = user_fixture()
+      client2 = user_fixture()
+      artist = user_fixture()
+      studio = studio_fixture([artist])
+
+      offering =
+        offering_fixture(studio, %{
+          slots: nil
+        })
+
+      Offerings.Notifications.subscribe_user!(client, offering)
+
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
+
+      Offerings.update_offering(offering |> Repo.reload(), true, %{open: false})
+      Offerings.update_offering(offering |> Repo.reload(), true, %{open: true})
+
+      Notifications.wait_for_notifications()
+
+      # Artist is studio-subscribed
+      assert [%{short_body: "Commission slots are now available for " <> _}] =
+               Notifications.unread_notifications(artist).entries
+
+      # User is specifically-subscribed
+      assert [%{short_body: "Commission slots are now available for " <> _}] =
+               Notifications.unread_notifications(client).entries
+
+      # And this rando isn't at all
+      assert [] = Notifications.unread_notifications(client2).entries
+    end
+
+    test "notify when there's a new offering" do
+      # TODO
+    end
+  end
+
   describe "offering slots" do
     test "with no slot limit" do
       artist = user_fixture()
@@ -128,7 +167,7 @@ defmodule Banchan.OfferingsTest do
       assert 0 == Offerings.offering_available_slots(offering)
 
       # Creating new commissions is blocked.
-      assert {:error, :no_slots_available} ==
+      assert {:error, :offering_closed} ==
                Commissions.create_commission(
                  client,
                  studio,
@@ -151,7 +190,7 @@ defmodule Banchan.OfferingsTest do
       assert 0 == Offerings.offering_available_slots(offering)
 
       # Still can't make that comm...
-      assert {:error, :no_slots_available} ==
+      assert {:error, :offering_closed} ==
                Commissions.create_commission(
                  client,
                  studio,
@@ -169,6 +208,24 @@ defmodule Banchan.OfferingsTest do
       Commissions.update_status(artist, comm2 |> Repo.reload(), :ready_for_review)
       Commissions.update_status(client, comm2 |> Repo.reload(), :approved)
       assert 1 == Offerings.offering_available_slots(offering)
+
+      # Still closed!
+      assert {:error, :offering_closed} ==
+               Commissions.create_commission(
+                 client,
+                 studio,
+                 offering,
+                 [],
+                 [],
+                 %{
+                   title: "some title",
+                   description: "Some Description",
+                   tos_ok: true
+                 }
+               )
+
+      # Offering must be manually reopened
+      assert {:ok, _} = Offerings.update_offering(offering |> Repo.reload(), true, %{open: true})
 
       # Now we can make comms again!
       {:ok, _comm} =
@@ -305,7 +362,7 @@ defmodule Banchan.OfferingsTest do
       assert 0 == Offerings.offering_available_proposals(offering)
 
       # Creating new commissions is blocked.
-      assert {:error, :no_proposals_available} ==
+      assert {:error, :offering_closed} ==
                Commissions.create_commission(
                  client,
                  studio,
@@ -328,6 +385,39 @@ defmodule Banchan.OfferingsTest do
 
       Commissions.update_status(artist, comm4, :accepted)
       assert 3 == Offerings.offering_available_proposals(offering)
+
+      # But we're still closed.
+      assert {:error, :offering_closed} ==
+               Commissions.create_commission(
+                 client,
+                 studio,
+                 offering,
+                 [],
+                 [],
+                 %{
+                   title: "some title",
+                   description: "Some Description",
+                   tos_ok: true
+                 }
+               )
+
+      # Offering must be manually reopened
+      assert {:ok, _} = Offerings.update_offering(offering |> Repo.reload(), true, %{open: true})
+
+      # Now we can start making comms again!
+      assert {:ok, _comm} =
+               Commissions.create_commission(
+                 client,
+                 studio,
+                 offering,
+                 [],
+                 [],
+                 %{
+                   title: "some title",
+                   description: "Some Description",
+                   tos_ok: true
+                 }
+               )
     end
   end
 end

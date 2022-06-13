@@ -209,17 +209,17 @@ defmodule Banchan.Commissions do
       ) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        available_slot_count = Offerings.offering_available_slots(offering)
+        offering = offering |> Repo.reload()
         available_proposal_count = Offerings.offering_available_proposals(offering)
 
-        maybe_close_offering(offering, available_slot_count, available_proposal_count)
+        maybe_close_offering(offering, available_proposal_count)
 
         cond do
+          !offering.open ->
+            {:error, :offering_closed}
+
           is_nil(actor.confirmed_at) ->
             {:error, :not_confirmed}
-
-          !is_nil(available_slot_count) && available_slot_count <= 0 ->
-            {:error, :no_slots_available}
 
           !is_nil(available_proposal_count) && available_proposal_count <= 0 ->
             {:error, :no_proposals_available}
@@ -232,11 +232,9 @@ defmodule Banchan.Commissions do
     ret
   end
 
-  defp maybe_close_offering(offering, available_slot_count, available_proposal_count) do
-    # Make sure we close the offering if we're out of slots or proposals.
-    close_slots = !is_nil(available_slot_count) && available_slot_count <= 1
-    close_proposals = !is_nil(available_proposal_count) && available_proposal_count <= 1
-    close = close_slots || close_proposals
+  defp maybe_close_offering(offering, available_proposal_count) do
+    # Make sure we close the offering if we're out of proposals.
+    close = !is_nil(available_proposal_count) && available_proposal_count <= 1
 
     if close do
       # NB(zkat): We pretend we're a studio member here because we're doing
@@ -297,6 +295,20 @@ defmodule Banchan.Commissions do
         check_status_transition!(actor, commission, changeset.changes.status)
 
         {:ok, commission} = changeset |> Repo.update()
+
+        if commission.status == :accepted do
+          offering = Repo.preload(commission, :offering).offering
+          available_slot_count = Offerings.offering_available_slots(offering)
+
+          # Make sure we close the offering if we're out of slots.
+          close = !is_nil(available_slot_count) && available_slot_count <= 1
+
+          if close do
+            # NB(zkat): We pretend we're a studio member here because we're doing
+            # this on behalf of the studio. It's safe.
+            {:ok, _} = Offerings.update_offering(offering, true, %{open: false})
+          end
+        end
 
         if commission.status == :approved do
           # Release any successful deposits.
