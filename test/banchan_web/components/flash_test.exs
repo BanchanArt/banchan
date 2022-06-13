@@ -16,10 +16,21 @@ defmodule BanchanWeb.Components.FlashTest do
 
     assert html =~ """
            <div class="flash-container">
-             <p phx-value-key="info" phx-click="lv:clear-flash" class="alert alert-info py-0" role="alert"></p>
-             <p phx-value-key="error" phx-click="lv:clear-flash" class="alert alert-danger py-0" role="alert"></p>
            </div>
            """
+  end
+
+  test "renders success alerts" do
+    html =
+      render_surface do
+        ~F"""
+        <Flash flashes={%{"success" => "womp"}} />
+        """
+      end
+
+    assert html =~ "<div class=\"flash-container\">"
+    assert html =~ "alert alert-success"
+    assert html =~ "womp"
   end
 
   test "renders info alerts" do
@@ -30,12 +41,22 @@ defmodule BanchanWeb.Components.FlashTest do
         """
       end
 
-    assert html =~ """
-           <div class="flash-container">
-             <p phx-value-key="info" phx-click="lv:clear-flash" class="alert alert-info py-0" role="alert">womp</p>
-             <p phx-value-key="error" phx-click="lv:clear-flash" class="alert alert-danger py-0" role="alert"></p>
-           </div>
-           """
+    assert html =~ "<div class=\"flash-container\">"
+    assert html =~ "alert alert-info"
+    assert html =~ "womp"
+  end
+
+  test "renders warning alerts" do
+    html =
+      render_surface do
+        ~F"""
+        <Flash flashes={%{"warning" => "womp"}} />
+        """
+      end
+
+    assert html =~ "<div class=\"flash-container\">"
+    assert html =~ "alert alert-warning"
+    assert html =~ "womp"
   end
 
   test "renders error alerts" do
@@ -46,11 +67,8 @@ defmodule BanchanWeb.Components.FlashTest do
         """
       end
 
-    assert html =~ """
-           <div class="flash-container">
-             <p phx-value-key="info" phx-click="lv:clear-flash" class="alert alert-info py-0" role="alert"></p>
-             <p phx-value-key="error" phx-click="lv:clear-flash" class="alert alert-danger py-0" role="alert">womp</p>
-           </div>
-           """
+    assert html =~ "<div class=\"flash-container\">"
+    assert html =~ "alert alert-error"
+    assert html =~ "womp"
   end
 end

@@ -9,9 +9,61 @@ defmodule BanchanWeb.Components.Flash do
   def render(assigns) do
     ~F"""
     <div class="flash-container">
-      <p class="alert alert-info py-0" role="alert" :on-click="lv:clear-flash" :values={key: "info"}>{live_flash(@flashes, :info)}</p>
+      {#if live_flash(@flashes, :success)}
+        <div
+          class="alert alert-success shadow-lg p-2 hover:cursor-pointer"
+          role="alert"
+          :on-click="lv:clear-flash"
+          :values={key: "success"}
+        >
+          <div>
+            <i class="fas fa-check-circle" />
+            <span>{live_flash(@flashes, :success)}</span>
+          </div>
+        </div>
+      {/if}
 
-      <p class="alert alert-danger py-0" role="alert" :on-click="lv:clear-flash" :values={key: "error"}>{live_flash(@flashes, :error)}</p>
+      {#if live_flash(@flashes, :info)}
+        <div
+          class="alert alert-info shadow-lg p-2 hover:cursor-pointer"
+          role="alert"
+          :on-click="lv:clear-flash"
+          :values={key: "info"}
+        >
+          <div>
+            <i class="fas fa-info-circle" />
+            <span>{live_flash(@flashes, :info)}</span>
+          </div>
+        </div>
+      {/if}
+
+      {#if live_flash(@flashes, :warning)}
+        <div
+          class="alert alert-warning shadow-lg p-2 hover:cursor-pointer"
+          role="alert"
+          :on-click="lv:clear-flash"
+          :values={key: "warning"}
+        >
+          <div>
+            <i class="fas fa-exclamation-triangle" />
+            <span>{live_flash(@flashes, :warning)}</span>
+          </div>
+        </div>
+      {/if}
+
+      {#if live_flash(@flashes, :error)}
+        <div
+          class="alert alert-error shadow-lg p-2 hover:cursor-pointer"
+          role="alert"
+          :on-click="lv:clear-flash"
+          :values={key: "error"}
+        >
+          <div>
+            <i class="fas fa-exclamation-circle" />
+            <span>{live_flash(@flashes, :error)}</span>
+          </div>
+        </div>
+      {/if}
     </div>
     """
   end
