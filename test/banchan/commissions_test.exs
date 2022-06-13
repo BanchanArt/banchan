@@ -110,7 +110,7 @@ defmodule Banchan.CommissionsTest do
 
       {:ok, _comm1} = Commissions.update_status(user, comm1, :accepted)
 
-      assert {:error, :no_slots_available} == new_comm.()
+      assert {:error, :offering_closed} == new_comm.()
 
       {:ok, _offering} =
         Offerings.update_offering(offering, true, %{
@@ -119,14 +119,20 @@ defmodule Banchan.CommissionsTest do
 
       {:ok, _comm2} = Commissions.update_status(user, comm2, :accepted)
 
-      assert {:error, :no_slots_available} == new_comm.()
+      assert {:error, :offering_closed} == new_comm.()
 
       {:ok, _comm1} = Commissions.update_status(user, comm1 |> Repo.reload(), :ready_for_review)
       {:ok, _comm1} = Commissions.update_status(user, comm1 |> Repo.reload(), :approved)
 
+      # Closed until we reopen explicitly.
+      assert {:error, :offering_closed} == new_comm.()
+
+      # Manually reopen
+      assert {:ok, _} = Offerings.update_offering(offering |> Repo.reload(), true, %{open: true})
+
       {:ok, comm3} = new_comm.()
       {:ok, _comm3} = Commissions.update_status(user, comm3, :accepted)
-      assert {:error, :no_slots_available} == new_comm.()
+      assert {:error, :offering_closed} == new_comm.()
     end
   end
 

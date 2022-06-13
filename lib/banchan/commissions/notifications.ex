@@ -26,7 +26,7 @@ defmodule Banchan.Commissions.Notifications do
   end
 
   def subscribe_user!(%User{} = user, %Commission{} = comm) do
-    %CommissionSubscription{user: user, commission: comm, silenced: false}
+    %CommissionSubscription{user_id: user.id, commission_id: comm.id, silenced: false}
     |> Repo.insert(
       on_conflict: {:replace, [:silenced]},
       conflict_target: [:user_id, :commission_id]
@@ -34,7 +34,7 @@ defmodule Banchan.Commissions.Notifications do
   end
 
   def unsubscribe_user!(%User{} = user, %Commission{} = comm) do
-    %CommissionSubscription{user: user, commission: comm, silenced: true}
+    %CommissionSubscription{user_id: user.id, commission_id: comm.id, silenced: true}
     |> Repo.insert(
       on_conflict: {:replace, [:silenced]},
       conflict_target: [:user_id, :commission_id]

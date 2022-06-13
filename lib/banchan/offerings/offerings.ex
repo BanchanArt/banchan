@@ -5,7 +5,7 @@ defmodule Banchan.Offerings do
   import Ecto.Query, warn: false
 
   alias Banchan.Commissions.Commission
-  alias Banchan.Offerings.Offering
+  alias Banchan.Offerings.{Notifications, Offering}
   alias Banchan.Repo
 
   def new_offering(_, false, _) do
@@ -35,7 +35,26 @@ defmodule Banchan.Offerings do
   end
 
   def update_offering(%Offering{} = offering, _current_user_member?, attrs) do
-    change_offering(offering, attrs) |> Repo.update(returning: true)
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
+
+        ret = change_offering(offering, attrs) |> Repo.update(returning: true)
+
+        case ret do
+          {:ok, changed} ->
+            if !open_before? && changed.open do
+              Notifications.offering_opened(changed)
+            end
+
+            {:ok, changed}
+
+          {:error, error} ->
+            {:error, error}
+        end
+      end)
+
+    ret
   end
 
   def offering_base_price(%Offering{} = offering) do

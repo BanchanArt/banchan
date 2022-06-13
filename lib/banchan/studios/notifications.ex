@@ -18,13 +18,13 @@ defmodule Banchan.Studios.Notifications do
     |> Repo.exists?()
   end
 
-  def subscribe_user!(%User{id: user_id}, %Studio{id: studio_id}) do
-    %StudioSubscription{user_id: user_id, studio_id: studio_id, silenced: false}
+  def subscribe_user!(%User{} = user, %Studio{} = studio) do
+    %StudioSubscription{user_id: user.id, studio_id: studio.id, silenced: false}
     |> Repo.insert(on_conflict: {:replace, [:silenced]}, conflict_target: [:user_id, :studio_id])
   end
 
   def unsubscribe_user!(%User{} = user, %Studio{} = studio) do
-    %StudioSubscription{user: user, studio: studio, silenced: true}
+    %StudioSubscription{user_id: user.id, studio_id: studio.id, silenced: true}
     |> Repo.insert(on_conflict: {:replace, [:silenced]}, conflict_target: [:user_id, :studio_id])
   end
 

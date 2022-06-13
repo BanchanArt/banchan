@@ -24,6 +24,17 @@ defmodule Banchan.Repo.Migrations.Notifications do
     create unique_index(:studio_subscriptions, [:user_id, :studio_id])
     create index(:studio_subscriptions, [:studio_id])
 
+    create table(:offering_subscriptions) do
+      add :user_id, references(:users, on_delete: :delete_all)
+      add :offering_id, references(:offerings, on_delete: :delete_all)
+      add :silenced, :boolean, default: false
+
+      timestamps()
+    end
+
+    create unique_index(:offering_subscriptions, [:user_id, :offering_id])
+    create index(:offering_subscriptions, [:offering_id])
+
     create table(:user_notifications) do
       add :ref, :string, null: false
       add :user_id, references(:users, on_delete: :delete_all), null: false
