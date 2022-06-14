@@ -25,10 +25,11 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
     available_slots = Offerings.offering_available_slots(socket.assigns.offering)
 
     subscribed? =
-      Offerings.Notifications.user_subscribed?(
-        socket.assigns.current_user,
-        socket.assigns.offering
-      )
+      socket.assigns.current_user &&
+        Offerings.Notifications.user_subscribed?(
+          socket.assigns.current_user,
+          socket.assigns.offering
+        )
 
     {:ok,
      socket
@@ -39,9 +40,20 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
 
   @impl true
   def handle_event("notify_me", _, socket) do
-    Offerings.Notifications.subscribe_user!(socket.assigns.current_user, socket.assigns.offering)
-    send_update(__MODULE__, id: socket.assigns.id)
-    {:noreply, socket}
+    if socket.assigns.current_user do
+      Offerings.Notifications.subscribe_user!(
+        socket.assigns.current_user,
+        socket.assigns.offering
+      )
+
+      send_update(__MODULE__, id: socket.assigns.id)
+      {:noreply, socket}
+    else
+      {:noreply,
+       socket
+       |> put_flash(:info, "You must log in to subscribe.")
+       |> redirect(to: Routes.login_path(Endpoint, :new))}
+    end
   end
 
   @impl true
