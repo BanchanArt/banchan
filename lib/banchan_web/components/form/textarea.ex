@@ -31,25 +31,28 @@ defmodule BanchanWeb.Components.Form.TextArea do
           <Label class="label" />
         {/if}
       {/if}
-      <div class={"control w-full", @wrapper_class}>
-        <#slot name="left" />
-        <InputContext :let={form: form, field: field}>
-          <TextArea
-            class={
-              "textarea",
-              "textarea-bordered",
-              "textarea-primary",
-              "h-40",
-              "w-full",
-              @class,
-              "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-            }
-            opts={@opts}
-          />
-        </InputContext>
-        <#slot name="right" />
+      <div class="flex flex-col">
+        <div class="flex flex-row gap-2">
+          <div class={"control w-full", @wrapper_class}>
+            <#slot name="left" />
+            <InputContext :let={form: form, field: field}>
+              <TextArea
+                class={
+                  "textarea",
+                  "textarea-bordered",
+                  "h-40",
+                  "w-full",
+                  @class,
+                  "textarea-error": !Enum.empty?(Keyword.get_values(form.errors, field))
+                }
+                opts={@opts}
+              />
+            </InputContext>
+            <#slot name="right" />
+          </div>
+          <ErrorTag class="help is-danger" />
+        </div>
       </div>
-      <ErrorTag class="help is-danger" />
     </Field>
     """
   end

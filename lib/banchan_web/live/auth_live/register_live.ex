@@ -38,7 +38,7 @@ defmodule BanchanWeb.RegisterLive do
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <h1 class="text-2xl">Register</h1>
       <Form
-        class="col-span-1"
+        class="col-span-1 max-w-md"
         for={@changeset}
         action={Routes.user_registration_path(Endpoint, :create)}
         change="change"
@@ -47,7 +47,12 @@ defmodule BanchanWeb.RegisterLive do
       >
         <EmailInput name={:email} icon="envelope" opts={required: true} />
         <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-        <TextInput name={:password_confirmation} icon="lock" opts={required: true, type: :password} />
+        <TextInput
+          name={:password_confirmation}
+          label="Confirm Password"
+          icon="lock"
+          opts={required: true, type: :password}
+        />
         <Submit changeset={@changeset} label="Register" />
       </Form>
     </Layout>

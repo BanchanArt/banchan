@@ -31,7 +31,7 @@ defmodule BanchanWeb.LoginLive do
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <h1 class="text-2xl">Log in</h1>
       <Form
-        class="col-span-1"
+        class="col-span-1 max-w-md"
         for={@changeset}
         action={Routes.user_session_path(Endpoint, :create)}
         change="change"

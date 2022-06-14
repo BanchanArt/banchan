@@ -26,29 +26,31 @@ defmodule BanchanWeb.Components.Form.TextInput do
           <Label class="label" />
         {/if}
       {/if}
-      <div class="control">
-        <InputContext :let={form: form, field: field}>
-          <TextInput
-            class={
-              "input",
-              "input-primary",
-              "input-bordered",
-              "input-sm",
-              "w-full",
-              @class,
-              "has-icon-left": @icon,
-              "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-            }
-            opts={@opts}
-          />
-        </InputContext>
-        {#if @icon}
-          <span class="icon is-small is-left">
-            <i class={"fas", "fa-#{@icon}"} />
-          </span>
-        {/if}
+      <div class="flex flex-col">
+        <div class="flex flex-row gap-2">
+          {#if @icon}
+            <span class="icon is-small is-left">
+              <i class={"fas", "fa-#{@icon}"} />
+            </span>
+          {/if}
+          <div class="control">
+            <InputContext :let={form: form, field: field}>
+              <TextInput
+                class={
+                  "input",
+                  "input-bordered",
+                  "input-sm",
+                  "w-full",
+                  @class,
+                  "input-error": !Enum.empty?(Keyword.get_values(form.errors, field))
+                }
+                opts={@opts}
+              />
+            </InputContext>
+          </div>
+        </div>
+        <ErrorTag class="help text-error" />
       </div>
-      <ErrorTag class="help is-danger" />
     </Field>
     """
   end

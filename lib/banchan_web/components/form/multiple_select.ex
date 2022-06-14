@@ -27,29 +27,31 @@ defmodule BanchanWeb.Components.Form.MultipleSelect do
           <Label class="label" />
         {/if}
       {/if}
-      <div class="control">
-        <InputContext :let={form: form, field: field}>
-          <MultipleSelect
-            class={
-              "textarea",
-              "textarea-primary",
-              "textarea-bordered",
-              "w-full",
-              @class,
-              "has-icon-left": @icon,
-              "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-            }
-            opts={@opts}
-            options={@options}
-          />
-        </InputContext>
-        {#if @icon}
-          <span class="icon is-small is-left">
-            <i class={"fas", "fa-#{@icon}"} />
-          </span>
-        {/if}
+      <div class="flex flex-col">
+        <div class="flex flex-row gap-2">
+          {#if @icon}
+            <span class="icon is-small is-left">
+              <i class={"fas", "fa-#{@icon}"} />
+            </span>
+          {/if}
+          <div class="control">
+            <InputContext :let={form: form, field: field}>
+              <MultipleSelect
+                class={
+                  "textarea",
+                  "textarea-bordered",
+                  "w-full",
+                  @class,
+                  "textarea-error": !Enum.empty?(Keyword.get_values(form.errors, field))
+                }
+                opts={@opts}
+                options={@options}
+              />
+            </InputContext>
+          </div>
+          <ErrorTag class="help is-danger" />
+        </div>
       </div>
-      <ErrorTag class="help is-danger" />
     </Field>
     """
   end
