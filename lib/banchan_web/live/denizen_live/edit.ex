@@ -35,24 +35,18 @@ defmodule BanchanWeb.DenizenLive.Edit do
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <h1 class="text-2xl">Edit Profile for @{@user.handle}</h1>
-          <Form class="profile-info" for={@changeset} change="change" submit="submit">
-            <TextInput name={:name} icon="user" opts={required: true} />
-            <TextInput name={:handle} icon="at" opts={required: true} />
-            <TextArea name={:bio} />
-            <Submit changeset={@changeset} label="Save" />
-          </Form>
-        </div>
-        <div class="p-6">
-          <h2 class="text-xl">Update profile picture</h2>
-          <Form class="pfp-upload" for={:pfp} change="change_pfp" submit="submit_pfp">
-            <UploadInput upload={@uploads.pfp} cancel="cancel_pfp_upload" />
-            <Submit label="Upload" />
-          </Form>
-        </div>
-      </div>
+      <h1 class="text-2xl">Edit Profile for @{@user.handle}</h1>
+      <Form class="profile-info" for={@changeset} change="change" submit="submit">
+        <TextInput name={:name} icon="user" opts={required: true} />
+        <TextInput name={:handle} icon="at" opts={required: true} />
+        <TextArea name={:bio} />
+        <Submit changeset={@changeset} label="Save" />
+      </Form>
+      <h2 class="text-xl">Update profile picture</h2>
+      <Form class="pfp-upload" for={:pfp} change="change_pfp" submit="submit_pfp">
+        <UploadInput upload={@uploads.pfp} cancel="cancel_pfp_upload" />
+        <Submit label="Upload" />
+      </Form>
     </Layout>
     """
   end

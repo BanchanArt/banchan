@@ -213,7 +213,7 @@ defmodule BanchanWeb.Components.Notifications do
             {@notifications.total_entries}
           </span>
         {/if}
-        <button type="button" :on-click="toggle_menu" class="btn btn-circle">
+        <button type="button" :on-click="toggle_menu" class="btn btn-circle btn-ghost">
           <i class="fas fa-bell" />
         </button>
       </div>

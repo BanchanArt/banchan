@@ -36,24 +36,20 @@ defmodule BanchanWeb.RegisterLive do
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <h1 class="text-2xl">Register</h1>
-          <Form
-            class="col-span-1"
-            for={@changeset}
-            action={Routes.user_registration_path(Endpoint, :create)}
-            change="change"
-            submit="submit"
-            trigger_action={@trigger_submit}
-          >
-            <EmailInput name={:email} icon="envelope" opts={required: true} />
-            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-            <TextInput name={:password_confirmation} icon="lock" opts={required: true, type: :password} />
-            <Submit changeset={@changeset} label="Register" />
-          </Form>
-        </div>
-      </div>
+      <h1 class="text-2xl">Register</h1>
+      <Form
+        class="col-span-1"
+        for={@changeset}
+        action={Routes.user_registration_path(Endpoint, :create)}
+        change="change"
+        submit="submit"
+        trigger_action={@trigger_submit}
+      >
+        <EmailInput name={:email} icon="envelope" opts={required: true} />
+        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+        <TextInput name={:password_confirmation} icon="lock" opts={required: true, type: :password} />
+        <Submit changeset={@changeset} label="Register" />
+      </Form>
     </Layout>
     """
   end

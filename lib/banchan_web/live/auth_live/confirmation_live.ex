@@ -21,15 +21,11 @@ defmodule BanchanWeb.ConfirmationLive do
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <h1 class="text-2xl">Resend confirmation instructions</h1>
-          <Form for={:user} submit="submit">
-            <EmailInput name={:email} opts={required: true} />
-            <Submit label="Resend confirmation information" />
-          </Form>
-        </div>
-      </div>
+      <h1 class="text-2xl">Resend confirmation instructions</h1>
+      <Form for={:user} submit="submit">
+        <EmailInput name={:email} opts={required: true} />
+        <Submit label="Resend confirmation information" />
+      </Form>
     </Layout>
     """
   end

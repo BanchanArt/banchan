@@ -29,25 +29,21 @@ defmodule BanchanWeb.LoginLive do
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <h1 class="text-2xl">Log in</h1>
-          <Form
-            class="col-span-1"
-            for={@changeset}
-            action={Routes.user_session_path(Endpoint, :create)}
-            change="change"
-            submit="submit"
-            trigger_action={@trigger_submit}
-          >
-            <EmailInput name={:email} icon="envelope" opts={required: true} />
-            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-            <TextInput name={:mfa_token} icon="mobile-alt" opts={maxlength: 6, placeholder: "optional"} />
-            <Checkbox name={:remember_me}>Keep me logged in for 60 days.</Checkbox>
-            <Submit changeset={@changeset} label="Log in" />
-          </Form>
-        </div>
-      </div>
+      <h1 class="text-2xl">Log in</h1>
+      <Form
+        class="col-span-1"
+        for={@changeset}
+        action={Routes.user_session_path(Endpoint, :create)}
+        change="change"
+        submit="submit"
+        trigger_action={@trigger_submit}
+      >
+        <EmailInput name={:email} icon="envelope" opts={required: true} />
+        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+        <TextInput name={:mfa_token} icon="mobile-alt" opts={maxlength: 6, placeholder: "optional"} />
+        <Checkbox name={:remember_me}>Keep me logged in for 60 days.</Checkbox>
+        <Submit changeset={@changeset} label="Log in" />
+      </Form>
     </Layout>
     """
   end

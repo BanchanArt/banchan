@@ -22,21 +22,23 @@ defmodule BanchanWeb.Components.Layout do
     <div class="drawer drawer-mobile h-screen w-full">
       <input type="checkbox" id="drawer-toggle" class="drawer-toggle">
       <div class="drawer-content h-screen flex flex-col">
-        <Nav uri={@uri} current_user={@current_user} />
+        <div class="top-0 z-30 sticky shadow-sm">
+          <Nav uri={@uri} current_user={@current_user} />
+        </div>
         {#if slot_assigned?(:hero)}
           <#slot name="hero" />
         {/if}
-        <section class="flex flex-col flex-grow">
+        <section class="flex flex-col flex-grow p-4 shadow-inner">
           <Flash flashes={@flashes} />
           <#slot />
         </section>
-        <footer class="footer p-10 bg-neutral text-neutral-content">
+        <footer class="footer p-10 bg-base-200 z-30 shadow-sm">
           <div>
             <span class="footer-title">Co-op</span>
             {!-- # TODO: Fill these out --}
             <a href="#" class="link link-hover">About us</a>
             <a href="#" class="link link-hover">Contact</a>
-            <a href="#" class="link link-hover">Jobs</a>
+            <a href="#" class="link link-hover">Membership</a>
             <a href="#" class="link link-hover">Press kit</a>
           </div>
           <div>
@@ -46,24 +48,35 @@ defmodule BanchanWeb.Components.Layout do
             <a href="#" class="link link-hover">Privacy policy</a>
             <a href="#" class="link link-hover">Cookie policy</a>
           </div>
+          <div>
+            <span class="footer-title">Social</span>
+            <div class="grid grid-flow-col gap-4">
+              <a href="https://twitter.com/BanchanArt"><i class="fab fa-twitter text-xl" /></a>
+              <a href="https://discord.gg/jgat3hsX5V"><i class="fab fa-discord text-xl" /></a>
+            </div>
+          </div>
         </footer>
       </div>
       <div class="drawer-side">
         <label for="drawer-toggle" class="drawer-overlay" />
-        <aside class="bg-base-200 w-52 shadow">
+        <aside class="bg-base-200 w-48 shadow">
           <ul tabindex="0" class="menu flex flex-col p-2">
+            <li>
+              <LiveRedirect to={Routes.home_path(Endpoint, :index)}>
+                <span>
+                  <i class="fas fa-home" />
+                  Home
+                </span>
+              </LiveRedirect>
+            </li>
             {#if @current_user}
-              <li>
-                <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
-                  <span>
-                    Your Profile
-                  </span>
-                </LiveRedirect>
+              <li class="menu-title">
+                <span>Art</span>
               </li>
               <li>
                 <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
                   <span>
-                    <i class="fa fa-palette" />
+                    <i class="fas fa-palette" />
                     Commissions
                   </span>
                 </LiveRedirect>
@@ -71,15 +84,26 @@ defmodule BanchanWeb.Components.Layout do
               <li>
                 <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
                   <span>
-                    <i class="fa fa-palette" />
+                    <i class="fas fa-paint-brush" />
                     Studios
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li class="menu-title">
+                <span>Account</span>
+              </li>
+              <li>
+                <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
+                  <span>
+                    <i class="fas fa-user-circle" />
+                    Your Profile
                   </span>
                 </LiveRedirect>
               </li>
               <li>
                 <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
                   <span>
-                    <i class="fa fa-cog" />
+                    <i class="fas fa-cog" />
                     Settings
                   </span>
                 </LiveRedirect>
@@ -87,6 +111,7 @@ defmodule BanchanWeb.Components.Layout do
               <li>
                 <LiveRedirect to={Routes.setup_mfa_path(Endpoint, :edit)}>
                   <span>
+                    <i class="fas fa-shield" />
                     MFA Setup
                   </span>
                 </LiveRedirect>
@@ -100,6 +125,9 @@ defmodule BanchanWeb.Components.Layout do
                 </Link>
               </li>
             {#else}
+              <li class="menu-title">
+                <span>Account</span>
+              </li>
               <li>
                 <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
                   <span>

@@ -14,12 +14,7 @@ defmodule BanchanWeb.Components.Nav do
 
   def render(assigns) do
     ~F"""
-    <nav
-      id="nav"
-      class="navbar bg-neutral text-neutral-content"
-      role="navigation"
-      aria-label="main navigation"
-    >
+    <nav id="nav" class="navbar bg-base-100" role="navigation" aria-label="main navigation">
       <div class="flex-none gap-4 lg:hidden items-center">
         <label for="drawer-toggle" class="btn btn-square btn-ghost">
           <svg

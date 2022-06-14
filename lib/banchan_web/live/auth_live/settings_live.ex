@@ -175,112 +175,108 @@ defmodule BanchanWeb.SettingsLive do
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <h1 class="text-2xl">Account Settings</h1>
-          <br>
-          <h2 class="text-xl">Appearance</h2>
-          <div class="flex flex-row items-center gap-4">
-            <span>Dark Mode</span>
-            <input
-              :hook="Theme"
-              id="toggle_theme"
-              checked={@theme == "dark"}
-              :on-click="toggle_theme"
-              type="checkbox"
-              class="toggle"
+      <h1 class="text-2xl">Account Settings</h1>
+      <br>
+      <h2 class="text-xl">Appearance</h2>
+      <div class="flex flex-row items-center gap-4">
+        <span>Dark Mode</span>
+        <input
+          :hook="Theme"
+          id="toggle_theme"
+          checked={@theme == "dark"}
+          :on-click="toggle_theme"
+          type="checkbox"
+          class="toggle"
+        />
+        {#if !@theme}
+          <svg
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
-            {#if !@theme}
-              <svg
-                class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-            {/if}
-          </div>
+          </svg>
+        {/if}
+      </div>
 
-          <div
-            tabindex="0"
-            class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open"
+      <div
+        tabindex="0"
+        class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open"
+      >
+        <div class="collapse-title text-xl font-medium">
+          Notifications
+        </div>
+        <div class="collapse-content">
+          <h2 class="text-lg">Commissions</h2>
+          <Form
+            class="col-span-auto"
+            for={@notification_settings_changeset}
+            change="change_notification_settings"
+            submit="submit_notification_settings"
           >
-            <div class="collapse-title text-xl font-medium">
-              Notifications
-            </div>
-            <div class="collapse-content">
-              <h2 class="text-lg">Commissions</h2>
-              <Form
-                class="col-span-auto"
-                for={@notification_settings_changeset}
-                change="change_notification_settings"
-                submit="submit_notification_settings"
-              >
-                <Checkbox name={:commission_email} label="Email" />
-                <Checkbox name={:commission_web} label="Web" />
-                <Submit changeset={@notification_settings_changeset} label="Save" />
-              </Form>
-            </div>
-          </div>
-          <div
-            tabindex="0"
-            class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open"
+            <Checkbox name={:commission_email} label="Email" />
+            <Checkbox name={:commission_web} label="Web" />
+            <Submit changeset={@notification_settings_changeset} label="Save" />
+          </Form>
+        </div>
+      </div>
+      <div
+        tabindex="0"
+        class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open"
+      >
+        <div class="collapse-title text-xl font-medium">
+          Update Email
+        </div>
+        <div class="collapse-content">
+          <Form
+            class="col-span-auto"
+            for={@email_changeset}
+            change="change_email"
+            submit="submit_email"
+            opts={autocomplete: "off"}
           >
-            <div class="collapse-title text-xl font-medium">
-              Update Email
-            </div>
-            <div class="collapse-content">
-              <Form
-                class="col-span-auto"
-                for={@email_changeset}
-                change="change_email"
-                submit="submit_email"
-                opts={autocomplete: "off"}
-              >
-                <EmailInput name={:email} icon="envelope" opts={required: true} />
-                <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-                <Submit changeset={@email_changeset} label="Save" />
-              </Form>
-            </div>
-          </div>
-          <div
-            tabindex="0"
-            class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open"
+            <EmailInput name={:email} icon="envelope" opts={required: true} />
+            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+            <Submit changeset={@email_changeset} label="Save" />
+          </Form>
+        </div>
+      </div>
+      <div
+        tabindex="0"
+        class="collapse w-96 border rounded-box border-base-300 collapse-arrow collapse-open"
+      >
+        <div class="collapse-title text-xl font-medium">
+          Update Password
+        </div>
+        <div class="collapse-content">
+          <Form
+            class="col-span-auto"
+            for={@password_changeset}
+            change="change_password"
+            submit="submit_password"
+            opts={autocomplete: "off"}
           >
-            <div class="collapse-title text-xl font-medium">
-              Update Password
-            </div>
-            <div class="collapse-content">
-              <Form
-                class="col-span-auto"
-                for={@password_changeset}
-                change="change_password"
-                submit="submit_password"
-                opts={autocomplete: "off"}
-              >
-                <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-                <TextInput
-                  name={:password_confirmation}
-                  icon="lock"
-                  label="New Password Confirmation"
-                  opts={required: true, type: :password}
-                />
-                <TextInput
-                  name={:current_confirmation}
-                  icon="lock"
-                  label="New Password Confirmation"
-                  opts={required: true, type: :password}
-                />
-                <Submit changeset={@password_changeset} label="Save" />
-              </Form>
-            </div>
-          </div>
+            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+            <TextInput
+              name={:password_confirmation}
+              icon="lock"
+              label="New Password Confirmation"
+              opts={required: true, type: :password}
+            />
+            <TextInput
+              name={:current_confirmation}
+              icon="lock"
+              label="New Password Confirmation"
+              opts={required: true, type: :password}
+            />
+            <Submit changeset={@password_changeset} label="Save" />
+          </Form>
         </div>
       </div>
     </Layout>
