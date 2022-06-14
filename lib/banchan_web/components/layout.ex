@@ -19,7 +19,7 @@ defmodule BanchanWeb.Components.Layout do
 
   def render(assigns) do
     ~F"""
-    <div class="drawer drawer-end h-screen w-full">
+    <div class="drawer drawer-mobile h-screen w-full">
       <input type="checkbox" id="drawer-toggle" class="drawer-toggle">
       <div class="drawer-content h-screen flex flex-col">
         <Nav uri={@uri} current_user={@current_user} />
@@ -50,73 +50,75 @@ defmodule BanchanWeb.Components.Layout do
       </div>
       <div class="drawer-side">
         <label for="drawer-toggle" class="drawer-overlay" />
-        <ul tabindex="0" class="p-2 shadow menu dropdown-content bg-base-200 w-52">
-          {#if @current_user}
-            <li>
-              <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
-                <span>
-                  Your Profile
-                </span>
-              </LiveRedirect>
-            </li>
-            <li>
-              <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
-                <span>
-                  <i class="fa fa-palette" />
-                  Commissions
-                </span>
-              </LiveRedirect>
-            </li>
-            <li>
-              <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
-                <span>
-                  <i class="fa fa-palette" />
-                  Studios
-                </span>
-              </LiveRedirect>
-            </li>
-            <li>
-              <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
-                <span>
-                  <i class="fa fa-cog" />
-                  Settings
-                </span>
-              </LiveRedirect>
-            </li>
-            <li>
-              <LiveRedirect to={Routes.setup_mfa_path(Endpoint, :edit)}>
-                <span>
-                  MFA Setup
-                </span>
-              </LiveRedirect>
-            </li>
-            <li>
-              <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
-                <span>
-                  <i class="fa fa-sign-out-alt" />
-                  Log out
-                </span>
-              </Link>
-            </li>
-          {#else}
-            <li>
-              <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
-                <span>
-                  <i class="fa fa-user" />
-                  Register
-                </span>
-              </LiveRedirect>
-            </li>
-            <li>
-              <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
-                <span>
-                  <i class="fa fa-sign-in-alt" />
-                  Log in
-                </span>
-              </LiveRedirect>
-            </li>
-          {/if}
-        </ul>
+        <aside class="bg-base-200 w-52 shadow">
+          <ul tabindex="0" class="menu flex flex-col p-2">
+            {#if @current_user}
+              <li>
+                <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
+                  <span>
+                    Your Profile
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
+                <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
+                  <span>
+                    <i class="fa fa-palette" />
+                    Commissions
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
+                <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
+                  <span>
+                    <i class="fa fa-palette" />
+                    Studios
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
+                <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
+                  <span>
+                    <i class="fa fa-cog" />
+                    Settings
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
+                <LiveRedirect to={Routes.setup_mfa_path(Endpoint, :edit)}>
+                  <span>
+                    MFA Setup
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
+                <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
+                  <span>
+                    <i class="fa fa-sign-out-alt" />
+                    Log out
+                  </span>
+                </Link>
+              </li>
+            {#else}
+              <li>
+                <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
+                  <span>
+                    <i class="fa fa-user" />
+                    Register
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
+                <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
+                  <span>
+                    <i class="fa fa-sign-in-alt" />
+                    Log in
+                  </span>
+                </LiveRedirect>
+              </li>
+            {/if}
+          </ul>
+        </aside>
       </div>
     </div>
     """

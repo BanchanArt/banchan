@@ -20,6 +20,22 @@ defmodule BanchanWeb.Components.Nav do
       role="navigation"
       aria-label="main navigation"
     >
+      <div class="flex-none gap-4 lg:hidden items-center">
+        <label for="drawer-toggle" class="btn btn-square btn-ghost">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            class="inline-block w-6 h-6 stroke-current"
+          ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            /></svg>
+        </label>
+      </div>
+
       <div class="flex-1">
         <LiveRedirect to={Routes.home_path(Endpoint, :index)}>
           <img
@@ -31,16 +47,7 @@ defmodule BanchanWeb.Components.Nav do
 
       <div class="flex-none hidden md:block">
         <ul class="menu horizontal">
-          {#if @current_user}
-            <li>
-              <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
-                <span>
-                  <i class="fa fa-palette" />
-                  Commissions
-                </span>
-              </LiveRedirect>
-            </li>
-          {#else}
+          {#if is_nil(@current_user)}
             <li>
               <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
                 <span>
@@ -63,22 +70,6 @@ defmodule BanchanWeb.Components.Nav do
 
       <div class="flex-none">
         <Notifications id="notifications" uri={@uri} current_user={@current_user} />
-      </div>
-
-      <div class="flex-none gap-4 items-center">
-        <label for="drawer-toggle" class="btn btn-square btn-ghost">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            class="inline-block w-6 h-6 stroke-current"
-          ><path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            /></svg>
-        </label>
       </div>
     </nav>
     """
