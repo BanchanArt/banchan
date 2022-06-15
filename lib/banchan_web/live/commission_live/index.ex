@@ -219,12 +219,9 @@ defmodule BanchanWeb.CommissionLive do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <div class="flex flex-row grow md:grow-0">
-        <div class={"flex flex-col px-4 sidebar basis-full md:basis-1/4", "hidden md:flex": @commission}>
-          <h1 class="text-2xl font-bold mb-4">
-            Commissions
-          </h1>
+        <div class={"flex flex-col sidebar basis-full md:basis-1/4", "hidden md:flex": @commission}>
           <Form for={@filter} submit="filter" class="form-control">
-            <div class="input-group">
+            <div class="input-group w-full">
               <button :on-click="toggle_filter" type="button" class="btn btn-square btn-primary"><i class="fas fa-filter" /></button>
               <Field name={:search}>
                 <SurfaceTextInput class="input input-bordered w-full" />
@@ -251,7 +248,8 @@ defmodule BanchanWeb.CommissionLive do
               </div>
             </div>
           </Form>
-          <ul class="divide-y-2 divide-neutral-content divide-opacity-10 menu menu-compact">
+          <div class="divider">Commissions</div>
+          <ul class="menu menu-compact gap-2 p-2">
             {#for result <- @results.entries}
               <CommissionRow
                 result={result}
