@@ -61,7 +61,7 @@ defmodule BanchanWeb.Components.Layout do
       <div :if={!is_nil(@current_user)} class="drawer-side">
         <label for="drawer-toggle" class="drawer-overlay" />
         <aside class="bg-base-200 w-48 shadow">
-          <ul tabindex="0" class="menu flex flex-col p-2">
+          <ul tabindex="0" class="menu flex flex-col p-2 gap-3">
             <li>
               <LiveRedirect to={Routes.home_path(Endpoint, :index)}>
                 <span>
@@ -75,12 +75,28 @@ defmodule BanchanWeb.Components.Layout do
                 <span>Art</span>
               </li>
               <li>
+                <a href="#">
+                  <span>
+                    <i class="fas fa-search" />
+                    Discover
+                  </span>
+                </a>
+              </li>
+              <li>
                 <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
                   <span>
                     <i class="fas fa-palette" />
                     Commissions
                   </span>
                 </LiveRedirect>
+              </li>
+              <li>
+                <a href="#">
+                  <span>
+                    <i class="fas fa-list" />
+                    Subscriptions
+                  </span>
+                </a>
               </li>
               <li>
                 <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
@@ -100,6 +116,14 @@ defmodule BanchanWeb.Components.Layout do
                     Your Profile
                   </span>
                 </LiveRedirect>
+              </li>
+              <li>
+                <a href="#">
+                  <span>
+                    <i class="fas fa-comment-alt" />
+                    Messages
+                  </span>
+                </a>
               </li>
               <li>
                 <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
