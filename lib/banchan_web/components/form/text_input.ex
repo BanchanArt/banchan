@@ -29,17 +29,16 @@ defmodule BanchanWeb.Components.Form.TextInput do
       <div class="flex flex-col">
         <div class="flex flex-row gap-2">
           {#if @icon}
-            <span class="icon is-small is-left">
-              <i class={"fas", "fa-#{@icon}"} />
+            <span class="icon text-2xl my-auto">
+              <i class={"fas fa-#{@icon}"} />
             </span>
           {/if}
-          <div class="control">
+          <div class="control w-full">
             <InputContext :let={form: form, field: field}>
               <TextInput
                 class={
                   "input",
                   "input-bordered",
-                  "input-sm",
                   "w-full",
                   @class,
                   "input-error": !Enum.empty?(Keyword.get_values(form.errors, field))

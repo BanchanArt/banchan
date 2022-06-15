@@ -18,7 +18,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   def render(assigns) do
     ~F"""
     <Field class="form-control" name={@name}>
-      <Label class={"label cursor-pointer max-w-md", @wrapper_class}>
+      <Label class={"label cursor-pointer", @wrapper_class}>
         <div class="label-text">
           <#slot>{@label}</#slot>
         </div>

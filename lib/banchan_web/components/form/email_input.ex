@@ -27,17 +27,16 @@ defmodule BanchanWeb.Components.Form.EmailInput do
       <div class="flex flex-col">
         <div class="flex flex-row gap-2">
           {#if @icon}
-            <span class="icon is-small is-left">
-              <i class={"fas", "fa-#{@icon}"} />
+            <span class="icon text-2xl my-auto">
+              <i class={"fas fa-#{@icon}"} />
             </span>
           {/if}
-          <div class={"control", @wrapper_class}>
+          <div class={"w-full control", @wrapper_class}>
             <InputContext :let={form: form, field: field}>
               <EmailInput
                 class={
                   "input",
                   "input-bordered",
-                  "input-sm",
                   "w-full",
                   @class,
                   "input-error": !Enum.empty?(Keyword.get_values(form.errors, field))

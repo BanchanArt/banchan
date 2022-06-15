@@ -13,6 +13,7 @@ defmodule BanchanWeb.Components.Layout do
   prop current_user, :any
   prop flashes, :string
   prop uri, :string, required: true
+  prop padding, :string, default: "4"
 
   slot hero
   slot default
@@ -28,11 +29,11 @@ defmodule BanchanWeb.Components.Layout do
         {#if slot_assigned?(:hero)}
           <#slot name="hero" />
         {/if}
-        <section class="flex flex-col flex-grow p-4 shadow-inner">
+        <section class={"flex flex-col flex-grow p-#{@padding} shadow-inner"}>
           <Flash flashes={@flashes} />
           <#slot />
         </section>
-        <footer class="footer p-10 bg-base-200 z-30 shadow-sm">
+        <footer class="footer p-10 z-30 shadow-sm">
           <div>
             <span class="footer-title">Co-op</span>
             {!-- # TODO: Fill these out --}
