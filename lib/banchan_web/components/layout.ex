@@ -14,6 +14,7 @@ defmodule BanchanWeb.Components.Layout do
   prop flashes, :string
   prop uri, :string, required: true
   prop padding, :string, default: "4"
+  prop drawer, :boolean, default: true
 
   slot hero
   slot default
@@ -58,7 +59,7 @@ defmodule BanchanWeb.Components.Layout do
           </div>
         </footer>
       </div>
-      <div class="drawer-side">
+      <div :if={@drawer} class="drawer-side">
         <label for="drawer-toggle" class="drawer-overlay" />
         <aside class="bg-base-200 w-48 shadow">
           <ul tabindex="0" class="menu flex flex-col p-2">
@@ -124,26 +125,6 @@ defmodule BanchanWeb.Components.Layout do
                     Log out
                   </span>
                 </Link>
-              </li>
-            {#else}
-              <li class="menu-title">
-                <span>Account</span>
-              </li>
-              <li>
-                <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
-                  <span>
-                    <i class="fa fa-user" />
-                    Register
-                  </span>
-                </LiveRedirect>
-              </li>
-              <li>
-                <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
-                  <span>
-                    <i class="fa fa-sign-in-alt" />
-                    Log in
-                  </span>
-                </LiveRedirect>
               </li>
             {/if}
           </ul>

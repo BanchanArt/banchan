@@ -5,7 +5,7 @@ defmodule BanchanWeb.LoginLive do
   use BanchanWeb, :surface_view
   on_mount BanchanWeb.UserLiveAuth
 
-  alias Surface.Components.Form
+  alias Surface.Components.{Form, LiveRedirect}
 
   alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextInput}
   alias BanchanWeb.Components.Layout
@@ -28,7 +28,7 @@ defmodule BanchanWeb.LoginLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} padding="0" current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} padding="0" drawer={false} current_user={@current_user} flashes={@flash}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-sm w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Form
@@ -51,6 +51,12 @@ defmodule BanchanWeb.LoginLive do
             <Checkbox name={:remember_me}>Keep me logged in for 60 days.</Checkbox>
             <Submit class="w-full" changeset={@changeset} label="Log in" />
           </Form>
+          <div class="divider">OR</div>
+          <div class="mx-auto">
+            <LiveRedirect class="btn btn-link btn-sm w-full" to={Routes.register_path(Endpoint, :new)}>
+              Register
+            </LiveRedirect>
+          </div>
         </div>
       </div>
     </Layout>

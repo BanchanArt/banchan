@@ -5,7 +5,7 @@ defmodule BanchanWeb.RegisterLive do
   use BanchanWeb, :surface_view
   on_mount BanchanWeb.UserLiveAuth
 
-  alias Surface.Components.Form
+  alias Surface.Components.{Form, LiveRedirect}
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
@@ -35,7 +35,7 @@ defmodule BanchanWeb.RegisterLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} padding="0" current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} padding="0" drawer={false} current_user={@current_user} flashes={@flash}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-sm w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Form
@@ -57,6 +57,12 @@ defmodule BanchanWeb.RegisterLive do
             />
             <Submit class="w-full" changeset={@changeset} label="Register" />
           </Form>
+          <div class="divider">OR</div>
+          <div class="mx-auto">
+            <LiveRedirect class="btn btn-link btn-sm w-full" to={Routes.login_path(Endpoint, :new)}>
+              Log In
+            </LiveRedirect>
+          </div>
         </div>
       </div>
     </Layout>

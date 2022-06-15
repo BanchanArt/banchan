@@ -40,28 +40,16 @@ defmodule BanchanWeb.Components.Nav do
         </LiveRedirect>
       </div>
 
-      <div class="flex-none hidden md:block">
-        <ul class="menu horizontal">
-          {#if is_nil(@current_user)}
-            <li>
-              <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
-                <span>
-                  <i class="fa fa-user" />
-                  Register
-                </span>
-              </LiveRedirect>
-            </li>
-            <li>
-              <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
-                <span>
-                  <i class="fa fa-sign-in-alt" />
-                  Log in
-                </span>
-              </LiveRedirect>
-            </li>
-          {/if}
-        </ul>
-      </div>
+      {#if is_nil(@current_user)}
+        <div class="mx-4">
+          <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
+            <span>
+              <i class="fa fa-sign-in-alt" />
+              Log in
+            </span>
+          </LiveRedirect>
+        </div>
+      {/if}
 
       <div class="flex-none">
         <Notifications id="notifications" uri={@uri} current_user={@current_user} />
