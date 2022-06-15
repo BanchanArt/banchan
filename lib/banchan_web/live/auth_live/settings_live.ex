@@ -230,15 +230,20 @@ defmodule BanchanWeb.SettingsLive do
         <h3 class="text-lg">
           Update Password
         </h3>
-        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
         <TextInput
-          name={:password_confirmation}
+          name={:current_confirmation}
           icon="lock"
-          label="New Password Confirmation"
+          label="Current Password"
           opts={required: true, type: :password}
         />
         <TextInput
-          name={:current_confirmation}
+          name={:password}
+          label="New Password"
+          icon="lock"
+          opts={required: true, type: :password}
+        />
+        <TextInput
+          name={:password_confirmation}
           icon="lock"
           label="New Password Confirmation"
           opts={required: true, type: :password}
