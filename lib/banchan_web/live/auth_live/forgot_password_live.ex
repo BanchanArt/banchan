@@ -8,8 +8,8 @@ defmodule BanchanWeb.ForgotPasswordLive do
 
   alias Banchan.Accounts
 
+  alias BanchanWeb.AuthLive.Components.AuthLayout
   alias BanchanWeb.Components.Form.{EmailInput, Submit}
-  alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -20,13 +20,14 @@ defmodule BanchanWeb.ForgotPasswordLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Forgot your password?</h1>
-      <Form class="col-span-1" for={:user} submit="submit">
+    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
+      <Form class="flex flex-col gap-4" for={:user} submit="submit">
+        <h1 class="text-2xl">Forgot your password?</h1>
+        <p>If you have an account, instructions for password reset will be sent to it.</p>
         <EmailInput name={:email} icon="envelope" opts={required: true} />
-        <Submit label="Send instructions to reset password" />
+        <Submit class="w-full" label="Send Instructions" />
       </Form>
-    </Layout>
+    </AuthLayout>
     """
   end
 

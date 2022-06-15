@@ -21,7 +21,7 @@ defmodule BanchanWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} drawer={!is_nil(@current_user)} current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <h1 class="text-3xl">Home</h1>
       <h2 class="text-lg">Commission Someone</h2>
       <div class="studio-list grid grid-cols-3 gap-3">

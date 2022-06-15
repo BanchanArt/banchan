@@ -14,7 +14,6 @@ defmodule BanchanWeb.Components.Layout do
   prop flashes, :string
   prop uri, :string, required: true
   prop padding, :string, default: "4"
-  prop drawer, :boolean, default: true
 
   slot hero
   slot default
@@ -59,7 +58,7 @@ defmodule BanchanWeb.Components.Layout do
           </div>
         </footer>
       </div>
-      <div :if={@drawer} class="drawer-side">
+      <div :if={!is_nil(@current_user)} class="drawer-side">
         <label for="drawer-toggle" class="drawer-overlay" />
         <aside class="bg-base-200 w-48 shadow">
           <ul tabindex="0" class="menu flex flex-col p-2">

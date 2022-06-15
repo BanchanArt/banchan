@@ -9,8 +9,8 @@ defmodule BanchanWeb.ResetPasswordLive do
   alias Banchan.Accounts
   alias Banchan.Accounts.User
 
+  alias BanchanWeb.AuthLive.Components.AuthLayout
   alias BanchanWeb.Components.Form.{Submit, TextInput}
-  alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -35,9 +35,9 @@ defmodule BanchanWeb.ResetPasswordLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Reset password</h1>
-      <Form class="col-span-1" for={@changeset} change="change" submit="submit">
+    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
+      <Form class="flex flex-col gap-4" for={@changeset} change="change" submit="submit">
+        <h1 class="text-2xl">Reset Password</h1>
         <TextInput
           name={:password}
           label="New Password"
@@ -50,9 +50,9 @@ defmodule BanchanWeb.ResetPasswordLive do
           label="Confirm New Password"
           opts={required: true, type: :password}
         />
-        <Submit changeset={@changeset} label="Reset Password" />
+        <Submit class="w-full" changeset={@changeset} label="Reset Password" />
       </Form>
-    </Layout>
+    </AuthLayout>
     """
   end
 

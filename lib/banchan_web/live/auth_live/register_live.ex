@@ -10,8 +10,8 @@ defmodule BanchanWeb.RegisterLive do
   alias Banchan.Accounts
   alias Banchan.Accounts.User
 
+  alias BanchanWeb.AuthLive.Components.AuthLayout
   alias BanchanWeb.Components.Form.{EmailInput, Submit, TextInput}
-  alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -35,37 +35,33 @@ defmodule BanchanWeb.RegisterLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} padding="0" drawer={false} current_user={@current_user} flashes={@flash}>
-      <div class="w-full md:bg-base-300">
-        <div class="max-w-sm w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
-          <Form
-            class="flex flex-col gap-4"
-            for={@changeset}
-            action={Routes.user_registration_path(Endpoint, :create)}
-            change="change"
-            submit="submit"
-            trigger_action={@trigger_submit}
-          >
-            <h1 class="text-2xl mx-auto">Register</h1>
-            <EmailInput name={:email} icon="envelope" opts={required: true} />
-            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-            <TextInput
-              name={:password_confirmation}
-              label="Confirm Password"
-              icon="lock"
-              opts={required: true, type: :password}
-            />
-            <Submit class="w-full" changeset={@changeset} label="Register" />
-          </Form>
-          <div class="divider">OR</div>
-          <div class="mx-auto">
-            <LiveRedirect class="btn btn-link btn-sm w-full" to={Routes.login_path(Endpoint, :new)}>
-              Log In
-            </LiveRedirect>
-          </div>
-        </div>
+    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
+      <Form
+        class="flex flex-col gap-4"
+        for={@changeset}
+        action={Routes.user_registration_path(Endpoint, :create)}
+        change="change"
+        submit="submit"
+        trigger_action={@trigger_submit}
+      >
+        <h1 class="text-2xl">Register</h1>
+        <EmailInput name={:email} icon="envelope" opts={required: true} />
+        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+        <TextInput
+          name={:password_confirmation}
+          label="Confirm Password"
+          icon="lock"
+          opts={required: true, type: :password}
+        />
+        <Submit class="w-full" changeset={@changeset} label="Register" />
+      </Form>
+      <div class="divider">OR</div>
+      <div class="mx-auto">
+        <LiveRedirect class="btn btn-link btn-sm w-full" to={Routes.login_path(Endpoint, :new)}>
+          Log In
+        </LiveRedirect>
       </div>
-    </Layout>
+    </AuthLayout>
     """
   end
 
