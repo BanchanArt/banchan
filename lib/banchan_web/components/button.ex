@@ -18,6 +18,7 @@ defmodule BanchanWeb.Components.Button do
     <button
       class={
         "btn",
+        "btn-loadable",
         "text-center",
         "py-1",
         "px-5 m-1",

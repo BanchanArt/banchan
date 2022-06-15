@@ -218,72 +218,68 @@ defmodule BanchanWeb.CommissionLive do
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="flex flex-col grow max-h-full">
-        <div class="flex flex-row grow md:grow-0">
-          <div class={"flex flex-col px-4 sidebar basis-full md:basis-1/4", "hidden md:flex": @commission}>
-            <h1 class="text-2xl font-bold mb-4">
-              Commissions
-            </h1>
-            <Form for={@filter} submit="filter" class="form-control">
-              <div class="input-group">
-                <button :on-click="toggle_filter" type="button" class="btn btn-square btn-primary"><i class="fas fa-filter" /></button>
-                <Field name={:search}>
-                  <SurfaceTextInput class="input input-bordered w-full" />
-                </Field>
-                <Submit class="btn btn-square btn-primary">
-                  <i class="fas fa-search" />
-                </Submit>
-              </div>
-              <div class={"collapse rounded-box", "collapse-open": @filter_open, "collapse-close": !@filter_open}>
-                <div class="collapse-content">
-                  <div class="flex flex-col">
-                    <h2 class="text-xl pt-4">
-                      Additional Filters
-                    </h2>
-                    <div class="divider" />
-                    <TextInput name={:client} />
-                    <TextInput name={:studio} />
-                    <MultipleSelect class="" name={:statuses} options={@status_options} />
-                    <div class="py-2">
-                      <Checkbox label="Show Archived" name={:show_archived} />
-                    </div>
-                    <Submit label="Apply" class="btn btn-square btn-primary w-full" />
+      <div class="flex flex-row grow md:grow-0">
+        <div class={"flex flex-col sidebar basis-full md:basis-1/4", "hidden md:flex": @commission}>
+          <Form for={@filter} submit="filter" class="form-control">
+            <div class="input-group w-full">
+              <button :on-click="toggle_filter" type="button" class="btn btn-square btn-primary"><i class="fas fa-filter" /></button>
+              <Field name={:search}>
+                <SurfaceTextInput class="input input-bordered w-full" />
+              </Field>
+              <Submit class="btn btn-square btn-primary">
+                <i class="fas fa-search" />
+              </Submit>
+            </div>
+            <div class={"collapse rounded-box", "collapse-open": @filter_open, "collapse-close": !@filter_open}>
+              <div class="collapse-content">
+                <div class="flex flex-col">
+                  <h2 class="text-xl pt-4">
+                    Additional Filters
+                  </h2>
+                  <div class="divider" />
+                  <TextInput name={:client} />
+                  <TextInput name={:studio} />
+                  <MultipleSelect class="" name={:statuses} options={@status_options} />
+                  <div class="py-2">
+                    <Checkbox label="Show Archived" name={:show_archived} />
                   </div>
+                  <Submit label="Apply" class="btn btn-square btn-primary w-full" />
                 </div>
               </div>
-            </Form>
-            <ul class="divide-y-2 divide-neutral-content divide-opacity-10 menu menu-compact">
-              {#for result <- @results.entries}
-                <CommissionRow
-                  result={result}
-                  highlight={@commission && @commission.public_id == result.commission.public_id}
-                />
-              {#else}
-                <li>
-                  <div class="py-2 px-4 text-xl">
-                    No Results
-                  </div>
-                </li>
-              {/for}
-            </ul>
-            <div :hook="InfiniteScroll" id="commission-infinite-scroll" data-page={@page} />
-          </div>
-          {#if @commission}
-            <div class="md:container basis-full md:basis-3/4">
-              <Commission
-                uri={@uri}
-                current_user={@current_user}
-                commission={@commission}
-                subscribed?={@subscribed?}
-                archived?={@archived?}
-                current_user_member?={@current_user_member?}
-                toggle_subscribed="toggle_subscribed"
-                toggle_archived="toggle_archived"
-                withdraw="withdraw"
-              />
             </div>
-          {/if}
+          </Form>
+          <div class="divider">Commissions</div>
+          <ul class="menu menu-compact gap-2 p-2">
+            {#for result <- @results.entries}
+              <CommissionRow
+                result={result}
+                highlight={@commission && @commission.public_id == result.commission.public_id}
+              />
+            {#else}
+              <li>
+                <div class="py-2 px-4 text-xl">
+                  No Results
+                </div>
+              </li>
+            {/for}
+          </ul>
+          <div :hook="InfiniteScroll" id="commission-infinite-scroll" data-page={@page} />
         </div>
+        {#if @commission}
+          <div class="md:container basis-full md:basis-3/4">
+            <Commission
+              uri={@uri}
+              current_user={@current_user}
+              commission={@commission}
+              subscribed?={@subscribed?}
+              archived?={@archived?}
+              current_user_member?={@current_user_member?}
+              toggle_subscribed="toggle_subscribed"
+              toggle_archived="toggle_archived"
+              withdraw="withdraw"
+            />
+          </div>
+        {/if}
       </div>
     </Layout>
     """

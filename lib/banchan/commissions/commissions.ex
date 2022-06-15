@@ -1078,7 +1078,7 @@ defmodule Banchan.Commissions do
         # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
         Money.new(0, :USD),
         fn event, acc ->
-          if event.invoice && event.invoice.status == :succeeded do
+          if event.invoice && event.invoice.status in [:succeeded, :released] do
             Money.add(acc, event.invoice.amount)
           else
             acc

@@ -5,13 +5,13 @@ defmodule BanchanWeb.RegisterLive do
   use BanchanWeb, :surface_view
   on_mount BanchanWeb.UserLiveAuth
 
-  alias Surface.Components.Form
+  alias Surface.Components.{Form, LiveRedirect}
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
 
+  alias BanchanWeb.AuthLive.Components.AuthLayout
   alias BanchanWeb.Components.Form.{EmailInput, Submit, TextInput}
-  alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -35,26 +35,33 @@ defmodule BanchanWeb.RegisterLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <h1 class="text-2xl">Register</h1>
-          <Form
-            class="col-span-1"
-            for={@changeset}
-            action={Routes.user_registration_path(Endpoint, :create)}
-            change="change"
-            submit="submit"
-            trigger_action={@trigger_submit}
-          >
-            <EmailInput name={:email} icon="envelope" opts={required: true} />
-            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-            <TextInput name={:password_confirmation} icon="lock" opts={required: true, type: :password} />
-            <Submit changeset={@changeset} label="Register" />
-          </Form>
-        </div>
+    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
+      <Form
+        class="flex flex-col gap-4"
+        for={@changeset}
+        action={Routes.user_registration_path(Endpoint, :create)}
+        change="change"
+        submit="submit"
+        trigger_action={@trigger_submit}
+      >
+        <h1 class="text-2xl">Register</h1>
+        <EmailInput name={:email} icon="envelope" opts={required: true} />
+        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+        <TextInput
+          name={:password_confirmation}
+          label="Confirm Password"
+          icon="lock"
+          opts={required: true, type: :password}
+        />
+        <Submit class="w-full" changeset={@changeset} label="Register" />
+      </Form>
+      <div class="divider">OR</div>
+      <div class="mx-auto">
+        <LiveRedirect class="btn btn-link btn-sm w-full" to={Routes.login_path(Endpoint, :new)}>
+          Log In
+        </LiveRedirect>
       </div>
-    </Layout>
+    </AuthLayout>
     """
   end
 

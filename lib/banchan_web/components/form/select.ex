@@ -17,7 +17,7 @@ defmodule BanchanWeb.Components.Form.Select do
 
   def render(assigns) do
     ~F"""
-    <Field class="field" name={@name}>
+    <Field class="field w-full" name={@name}>
       {#if @show_label}
         {#if @label}
           <Label class="label">
@@ -27,29 +27,31 @@ defmodule BanchanWeb.Components.Form.Select do
           <Label class="label" />
         {/if}
       {/if}
-      <div class="control">
-        <InputContext :let={form: form, field: field}>
-          <Select
-            class={
-              "select",
-              "select-primary",
-              "select-bordered",
-              "w-full",
-              @class,
-              "has-icon-left": @icon,
-              "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
-            }
-            opts={@opts}
-            options={@options}
-          />
-        </InputContext>
-        {#if @icon}
-          <span class="icon is-small is-left">
-            <i class={"fas", "fa-#{@icon}"} />
-          </span>
-        {/if}
+      <div class="flex flex-col">
+        <div class="flex flex-row gap-2">
+          {#if @icon}
+            <span class="icon text-2xl my-auto">
+              <i class={"fas fa-#{@icon}"} />
+            </span>
+          {/if}
+          <div class="control w-full">
+            <InputContext :let={form: form, field: field}>
+              <Select
+                class={
+                  "select",
+                  "select-bordered",
+                  "w-full",
+                  @class,
+                  "select-error": !Enum.empty?(Keyword.get_values(form.errors, field))
+                }
+                opts={@opts}
+                options={@options}
+              />
+            </InputContext>
+          </div>
+        </div>
+        <ErrorTag class="help text-error" />
       </div>
-      <ErrorTag class="help is-danger" />
     </Field>
     """
   end

@@ -219,7 +219,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
                 Pay Out
               </Button>
               <div class="divider">History</div>
-              <ul class="payout-rows divide-y-2 divide-base-content divide-opacity-10 menu menu-compact">
+              <ul class="payout-rows menu menu-compact p-2">
                 {#if @results}
                   {#for payout <- @results.entries}
                     <PayoutRow studio={@studio} payout={payout} highlight={@payout_id == payout.public_id} />

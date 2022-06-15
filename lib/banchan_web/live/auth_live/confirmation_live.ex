@@ -8,8 +8,8 @@ defmodule BanchanWeb.ConfirmationLive do
 
   alias Banchan.Accounts
 
+  alias BanchanWeb.AuthLive.Components.AuthLayout
   alias BanchanWeb.Components.Form.{EmailInput, Submit}
-  alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -20,17 +20,14 @@ defmodule BanchanWeb.ConfirmationLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <h1 class="text-2xl">Resend confirmation instructions</h1>
-          <Form for={:user} submit="submit">
-            <EmailInput name={:email} opts={required: true} />
-            <Submit label="Resend confirmation information" />
-          </Form>
-        </div>
-      </div>
-    </Layout>
+    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
+      <Form class="flex flex-col gap-4" for={:user} submit="submit">
+        <h1 class="text-2xl mx-auto">Resend Confirmation</h1>
+        <p>Email confirmation will be sent again to this address.</p>
+        <EmailInput name={:email} icon="envelope" opts={required: true} />
+        <Submit class="w-full" label="Resend" />
+      </Form>
+    </AuthLayout>
     """
   end
 

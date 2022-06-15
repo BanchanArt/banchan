@@ -8,8 +8,8 @@ defmodule BanchanWeb.SetupMfaLive do
 
   alias Banchan.Accounts
 
+  alias BanchanWeb.AuthLive.Components.AuthLayout
   alias BanchanWeb.Components.Form.{Submit, TextInput}
-  alias BanchanWeb.Components.Layout
 
   @impl true
   def mount(_params, _session, socket) do
@@ -39,43 +39,34 @@ defmodule BanchanWeb.SetupMfaLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="shadow bg-base-200 text-base-content">
-        {#if @qrcode_svg && !@totp_activated}
-          <div class="p-6">
-            <h1 class="text-2xl">Your QR Code</h1>
-            <br>
-            <img src={@qrcode_svg} style="width: 200px; padding: 10px; background-color: white;">
-            <br>
-            No QR code reader? Input the following value in your MFA app:
-            <br>
-            {@secret}
-          </div>
-          <div class="p-6">
-            <h1 class="text-2xl">Confirm MFA 6-digit OTP</h1>
-            <Form class="col-span-1" for={:user} submit="confirm_mfa">
-              <TextInput name={:token} label="One Time Password" opts={required: true} />
-              <Submit label="Activate" />
-            </Form>
-          </div>
-        {#elseif @qrcode_svg && @totp_activated}
-          <div class="p-6">
-            <h1 class="text-2xl">You have MFA enabled</h1>
-            <Form class="col-span-1" for={:user} submit="deactivate_mfa">
-              <Submit label="Deactivate MFA" />
-            </Form>
-          </div>
-        {#else}
-          <div class="p-6">
-            <h1 class="text-2xl">MFA Setup</h1>
-            <Form class="col-span-1" for={:user} submit="setup_mfa">
-              You do not have MFA enabled.
-              <Submit label="Set up MFA" />
-            </Form>
-          </div>
-        {/if}
-      </div>
-    </Layout>
+    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
+      {#if @qrcode_svg && !@totp_activated}
+        <h1 class="text-2xl">Your QR Code</h1>
+        <br>
+        <img src={@qrcode_svg} style="width: 200px; padding: 10px; background-color: white;">
+        <br>
+        No QR code reader? Input the following value in your MFA app:
+        <br>
+        {@secret}
+        <div class="divider" />
+        <h1 class="text-2xl">Confirm MFA 6-digit OTP</h1>
+        <Form class="flex flex-col gap-4" for={:user} submit="confirm_mfa">
+          <TextInput name={:token} label="One Time Password" opts={required: true} />
+          <Submit class="w-full" label="Activate" />
+        </Form>
+      {#elseif @qrcode_svg && @totp_activated}
+        <h1 class="text-2xl">You have MFA enabled</h1>
+        <Form for={:user} submit="deactivate_mfa">
+          <Submit class="w-full" label="Deactivate MFA" />
+        </Form>
+      {#else}
+        <h1 class="text-2xl">MFA Setup</h1>
+        <Form for={:user} submit="setup_mfa">
+          You do not have MFA enabled.
+          <Submit class="w-full" label="Set up MFA" />
+        </Form>
+      {/if}
+    </AuthLayout>
     """
   end
 

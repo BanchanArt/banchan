@@ -27,28 +27,30 @@ defmodule BanchanWeb.DenizenLive.Show do
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <section class="grid grid-cols-2 bg-secondary">
-        <div class="col-span-12">
-          <article class="ml-8">
-            <Avatar class="w-32" user={@user} />
-            <h1 class="text-xl text-base-content font-bold">
-              {@user.handle}
-            </h1>
-            <br>
-            <p class="text-base text-secondary-content">
-              Witty phrase here.
-            </p>
-            {!-- # TODO: add in follow functionality --}
-            <button type="button" class="btn glass btn-sm text-center rounded-full px-4 py-0" label="Follow">Follow</button>
-          </article>
-        </div>
-        <nav class="tabs col-start-2 grid-cols-3 inline-grid">
-          <div class="tab tab-bordered tab-active bg-primary-focus text-center rounded-t-lg border-t-6 border-solid border-green-300"><a>Profile Home</a></div>
-          <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Featured</a></div>
-          <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Characters</a></div>
-        </nav>
-      </section>
-      <div class="grid grid-cols-2 justify-items-stretch gap-6 mt-8">
+      <:hero>
+        <section class="grid grid-cols-2 bg-secondary">
+          <div class="col-span-12">
+            <article class="ml-8">
+              <Avatar class="w-32" user={@user} />
+              <h1 class="text-xl text-base-content font-bold">
+                {@user.handle}
+              </h1>
+              <br>
+              <p class="text-base text-secondary-content">
+                Witty phrase here.
+              </p>
+              {!-- # TODO: add in follow functionality --}
+              <button type="button" class="btn glass btn-sm text-center rounded-full px-4 py-0" label="Follow">Follow</button>
+            </article>
+          </div>
+          <nav class="tabs col-start-2 grid-cols-3 inline-grid">
+            <div class="tab tab-bordered tab-active bg-primary-focus text-center rounded-t-lg border-t-6 border-solid border-green-300"><a>Profile Home</a></div>
+            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Featured</a></div>
+            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Characters</a></div>
+          </nav>
+        </section>
+      </:hero>
+      <div class="grid grid-cols-2 justify-items-stretch gap-6">
         <div class="bg-base-200 p-4 shadow-lg">
           <h2 class="text-xl text-secondary-content font-bold">Studios</h2>
           <div class="denizen-studios">

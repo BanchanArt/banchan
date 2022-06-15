@@ -5,10 +5,10 @@ defmodule BanchanWeb.LoginLive do
   use BanchanWeb, :surface_view
   on_mount BanchanWeb.UserLiveAuth
 
-  alias Surface.Components.Form
+  alias Surface.Components.{Form, LiveRedirect}
 
+  alias BanchanWeb.AuthLive.Components.AuthLayout
   alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextInput}
-  alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -28,27 +28,37 @@ defmodule BanchanWeb.LoginLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <h1 class="text-2xl">Log in</h1>
-          <Form
-            class="col-span-1"
-            for={@changeset}
-            action={Routes.user_session_path(Endpoint, :create)}
-            change="change"
-            submit="submit"
-            trigger_action={@trigger_submit}
-          >
-            <EmailInput name={:email} icon="envelope" opts={required: true} />
-            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-            <TextInput name={:mfa_token} icon="mobile-alt" opts={maxlength: 6, placeholder: "optional"} />
-            <Checkbox name={:remember_me}>Keep me logged in for 60 days.</Checkbox>
-            <Submit changeset={@changeset} label="Log in" />
-          </Form>
-        </div>
+    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
+      <Form
+        class="flex flex-col gap-4"
+        for={@changeset}
+        action={Routes.user_session_path(Endpoint, :create)}
+        change="change"
+        submit="submit"
+        trigger_action={@trigger_submit}
+      >
+        <h1 class="text-2xl">Log in</h1>
+        <EmailInput name={:email} icon="envelope" opts={required: true} />
+        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+        <TextInput
+          label="MFA Token"
+          name={:mfa_token}
+          icon="mobile-alt"
+          opts={maxlength: 6, placeholder: "optional"}
+        />
+        <Checkbox name={:remember_me}>Keep me logged in for 60 days.</Checkbox>
+        <Submit class="w-full" changeset={@changeset} label="Log in" />
+        <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
+          Forgot your password?
+        </LiveRedirect>
+      </Form>
+      <div class="divider">OR</div>
+      <div class="mx-auto">
+        <LiveRedirect class="btn btn-link btn-sm w-full" to={Routes.register_path(Endpoint, :new)}>
+          Register
+        </LiveRedirect>
       </div>
-    </Layout>
+    </AuthLayout>
     """
   end
 

@@ -14,12 +14,7 @@ defmodule BanchanWeb.Components.Nav do
 
   def render(assigns) do
     ~F"""
-    <nav
-      id="nav"
-      class="navbar bg-neutral text-neutral-content"
-      role="navigation"
-      aria-label="main navigation"
-    >
+    <nav id="nav" class="navbar bg-base-100" role="navigation" aria-label="main navigation">
       <div class="flex-none gap-4 lg:hidden items-center">
         <label for="drawer-toggle" class="btn btn-square btn-ghost">
           <svg
@@ -45,28 +40,16 @@ defmodule BanchanWeb.Components.Nav do
         </LiveRedirect>
       </div>
 
-      <div class="flex-none hidden md:block">
-        <ul class="menu horizontal">
-          {#if is_nil(@current_user)}
-            <li>
-              <LiveRedirect label="Register" to={Routes.register_path(Endpoint, :new)}>
-                <span>
-                  <i class="fa fa-user" />
-                  Register
-                </span>
-              </LiveRedirect>
-            </li>
-            <li>
-              <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
-                <span>
-                  <i class="fa fa-sign-in-alt" />
-                  Log in
-                </span>
-              </LiveRedirect>
-            </li>
-          {/if}
-        </ul>
-      </div>
+      {#if is_nil(@current_user)}
+        <div class="mx-4">
+          <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
+            <span>
+              <i class="fa fa-sign-in-alt" />
+              Log in
+            </span>
+          </LiveRedirect>
+        </div>
+      {/if}
 
       <div class="flex-none">
         <Notifications id="notifications" uri={@uri} current_user={@current_user} />

@@ -28,14 +28,13 @@ defmodule BanchanWeb.Components.Form.Checkbox do
               @class,
               "checkbox",
               "checkbox-primary",
-              "is-large",
-              "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+              "checkbox-error": !Enum.empty?(Keyword.get_values(form.errors, field))
             }
             opts={@opts}
           />
         </InputContext>
       </Label>
-      <ErrorTag class="help is-danger" />
+      <ErrorTag class="help text-error" />
     </Field>
     """
   end
