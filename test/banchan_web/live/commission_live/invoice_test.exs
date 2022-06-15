@@ -54,7 +54,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       assert invoice_box =~ "$420.00"
       refute invoice_box =~ "Payment is Requested"
       assert invoice_box =~ "Waiting for Payment"
-      assert invoice_box =~ ~r/<button[^<]+Cancel Payment Request</
+      assert invoice_box =~ ~r/<button[^<]+Cancel Payment</
       refute invoice_box =~ ~r/<button[^<]+Pay</
       refute invoice_box =~ "modal-open"
 
@@ -69,9 +69,9 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "Payment is requested"
+      assert invoice_box =~ "Payment Requested"
       refute invoice_box =~ "Waiting for Payment"
-      refute invoice_box =~ ~r/<button[^<]+Cancel Payment Request</
+      refute invoice_box =~ ~r/<button[^<]+Cancel Payment</
       assert invoice_box =~ ~r/<button[^<]+Pay</
       refute invoice_box =~ "modal-open"
     end
@@ -206,8 +206,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> element(".invoice-box")
         |> render()
 
-      assert invoice_box =~ "Payment session in progress"
-      assert invoice_box =~ ~r/<button[^<]+Cancel Payment Request</
+      assert invoice_box =~ "Payment in Process"
+      assert invoice_box =~ ~r/<button[^<]+Cancel Payment</
       refute invoice_box =~ ~r/<button[^<]+Continue Payment</
 
       # Back to the client
@@ -221,8 +221,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> element(".invoice-box")
         |> render()
 
-      assert invoice_box =~ "Payment session in progress"
-      refute invoice_box =~ ~r/<button[^<]+Cancel Payment Request</
+      assert invoice_box =~ "Payment in Process"
+      refute invoice_box =~ ~r/<button[^<]+Cancel Payment</
       assert invoice_box =~ ~r/<button[^<]+Continue Payment</
 
       client_page_live
@@ -269,8 +269,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> element(".invoice-box")
         |> render()
 
-      assert invoice_box =~ "Payment succeeded"
-      refute invoice_box =~ ~r/<button[^<]+Cancel Payment Request</
+      assert invoice_box =~ "Payment Succeeded"
+      refute invoice_box =~ ~r/<button[^<]+Cancel Payment</
       refute invoice_box =~ ~r/<button[^<]+Continue Payment</
 
       # Check artist
@@ -279,8 +279,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> element(".invoice-box")
         |> render()
 
-      assert invoice_box =~ "Payment succeeded"
-      refute invoice_box =~ ~r/<button[^<]+Cancel Payment Request</
+      assert invoice_box =~ "Payment Succeeded"
+      refute invoice_box =~ ~r/<button[^<]+Cancel Payment</
       refute invoice_box =~ ~r/<button[^<]+Continue Payment</
     end
   end

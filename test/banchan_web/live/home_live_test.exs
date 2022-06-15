@@ -14,9 +14,7 @@ defmodule BanchanWeb.HomeLiveTest do
   test "render when logged out", %{conn: conn} do
     {:ok, page_live, disconnected_html} = live(conn, "/")
     assert disconnected_html =~ "Log in"
-    assert disconnected_html =~ "Register"
     assert render(page_live) =~ "Log in"
-    assert render(page_live) =~ "Register"
   end
 
   test "render when logged in", %{conn: conn, user: user} do

@@ -55,26 +55,22 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
       conn = log_in_user(conn, user)
 
-      {:ok, page_live, disconnected_html} =
+      {:ok, page_live, _disconnected_html} =
         live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
 
-      rendered_html = render(page_live)
+      assert page_live
+             |> element(".profile-info button[type=submit]")
+             |> render() =~ "disabled"
 
-      assert disconnected_html =~
-               "<button class=\"btn text-center py-1 px-5 btn-primary m-1\" disabled=\"disabled\" type=\"submit\">"
+      page_live
+      |> element(".profile-info")
+      |> render_change(%{
+        user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
+      })
 
-      assert rendered_html =~
-               "<button class=\"btn text-center py-1 px-5 btn-primary m-1\" disabled=\"disabled\" type=\"submit\">"
-
-      rendered =
-        page_live
-        |> element(".profile-info")
-        |> render_change(%{
-          user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
-        })
-
-      assert rendered =~
-               "<button class=\"btn text-center py-1 px-5 btn-primary m-1\" type=\"submit\">"
+      refute page_live
+             |> element(".profile-info button[type=submit]")
+             |> render() =~ "disabled"
     end
 
     test "updates profile values on change, but does not change user in db", %{

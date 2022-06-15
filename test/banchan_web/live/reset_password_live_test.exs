@@ -18,7 +18,7 @@ defmodule BanchanWeb.ResetPasswordLiveTest do
 
   test "renders reset password", %{conn: conn, token: token} do
     {:ok, _view, html} = live(conn, Routes.reset_password_path(conn, :edit, token))
-    assert html =~ "Reset password</h1>"
+    assert html =~ "Reset Password"
   end
 
   test "does not render reset password with invalid token", %{conn: conn} do
@@ -56,7 +56,7 @@ defmodule BanchanWeb.ResetPasswordLiveTest do
       )
       |> render_submit()
 
-    assert html =~ "Reset password</h1>"
+    assert html =~ "Reset Password"
     assert html =~ "should be at least 12 character(s)"
     assert html =~ "does not match password"
   end

@@ -250,11 +250,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                     <Button class="continue-payment btn-sm" click="continue_payment" label="Continue Payment" />
                   {/if}
                   {#if @current_user_member?}
-                    <Button
-                      class="cancel-payment-request btn-sm"
-                      click="force_expire"
-                      label="Cancel Payment Request"
-                    />
+                    <Button class="cancel-payment-request btn-sm" click="force_expire" label="Cancel Payment" />
                   {/if}
                 </div>
               </div>
