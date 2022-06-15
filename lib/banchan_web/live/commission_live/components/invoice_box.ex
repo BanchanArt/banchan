@@ -209,68 +209,96 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       {/if}
 
       {!-- Invoice box --}
-      <div class="place-self-center stats stats-vertical md:stats-horizontal">
+      <div class="place-self-center stats">
         <div class="stat">
-          <div class="stat-title">Invoice</div>
-          <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
           {#case @event.invoice.status}
             {#match :pending}
               {#if @current_user.id == @commission.client_id}
-                <div class="stat-desc">Payment is requested.</div>
-                <Form for={@changeset} class="stat-actions" change="change" submit="submit">
+                <div class="stat-title">Payment Requested</div>
+                <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+                <div class="stat-desc">Please consider adding a tip!</div>
+                <Form for={@changeset} class="stat-actions flex flex-col gap-2" change="change" submit="submit">
                   <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
-                  <Submit class="pay-invoice" changeset={@changeset} label="Pay" />
+                  <Submit class="pay-invoice btn-sm w-full" changeset={@changeset} label="Pay" />
                   {#if @current_user_member?}
-                    {!-- # TODO: This should be a Link so it's accessible. --}
-                    <Button class="cancel-payment-request" click="force_expire" label="Cancel Payment Request" />
+                    <Button
+                      class="cancel-payment-request btn-sm w-full"
+                      click="force_expire"
+                      label="Cancel Payment"
+                    />
                   {/if}
                 </Form>
               {#else}
+                <div class="stat-title">Payment Requested</div>
+                <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
                 <div class="stat-desc">Waiting for Payment</div>
                 {#if @current_user_member?}
                   <div class="stat-actions">
-                    {!-- # TODO: This should be a Link so it's accessible. --}
-                    <Button class="cancel-payment-request" click="force_expire" label="Cancel Payment Request" />
+                    <Button class="cancel-payment-request btn-sm" click="force_expire" label="Cancel Payment" />
                   </div>
                 {/if}
               {/if}
             {#match :submitted}
-              <div class="stat-desc">Payment session in progress.</div>
+              <div class="stat-title">Payment in Process</div>
+              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+              {#if @event.invoice.tip.amount > 0}
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+              {/if}
               <div class="stat-actions">
-                {#if @current_user.id == @commission.client_id}
-                  {!-- # TODO: This should be a Link so it's accessible. --}
-                  <Button class="continue-payment" click="continue_payment" label="Continue Payment" />
-                {/if}
-                {#if @current_user_member?}
-                  {!-- # TODO: This should be a Link so it's accessible. --}
-                  <Button class="cancel-payment-request" click="force_expire" label="Cancel Payment Request" />
-                {/if}
+                <div class="flex flex-col gap-2">
+                  {#if @current_user.id == @commission.client_id}
+                    <Button class="continue-payment btn-sm" click="continue_payment" label="Continue Payment" />
+                  {/if}
+                  {#if @current_user_member?}
+                    <Button
+                      class="cancel-payment-request btn-sm"
+                      click="force_expire"
+                      label="Cancel Payment Request"
+                    />
+                  {/if}
+                </div>
               </div>
             {#match :expired}
               {!-- # TODO: Better, more obvious display for when something's expired --}
-              <div class="stat-desc">Payment session expired.</div>
+              <div class="stat-title text-warning">Payment session expired.</div>
+              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+              <div class="stat-desc">You'll need to start a new session.</div>
             {#match :succeeded}
-              <div class="stat-desc">Payment succeeded.</div>
+              <div class="stat-title">Payment Succeeded</div>
+              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+              {#if @event.invoice.tip.amount > 0}
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+              {/if}
               <div class="stat-actions">
-                {#if @current_user_member?}
-                  <Button
-                    label="Refund Payment"
-                    click="toggle_refund_modal"
-                    class="open-refund-modal modal-button btn-warning"
-                  />
-                {/if}
-                {#if @current_user.id == @commission.client_id}
-                  <Button
-                    label="Release Now"
-                    click="toggle_release_modal"
-                    class="open-release-modal modal-button btn-success"
-                  />
-                {/if}
+                <div class="flex flex-col gap-2">
+                  {#if @current_user_member?}
+                    <Button
+                      label="Refund Payment"
+                      click="toggle_refund_modal"
+                      class="open-refund-modal modal-button btn-warning btn-sm w-full"
+                    />
+                  {/if}
+                  {#if @current_user.id == @commission.client_id}
+                    <Button
+                      label="Release Now"
+                      click="toggle_release_modal"
+                      class="open-release-modal modal-button btn-success btn-sm w-full"
+                    />
+                  {/if}
+                </div>
               </div>
             {#match :released}
-              <div class="stat-desc">Payment released to studio.</div>
+              <div class="stat-title">Payment Released to Studio</div>
+              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+              {#if @event.invoice.tip.amount > 0}
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+              {/if}
             {#match :refunded}
-              {!-- # TODO: better, more obvious display for refunds... --}
+              <div class="stat-title text-warning">Payment Refunded</div>
+              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+              {#if @event.invoice.tip.amount > 0}
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+              {/if}
               <div class="stat-desc">Payment has been refunded to the client.</div>
             {#match nil}
               {!-- NOTE: This state happens for a very brief window of time
@@ -278,18 +306,14 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 Invoice itself is created, where there _is_ no
                 Invoice for the event. If it's anything but a quick flash,
                 there's probably a bug. --}
+              <div class="stat-title text-warning">Payment Refunded</div>
+              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
               <div class="stat-desc">Please wait...</div>
           {/case}
         </div>
-        {#if @event.invoice.status == :succeeded || @event.invoice.status == :released ||
-            @event.invoice.status == :refunded}
-          <div class="stat">
-            <div class="stat-title">Tip</div>
-            <div class="stat-value">{Money.to_string(@event.invoice.tip)}</div>
-            <div class="stat-desc">Thank you!</div>
-          </div>
-        {/if}
       </div>
+
+      {!-- Footer/Extra info --}
       {#if !is_nil(@event.invoice.refund_status)}
         <span class="italic p-4 text-xs">
           {#case @event.invoice.refund_status}
