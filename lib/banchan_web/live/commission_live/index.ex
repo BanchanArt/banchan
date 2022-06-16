@@ -12,8 +12,8 @@ defmodule BanchanWeb.CommissionLive do
   alias Banchan.Commissions.{CommissionFilter, Notifications}
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
+  alias BanchanWeb.Components.{InfiniteScroll, Layout}
   alias BanchanWeb.Components.Form.{Checkbox, MultipleSelect, TextInput}
-  alias BanchanWeb.Components.Layout
 
   alias BanchanWeb.CommissionLive.Components.Commission
 
@@ -263,7 +263,7 @@ defmodule BanchanWeb.CommissionLive do
               </li>
             {/for}
           </ul>
-          <div :hook="InfiniteScroll" id="commission-infinite-scroll" data-page={@page} />
+          <InfiniteScroll id="commissions-infinite-scroll" page={@page} load_more="load_more" />
         </div>
         {#if @commission}
           <div class="md:container basis-full md:basis-3/4">
