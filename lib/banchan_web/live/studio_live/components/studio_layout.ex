@@ -14,12 +14,13 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   prop studio, :struct, required: true
   prop tab, :atom
   prop uri, :string, required: true
+  prop padding, :integer
 
   slot default
 
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flashes}>
+    <Layout uri={@uri} padding={@padding} current_user={@current_user} flashes={@flashes}>
       <:hero>
         <section class="bg-secondary">
           <div class="ml-8 col-span-12">

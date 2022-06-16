@@ -13,7 +13,7 @@ defmodule BanchanWeb.Components.Layout do
   prop current_user, :any
   prop flashes, :string
   prop uri, :string, required: true
-  prop padding, :string, default: "4"
+  prop padding, :integer, default: 4
 
   slot hero
   slot default

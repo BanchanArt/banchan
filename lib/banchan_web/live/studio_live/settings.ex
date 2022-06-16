@@ -12,7 +12,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   import BanchanWeb.StudioLive.Helpers
 
   alias BanchanWeb.Components.Button
-  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{MarkdownInput, Submit, TextArea, TextInput}
   alias BanchanWeb.StudioLive.Components.StudioLayout
 
   @impl true
@@ -78,10 +78,11 @@ defmodule BanchanWeb.StudioLive.Settings do
       studio={@studio}
       current_user_member?={@current_user_member?}
       tab={:settings}
+      padding={0}
       uri={@uri}
     >
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
+      <div class="w-full md:bg-base-300">
+        <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <h1 class="text-2xl">{@studio.name}</h1>
           <div class="divider" />
           <h2 class="text-xl py-6">Notifications</h2>
@@ -95,14 +96,14 @@ defmodule BanchanWeb.StudioLive.Settings do
           </Button>
           <div class="divider" />
           <h2 class="text-xl py-6">Edit Studio Profile</h2>
-          <Form class="col-span-one" for={@changeset} change="change" submit="submit">
+          <Form class="flex flex-col gap-2" for={@changeset} change="change" submit="submit">
             <TextInput name={:name} icon="user" opts={required: true} />
             {!-- # TODO: Bring this back when we've figured out how this interacts with Stripe --}
             {!-- <TextInput name={:handle} icon="at" opts={required: true} /> --}
             <TextArea name={:description} opts={required: true} />
-            <TextArea name={:summary} />
-            <TextArea name={:default_terms} />
-            <TextArea name={:default_template} />
+            <MarkdownInput id="summary" name={:summary} />
+            <MarkdownInput id="default-terms" name={:default_terms} />
+            <MarkdownInput id="default-template" name={:default_template} />
             <Submit changeset={@changeset} label="Save" />
           </Form>
         </div>
