@@ -12,15 +12,37 @@ defmodule BanchanWeb.LayoutView do
 
         {!-- OpenGraph/Card display --}
         {!-- # TODO: Make title/description/image dynamic based on page.... somehow? --}
-        <meta property="og:title" content="Banchan Art">
-        <meta property="og:description" content="The co-operative commissions marketplace.">
-        <meta property="og:image" content={Routes.static_url(Endpoint, "/images/640x360.png")}>
-        <meta property="og:image:width" content="640">
-        <meta property="og:image:height" content="360">
+        <meta property="og:title" content={
+          if assigns[:studio] do
+            "Banchan Art | #{assigns[:studio].name}"
+          else
+            "Banchan Art"
+          end
+        }>
+        <meta property="og:description" content={
+          if assigns[:studio] do
+            assigns[:studio].description
+          else
+            "The co-operative commissions marketplace."
+          end
+        }>
+        <meta property="og:image" content={
+          if assigns[:studio] do
+            Routes.static_url(Endpoint, "/images/shop_card_default.png")
+          else
+            Routes.static_url(Endpoint, "/images/640x360.png")
+          end
+        }>
         <meta property="og:site_name" content="Banchan Art">
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:site" content="@BanchanArt">
-        <meta name="twitter:image:src" content={Routes.static_url(Endpoint, "/images/640x360.png")}>
+        <meta name="twitter:image:src" content={
+          if assigns[:studio] do
+            Routes.static_url(Endpoint, "/images/shop_card_default.png")
+          else
+            Routes.static_url(Endpoint, "/images/640x360.png")
+          end
+        }>
 
         {!-- Icons and favicons --}
         <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon.png">
