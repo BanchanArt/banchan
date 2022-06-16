@@ -15,7 +15,6 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   prop label, :string
   prop show_label, :boolean, default: true
   prop class, :css_class
-  prop hook_id, :string, default: "markdown-input-wrapper-id"
   prop upload, :struct
   prop cancel_upload, :event
 
@@ -87,7 +86,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
                 class="relative flex h-40 w-full"
                 phx-drop-target={@upload && @upload.ref}
                 :hook="MarkdownInput"
-                id={@hook_id}
+                id={@id <> "-hook"}
               >
                 <TextArea
                   class={
