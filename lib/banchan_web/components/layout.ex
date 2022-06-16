@@ -61,7 +61,7 @@ defmodule BanchanWeb.Components.Layout do
       <div :if={!is_nil(@current_user)} class="drawer-side">
         <label for="drawer-toggle" class="drawer-overlay" />
         <aside class="bg-base-200 w-48 shadow">
-          <ul tabindex="0" class="menu flex flex-col p-2 gap-3">
+          <ul tabindex="0" class="menu flex flex-col p-2 gap-2">
             <li>
               <LiveRedirect to={Routes.home_path(Endpoint, :index)}>
                 <span>
@@ -70,6 +70,29 @@ defmodule BanchanWeb.Components.Layout do
                 </span>
               </LiveRedirect>
             </li>
+            {#if :admin in @current_user.roles}
+              <li class="menu-title">
+                <span>Admin</span>
+              </li>
+              <li>
+                <LiveRedirect to="/admin/dashboard">
+                  <span>
+                    <i class="fas fa-tachometer-alt" />
+                    Dashboard
+                  </span>
+                </LiveRedirect>
+              </li>
+              {#if Mix.env() == :dev}
+                <li>
+                  <LiveRedirect to="/admin/sent_emails">
+                    <span>
+                      <i class="fas fa-paper-plane" />
+                      Sent Emails
+                    </span>
+                  </LiveRedirect>
+                </li>
+              {/if}
+            {/if}
             {#if @current_user}
               <li class="menu-title">
                 <span>Art</span>
