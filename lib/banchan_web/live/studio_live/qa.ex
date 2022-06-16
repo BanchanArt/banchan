@@ -23,6 +23,7 @@ defmodule BanchanWeb.StudioLive.Qa do
   def render(assigns) do
     ~F"""
     <StudioLayout
+      id="studio-layout"
       current_user={@current_user}
       flashes={@flash}
       studio={@studio}

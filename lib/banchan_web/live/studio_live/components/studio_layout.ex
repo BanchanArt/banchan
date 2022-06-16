@@ -2,9 +2,11 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   @moduledoc """
   Shared layout component between the various Studio-related pages.
   """
-  use BanchanWeb, :component
+  use BanchanWeb, :live_component
 
-  alias BanchanWeb.Components.Layout
+  alias Banchan.Studios
+
+  alias BanchanWeb.Components.{Button, Layout}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.TabButton
 
@@ -16,7 +18,32 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   prop uri, :string, required: true
   prop padding, :integer
 
+  data user_following, :boolean, default: false
+
   slot default
+
+  def update(assigns, socket) do
+    socket = assign(socket, assigns)
+    {:ok,
+     socket
+     |> assign(
+       user_following: socket.assigns.current_user && Studios.Notifications.user_following?(socket.assigns.current_user, socket.assigns.studio)
+     )}
+  end
+
+  def handle_event(
+        "toggle_follow",
+        _,
+        %{assigns: %{user_following: user_following, studio: studio, current_user: current_user}} = socket
+      ) do
+    if user_following do
+      Studios.Notifications.unfollow_studio!(studio, current_user)
+    else
+      Studios.Notifications.follow_studio!(studio, current_user)
+    end
+
+    {:noreply, socket |> assign(user_following: !user_following)}
+  end
 
   def render(assigns) do
     ~F"""
@@ -29,8 +56,13 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
             </p>
             <p class="text-base text-secondary-content flex-grow">
               {@studio.description}
-              {!-- # TODO: add in follow functionality --}
-              <button type="button" class="btn glass btn-sm text-center rounded-full px-2 py-0" label="Follow">Follow</button>
+              <Button click="toggle_follow" class="glass btn-sm rounded-full px-2 py-0">
+                {if @user_following do
+                  "Unfollow"
+                else
+                  "Follow"
+                end}
+              </Button>
             </p>
             <br>
           </div>
