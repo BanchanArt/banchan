@@ -12,6 +12,7 @@ defmodule Banchan.OfferingsTest do
   alias Banchan.Commissions
   alias Banchan.Notifications
   alias Banchan.Offerings
+  alias Banchan.Studios
 
   setup do
     on_exit(fn -> Notifications.wait_for_notifications() end)
@@ -21,6 +22,7 @@ defmodule Banchan.OfferingsTest do
     test "notify offering and studio subscribers when an offering opens" do
       client = user_fixture()
       client2 = user_fixture()
+      client3 = user_fixture()
       artist = user_fixture()
       studio = studio_fixture([artist])
 
@@ -30,6 +32,7 @@ defmodule Banchan.OfferingsTest do
         })
 
       Offerings.Notifications.subscribe_user!(client, offering)
+      Studios.Notifications.follow_studio!(studio, client2)
 
       Notifications.mark_all_as_read(client)
       Notifications.mark_all_as_read(artist)
@@ -39,16 +42,19 @@ defmodule Banchan.OfferingsTest do
 
       Notifications.wait_for_notifications()
 
-      # Artist is studio-subscribed
-      assert [%{short_body: "Commission slots are now available for " <> _}] =
-               Notifications.unread_notifications(artist).entries
+      # Artist does not follow the studio, so no notifs.
+      assert [] = Notifications.unread_notifications(artist).entries
 
       # User is specifically-subscribed
       assert [%{short_body: "Commission slots are now available for " <> _}] =
                Notifications.unread_notifications(client).entries
 
+      # User follows studio
+      assert [%{short_body: "Commission slots are now available for " <> _}] =
+               Notifications.unread_notifications(client2).entries
+
       # And this rando isn't at all
-      assert [] = Notifications.unread_notifications(client2).entries
+      assert [] = Notifications.unread_notifications(client3).entries
     end
 
     test "notify when there's a new offering" do
