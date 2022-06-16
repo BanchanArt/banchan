@@ -8,48 +8,35 @@ defmodule BanchanWeb.LayoutView do
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        {live_title_tag(
-          if assigns[:studio] do
-            "Banchan Art | #{assigns[:studio].name}"
-          else
-            "Banchan Art"
-          end
-        )}
+        {live_title_tag(assigns[:page_title] || "Art Goes Here", prefix: "Banchan Art | ")}
         {Phoenix.HTML.Tag.csrf_meta_tag()}
 
         {!-- OpenGraph/Card display --}
-        {!-- # TODO: Make title/description/image dynamic based on page.... somehow? --}
-        <meta property="og:title" content={
-          if assigns[:studio] do
-            "Banchan Art | #{assigns[:studio].name}"
-          else
-            "Banchan Art"
-          end
-        }>
-        <meta property="og:description" content={
-          if assigns[:studio] do
-            assigns[:studio].description
-          else
-            "The co-operative commissions marketplace."
-          end
-        }>
-        <meta property="og:image" content={
-          if assigns[:studio] do
-            Routes.static_url(Endpoint, "/images/shop_card_default.png")
-          else
-            Routes.static_url(Endpoint, "/images/640x360.png")
-          end
-        }>
         <meta property="og:site_name" content="Banchan Art">
-        <meta name="twitter:card" content="summary_large_image">
+        <meta property="og:title" content={"Banchan Art | #{assigns[:page_title] || "Art Goes Here"}"}>
+        <meta
+          property="og:description"
+          content={assigns[:page_description] ||
+            "The co-operative commissions marketplace."}
+        />
+        {#if assigns[:page_small_image]}
+          <meta property="og:image" content={assigns[:page_small_image]}>
+          <meta name="twitter:image:src" content={assigns[:page_image]}>
+          <meta name="twitter:card" content="summary">
+        {#else}
+          <meta
+            property="og:image"
+            content={assigns[:page_image] ||
+              Routes.static_url(Endpoint, "/images/640x360.png")}
+          />
+          <meta
+            name="twitter:image:src"
+            content={assigns[:page_image] ||
+              Routes.static_url(Endpoint, "/images/640x360.png")}
+          />
+          <meta name="twitter:card" content="summary_large_image">
+        {/if}
         <meta name="twitter:site" content="@BanchanArt">
-        <meta name="twitter:image:src" content={
-          if assigns[:studio] do
-            Routes.static_url(Endpoint, "/images/shop_card_default.png")
-          else
-            Routes.static_url(Endpoint, "/images/640x360.png")
-          end
-        }>
 
         {!-- Icons and favicons --}
         <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon.png">

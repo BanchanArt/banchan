@@ -10,7 +10,9 @@ defmodule BanchanWeb.UserLiveAuth do
 
   def on_mount(auth, _params, session, socket) do
     socket =
-      assign_new(socket, :current_user, fn ->
+      socket
+      |> assign(page_title: "Art Goes Here")
+      |> assign_new(:current_user, fn ->
         find_current_user(session)
       end)
 

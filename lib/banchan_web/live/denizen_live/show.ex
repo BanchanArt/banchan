@@ -15,7 +15,20 @@ defmodule BanchanWeb.DenizenLive.Show do
   def mount(%{"handle" => handle}, _session, socket) do
     user = Accounts.get_user_by_handle!(handle)
     studios = Studios.list_studios_for_user(user)
-    {:ok, assign(socket, user: user, studios: studios)}
+
+    {:ok,
+     assign(socket,
+       user: user,
+       studios: studios,
+       page_title: "#{user.name} (@#{user.handle})",
+       page_description: user.bio,
+       page_small_image:
+         if user.pfp_thumb_id do
+           Routes.profile_image_url(Endpoint, :profile_image, user.pfp_thumb_id)
+         else
+           Routes.static_url(Endpoint, "/images/denizen_default_icon.png")
+         end
+     )}
   end
 
   @impl true
