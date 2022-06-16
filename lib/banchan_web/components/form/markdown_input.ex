@@ -93,10 +93,10 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
                   class={
                     "textarea",
                     "textarea-bordered",
-                    "textarea-primary",
                     "h-40",
+                    "w-full",
                     @class,
-                    "is-danger": !Enum.empty?(Keyword.get_values(form.errors, field))
+                    "textarea-error": !Enum.empty?(Keyword.get_values(form.errors, field))
                   }
                   opts={@opts}
                 />
@@ -134,7 +134,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
           </div>
         </InputContext>
       </div>
-      <ErrorTag class="help is-danger" />
+      <ErrorTag class="help text-error" />
     </Field>
     """
   end
