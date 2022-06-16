@@ -597,7 +597,8 @@ defmodule Banchan.Studios do
         business_profile: %{
           # Digital Media
           mcc: "7333",
-          url: studio_url
+          # NB(zkat): This replacement is so this code will actually work in dev environments.
+          url: String.replace(studio_url, "localhost:4000", "banchan.art")
         }
       })
 

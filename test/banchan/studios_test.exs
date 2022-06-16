@@ -53,7 +53,10 @@ defmodule Banchan.StudiosTest do
       stripe_id = unique_stripe_id()
       studio_handle = unique_studio_handle()
       studio_name = unique_studio_name()
-      studio_url = "http://localhost:4000/studios/#{studio_handle}"
+      # NB(zkat): This would otherwise be localhost:4000, but we have to do a
+      # replacement here to make the URL valid for testing with stripe,
+      # because stripe does not want localhost, even in test mode.
+      studio_url = "http://banchan.art/studios/#{studio_handle}"
 
       Banchan.StripeAPI.Mock
       |> expect(:create_account, fn attrs ->
