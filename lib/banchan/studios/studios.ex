@@ -297,7 +297,7 @@ defmodule Banchan.Studios do
       where: p.studio_id == ^studio.id,
       order_by: {:desc, p.inserted_at}
     )
-    |> Repo.paginate(page: page, page_size: 20)
+    |> Repo.paginate(page: page, page_size: 10)
   end
 
   def payout_studio(%User{} = actor, %Studio{} = studio) do

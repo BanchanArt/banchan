@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   alias Banchan.Studios
 
-  alias BanchanWeb.Components.Button
+  alias BanchanWeb.Components.{Button, InfiniteScroll}
   alias BanchanWeb.StudioLive.Components.{Payout, PayoutRow, StudioLayout}
 
   def mount(params, _session, socket) do
@@ -49,10 +49,19 @@ defmodule BanchanWeb.StudioLive.Payouts do
        |> assign(payout_id: payout_id)
        |> assign(data_pending: true)
        |> assign(fypm_pending: false)
-       |> assign(page: page(params))
+       |> assign(page: 1)
        |> assign(payout: payout)
        |> assign(results: Map.get(socket.assigns, :results, nil))
        |> assign(balance: Map.get(socket.assigns, :balance, nil))}
+    end
+  end
+
+  def handle_event("load_more", _, socket) do
+    if socket.assigns.results.total_entries >
+         socket.assigns.page * socket.assigns.results.page_size do
+      {:noreply, socket |> assign(page: socket.assigns.page + 1) |> fetch()}
+    else
+      {:noreply, socket}
     end
   end
 
@@ -162,18 +171,17 @@ defmodule BanchanWeb.StudioLive.Payouts do
       Enum.all?(available, &(&1.amount > 0))
   end
 
-  defp page(%{"page" => page}) do
-    case Integer.parse(page) do
-      {p, ""} ->
-        p
-
-      _ ->
-        1
-    end
-  end
-
-  defp page(_other) do
-    1
+  defp fetch(%{assigns: %{results: results, page: page}} = socket) do
+    socket
+    |> assign(
+      :results,
+      %{
+        results
+        | entries:
+            results.entries ++
+              Studios.list_payouts(socket.assigns.studio, page).entries
+      }
+    )
   end
 
   @impl true
@@ -226,6 +234,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
                   {/for}
                 {/if}
               </ul>
+              <InfiniteScroll id="payouts-infinite-scroll" page={@page} load_more="load_more" />
             </div>
           </div>
           {#if @payout_id}
