@@ -209,8 +209,12 @@ defmodule BanchanWeb.Components.Notifications do
     <div class="relative" :on-click-away="close_menu">
       <div class="indicator">
         {#if @notifications && @notifications.total_entries > 0}
-          <span class="indicator-item indicator-bottom indicator-right badge badge-secondary">
-            {@notifications.total_entries}
+          <span class="indicator-item indicator-bottom indicator-start badge badge-secondary">
+            {#if @notifications.total_entries > 99}
+              99+
+            {#else}
+              {@notifications.total_entries}
+            {/if}
           </span>
         {/if}
         <button type="button" :on-click="toggle_menu" class="btn btn-circle btn-ghost">
