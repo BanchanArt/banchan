@@ -1,8 +1,8 @@
 # Contributor License Agreement
 
-Owner: Digital Workers Guild LLC
-Project: Banchan Art
-Address: https://github.com/digitalworkersguild/banchan
+* Owner: [Digital Workers Guild LLC](https://digitalworkersguild.com)
+* Project: Banchan Art
+* Address: https://github.com/digitalworkersguild/banchan
 
 ## Purpose
 
