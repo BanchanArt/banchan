@@ -92,7 +92,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   def render(assigns) do
     ~F"""
     <Form
-      class="max-w-lg mx-auto"
       for={@changeset}
       change="change"
       submit="submit"
@@ -146,7 +145,11 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           <Inputs form={form} for={:options} :let={index: index}>
             <li tabindex="0" class="collapse">
               <input phx-update="ignore" type="checkbox">
-              <div class="collapse-title text-xl rounded-lg border border-primary">{Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index).name || "New Option"}
+              <div class="collapse-title text-xl rounded-lg border border-primary">
+                {
+                  opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
+                  (opt.name || "New Option") <> " - " <> Money.to_string(opt.price || Money.new(0, :USD))
+              }
               </div>
               <div class="collapse-content">
                 <TextInput name={:name} info="Name of the option." opts={required: true} />

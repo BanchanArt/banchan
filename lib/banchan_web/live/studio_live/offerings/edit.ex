@@ -38,9 +38,10 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
       tab={:settings}
       uri={@uri}
     >
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <h1>Edit Offering</h1>
+      <div>
+        <div class="p-6 max-w-lg mx-auto">
+          <h1 class="text-3xl">Edit Offering</h1>
+          <div class="divider" />
           <Components.Offering id="edit-offering" changeset={@changeset} submit="save" />
         </div>
       </div>
