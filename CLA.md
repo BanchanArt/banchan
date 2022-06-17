@@ -87,3 +87,4 @@ The undersigned have all agreed to this CLA:
 * Maria Mora (@riamaria)
 * Troy Coll (@tacohole)
 * Ava Collins (@simplesthing)
+* Emil Socks (@EmiSocks)
