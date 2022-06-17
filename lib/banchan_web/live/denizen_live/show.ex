@@ -8,7 +8,8 @@ defmodule BanchanWeb.DenizenLive.Show do
 
   alias Banchan.Accounts
   alias Banchan.Studios
-  alias BanchanWeb.Components.{Avatar, Layout, StudioCard}
+
+  alias BanchanWeb.Components.{Avatar, Button, Layout, StudioCard}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -20,6 +21,9 @@ defmodule BanchanWeb.DenizenLive.Show do
      assign(socket,
        user: user,
        studios: studios,
+       user_following?:
+         socket.assigns.current_user &&
+           Accounts.Notifications.user_following?(socket.assigns.current_user, user),
        page_title: "#{user.name} (@#{user.handle})",
        page_description: user.bio,
        page_small_image:
@@ -34,6 +38,22 @@ defmodule BanchanWeb.DenizenLive.Show do
   @impl true
   def handle_params(_params, uri, socket) do
     {:noreply, socket |> assign(uri: uri)}
+  end
+
+  @impl true
+  def handle_event(
+        "toggle_follow",
+        _,
+        %{assigns: %{user_following?: user_following?, user: user, current_user: current_user}} =
+          socket
+      ) do
+    if user_following? do
+      Accounts.Notifications.unfollow_user!(user, current_user)
+    else
+      Accounts.Notifications.follow_user!(user, current_user)
+    end
+
+    {:noreply, socket |> assign(user_following?: !user_following?)}
   end
 
   @impl true
@@ -52,8 +72,15 @@ defmodule BanchanWeb.DenizenLive.Show do
               <p class="text-base text-secondary-content">
                 Witty phrase here.
               </p>
-              {!-- # TODO: add in follow functionality --}
-              <button type="button" class="btn glass btn-sm text-center rounded-full px-4 py-0" label="Follow">Follow</button>
+              {#if @current_user}
+                <Button click="toggle_follow" class="glass btn-sm rounded-full px-2 py-0">
+                  {if @user_following? do
+                    "Unfollow"
+                  else
+                    "Follow"
+                  end}
+                </Button>
+              {/if}
             </article>
           </div>
           <nav class="tabs col-start-2 grid-cols-3 inline-grid">

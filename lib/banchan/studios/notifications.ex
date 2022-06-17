@@ -7,7 +7,7 @@ defmodule Banchan.Studios.Notifications do
   alias Banchan.Accounts.User
   alias Banchan.Notifications
   alias Banchan.Repo
-  alias Banchan.Studios.{Payout, Studio, StudioSubscription}
+  alias Banchan.Studios.{Payout, Studio, StudioFollower, StudioSubscription}
 
   @pubsub Banchan.PubSub
 
@@ -26,6 +26,29 @@ defmodule Banchan.Studios.Notifications do
   def unsubscribe_user!(%User{} = user, %Studio{} = studio) do
     %StudioSubscription{user_id: user.id, studio_id: studio.id, silenced: true}
     |> Repo.insert(on_conflict: {:replace, [:silenced]}, conflict_target: [:user_id, :studio_id])
+  end
+
+  def user_following?(%User{} = user, %Studio{} = studio) do
+    from(sub in StudioFollower,
+      where: sub.user_id == ^user.id and sub.studio_id == ^studio.id
+    )
+    |> Repo.exists?()
+  end
+
+  def follow_studio!(%Studio{} = studio, %User{} = user) do
+    %StudioFollower{user_id: user.id, studio_id: studio.id}
+    |> Repo.insert(on_conflict: :nothing, conflict_target: [:user_id, :studio_id])
+
+    :ok
+  end
+
+  def unfollow_studio!(%Studio{} = studio, %User{} = user) do
+    from(f in StudioFollower,
+      where: f.user_id == ^user.id and f.studio_id == ^studio.id
+    )
+    |> Repo.delete_all()
+
+    :ok
   end
 
   def subscribers(%Studio{} = studio) do

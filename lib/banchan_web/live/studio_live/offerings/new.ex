@@ -29,6 +29,7 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   def render(assigns) do
     ~F"""
     <Components.StudioLayout
+      id="studio-layout"
       current_user={@current_user}
       flashes={@flash}
       studio={@studio}
