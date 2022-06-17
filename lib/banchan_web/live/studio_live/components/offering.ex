@@ -139,35 +139,41 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         label="Hide from Shop"
         info="Hide this offering from the shop. You will still be able to link people to it."
       />
-      <h3>Options</h3>
-      <InputContext :let={form: form}>
-        <Inputs form={form} for={:options} :let={index: index}>
-          <div>
-            <h4>Option
-              <Button primary={false} value={index} click="remove_option">Remove</Button>
-            </h4>
-            <TextInput name={:name} info="Name of the option." opts={required: true} />
-            <TextArea name={:description} info="Description for the option." opts={required: true} />
-            <TextInput name={:price} info="Quoted price for adding this option." opts={required: true} />
-            <Checkbox
-              name={:multiple}
-              info="Allow multiple instances of this option at the same time."
-              label="Allow Multiple"
-            />
-            <Checkbox name={:sticky} info="Once this option is added, it can't be removed." label="Sticky" />
-            <Checkbox
-              name={:default}
-              info="Whether this option is added by default. Default options are also used to calculate your offering's base price."
-              label="Default"
-            />
+      <h3 class="text-2xl">Options</h3>
+      <div class="divider" />
+      <ul class="flex flex-col gap-2">
+        <InputContext :let={form: form}>
+          <Inputs form={form} for={:options} :let={index: index}>
+            <li tabindex="0" class="collapse">
+              <input phx-update="ignore" type="checkbox">
+              <div class="collapse-title text-xl rounded-lg border border-primary">{Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index).name || "New Option"}
+              </div>
+              <div class="collapse-content">
+                <TextInput name={:name} info="Name of the option." opts={required: true} />
+                <TextArea name={:description} info="Description for the option." opts={required: true} />
+                <TextInput name={:price} info="Quoted price for adding this option." opts={required: true} />
+                <Checkbox
+                  name={:multiple}
+                  info="Allow multiple instances of this option at the same time."
+                  label="Allow Multiple"
+                />
+                <Checkbox name={:sticky} info="Once this option is added, it can't be removed." label="Sticky" />
+                <Checkbox
+                  name={:default}
+                  info="Whether this option is added by default. Default options are also used to calculate your offering's base price."
+                  label="Default"
+                />
+                <Button primary={false} value={index} click="remove_option">Remove</Button>
+              </div>
+            </li>
+          </Inputs>
+        </InputContext>
+        <li class="field">
+          <div class="control">
+            <Button click="add_option" label="Add Option" />
           </div>
-        </Inputs>
-      </InputContext>
-      <div class="field">
-        <div class="control">
-          <Button click="add_option" label="Add Option" />
-        </div>
-      </div>
+        </li>
+      </ul>
       <Submit changeset={@changeset} label="Save" />
     </Form>
     """
