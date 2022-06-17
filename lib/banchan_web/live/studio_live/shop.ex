@@ -97,7 +97,7 @@ defmodule BanchanWeb.StudioLive.Shop do
           {#if @current_user_member?}
             <div class="basis-full md:basis-1/3 p-2 max-w-sm h-128">
               <LiveRedirect to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}>
-                <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 h-full">
+                <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full">
                   <span class="text-6xl mx-auto my-auto flex items-center justify-center h-full">+</span>
                 </Card>
               </LiveRedirect>

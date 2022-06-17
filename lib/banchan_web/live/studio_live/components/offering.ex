@@ -15,7 +15,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias Banchan.Utils
 
   alias BanchanWeb.Components.Button
-  alias BanchanWeb.Components.Form.{Checkbox, Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextArea, TextInput}
 
   prop changeset, :struct, required: true
 
@@ -91,12 +91,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   def render(assigns) do
     ~F"""
-    <Form
-      for={@changeset}
-      change="change"
-      submit="submit"
-      opts={autocomplete: "off"}
-    >
+    <Form for={@changeset} change="change" submit="submit" opts={autocomplete: "off"}>
       <TextInput
         name={:name}
         info="Name of the offering, as it should appear in the offering card."
@@ -111,14 +106,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         name={:description}
         info="Description of the offering, as it should appear in the offering card."
         opts={required: true}
-      />
-      <TextArea
-        name={:terms}
-        info="Terms of service specific to this offering. Leave blank to use your studio's default terms."
-      />
-      <TextArea
-        name={:template}
-        info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
       />
       <TextInput
         name={:slots}
@@ -146,10 +133,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             <li tabindex="0" class="collapse">
               <input phx-update="ignore" type="checkbox">
               <div class="collapse-title text-xl rounded-lg border border-primary">
-                {
-                  opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
-                  (opt.name || "New Option") <> " - " <> Money.to_string(opt.price || Money.new(0, :USD))
-              }
+                {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
+                (opt.name || "New Option") <> " - " <> Money.to_string(opt.price || Money.new(0, :USD))}
               </div>
               <div class="collapse-content">
                 <TextInput name={:name} info="Name of the option." opts={required: true} />
@@ -166,18 +151,36 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                   info="Whether this option is added by default. Default options are also used to calculate your offering's base price."
                   label="Default"
                 />
-                <Button primary={false} value={index} click="remove_option">Remove</Button>
+                <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
               </div>
             </li>
           </Inputs>
         </InputContext>
         <li class="field">
           <div class="control">
-            <Button click="add_option" label="Add Option" />
+            <Button class="w-full" click="add_option" label="Add Option" />
           </div>
         </li>
       </ul>
-      <Submit changeset={@changeset} label="Save" />
+      <div class="divider" />
+      <div tabindex="0" class="collapse">
+        <input phx-update="ignore" type="checkbox">
+        <h3 class="collapse-title rounded-lg border border-primary text-2xl">Terms and Template</h3>
+        <div class="collapse-content">
+          <MarkdownInput
+            id="tos"
+            name={:terms}
+            info="Terms of service specific to this offering. Leave blank to use your studio's default terms."
+          />
+          <MarkdownInput
+            id="template"
+            name={:template}
+            info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
+          />
+        </div>
+      </div>
+      <div class="divider" />
+      <Submit class="w-full" changeset={@changeset} label="Save" />
     </Form>
     """
   end
