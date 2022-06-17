@@ -54,8 +54,3 @@ config :stripity_stripe,
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
-
-# Import local development config.
-if config_env() == :dev do
-  import_config "dev.secret.exs"
-end

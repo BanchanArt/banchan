@@ -1,8 +1,7 @@
 import Config
 
 # Configure your database
-config :banchan, Banchan.Repo,
-  show_sensitive_data_on_connection_error: true
+config :banchan, Banchan.Repo, show_sensitive_data_on_connection_error: true
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -11,6 +10,7 @@ config :banchan, Banchan.Repo,
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :banchan, BanchanWeb.Endpoint,
+  http: [port: 4000],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
@@ -74,3 +74,6 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Import local development config
+import_config "dev.secret.exs"

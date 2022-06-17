@@ -3,10 +3,6 @@
 
 import Config
 
-# Which port the server runs on
-config :banchan, BanchanWeb.Endpoint,
-  http: [port: 4000]
-
 # Database configuration
 config :banchan, Banchan.Repo,
   username: "postgres",
@@ -22,8 +18,8 @@ config :stripity_stripe,
 
 # AWS configuration. If left unset,
 # uploads will be saved to priv/uploads
-#config :ex_aws,
-  #bucket: "",
-  #region: "us-west-1",
-  #access_key_id: "",
-  #secret_access_key: ""
+# config :ex_aws,
+# bucket: "",
+# region: "us-west-1",
+# access_key_id: "",
+# secret_access_key: ""
