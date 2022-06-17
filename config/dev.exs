@@ -2,12 +2,7 @@ import Config
 
 # Configure your database
 config :banchan, Banchan.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "banchan_dev",
-  hostname: "localhost",
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  show_sensitive_data_on_connection_error: true
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -16,7 +11,6 @@ config :banchan, Banchan.Repo,
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :banchan, BanchanWeb.Endpoint,
-  http: [port: 4000],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
