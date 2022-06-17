@@ -1,13 +1,7 @@
 import Config
 
 # Configure your database
-config :banchan, Banchan.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "banchan_dev",
-  hostname: "localhost",
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+config :banchan, Banchan.Repo, show_sensitive_data_on_connection_error: true
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -80,3 +74,6 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Import local development config
+import_config "dev.secret.exs"

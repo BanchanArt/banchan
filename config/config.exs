@@ -4,17 +4,6 @@
 # This configuration file is loaded before any dependency and
 # is restricted to this project.
 
-# Load environment variables
-if File.exists?(".env.ps1") and System.find_executable("powershell") do
-  IO.puts("Loading .env.ps1")
-  System.cmd("powershell", [".env.ps1"])
-end
-
-if File.exists?(".env") and System.find_executable("source") do
-  IO.puts("Loading .env")
-  System.cmd("source", [".env"])
-end
-
 # General application configuration
 import Config
 
