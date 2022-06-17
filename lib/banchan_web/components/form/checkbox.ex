@@ -12,6 +12,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   prop wrapper_class, :css_class
   prop class, :css_class
   prop label, :string
+  prop info, :string
 
   slot default
 
@@ -21,6 +22,11 @@ defmodule BanchanWeb.Components.Form.Checkbox do
       <Label class={"label cursor-pointer", @wrapper_class}>
         <div class="label-text">
           <#slot>{@label}</#slot>
+          {#if @info}
+            <div class="tooltip" data-tip={@info}>
+              <i class="fas fa-info-circle" />
+            </div>
+          {/if}
         </div>
         <InputContext :let={form: form, field: field}>
           <Checkbox

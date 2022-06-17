@@ -15,6 +15,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   prop label, :string
   prop show_label, :boolean, default: true
   prop class, :css_class
+  prop info, :string
   prop upload, :struct
   prop cancel_upload, :event
 
@@ -56,13 +57,18 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
     ~F"""
     <Field class="field" name={@name}>
       {#if @show_label}
-        {#if @label}
+        <InputContext assigns={assigns} :let={field: field}>
           <Label class="label">
-            {@label}
+            <span class="label-text">
+              {@label || Phoenix.Naming.humanize(field)}
+              {#if @info}
+                <div class="tooltip" data-tip={@info}>
+                  <i class="fas fa-info-circle" />
+                </div>
+              {/if}
+            </span>
           </Label>
-        {#else}
-          <Label class="label" />
-        {/if}
+        </InputContext>
       {/if}
       <div class="control">
         <InputContext :let={form: form, field: field}>

@@ -91,47 +91,85 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   def render(assigns) do
     ~F"""
-    <div class="grid grid-cols-3 gap-4">
-      <Form
-        class="col-span-1"
-        for={@changeset}
-        change="change"
-        submit="submit"
-        opts={autocomplete: "off"}
-      >
-        <TextInput name={:name} opts={required: true} />
-        <TextInput name={:type} opts={required: true} />
-        <TextArea name={:description} opts={required: true} />
-        <TextArea name={:terms} />
-        <TextArea name={:template} />
-        <TextInput name={:slots} />
-        <TextInput name={:max_proposals} />
-        <Checkbox name={:open} label="Show as Open" />
-        <Checkbox name={:hidden} label="Hide from Shop" />
-        <h3>Options</h3>
-        <InputContext :let={form: form}>
-          <Inputs form={form} for={:options} :let={index: index}>
-            <div>
-              <h4>Option
-                <Button primary={false} value={index} click="remove_option">Remove</Button>
-              </h4>
-              <TextInput name={:name} opts={required: true} />
-              <TextArea name={:description} opts={required: true} />
-              <TextInput name={:price} opts={required: true} />
-              <Checkbox name={:multiple} label="Allow clients to select this option multiple times." />
-              <Checkbox name={:sticky} label="Sticky" />
-              <Checkbox name={:default} label="Default" />
-            </div>
-          </Inputs>
-        </InputContext>
-        <div class="field">
-          <div class="control">
-            <Button click="add_option" label="Add Option" />
+    <Form
+      class="max-w-lg mx-auto"
+      for={@changeset}
+      change="change"
+      submit="submit"
+      opts={autocomplete: "off"}
+    >
+      <TextInput
+        name={:name}
+        info="Name of the offering, as it should appear in the offering card."
+        opts={required: true}
+      />
+      <TextInput
+        name={:type}
+        info="Lowercase, no-spaces, limited characters. This is what will show up in the url and must be unique."
+        opts={required: true}
+      />
+      <TextArea
+        name={:description}
+        info="Description of the offering, as it should appear in the offering card."
+        opts={required: true}
+      />
+      <TextArea
+        name={:terms}
+        info="Terms of service specific to this offering. Leave blank to use your studio's default terms."
+      />
+      <TextArea
+        name={:template}
+        info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
+      />
+      <TextInput
+        name={:slots}
+        info="Max slots available. Slots are used up as you accept commissions. Leave blank for unlimited slots."
+      />
+      <TextInput
+        name={:max_proposals}
+        info="Max proposals. Unlike slots, these are used as soon as someone makes a proposal. Use this setting to prevent your inbox from getting flooded with too many proposals. Leave blank for unlimited proposals."
+      />
+      <Checkbox
+        name={:open}
+        label="Open"
+        info="Open up this offering for new proposals. The offering will remain visible if closed."
+      />
+      <Checkbox
+        name={:hidden}
+        label="Hide from Shop"
+        info="Hide this offering from the shop. You will still be able to link people to it."
+      />
+      <h3>Options</h3>
+      <InputContext :let={form: form}>
+        <Inputs form={form} for={:options} :let={index: index}>
+          <div>
+            <h4>Option
+              <Button primary={false} value={index} click="remove_option">Remove</Button>
+            </h4>
+            <TextInput name={:name} info="Name of the option." opts={required: true} />
+            <TextArea name={:description} info="Description for the option." opts={required: true} />
+            <TextInput name={:price} info="Quoted price for adding this option." opts={required: true} />
+            <Checkbox
+              name={:multiple}
+              info="Allow multiple instances of this option at the same time."
+              label="Allow Multiple"
+            />
+            <Checkbox name={:sticky} info="Once this option is added, it can't be removed." label="Sticky" />
+            <Checkbox
+              name={:default}
+              info="Whether this option is added by default. Default options are also used to calculate your offering's base price."
+              label="Default"
+            />
           </div>
+        </Inputs>
+      </InputContext>
+      <div class="field">
+        <div class="control">
+          <Button click="add_option" label="Add Option" />
         </div>
-        <Submit changeset={@changeset} label="Save" />
-      </Form>
-    </div>
+      </div>
+      <Submit changeset={@changeset} label="Save" />
+    </Form>
     """
   end
 end
