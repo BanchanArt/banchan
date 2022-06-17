@@ -24,17 +24,24 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
+
     {:ok,
      socket
      |> assign(
-       user_following: socket.assigns.current_user && Studios.Notifications.user_following?(socket.assigns.current_user, socket.assigns.studio)
+       user_following:
+         socket.assigns.current_user &&
+           Studios.Notifications.user_following?(
+             socket.assigns.current_user,
+             socket.assigns.studio
+           )
      )}
   end
 
   def handle_event(
         "toggle_follow",
         _,
-        %{assigns: %{user_following: user_following, studio: studio, current_user: current_user}} = socket
+        %{assigns: %{user_following: user_following, studio: studio, current_user: current_user}} =
+          socket
       ) do
     if user_following do
       Studios.Notifications.unfollow_studio!(studio, current_user)
