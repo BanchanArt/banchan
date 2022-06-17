@@ -13,13 +13,16 @@ config :banchan, Banchan.Repo,
 
 # Stripe configuration
 config :stripity_stripe,
+  # You can find your Stripe Secret Key at https://dashboard.stripe.com/test/apikeys
   api_key: "",
+  # This secret will be printed out by `mix stripe.local`. It looks like
+  # `whsec_12345...`. It stays consistent between `mix stripe.local` calls.
   endpoint_secret: ""
 
-# AWS configuration. If left unset,
-# uploads will be saved to priv/uploads
+# AWS configuration
+# If left unset, uploads will be saved to `priv/uploads`
 # config :ex_aws,
-# bucket: "",
-# region: "us-west-1",
-# access_key_id: "",
-# secret_access_key: ""
+#   bucket: "",
+#   region: "us-west-1",
+#   access_key_id: "",
+#   secret_access_key: ""

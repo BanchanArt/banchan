@@ -152,7 +152,10 @@ defmodule Banchan.Notifications do
 
     Email.new_email(
       to: email,
-      from: "notifications@" <> (System.get_env("SENDGRID_DOMAIN") || "noreply.banchan.art"),
+      from:
+        "notifications@" <>
+          (Application.get_env(:banchan, Banchan.Mailer)[:sendgrid_domain] ||
+             "noreply.banchan.art"),
       subject: title,
       html_body: notification.html_body,
       text_body: notification.text_body

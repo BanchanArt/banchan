@@ -8,7 +8,9 @@ defmodule Banchan.Accounts.UserNotifier do
   defp deliver(to, subject, body) do
     Email.new_email(
       to: to,
-      from: "noreply@" <> (System.get_env("SENDGRID_DOMAIN") || "banchan.art"),
+      from:
+        "noreply@" <>
+          (Application.get_env(:banchan, Banchan.Mailer)[:sendgrid_domain] || "banchan.art"),
       subject: subject,
       text_body: body
     )
