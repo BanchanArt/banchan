@@ -18,7 +18,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   prop uri, :string, required: true
   prop padding, :integer
 
-  data user_following, :boolean, default: false
+  data user_following?, :boolean, default: false
 
   slot default
 
@@ -28,7 +28,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
     {:ok,
      socket
      |> assign(
-       user_following:
+       user_following?:
          socket.assigns.current_user &&
            Studios.Notifications.user_following?(
              socket.assigns.current_user,
@@ -40,16 +40,17 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   def handle_event(
         "toggle_follow",
         _,
-        %{assigns: %{user_following: user_following, studio: studio, current_user: current_user}} =
-          socket
+        %{
+          assigns: %{user_following?: user_following?, studio: studio, current_user: current_user}
+        } = socket
       ) do
-    if user_following do
+    if user_following? do
       Studios.Notifications.unfollow_studio!(studio, current_user)
     else
       Studios.Notifications.follow_studio!(studio, current_user)
     end
 
-    {:noreply, socket |> assign(user_following: !user_following)}
+    {:noreply, socket |> assign(user_following?: !user_following?)}
   end
 
   def render(assigns) do
@@ -63,13 +64,15 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
             </p>
             <p class="text-base text-secondary-content flex-grow">
               {@studio.description}
-              <Button click="toggle_follow" class="glass btn-sm rounded-full px-2 py-0">
-                {if @user_following do
-                  "Unfollow"
-                else
-                  "Follow"
-                end}
-              </Button>
+              {#if @current_user}
+                <Button click="toggle_follow" class="glass btn-sm rounded-full px-2 py-0">
+                  {if @user_following? do
+                    "Unfollow"
+                  else
+                    "Follow"
+                  end}
+                </Button>
+              {/if}
             </p>
             <br>
           </div>
