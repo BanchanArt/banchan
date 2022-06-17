@@ -24,13 +24,13 @@ defmodule BanchanWeb.Components.Card do
 
   def render(assigns) do
     ~F"""
-    <div class="shadow-xl bg-base-200 card flex flex-col flex-grow">
+    <div class={"shadow-xl bg-base-200 card flex flex-col flex-grow", @class}>
       {#if slot_assigned?(:image)}
         <figure class="aspect-video">
           <#slot name="image" />
         </figure>
       {/if}
-      <div class={"card-body flex flex-col flex-grow", @class}>
+      <div class="card-body flex flex-col flex-grow">
         {#if slot_assigned?(:header)}
           <header class="card-title flex items-center">
             <div class="grow">

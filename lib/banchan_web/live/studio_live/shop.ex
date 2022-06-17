@@ -10,9 +10,9 @@ defmodule BanchanWeb.StudioLive.Shop do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.Components.Button
+  alias BanchanWeb.Components.{Button, Card}
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.{CommissionCard, StudioLayout}
+  alias BanchanWeb.StudioLive.Components.{OfferingCard, StudioLayout}
 
   @impl true
   def mount(params, _session, socket) do
@@ -31,7 +31,7 @@ defmodule BanchanWeb.StudioLive.Shop do
       end
 
     # TODO: This page does a TON of requests right now (partly because of
-    # CommissionCard). This should be replaced with a single "general" query
+    # OfferingCard). This should be replaced with a single "general" query
     # that picks up everything we need for this listing.
     {:ok,
      assign(socket,
@@ -82,10 +82,11 @@ defmodule BanchanWeb.StudioLive.Shop do
       {#if Studios.charges_enabled?(@studio)}
         <div class="flex flex-wrap pt-4 items-stretch">
           {#for offering <- @offerings}
-            <div class="md:basis-1/2 p-2 max-w-sm flex flex-grow flex-col">
-              <CommissionCard
+            <div class="basis-full md:basis-1/3 p-2 max-w-sm h-128">
+              <OfferingCard
                 id={"offering-" <> offering.type}
                 current_user={@current_user}
+                current_user_member?={@current_user_member?}
                 studio={@studio}
                 offering={offering}
               />
@@ -94,11 +95,12 @@ defmodule BanchanWeb.StudioLive.Shop do
             This shop has no offerings currently available. Check back in later!
           {/for}
           {#if @current_user_member?}
-            <div class="md:basis-1/2">
-              <LiveRedirect
-                to={Routes.studio_offerings_index_path(Endpoint, :index, @studio.handle)}
-                class="btn btn-sm text-center rounded-full m-5 btn-warning"
-              >Manage Offerings</LiveRedirect>
+            <div class="basis-full md:basis-1/3 p-2 max-w-sm h-128">
+              <LiveRedirect to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}>
+                <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 h-full">
+                  <span class="text-6xl mx-auto my-auto flex items-center justify-center h-full">+</span>
+                </Card>
+              </LiveRedirect>
             </div>
           {/if}
         </div>

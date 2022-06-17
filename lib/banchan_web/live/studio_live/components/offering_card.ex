@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Components.CommissionCard do
+defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   @moduledoc """
   Card component for commissions
   """
@@ -12,6 +12,7 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
   alias BanchanWeb.Endpoint
 
   prop current_user, :struct, required: true
+  prop current_user_member?, :boolean, required: true
   prop studio, :struct, required: true
   prop offering, :struct, required: true
 
@@ -69,13 +70,13 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
 
   def render(assigns) do
     ~F"""
-    <Card>
+    <Card class="h-full">
       <:header>
         <div class="text-lg font-bold">{@offering.name}</div>
       </:header>
       <:header_aside>
         {#if @offering.open && !is_nil(@offering.slots)}
-          <div class="badge badge-outline badge-success">{@available_slots}/{@offering.slots} Slots</div>
+          <div class="whitespace-nowrap badge badge-outline badge-success">{@available_slots}/{@offering.slots} Slots</div>
         {#elseif !@offering.open && !is_nil(@offering.slots)}
           <div class="badge badge-error badge-outline">0/{@offering.slots} Slots</div>
         {#elseif @offering.open}
@@ -91,7 +92,7 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
         <img class="object-cover" src={Routes.static_path(Endpoint, "/images/hj-illustration.jpg")}>
       </:image>
       <div class="flex flex-col grow">
-        <p class="mt-2 grow flex">{@offering.description}</p>
+        <p class="mt-2 grow flex h-full">{@offering.description}</p>
         <p class="text-success mt-2 grow-0">
           <span class="font-bold">Base Price:</span>
           {#if @base_price}
@@ -103,6 +104,12 @@ defmodule BanchanWeb.StudioLive.Components.CommissionCard do
       </div>
       <:footer>
         <div class="flex flex-row justify-end card-actions">
+          {#if @current_user_member?}
+            <LiveRedirect
+              to={Routes.studio_offerings_edit_path(Endpoint, :edit, @studio.handle, @offering.type)}
+              class="btn text-center btn-secondary"
+            >Edit</LiveRedirect>
+          {/if}
           {#if @offering.open}
             <LiveRedirect
               to={Routes.studio_commissions_new_path(Endpoint, :new, @studio.handle, @offering.type)}

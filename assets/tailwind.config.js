@@ -7,6 +7,13 @@ module.exports = {
     require('@tailwindcss/typography'),
     require('daisyui')
   ],
+  theme: {
+    extend: {
+      spacing: {
+        '128': '32rem',
+      }
+    }
+  },
   daisyui: {
     styled: true,
     base: true,

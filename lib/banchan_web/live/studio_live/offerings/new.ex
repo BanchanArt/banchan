@@ -64,7 +64,7 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
 
         {:noreply,
          redirect(socket,
-           to: Routes.studio_offerings_index_path(Endpoint, :index, socket.assigns.studio.handle)
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
