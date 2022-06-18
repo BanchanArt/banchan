@@ -138,7 +138,7 @@ defmodule Banchan.Studios do
     q =
       from o in Ecto.assoc(studio, :offerings),
         where: ^current_user_member? or o.hidden == false,
-        order_by: o.index,
+        order_by: [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index],
         preload: [:options]
 
     q =

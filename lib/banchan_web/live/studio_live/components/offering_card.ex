@@ -15,6 +15,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   prop current_user_member?, :boolean, required: true
   prop studio, :struct, required: true
   prop offering, :struct, required: true
+  prop unarchive, :event, required: true
 
   data base_price, :integer
   data available_slots, :integer
@@ -70,67 +71,78 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
 
   def render(assigns) do
     ~F"""
-    <Card class="h-full">
-      <:header>
-        <div class="text-lg font-bold">{@offering.name}</div>
-      </:header>
-      <:header_aside>
-        {#if @offering.open && !is_nil(@offering.slots)}
-          <div class="whitespace-nowrap badge badge-outline badge-success">{@available_slots}/{@offering.slots} Slots</div>
-        {#elseif !@offering.open && !is_nil(@offering.slots)}
-          <div class="badge badge-error badge-outline">0/{@offering.slots} Slots</div>
-        {#elseif @offering.open}
-          <div class="badge badge-success badge-outline">Open</div>
-        {#else}
-          <div class="badge badge-error badge-outline">Closed</div>
-        {/if}
-        {#if @offering.hidden}
-          <div class="badge badge-error badge-outline">Hidden</div>
-        {/if}
-      </:header_aside>
-      <:image>
-        <img
-          class="object-cover"
-          src={if @offering.card_img_id do
-            Routes.offering_image_path(Endpoint, :card_image, @offering.card_img_id)
-          else
-            Routes.static_path(Endpoint, "/images/640x360.png")
-          end}
-        />
-      </:image>
-      <div class="flex flex-col grow">
-        <p class="mt-2 grow flex text-ellipsis overflow-hidden h-full">{@offering.description}</p>
-        <p class="text-success mt-2 grow-0">
-          <span class="font-bold">Base Price:</span>
-          {#if @base_price}
-            <span class="float-right">{@base_price}</span>
+    <div class="h-full relative">
+      {#if @offering.archived_at}
+        <Button
+          class="btn-primary z-50 absolute top-4 right-4"
+          click={@unarchive}
+          opts={
+            phx_value_type: @offering.type
+          }
+        >Unarchive</Button>
+      {/if}
+      <Card class={"h-full", "opacity-50": !is_nil(@offering.archived_at)}>
+        <:header>
+          <div class="text-lg font-bold">{@offering.name}</div>
+        </:header>
+        <:header_aside>
+          {#if @offering.open && !is_nil(@offering.slots)}
+            <div class="whitespace-nowrap badge badge-outline badge-success">{@available_slots}/{@offering.slots} Slots</div>
+          {#elseif !@offering.open && !is_nil(@offering.slots)}
+            <div class="badge badge-error badge-outline">0/{@offering.slots} Slots</div>
+          {#elseif @offering.open}
+            <div class="badge badge-success badge-outline">Open</div>
           {#else}
-            <span class="float-right">Inquire</span>
+            <div class="badge badge-error badge-outline">Closed</div>
           {/if}
-        </p>
-      </div>
-      <:footer>
-        <div class="flex flex-row justify-end card-actions">
-          {#if @current_user_member?}
-            <LiveRedirect
-              to={Routes.studio_offerings_edit_path(Endpoint, :edit, @studio.handle, @offering.type)}
-              class="btn text-center btn-secondary"
-            >Edit</LiveRedirect>
+          {#if @offering.hidden}
+            <div class="badge badge-error badge-outline">Hidden</div>
           {/if}
-          {#if @offering.open}
-            <LiveRedirect
-              to={Routes.studio_commissions_new_path(Endpoint, :new, @studio.handle, @offering.type)}
-              class="btn text-center btn-info"
-            >Request</LiveRedirect>
-          {#elseif !@subscribed?}
-            <Button class="btn-info" click="notify_me">Notify Me</Button>
-          {/if}
-          {#if @subscribed?}
-            <Button class="btn-info" click="unnotify_me">Unsubscribe</Button>
-          {/if}
+        </:header_aside>
+        <:image>
+          <img
+            class="object-cover"
+            src={if @offering.card_img_id do
+              Routes.offering_image_path(Endpoint, :card_image, @offering.card_img_id)
+            else
+              Routes.static_path(Endpoint, "/images/640x360.png")
+            end}
+          />
+        </:image>
+        <div class="flex flex-col grow">
+          <p class="mt-2 grow flex text-ellipsis overflow-hidden h-full">{@offering.description}</p>
+          <p class="text-success mt-2 grow-0">
+            <span class="font-bold">Base Price:</span>
+            {#if @base_price}
+              <span class="float-right">{@base_price}</span>
+            {#else}
+              <span class="float-right">Inquire</span>
+            {/if}
+          </p>
         </div>
-      </:footer>
-    </Card>
+        <:footer>
+          <div :if={is_nil(@offering.archived_at)} class="flex flex-row justify-end card-actions">
+            {#if @current_user_member?}
+              <LiveRedirect
+                to={Routes.studio_offerings_edit_path(Endpoint, :edit, @studio.handle, @offering.type)}
+                class="btn text-center btn-secondary"
+              >Edit</LiveRedirect>
+            {/if}
+            {#if @offering.open}
+              <LiveRedirect
+                to={Routes.studio_commissions_new_path(Endpoint, :new, @studio.handle, @offering.type)}
+                class="btn text-center btn-info"
+              >Request</LiveRedirect>
+            {#elseif !@subscribed?}
+              <Button class="btn-info" click="notify_me">Notify Me</Button>
+            {/if}
+            {#if @subscribed?}
+              <Button class="btn-info" click="unnotify_me">Unsubscribe</Button>
+            {/if}
+          </div>
+        </:footer>
+      </Card>
+    </div>
     """
   end
 end

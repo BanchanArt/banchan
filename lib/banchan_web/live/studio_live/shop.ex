@@ -4,6 +4,7 @@ defmodule BanchanWeb.StudioLive.Shop do
   """
   use BanchanWeb, :surface_view
 
+  alias Banchan.Offerings
   alias Banchan.Studios
 
   alias Surface.Components.LiveRedirect
@@ -19,7 +20,13 @@ defmodule BanchanWeb.StudioLive.Shop do
     socket = assign_studio_defaults(params, socket, false, false)
     studio = socket.assigns.studio
     members = Studios.list_studio_members(studio)
-    offerings = Studios.list_studio_offerings(studio, socket.assigns.current_user_member?)
+
+    offerings =
+      Studios.list_studio_offerings(
+        studio,
+        socket.assigns.current_user_member?,
+        socket.assigns.current_user_member?
+      )
 
     Studios.subscribe_to_stripe_state(studio)
 
@@ -39,6 +46,11 @@ defmodule BanchanWeb.StudioLive.Shop do
        offerings: offerings,
        stripe_onboarding_url: stripe_onboarding_url
      )}
+  end
+
+  @impl true
+  def handle_params(_params, uri, socket) do
+    {:noreply, socket |> assign(uri: uri)}
   end
 
   @impl true
@@ -63,8 +75,21 @@ defmodule BanchanWeb.StudioLive.Shop do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
+  def handle_event("unarchive", %{"type" => type}, socket) do
+    {:ok, _} =
+      Offerings.unarchive_offering(
+        Enum.find(socket.assigns.offerings, &(&1.type == type)),
+        socket.assigns.current_user_member?
+      )
+
+    offerings =
+      Studios.list_studio_offerings(
+        socket.assigns.studio,
+        socket.assigns.current_user_member?,
+        socket.assigns.current_user_member?
+      )
+
+    {:noreply, socket |> assign(offerings: offerings)}
   end
 
   @impl true
@@ -89,6 +114,7 @@ defmodule BanchanWeb.StudioLive.Shop do
                 current_user_member?={@current_user_member?}
                 studio={@studio}
                 offering={offering}
+                unarchive="unarchive"
               />
             </div>
           {#else}

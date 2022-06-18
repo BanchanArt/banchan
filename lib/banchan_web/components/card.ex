@@ -5,7 +5,7 @@ defmodule BanchanWeb.Components.Card do
   use BanchanWeb, :component
 
   @doc "Additional class text"
-  prop class, :string, default: ""
+  prop class, :css_class
 
   @doc "The header"
   slot header

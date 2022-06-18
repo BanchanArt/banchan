@@ -15,9 +15,19 @@ defmodule Banchan.Offerings do
   end
 
   def new_offering(studio, _current_user_member?, attrs, image \\ nil) do
-    %Offering{studio_id: studio.id, card_img: image}
-    |> Offering.changeset(attrs)
-    |> Repo.insert()
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        max_idx =
+          from(o in Offering, where: o.studio_id == ^studio.id, select: max(o.index))
+          |> Repo.one!() ||
+            0
+
+        %Offering{studio_id: studio.id, card_img: image, index: max_idx + 1}
+        |> Offering.changeset(attrs)
+        |> Repo.insert()
+      end)
+
+    ret
   end
 
   def archive_offering(%Offering{}, false) do
@@ -25,14 +35,56 @@ defmodule Banchan.Offerings do
   end
 
   def archive_offering(%Offering{} = offering, true) do
-    {1, [new]} =
-      from(o in Offering,
-        where: o.id == ^offering.id,
-        select: o
-      )
-      |> Repo.update_all(set: [archived_at: NaiveDateTime.utc_now()])
+    {:ok, new} =
+      Repo.transaction(fn ->
+        {1, [new]} =
+          from(o in Offering,
+            where: o.id == ^offering.id,
+            select: o
+          )
+          |> Repo.update_all(set: [index: nil, archived_at: NaiveDateTime.utc_now()])
+
+        current_index = new.index
+
+        if !is_nil(current_index) do
+          {_, _} =
+            from(
+              o in Offering,
+              where: o.index >= ^current_index and not is_nil(o.index),
+              update: [set: [index: o.index - 1]]
+            )
+            |> Repo.update_all([])
+        end
+
+        new
+      end)
 
     {:ok, new}
+  end
+
+  def unarchive_offering(%Offering{}, false) do
+    {:error, :unauthorized}
+  end
+
+  def unarchive_offering(%Offering{} = offering, true) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        max_idx =
+          from(o in Offering, where: o.studio_id == ^offering.studio_id, select: max(o.index))
+          |> Repo.one!() ||
+            0
+
+        {1, [new]} =
+          from(o in Offering,
+            where: o.id == ^offering.id,
+            select: o
+          )
+          |> Repo.update_all(set: [index: max_idx + 1, archived_at: nil])
+
+        {:ok, new}
+      end)
+
+    ret
   end
 
   def get_offering_by_type!(type, current_user_member?) do
