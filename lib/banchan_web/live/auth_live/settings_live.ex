@@ -179,18 +179,20 @@ defmodule BanchanWeb.SettingsLive do
       <div class="divider" />
       <h2 class="text-xl">Appearance</h2>
       <div class="flex flex-row items-center py-6 gap-4">
-        <span class="grow">Color Mode</span>
-        <label class="swap">
-          <input
-            :hook="Theme"
-            id="toggle_theme"
-            checked={@theme == "dark"}
-            :on-click="toggle_theme"
-            type="checkbox"
-            class={"hidden", loading: !@theme}
-          />
-          <i class="fas fa-sun swap-off text-3xl" />
-          <i class="fas fa-moon swap-on text-3xl" />
+        <label class="label cursor-pointer grow">
+          <span>Color Mode</span>
+          <label class="swap">
+            <input
+              :hook="Theme"
+              id="toggle_theme"
+              checked={@theme == "dark"}
+              :on-click="toggle_theme"
+              type="checkbox"
+              class={"hidden", loading: !@theme}
+            />
+            <i class="fas fa-sun swap-off text-3xl" />
+            <i class="fas fa-moon swap-on text-3xl" />
+          </label>
         </label>
       </div>
       <div class="divider" />
