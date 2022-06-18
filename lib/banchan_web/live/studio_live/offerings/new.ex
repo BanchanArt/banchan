@@ -65,6 +65,8 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
           <Components.Offering
             id="new-offering"
             current_user={@current_user}
+            current_user_member?={@current_user_member?}
+            studio={@studio}
             changeset={@changeset}
             submit="save"
           />

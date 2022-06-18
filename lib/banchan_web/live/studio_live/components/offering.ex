@@ -26,6 +26,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   }
 
   prop current_user, :struct, required: true
+  prop current_user_member?, :boolean, required: true
+  prop studio, :struct, required: true
   prop changeset, :struct, required: true
 
   # TODO: Switch to using this when the following bugs are both fixed and released:
@@ -51,6 +53,21 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
        max_entries: 1,
        max_file_size: 10_000_000
      )}
+  end
+
+  @impl true
+  def handle_event("archive", _, %{assigns: %{changeset: %{data: data}}} = socket) do
+    if data && data.id do
+      {:ok, _} =
+        Offerings.archive_offering(%Offering{id: data.id}, socket.assigns.current_user_member?)
+
+      {:noreply,
+       redirect(socket,
+         to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+       )}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
@@ -244,7 +261,12 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         </div>
       </div>
       <div class="divider" />
-      <Submit class="w-full" changeset={@changeset} label="Save" />
+      <div class="flex flex-row">
+        <Submit changeset={@changeset} label="Save" />
+        {#if @changeset.data.id}
+          <Button class="btn-error" click="archive" label="Archive" />
+        {/if}
+      </div>
     </Form>
     """
   end

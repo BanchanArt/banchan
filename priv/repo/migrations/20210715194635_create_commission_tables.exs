@@ -13,6 +13,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :index, :integer
       add :terms, :text
       add :template, :text
+      add :archived_at, :naive_datetime
 
       add :card_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :studio_id, references(:studios), null: false

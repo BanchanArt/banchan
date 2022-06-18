@@ -20,6 +20,21 @@ defmodule Banchan.Offerings do
     |> Repo.insert()
   end
 
+  def archive_offering(%Offering{}, false) do
+    {:error, :unauthorized}
+  end
+
+  def archive_offering(%Offering{} = offering, true) do
+    {1, [new]} =
+      from(o in Offering,
+        where: o.id == ^offering.id,
+        select: o
+      )
+      |> Repo.update_all(set: [archived_at: NaiveDateTime.utc_now()])
+
+    {:ok, new}
+  end
+
   def get_offering_by_type!(type, current_user_member?) do
     Repo.one!(
       from o in Offering,

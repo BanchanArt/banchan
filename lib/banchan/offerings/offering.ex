@@ -21,6 +21,7 @@ defmodule Banchan.Offerings.Offering do
     field :hidden, :boolean, default: true
     field :terms, :string
     field :template, :string
+    field :archived_at, :naive_datetime
 
     belongs_to :card_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :studio, Studio
