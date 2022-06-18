@@ -11,6 +11,7 @@ module.exports = {
     extend: {
       spacing: {
         '128': '32rem',
+        'video': '56.25%',
       }
     }
   },

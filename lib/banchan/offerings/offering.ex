@@ -8,6 +8,7 @@ defmodule Banchan.Offerings.Offering do
   alias Banchan.Commissions.Commission
   alias Banchan.Offerings.OfferingOption
   alias Banchan.Studios.Studio
+  alias Banchan.Uploads.Upload
 
   schema "offerings" do
     field :type, :string
@@ -21,6 +22,7 @@ defmodule Banchan.Offerings.Offering do
     field :terms, :string
     field :template, :string
 
+    belongs_to :card_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :studio, Studio
     has_many :commissions, Commission
     has_many :options, OfferingOption, on_replace: :delete_if_exists

@@ -15,8 +15,17 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias Banchan.Utils
 
   alias BanchanWeb.Components.Button
-  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextArea, TextInput}
 
+  alias BanchanWeb.Components.Form.{
+    Checkbox,
+    MarkdownInput,
+    Submit,
+    TextArea,
+    TextInput,
+    UploadInput
+  }
+
+  prop current_user, :struct, required: true
   prop changeset, :struct, required: true
 
   # TODO: Switch to using this when the following bugs are both fixed and released:
@@ -26,10 +35,31 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   # prop submit, :event, required: true
   prop submit, :string, required: true
 
+  data uploads, :map
+  data card_img_id, :integer
+
+  def update(assigns, socket) do
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(card_img_id: assigns[:changeset] && Ecto.Changeset.get_field(assigns[:changeset], :card_img_id))
+     |> allow_upload(:card_image,
+       accept: ~w(.jpg .jpeg .png),
+       max_entries: 1,
+       max_file_size: 10_000_000
+     )}
+  end
+
   @impl true
   def handle_event("submit", %{"offering" => offering}, socket) do
     offering = moneyfy_offering(offering)
-    send(self(), {socket.assigns.submit, offering})
+
+    images =
+      consume_uploaded_entries(socket, :card_image, fn %{path: path}, _entry ->
+        {:ok, Offerings.make_card_image!(socket.assigns.current_user, path)}
+      end)
+
+    send(self(), {socket.assigns.submit, offering, Enum.at(images, 0)})
     {:noreply, socket}
   end
 
@@ -78,6 +108,11 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("cancel_upload", %{"ref" => ref}, socket) do
+    {:noreply, cancel_upload(socket, :card_image, ref)}
+  end
+
   defp moneyfy_offering(offering) do
     # *sigh*
     Map.update(offering, "options", [], fn options ->
@@ -91,7 +126,15 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   def render(assigns) do
     ~F"""
-    <Form for={@changeset} change="change" submit="submit" opts={autocomplete: "off"}>
+    <Form
+      for={@changeset}
+      change="change"
+      opts={
+        autocomplete: "off",
+        phx_target: @myself,
+        phx_submit: "submit"
+      }
+    >
       <TextInput
         name={:name}
         info="Name of the offering, as it should appear in the offering card."
@@ -107,6 +150,24 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         info="Description of the offering, as it should appear in the offering card."
         opts={required: true}
       />
+      <div class="relative pb-video">
+        {#if Enum.empty?(@uploads.card_image.entries) && !@card_img_id}
+          <img
+            class="absolute h-full w-full object-cover"
+            src={Routes.static_path(Endpoint, "/images/640x360.png")}
+          />
+        {#elseif !Enum.empty?(@uploads.card_image.entries)}
+          {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
+            class: "absolute h-full w-full object-cover"
+          )}
+        {#else}
+          <img
+            class="absolute h-full w-full object-cover"
+            src={Routes.offering_image_path(Endpoint, :card_image, @card_img_id)}
+          />
+        {/if}
+      </div>
+      <UploadInput label="Card Image" upload={@uploads.card_image} cancel="cancel_upload" />
       <TextInput
         name={:slots}
         info="Max slots available. Slots are used up as you accept commissions. Leave blank for unlimited slots."

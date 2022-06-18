@@ -94,6 +94,8 @@ defmodule BanchanWeb.Router do
 
     get("/profile_images/:id/img.jpeg", ProfileImageController, :profile_image)
 
+    get("/offering_images/:id/card_image.jpeg", OfferingImageController, :card_image)
+
     get("/studios/:handle/connect_to_stripe", StripeAccountController, :account_link)
 
     get("/confirm/:token", UserConfirmationController, :confirm)

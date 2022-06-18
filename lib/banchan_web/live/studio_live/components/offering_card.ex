@@ -89,7 +89,14 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         {/if}
       </:header_aside>
       <:image>
-        <img class="object-cover" src={Routes.static_path(Endpoint, "/images/hj-illustration.jpg")}>
+        <img
+          class="object-cover"
+          src={if @offering.card_img_id do
+            Routes.offering_image_path(Endpoint, :card_image, @offering.card_img_id)
+          else
+            Routes.static_path(Endpoint, "/images/640x360.png")
+          end}
+        />
       </:image>
       <div class="flex flex-col grow">
         <p class="mt-2 grow flex h-full">{@offering.description}</p>

@@ -26,38 +26,12 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   end
 
   @impl true
-  def render(assigns) do
-    ~F"""
-    <Components.StudioLayout
-      id="studio-layout"
-      current_user={@current_user}
-      flashes={@flash}
-      studio={@studio}
-      current_user_member?={@current_user_member?}
-      tab={:settings}
-      uri={@uri}
-    >
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <div
-            data-tip="Make a new offering to the gods"
-            class="tooltip tooltip-open tooltip-bottom tooltip-primary"
-          >
-            <h1 class="text-xl">New Offering</h1>
-          </div>
-          <Components.Offering id="new-offering" changeset={@changeset} submit="save" />
-        </div>
-      </div>
-    </Components.StudioLayout>
-    """
-  end
-
-  @impl true
-  def handle_info({"save", offering}, socket) do
+  def handle_info({"save", offering, image}, socket) do
     case Offerings.new_offering(
            socket.assigns.studio,
            socket.assigns.current_user_member?,
-           offering
+           offering,
+           image
          ) do
       {:ok, _offering} ->
         put_flash(socket, :info, "Offering created.")
@@ -70,5 +44,33 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
     end
+  end
+
+  @impl true
+  def render(assigns) do
+    ~F"""
+    <Components.StudioLayout
+      id="studio-layout"
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      current_user_member?={@current_user_member?}
+      tab={:settings}
+      uri={@uri}
+    >
+      <div>
+        <div class="p-6 max-w-lg mx-auto">
+          <h1 class="text-3xl">New Offering</h1>
+          <div class="divider" />
+          <Components.Offering
+            id="new-offering"
+            current_user={@current_user}
+            changeset={@changeset}
+            submit="save"
+          />
+        </div>
+      </div>
+    </Components.StudioLayout>
+    """
   end
 end

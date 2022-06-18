@@ -4,16 +4,18 @@ defmodule Banchan.Offerings do
   """
   import Ecto.Query, warn: false
 
+  alias Banchan.Accounts.User
   alias Banchan.Commissions.Commission
   alias Banchan.Offerings.{Notifications, Offering}
   alias Banchan.Repo
+  alias Banchan.Uploads
 
   def new_offering(_, false, _) do
     {:error, :unauthorized}
   end
 
-  def new_offering(studio, _current_user_member?, attrs) do
-    %Offering{studio_id: studio.id}
+  def new_offering(studio, _current_user_member?, attrs, image \\ nil) do
+    %Offering{studio_id: studio.id, card_img: image}
     |> Offering.changeset(attrs)
     |> Repo.insert()
   end
@@ -34,12 +36,17 @@ defmodule Banchan.Offerings do
     {:error, :unauthorized}
   end
 
-  def update_offering(%Offering{} = offering, _current_user_member?, attrs) do
+  def update_offering(%Offering{} = offering, _current_user_member?, attrs, image \\ nil) do
     {:ok, ret} =
       Repo.transaction(fn ->
         open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
 
-        ret = change_offering(offering, attrs) |> Repo.update(returning: true)
+        ret =
+          offering
+          |> Repo.preload(:card_img)
+          |> change_offering(attrs)
+          |> Ecto.Changeset.put_assoc(:card_img, image)
+          |> Repo.update(returning: true)
 
         case ret do
           {:ok, changed} ->
@@ -116,5 +123,18 @@ defmodule Banchan.Offerings do
       true ->
         max - count
     end
+  end
+
+  def make_card_image!(%User{} = uploader, src) do
+    mog =
+      Mogrify.open(src)
+      |> Mogrify.format("jpeg")
+      |> Mogrify.gravity("Center")
+      |> Mogrify.resize_to_fill("640x360")
+      |> Mogrify.save(in_place: true)
+
+    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")
+    File.rm!(mog.path)
+    image
   end
 end

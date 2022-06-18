@@ -68,59 +68,67 @@ user = user |> Banchan.Repo.reload()
   )
 
 {:ok, _} =
-  Banchan.Offerings.new_offering(studio, true, %{
-    type: "illustration",
-    index: 0,
-    name: "Illustration",
-    description: "A detailed illustration with full rendering and background.",
-    open: true,
-    hidden: false,
-    max_proposals: 3,
-    options: [
-      %{
-        name: "Base Price",
-        description: "The commission itself.",
-        price: Money.new(10000, :USD),
-        default: true,
-        sticky: true
-      },
-      %{
-        name: "Extra Character",
-        description: "Add another character to the illustration.",
-        price: Money.new(500, :USD),
-        multiple: true
-      },
-      %{
-        name: "Full background",
-        description: "Add full background.",
-        price: Money.new(4500, :USD)
-      }
-    ]
-  })
+  Banchan.Offerings.new_offering(
+    studio,
+    true,
+    %{
+      type: "illustration",
+      index: 0,
+      name: "Illustration",
+      description: "A detailed illustration with full rendering and background.",
+      open: true,
+      hidden: false,
+      max_proposals: 3,
+      options: [
+        %{
+          name: "Base Price",
+          description: "The commission itself.",
+          price: Money.new(10000, :USD),
+          default: true,
+          sticky: true
+        },
+        %{
+          name: "Extra Character",
+          description: "Add another character to the illustration.",
+          price: Money.new(500, :USD),
+          multiple: true
+        },
+        %{
+          name: "Full background",
+          description: "Add full background.",
+          price: Money.new(4500, :USD)
+        }
+      ]
+    }
+  )
 
 {:ok, _} =
-  Banchan.Offerings.new_offering(studio, true, %{
-    type: "chibi",
-    index: 1,
-    name: "Chibi",
-    description: "Big eyes, small mouth, tiny body, big heart.",
-    open: true,
-    hidden: true,
-    slots: 3,
-    options: [
-      %{
-        name: "Base Price",
-        description: "One chibi character, to order.",
-        price: Money.new(5000, :USD),
-        default: true,
-        sticky: true
-      },
-      %{
-        name: "Extra Character",
-        description: "Add an extra character to the commission.",
-        price: Money.new(2500, :USD),
-        multiple: true
-      }
-    ],
-    terms: "**No NFTs**. But also no derivative works."
-  })
+  Banchan.Offerings.new_offering(
+    studio,
+    true,
+    %{
+      type: "chibi",
+      index: 1,
+      name: "Chibi",
+      description: "Big eyes, small mouth, tiny body, big heart.",
+      open: true,
+      hidden: true,
+      slots: 3,
+      options: [
+        %{
+          name: "Base Price",
+          description: "One chibi character, to order.",
+          price: Money.new(5000, :USD),
+          default: true,
+          sticky: true
+        },
+        %{
+          name: "Extra Character",
+          description: "Add an extra character to the commission.",
+          price: Money.new(2500, :USD),
+          multiple: true
+        }
+      ],
+      terms: "**No NFTs**. But also no derivative works."
+    }
+  )

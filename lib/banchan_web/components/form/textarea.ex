@@ -56,8 +56,8 @@ defmodule BanchanWeb.Components.Form.TextArea do
             </InputContext>
             <#slot name="right" />
           </div>
-          <ErrorTag class="help is-danger" />
         </div>
+        <ErrorTag class="help text-error" />
       </div>
     </Field>
     """
