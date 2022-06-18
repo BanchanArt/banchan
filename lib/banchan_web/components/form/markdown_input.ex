@@ -46,6 +46,10 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   def render(assigns) do
     ~F"""
     <Field class="field" name={@name}>
+      {#if @show_label}
+        <InputContext assigns={assigns} :let={field: field}>
+          <Label class="label">
+            <span class="label-text">
               {@label || Phoenix.Naming.humanize(field)}
               {#if @info}
                 <div class="tooltip" data-tip={@info}>
