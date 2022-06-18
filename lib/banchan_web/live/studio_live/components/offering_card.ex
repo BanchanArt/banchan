@@ -99,7 +99,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         />
       </:image>
       <div class="flex flex-col grow">
-        <p class="mt-2 grow flex h-full">{@offering.description}</p>
+        <p class="mt-2 grow flex text-ellipsis overflow-hidden h-full">{@offering.description}</p>
         <p class="text-success mt-2 grow-0">
           <span class="font-bold">Base Price:</span>
           {#if @base_price}

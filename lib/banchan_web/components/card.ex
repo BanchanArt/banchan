@@ -24,7 +24,7 @@ defmodule BanchanWeb.Components.Card do
 
   def render(assigns) do
     ~F"""
-    <div class={"shadow-xl bg-base-200 card flex flex-col flex-grow", @class}>
+    <div class={"shadow-xl bg-base-200 card card-compact flex flex-col flex-grow", @class}>
       {#if slot_assigned?(:image)}
         <figure class="aspect-video">
           <#slot name="image" />

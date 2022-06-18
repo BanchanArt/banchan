@@ -80,9 +80,9 @@ defmodule BanchanWeb.StudioLive.Shop do
       uri={@uri}
     >
       {#if Studios.charges_enabled?(@studio)}
-        <div class="flex flex-wrap pt-4 items-stretch">
+        <div class="flex flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 auto-rows-fr pt-4">
           {#for offering <- @offerings}
-            <div class="basis-full md:basis-1/3 p-2 max-w-sm h-128">
+            <div class="p-2">
               <OfferingCard
                 id={"offering-" <> offering.type}
                 current_user={@current_user}
@@ -95,7 +95,7 @@ defmodule BanchanWeb.StudioLive.Shop do
             This shop has no offerings currently available. Check back in later!
           {/for}
           {#if @current_user_member?}
-            <div class="basis-full md:basis-1/3 p-2 max-w-sm h-128">
+            <div class="p-2">
               <LiveRedirect to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}>
                 <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full">
                   <span class="text-6xl mx-auto my-auto flex items-center justify-center h-full">+</span>
