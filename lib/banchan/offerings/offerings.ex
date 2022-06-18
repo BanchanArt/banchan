@@ -42,11 +42,17 @@ defmodule Banchan.Offerings do
         open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
 
         ret =
-          offering
-          |> Repo.preload(:card_img)
-          |> change_offering(attrs)
-          |> Ecto.Changeset.put_assoc(:card_img, image)
-          |> Repo.update(returning: true)
+          if image do
+            offering
+            |> Repo.preload(:card_img)
+            |> change_offering(attrs)
+            |> Ecto.Changeset.put_assoc(:card_img, image)
+            |> Repo.update(returning: true)
+          else
+            offering
+            |> change_offering(attrs)
+            |> Repo.update(returning: true)
+          end
 
         case ret do
           {:ok, changed} ->

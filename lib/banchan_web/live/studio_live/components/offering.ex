@@ -42,7 +42,10 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(card_img_id: assigns[:changeset] && Ecto.Changeset.get_field(assigns[:changeset], :card_img_id))
+     |> assign(
+       card_img_id:
+         assigns[:changeset] && Ecto.Changeset.get_field(assigns[:changeset], :card_img_id)
+     )
      |> allow_upload(:card_image,
        accept: ~w(.jpg .jpeg .png),
        max_entries: 1,
