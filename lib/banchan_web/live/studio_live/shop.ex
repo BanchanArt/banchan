@@ -141,6 +141,7 @@ defmodule BanchanWeb.StudioLive.Shop do
               else
                 nil
               end}
+              data-type={offering.type}
             >
               <OfferingCard
                 id={"offering-" <> offering.type}

@@ -71,7 +71,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
 
   def render(assigns) do
     ~F"""
-    <div data-type={@offering.type} class="h-full relative">
+    <div class="h-full relative">
       {#if @offering.archived_at}
         <Button
           class="btn-primary z-50 absolute top-4 right-4"
