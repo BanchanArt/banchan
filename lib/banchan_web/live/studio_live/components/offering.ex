@@ -63,7 +63,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
            Offerings.offering_gallery_uploads(socket.assigns.offering)
            |> Enum.map(&{:existing, &1})
          else
-            assigns[:gallery_images] || []
+           assigns[:gallery_images] || []
          end
      )}
   end
@@ -158,25 +158,27 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     new_gallery_uploads =
       consume_uploaded_entries(socket, :gallery_images, fn %{path: path}, entry ->
         {:ok,
-         {entry.ref, Offerings.make_gallery_image!(
-           socket.assigns.current_user,
-           path,
-           socket.assigns.current_user_member?
-         )}}
+         {entry.ref,
+          Offerings.make_gallery_image!(
+            socket.assigns.current_user,
+            path,
+            socket.assigns.current_user_member?
+          )}}
       end)
 
-    gallery_images = socket.assigns.gallery_images
-    |> Enum.map(fn {type, data} ->
-      if type == :existing do
-        data
-      else
-        Enum.find_value(new_gallery_uploads, fn {ref, upload} ->
-          if ref == data.ref do
-            upload
-          end
-        end)
-      end
-    end)
+    gallery_images =
+      socket.assigns.gallery_images
+      |> Enum.map(fn {type, data} ->
+        if type == :existing do
+          data
+        else
+          Enum.find_value(new_gallery_uploads, fn {ref, upload} ->
+            if ref == data.ref do
+              upload
+            end
+          end)
+        end
+      end)
 
     case submit_offering(
            socket.assigns.offering,
