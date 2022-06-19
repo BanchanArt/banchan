@@ -71,7 +71,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
 
   def render(assigns) do
     ~F"""
-    <div class="h-full relative">
+    <div data-type={@offering.type} class="h-full relative">
       {#if @offering.archived_at}
         <Button
           class="btn-primary z-50 absolute top-4 right-4"
@@ -101,6 +101,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         </:header_aside>
         <:image>
           <img
+            draggable="false"
             class="object-cover"
             src={if @offering.card_img_id do
               Routes.offering_image_path(Endpoint, :card_image, @offering.card_img_id)

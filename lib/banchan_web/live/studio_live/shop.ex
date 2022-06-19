@@ -93,6 +93,25 @@ defmodule BanchanWeb.StudioLive.Shop do
   end
 
   @impl true
+  def handle_event("drop_card", %{"type" => type, "new_index" => new_index}, socket) do
+    {:ok, _} =
+      Offerings.move_offering(
+        Enum.find(socket.assigns.offerings, &(&1.type == type)),
+        new_index,
+        socket.assigns.current_user_member?
+      )
+
+    offerings =
+      Studios.list_studio_offerings(
+        socket.assigns.studio,
+        socket.assigns.current_user_member?,
+        socket.assigns.current_user_member?
+      )
+
+    {:noreply, socket |> assign(offerings: offerings)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <StudioLayout
@@ -105,9 +124,24 @@ defmodule BanchanWeb.StudioLive.Shop do
       uri={@uri}
     >
       {#if Studios.charges_enabled?(@studio)}
-        <div class="flex flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 auto-rows-fr pt-4">
+        <div
+          id="offering-cards"
+          :hook="DragDropCards"
+          class="flex flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 auto-rows-fr pt-4"
+        >
           {#for offering <- @offerings}
-            <div class="p-2">
+            <div
+              class={
+                "offering-card p-2",
+                "cursor-move select-none": @current_user_member? && is_nil(offering.archived_at),
+                archived: !is_nil(offering.archived_at)
+              }
+              draggable={if @current_user_member? && is_nil(offering.archived_at) do
+                "true"
+              else
+                nil
+              end}
+            >
               <OfferingCard
                 id={"offering-" <> offering.type}
                 current_user={@current_user}

@@ -87,6 +87,46 @@ defmodule Banchan.Offerings do
     ret
   end
 
+  def move_offering(%Offering{}, _, false) do
+    {:error, :unauthorized}
+  end
+
+  def move_offering(%Offering{} = offering, new_index, true) when new_index >= 0 do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        # "Remove" the existing offering
+        {_, _} =
+          from(o in Offering,
+            where:
+              o.studio_id ==
+                ^offering.studio_id and not is_nil(o.index) and o.index > ^offering.index,
+            update: [set: [index: o.index - 1]]
+          )
+          |> Repo.update_all([])
+
+        # Shift everything after new index to the right.
+        {_, _} =
+          from(o in Offering,
+            where:
+              o.studio_id == ^offering.studio_id and not is_nil(o.index) and o.index >= ^new_index,
+            update: [set: [index: o.index + 1]]
+          )
+          |> Repo.update_all([])
+
+        {1, [o]} =
+          from(o in Offering,
+            where: o.id == ^offering.id,
+            update: [set: [index: ^new_index]],
+            select: o
+          )
+          |> Repo.update_all([])
+
+        {:ok, o}
+      end)
+
+    ret
+  end
+
   def get_offering_by_type!(type, current_user_member?) do
     Repo.one!(
       from o in Offering,
