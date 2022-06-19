@@ -20,10 +20,16 @@ defmodule Banchan.Uploads do
   )
 
   def image?(%Upload{type: type}) do
+    image?(type)
+  end
+  def image?(type) when is_binary(type) do
     type in @image_formats
   end
 
   def video?(%Upload{type: type}) do
+    video?(type)
+  end
+  def video?(type) when is_binary(type) do
     type in @video_formats
   end
 
@@ -54,6 +60,12 @@ defmodule Banchan.Uploads do
   def save_file!(%User{} = user, src, type, file_name, bucket \\ get_bucket()) do
     key = gen_key()
     size = File.stat!(src).size
+    {width, height} = if image?(type) || video?(type) do
+      %{width: width, height: height} = Mogrify.identify(src)
+      {width, height}
+    else
+      {nil, nil}
+    end
 
     if Mix.env() == :prod || System.get_env("AWS_REGION") do
       src
@@ -72,7 +84,9 @@ defmodule Banchan.Uploads do
       key: key,
       bucket: bucket,
       type: type,
-      size: size
+      size: size,
+      width: width,
+      height: height
     }
     |> Repo.insert!()
   end

@@ -15,6 +15,8 @@ defmodule Banchan.Uploads.Upload do
     field :key, :string
     field :type, :string
     field :size, :integer
+    field :width, :integer
+    field :height, :integer
 
     belongs_to :uploader, User
     timestamps()
