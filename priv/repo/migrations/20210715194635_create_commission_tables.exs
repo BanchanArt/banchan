@@ -37,12 +37,15 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
 
     create index(:offering_options, [:offering_id])
 
-    create table(:offering_gallery_imgs) do
+    create table(:offering_gallery_images) do
       add :offering_id, references(:offerings, on_delete: :delete_all), null: false
-      add :upload_id, references(:uploads, on_delete: :delete_all), null: false
+      add :upload_id, references(:uploads, on_delete: :delete_all, type: :uuid), null: false
+      add :index, :integer, null: false
+
+      timestamps()
     end
 
-    create_unique_index(:offering_gallery_imgs, [:offering_id, :upload_id])
+    create unique_index(:offering_gallery_images, [:offering_id, :upload_id])
 
     create table(:commissions) do
       add :public_id, :string, null: false

@@ -29,22 +29,18 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
   prop studio, :struct, required: true
-  prop changeset, :struct, required: true
+  prop offering, :struct
 
-  # TODO: Switch to using this when the following bugs are both fixed and released:
-  # * https://github.com/surface-ui/surface/issues/563
-  # * https://github.com/phoenixframework/phoenix_live_view/issues/1850
-  #
-  # prop submit, :event, required: true
-  prop submit, :string, required: true
-
+  data changeset, :struct
   data uploads, :map
   data card_img_id, :integer
 
   def update(assigns, socket) do
+    socket = socket |> assign(assigns)
+
     {:ok,
      socket
-     |> assign(assigns)
+     |> assign(changeset: Offering.changeset(socket.assigns.offering || %Offering{}, %{}))
      |> assign(
        card_img_id:
          assigns[:changeset] && Ecto.Changeset.get_field(assigns[:changeset], :card_img_id)
@@ -76,19 +72,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     else
       {:noreply, socket}
     end
-  end
-
-  @impl true
-  def handle_event("submit", %{"offering" => offering}, socket) do
-    offering = moneyfy_offering(offering)
-
-    images =
-      consume_uploaded_entries(socket, :card_image, fn %{path: path}, _entry ->
-        {:ok, Offerings.make_card_image!(socket.assigns.current_user, path)}
-      end)
-
-    send(self(), {socket.assigns.submit, offering, Enum.at(images, 0)})
-    {:noreply, socket}
   end
 
   @impl true
@@ -128,7 +111,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     offering = moneyfy_offering(offering)
 
     changeset =
-      %Offering{}
+      (socket.assigns.offering || %Offering{})
       |> Offerings.change_offering(offering)
       |> Map.put(:action, :update)
 
@@ -144,6 +127,61 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   @impl true
   def handle_event("cancel_gallery_upload", %{"ref" => ref}, socket) do
     {:noreply, socket |> cancel_upload(:gallery_images, ref)}
+  end
+
+  @impl true
+  def handle_event("submit", %{"offering" => offering}, socket) do
+    offering = moneyfy_offering(offering)
+
+    card_images =
+      consume_uploaded_entries(socket, :card_image, fn %{path: path}, _entry ->
+        {:ok, Offerings.make_card_image!(socket.assigns.current_user, path)}
+      end)
+
+    gallery_images =
+      consume_uploaded_entries(socket, :gallery_image, fn %{path: path}, _entry ->
+        {:ok, Offerings.make_gallery_image!(socket.assigns.current_user, path)}
+      end)
+
+    case submit_offering(
+           socket.assigns.offering,
+           offering,
+           Enum.at(card_images, 0),
+           gallery_images,
+           socket.assigns.studio,
+           socket.assigns.current_user_member?
+         ) do
+      {:ok, _offering} ->
+        {:noreply,
+         redirect(socket,
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
+    end
+  end
+
+  defp submit_offering(offering, attrs, card_image, gallery_images, studio, current_user_member?)
+       when is_nil(offering) do
+    Offerings.new_offering(
+      studio,
+      current_user_member?,
+      attrs,
+      card_image,
+      gallery_images
+    )
+  end
+
+  defp submit_offering(offering, attrs, card_image, gallery_images, _studio, current_user_member?)
+       when not is_nil(offering) do
+    Offerings.update_offering(
+      offering,
+      current_user_member?,
+      attrs,
+      card_image,
+      gallery_images
+    )
   end
 
   defp moneyfy_offering(offering) do

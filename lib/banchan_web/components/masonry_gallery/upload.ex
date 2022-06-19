@@ -37,7 +37,10 @@ defmodule BanchanWeb.Components.MasonGallery.Upload do
   def render(assigns) do
     ~F"""
     <div class={"upload-preview", calculate_span(@upload)}>
-      <img class="w-full h-full object-cover" src={Routes.public_image_path(Endpoint, :image, @upload.id)}>
+      <img
+        class="w-full h-full object-cover"
+        src={Routes.public_image_path(Endpoint, :image, @upload.id)}
+      />
     </div>
     """
   end

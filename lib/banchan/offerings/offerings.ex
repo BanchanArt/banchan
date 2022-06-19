@@ -10,11 +10,11 @@ defmodule Banchan.Offerings do
   alias Banchan.Repo
   alias Banchan.Uploads
 
-  def new_offering(_, false, _) do
+  def new_offering(_, false, _, _, _) do
     {:error, :unauthorized}
   end
 
-  def new_offering(studio, _current_user_member?, attrs, image \\ nil) do
+  def new_offering(studio, true, attrs, card_image, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
         max_idx =
@@ -22,7 +22,12 @@ defmodule Banchan.Offerings do
           |> Repo.one!() ||
             0
 
-        %Offering{studio_id: studio.id, card_img: image, index: max_idx + 1}
+        %Offering{
+          studio_id: studio.id,
+          card_img: card_image,
+          gallery_imgs: gallery_images || [],
+          index: max_idx + 1
+        }
         |> Offering.changeset(attrs)
         |> Repo.insert()
       end)
@@ -139,27 +144,36 @@ defmodule Banchan.Offerings do
     Offering.changeset(offering, attrs)
   end
 
-  def update_offering(_, false, _) do
+  def update_offering(_, false, _, _, _) do
     {:error, :unauthorized}
   end
 
-  def update_offering(%Offering{} = offering, _current_user_member?, attrs, image \\ nil) do
+  def update_offering(%Offering{} = offering, true, attrs, card_image, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
         open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
 
-        ret =
-          if image do
-            offering
-            |> Repo.preload(:card_img)
-            |> change_offering(attrs)
-            |> Ecto.Changeset.put_assoc(:card_img, image)
-            |> Repo.update(returning: true)
+        changeset =
+          offering
+          |> Repo.preload(:card_img)
+          |> Repo.preload(:gallery_imgs)
+          |> change_offering(attrs)
+
+        changeset =
+          if is_nil(card_image) do
+            changeset
           else
-            offering
-            |> change_offering(attrs)
-            |> Repo.update(returning: true)
+            changeset |> Ecto.Changeset.put_assoc(:card_img, card_image)
           end
+
+        changeset =
+          if is_nil(gallery_images) do
+            changeset
+          else
+            changeset |> Ecto.Changeset.put_assoc(:gallery_images, gallery_images)
+          end
+
+        ret = changeset |> Repo.update(returning: true)
 
         case ret do
           {:ok, changed} ->
@@ -247,6 +261,17 @@ defmodule Banchan.Offerings do
       |> Mogrify.save(in_place: true)
 
     image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")
+    File.rm!(mog.path)
+    image
+  end
+
+  def make_gallery_image!(%User{} = uploader, src) do
+    mog =
+      Mogrify.open(src)
+      |> Mogrify.format("jpeg")
+      |> Mogrify.save(in_place: true)
+
+    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "gallery_image.jpg")
     File.rm!(mog.path)
     image
   end

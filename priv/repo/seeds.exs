@@ -99,7 +99,9 @@ user = user |> Banchan.Repo.reload()
           price: Money.new(4500, :USD)
         }
       ]
-    }
+    },
+    nil,
+    nil
   )
 
 {:ok, _} =
@@ -130,5 +132,7 @@ user = user |> Banchan.Repo.reload()
         }
       ],
       terms: "**No NFTs**. But also no derivative works."
-    }
+    },
+    nil,
+    nil
   )

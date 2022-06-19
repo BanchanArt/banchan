@@ -6,7 +6,7 @@ defmodule Banchan.Offerings.Offering do
   import Ecto.Changeset
 
   alias Banchan.Commissions.Commission
-  alias Banchan.Offerings.OfferingOption
+  alias Banchan.Offerings.{GalleryImage, OfferingOption}
   alias Banchan.Studios.Studio
   alias Banchan.Uploads.Upload
 
@@ -25,7 +25,7 @@ defmodule Banchan.Offerings.Offering do
 
     belongs_to :studio, Studio
     belongs_to :card_img, Upload, on_replace: :nilify, type: :binary_id
-    many_to_many :gallery_imgs, Upload, join_through: "offerings_gallery_imgs"
+    has_many :gallery_imgs, GalleryImage, preload_order: [asc: :index]
     has_many :commissions, Commission
     has_many :options, OfferingOption, on_replace: :delete_if_exists
 

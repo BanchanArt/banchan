@@ -4,10 +4,6 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   """
   use BanchanWeb, :surface_view
 
-  alias Banchan.Offerings
-  alias Banchan.Offerings.Offering
-
-  alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components
 
   import BanchanWeb.StudioLive.Helpers
@@ -15,35 +11,13 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   @impl true
   def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, true, false)
-    changeset = Offering.changeset(%Offering{}, %{})
 
-    {:ok, assign(socket, changeset: changeset)}
+    {:ok, socket}
   end
 
   @impl true
   def handle_params(_params, uri, socket) do
     {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
-  def handle_info({"save", offering, image}, socket) do
-    case Offerings.new_offering(
-           socket.assigns.studio,
-           socket.assigns.current_user_member?,
-           offering,
-           image
-         ) do
-      {:ok, _offering} ->
-        put_flash(socket, :info, "Offering created.")
-
-        {:noreply,
-         redirect(socket,
-           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
-         )}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, changeset: changeset)}
-    end
   end
 
   @impl true
@@ -67,8 +41,6 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
             current_user={@current_user}
             current_user_member?={@current_user_member?}
             studio={@studio}
-            changeset={@changeset}
-            submit="save"
           />
         </div>
       </div>
