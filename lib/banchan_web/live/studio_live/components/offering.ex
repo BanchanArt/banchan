@@ -14,7 +14,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias Banchan.Offerings.{Offering, OfferingOption}
   alias Banchan.Utils
 
-  alias BanchanWeb.Components.Button
+  alias BanchanWeb.Components.{Button, MasonryGallery}
+  alias BanchanWeb.Components.MasonGallery.LiveImgPreview
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
@@ -49,8 +50,15 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
          assigns[:changeset] && Ecto.Changeset.get_field(assigns[:changeset], :card_img_id)
      )
      |> allow_upload(:card_image,
+       # TODO: Be less restrictive here
        accept: ~w(.jpg .jpeg .png),
        max_entries: 1,
+       max_file_size: 10_000_000
+     )
+     |> allow_upload(:gallery_images,
+       # TODO: Be less restrictive here
+       accept: ~w(.jpg .jpeg .png),
+       max_entries: 10,
        max_file_size: 10_000_000
      )}
   end
@@ -129,8 +137,13 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   end
 
   @impl true
-  def handle_event("cancel_upload", %{"ref" => ref}, socket) do
-    {:noreply, cancel_upload(socket, :card_image, ref)}
+  def handle_event("cancel_card_upload", %{"ref" => ref}, socket) do
+    {:noreply, socket |> cancel_upload(:card_image, ref)}
+  end
+
+  @impl true
+  def handle_event("cancel_gallery_upload", %{"ref" => ref}, socket) do
+    {:noreply, socket |> cancel_upload(:gallery_images, ref)}
   end
 
   defp moneyfy_offering(offering) do
@@ -187,7 +200,25 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           />
         {/if}
       </div>
-      <UploadInput label="Card Image" upload={@uploads.card_image} cancel="cancel_upload" />
+      <UploadInput label="Card Image" upload={@uploads.card_image} cancel="cancel_card_upload" />
+      <div tabindex="0" class="collapse">
+        <input phx-update="ignore" type="checkbox">
+        <div class="collapse-title text-xl rounded-lg border border-primary">
+          Gallery Images
+        </div>
+        <div class="collapse-content">
+          <MasonryGallery>
+            {#for entry <- @uploads.gallery_images.entries}
+              <LiveImgPreview entry={entry} />
+            {/for}
+          </MasonryGallery>
+          <UploadInput
+            label="Gallery Images"
+            upload={@uploads.gallery_images}
+            cancel="cancel_gallery_upload"
+          />
+        </div>
+      </div>
       <TextInput
         name={:slots}
         info="Max slots available. Slots are used up as you accept commissions. Leave blank for unlimited slots."

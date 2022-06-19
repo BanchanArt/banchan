@@ -12,6 +12,12 @@ module.exports = {
       spacing: {
         '128': '32rem',
         'video': '56.25%',
+      },
+      gridAutoRows: {
+        'gallery': '50px'
+      },
+      gridTemplateColumns: {
+        'gallery': 'repeat(auto-fill, minmax(30%, 1fr))'
       }
     }
   },

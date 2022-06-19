@@ -23,8 +23,9 @@ defmodule Banchan.Offerings.Offering do
     field :template, :string
     field :archived_at, :naive_datetime
 
-    belongs_to :card_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :studio, Studio
+    belongs_to :card_img, Upload, on_replace: :nilify, type: :binary_id
+    many_to_many :gallery_imgs, Upload, join_through: "offerings_gallery_imgs"
     has_many :commissions, Commission
     has_many :options, OfferingOption, on_replace: :delete_if_exists
 
