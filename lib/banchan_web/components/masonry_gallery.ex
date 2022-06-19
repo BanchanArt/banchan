@@ -14,7 +14,7 @@ defmodule BanchanWeb.Components.MasonryGallery do
       ratio >= 140 ->
         # Wide
         "col-span-1"
-      (ratio >= 100 && ratio < 140) || (ratio < 100 && ratio > 80) ->
+      ratio > 80 && ratio < 140 ->
         # Square-ish
         "col-span-2"
       ratio <= 80 && ratio > 50 ->
