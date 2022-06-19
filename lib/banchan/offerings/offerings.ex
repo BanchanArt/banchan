@@ -6,9 +6,10 @@ defmodule Banchan.Offerings do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Commission
-  alias Banchan.Offerings.{Notifications, Offering}
+  alias Banchan.Offerings.{GalleryImage, Notifications, Offering}
   alias Banchan.Repo
   alias Banchan.Uploads
+  alias Banchan.Uploads.Upload
 
   def new_offering(_, false, _, _, _) do
     {:error, :unauthorized}
@@ -22,10 +23,20 @@ defmodule Banchan.Offerings do
           |> Repo.one!() ||
             0
 
+        gallery_images =
+          (gallery_images || [])
+          |> Enum.with_index()
+          |> Enum.map(fn {%Upload{} = upload, index} ->
+            %GalleryImage{
+              index: index,
+              upload_id: upload.id
+            }
+          end)
+
         %Offering{
           studio_id: studio.id,
           card_img: card_image,
-          gallery_imgs: gallery_images || [],
+          gallery_imgs: gallery_images,
           index: max_idx + 1
         }
         |> Offering.changeset(attrs)
@@ -170,7 +181,17 @@ defmodule Banchan.Offerings do
           if is_nil(gallery_images) do
             changeset
           else
-            changeset |> Ecto.Changeset.put_assoc(:gallery_images, gallery_images)
+            gallery_images =
+              (gallery_images || [])
+              |> Enum.with_index()
+              |> Enum.map(fn {%Upload{} = upload, index} ->
+                %GalleryImage{
+                  index: index,
+                  upload_id: upload.id
+                }
+              end)
+
+            changeset |> Ecto.Changeset.put_assoc(:gallery_imgs, gallery_images)
           end
 
         ret = changeset |> Repo.update(returning: true)
@@ -252,7 +273,7 @@ defmodule Banchan.Offerings do
     end
   end
 
-  def make_card_image!(%User{} = uploader, src) do
+  def make_card_image!(%User{} = uploader, src, true) do
     mog =
       Mogrify.open(src)
       |> Mogrify.format("jpeg")
@@ -265,7 +286,17 @@ defmodule Banchan.Offerings do
     image
   end
 
-  def make_gallery_image!(%User{} = uploader, src) do
+  def offering_gallery_uploads(%Offering{} = offering) do
+    from(i in GalleryImage,
+      join: u in assoc(i, :upload),
+      where: i.offering_id == ^offering.id,
+      order_by: [asc: i.index],
+      select: u
+    )
+    |> Repo.all()
+  end
+
+  def make_gallery_image!(%User{} = uploader, src, true) do
     mog =
       Mogrify.open(src)
       |> Mogrify.format("jpeg")

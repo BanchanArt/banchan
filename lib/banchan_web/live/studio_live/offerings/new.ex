@@ -12,12 +12,18 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, true, false)
 
-    {:ok, socket}
+    {:ok, socket |> assign(gallery_images: nil)}
   end
 
   @impl true
   def handle_params(_params, uri, socket) do
     {:noreply, socket |> assign(uri: uri)}
+  end
+
+  def handle_info({:updated_gallery_images, _, images}, socket) do
+    {:noreply,
+     socket
+     |> assign(gallery_images: images)}
   end
 
   @impl true
@@ -41,6 +47,7 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
             current_user={@current_user}
             current_user_member?={@current_user_member?}
             studio={@studio}
+            gallery_images={@gallery_images}
           />
         </div>
       </div>

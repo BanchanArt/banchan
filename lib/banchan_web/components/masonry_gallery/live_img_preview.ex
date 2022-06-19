@@ -1,4 +1,4 @@
-defmodule BanchanWeb.Components.MasonGallery.LiveImgPreview do
+defmodule BanchanWeb.Components.MasonryGallery.LiveImgPreview do
   @moduledoc """
   Component for MasonGallery images that are being displayed through
   LiveView's `live_img_preview`.

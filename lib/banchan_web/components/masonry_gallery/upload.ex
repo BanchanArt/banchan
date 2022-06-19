@@ -1,4 +1,4 @@
-defmodule BanchanWeb.Components.MasonGallery.Upload do
+defmodule BanchanWeb.Components.MasonryGallery.Upload do
   @moduledoc """
   Component for MasonGallery images that have already been uploaded.
   """

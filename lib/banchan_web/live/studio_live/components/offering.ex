@@ -15,7 +15,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias Banchan.Utils
 
   alias BanchanWeb.Components.{Button, MasonryGallery}
-  alias BanchanWeb.Components.MasonGallery.LiveImgPreview
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
@@ -30,21 +29,15 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   prop current_user_member?, :boolean, required: true
   prop studio, :struct, required: true
   prop offering, :struct
+  prop gallery_images, :any
 
   data changeset, :struct
   data uploads, :map
   data card_img_id, :integer
 
-  def update(assigns, socket) do
-    socket = socket |> assign(assigns)
-
+  def mount(socket) do
     {:ok,
      socket
-     |> assign(changeset: Offering.changeset(socket.assigns.offering || %Offering{}, %{}))
-     |> assign(
-       card_img_id:
-         assigns[:changeset] && Ecto.Changeset.get_field(assigns[:changeset], :card_img_id)
-     )
      |> allow_upload(:card_image,
        # TODO: Be less restrictive here
        accept: ~w(.jpg .jpeg .png),
@@ -56,6 +49,27 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
        accept: ~w(.jpg .jpeg .png),
        max_entries: 10,
        max_file_size: 10_000_000
+     )}
+  end
+
+  def update(assigns, socket) do
+    socket = socket |> assign(assigns)
+
+    {:ok,
+     socket
+     |> assign(changeset: Offering.changeset(socket.assigns.offering || %Offering{}, %{}))
+     |> assign(
+       card_img_id:
+         assigns[:changeset] && Ecto.Changeset.get_field(assigns[:changeset], :card_img_id)
+     )
+     |> assign(
+       gallery_images:
+         if socket.assigns.offering && is_nil(assigns[:gallery_images]) do
+           Offerings.offering_gallery_uploads(socket.assigns.offering)
+           |> Enum.map(&{:existing, &1})
+         else
+            assigns[:gallery_images] || []
+         end
      )}
   end
 
@@ -115,7 +129,10 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
       |> Offerings.change_offering(offering)
       |> Map.put(:action, :update)
 
-    socket = assign(socket, changeset: changeset)
+    socket =
+      socket
+      |> assign(changeset: changeset)
+
     {:noreply, socket}
   end
 
@@ -135,13 +152,36 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
     card_images =
       consume_uploaded_entries(socket, :card_image, fn %{path: path}, _entry ->
-        {:ok, Offerings.make_card_image!(socket.assigns.current_user, path)}
+        {:ok,
+         Offerings.make_card_image!(
+           socket.assigns.current_user,
+           path,
+           socket.assigns.current_user_member?
+         )}
       end)
 
-    gallery_images =
-      consume_uploaded_entries(socket, :gallery_image, fn %{path: path}, _entry ->
-        {:ok, Offerings.make_gallery_image!(socket.assigns.current_user, path)}
+    new_gallery_uploads =
+      consume_uploaded_entries(socket, :gallery_images, fn %{path: path}, entry ->
+        {:ok,
+         {entry.ref, Offerings.make_gallery_image!(
+           socket.assigns.current_user,
+           path,
+           socket.assigns.current_user_member?
+         )}}
       end)
+
+    gallery_images = socket.assigns.gallery_images
+    |> Enum.map(fn {type, data} ->
+      if type == :existing do
+        data
+      else
+        Enum.find_value(new_gallery_uploads, fn {ref, upload} ->
+          if ref == data.ref do
+            upload
+          end
+        end)
+      end
+    end)
 
     case submit_offering(
            socket.assigns.offering,
@@ -245,11 +285,12 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           Gallery Images
         </div>
         <div class="collapse-content">
-          <MasonryGallery>
-            {#for entry <- @uploads.gallery_images.entries}
-              <LiveImgPreview entry={entry} />
-            {/for}
-          </MasonryGallery>
+          <MasonryGallery
+            id="gallery-preview"
+            send_updates_to={self()}
+            images={@gallery_images}
+            entries={@uploads.gallery_images.entries}
+          />
           <UploadInput
             label="Gallery Images"
             upload={@uploads.gallery_images}
@@ -331,7 +372,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
       </div>
       <div class="divider" />
       <div class="flex flex-row">
-        <Submit changeset={@changeset} label="Save" />
+        <Submit label="Save" />
         {#if @changeset.data.id}
           <Button class="btn-error" click="archive" label="Archive" />
         {/if}

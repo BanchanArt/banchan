@@ -15,12 +15,18 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
     socket = assign_studio_defaults(params, socket, true, false)
     offering = Offerings.get_offering_by_type!(offering_type, socket.assigns.current_user_member?)
 
-    {:ok, assign(socket, offering: offering)}
+    {:ok, assign(socket, offering: offering, gallery_images: nil)}
   end
 
   @impl true
   def handle_params(_params, uri, socket) do
     {:noreply, socket |> assign(uri: uri)}
+  end
+
+  def handle_info({:updated_gallery_images, _, images}, socket) do
+    {:noreply,
+     socket
+     |> assign(gallery_images: images)}
   end
 
   @impl true
@@ -45,6 +51,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
             current_user_member?={@current_user_member?}
             studio={@studio}
             offering={@offering}
+            gallery_images={@gallery_images}
           />
         </div>
       </div>
