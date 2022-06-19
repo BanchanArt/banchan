@@ -33,7 +33,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   data changeset, :struct
   data uploads, :map
-  data card_img_id, :integer
 
   def mount(socket) do
     {:ok,
@@ -58,10 +57,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     {:ok,
      socket
      |> assign(changeset: Offering.changeset(socket.assigns.offering || %Offering{}, %{}))
-     |> assign(
-       card_img_id:
-         assigns[:changeset] && Ecto.Changeset.get_field(assigns[:changeset], :card_img_id)
-     )
      |> assign(
        gallery_images:
          if socket.assigns.offering && is_nil(assigns[:gallery_images]) do
@@ -262,7 +257,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         opts={required: true}
       />
       <div class="relative pb-video">
-        {#if Enum.empty?(@uploads.card_image.entries) && !@card_img_id}
+        {#if Enum.empty?(@uploads.card_image.entries) && !(@offering && @offering.card_img_id)}
           <img
             class="absolute h-full w-full object-cover"
             src={Routes.static_path(Endpoint, "/images/640x360.png")}
@@ -274,7 +269,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         {#else}
           <img
             class="absolute h-full w-full object-cover"
-            src={Routes.public_image_path(Endpoint, :image, @card_img_id)}
+            src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
           />
         {/if}
       </div>
