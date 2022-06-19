@@ -183,7 +183,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         {#else}
           <img
             class="absolute h-full w-full object-cover"
-            src={Routes.offering_image_path(Endpoint, :card_image, @card_img_id)}
+            src={Routes.public_image_path(Endpoint, :image, @card_img_id)}
           />
         {/if}
       </div>

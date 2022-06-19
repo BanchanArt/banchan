@@ -104,7 +104,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
             draggable="false"
             class="object-cover"
             src={if @offering.card_img_id do
-              Routes.offering_image_path(Endpoint, :card_image, @offering.card_img_id)
+              Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
             else
               Routes.static_path(Endpoint, "/images/640x360.png")
             end}

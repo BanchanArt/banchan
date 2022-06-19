@@ -1,12 +1,12 @@
-defmodule BanchanWeb.OfferingImageController do
+defmodule BanchanWeb.PublicImageController do
   @moduledoc """
-  "securely" serves offering-related images
+  Serves public image uploads.
   """
   use BanchanWeb, :controller
 
   alias Banchan.Uploads
 
-  def card_image(conn, %{"id" => upload_id}) do
+  def image(conn, %{"id" => upload_id}) do
     upload = Uploads.get_by_id!(upload_id)
 
     conn

@@ -92,9 +92,7 @@ defmodule BanchanWeb.Router do
 
     get("/go/:handle", DispatchController, :dispatch)
 
-    get("/profile_images/:id/img.jpeg", ProfileImageController, :profile_image)
-
-    get("/offering_images/:id/card_image.jpeg", OfferingImageController, :card_image)
+    get("/images/:id", PublicImageController, :image)
 
     get("/studios/:handle/connect_to_stripe", StripeAccountController, :account_link)
 
