@@ -7,7 +7,8 @@ defmodule BanchanWeb.Components.MasonryGallery.Upload do
   alias Banchan.Uploads.Upload
 
   prop upload, :struct, required: true
-  prop draggable, :boolean
+  prop editable, :boolean
+  prop deleted, :event
 
   defp calculate_span(%Upload{width: width, height: height}) do
     ratio = width / height * 100
@@ -38,15 +39,24 @@ defmodule BanchanWeb.Components.MasonryGallery.Upload do
   def render(assigns) do
     ~F"""
     <div
-      class={"masonry-item upload-preview", calculate_span(@upload)}
+      class={"masonry-item upload-preview relative", calculate_span(@upload), "hover:cursor-move": @editable}
       data-type="existing"
       data-id={@upload.id}
-      draggable={if @draggable do
+      draggable={if @editable do
         "true"
       else
         "false"
       end}
     >
+      {#if @editable}
+        <button
+          type="button"
+          phx-value-type="existing"
+          phx-value-id={@upload.id}
+          class="btn btn-xs btn-circle absolute right-2 top-2"
+          :on-click={@deleted}
+        >✕</button>
+      {/if}
       <img
         class="w-full h-full object-cover"
         src={Routes.public_image_path(Endpoint, :image, @upload.id)}

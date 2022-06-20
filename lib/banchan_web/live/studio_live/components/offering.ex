@@ -52,7 +52,26 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   end
 
   def update(assigns, socket) do
+    old_assigns = socket.assigns
     socket = socket |> assign(assigns)
+
+    socket =
+      if is_nil(assigns[:gallery_images]) &&
+           old_assigns[:gallery_images] == assigns[:gallery_images] do
+        socket
+      else
+        # Cancel any live items that got removed.
+        old_assigns[:gallery_images]
+        |> Enum.filter(fn {type, data} ->
+          type == :live &&
+            !Enum.find(assigns[:gallery_images], fn {t, d} ->
+              t == :live && data.ref == d.ref
+            end)
+        end)
+        |> Enum.reduce(socket, fn {:live, entry}, socket ->
+          socket |> cancel_upload(:gallery_images, entry.ref)
+        end)
+      end
 
     {:ok,
      socket
@@ -243,136 +262,141 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         phx_submit: "submit"
       }
     >
-      <TextInput
-        name={:name}
-        info="Name of the offering, as it should appear in the offering card."
-        opts={required: true}
-      />
-      <TextInput
-        name={:type}
-        info="Lowercase, no-spaces, limited characters. This is what will show up in the url and must be unique."
-        opts={required: true}
-      />
-      <TextArea
-        name={:description}
-        info="Description of the offering, as it should appear in the offering card."
-        opts={required: true}
-      />
-      <div class="relative pb-video">
-        {#if Enum.empty?(@uploads.card_image.entries) && !(@offering && @offering.card_img_id)}
-          <img
-            class="absolute h-full w-full object-cover"
-            src={Routes.static_path(Endpoint, "/images/640x360.png")}
-          />
-        {#elseif !Enum.empty?(@uploads.card_image.entries)}
-          {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
-            class: "absolute h-full w-full object-cover"
-          )}
-        {#else}
-          <img
-            class="absolute h-full w-full object-cover"
-            src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
-          />
-        {/if}
-      </div>
-      <UploadInput label="Card Image" upload={@uploads.card_image} cancel="cancel_card_upload" />
-      <div tabindex="0" class="collapse">
-        <input phx-update="ignore" type="checkbox">
-        <div class="collapse-title text-xl rounded-lg border border-primary">
-          Gallery Images
-        </div>
-        <div class="collapse-content">
-          <MasonryGallery
-            id="gallery-preview"
-            send_updates_to={self()}
-            images={@gallery_images}
-            entries={@uploads.gallery_images.entries}
-          />
-          <UploadInput
-            label="Gallery Images"
-            upload={@uploads.gallery_images}
-            cancel="cancel_gallery_upload"
-          />
-        </div>
-      </div>
-      <TextInput
-        name={:slots}
-        info="Max slots available. Slots are used up as you accept commissions. Leave blank for unlimited slots."
-      />
-      <TextInput
-        name={:max_proposals}
-        info="Max proposals. Unlike slots, these are used as soon as someone makes a proposal. Use this setting to prevent your inbox from getting flooded with too many proposals. Leave blank for unlimited proposals."
-      />
-      <Checkbox
-        name={:open}
-        label="Open"
-        info="Open up this offering for new proposals. The offering will remain visible if closed."
-      />
-      <Checkbox
-        name={:hidden}
-        label="Hide from Shop"
-        info="Hide this offering from the shop. You will still be able to link people to it."
-      />
-      <h3 class="text-2xl">Options</h3>
-      <div class="divider" />
-      <ul class="flex flex-col gap-2">
-        <InputContext :let={form: form}>
-          <Inputs form={form} for={:options} :let={index: index}>
-            <li tabindex="0" class="collapse">
-              <input phx-update="ignore" type="checkbox">
-              <div class="collapse-title text-xl rounded-lg border border-primary">
-                {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
-                (opt.name || "New Option") <> " - " <> Money.to_string(opt.price || Money.new(0, :USD))}
-              </div>
-              <div class="collapse-content">
-                <TextInput name={:name} info="Name of the option." opts={required: true} />
-                <TextArea name={:description} info="Description for the option." opts={required: true} />
-                <TextInput name={:price} info="Quoted price for adding this option." opts={required: true} />
-                <Checkbox
-                  name={:multiple}
-                  info="Allow multiple instances of this option at the same time."
-                  label="Allow Multiple"
-                />
-                <Checkbox name={:sticky} info="Once this option is added, it can't be removed." label="Sticky" />
-                <Checkbox
-                  name={:default}
-                  info="Whether this option is added by default. Default options are also used to calculate your offering's base price."
-                  label="Default"
-                />
-                <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
-              </div>
-            </li>
-          </Inputs>
-        </InputContext>
-        <li class="field">
-          <div class="control">
-            <Button class="w-full" click="add_option" label="Add Option" />
+      <div class="flex flex-col gap-2">
+        <TextInput
+          name={:name}
+          info="Name of the offering, as it should appear in the offering card."
+          opts={required: true}
+        />
+        <TextInput
+          name={:type}
+          info="Lowercase, no-spaces, limited characters. This is what will show up in the url and must be unique."
+          opts={required: true}
+        />
+        <TextArea
+          name={:description}
+          info="Description of the offering, as it should appear in the offering card."
+          opts={required: true}
+        />
+        <TextInput
+          name={:slots}
+          info="Max slots available. Slots are used up as you accept commissions. Leave blank for unlimited slots."
+        />
+        <TextInput
+          name={:max_proposals}
+          info="Max proposals. Unlike slots, these are used as soon as someone makes a proposal. Use this setting to prevent your inbox from getting flooded with too many proposals. Leave blank for unlimited proposals."
+        />
+        <Checkbox
+          name={:open}
+          label="Open"
+          info="Open up this offering for new proposals. The offering will remain visible if closed."
+        />
+        <Checkbox
+          name={:hidden}
+          label="Hide from Shop"
+          info="Hide this offering from the shop. You will still be able to link people to it."
+        />
+        <div tabindex="0" class="collapse collapse-arrow">
+          <input phx-update="ignore" type="checkbox">
+          <div class="collapse-title text-xl rounded-lg border border-primary">
+            Images
           </div>
-        </li>
-      </ul>
-      <div class="divider" />
-      <div tabindex="0" class="collapse">
-        <input phx-update="ignore" type="checkbox">
-        <h3 class="collapse-title rounded-lg border border-primary text-2xl">Terms and Template</h3>
-        <div class="collapse-content">
-          <MarkdownInput
-            id="tos"
-            name={:terms}
-            info="Terms of service specific to this offering. Leave blank to use your studio's default terms."
-          />
-          <MarkdownInput
-            id="template"
-            name={:template}
-            info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
-          />
+          <div class="collapse-content flex flex-col gap-2">
+            <div class="relative pb-video pt-2">
+              {#if Enum.empty?(@uploads.card_image.entries) && !(@offering && @offering.card_img_id)}
+                <img
+                  class="absolute h-full w-full object-cover rounded-lg"
+                  src={Routes.static_path(Endpoint, "/images/640x360.png")}
+                />
+              {#elseif !Enum.empty?(@uploads.card_image.entries)}
+                {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
+                  class: "absolute h-full w-full object-cover rounded-lg"
+                )}
+              {#else}
+                <img
+                  class="absolute h-full w-full object-cover rounded-lg"
+                  src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
+                />
+              {/if}
+            </div>
+            <UploadInput label="Card Image" upload={@uploads.card_image} cancel="cancel_card_upload" />
+            <MasonryGallery
+              id="gallery-preview"
+              class="py-2 rounded-lg"
+              send_updates_to={self()}
+              images={@gallery_images}
+              editable
+              entries={@uploads.gallery_images.entries}
+            />
+            <UploadInput
+              label="Gallery Images"
+              upload={@uploads.gallery_images}
+              cancel="cancel_gallery_upload"
+              hide_list
+            />
+          </div>
         </div>
-      </div>
-      <div class="divider" />
-      <div class="flex flex-row">
-        <Submit label="Save" />
-        {#if @changeset.data.id}
-          <Button class="btn-error" click="archive" label="Archive" />
-        {/if}
+        <h3 class="text-2xl pt-10">Options</h3>
+        <div class="divider" />
+        <ul class="flex flex-col gap-2">
+          <InputContext :let={form: form}>
+            <Inputs form={form} for={:options} :let={index: index}>
+              <li tabindex="0" class="collapse collapse-arrow">
+                <input phx-update="ignore" type="checkbox">
+                <div class="collapse-title text-xl rounded-lg border border-primary">
+                  {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
+                  (opt.name || "New Option") <> " - " <> Money.to_string(opt.price || Money.new(0, :USD))}
+                </div>
+                <div class="collapse-content">
+                  <TextInput name={:name} info="Name of the option." opts={required: true} />
+                  <TextArea name={:description} info="Description for the option." opts={required: true} />
+                  <TextInput name={:price} info="Quoted price for adding this option." opts={required: true} />
+                  <Checkbox
+                    name={:multiple}
+                    info="Allow multiple instances of this option at the same time."
+                    label="Allow Multiple"
+                  />
+                  <Checkbox name={:sticky} info="Once this option is added, it can't be removed." label="Sticky" />
+                  <Checkbox
+                    name={:default}
+                    info="Whether this option is added by default. Default options are also used to calculate your offering's base price."
+                    label="Default"
+                  />
+                  <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
+                </div>
+              </li>
+            </Inputs>
+          </InputContext>
+          <li class="field">
+            <div class="control">
+              <Button class="w-full" click="add_option" label="Add Option" />
+            </div>
+          </li>
+        </ul>
+        <div class="divider" />
+        <div tabindex="0" class="collapse collapse-arrow">
+          <input phx-update="ignore" type="checkbox">
+          <h3 class="collapse-title rounded-lg border border-primary text-2xl">Terms and Template</h3>
+          <div class="collapse-content">
+            <MarkdownInput
+              id="tos"
+              name={:terms}
+              info="Terms of service specific to this offering. Leave blank to use your studio's default terms."
+            />
+            <MarkdownInput
+              id="template"
+              name={:template}
+              info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
+            />
+          </div>
+        </div>
+        <div class="divider" />
+        <div class="flex flex-row">
+          <Submit label="Save" />
+          {#if @changeset.data.id}
+            <Button class="btn-error" click="archive" label="Archive" />
+          {/if}
+        </div>
       </div>
     </Form>
     """

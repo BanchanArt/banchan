@@ -9,23 +9,30 @@ defmodule BanchanWeb.Components.Form.UploadInput do
   prop upload, :struct, required: true
   prop label, :string, default: "Upload attachments"
   prop cancel, :event, required: true
+  prop hide_list, :boolean
 
   def render(assigns) do
     ~F"""
     <ul>
       {#for entry <- @upload.entries}
         <li>
-          <button type="button" class="text-2xl" :on-click={@cancel} phx-value-ref={entry.ref}>&times;</button>
-          {entry.client_name}
-          <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
-          {#for err <- upload_errors(@upload, entry)}
-            <p>{error_to_string(err)}</p>
-          {/for}
+          {#if @hide_list}
+            {#for err <- upload_errors(@upload, entry)}
+              <p class="text-error">{entry.client_name}: {error_to_string(err)}</p>
+            {/for}
+          {#else}
+            <button type="button" class="text-2xl" :on-click={@cancel} phx-value-ref={entry.ref}>&times;</button>
+            {entry.client_name}
+            <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
+            {#for err <- upload_errors(@upload, entry)}
+              <p class="text-error">{error_to_string(err)}</p>
+            {/for}
+          {/if}
         </li>
       {/for}
     </ul>
     {#for err <- upload_errors(@upload)}
-      <p>{error_to_string(err)}</p>
+      <p class="text-error">{error_to_string(err)}</p>
     {/for}
     <div
       class="relative h-15 rounded-lg border-dashed border-2 border-primary flex justify-center items-center"
