@@ -25,12 +25,6 @@ $fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
   --border-btn: 5px;          /* default border size for button */
 }
 
-// NB(@zkat): This fixes an obnoxious interaction between modals and the
-// drawer. I don't know why the z-index: 0 was necessary in the first place.
-.drawer-toggle~.drawer-content {
-  z-index: auto !important;
-}
-
 .phx-click-loading.btn-loadable {
   @apply loading;
 }

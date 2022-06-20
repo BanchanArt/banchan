@@ -175,7 +175,13 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           :on-window-keydown="close_gallery"
           phx-key="Escape"
         >
-          <div :on-click="nothing" class="modal-box md:w-11/12 md:max-w-5xl relative">
+          {!--
+             NB(@zkat): This lg:w-8/12 is a crappy hack to prevent weird
+             z-index overlapping issues with the drawer. It can be taken out
+             if/when we figure out a different drawer situation than DaisyUI's
+             built-in one.
+          --}
+          <div :on-click="nothing" class="modal-box sm:w-11/12 sm:max-w-5xl lg:w-8/12 relative">
             <div
               class="close-modal btn btn-sm btn-circle absolute right-2 top-2 z-50"
               :on-click="close_gallery"
