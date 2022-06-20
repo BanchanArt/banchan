@@ -6,8 +6,9 @@ defmodule Banchan.Offerings.Offering do
   import Ecto.Changeset
 
   alias Banchan.Commissions.Commission
-  alias Banchan.Offerings.OfferingOption
+  alias Banchan.Offerings.{GalleryImage, OfferingOption}
   alias Banchan.Studios.Studio
+  alias Banchan.Uploads.Upload
 
   schema "offerings" do
     field :type, :string
@@ -20,8 +21,15 @@ defmodule Banchan.Offerings.Offering do
     field :hidden, :boolean, default: true
     field :terms, :string
     field :template, :string
+    field :archived_at, :naive_datetime
 
     belongs_to :studio, Studio
+    belongs_to :card_img, Upload, on_replace: :nilify, type: :binary_id
+
+    has_many :gallery_imgs, GalleryImage,
+      on_replace: :delete_if_exists,
+      preload_order: [asc: :index]
+
     has_many :commissions, Commission
     has_many :options, OfferingOption, on_replace: :delete_if_exists
 

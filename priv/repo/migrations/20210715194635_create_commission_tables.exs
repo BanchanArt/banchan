@@ -13,7 +13,9 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :index, :integer
       add :terms, :text
       add :template, :text
+      add :archived_at, :naive_datetime
 
+      add :card_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :studio_id, references(:studios), null: false
 
       timestamps()
@@ -34,6 +36,16 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     end
 
     create index(:offering_options, [:offering_id])
+
+    create table(:offering_gallery_images) do
+      add :offering_id, references(:offerings, on_delete: :delete_all), null: false
+      add :upload_id, references(:uploads, on_delete: :delete_all, type: :uuid), null: false
+      add :index, :integer, null: false
+
+      timestamps()
+    end
+
+    create unique_index(:offering_gallery_images, [:offering_id, :upload_id])
 
     create table(:commissions) do
       add :public_id, :string, null: false
@@ -193,8 +205,8 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     create index(:commission_invoices, [:event_id])
 
     create table(:invoices_payouts) do
-      add :invoice_id, references(:commission_invoices), null: false
-      add :payout_id, references(:studio_payouts), null: false
+      add :invoice_id, references(:commission_invoices, on_delete: :delete_all), null: false
+      add :payout_id, references(:studio_payouts, on_delete: :delete_all), null: false
     end
 
     create unique_index(:invoices_payouts, [:invoice_id, :payout_id])

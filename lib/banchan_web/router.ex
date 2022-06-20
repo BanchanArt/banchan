@@ -60,7 +60,6 @@ defmodule BanchanWeb.Router do
       live("/studios/:handle/settings", StudioLive.Settings, :show)
       live("/studios/:handle/payouts", StudioLive.Payouts, :index)
       live("/studios/:handle/payouts/:payout_id", StudioLive.Payouts, :show)
-      live("/studios/:handle/offerings", StudioLive.Offerings.Index, :index)
       live("/studios/:handle/offerings/new", StudioLive.Offerings.New, :new)
       live("/studios/:handle/offerings/edit/:offering_type", StudioLive.Offerings.Edit, :edit)
       live("/studios/:handle/commissions/new/:offering_type", StudioLive.Commissions.New, :new)
@@ -93,7 +92,7 @@ defmodule BanchanWeb.Router do
 
     get("/go/:handle", DispatchController, :dispatch)
 
-    get("/profile_images/:id/img.jpeg", ProfileImageController, :profile_image)
+    get("/images/:id", PublicImageController, :image)
 
     get("/studios/:handle/connect_to_stripe", StripeAccountController, :account_link)
 

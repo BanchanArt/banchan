@@ -28,7 +28,7 @@ defmodule BanchanWeb.DenizenLive.Show do
        page_description: user.bio,
        page_small_image:
          if user.pfp_thumb_id do
-           Routes.profile_image_url(Endpoint, :profile_image, user.pfp_thumb_id)
+           Routes.public_image_url(Endpoint, :image, user.pfp_thumb_id)
          else
            Routes.static_url(Endpoint, "/images/denizen_default_icon.png")
          end

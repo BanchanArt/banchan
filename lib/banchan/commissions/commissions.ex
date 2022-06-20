@@ -239,7 +239,7 @@ defmodule Banchan.Commissions do
     if close do
       # NB(zkat): We pretend we're a studio member here because we're doing
       # this on behalf of the studio. It's safe.
-      {:ok, _} = Offerings.update_offering(offering, true, %{open: false})
+      {:ok, _} = Offerings.update_offering(offering, true, %{open: false}, nil, nil)
     end
   end
 
@@ -306,7 +306,7 @@ defmodule Banchan.Commissions do
           if close do
             # NB(zkat): We pretend we're a studio member here because we're doing
             # this on behalf of the studio. It's safe.
-            {:ok, _} = Offerings.update_offering(offering, true, %{open: false})
+            {:ok, _} = Offerings.update_offering(offering, true, %{open: false}, nil, nil)
           end
         end
 

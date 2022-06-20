@@ -15,17 +15,12 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   prop label, :string
   prop show_label, :boolean, default: true
   prop class, :css_class
+  prop info, :string
   prop upload, :struct
   prop cancel_upload, :event
 
   data dragging, :boolean, default: false
   data previewing, :boolean, default: false
-  data markdown, :string, default: ""
-
-  @impl true
-  def update(assigns, socket) do
-    {:ok, socket |> assign(assigns) |> assign(markdown: "")}
-  end
 
   @impl true
   def handle_event("markdown", _, socket) do
@@ -34,10 +29,6 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
 
   def handle_event("preview", _, socket) do
     {:noreply, assign(socket, previewing: true)}
-  end
-
-  def handle_event("change", %{"value" => markdown}, socket) do
-    {:noreply, assign(socket, markdown: markdown || "")}
   end
 
   def handle_event("dragstart", _, socket) do
@@ -56,13 +47,18 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
     ~F"""
     <Field class="field" name={@name}>
       {#if @show_label}
-        {#if @label}
+        <InputContext assigns={assigns} :let={field: field}>
           <Label class="label">
-            {@label}
+            <span class="label-text">
+              {@label || Phoenix.Naming.humanize(field)}
+              {#if @info}
+                <div class="tooltip" data-tip={@info}>
+                  <i class="fas fa-info-circle" />
+                </div>
+              {/if}
+            </span>
           </Label>
-        {#else}
-          <Label class="label" />
-        {/if}
+        </InputContext>
       {/if}
       <div class="control">
         <InputContext :let={form: form, field: field}>
@@ -74,10 +70,10 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
             {#if @previewing}
               <div class="h-40 border-2 overflow-auto border-neutral rounded">
                 <div class="p-2 text-sm">
-                  {#if @markdown == ""}
-                    Nothing to preview
+                  {#if Phoenix.HTML.FormData.input_value(nil, form, field)}
+                    <Markdown content={Phoenix.HTML.FormData.input_value(nil, form, field)} />
                   {#else}
-                    <Markdown content={@markdown} />
+                    Nothing to preview
                   {/if}
                 </div>
               </div>

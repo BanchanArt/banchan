@@ -89,17 +89,17 @@ defmodule BanchanWeb do
     end
   end
 
-  def component do
+  def component(args \\ []) do
     quote do
-      use Surface.Component
+      use Surface.Component, unquote(args)
 
       unquote(view_helpers())
     end
   end
 
-  def live_component do
+  def live_component(args \\ []) do
     quote do
-      use Surface.LiveComponent
+      use Surface.LiveComponent, unquote(args)
 
       unquote(view_helpers())
     end
@@ -152,5 +152,9 @@ defmodule BanchanWeb do
   """
   defmacro __using__(which) when is_atom(which) do
     apply(__MODULE__, which, [])
+  end
+
+  defmacro __using__(which) when is_list(which) do
+    apply(__MODULE__, Keyword.get(which, :type), [which])
   end
 end

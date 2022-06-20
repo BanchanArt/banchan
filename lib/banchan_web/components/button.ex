@@ -10,6 +10,7 @@ defmodule BanchanWeb.Components.Button do
   prop click, :event
   prop class, :css_class
   prop disabled, :boolean, default: false
+  prop opts, :keyword, default: []
 
   slot default
 
@@ -30,6 +31,7 @@ defmodule BanchanWeb.Components.Button do
       type="button"
       disabled={@disabled}
       :on-click={@click}
+      {...@opts}
     >{@label}<#slot /></button>
     """
   end

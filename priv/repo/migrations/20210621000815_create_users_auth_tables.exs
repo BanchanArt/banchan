@@ -11,6 +11,8 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :key, :string, null: false
       add :type, :string
       add :size, :integer, null: false
+      add :width, :integer
+      add :height, :integer
 
       timestamps()
     end

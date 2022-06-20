@@ -19,9 +19,10 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
   data changeset, :struct
   data uploads, :map
 
-  def mount(socket) do
+  def update(assigns, socket) do
     {:ok,
      socket
+     |> assign(assigns)
      |> assign(changeset: Event.comment_changeset(%Event{}, %{}))
      # TODO: move max file size somewhere configurable.
      # TODO: constrain :accept?

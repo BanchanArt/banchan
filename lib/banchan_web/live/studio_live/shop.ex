@@ -4,22 +4,29 @@ defmodule BanchanWeb.StudioLive.Shop do
   """
   use BanchanWeb, :surface_view
 
+  alias Banchan.Offerings
   alias Banchan.Studios
 
   alias Surface.Components.LiveRedirect
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.Components.Button
+  alias BanchanWeb.Components.{Button, Card}
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.{CommissionCard, StudioLayout}
+  alias BanchanWeb.StudioLive.Components.{OfferingCard, StudioLayout}
 
   @impl true
   def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, false, false)
     studio = socket.assigns.studio
     members = Studios.list_studio_members(studio)
-    offerings = Studios.list_studio_offerings(studio, socket.assigns.current_user_member?)
+
+    offerings =
+      Studios.list_studio_offerings(
+        studio,
+        socket.assigns.current_user_member?,
+        socket.assigns.current_user_member?
+      )
 
     Studios.subscribe_to_stripe_state(studio)
 
@@ -31,7 +38,7 @@ defmodule BanchanWeb.StudioLive.Shop do
       end
 
     # TODO: This page does a TON of requests right now (partly because of
-    # CommissionCard). This should be replaced with a single "general" query
+    # OfferingCard). This should be replaced with a single "general" query
     # that picks up everything we need for this listing.
     {:ok,
      assign(socket,
@@ -39,6 +46,11 @@ defmodule BanchanWeb.StudioLive.Shop do
        offerings: offerings,
        stripe_onboarding_url: stripe_onboarding_url
      )}
+  end
+
+  @impl true
+  def handle_params(_params, uri, socket) do
+    {:noreply, socket |> assign(uri: uri)}
   end
 
   @impl true
@@ -63,8 +75,40 @@ defmodule BanchanWeb.StudioLive.Shop do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
+  def handle_event("unarchive", %{"type" => type}, socket) do
+    {:ok, _} =
+      Offerings.unarchive_offering(
+        Enum.find(socket.assigns.offerings, &(&1.type == type)),
+        socket.assigns.current_user_member?
+      )
+
+    offerings =
+      Studios.list_studio_offerings(
+        socket.assigns.studio,
+        socket.assigns.current_user_member?,
+        socket.assigns.current_user_member?
+      )
+
+    {:noreply, socket |> assign(offerings: offerings)}
+  end
+
+  @impl true
+  def handle_event("drop_card", %{"type" => type, "new_index" => new_index}, socket) do
+    {:ok, _} =
+      Offerings.move_offering(
+        Enum.find(socket.assigns.offerings, &(&1.type == type)),
+        new_index,
+        socket.assigns.current_user_member?
+      )
+
+    offerings =
+      Studios.list_studio_offerings(
+        socket.assigns.studio,
+        socket.assigns.current_user_member?,
+        socket.assigns.current_user_member?
+      )
+
+    {:noreply, socket |> assign(offerings: offerings)}
   end
 
   @impl true
@@ -80,25 +124,44 @@ defmodule BanchanWeb.StudioLive.Shop do
       uri={@uri}
     >
       {#if Studios.charges_enabled?(@studio)}
-        <div class="flex flex-wrap pt-4 items-stretch">
+        <div
+          id="offering-cards"
+          :hook="DragDropCards"
+          class="flex flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 auto-rows-fr pt-4"
+        >
           {#for offering <- @offerings}
-            <div class="md:basis-1/2 p-2 max-w-sm flex flex-grow flex-col">
-              <CommissionCard
+            <div
+              class={
+                "offering-card p-2",
+                "cursor-move select-none": @current_user_member? && is_nil(offering.archived_at),
+                archived: !is_nil(offering.archived_at)
+              }
+              draggable={if @current_user_member? && is_nil(offering.archived_at) do
+                "true"
+              else
+                nil
+              end}
+              data-type={offering.type}
+            >
+              <OfferingCard
                 id={"offering-" <> offering.type}
                 current_user={@current_user}
+                current_user_member?={@current_user_member?}
                 studio={@studio}
                 offering={offering}
+                unarchive="unarchive"
               />
             </div>
           {#else}
             This shop has no offerings currently available. Check back in later!
           {/for}
           {#if @current_user_member?}
-            <div class="md:basis-1/2">
-              <LiveRedirect
-                to={Routes.studio_offerings_index_path(Endpoint, :index, @studio.handle)}
-                class="btn btn-sm text-center rounded-full m-5 btn-warning"
-              >Manage Offerings</LiveRedirect>
+            <div class="p-2">
+              <LiveRedirect to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}>
+                <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full transition-all">
+                  <span class="text-6xl mx-auto my-auto flex items-center justify-center h-full">+</span>
+                </Card>
+              </LiveRedirect>
             </div>
           {/if}
         </div>
