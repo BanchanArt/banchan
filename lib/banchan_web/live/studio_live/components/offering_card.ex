@@ -175,7 +175,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           :on-window-keydown="close_gallery"
           phx-key="Escape"
         >
-          <div :on-click="nothing" class="modal-box relative">
+          <div :on-click="nothing" class="modal-box md:w-11/12 md:max-w-5xl relative">
             <div
               class="close-modal btn btn-sm btn-circle absolute right-2 top-2 z-50"
               :on-click="close_gallery"
@@ -184,7 +184,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
             <div class="divider" />
             {#if Enum.empty?(@gallery_images)}
               <img
-                class="object-cover"
+                class="object-cover w-full h-full"
                 src={if @offering.card_img_id do
                   Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
                 else

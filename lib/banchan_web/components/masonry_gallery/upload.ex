@@ -16,23 +16,23 @@ defmodule BanchanWeb.Components.MasonryGallery.Upload do
     cond do
       ratio >= 180 ->
         # Very Wide
-        "row-span-1"
+        "sm:row-span-1"
 
       ratio < 180 && ratio >= 120 ->
         # Wide
-        "row-span-2"
+        "sm:row-span-2"
 
       ratio < 120 && ratio >= 80 ->
         # Square-ish
-        "row-span-3"
+        "sm:row-span-3"
 
       ratio < 80 && ratio >= 30 ->
         # Tall
-        "row-span-4"
+        "sm:row-span-4"
 
       ratio < 30 ->
         # Very tall
-        "row-span-5"
+        "sm:row-span-5"
     end
   end
 
