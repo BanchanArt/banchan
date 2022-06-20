@@ -11,10 +11,6 @@ defmodule BanchanWeb.PublicImageController do
 
     conn
     |> put_resp_header("content-length", "#{upload.size}")
-    |> put_resp_header(
-      "content-disposition",
-      "attachment; filename=\"#{upload.name || upload.key}\""
-    )
     |> put_resp_header("cache-control", "max-age=604800, must-revalidate")
     |> put_resp_content_type(upload.type)
     |> send_chunked(200)
