@@ -8,7 +8,7 @@ defmodule BanchanWeb.Components.MasonryGallery do
 
   prop editable, :boolean, default: false
   prop images, :list, required: true
-  prop entries, :list, required: true
+  prop entries, :list
   prop send_updates_to, :any
   prop class, :css_class
 

@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
 
   alias Banchan.Offerings
 
-  alias BanchanWeb.Components.{Button, Card}
+  alias BanchanWeb.Components.{Button, Card, MasonryGallery}
   alias BanchanWeb.Endpoint
 
   prop current_user, :struct, required: true
@@ -17,6 +17,8 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   prop offering, :struct, required: true
   prop unarchive, :event, required: true
 
+  data show_gallery, :boolean, default: false
+  data gallery_images, :list, default: []
   data base_price, :integer
   data available_slots, :integer
   data subscribed?, :boolean
@@ -25,6 +27,10 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
     socket = assign(socket, assigns)
     base_price = Offerings.offering_base_price(socket.assigns.offering)
     available_slots = Offerings.offering_available_slots(socket.assigns.offering)
+
+    gallery_images =
+      Offerings.offering_gallery_uploads(socket.assigns.offering)
+      |> Enum.map(&{:existing, &1})
 
     subscribed? =
       socket.assigns.current_user &&
@@ -37,7 +43,8 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
      socket
      |> assign(base_price: base_price)
      |> assign(available_slots: available_slots)
-     |> assign(subscribed?: subscribed?)}
+     |> assign(subscribed?: subscribed?)
+     |> assign(gallery_images: gallery_images)}
   end
 
   @impl true
@@ -66,6 +73,21 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
     )
 
     send_update(__MODULE__, id: socket.assigns.id)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("toggle_gallery", _, socket) do
+    {:noreply, socket |> assign(show_gallery: !socket.assigns.show_gallery)}
+  end
+
+  @impl true
+  def handle_event("close_gallery", _, socket) do
+    {:noreply, socket |> assign(show_gallery: false)}
+  end
+
+  @impl true
+  def handle_event("nothing", _, socket) do
     {:noreply, socket}
   end
 
@@ -102,7 +124,8 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         <:image>
           <img
             draggable="false"
-            class="object-cover"
+            :on-click="toggle_gallery"
+            class="object-cover hover:cursor-pointer hover:opacity-50 transition-all"
             src={if @offering.card_img_id do
               Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
             else
@@ -143,6 +166,37 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           </div>
         </:footer>
       </Card>
+
+      {!-- Gallery modal --}
+      {#if @show_gallery}
+        <div
+          class="modal modal-open cursor-default"
+          :on-click="toggle_gallery"
+          :on-window-keydown="close_gallery"
+          phx-key="Escape"
+        >
+          <div :on-click="nothing" class="modal-box relative">
+            <div
+              class="close-modal btn btn-sm btn-circle absolute right-2 top-2 z-50"
+              :on-click="close_gallery"
+            >✕</div>
+            <div class="text-lg font-bold">{@offering.name}</div>
+            <div class="divider" />
+            {#if Enum.empty?(@gallery_images)}
+              <img
+                class="object-cover"
+                src={if @offering.card_img_id do
+                  Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
+                else
+                  Routes.static_path(Endpoint, "/images/640x360.png")
+                end}
+              />
+            {#else}
+              <MasonryGallery id={@id <> "-masonry-gallery"} images={@gallery_images} />
+            {/if}
+          </div>
+        </div>
+      {/if}
     </div>
     """
   end
