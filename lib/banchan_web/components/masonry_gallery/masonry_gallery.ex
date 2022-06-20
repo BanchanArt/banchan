@@ -6,6 +6,7 @@ defmodule BanchanWeb.Components.MasonryGallery do
 
   alias BanchanWeb.Components.MasonryGallery
 
+  prop editable, :boolean, default: false
   prop images, :list, required: true
   prop entries, :list, required: true
   prop send_updates_to, :any
@@ -39,6 +40,26 @@ defmodule BanchanWeb.Components.MasonryGallery do
     {:ok, socket}
   end
 
+  def handle_event("items_reordered", %{"items" => items}, socket) do
+    new_images =
+      items
+      |> Enum.map(fn %{"type" => type, "id" => id} ->
+        if type == :live do
+          Enum.find(socket.assigns.images, fn {_, data} ->
+            data.ref == id
+          end)
+        else
+          Enum.find(socket.assigns.images, fn {_, data} ->
+            data.id == id
+          end)
+        end
+      end)
+
+    notify_changed(new_images, socket)
+
+    {:noreply, socket}
+  end
+
   defp notify_changed(_, %{assigns: %{send_updates_to: nil}}) do
     nil
   end
@@ -53,13 +74,16 @@ defmodule BanchanWeb.Components.MasonryGallery do
 
   def render(assigns) do
     ~F"""
-    <div class="grid auto-rows-gallery gap-0.5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+    <div
+      :hook="MasonryGallery"
+      class="grid auto-rows-gallery gap-0.5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+    >
       {#for image <- @images}
         {#case image}
           {#match {:existing, upload}}
-            <MasonryGallery.Upload upload={upload} />
+            <MasonryGallery.Upload upload={upload} draggable={@editable} />
           {#match {:live, entry}}
-            <MasonryGallery.LiveImgPreview entry={entry} />
+            <MasonryGallery.LiveImgPreview entry={entry} draggable={@editable} />
         {/case}
       {/for}
     </div>
