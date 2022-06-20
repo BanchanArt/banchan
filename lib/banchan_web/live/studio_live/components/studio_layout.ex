@@ -96,12 +96,6 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 current_tab={@tab}
                 to={Routes.studio_portfolio_path(Endpoint, :show, @studio.handle)}
               />
-              <TabButton
-                label="Q&A"
-                tab_name={:qa}
-                current_tab={@tab}
-                to={Routes.studio_qa_path(Endpoint, :show, @studio.handle)}
-              />
               {#if @current_user_member?}
                 <TabButton
                   label="Payouts"
