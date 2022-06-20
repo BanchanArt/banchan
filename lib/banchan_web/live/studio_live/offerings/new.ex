@@ -35,7 +35,7 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
       flashes={@flash}
       studio={@studio}
       current_user_member?={@current_user_member?}
-      tab={:settings}
+      tab={:shop}
       uri={@uri}
     >
       <div>
