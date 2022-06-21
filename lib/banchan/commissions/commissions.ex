@@ -1052,6 +1052,9 @@ defmodule Banchan.Commissions do
 
     case ret do
       {:ok, event} ->
+        create_event(:refund_processed, actor, event.commission, true, [], %{
+          amount: Money.new(refund.amount, String.to_atom(String.upcase(refund.currency)))
+        })
         Notifications.invoice_refund_updated(event.commission, event, actor)
         Notifications.commission_event_updated(event.commission, event, actor)
         {:ok, event.invoice}

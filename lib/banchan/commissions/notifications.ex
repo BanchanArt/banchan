@@ -187,8 +187,11 @@ defmodule Banchan.Commissions.Notifications do
   end
 
   defp new_event_notification_body(%Event{type: :payment_processed, amount: amount}) do
-    # TODO: Add tip amount
     "A payment for #{Money.to_string(amount)} has been successfully processed. It will be available for payout when the commission is completed and accepted."
+  end
+
+  defp new_event_notification_body(%Event{type: :refund_processed, amount: amount}) do
+    "A refund for #{Money.to_string(amount)} has been issued successfully. Funds should clear in 5-10 days."
   end
 
   defp new_event_notification_body(%Event{type: :status, status: status}) do

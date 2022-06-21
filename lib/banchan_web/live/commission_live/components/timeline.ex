@@ -62,6 +62,10 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                   <TimelineItem uri={@uri} icon="$" event={event}>
                     paid {Money.to_string(event.amount)}
                   </TimelineItem>
+                {#match :refund_processed}
+                  <TimelineItem uri={@uri} icon="$" event={event}>
+                    refunded {Money.to_string(event.amount)}
+                  </TimelineItem>
                 {#match :status}
                   <TimelineItem uri={@uri} icon="S" event={event}>
                     changed the status to <strong>{Common.humanize_status(event.status)}</strong>
