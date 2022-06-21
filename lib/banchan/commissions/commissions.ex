@@ -643,24 +643,42 @@ defmodule Banchan.Commissions do
         File.mkdir_p!(Path.dirname(tmp_file))
         File.rename(src, tmp_file)
 
-        # SECURITY: If someone uploads an .exe as a media type, this will crash, so we're safe :)
-        mog =
-          Mogrify.open(tmp_file)
-          |> Mogrify.format("jpeg")
-          |> Mogrify.gravity("Center")
-          |> Mogrify.resize_to_fill("128x128")
-          |> Mogrify.save()
+        thumb =
+          cond do
+            Uploads.image?(upload) ->
+              format =
+                if upload.type === "image/gif" do
+                  "gif"
+                else
+                  "jpeg"
+                end
 
-        final_path =
-          if Uploads.video?(upload) do
-            mog.path |> String.replace(~r/\.jpeg$/, "-0.jpeg")
-          else
-            mog.path
+              # SECURITY: If someone uploads an .exe as a media type, this will crash, so we're safe :)
+              mog =
+                Mogrify.open(tmp_file)
+                |> Mogrify.format(format)
+                |> Mogrify.gravity("Center")
+                |> Mogrify.resize_to_fill("128x128")
+                |> Mogrify.save()
+
+              final_path =
+                if File.exists?(mog.path |> String.replace(~r/\.jpeg$/, "-0.jpeg")) do
+                  mog.path |> String.replace(~r/\.jpeg$/, "-0.jpeg")
+                else
+                  mog.path
+                end
+
+              image =
+                Uploads.save_file!(user, final_path, "image/" <> format, "thumbnail." <> format)
+
+              File.rm!(tmp_file)
+              File.rm!(final_path)
+
+              image
+
+            Uploads.video?(upload) ->
+              nil
           end
-
-        thumb = Uploads.save_file!(user, final_path, "image/jpeg", "thumbnail.jpg")
-        File.rm!(tmp_file)
-        File.rm!(final_path)
 
         thumb
       end
