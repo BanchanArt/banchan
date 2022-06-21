@@ -881,7 +881,17 @@ defmodule Banchan.Commissions do
       when session_id != nil do
     # NOTE: We don't manually expire the invoice in the database here. That's
     # handled by process_payment_expired!/1 when the webhook fires.
-    :ok = stripe_mod().expire_payment(session_id)
+    case stripe_mod().expire_payment(session_id) do
+      {:ok, _} ->
+        :ok
+      {:error, error} ->
+        {:ok, session} = stripe_mod().retrieve_session(session_id, [])
+        if session.status == "expired" do
+          process_payment_expired!(session)
+        else
+          raise error.message
+        end
+    end
   end
 
   def expire_payment!(%Invoice{}, _) do
