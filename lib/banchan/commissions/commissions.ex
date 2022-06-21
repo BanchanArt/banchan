@@ -884,8 +884,10 @@ defmodule Banchan.Commissions do
     case stripe_mod().expire_payment(session_id) do
       {:ok, _} ->
         :ok
+
       {:error, error} ->
         {:ok, session} = stripe_mod().retrieve_session(session_id, [])
+
         if session.status == "expired" do
           process_payment_expired!(session)
         else
@@ -1065,6 +1067,7 @@ defmodule Banchan.Commissions do
         create_event(:refund_processed, actor, event.commission, true, [], %{
           amount: Money.new(refund.amount, String.to_atom(String.upcase(refund.currency)))
         })
+
         Notifications.invoice_refund_updated(event.commission, event, actor)
         Notifications.commission_event_updated(event.commission, event, actor)
         {:ok, event.invoice}
