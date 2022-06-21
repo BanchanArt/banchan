@@ -18,23 +18,30 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   prop uri, :string, required: true
   prop padding, :integer
 
-  data user_following?, :boolean, default: false
+  data user_following?, :boolean
 
   slot default
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
 
-    {:ok,
-     socket
-     |> assign(
-       user_following?:
-         socket.assigns.current_user &&
-           Studios.Notifications.user_following?(
-             socket.assigns.current_user,
-             socket.assigns.studio
-           )
-     )}
+    socket =
+      if is_nil(socket.assigns[:user_following?]) && socket.assigns.current_user do
+        IO.puts("settings :user_following?")
+
+        socket
+        |> assign(
+          user_following?:
+            Studios.Notifications.user_following?(
+              socket.assigns.current_user,
+              socket.assigns.studio
+            )
+        )
+      else
+        socket
+      end
+
+    {:ok, socket}
   end
 
   def handle_event(
