@@ -51,13 +51,7 @@ defmodule Banchan.StripeAPI do
 
   @impl Banchan.StripeAPI.Base
   def expire_payment(session_id) do
-    case Stripe.Request.new_request([])
-         |> Stripe.Request.put_endpoint("checkout/sessions/#{session_id}/expire")
-         |> Stripe.Request.put_method(:post)
-         |> Stripe.Request.make_request() do
-      {:ok, _} -> :ok
-      {:error, err} -> {:error, err}
-    end
+    Stripe.Session.expire(session_id)
   end
 
   @impl Banchan.StripeAPI.Base

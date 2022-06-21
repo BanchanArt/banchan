@@ -294,6 +294,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
     } do
       amount = Money.new(42_000, :USD)
       tip = Money.new(6900, :USD)
+      total = Money.add(amount, tip)
 
       session = payment_fixture(artist, commission, amount, tip)
 
@@ -365,7 +366,14 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         assert charge_id == params.charge
         assert true == params.reverse_transfer
         assert true == params.refund_application_fee
-        {:ok, %Stripe.Refund{id: refund_id, status: "succeeded"}}
+
+        {:ok,
+         %Stripe.Refund{
+           id: refund_id,
+           status: "succeeded",
+           amount: total.amount,
+           currency: total.currency |> to_string() |> String.downcase()
+         }}
       end)
 
       artist_page_live
@@ -501,6 +509,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
     } do
       amount = Money.new(42_000, :USD)
       tip = Money.new(6900, :USD)
+      total = Money.add(amount, tip)
 
       session = payment_fixture(artist, commission, amount, tip)
 
@@ -561,7 +570,15 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       assert invoice_box =~ "$69.00"
       assert invoice_box =~ "A refund is pending"
 
-      Commissions.process_refund_updated(%Stripe.Refund{id: refund_id, status: "succeeded"}, nil)
+      Commissions.process_refund_updated(
+        %Stripe.Refund{
+          id: refund_id,
+          status: "succeeded",
+          amount: total.amount,
+          currency: total.currency |> to_string() |> String.downcase()
+        },
+        nil
+      )
 
       Notifications.wait_for_notifications()
 

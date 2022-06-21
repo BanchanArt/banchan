@@ -398,7 +398,7 @@ defmodule Banchan.CommissionsTest do
       Banchan.StripeAPI.Mock
       |> expect(:expire_payment, fn sess_id ->
         assert sess_id == sess.id
-        :ok
+        {:ok, sess}
       end)
 
       assert :ok == Commissions.expire_payment!(invoice, true)
@@ -534,6 +534,7 @@ defmodule Banchan.CommissionsTest do
       artist = Enum.at(studio.artists, 0)
       amount = Money.new(420, :USD)
       tip = Money.new(69, :USD)
+      total = Money.add(amount, tip)
 
       invoice =
         invoice_fixture(artist, commission, %{
@@ -576,7 +577,14 @@ defmodule Banchan.CommissionsTest do
         assert charge_id == params.charge
         assert true == params.reverse_transfer
         assert true == params.refund_application_fee
-        {:ok, %Stripe.Refund{id: refund_id, status: "succeeded"}}
+
+        {:ok,
+         %Stripe.Refund{
+           id: refund_id,
+           status: "succeeded",
+           amount: total.amount,
+           currency: total.currency |> to_string() |> String.upcase()
+         }}
       end)
 
       Notifications.mark_all_as_read(client)
@@ -600,8 +608,12 @@ defmodule Banchan.CommissionsTest do
 
       assert [] == Notifications.unread_notifications(artist).entries
 
-      assert [%{short_body: "A refund has been successfully processed."}] =
-               Notifications.unread_notifications(client).entries
+      assert [
+               %{
+                 short_body:
+                   "A refund for $4.89 has been issued successfully. Funds should clear in 5-10 days."
+               }
+             ] = Notifications.unread_notifications(client).entries
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
@@ -686,6 +698,7 @@ defmodule Banchan.CommissionsTest do
       artist = Enum.at(studio.artists, 0)
       amount = Money.new(420, :USD)
       tip = Money.new(69, :USD)
+      total = Money.add(amount, tip)
 
       invoice =
         invoice_fixture(artist, commission, %{
@@ -725,7 +738,14 @@ defmodule Banchan.CommissionsTest do
          }}
       end)
       |> expect(:create_refund, fn _params, _opts ->
-        {:ok, %Stripe.Refund{id: refund_id, status: "failed", failure_reason: "unknown"}}
+        {:ok,
+         %Stripe.Refund{
+           id: refund_id,
+           status: "failed",
+           failure_reason: "unknown",
+           amount: total.amount,
+           currency: total.currency |> to_string() |> String.upcase()
+         }}
       end)
 
       Commissions.subscribe_to_commission_events(commission)
@@ -780,7 +800,12 @@ defmodule Banchan.CommissionsTest do
                status: :succeeded
              } = invoice
 
-      refund = %Stripe.Refund{id: refund_id, status: "succeeded"}
+      refund = %Stripe.Refund{
+        id: refund_id,
+        status: "succeeded",
+        amount: total.amount,
+        currency: total.currency |> to_string() |> String.upcase()
+      }
 
       assert {:ok,
               %Invoice{
@@ -793,11 +818,14 @@ defmodule Banchan.CommissionsTest do
 
       Notifications.wait_for_notifications()
 
-      assert [%{short_body: "A refund has been successfully processed."}] =
-               Notifications.unread_notifications(artist).entries
+      assert [] = Notifications.unread_notifications(artist).entries
 
-      assert [%{short_body: "A refund has been successfully processed."}] =
-               Notifications.unread_notifications(client).entries
+      assert [
+               %{
+                 short_body:
+                   "A refund for $4.89 has been issued successfully. Funds should clear in 5-10 days."
+               }
+             ] = Notifications.unread_notifications(client).entries
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
@@ -816,6 +844,7 @@ defmodule Banchan.CommissionsTest do
       artist = Enum.at(studio.artists, 0)
       amount = Money.new(420, :USD)
       tip = Money.new(69, :USD)
+      total = Money.add(amount, tip)
 
       invoice =
         invoice_fixture(artist, commission, %{
@@ -852,7 +881,13 @@ defmodule Banchan.CommissionsTest do
          }}
       end)
       |> expect(:create_refund, fn _params, _opts ->
-        {:ok, %Stripe.Refund{id: refund_id, status: "pending"}}
+        {:ok,
+         %Stripe.Refund{
+           id: refund_id,
+           status: "pending",
+           amount: total.amount,
+           currency: total.currency |> to_string() |> String.upcase()
+         }}
       end)
 
       Commissions.subscribe_to_commission_events(commission)
@@ -885,7 +920,12 @@ defmodule Banchan.CommissionsTest do
 
       assert %Invoice{id: ^iid, refund_status: :pending, status: :succeeded} = invoice
 
-      refund = %Stripe.Refund{id: refund_id, status: "succeeded"}
+      refund = %Stripe.Refund{
+        id: refund_id,
+        status: "succeeded",
+        amount: total.amount,
+        currency: total.currency |> to_string() |> String.upcase()
+      }
 
       assert {:ok,
               %Invoice{
@@ -916,6 +956,7 @@ defmodule Banchan.CommissionsTest do
       artist = Enum.at(studio.artists, 0)
       amount = Money.new(420, :USD)
       tip = Money.new(69, :USD)
+      total = Money.add(amount, tip)
 
       invoice =
         invoice_fixture(artist, commission, %{
@@ -955,7 +996,13 @@ defmodule Banchan.CommissionsTest do
          }}
       end)
       |> expect(:create_refund, fn _params, _opts ->
-        {:ok, %Stripe.Refund{id: refund_id, status: "requires_action"}}
+        {:ok,
+         %Stripe.Refund{
+           id: refund_id,
+           status: "requires_action",
+           amount: total.amount,
+           currency: total.currency |> to_string() |> String.downcase()
+         }}
       end)
 
       Commissions.subscribe_to_commission_events(commission)
@@ -996,7 +1043,12 @@ defmodule Banchan.CommissionsTest do
 
       assert %Invoice{id: ^iid, refund_status: :requires_action, status: :succeeded} = invoice
 
-      refund = %Stripe.Refund{id: refund_id, status: "succeeded"}
+      refund = %Stripe.Refund{
+        id: refund_id,
+        status: "succeeded",
+        amount: total.amount,
+        currency: total.currency |> to_string() |> String.downcase()
+      }
 
       assert {:ok,
               %Invoice{
@@ -1009,11 +1061,14 @@ defmodule Banchan.CommissionsTest do
 
       Notifications.wait_for_notifications()
 
-      assert [%{short_body: "A refund has been successfully processed."}] =
-               Notifications.unread_notifications(artist).entries
+      assert [] = Notifications.unread_notifications(artist).entries
 
-      assert [%{short_body: "A refund has been successfully processed."}] =
-               Notifications.unread_notifications(client).entries
+      assert [
+               %{
+                 short_body:
+                   "A refund for $4.89 has been issued successfully. Funds should clear in 5-10 days."
+               }
+             ] = Notifications.unread_notifications(client).entries
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
@@ -1033,6 +1088,7 @@ defmodule Banchan.CommissionsTest do
       artist = Enum.at(studio.artists, 0)
       amount = Money.new(420, :USD)
       tip = Money.new(69, :USD)
+      total = Money.add(amount, tip)
 
       invoice =
         invoice_fixture(artist, commission, %{
@@ -1118,7 +1174,12 @@ defmodule Banchan.CommissionsTest do
 
       assert %Invoice{id: ^iid, refund_status: :canceled, status: :succeeded} = invoice
 
-      refund = %Stripe.Refund{id: refund_id, status: "succeeded"}
+      refund = %Stripe.Refund{
+        id: refund_id,
+        status: "succeeded",
+        amount: total.amount,
+        currency: total.currency |> to_string() |> String.downcase()
+      }
 
       assert {:ok,
               %Invoice{
@@ -1131,11 +1192,14 @@ defmodule Banchan.CommissionsTest do
 
       Notifications.wait_for_notifications()
 
-      assert [%{short_body: "A refund has been successfully processed."}] =
-               Notifications.unread_notifications(artist).entries
+      assert [] = Notifications.unread_notifications(artist).entries
 
-      assert [%{short_body: "A refund has been successfully processed."}] =
-               Notifications.unread_notifications(client).entries
+      assert [
+               %{
+                 short_body:
+                   "A refund for $4.89 has been issued successfully. Funds should clear in 5-10 days."
+               }
+             ] = Notifications.unread_notifications(client).entries
 
       assert_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
