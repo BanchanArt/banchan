@@ -76,7 +76,7 @@ defmodule Banchan.MixProject do
       {:scrivener_ecto, "~> 2.7.0"},
       {:nimble_totp, "~> 0.1.0"},
       {:qr_code, "~> 2.2.1"},
-      {:stripity_stripe, "~> 2.12.1"},
+      {:stripity_stripe, "~> 2.15.0"},
       {:phoenix_live_reload, "~> 1.3.3", only: :dev},
       {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
       # Testing and static analysis
