@@ -8,6 +8,7 @@ defmodule Banchan.Offerings do
   alias Banchan.Commissions.Commission
   alias Banchan.Offerings.{GalleryImage, Notifications, Offering}
   alias Banchan.Repo
+  alias Banchan.Studios.Studio
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
 
@@ -143,10 +144,12 @@ defmodule Banchan.Offerings do
     ret
   end
 
-  def get_offering_by_type!(type, current_user_member?) do
+  def get_offering_by_type!(%Studio{} = studio, type, current_user_member?) do
     Repo.one!(
       from o in Offering,
-        where: o.type == ^type and (^current_user_member? or not o.hidden)
+        where:
+          o.studio_id == ^studio.id and o.type == ^type and
+            (^current_user_member? or not o.hidden)
     )
     |> Repo.preload(:options)
   end

@@ -45,25 +45,7 @@ user = user |> Banchan.Repo.reload()
       handle: "kitteh-studio",
       name: "Kitteh Studio",
       description: "Kitteh-related stuff",
-      summary: """
-      ### These are all private commissions, meaning: **non-commercial**
-
-      You're only paying for my service to create the work not copyrights or licensing of the work itself!
-
-      #### I will draw
-
-      * Humans/humanoids
-      * anthros+furries/creatures/monsters/animals
-      * mecha/robots/vehicles
-      * environments/any type of background
-
-      #### I will not draw
-
-      * NSFW
-      * Fanart
-      """,
-      default_terms:
-        "I agree that this can **never be used for NFTs** in any way, shape, or form."
+      country: :US
     }
   )
 
@@ -132,6 +114,55 @@ user = user |> Banchan.Repo.reload()
         }
       ],
       terms: "**No NFTs**. But also no derivative works."
+    },
+    nil,
+    nil
+  )
+
+{:ok, studio} =
+  Banchan.Studios.new_studio(
+    %Banchan.Studios.Studio{artists: [user]},
+    "https://banchan.art/studios/kitteh-japan",
+    %{
+      handle: "kitteh-japan",
+      name: "Kitteh Studio in Japan",
+      description: "Kitteh-related stuff, Made in Japan™️",
+      country: :JP
+    }
+  )
+
+{:ok, _} =
+  Banchan.Offerings.new_offering(
+    studio,
+    true,
+    %{
+      type: "illustration",
+      index: 0,
+      name: "Illustration",
+      description: "A detailed illustration with full rendering and background.",
+      open: true,
+      hidden: false,
+      max_proposals: 3,
+      options: [
+        %{
+          name: "Base Price",
+          description: "The commission itself.",
+          price: Money.new(10000, :USD),
+          default: true,
+          sticky: true
+        },
+        %{
+          name: "Extra Character",
+          description: "Add another character to the illustration.",
+          price: Money.new(500, :USD),
+          multiple: true
+        },
+        %{
+          name: "Full background",
+          description: "Add full background.",
+          price: Money.new(4500, :USD)
+        }
+      ]
     },
     nil,
     nil
