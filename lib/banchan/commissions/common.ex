@@ -26,6 +26,7 @@ defmodule Banchan.Commissions.Common do
     :line_item_added,
     :line_item_removed,
     :payment_processed,
+    :refund_processed,
     :status
   ]
 
