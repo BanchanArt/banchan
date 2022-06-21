@@ -831,7 +831,7 @@ defmodule Banchan.Commissions do
 
         create_event(
           :payment_processed,
-          Repo.reload!(%User{id: event.actor_id}),
+          Repo.reload!(%User{id: invoice.client_id}),
           Repo.reload!(%Commission{id: event.commission_id}),
           true,
           [],
