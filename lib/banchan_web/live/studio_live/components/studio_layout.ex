@@ -27,8 +27,6 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
     socket =
       if is_nil(socket.assigns[:user_following?]) && socket.assigns.current_user do
-        IO.puts("settings :user_following?")
-
         socket
         |> assign(
           user_following?:

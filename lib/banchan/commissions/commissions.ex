@@ -886,13 +886,7 @@ defmodule Banchan.Commissions do
         :ok
 
       {:error, error} ->
-        {:ok, session} = stripe_mod().retrieve_session(session_id, [])
-
-        if session.status == "expired" do
-          process_payment_expired!(session)
-        else
-          raise error.message
-        end
+        raise error.message
     end
   end
 
@@ -1064,11 +1058,33 @@ defmodule Banchan.Commissions do
 
     case ret do
       {:ok, event} ->
-        create_event(:refund_processed, actor, event.commission, true, [], %{
-          amount: Money.new(refund.amount, String.to_atom(String.upcase(refund.currency)))
-        })
+        if event.invoice.refund_status == :succeeded do
+          actor =
+            cond do
+              is_nil(actor) && event.invoice.refunded_by_id ->
+                %User{id: event.invoice.refunded_by_id} |> Repo.reload!()
 
-        Notifications.invoice_refund_updated(event.commission, event, actor)
+              !is_nil(actor) ->
+                actor
+
+              true ->
+                raise "Bad state: an invoice was succeeded that didn't already have a refunded_by_id."
+            end
+
+          create_event(
+            :refund_processed,
+            actor,
+            event.commission,
+            true,
+            [],
+            %{
+              amount: Money.new(refund.amount, String.to_atom(String.upcase(refund.currency)))
+            }
+          )
+        else
+          Notifications.invoice_refund_updated(event.commission, event, actor)
+        end
+
         Notifications.commission_event_updated(event.commission, event, actor)
         {:ok, event.invoice}
 

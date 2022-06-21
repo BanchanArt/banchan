@@ -172,7 +172,7 @@ defmodule Banchan.Commissions.Notifications do
       if Ecto.assoc_loaded?(actor) do
         actor
       else
-        Repo.one!(User, actor_id)
+        Repo.get!(User, actor_id)
       end
 
     "#{handle} replied:\n\n#{body}"
@@ -303,7 +303,7 @@ defmodule Banchan.Commissions.Notifications do
   end
 
   defp refund_updated_body(:succeeded) do
-    "A refund has been successfully processed."
+    raise "This event should be getting handled by new_commission_event instead."
   end
 
   defp refund_updated_body(:failed) do
