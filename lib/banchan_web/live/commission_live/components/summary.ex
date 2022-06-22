@@ -28,9 +28,17 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
     estimate =
       Enum.reduce(
         assigns.line_items,
-        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-        Money.new(0, :USD),
-        fn item, acc -> Money.add(acc, item.amount) end
+        %{},
+        fn item, acc ->
+          current =
+            Map.get(
+              acc,
+              item.amount.currency,
+              Money.new(0, item.amount.currency)
+            )
+
+          Map.put(acc, item.amount.currency, Money.add(current, item.amount))
+        end
       )
 
     ~F"""
@@ -70,23 +78,36 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
       {#if @deposited}
         <div class="px-2 flex flex-row items-center">
           <div class="font-bold grow">Total:</div>
-          <div class="px-2">{Money.to_string(estimate)}</div>
+          <div class="px-2">{estimate
+            |> Enum.values()
+            |> Enum.map(&Money.to_string(&1))
+            |> Enum.join(" + ")}</div>
         </div>
         <div class="divider -py-2" />
         <div class="px-2 flex flex-col gap-2">
           <div class="flex flex-row items-center">
             <div class="font-bold grow">Deposited:</div>
-            <div class="px-2">{Money.to_string(@deposited)}</div>
+            <div class="px-2">{@deposited
+              |> Enum.values()
+              |> Enum.map(&Money.to_string(&1))
+              |> Enum.join(" + ")}</div>
           </div>
           <div class="flex flex-row items-center">
             <div class="font-bold grow">Remaining Balance:</div>
-            <div class="px-2">{Money.to_string(Money.subtract(estimate, @deposited))}</div>
+            <div class="px-2">{estimate
+              |> Enum.map(fn {currency, amount} ->
+                Money.subtract(amount, Map.get(@deposited, currency, Money.new(0, currency)))
+              end)
+              |> Enum.join(" + ")}</div>
           </div>
         </div>
       {#else}
         <div class="px-2 flex">
           <div class="font-bold grow">Estimate:</div>
-          <div class="">{Money.to_string(estimate)}</div>
+          <div class="">{estimate
+            |> Enum.values()
+            |> Enum.map(&Money.to_string(&1))
+            |> Enum.join(" + ")}</div>
         </div>
       {/if}
       <div class="divider" />

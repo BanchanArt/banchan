@@ -200,24 +200,22 @@ defmodule BanchanWeb.StudioLive.Payouts do
         <div class="flex flex-row grow md:grow-0">
           <div class={"flex flex-col basis-full md:basis-1/4 px-4 sidebar", "hidden md:flex": @payout_id}>
             <div id="available" class="flex flex-col">
-              <div class="stats stats-horizontal">
-                {#if @balance}
-                  {#for avail <- @balance.available}
-                    {#if avail.amount > 0}
-                      <div class="stat">
-                        <div class="stat-value">{Money.to_string(avail)}</div>
-                        <div class="stat-desc">Available for Payout</div>
-                      </div>
-                    {/if}
-                  {/for}
-                {/if}
-                {#if is_nil(@balance) || !payout_possible?(@balance.available)}
-                  <div class="stat">
-                    <div class="stat-value">{Money.to_string(Money.new(0, :USD))}</div>
-                    <div class="stat-desc">Available for Payout</div>
-                  </div>
-                {/if}
-              </div>
+              {#if is_nil(@balance) || !payout_possible?(@balance.available)}
+                <h2 class="text-xl2">No Balance Available</h2>
+              {#else}
+                <div class="stats stats-horizontal">
+                  {#if @balance}
+                    {#for avail <- @balance.available}
+                      {#if avail.amount > 0}
+                        <div class="stat">
+                          <div class="stat-value">{Money.to_string(avail)}</div>
+                          <div class="stat-desc">Available for Payout</div>
+                        </div>
+                      {/if}
+                    {/for}
+                  {/if}
+                </div>
+              {/if}
               <Button
                 click="fypm"
                 disabled={@fypm_pending || is_nil(@balance) || !payout_possible?(@balance.available)}

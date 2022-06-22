@@ -345,7 +345,13 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                 <input phx-update="ignore" type="checkbox">
                 <div class="collapse-title text-xl rounded-lg border border-primary">
                   {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
-                  (opt.name || "New Option") <> " - " <> Money.to_string(opt.price || Money.new(0, :USD))}
+
+                  (opt.name || "New Option") <>
+                    if opt.price do
+                      " - " <> Money.to_string(opt.price)
+                    else
+                      ""
+                    end}
                 </div>
                 <div class="collapse-content">
                   <TextInput name={:name} info="Name of the option." opts={required: true} />

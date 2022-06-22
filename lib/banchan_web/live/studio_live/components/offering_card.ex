@@ -19,7 +19,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
 
   data show_gallery, :boolean, default: false
   data gallery_images, :list, default: []
-  data base_price, :integer
+  data base_price, :list
   data available_slots, :integer
   data subscribed?, :boolean
 
@@ -137,8 +137,8 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           <p class="mt-2 grow flex text-ellipsis overflow-hidden h-full">{@offering.description}</p>
           <p class="text-success mt-2 grow-0">
             <span class="font-bold">Base Price:</span>
-            {#if @base_price}
-              <span class="float-right">{@base_price}</span>
+            {#if @base_price && !Enum.empty?(@base_price)}
+              <span class="float-right">{@base_price |> Enum.map(&Money.to_string(&1)) |> Enum.join(" + ")}</span>
             {#else}
               <span class="float-right">Inquire</span>
             {/if}

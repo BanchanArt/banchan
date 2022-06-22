@@ -53,7 +53,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
           |> Enum.map(fn option ->
             %LineItem{
               option: option,
-              amount: option.price || Money.new(0, :USD),
+              amount: option.price,
               name: option.name,
               description: option.description,
               sticky: option.sticky
@@ -146,7 +146,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     else
       line_item = %LineItem{
         option: option,
-        amount: option.price || Money.new(0, :USD),
+        amount: option.price,
         name: option.name,
         description: option.description
       }

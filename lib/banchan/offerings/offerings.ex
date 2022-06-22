@@ -221,8 +221,17 @@ defmodule Banchan.Offerings do
     else
       offering.options
       |> Enum.filter(& &1.default)
-      |> Enum.map(&(&1.price || Money.new(0, :USD)))
-      |> Enum.reduce(Money.new(0, :USD), &Money.add(&1, &2))
+      |> Enum.map(& &1.price)
+      |> Enum.reduce(%{}, fn price, acc ->
+        current =
+          Map.get(
+            acc,
+            price.amount.currency,
+            Money.new(0, price.amount.currency)
+          )
+
+        Map.put(acc, price.amount.currency, Money.add(current, price.amount))
+      end)
     end
   end
 

@@ -16,11 +16,13 @@ defmodule BanchanWeb.StudioLive.New do
 
   @impl true
   def mount(_params, _session, socket) do
-    currencies = Studios.Common.supported_currencies()
-    |> Enum.map(fn currency ->
-      %{name: name, symbol: symbol} = Money.Currency.get(currency)
-      {:"#{name} (#{symbol})", currency}
-    end)
+    currencies =
+      Studios.Common.supported_currencies()
+      |> Enum.map(fn currency ->
+        %{name: name, symbol: symbol} = Money.Currency.get(currency)
+        {:"#{name} (#{symbol})", currency}
+      end)
+
     socket =
       socket
       |> assign(
@@ -70,7 +72,11 @@ defmodule BanchanWeb.StudioLive.New do
             <TextArea name={:description} opts={required: true} />
             <Select name={:country} options={@countries} opts={required: true} />
             <Select name={:default_currency} options={@currencies} opts={required: true} />
-            <MultipleSelect name={:payment_currencies} options={@currencies} opts={required: true, default_value: :USD} />
+            <MultipleSelect
+              name={:payment_currencies}
+              options={@currencies}
+              opts={required: true, default_value: :USD}
+            />
             <Submit changeset={@changeset} label="Save" />
           </Form>
         </div>

@@ -39,7 +39,14 @@ defmodule Banchan.Studios.Studio do
   @doc false
   def creation_changeset(studio, attrs) do
     studio
-    |> cast(attrs, [:name, :handle, :description, :country, :default_currency, :payment_currencies])
+    |> cast(attrs, [
+      :name,
+      :handle,
+      :description,
+      :country,
+      :default_currency,
+      :payment_currencies
+    ])
     |> validate_required([:name, :handle, :country, :default_currency, :payment_currencies])
     |> validate_default_currency(:default_currency, :payment_currencies)
     |> validate_handle_unique(:handle)
@@ -48,7 +55,16 @@ defmodule Banchan.Studios.Studio do
   @doc false
   def profile_changeset(studio, attrs) do
     studio
-    |> cast(attrs, [:name, :handle, :description, :summary, :default_currency, :payment_currencies, :default_terms, :default_template])
+    |> cast(attrs, [
+      :name,
+      :handle,
+      :description,
+      :summary,
+      :default_currency,
+      :payment_currencies,
+      :default_terms,
+      :default_template
+    ])
     |> validate_required([:name, :handle, :default_currency, :payment_currencies])
     |> validate_markdown(:default_terms)
     |> validate_markdown(:default_template)
@@ -57,18 +73,20 @@ defmodule Banchan.Studios.Studio do
   end
 
   defp validate_default_currency(changeset, default_field, currencies_field)
+
   defp validate_default_currency(changeset, default_field, currencies_field) do
     validate_change(changeset, default_field, fn _, value ->
-    case fetch_field(changeset, currencies_field) do
-      {:changes, currencies} when is_list(currencies) ->
-        if value in currencies do
+      case fetch_field(changeset, currencies_field) do
+        {:changes, currencies} when is_list(currencies) ->
+          if value in currencies do
+            []
+          else
+            [{default_field, "Must be one of the selected payment currencies."}]
+          end
+
+        _ ->
           []
-        else
-          [{default_field, "Must be one of the selected payment currencies."}]
-        end
-      _ ->
-        []
-    end
+      end
     end)
   end
 

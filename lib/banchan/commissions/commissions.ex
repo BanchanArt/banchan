@@ -427,7 +427,7 @@ defmodule Banchan.Commissions do
             %OfferingOption{} ->
               %LineItem{
                 option: option,
-                amount: option.price || Money.new(0, :USD),
+                amount: option.price,
                 name: option.name,
                 description: option.description
               }
@@ -1107,11 +1107,17 @@ defmodule Banchan.Commissions do
     if Ecto.assoc_loaded?(commission.events) do
       Enum.reduce(
         commission.events,
-        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-        Money.new(0, :USD),
+        %{},
         fn event, acc ->
           if event.invoice && event.invoice.status in [:succeeded, :released] do
-            Money.add(acc, event.invoice.amount)
+            current =
+              Map.get(
+                acc,
+                event.invoice.amount.currency,
+                Money.new(0, event.invoice.amount.currency)
+              )
+
+            Map.put(acc, event.invoice.amount.currency, Money.add(current, event.invoice.amount))
           else
             acc
           end
@@ -1130,9 +1136,11 @@ defmodule Banchan.Commissions do
 
       Enum.reduce(
         deposits,
-        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-        Money.new(0, :USD),
-        fn dep, acc -> Money.add(acc, dep.amount) end
+        %{},
+        fn dep, acc ->
+          current = Map.get(acc, dep.amount.currency, Money.new(0, dep.amount.currency))
+          Map.put(acc, dep.amount.currency, Money.add(current, dep.amount))
+        end
       )
     end
   end
