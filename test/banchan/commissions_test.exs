@@ -149,6 +149,19 @@ defmodule Banchan.CommissionsTest do
     end
   end
 
+  describe "events" do
+    test "make_attachment" do
+      user = user_fixture()
+      src = "test/support/fixtures/file-types/image/1.png"
+      type = "image/png"
+      name = "1"
+
+      {:ok, attachment} = Commissions.make_attachment!(user, src, type, name)
+
+      assert user == attachment.uploader
+    end
+  end
+
   describe "invoices" do
     test "basic invoice" do
       commission = commission_fixture()

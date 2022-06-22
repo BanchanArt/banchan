@@ -634,6 +634,7 @@ defmodule Banchan.Commissions do
   end
 
   def make_attachment!(%User{} = user, src, type, name) do
+    Logger.info(%{message: "src", src: src})
     upload = Uploads.save_file!(user, src, type, name)
 
     thumbnail =

@@ -8,12 +8,14 @@ defmodule Banchan.Uploads do
   alias Banchan.Repo
   alias Banchan.Uploads.Upload
 
-  # TODO: FIX mogrify error: identify: no decode delegate for this image format `' @ error/constitute.c/ReadImage/738 for MIME types:
+  # TODO: FIX mogrify error: identify: no decode delegate for this image format
+  # `' @ error/constitute.c/ReadImage/738 for MIME types:
   # image/x-icon image/vnd.microsoft.icon
   @image_formats ~w(
     image/bmp image/gif image/png image/jpeg image/jpg
-    image/jp2 image/psd image/vnd.adobe.photoshop
-    image/tiff image/webp image/heic image/svg+xml image/x-xcf
+    image/jp2 image/psd image/vnd.adobe.photoshop image/x-icon
+    image/vnd.microsoft.icon image/tiff image/webp
+    image/heic image/svg+xml image/x-xcf
   )
 
   @video_formats ~w(
@@ -58,7 +60,7 @@ defmodule Banchan.Uploads do
   end
 
   def get_upload!(bucket, key) do
-    Repo.one!(from u in Upload, where: u.bucket == ^bucket and u.key == ^key)
+    Repo.one!(from(u in Upload, where: u.bucket == ^bucket and u.key == ^key))
   end
 
   def save_file!(%User{} = user, src, type, file_name, bucket \\ get_bucket()) do
@@ -66,7 +68,7 @@ defmodule Banchan.Uploads do
     size = File.stat!(src).size
 
     {width, height} =
-      if image?(type) || video?(type) do
+      if image?(type) do
         %{width: width, height: height} = Mogrify.identify(src)
         {width, height}
       else
