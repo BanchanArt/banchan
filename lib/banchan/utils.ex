@@ -3,7 +3,17 @@ defmodule Banchan.Utils do
   Collection of miscellaneous utilities that don't quite fit anywhere else.
   """
 
-  def moneyfy(amount, currency) do
+  def moneyfy(amount, currency) when is_binary(currency) do
+    try do
+      currency = currency |> String.upcase() |> String.to_existing_atom()
+      moneyfy(amount, currency)
+    rescue
+      ArgumentError ->
+        amount
+    end
+  end
+
+  def moneyfy(amount, currency) when is_atom(currency) do
     case Money.parse(amount, currency) do
       {:ok, money} ->
         money

@@ -255,6 +255,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 remove_item="remove_item"
                 line_items={@line_items}
                 offering={@offering}
+                studio={@studio}
               />
             </div>
             <div class="md:order-2 md:col-span-2 md:row-span-2">

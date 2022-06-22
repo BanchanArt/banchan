@@ -16,6 +16,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   prop current_user_member?, :boolean, required: true
   prop allow_edits, :boolean, required: true
 
+  data studio, :struct
   data custom_changeset, :struct
   data deposited, :struct
   data open_custom, :boolean, default: false
@@ -50,8 +51,16 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
           socket.assigns.current_user_member?
         )
 
+      studio = (socket.assigns.commission |> Repo.preload(:studio)).studio
+
       {:ok,
-       socket |> assign(custom_changeset: custom_changeset, deposited: deposited, loaded: true)}
+       socket
+       |> assign(
+         studio: studio,
+         custom_changeset: custom_changeset,
+         deposited: deposited,
+         loaded: true
+       )}
     end
   end
 
@@ -143,7 +152,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   @impl true
   def handle_event(
         "change_custom",
-        %{"line_item" => %{"name" => name, "description" => description, "amount" => amount}},
+        %{"line_item" => %{"name" => name, "description" => description, "amount" => amount, "currency" => currency}},
         socket
       ) do
     changeset =
@@ -151,7 +160,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       |> LineItem.custom_changeset(%{
         name: name,
         description: description,
-        amount: Utils.moneyfy(amount)
+        amount: Utils.moneyfy(amount, currency)
       })
       |> Map.put(:action, :insert)
 
@@ -161,7 +170,14 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   @impl true
   def handle_event(
         "submit_custom",
-        %{"line_item" => %{"name" => name, "description" => description, "amount" => amount}},
+        %{
+          "line_item" => %{
+            "name" => name,
+            "description" => description,
+            "amount" => amount,
+            "currency" => currency
+          }
+        },
         socket
       ) do
     commission = socket.assigns.commission
@@ -174,7 +190,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
           %{
             name: name,
             description: description,
-            amount: Utils.moneyfy(amount)
+            amount: Utils.moneyfy(amount, currency)
           },
           socket.assigns.current_user_member?
         )
@@ -207,6 +223,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       submit_custom="submit_custom"
       nothing="nothing"
       deposited={@deposited}
+      studio={@studio}
     />
     """
   end

@@ -7,8 +7,9 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   alias Surface.Components.Form
 
   alias BanchanWeb.Components.Button
-  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Select, Submit, TextArea, TextInput}
 
+  prop studio, :struct, required: true
   prop line_items, :list, required: true
   prop allow_edits, :boolean, default: false
   prop offering, :struct
@@ -159,7 +160,16 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                 <h3 class="text-xl font-bold">Add Custom Option</h3>
                 <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
                 <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
-                <TextInput name={:amount} label="Price" opts={required: true, placeholder: "$100.00"} />
+                <Select
+                  name={:currency}
+                  options={
+                    @studio.payment_currencies
+                    |> Enum.map(&{:"#{Money.Currency.name(&1) (Money.Currency.symbol(&1))}", &1})
+                  }
+                  selected={@studio.default_currency}
+                  opts={required: true}
+                />
+                <TextInput name={:amount} label="Price" opts={required: true} />
                 <div class="modal-action">
                   <Button primary={false} click={@toggle_custom} label="Cancel" />
                   <Submit changeset={@custom_changeset} />
