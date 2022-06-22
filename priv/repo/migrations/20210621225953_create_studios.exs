@@ -8,6 +8,8 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :handle, :citext, null: false
       add :description, :text
       add :country, :string, null: false
+      add :default_currency, :string, null: false
+      add :payment_currencies, {:array, :string}, null: false
       add :header_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :card_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :default_terms, :text
