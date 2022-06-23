@@ -138,7 +138,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           <p class="text-success mt-2 grow-0">
             <span class="font-bold">Base Price:</span>
             {#if @base_price && !Enum.empty?(@base_price)}
-              <span class="float-right">{@base_price |> Enum.map(&Money.to_string(&1)) |> Enum.join(" + ")}</span>
+              <span class="float-right">{@base_price |> Enum.map(fn {_, amt} -> Money.to_string(amt) end) |> Enum.join(" + ")}</span>
             {#else}
               <span class="float-right">Inquire</span>
             {/if}

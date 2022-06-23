@@ -35,4 +35,6 @@ defmodule Banchan.StripeAPI.Base do
               {:ok, Stripe.Refund.t()} | {:error, Stripe.Error.t()}
   @callback retrieve_session(id :: Stripe.id(), opts :: Stripe.options()) ::
               {:ok, Stripe.Session.t()} | {:error, Stripe.Error.t()}
+  @callback retrieve_transfer(id :: Stripe.id()) ::
+              {:ok, Stripe.Transfer.t()} | {:error, Stripe.Error.t()}
 end

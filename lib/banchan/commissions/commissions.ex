@@ -774,6 +774,7 @@ defmodule Banchan.Commissions do
       |> Repo.one!()
 
     platform_fee = Money.multiply(Money.add(amount, tip), platform_fee)
+    transfer_amt = amount |> Money.add(tip) |> Money.subtract(platform_fee)
 
     {:ok, session} =
       stripe_mod().create_session(%{
@@ -783,8 +784,8 @@ defmodule Banchan.Commissions do
         success_url: uri,
         line_items: items,
         payment_intent_data: %{
-          application_fee_amount: platform_fee.amount,
           transfer_data: %{
+            amount: transfer_amt.amount,
             destination: stripe_id
           }
         }
@@ -806,13 +807,22 @@ defmodule Banchan.Commissions do
   end
 
   def process_payment_succeeded!(session) do
-    {:ok, %{charges: %{data: [%{balance_transaction: txn_id}]}}} =
+    {:ok, %{charges: %{data: [%{balance_transaction: txn_id, transfer: transfer}]}}} =
       stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, [])
 
     {:ok, %{available_on: available_on, amount: amt, currency: curr}} =
       stripe_mod().retrieve_balance_transaction(txn_id, [])
 
-    amount = Money.new(amt, String.to_atom(String.upcase(curr)))
+    {:ok, transfer} = stripe_mod().retrieve_transfer(transfer)
+
+    total_charged = Money.new(amt, String.to_atom(String.upcase(curr)))
+    final_transfer_txn = transfer.destination_payment.balance_transaction
+
+    total_transferred =
+      Money.new(
+        final_transfer_txn.amount,
+        String.to_atom(String.upcase(final_transfer_txn.currency))
+      )
 
     {:ok, available_on} = DateTime.from_unix(available_on)
 
@@ -823,7 +833,9 @@ defmodule Banchan.Commissions do
           |> Repo.update_all(
             set: [
               status: :succeeded,
-              payout_available_on: available_on
+              payout_available_on: available_on,
+              total_charged: total_charged,
+              total_transferred: total_transferred
             ]
           )
 
@@ -836,7 +848,7 @@ defmodule Banchan.Commissions do
           true,
           [],
           %{
-            amount: amount
+            amount: invoice.amount |> Money.add(invoice.tip)
           }
         )
 

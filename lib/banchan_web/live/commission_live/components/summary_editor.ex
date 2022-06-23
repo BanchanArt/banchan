@@ -7,6 +7,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.LineItem
+  alias Banchan.Repo
   alias Banchan.Utils
 
   alias BanchanWeb.CommissionLive.Components.Summary
@@ -152,7 +153,14 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   @impl true
   def handle_event(
         "change_custom",
-        %{"line_item" => %{"name" => name, "description" => description, "amount" => amount, "currency" => currency}},
+        %{
+          "line_item" => %{
+            "name" => name,
+            "description" => description,
+            "amount" => amount,
+            "currency" => currency
+          }
+        },
         socket
       ) do
     changeset =

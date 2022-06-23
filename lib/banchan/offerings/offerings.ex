@@ -226,11 +226,11 @@ defmodule Banchan.Offerings do
         current =
           Map.get(
             acc,
-            price.amount.currency,
-            Money.new(0, price.amount.currency)
+            price.currency,
+            Money.new(0, price.currency)
           )
 
-        Map.put(acc, price.amount.currency, Money.add(current, price.amount))
+        Map.put(acc, price.currency, Money.add(current, price))
       end)
     end
   end

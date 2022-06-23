@@ -80,7 +80,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
         <div class="px-2 flex flex-row items-center">
           <div class="font-bold grow">Total:</div>
           <div class="px-2">{estimate
-            |> Enum.values()
+            |> Map.values()
             |> Enum.map(&Money.to_string(&1))
             |> Enum.join(" + ")}</div>
         </div>
@@ -89,7 +89,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
           <div class="flex flex-row items-center">
             <div class="font-bold grow">Deposited:</div>
             <div class="px-2">{@deposited
-              |> Enum.values()
+              |> Map.values()
               |> Enum.map(&Money.to_string(&1))
               |> Enum.join(" + ")}</div>
           </div>
@@ -106,7 +106,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
         <div class="px-2 flex">
           <div class="font-bold grow">Estimate:</div>
           <div class="">{estimate
-            |> Enum.values()
+            |> Map.values()
             |> Enum.map(&Money.to_string(&1))
             |> Enum.join(" + ")}</div>
         </div>
@@ -162,10 +162,8 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                 <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
                 <Select
                   name={:currency}
-                  options={
-                    @studio.payment_currencies
-                    |> Enum.map(&{:"#{Money.Currency.name(&1) (Money.Currency.symbol(&1))}", &1})
-                  }
+                  options={@studio.payment_currencies
+                  |> Enum.map(&{:"#{Money.Currency.name(&1)} (#{Money.Currency.symbol(&1)})", &1})}
                   selected={@studio.default_currency}
                   opts={required: true}
                 />

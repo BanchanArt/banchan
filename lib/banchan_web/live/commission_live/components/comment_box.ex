@@ -6,11 +6,12 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.Event
+  alias Banchan.Repo
   alias Banchan.Utils
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Select, Submit, TextInput}
 
   prop commission, :struct, required: true
   prop actor, :struct, required: true
@@ -18,11 +19,20 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
 
   data changeset, :struct
   data uploads, :map
+  data studio, :struct
 
   def update(assigns, socket) do
+    studio =
+      if socket.assigns[:studio] && socket.assigns[:studio].id == assigns[:commission].studio_id do
+        socket.assigns.studio
+      else
+        (assigns[:commission] |> Repo.preload(:studio)).studio
+      end
+
     {:ok,
      socket
      |> assign(assigns)
+     |> assign(studio: studio)
      |> assign(changeset: Event.comment_changeset(%Event{}, %{}))
      # TODO: move max file size somewhere configurable.
      # TODO: constrain :accept?
@@ -33,10 +43,14 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
      )}
   end
 
-  def handle_event("change", %{"event" => %{"amount" => amount} = event}, socket) do
+  def handle_event(
+        "change",
+        %{"event" => %{"amount" => amount, "currency" => currency} = event},
+        socket
+      ) do
     changeset =
       %Event{}
-      |> Event.comment_changeset(%{event | "amount" => Utils.moneyfy(amount)})
+      |> Event.comment_changeset(%{event | "amount" => Utils.moneyfy(amount, currency)})
       |> Map.put(:action, :update)
 
     {:noreply, assign(socket, changeset: changeset)}
@@ -56,7 +70,11 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
     {:noreply, cancel_upload(socket, :attachment, ref)}
   end
 
-  def handle_event("add_comment", %{"event" => %{"amount" => amount} = event}, socket)
+  def handle_event(
+        "add_comment",
+        %{"event" => %{"amount" => amount, "currency" => currency} = event},
+        socket
+      )
       when amount != "" do
     attachments = process_uploads(socket)
 
@@ -65,7 +83,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
            socket.assigns.commission,
            socket.assigns.current_user_member?,
            attachments,
-           %{event | "amount" => Utils.moneyfy(amount)}
+           %{event | "amount" => Utils.moneyfy(amount, currency)}
          ) do
       {:ok, _event} ->
         {:noreply,
@@ -141,7 +159,25 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
             opts={required: true, placeholder: "Write a comment"}
           />
           {#if @current_user_member?}
-            <TextInput name={:amount} show_label={false} opts={placeholder: "Invoice Amount (optional)"} />
+            <div class="flex flex-row gap-2">
+              {#case @studio.payment_currencies}
+                {#match [_]}
+                  <div class="flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
+                {#match _}
+                  <div class="flex-basis-1/4">
+                    <Select
+                      name={:currency}
+                      show_label={false}
+                      options={@studio.payment_currencies
+                      |> Enum.map(&{"#{to_string(&1)}#{Money.Currency.symbol(&1)}", &1})}
+                      selected={@studio.default_currency}
+                    />
+                  </div>
+              {/case}
+              <div class="grow">
+                <TextInput name={:amount} show_label={false} opts={placeholder: "Invoice Amount (optional)"} />
+              </div>
+            </div>
             {#if Enum.empty?(@uploads.attachment.entries)}
               <Submit changeset={@changeset} label="Post" />
             {#else}
