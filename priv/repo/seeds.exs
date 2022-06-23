@@ -14,7 +14,7 @@ if Mix.env() == :test do
   Mox.defmock(Banchan.StripeAPI.Mock, for: Banchan.StripeAPI.Base)
 
   Banchan.StripeAPI.Mock
-  |> Mox.expect(:create_account, fn _ ->
+  |> Mox.expect(:create_account, 2, fn _ ->
     {:ok, %Stripe.Account{id: "mock_account#{System.unique_integer()}"}}
   end)
 end
