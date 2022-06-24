@@ -3,9 +3,16 @@ defmodule Banchan.Utils do
   Collection of miscellaneous utilities that don't quite fit anywhere else.
   """
 
-  def moneyfy(amount) do
-    # TODO: In the future, we can replace this :USD with a param and the DB will be fine.
-    case Money.parse(amount, :USD) do
+  def moneyfy(amount, currency) when is_binary(currency) do
+    currency = currency |> String.upcase() |> String.to_existing_atom()
+    moneyfy(amount, currency)
+  rescue
+    ArgumentError ->
+      amount
+  end
+
+  def moneyfy(amount, currency) when is_atom(currency) do
+    case Money.parse(amount, currency) do
       {:ok, money} ->
         money
 

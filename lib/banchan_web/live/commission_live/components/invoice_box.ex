@@ -36,7 +36,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   def handle_event("change", %{"event" => %{"amount" => amount}}, socket) do
     changeset =
       %Event{}
-      |> Event.amount_changeset(%{"amount" => Utils.moneyfy(amount)})
+      |> Event.amount_changeset(%{
+        "amount" => Utils.moneyfy(amount, socket.assigns.event.invoice.amount.currency)
+      })
       |> Map.put(:action, :insert)
 
     {:noreply, socket |> assign(:changeset, changeset)}
@@ -46,7 +48,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   def handle_event("submit", %{"event" => %{"amount" => amount}}, socket) do
     changeset =
       %Event{}
-      |> Event.amount_changeset(%{"amount" => Utils.moneyfy(amount)})
+      |> Event.amount_changeset(%{
+        "amount" => Utils.moneyfy(amount, socket.assigns.event.invoice.amount.currency)
+      })
       |> Map.put(:action, :insert)
 
     if changeset.valid? do
@@ -56,7 +60,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           socket.assigns.event,
           socket.assigns.commission,
           replace_fragment(socket.assigns.uri, socket.assigns.event),
-          Utils.moneyfy(amount)
+          Utils.moneyfy(amount, socket.assigns.event.invoice.amount.currency)
         )
 
       {:noreply, socket |> redirect(external: url)}
@@ -218,7 +222,10 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
                 <div class="stat-desc">Please consider adding a tip!</div>
                 <Form for={@changeset} class="stat-actions flex flex-col gap-2" change="change" submit="submit">
-                  <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
+                  <div class="flex flex-row gap-2">
+                    {Money.Currency.symbol(@event.invoice.amount)}
+                    <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
+                  </div>
                   <Submit class="pay-invoice btn-sm w-full" changeset={@changeset} label="Pay" />
                   {#if @current_user_member?}
                     <Button

@@ -74,18 +74,37 @@ defmodule Banchan.CommissionsFixtures do
         available_on \\ DateTime.add(DateTime.utc_now(), -2)
       ) do
     txn_id = "stripe-mock-transaction-id#{System.unique_integer()}"
+    trans_id = "stripe-mock-transfer-id#{System.unique_integer()}"
+
     invoice = from(i in Invoice, where: i.stripe_session_id == ^session.id) |> Repo.one!()
 
     Banchan.StripeAPI.Mock
     |> expect(:retrieve_payment_intent, fn _, _, _ ->
-      {:ok, %{charges: %{data: [%{balance_transaction: txn_id}]}}}
+      {:ok, %{charges: %{data: [%{balance_transaction: txn_id, transfer: trans_id}]}}}
     end)
     |> expect(:retrieve_balance_transaction, fn _, _ ->
       {:ok,
        %{
          available_on: DateTime.to_unix(available_on),
-         amount: Money.add(invoice.amount, invoice.tip).amount,
-         currency: "usd"
+         amount:
+           (invoice.amount
+            |> Money.add(invoice.tip)
+            |> Money.subtract(invoice.platform_fee)).amount,
+         currency: invoice.amount.currency |> to_string() |> String.downcase()
+       }}
+    end)
+    |> expect(:retrieve_transfer, fn _ ->
+      {:ok,
+       %Stripe.Transfer{
+         destination_payment: %{
+           balance_transaction: %{
+             amount:
+               (invoice.amount
+                |> Money.add(invoice.tip)
+                |> Money.subtract(invoice.platform_fee)).amount,
+             currency: invoice.amount.currency |> to_string() |> String.downcase()
+           }
+         }
        }}
     end)
 

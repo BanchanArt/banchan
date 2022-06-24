@@ -133,10 +133,12 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
               <div>Failure: {@payout.failure_message}</div>
             {/if}
           </div>
-          <Button disabled={cancel_disabled} click="toggle_modal" class="open-modal modal-button btn-error">Cancel</Button>
+          {#if !Payout.done?(@payout)}
+            <Button disabled={cancel_disabled} click="toggle_modal" class="open-modal modal-button btn-error">Cancel</Button>
+          {/if}
         </div>
         <div class="divider">Invoices</div>
-        <div class="menu divide-y-2 divide-neutral-content divide-opacity-10 pb-4">
+        <div class="menu md:hidden divide-y-2 divide-neutral-content divide-opacity-10 pb-4">
           {#for invoice <- @payout.invoices}
             <a href={replace_fragment(
               Routes.commission_path(Endpoint, :show, invoice.commission.public_id),
@@ -202,10 +204,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
                   {invoice.updated_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
                 </td>
                 <td class="text-success">
-                  {invoice.amount
-                  |> Money.add(invoice.tip)
-                  |> Money.subtract(invoice.platform_fee)
-                  |> Money.to_string()}
+                  {Money.to_string(invoice.total_transferred)}
                 </td>
                 <td>
                   {Money.to_string(invoice.amount)}

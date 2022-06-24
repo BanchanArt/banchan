@@ -72,7 +72,10 @@ defmodule Banchan.StudiosTest do
           studio_url,
           %{
             name: studio_name,
-            handle: studio_handle
+            handle: studio_handle,
+            country: "US",
+            default_currency: "USD",
+            payment_currencies: ["USD", "EUR"]
           }
         )
 

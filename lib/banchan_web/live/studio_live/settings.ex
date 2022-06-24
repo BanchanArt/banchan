@@ -12,16 +12,33 @@ defmodule BanchanWeb.StudioLive.Settings do
   import BanchanWeb.StudioLive.Helpers
 
   alias BanchanWeb.Components.Button
-  alias BanchanWeb.Components.Form.{MarkdownInput, Submit, TextArea, TextInput}
+
+  alias BanchanWeb.Components.Form.{
+    MarkdownInput,
+    MultipleSelect,
+    Select,
+    Submit,
+    TextArea,
+    TextInput
+  }
+
   alias BanchanWeb.StudioLive.Components.StudioLayout
 
   @impl true
   def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, true, false)
 
+    currencies =
+      Studios.Common.supported_currencies()
+      |> Enum.map(fn currency ->
+        %{name: name, symbol: symbol} = Money.Currency.get(currency)
+        {:"#{name} (#{symbol})", currency}
+      end)
+
     {:ok,
      assign(socket,
        changeset: Studio.profile_changeset(socket.assigns.studio, %{}),
+       currencies: [{:"Currencies...", nil} | currencies],
        subscribed?:
          Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.studio)
      )}
@@ -102,6 +119,8 @@ defmodule BanchanWeb.StudioLive.Settings do
             {!-- # TODO: Bring this back when we've figured out how this interacts with Stripe --}
             {!-- <TextInput name={:handle} icon="at" opts={required: true} /> --}
             <TextArea name={:description} opts={required: true} />
+            <Select name={:default_currency} options={@currencies} opts={required: true} />
+            <MultipleSelect name={:payment_currencies} options={@currencies} opts={required: true} />
             <MarkdownInput id="summary" name={:summary} />
             <MarkdownInput id="default-terms" name={:default_terms} />
             <MarkdownInput id="default-template" name={:default_template} />

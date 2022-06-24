@@ -19,6 +19,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias BanchanWeb.Components.Form.{
     Checkbox,
     MarkdownInput,
+    Select,
     Submit,
     TextArea,
     TextInput,
@@ -243,11 +244,23 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   defp moneyfy_offering(offering) do
     # *sigh*
     Map.update(offering, "options", [], fn options ->
-      Map.new(
-        Enum.map(Enum.with_index(Map.values(options)), fn {opt, idx} ->
-          {to_string(idx), Map.update(opt, "price", "", &Utils.moneyfy/1)}
-        end)
-      )
+      Map.values(options)
+      |> Enum.with_index()
+      |> Enum.map(fn {opt, idx} ->
+        key = to_string(idx)
+
+        opt =
+          case Map.fetch(opt, "currency") do
+            {:ok, currency} ->
+              Map.update(opt, "price", "", &Utils.moneyfy(&1, currency))
+
+            :error ->
+              opt
+          end
+
+        {key, opt}
+      end)
+      |> Map.new()
     end)
   end
 
@@ -345,11 +358,24 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                 <input phx-update="ignore" type="checkbox">
                 <div class="collapse-title text-xl rounded-lg border border-primary">
                   {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
-                  (opt.name || "New Option") <> " - " <> Money.to_string(opt.price || Money.new(0, :USD))}
+
+                  (opt.name || "New Option") <>
+                    if opt.price do
+                      " - " <> Money.to_string(opt.price)
+                    else
+                      ""
+                    end}
                 </div>
                 <div class="collapse-content">
                   <TextInput name={:name} info="Name of the option." opts={required: true} />
                   <TextArea name={:description} info="Description for the option." opts={required: true} />
+                  <Select
+                    name={:currency}
+                    info="Currency for the price."
+                    options={@studio.payment_currencies}
+                    selected={@studio.default_currency}
+                    opts={required: true}
+                  />
                   <TextInput name={:price} info="Quoted price for adding this option." opts={required: true} />
                   <Checkbox
                     name={:multiple}

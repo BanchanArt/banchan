@@ -10,12 +10,26 @@ defmodule BanchanWeb.StudioLive.New do
   alias Banchan.Studios
   alias Banchan.Studios.Studio
 
-  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{MultipleSelect, Select, Submit, TextArea, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
   @impl true
   def mount(_params, _session, socket) do
+    currencies =
+      Studios.Common.supported_currencies()
+      |> Enum.map(fn currency ->
+        %{name: name, symbol: symbol} = Money.Currency.get(currency)
+        {:"#{name} (#{symbol})", currency}
+      end)
+
+    socket =
+      socket
+      |> assign(
+        countries: [{:"Choose your country...", nil} | Studios.Common.supported_countries()],
+        currencies: [{:"Currencies...", nil} | currencies]
+      )
+
     if is_nil(socket.assigns.current_user.confirmed_at) do
       socket =
         put_flash(
@@ -29,7 +43,7 @@ defmodule BanchanWeb.StudioLive.New do
          to: Routes.studio_index_path(Endpoint, :index)
        )}
     else
-      changeset = Studio.profile_changeset(%Studio{}, %{})
+      changeset = Studio.creation_changeset(%Studio{}, %{})
       {:ok, assign(socket, changeset: changeset)}
     end
   end
@@ -56,8 +70,13 @@ defmodule BanchanWeb.StudioLive.New do
             <TextInput name={:name} icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />
             <TextArea name={:description} opts={required: true} />
-            <TextArea name={:summary} />
-            <TextArea name={:default_terms} />
+            <Select name={:country} options={@countries} opts={required: true} />
+            <Select name={:default_currency} options={@currencies} opts={required: true} />
+            <MultipleSelect
+              name={:payment_currencies}
+              options={@currencies}
+              opts={required: true, default_value: :USD}
+            />
             <Submit changeset={@changeset} label="Save" />
           </Form>
         </div>

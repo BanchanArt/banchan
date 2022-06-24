@@ -3,7 +3,7 @@ defmodule Banchan.Studios do
   The Studios context.
   """
   @dialyzer [
-    {:nowarn_function, create_stripe_account: 1},
+    {:nowarn_function, create_stripe_account: 2},
     :no_return
   ]
 
@@ -14,7 +14,6 @@ defmodule Banchan.Studios do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Invoice
-  alias Banchan.Offerings.Offering
   alias Banchan.Repo
   alias Banchan.Studios.{Notifications, Payout, Studio}
 
@@ -32,10 +31,6 @@ defmodule Banchan.Studios do
   """
   def get_studio_by_handle!(handle) when is_binary(handle) do
     Repo.get_by!(Studio, handle: handle)
-  end
-
-  def get_offering_by_type!(%Studio{} = studio, type) do
-    Repo.get_by!(Offering, type: type, studio_id: studio.id)
   end
 
   @doc """
@@ -65,11 +60,18 @@ defmodule Banchan.Studios do
     if Enum.any?(artists, &is_nil(&1.confirmed_at)) do
       {:error, :unconfirmed_artist}
     else
-      changeset = studio |> Studio.profile_changeset(attrs)
+      changeset = studio |> Studio.creation_changeset(attrs)
 
       changeset =
         if changeset.valid? do
-          %{changeset | data: %{studio | stripe_id: create_stripe_account(url)}}
+          %{
+            changeset
+            | data: %{
+                studio
+                | stripe_id:
+                    create_stripe_account(url, Ecto.Changeset.get_field(changeset, :country))
+              }
+          }
         else
           changeset
         end
@@ -204,9 +206,7 @@ defmodule Banchan.Studios do
                   WHEN ? = 'released' THEN 'released'
                   ELSE 'held_back'
                 END", p.status, p.status, p.status, i.status),
-          fragment("(?).currency", i.amount),
-          fragment("(?).currency", i.tip),
-          fragment("(?).currency", i.platform_fee)
+          fragment("(?).currency", i.total_transferred)
         ],
         select: %{
           status:
@@ -218,19 +218,13 @@ defmodule Banchan.Studios do
                 END", p.status, p.status, p.status, i.status),
               :string
             ),
-          charged:
+          final:
             type(
-              fragment("(sum((?).amount), (?).currency)", i.amount, i.amount),
-              Money.Ecto.Composite.Type
-            ),
-          tips:
-            type(
-              fragment("(sum((?).amount), (?).currency)", i.tip, i.tip),
-              Money.Ecto.Composite.Type
-            ),
-          fees:
-            type(
-              fragment("(sum((?).amount), (?).currency)", i.platform_fee, i.platform_fee),
+              fragment(
+                "(sum((?).amount), (?).currency)",
+                i.total_transferred,
+                i.total_transferred
+              ),
               Money.Ecto.Composite.Type
             )
         }
@@ -255,20 +249,18 @@ defmodule Banchan.Studios do
   defp get_net_values(results) do
     Enum.reduce(results, {[], [], [], []}, fn %{status: status} = res,
                                               {released, held_back, on_the_way, paid} ->
-      net = Money.subtract(Money.add(res.charged, res.tips), res.fees)
-
       case status do
         "released" ->
-          {[net | released], held_back, on_the_way, paid}
+          {[res.final | released], held_back, on_the_way, paid}
 
         "held_back" ->
-          {released, [net | held_back], on_the_way, paid}
+          {released, [res.final | held_back], on_the_way, paid}
 
         "on_the_way" ->
-          {released, held_back, [net | on_the_way], paid}
+          {released, held_back, [res.final | on_the_way], paid}
 
         "paid" ->
-          {released, held_back, on_the_way, [net | paid]}
+          {released, held_back, on_the_way, [res.final | paid]}
       end
     end)
   end
@@ -361,7 +353,7 @@ defmodule Banchan.Studios do
       where:
         c.studio_id == ^studio.id and i.status == :released and
           (is_nil(p.id) or p.status not in [:pending, :in_transit, :paid]) and
-          fragment("(c0.amount).currency = ?::char(3)", ^currency_str) and
+          fragment("(?).currency = ?::char(3)", i.total_transferred, ^currency_str) and
           i.payout_available_on < ^now,
       order_by: {:asc, i.updated_at}
     )
@@ -369,10 +361,7 @@ defmodule Banchan.Studios do
     |> Enum.reduce_while({[], 0, Money.new(0, avail.currency)}, fn invoice,
                                                                    {invoice_ids, invoice_count,
                                                                     total} = acc ->
-      invoice_total =
-        invoice.amount
-        |> Money.add(invoice.tip)
-        |> Money.subtract(invoice.platform_fee)
+      invoice_total = invoice.total_transferred
 
       if invoice_total.amount + total.amount > avail.amount do
         {:halt, acc}
@@ -592,16 +581,22 @@ defmodule Banchan.Studios do
     Phoenix.PubSub.unsubscribe(@pubsub, "studio_stripe_state:#{stripe_id}")
   end
 
-  defp create_stripe_account(studio_url) do
+  defp create_stripe_account(studio_url, country) do
     # NOTE: I don't know why dialyzer complains about this. It works just fine.
     {:ok, acct} =
       stripe_mod().create_account(%{
         type: "express",
+        country: to_string(country),
         settings: %{payouts: %{schedule: %{interval: "manual"}}},
-        # TODO: this should only be done for _international_ accounts.
-        # tos_acceptance: %{
-        #   service_agreement: "recipient"
-        # },
+        capabilities: %{transfers: %{requested: true}},
+        tos_acceptance: %{
+          service_agreement:
+            if country == :US do
+              "full"
+            else
+              "recipient"
+            end
+        },
         business_profile: %{
           # Digital Media
           mcc: "7333",

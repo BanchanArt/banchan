@@ -68,4 +68,9 @@ defmodule Banchan.StripeAPI do
   def retrieve_session(id, opts) do
     Stripe.Session.retrieve(id, opts)
   end
+
+  @impl Banchan.StripeAPI.Base
+  def retrieve_transfer(id) do
+    Stripe.Transfer.retrieve(id, expand: ["destination_payment.balance_transaction"])
+  end
 end

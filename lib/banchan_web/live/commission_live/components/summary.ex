@@ -7,8 +7,9 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   alias Surface.Components.Form
 
   alias BanchanWeb.Components.Button
-  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Select, Submit, TextArea, TextInput}
 
+  prop studio, :struct, required: true
   prop line_items, :list, required: true
   prop allow_edits, :boolean, default: false
   prop offering, :struct
@@ -28,9 +29,17 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
     estimate =
       Enum.reduce(
         assigns.line_items,
-        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-        Money.new(0, :USD),
-        fn item, acc -> Money.add(acc, item.amount) end
+        %{},
+        fn item, acc ->
+          current =
+            Map.get(
+              acc,
+              item.amount.currency,
+              Money.new(0, item.amount.currency)
+            )
+
+          Map.put(acc, item.amount.currency, Money.add(current, item.amount))
+        end
       )
 
     ~F"""
@@ -70,23 +79,36 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
       {#if @deposited}
         <div class="px-2 flex flex-row items-center">
           <div class="font-bold grow">Total:</div>
-          <div class="px-2">{Money.to_string(estimate)}</div>
+          <div class="px-2">{estimate
+            |> Map.values()
+            |> Enum.map(&Money.to_string(&1))
+            |> Enum.join(" + ")}</div>
         </div>
         <div class="divider -py-2" />
         <div class="px-2 flex flex-col gap-2">
           <div class="flex flex-row items-center">
             <div class="font-bold grow">Deposited:</div>
-            <div class="px-2">{Money.to_string(@deposited)}</div>
+            <div class="px-2">{@deposited
+              |> Map.values()
+              |> Enum.map(&Money.to_string(&1))
+              |> Enum.join(" + ")}</div>
           </div>
           <div class="flex flex-row items-center">
             <div class="font-bold grow">Remaining Balance:</div>
-            <div class="px-2">{Money.to_string(Money.subtract(estimate, @deposited))}</div>
+            <div class="px-2">{estimate
+              |> Enum.map(fn {currency, amount} ->
+                Money.subtract(amount, Map.get(@deposited, currency, Money.new(0, currency)))
+              end)
+              |> Enum.join(" + ")}</div>
           </div>
         </div>
       {#else}
         <div class="px-2 flex">
           <div class="font-bold grow">Estimate:</div>
-          <div class="">{Money.to_string(estimate)}</div>
+          <div class="">{estimate
+            |> Map.values()
+            |> Enum.map(&Money.to_string(&1))
+            |> Enum.join(" + ")}</div>
         </div>
       {/if}
       <div class="divider" />
@@ -138,7 +160,14 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                 <h3 class="text-xl font-bold">Add Custom Option</h3>
                 <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
                 <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
-                <TextInput name={:amount} label="Price" opts={required: true, placeholder: "$100.00"} />
+                <Select
+                  name={:currency}
+                  options={@studio.payment_currencies
+                  |> Enum.map(&{:"#{Money.Currency.name(&1)} (#{Money.Currency.symbol(&1)})", &1})}
+                  selected={@studio.default_currency}
+                  opts={required: true}
+                />
+                <TextInput name={:amount} label="Price" opts={required: true} />
                 <div class="modal-action">
                   <Button primary={false} click={@toggle_custom} label="Cancel" />
                   <Submit changeset={@custom_changeset} />

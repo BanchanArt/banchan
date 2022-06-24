@@ -21,7 +21,13 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   @impl true
   def mount(%{"offering_type" => offering_type} = params, _session, socket) do
     socket = assign_studio_defaults(params, socket, false, true)
-    offering = Offerings.get_offering_by_type!(offering_type, socket.assigns.current_user_member?)
+
+    offering =
+      Offerings.get_offering_by_type!(
+        socket.assigns.studio,
+        offering_type,
+        socket.assigns.current_user_member?
+      )
 
     terms = offering.terms || socket.assigns.studio.default_terms || ""
     template = offering.template || socket.assigns.studio.default_template
@@ -47,7 +53,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
           |> Enum.map(fn option ->
             %LineItem{
               option: option,
-              amount: option.price || Money.new(0, :USD),
+              amount: option.price,
               name: option.name,
               description: option.description,
               sticky: option.sticky
@@ -140,7 +146,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
     else
       line_item = %LineItem{
         option: option,
-        amount: option.price || Money.new(0, :USD),
+        amount: option.price,
         name: option.name,
         description: option.description
       }
@@ -249,6 +255,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 remove_item="remove_item"
                 line_items={@line_items}
                 offering={@offering}
+                studio={@studio}
               />
             </div>
             <div class="md:order-2 md:col-span-2 md:row-span-2">

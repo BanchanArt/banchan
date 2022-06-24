@@ -19,7 +19,10 @@ defmodule Banchan.StudiosFixtures do
 
     Enum.into(attrs, %{
       name: name,
-      handle: name <> "-handle"
+      handle: name <> "-handle",
+      country: "US",
+      default_currency: "USD",
+      payment_currencies: ["USD", "EUR", "JPY"]
     })
   end
 

@@ -5,7 +5,7 @@ defmodule Banchan.Studios.Studio do
   import Ecto.Changeset
 
   alias Banchan.Identities
-
+  alias Banchan.Studios.Common
   alias Banchan.Uploads.Upload
 
   schema "studios" do
@@ -15,6 +15,9 @@ defmodule Banchan.Studios.Studio do
     field :summary, :string
     field :default_terms, :string
     field :default_template, :string
+    field :country, Ecto.Enum, values: Common.supported_countries() |> Keyword.values()
+    field :default_currency, Ecto.Enum, values: Common.supported_currencies()
+    field :payment_currencies, {:array, Ecto.Enum}, values: Common.supported_currencies()
 
     field :stripe_id, :string
     field :stripe_charges_enabled, :boolean
@@ -34,13 +37,57 @@ defmodule Banchan.Studios.Studio do
   end
 
   @doc false
+  def creation_changeset(studio, attrs) do
+    studio
+    |> cast(attrs, [
+      :name,
+      :handle,
+      :description,
+      :country,
+      :default_currency,
+      :payment_currencies
+    ])
+    |> validate_required([:name, :handle, :country, :default_currency, :payment_currencies])
+    |> validate_default_currency(:default_currency, :payment_currencies)
+    |> validate_handle_unique(:handle)
+  end
+
+  @doc false
   def profile_changeset(studio, attrs) do
     studio
-    |> cast(attrs, [:name, :handle, :description, :summary, :default_terms, :default_template])
-    |> validate_required([:name, :handle])
+    |> cast(attrs, [
+      :name,
+      :handle,
+      :description,
+      :summary,
+      :default_currency,
+      :payment_currencies,
+      :default_terms,
+      :default_template
+    ])
+    |> validate_required([:name, :handle, :default_currency, :payment_currencies])
     |> validate_markdown(:default_terms)
     |> validate_markdown(:default_template)
+    |> validate_default_currency(:default_currency, :payment_currencies)
     |> validate_handle_unique(:handle)
+  end
+
+  defp validate_default_currency(changeset, default_field, currencies_field)
+
+  defp validate_default_currency(changeset, default_field, currencies_field) do
+    validate_change(changeset, default_field, fn _, value ->
+      case fetch_field(changeset, currencies_field) do
+        {:changes, currencies} when is_list(currencies) ->
+          if value in currencies do
+            []
+          else
+            [{default_field, "Must be one of the selected payment currencies."}]
+          end
+
+        _ ->
+          []
+      end
+    end)
   end
 
   defp validate_handle_unique(changeset, field) when is_atom(field) do

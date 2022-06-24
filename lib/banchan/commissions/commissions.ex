@@ -427,7 +427,7 @@ defmodule Banchan.Commissions do
             %OfferingOption{} ->
               %LineItem{
                 option: option,
-                amount: option.price || Money.new(0, :USD),
+                amount: option.price,
                 name: option.name,
                 description: option.description
               }
@@ -774,6 +774,7 @@ defmodule Banchan.Commissions do
       |> Repo.one!()
 
     platform_fee = Money.multiply(Money.add(amount, tip), platform_fee)
+    transfer_amt = amount |> Money.add(tip) |> Money.subtract(platform_fee)
 
     {:ok, session} =
       stripe_mod().create_session(%{
@@ -783,8 +784,8 @@ defmodule Banchan.Commissions do
         success_url: uri,
         line_items: items,
         payment_intent_data: %{
-          application_fee_amount: platform_fee.amount,
           transfer_data: %{
+            amount: transfer_amt.amount,
             destination: stripe_id
           }
         }
@@ -806,13 +807,22 @@ defmodule Banchan.Commissions do
   end
 
   def process_payment_succeeded!(session) do
-    {:ok, %{charges: %{data: [%{balance_transaction: txn_id}]}}} =
+    {:ok, %{charges: %{data: [%{balance_transaction: txn_id, transfer: transfer}]}}} =
       stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, [])
 
     {:ok, %{available_on: available_on, amount: amt, currency: curr}} =
       stripe_mod().retrieve_balance_transaction(txn_id, [])
 
-    amount = Money.new(amt, String.to_atom(String.upcase(curr)))
+    {:ok, transfer} = stripe_mod().retrieve_transfer(transfer)
+
+    total_charged = Money.new(amt, String.to_atom(String.upcase(curr)))
+    final_transfer_txn = transfer.destination_payment.balance_transaction
+
+    total_transferred =
+      Money.new(
+        final_transfer_txn.amount,
+        String.to_atom(String.upcase(final_transfer_txn.currency))
+      )
 
     {:ok, available_on} = DateTime.from_unix(available_on)
 
@@ -823,7 +833,9 @@ defmodule Banchan.Commissions do
           |> Repo.update_all(
             set: [
               status: :succeeded,
-              payout_available_on: available_on
+              payout_available_on: available_on,
+              total_charged: total_charged,
+              total_transferred: total_transferred
             ]
           )
 
@@ -836,7 +848,7 @@ defmodule Banchan.Commissions do
           true,
           [],
           %{
-            amount: amount
+            amount: invoice.amount |> Money.add(invoice.tip)
           }
         )
 
@@ -1107,11 +1119,17 @@ defmodule Banchan.Commissions do
     if Ecto.assoc_loaded?(commission.events) do
       Enum.reduce(
         commission.events,
-        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-        Money.new(0, :USD),
+        %{},
         fn event, acc ->
           if event.invoice && event.invoice.status in [:succeeded, :released] do
-            Money.add(acc, event.invoice.amount)
+            current =
+              Map.get(
+                acc,
+                event.invoice.amount.currency,
+                Money.new(0, event.invoice.amount.currency)
+              )
+
+            Map.put(acc, event.invoice.amount.currency, Money.add(current, event.invoice.amount))
           else
             acc
           end
@@ -1130,9 +1148,11 @@ defmodule Banchan.Commissions do
 
       Enum.reduce(
         deposits,
-        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-        Money.new(0, :USD),
-        fn dep, acc -> Money.add(acc, dep.amount) end
+        %{},
+        fn dep, acc ->
+          current = Map.get(acc, dep.amount.currency, Money.new(0, dep.amount.currency))
+          Map.put(acc, dep.amount.currency, Money.add(current, dep.amount))
+        end
       )
     end
   end
