@@ -45,9 +45,9 @@ defmodule Banchan.Uploads do
 
   defp get_bucket do
     case Application.fetch_env(:ex_aws, :bucket) do
-      {:ok, {:system, var}} -> System.get_env(var) || "default"
-      {:ok, var} when is_binary(var) -> "default"
-      :error -> "default"
+      {:ok, {:system, var}} -> System.get_env(var)
+      {:ok, var} when is_binary(var) -> var
+      :error -> nil
     end
   end
 
@@ -59,7 +59,8 @@ defmodule Banchan.Uploads do
     Repo.one!(from u in Upload, where: u.bucket == ^bucket and u.key == ^key)
   end
 
-  def save_file!(%User{} = user, src, type, file_name, bucket \\ nil) do
+  def save_file!(%User{} = user, src, type, file_name, bucket \\ get_bucket()) do
+    bucket = bucket || "default-uploads-bucket"
     key = gen_key()
     size = File.stat!(src).size
 
@@ -74,7 +75,7 @@ defmodule Banchan.Uploads do
     if Mix.env() == :prod || !is_nil(Application.get_env(:ex_aws, :region)) do
       src
       |> ExAws.S3.Upload.stream_file()
-      |> ExAws.S3.upload(get_bucket(), key)
+      |> ExAws.S3.upload(bucket, key)
       |> ExAws.request!()
     else
       local = Path.join([local_upload_dir(), bucket, key])
