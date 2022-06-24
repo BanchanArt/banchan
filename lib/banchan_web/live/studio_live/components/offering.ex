@@ -14,7 +14,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias Banchan.Offerings.{Offering, OfferingOption}
   alias Banchan.Utils
 
-  alias BanchanWeb.Components.{Button, MasonryGallery}
+  alias BanchanWeb.Components.{Button, Collapse, MasonryGallery}
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
@@ -309,64 +309,64 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           label="Hide from Shop"
           info="Hide this offering from the shop. You will still be able to link people to it."
         />
-        <div tabindex="0" class="collapse collapse-arrow">
-          <input phx-update="ignore" type="checkbox">
-          <div class="collapse-title text-xl rounded-lg border border-primary">
-            Images
+        <Collapse id={@id <> "-images"} class="rounded-lg border border-primary">
+          <:header>
+            <h3 class="text-xl">
+              Images
+            </h3>
+          </:header>
+          <div class="relative pb-video pt-2">
+            {#if Enum.empty?(@uploads.card_image.entries) && !(@offering && @offering.card_img_id)}
+              <img
+                class="absolute h-full w-full object-cover rounded-lg"
+                src={Routes.static_path(Endpoint, "/images/640x360.png")}
+              />
+            {#elseif !Enum.empty?(@uploads.card_image.entries)}
+              {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
+                class: "absolute h-full w-full object-cover rounded-lg"
+              )}
+            {#else}
+              <img
+                class="absolute h-full w-full object-cover rounded-lg"
+                src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
+              />
+            {/if}
           </div>
-          <div class="collapse-content flex flex-col gap-2">
-            <div class="relative pb-video pt-2">
-              {#if Enum.empty?(@uploads.card_image.entries) && !(@offering && @offering.card_img_id)}
-                <img
-                  class="absolute h-full w-full object-cover rounded-lg"
-                  src={Routes.static_path(Endpoint, "/images/640x360.png")}
-                />
-              {#elseif !Enum.empty?(@uploads.card_image.entries)}
-                {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
-                  class: "absolute h-full w-full object-cover rounded-lg"
-                )}
-              {#else}
-                <img
-                  class="absolute h-full w-full object-cover rounded-lg"
-                  src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
-                />
-              {/if}
-            </div>
-            <UploadInput label="Card Image" upload={@uploads.card_image} cancel="cancel_card_upload" />
-            <MasonryGallery
-              id="gallery-preview"
-              class="py-2 rounded-lg"
-              send_updates_to={self()}
-              images={@gallery_images}
-              editable
-              entries={@uploads.gallery_images.entries}
-            />
-            <UploadInput
-              label="Gallery Images"
-              upload={@uploads.gallery_images}
-              cancel="cancel_gallery_upload"
-              hide_list
-            />
-          </div>
-        </div>
+          <UploadInput label="Card Image" upload={@uploads.card_image} cancel="cancel_card_upload" />
+          <MasonryGallery
+            id={@id <> "-gallery-preview"}
+            class="py-2 rounded-lg"
+            send_updates_to={self()}
+            images={@gallery_images}
+            editable
+            entries={@uploads.gallery_images.entries}
+          />
+          <UploadInput
+            label="Gallery Images"
+            upload={@uploads.gallery_images}
+            cancel="cancel_gallery_upload"
+            hide_list
+          />
+        </Collapse>
         <h3 class="text-2xl pt-10">Options</h3>
         <div class="divider" />
         <ul class="flex flex-col gap-2">
           <InputContext :let={form: form}>
             <Inputs form={form} for={:options} :let={index: index}>
-              <li tabindex="0" class="collapse collapse-arrow">
-                <input phx-update="ignore" type="checkbox">
-                <div class="collapse-title text-xl rounded-lg border border-primary">
-                  {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
+              <li>
+                <Collapse id={@id <> "-option-" <> "#{index}"} class="rounded-lg border border-primary">
+                  <:header>
+                    <h3 class="text-xl">
+                      {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
 
-                  (opt.name || "New Option") <>
-                    if opt.price do
-                      " - " <> Money.to_string(opt.price)
-                    else
-                      ""
-                    end}
-                </div>
-                <div class="collapse-content">
+                      (opt.name || "New Option") <>
+                        if opt.price do
+                          " - " <> Money.to_string(opt.price)
+                        else
+                          ""
+                        end}
+                    </h3>
+                  </:header>
                   <TextInput name={:name} info="Name of the option." opts={required: true} />
                   <TextArea name={:description} info="Description for the option." opts={required: true} />
                   <Select
@@ -389,7 +389,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                     label="Default"
                   />
                   <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
-                </div>
+                </Collapse>
               </li>
             </Inputs>
           </InputContext>
@@ -400,22 +400,21 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           </li>
         </ul>
         <div class="divider" />
-        <div tabindex="0" class="collapse collapse-arrow">
-          <input phx-update="ignore" type="checkbox">
-          <h3 class="collapse-title rounded-lg border border-primary text-2xl">Terms and Template</h3>
-          <div class="collapse-content">
-            <MarkdownInput
-              id="tos"
-              name={:terms}
-              info="Terms of service specific to this offering. Leave blank to use your studio's default terms."
-            />
-            <MarkdownInput
-              id="template"
-              name={:template}
-              info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
-            />
-          </div>
-        </div>
+        <Collapse class="rounded-lg border border-primary" id={@id <> "-terms-collapse"}>
+          <:header>
+            <h3 class="text-2xl">Terms and Template</h3>
+          </:header>
+          <MarkdownInput
+            id={@id <> "-tos"}
+            name={:terms}
+            info="Terms of service specific to this offering. Leave blank to use your studio's default terms."
+          />
+          <MarkdownInput
+            id={@id <> "-template"}
+            name={:template}
+            info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
+          />
+        </Collapse>
         <div class="divider" />
         <div class="flex flex-row">
           <Submit label="Save" />

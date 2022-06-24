@@ -12,7 +12,7 @@ defmodule BanchanWeb.CommissionLive do
   alias Banchan.Commissions.{CommissionFilter, Notifications}
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
-  alias BanchanWeb.Components.{InfiniteScroll, Layout}
+  alias BanchanWeb.Components.{Collapse, InfiniteScroll, Layout}
   alias BanchanWeb.Components.Form.{Checkbox, MultipleSelect, TextInput}
 
   alias BanchanWeb.CommissionLive.Components.Commission
@@ -174,6 +174,7 @@ defmodule BanchanWeb.CommissionLive do
   end
 
   def handle_event("toggle_filter", _, socket) do
+    Collapse.set_open("filter-options", !socket.assigns.filter_open)
     {:noreply, assign(socket, filter_open: !socket.assigns.filter_open)}
   end
 
@@ -230,23 +231,19 @@ defmodule BanchanWeb.CommissionLive do
                 <i class="fas fa-search" />
               </Submit>
             </div>
-            <div class={"collapse rounded-box", "collapse-open": @filter_open, "collapse-close": !@filter_open}>
-              <div class="collapse-content">
-                <div class="flex flex-col">
-                  <h2 class="text-xl pt-4">
-                    Additional Filters
-                  </h2>
-                  <div class="divider" />
-                  <TextInput name={:client} />
-                  <TextInput name={:studio} />
-                  <MultipleSelect class="" name={:statuses} options={@status_options} />
-                  <div class="py-2">
-                    <Checkbox label="Show Archived" name={:show_archived} />
-                  </div>
-                  <Submit label="Apply" class="btn btn-square btn-primary w-full" />
-                </div>
+            <Collapse id="filter-options" class="rounded-box">
+              <h2 class="text-xl pt-4">
+                Additional Filters
+              </h2>
+              <div class="divider" />
+              <TextInput name={:client} />
+              <TextInput name={:studio} />
+              <MultipleSelect name={:statuses} options={@status_options} />
+              <div class="py-2">
+                <Checkbox label="Show Archived" name={:show_archived} />
               </div>
-            </div>
+              <Submit label="Apply" class="btn btn-square btn-primary w-full" />
+            </Collapse>
           </Form>
           <div class="divider">Commissions</div>
           <ul class="menu menu-compact gap-2 p-2">
