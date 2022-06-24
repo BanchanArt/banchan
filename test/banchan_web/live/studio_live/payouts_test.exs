@@ -203,7 +203,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       assert page_live
              |> element("#available")
-             |> render() =~ "$0.00"
+             |> render() =~ "No Balance Available"
     end
 
     test "Shows available balance", %{
@@ -589,9 +589,9 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
              |> element(".payout .badge")
              |> render() =~ "Canceled"
 
-      assert page_live
-             |> element(".open-modal")
-             |> render() =~ "disabled=\"disabled\""
+      # We remove the modal from the page if cancellation is disabled.
+      refute page_live
+             |> has_element?(".open-modal")
 
       assert page_live
              |> element(".cancel-payout")

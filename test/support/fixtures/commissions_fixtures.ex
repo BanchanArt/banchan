@@ -86,7 +86,10 @@ defmodule Banchan.CommissionsFixtures do
       {:ok,
        %{
          available_on: DateTime.to_unix(available_on),
-         amount: Money.add(invoice.amount, invoice.tip).amount,
+         amount:
+           (invoice.amount
+            |> Money.add(invoice.tip)
+            |> Money.subtract(invoice.platform_fee)).amount,
          currency: invoice.amount.currency |> to_string() |> String.downcase()
        }}
     end)
@@ -95,7 +98,10 @@ defmodule Banchan.CommissionsFixtures do
        %Stripe.Transfer{
          destination_payment: %{
            balance_transaction: %{
-             amount: Money.add(invoice.amount, invoice.tip).amount,
+             amount:
+               (invoice.amount
+                |> Money.add(invoice.tip)
+                |> Money.subtract(invoice.platform_fee)).amount,
              currency: invoice.amount.currency |> to_string() |> String.downcase()
            }
          }

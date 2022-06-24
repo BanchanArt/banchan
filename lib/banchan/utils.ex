@@ -4,13 +4,11 @@ defmodule Banchan.Utils do
   """
 
   def moneyfy(amount, currency) when is_binary(currency) do
-    try do
-      currency = currency |> String.upcase() |> String.to_existing_atom()
-      moneyfy(amount, currency)
-    rescue
-      ArgumentError ->
-        amount
-    end
+    currency = currency |> String.upcase() |> String.to_existing_atom()
+    moneyfy(amount, currency)
+  rescue
+    ArgumentError ->
+      amount
   end
 
   def moneyfy(amount, currency) when is_atom(currency) do

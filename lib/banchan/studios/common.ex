@@ -144,7 +144,7 @@ defmodule Banchan.Studios.Common do
     :ZMW
   ]
 
-  def supported_currencies() do
+  def supported_currencies do
     @supported_currencies
   end
 
@@ -236,7 +236,7 @@ defmodule Banchan.Studios.Common do
     Uruguay: :UY
   ]
 
-  def supported_countries() do
+  def supported_countries do
     @supported_countries
   end
 end
