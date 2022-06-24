@@ -133,6 +133,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
         for={@changeset}
         change="change"
         opts={
+          id: "#{@id}-form",
           # NOTE: This is a workaround for a Surface bug in >=0.7.1: https://github.com/surface-ui/surface/issues/582
           # TODO: make this a regular submit="add_comment" when the bug gets fixed.
           phx_submit: "add_comment",
@@ -141,7 +142,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
       >
         <div class="block space-y-4">
           <MarkdownInput
-            id="initial-message"
+            id="{@id}-markdown-input"
             name={:text}
             show_label={false}
             class="w-full"
