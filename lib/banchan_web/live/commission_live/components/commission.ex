@@ -37,7 +37,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
         {/if}
       </h1>
       <div class="p-4">
-        <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
+        <div class="flex flex-col grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="flex flex-col md:order-2">
             <DraftBox
               id="draft-box"
