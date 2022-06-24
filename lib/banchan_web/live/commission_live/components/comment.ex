@@ -146,7 +146,12 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
       <div class="content px-4 user-markdown">
         {#if @changeset}
-          <Form for={@changeset} change="change_edit" submit="submit_edit" opts={id: "editing-event-#{@event.public_id}" }>
+          <Form
+            for={@changeset}
+            change="change_edit"
+            submit="submit_edit"
+            opts={id: "editing-event-#{@event.public_id}"}
+          >
             <MarkdownInput
               id={"editing-event-#{@event.public_id}"}
               name={:text}
