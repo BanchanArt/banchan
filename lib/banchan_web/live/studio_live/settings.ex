@@ -18,7 +18,6 @@ defmodule BanchanWeb.StudioLive.Settings do
     MultipleSelect,
     Select,
     Submit,
-    TextArea,
     TextInput
   }
 
@@ -118,10 +117,9 @@ defmodule BanchanWeb.StudioLive.Settings do
             <TextInput name={:name} icon="user" opts={required: true} />
             {!-- # TODO: Bring this back when we've figured out how this interacts with Stripe --}
             {!-- <TextInput name={:handle} icon="at" opts={required: true} /> --}
-            <TextArea name={:description} opts={required: true} />
             <Select name={:default_currency} options={@currencies} opts={required: true} />
             <MultipleSelect name={:payment_currencies} options={@currencies} opts={required: true} />
-            <MarkdownInput id="summary" name={:summary} />
+            <MarkdownInput id="about" name={:about} />
             <MarkdownInput id="default-terms" name={:default_terms} />
             <MarkdownInput id="default-template" name={:default_template} />
             <Submit changeset={@changeset} label="Save" />

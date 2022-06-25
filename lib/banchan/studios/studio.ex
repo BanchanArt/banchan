@@ -11,8 +11,7 @@ defmodule Banchan.Studios.Studio do
   schema "studios" do
     field :name, :string
     field :handle, :string
-    field :description, :string
-    field :summary, :string
+    field :about, :string
     field :default_terms, :string
     field :default_template, :string
     field :country, Ecto.Enum, values: Common.supported_countries() |> Keyword.values()
@@ -42,12 +41,13 @@ defmodule Banchan.Studios.Studio do
     |> cast(attrs, [
       :name,
       :handle,
-      :description,
+      :about,
       :country,
       :default_currency,
       :payment_currencies
     ])
     |> validate_required([:name, :handle, :country, :default_currency, :payment_currencies])
+    |> validate_markdown(:about)
     |> validate_default_currency(:default_currency, :payment_currencies)
     |> validate_handle_unique(:handle)
   end
@@ -58,14 +58,14 @@ defmodule Banchan.Studios.Studio do
     |> cast(attrs, [
       :name,
       :handle,
-      :description,
-      :summary,
+      :about,
       :default_currency,
       :payment_currencies,
       :default_terms,
       :default_template
     ])
     |> validate_required([:name, :handle, :default_currency, :payment_currencies])
+    |> validate_markdown(:about)
     |> validate_markdown(:default_terms)
     |> validate_markdown(:default_template)
     |> validate_default_currency(:default_currency, :payment_currencies)

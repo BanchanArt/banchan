@@ -102,8 +102,7 @@ defmodule Banchan.StudiosTest do
       attrs = %{
         name: "new name",
         handle: "new-handle",
-        description: "new description",
-        summary: "new summary",
+        about: "new about",
         default_terms: "new terms",
         default_template: "new template"
       }
@@ -127,16 +126,14 @@ defmodule Banchan.StudiosTest do
 
       assert studio.name == "new name"
       assert studio.handle == "new-handle"
-      assert studio.description == "new description"
-      assert studio.summary == "new summary"
+      assert studio.about == "new about"
       assert studio.default_terms == "new terms"
       assert studio.default_template == "new template"
 
       from_db = Repo.get!(Studio, studio.id) |> Repo.preload(:artists)
       assert studio.name == from_db.name
       assert studio.handle == from_db.handle
-      assert studio.description == from_db.description
-      assert studio.summary == from_db.summary
+      assert studio.about == from_db.about
       assert studio.default_terms == from_db.default_terms
       assert studio.default_template == from_db.default_template
     end

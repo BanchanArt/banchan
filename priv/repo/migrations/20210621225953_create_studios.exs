@@ -4,9 +4,8 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
   def change do
     create table(:studios) do
       add :name, :string, null: false
-      add :summary, :text
       add :handle, :citext, null: false
-      add :description, :text
+      add :about, :text
       add :country, :string, null: false
       add :default_currency, :string, null: false
       add :payment_currencies, {:array, :string}, null: false

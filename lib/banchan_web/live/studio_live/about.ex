@@ -35,7 +35,7 @@ defmodule BanchanWeb.StudioLive.About do
     >
       <div class="w-full mx-auto md:bg-base-300">
         <div class="max-w-prose w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
-          <Markdown content={@studio.summary} />
+          <Markdown content={@studio.about} />
         </div>
       </div>
     </StudioLayout>

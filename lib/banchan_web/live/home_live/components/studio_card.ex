@@ -32,7 +32,7 @@ defmodule BanchanWeb.Components.StudioCard do
         </div>
         <br>
         <div class="content">
-          {@studio.description}
+          {@studio.about && raw(HtmlSanitizeEx.strip_tags(Earmark.as_html!(@studio.about)))}
         </div>
       </div>
     </LiveRedirect>

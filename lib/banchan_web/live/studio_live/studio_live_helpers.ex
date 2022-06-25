@@ -23,7 +23,10 @@ defmodule BanchanWeb.StudioLive.Helpers do
     socket =
       socket
       |> assign(page_title: studio.name)
-      |> assign(page_description: studio.description)
+      |> assign(
+        page_description:
+          studio.about && HtmlSanitizeEx.strip_tags(Earmark.as_html!(studio.about))
+      )
       |> assign(page_image: Routes.static_url(Endpoint, "/images/shop_card_default.png"))
 
     cond do

@@ -44,7 +44,6 @@ user = user |> Banchan.Repo.reload()
     %{
       handle: "kitteh-studio",
       name: "Kitteh Studio",
-      description: "Kitteh-related stuff",
       country: "US",
       default_currency: "USD",
       payment_currencies: ["USD", "EUR"]
@@ -128,7 +127,6 @@ user = user |> Banchan.Repo.reload()
     %{
       handle: "kitteh-japan",
       name: "Kitteh Studio in Japan",
-      description: "Kitteh-related stuff, Made in Japan™️",
       country: "JP",
       default_currency: "JPY",
       payment_currencies: ["JPY", "USD", "KRW"]

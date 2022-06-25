@@ -10,7 +10,7 @@ defmodule BanchanWeb.StudioLive.New do
   alias Banchan.Studios
   alias Banchan.Studios.Studio
 
-  alias BanchanWeb.Components.Form.{MultipleSelect, Select, Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{MarkdownInput, MultipleSelect, Select, Submit, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -69,7 +69,7 @@ defmodule BanchanWeb.StudioLive.New do
           >
             <TextInput name={:name} icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />
-            <TextArea name={:description} opts={required: true} />
+            <MarkdownInput id="about" name={:about} opts={required: true} />
             <Select name={:country} options={@countries} opts={required: true} />
             <Select name={:default_currency} options={@currencies} opts={required: true} />
             <MultipleSelect
