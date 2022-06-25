@@ -19,6 +19,10 @@ defmodule BanchanWeb.StudioLive.Portfolio do
     {:noreply, socket |> assign(uri: uri)}
   end
 
+  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
+    {:noreply, socket |> assign(followers: new_count)}
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -27,6 +31,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
       current_user={@current_user}
       flashes={@flash}
       studio={@studio}
+      followers={@followers}
       current_user_member?={@current_user_member?}
       tab={:portfolio}
       uri={@uri}

@@ -14,6 +14,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   prop current_user_member?, :boolean, required: true
   prop flashes, :string, required: true
   prop studio, :struct, required: true
+  prop followers, :integer, required: true
   prop tab, :atom
   prop uri, :string, required: true
   prop padding, :integer
@@ -80,8 +81,10 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 </Button>
               {/if}
             </h1>
+            <div>
+              {@followers} followers
+            </div>
           </div>
-          <br>
           <div class="overflow-auto min-w-screen">
             <nav class="tabs px-2 flex flex-nowrap">
               <TabButton
