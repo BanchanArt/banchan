@@ -29,12 +29,12 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
       )
 
     ~F"""
-    <div>
+    <div class="snap-y">
       {#for chunk <- event_chunks}
         {#if List.first(chunk).type == :comment}
           <div class="flex flex-col space-y-4">
             {#for event <- chunk}
-              <article class="timeline-item" id={"event-#{event.public_id}"}>
+              <article class="timeline-item scroll-mt-32 snap-start" id={"event-#{event.public_id}"}>
                 <Comment
                   id={"event-#{event.public_id}"}
                   uri={@uri}
@@ -47,7 +47,8 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
             {/for}
           </div>
         {#else}
-          <div class="steps steps-vertical">
+          {!-- NB(@zkat): This is a load-bearing `overflow-visible` to fix anchor-links into timeline step events. --}
+          <div class="steps steps-vertical overflow-visible">
             {#for event <- chunk}
               {#case event.type}
                 {#match :line_item_added}
@@ -59,11 +60,11 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                     removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))})
                   </TimelineItem>
                 {#match :payment_processed}
-                  <TimelineItem uri={@uri} icon="$" event={event}>
+                  <TimelineItem uri={@uri} icon={Money.Currency.symbol(event.amount)} event={event}>
                     paid {Money.to_string(event.amount)}
                   </TimelineItem>
                 {#match :refund_processed}
-                  <TimelineItem uri={@uri} icon="$" event={event}>
+                  <TimelineItem uri={@uri} icon={Money.Currency.symbol(event.amount)} event={event}>
                     refunded {Money.to_string(event.amount)}
                   </TimelineItem>
                 {#match :status}

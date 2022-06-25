@@ -26,7 +26,7 @@ defmodule BanchanWeb.CommissionLive.Components.TimelineItem do
 
   def render(assigns) do
     ~F"""
-    <div id={"event-#{@event.public_id}"} data-content={@icon} class="step">
+    <div id={"event-#{@event.public_id}"} data-content={@icon} class="step scroll-mt-32 snap-start">
       <div class="text-xs text-left">
         <div class="inline-flex items-baseline space-x-1">
           <div class="self-center">

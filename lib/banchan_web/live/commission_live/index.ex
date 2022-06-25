@@ -219,18 +219,16 @@ defmodule BanchanWeb.CommissionLive do
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="flex flex-row grow md:grow-0">
-        <div class={"flex flex-col sidebar basis-full md:basis-1/4", "hidden md:flex": @commission}>
+      <div class="flex flex-row grow xl:grow-0">
+        <div class={"flex flex-col sidebar basis-full xl:basis-1/4", "hidden xl:flex": @commission}>
           <Form for={@filter} submit="filter" class="form-control">
-            <div class="input-group w-full">
+            <Field class="w-full input-group" name={:search}>
               <button :on-click="toggle_filter" type="button" class="btn btn-square btn-primary"><i class="fas fa-filter" /></button>
-              <Field name={:search}>
-                <SurfaceTextInput class="input input-bordered w-full" />
-              </Field>
+              <SurfaceTextInput class="input input-bordered w-full" />
               <Submit class="btn btn-square btn-primary">
                 <i class="fas fa-search" />
               </Submit>
-            </div>
+            </Field>
             <Collapse id="filter-options" class="rounded-box">
               <h2 class="text-xl pt-4">
                 Additional Filters
@@ -263,7 +261,7 @@ defmodule BanchanWeb.CommissionLive do
           <InfiniteScroll id="commissions-infinite-scroll" page={@page} load_more="load_more" />
         </div>
         {#if @commission}
-          <div class="md:container basis-full md:basis-3/4">
+          <div class="xl:container basis-full xl:basis-3/4">
             <Commission
               uri={@uri}
               current_user={@current_user}

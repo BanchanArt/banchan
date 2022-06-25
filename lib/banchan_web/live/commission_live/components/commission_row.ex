@@ -25,7 +25,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
     <li class={bordered: @highlight}>
       <LivePatch to={commission_url}>
         <div>
-          <div class="text-xl flex flex-col">
+          <div class="text-xl flex flex-row gap-2 flex-wrap">
             <span>{@result.commission.title}</span>
             <div class="badge badge-secondary badge-sm">{Common.humanize_status(@result.commission.status)}</div>
             {#if @result.archived}
