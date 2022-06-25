@@ -82,7 +82,15 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
               {/if}
             </h1>
             <div>
-              {@followers} followers
+              {if @followers > 9999 do
+                Number.SI.number_to_si(@followers)
+              else
+                Number.Delimit.number_to_delimited(@followers, precision: 0)
+              end} {if @followers == 1 do
+                "Follower"
+              else
+                "Followers"
+              end}
             </div>
           </div>
           <div class="overflow-auto min-w-screen">
