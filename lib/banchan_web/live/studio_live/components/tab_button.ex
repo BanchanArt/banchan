@@ -17,11 +17,9 @@ defmodule BanchanWeb.StudioLive.Components.TabButton do
       label={@label}
       class={
         "tab",
-        "tab-lifted",
-        "text-center",
+        "tab-bordered",
         "flex-1",
-        "tab-active": @current_tab == @tab_name,
-        "bg-base-200": @current_tab != @tab_name
+        "tab-active": @current_tab == @tab_name
       }
       to={@to}
     />

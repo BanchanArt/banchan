@@ -9,6 +9,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      aspectRatio: {
+        'header-image': '3.5 / 1'
+      },
       spacing: {
         '128': '32rem',
         'video': '56.25%',

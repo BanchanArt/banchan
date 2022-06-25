@@ -62,15 +62,16 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
     ~F"""
     <Layout uri={@uri} padding={@padding} current_user={@current_user} flashes={@flashes}>
       <:hero>
-        <section class="bg-secondary">
-          <div class="ml-8 col-span-12">
-            <p class="text-3xl text-secondary-content font-bold flex-grow">
+        <section>
+          <img
+            class="object-cover aspect-header-image rounded-xl"
+            src={Routes.static_url(Endpoint, "/images/shop_card_default.png")}
+          />
+          <div class="m-6">
+            <h1 class="text-2xl md:text-3xl flex flex-row">
               {@studio.name}
-            </p>
-            <p class="text-base text-secondary-content flex-grow">
-              {@studio.description}
               {#if @current_user}
-                <Button click="toggle_follow" class="glass btn-sm rounded-full px-2 py-0">
+                <Button click="toggle_follow" class="ml-auto btn-sm btn-outline rounded-full px-2 py-0">
                   {if @user_following? do
                     "Unfollow"
                   else
@@ -78,9 +79,9 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                   end}
                 </Button>
               {/if}
-            </p>
-            <br>
+            </h1>
           </div>
+          <br>
           <div class="overflow-auto min-w-screen">
             <nav class="tabs px-2 flex flex-nowrap">
               <TabButton
