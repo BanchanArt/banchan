@@ -263,7 +263,8 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 id="initial-message"
                 name={:description}
                 show_label={false}
-                class="w-full"
+                class="w-full h-96"
+                height="384px"
                 upload={@uploads.attachment}
                 cancel_upload="cancel_upload"
                 opts={

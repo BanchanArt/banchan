@@ -9,6 +9,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   alias Surface.Components.LiveFileInput
 
   prop name, :any, required: true
+  prop height, :string, default: "224px"
   prop opts, :keyword, default: []
   prop label, :string
   prop show_label, :boolean, default: true
@@ -62,14 +63,14 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
       <div class="control">
         <div class="relative">
           <div
-            class="h-56 rounded-lg"
+            class={@class}
             phx-update="ignore"
             phx-drop-target={@upload && @upload.ref}
             :hook="MarkdownInput"
             id={@id <> "-hook"}
           >
-            <div id={@id <> "-editor"} phx-update="ignore" class="object-cover editor w-full" />
-            <TextArea class="hidden input-textarea" />
+            <div id={@id <> "-editor"} data-height={@height} data-placeholder={Keyword.get(@opts || [], :placeholder)} phx-update="ignore" class="object-cover editor w-full h-full" />
+            <TextArea class="hidden input-textarea" opts={@opts} />
           </div>
           {#if @upload}
             {#if @dragging}
