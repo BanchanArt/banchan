@@ -39,4 +39,6 @@ defmodule Banchan.StripeAPI.Base do
               {:ok, Stripe.Transfer.t()} | {:error, Stripe.Error.t()}
   @callback update_account(id :: Stripe.id(), params :: %{}) ::
               {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
+  @callback create_login_link(id :: Strip.id(), params :: %{}) ::
+              {:ok, Stripe.LoginLink.t()} | {:error, Stripe.Error.t()}
 end

@@ -731,6 +731,15 @@ defmodule Banchan.Studios do
     acct.id
   end
 
+  def express_dashboard_link(%Studio{} = studio, redirect_url) do
+    stripe_mod().create_login_link(
+      studio.stripe_id,
+      %{
+        redirect_url: redirect_url
+      }
+    )
+  end
+
   defp stripe_mod do
     Application.get_env(:banchan, :stripe_mod)
   end

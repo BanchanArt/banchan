@@ -4,7 +4,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.Form
+  alias Surface.Components.{Form, Link}
 
   alias Banchan.Studios
   alias Banchan.Studios.{Notifications, Studio}
@@ -163,7 +163,21 @@ defmodule BanchanWeb.StudioLive.Settings do
               Subscribe
             {/if}
           </Button>
+
           <div class="divider" />
+
+          <h2 class="text-xl py-6">Stripe Dashboard</h2>
+          <div class="pb-6">
+            You can manage your Stripe account details, such as your bank account, and see stats on previous payouts, over on your Stripe Express Dashboard.
+          </div>
+          <Link
+            label="Go to Dashboard"
+            class="btn btn-primary"
+            to={Routes.stripe_dashboard_path(Endpoint, :dashboard, @studio.handle)}
+          />
+
+          <div class="divider" />
+
           <h2 class="text-xl py-6">Edit Studio Profile</h2>
           <Form class="flex flex-col gap-2" for={@changeset} change="change" submit="submit">
             <TextInput name={:name} info="Display name for studio" icon="user" opts={required: true} />

@@ -78,4 +78,9 @@ defmodule Banchan.StripeAPI do
   def update_account(id, params) do
     Stripe.Account.update(id, params)
   end
+
+  @impl Banchan.StripeAPI.Base
+  def create_login_link(id, params) do
+    Stripe.LoginLink.create(id, params)
+  end
 end
