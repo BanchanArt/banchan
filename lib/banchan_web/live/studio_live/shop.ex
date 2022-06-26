@@ -7,7 +7,7 @@ defmodule BanchanWeb.StudioLive.Shop do
   alias Banchan.Offerings
   alias Banchan.Studios
 
-  alias Surface.Components.LiveRedirect
+  alias Surface.Components.{Link, LiveRedirect}
 
   import BanchanWeb.StudioLive.Helpers
 
@@ -170,18 +170,27 @@ defmodule BanchanWeb.StudioLive.Shop do
             </div>
           {/if}
         </div>
-      {#elseif @current_user_member? && !@studio.stripe_details_submitted}
-        <p>You need to <a class="hover:underline font-bold" href={@stripe_onboarding_url}>onboard your studio on Stripe</a>
-
-          <Button click="recheck_stripe" label="Recheck" />
-        </p>
-      {#elseif @current_user_member? && !@studio.stripe_charges_enabled}
-        <p>Details have been submitted to Stripe. Please wait while charges are enabled.
-
-          <Button click="recheck_stripe" label="Recheck" />
-        </p>
       {#else}
-        <p>This studio is still working on opening its doors. Check back in soon!</p>
+        <div class="w-full mx-auto md:bg-base-300">
+          <div class="max-w-prose w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+            <h1 class="text-2xl">
+              Coming Soon
+            </h1>
+            <div class="divider" />
+            {#if @current_user_member? && !@studio.stripe_details_submitted}
+              <p>You need to onboard your studio on Stripe before it opens its doors.</p>
+              <div class="flex flex-row-reverse">
+                <Link label="Onboard" to={@stripe_onboarding_url} class="btn btn-primary py-1 px-5 m-1" />
+                <Button click="recheck_stripe" label="Recheck" />
+              </div>
+            {#elseif @current_user_member? && !@studio.stripe_charges_enabled}
+              <p>Details have been submitted to Stripe. Please wait while charges are enabled. This shouldn't take too long.</p>
+              <Button click="recheck_stripe" label="Recheck" />
+            {#else}
+              <p>This studio is still working on opening its doors. Check back in soon!</p>
+            {/if}
+          </div>
+        </div>
       {/if}
     </StudioLayout>
     """
