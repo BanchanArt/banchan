@@ -15,8 +15,9 @@ defmodule Banchan.Studios do
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Invoice
   alias Banchan.Repo
-  alias Banchan.Studios.{Notifications, Payout, Studio}
+  alias Banchan.Studios.{Notifications, Payout, PortfolioImage, Studio}
   alias Banchan.Uploads
+  alias Banchan.Uploads.Upload
 
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
@@ -112,6 +113,55 @@ defmodule Banchan.Studios do
     image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")
     File.rm!(mog.path)
     image
+  end
+
+  def make_portfolio_image!(%User{} = uploader, src, true) do
+    mog =
+      Mogrify.open(src)
+      |> Mogrify.format("jpeg")
+      |> Mogrify.save(in_place: true)
+
+    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "gallery_image.jpg")
+    File.rm!(mog.path)
+    image
+  end
+
+  def studio_portfolio_uploads(%Studio{} = studio) do
+    from(i in PortfolioImage,
+      join: u in assoc(i, :upload),
+      where: i.studio_id == ^studio.id,
+      order_by: [asc: i.index],
+      select: u
+    )
+    |> Repo.all()
+  end
+
+  def update_portfolio(studio, current_user_member?, portfolio_images)
+
+  def update_portfolio(_, false, _) do
+    {:error, :unauthorized}
+  end
+
+  def update_portfolio(%Studio{} = studio, true, portfolio_images) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        portfolio_images =
+          (portfolio_images || [])
+          |> Enum.with_index()
+          |> Enum.map(fn {%Upload{} = upload, index} ->
+            %PortfolioImage{
+              index: index,
+              upload_id: upload.id
+            }
+          end)
+
+        studio
+        |> Repo.preload(:portfolio_imgs)
+        |> Studio.portfolio_changeset(portfolio_images)
+        |> Repo.update(returning: true)
+      end)
+
+    ret
   end
 
   @doc """

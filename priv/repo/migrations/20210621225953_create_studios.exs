@@ -81,5 +81,15 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
     create unique_index(:studio_payouts, [:public_id])
     create unique_index(:studio_payouts, [:stripe_payout_id])
     create index(:studio_payouts, [:studio_id])
+
+    create table(:studio_portfolio_images) do
+      add :studio_id, references(:studios, on_delete: :delete_all), null: false
+      add :upload_id, references(:uploads, on_delete: :delete_all, type: :uuid), null: false
+      add :index, :integer, null: false
+
+      timestamps()
+    end
+
+    create unique_index(:studio_portfolio_images, [:studio_id, :upload_id])
   end
 end

@@ -5,7 +5,7 @@ defmodule Banchan.Studios.Studio do
   import Ecto.Changeset
 
   alias Banchan.Identities
-  alias Banchan.Studios.Common
+  alias Banchan.Studios.{Common, PortfolioImage}
   alias Banchan.Uploads.Upload
 
   schema "studios" do
@@ -27,6 +27,10 @@ defmodule Banchan.Studios.Studio do
 
     belongs_to :header_img, Upload, type: :binary_id
     belongs_to :card_img, Upload, type: :binary_id
+
+    has_many :portfolio_imgs, PortfolioImage,
+      on_replace: :delete_if_exists,
+      preload_order: [asc: :index]
 
     many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
 
@@ -70,6 +74,12 @@ defmodule Banchan.Studios.Studio do
     |> validate_markdown(:default_template)
     |> validate_default_currency(:default_currency, :payment_currencies)
     |> validate_handle_unique(:handle)
+  end
+
+  def portfolio_changeset(studio, images) do
+    studio
+    |> Ecto.Changeset.change()
+    |> put_assoc(:portfolio_imgs, images)
   end
 
   defp validate_default_currency(changeset, default_field, currencies_field)
