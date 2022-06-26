@@ -17,7 +17,8 @@ config :banchan, Banchan.Repo,
   database: "banchan_test#{System.get_env("MIX_TEST_PARTITION")}",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: 10
+  pool_size: 10,
+  queue_target: 500
 
 if System.get_env("GITHUB_ACTIONS") do
   config :banchan, Banchan.Repo,
