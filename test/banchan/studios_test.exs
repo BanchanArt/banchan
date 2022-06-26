@@ -18,6 +18,9 @@ defmodule Banchan.StudiosTest do
   alias Banchan.Studios
   alias Banchan.Studios.{Payout, Studio}
 
+  alias BanchanWeb.Endpoint
+  alias BanchanWeb.Router.Helpers, as: Routes
+
   setup :verify_on_exit!
 
   describe "validation" do
@@ -53,10 +56,7 @@ defmodule Banchan.StudiosTest do
       stripe_id = unique_stripe_id()
       studio_handle = unique_studio_handle()
       studio_name = unique_studio_name()
-      # NB(zkat): This would otherwise be localhost:4000, but we have to do a
-      # replacement here to make the URL valid for testing with stripe,
-      # because stripe does not want localhost, even in test mode.
-      studio_url = "http://banchan.art/studios/#{studio_handle}"
+      studio_url = Routes.studio_shop_url(Endpoint, :show, studio_handle)
 
       Banchan.StripeAPI.Mock
       |> expect(:create_account, fn attrs ->
@@ -69,7 +69,6 @@ defmodule Banchan.StudiosTest do
       {:ok, studio} =
         Banchan.Studios.new_studio(
           %Studio{artists: [user]},
-          studio_url,
           %{
             name: studio_name,
             handle: studio_handle,
@@ -111,17 +110,35 @@ defmodule Banchan.StudiosTest do
         Studios.update_studio_profile(
           studio,
           false,
-          attrs
+          attrs,
+          nil,
+          nil
         )
 
       from_db = Repo.get!(Studio, studio.id) |> Repo.preload(:artists)
       assert from_db.name != attrs.name
 
+      Banchan.StripeAPI.Mock
+      |> expect(:update_account, fn id, params ->
+        assert id == studio.stripe_id
+
+        assert %{
+                 business_profile: %{
+                   name: attrs.name,
+                   url: Routes.studio_shop_url(Endpoint, :show, attrs.handle)
+                 }
+               } == params
+
+        {:ok, %Stripe.Account{id: id}}
+      end)
+
       {:ok, studio} =
         Studios.update_studio_profile(
           studio,
           true,
-          attrs
+          attrs,
+          nil,
+          nil
         )
 
       assert studio.name == "new name"
@@ -182,7 +199,6 @@ defmodule Banchan.StudiosTest do
       user = user_fixture()
       studio_handle = unique_studio_handle()
       studio_name = unique_studio_name()
-      studio_url = "http://localhost:4000/studios/#{studio_handle}"
 
       Banchan.StripeAPI.Mock
       |> expect(:create_account, fn _ ->
@@ -192,7 +208,6 @@ defmodule Banchan.StudiosTest do
       {:ok, studio} =
         Banchan.Studios.new_studio(
           %Studio{artists: [user]},
-          studio_url,
           valid_studio_attributes(%{
             name: studio_name,
             handle: studio_handle

@@ -40,7 +40,6 @@ user = user |> Banchan.Repo.reload()
 {:ok, studio} =
   Banchan.Studios.new_studio(
     %Banchan.Studios.Studio{artists: [user]},
-    "https://banchan.art/studios/kitteh-studio",
     %{
       handle: "kitteh-studio",
       name: "Kitteh Studio",
@@ -123,7 +122,6 @@ user = user |> Banchan.Repo.reload()
 {:ok, studio} =
   Banchan.Studios.new_studio(
     %Banchan.Studios.Studio{artists: [user]},
-    "https://banchan.art/studios/kitteh-japan",
     %{
       handle: "kitteh-japan",
       name: "Kitteh Studio in Japan",

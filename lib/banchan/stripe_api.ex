@@ -73,4 +73,9 @@ defmodule Banchan.StripeAPI do
   def retrieve_transfer(id) do
     Stripe.Transfer.retrieve(id, expand: ["destination_payment.balance_transaction"])
   end
+
+  @impl Banchan.StripeAPI.Base
+  def update_account(id, params) do
+    Stripe.Account.update(id, params)
+  end
 end

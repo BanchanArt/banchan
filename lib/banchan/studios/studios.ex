@@ -16,6 +16,10 @@ defmodule Banchan.Studios do
   alias Banchan.Commissions.Invoice
   alias Banchan.Repo
   alias Banchan.Studios.{Notifications, Payout, Studio}
+  alias Banchan.Uploads
+
+  alias BanchanWeb.Endpoint
+  alias BanchanWeb.Router.Helpers, as: Routes
 
   @doc """
   Gets a studio by its handle.
@@ -36,16 +40,78 @@ defmodule Banchan.Studios do
   @doc """
   Updates the studio profile fields.
   """
-  def update_studio_profile(studio, current_user_member?, attrs)
+  def update_studio_profile(studio, current_user_member?, attrs, card_img, header_img)
 
-  def update_studio_profile(_, false, _) do
+  def update_studio_profile(_, false, _, _, _) do
     {:error, :unauthorized}
   end
 
-  def update_studio_profile(%Studio{} = studio, _, attrs) do
-    studio
-    |> Studio.profile_changeset(attrs)
-    |> Repo.update(returning: true)
+  def update_studio_profile(%Studio{} = studio, _, attrs, card_img, header_img) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        changeset =
+          studio
+          |> Repo.preload(:card_img)
+          |> Repo.preload(:header_img)
+          |> Studio.profile_changeset(attrs)
+
+        changeset =
+          if is_nil(card_img) do
+            changeset
+          else
+            changeset |> Ecto.Changeset.put_assoc(:card_img, card_img)
+          end
+
+        changeset =
+          if is_nil(header_img) do
+            changeset
+          else
+            changeset |> Ecto.Changeset.put_assoc(:header_img, header_img)
+          end
+
+        {:ok, _} =
+          stripe_mod().update_account(studio.stripe_id, %{
+            business_profile: %{
+              name: Ecto.Changeset.get_field(changeset, :name),
+              url:
+                String.replace(
+                  Routes.studio_shop_url(
+                    Endpoint,
+                    :show,
+                    Ecto.Changeset.get_field(changeset, :handle)
+                  ),
+                  "localhost:4000",
+                  "banchan.art"
+                )
+            }
+          })
+
+        changeset |> Repo.update(returning: true)
+      end)
+
+    ret
+  end
+
+  def make_card_image!(%User{} = uploader, src, true) do
+    mog =
+      Mogrify.open(src)
+      |> Mogrify.format("jpeg")
+      |> Mogrify.save(in_place: true)
+
+    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")
+    File.rm!(mog.path)
+    image
+  end
+
+  def make_header_image!(%User{} = uploader, src, true) do
+    mog =
+      Mogrify.open(src)
+      |> Mogrify.format("jpeg")
+      |> Mogrify.save(in_place: true)
+
+    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")
+    File.rm!(mog.path)
+    image
   end
 
   @doc """
@@ -56,7 +122,7 @@ defmodule Banchan.Studios do
       iex> new_studio(studio, %{handle: ..., name: ..., ...})
       {:ok, %Studio{}}
   """
-  def new_studio(%Studio{artists: artists} = studio, url, attrs) do
+  def new_studio(%Studio{artists: artists} = studio, attrs) do
     if Enum.any?(artists, &is_nil(&1.confirmed_at)) do
       {:error, :unconfirmed_artist}
     else
@@ -69,7 +135,14 @@ defmodule Banchan.Studios do
             | data: %{
                 studio
                 | stripe_id:
-                    create_stripe_account(url, Ecto.Changeset.get_field(changeset, :country))
+                    create_stripe_account(
+                      Routes.studio_shop_url(
+                        Endpoint,
+                        :show,
+                        Ecto.Changeset.get_field(changeset, :handle)
+                      ),
+                      Ecto.Changeset.get_field(changeset, :country)
+                    )
               }
           }
         else

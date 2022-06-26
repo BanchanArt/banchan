@@ -39,7 +39,6 @@ defmodule Banchan.StudiosFixtures do
     {:ok, studio} =
       Banchan.Studios.new_studio(
         %Studio{artists: artists},
-        "http://localhost:4000/studios/#{Map.get(attrs, :handle, "studio#{System.unique_integer()}")}",
         valid_studio_attributes(attrs)
       )
 

@@ -107,7 +107,6 @@ defmodule BanchanWeb.StudioLive.New do
   def handle_event("submit", val, socket) do
     case Studios.new_studio(
            %Studio{artists: [socket.assigns.current_user]},
-           Routes.studio_shop_url(Endpoint, :show, val["studio"]["handle"]),
            val["studio"]
          ) do
       {:ok, studio} ->
