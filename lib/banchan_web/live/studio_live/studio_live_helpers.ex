@@ -22,12 +22,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
 
     socket =
       socket
-      |> assign(page_title: studio.name)
-      |> assign(
-        page_description:
-          studio.about && HtmlSanitizeEx.strip_tags(Earmark.as_html!(studio.about))
-      )
-      |> assign(page_image: Routes.static_url(Endpoint, "/images/shop_card_default.png"))
+      |> assign_card_props(studio)
       |> assign(studio: studio)
       |> assign(current_user_member?: current_user_member?)
       |> assign(followers: Studios.Notifications.follower_count(studio))
@@ -46,5 +41,18 @@ defmodule BanchanWeb.StudioLive.Helpers do
       true ->
         socket
     end
+  end
+
+  def assign_card_props(socket, studio) do
+    socket
+    |> assign(page_title: studio.name)
+    |> assign(
+      page_description: studio.about && HtmlSanitizeEx.strip_tags(Earmark.as_html!(studio.about))
+    )
+    |> assign(
+      page_image:
+        (studio.card_img_id || studio.header_img_id) &&
+          Routes.public_image_url(Endpoint, :image, studio.card_img_id || studio.header_img_id)
+    )
   end
 end

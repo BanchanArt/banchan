@@ -23,17 +23,9 @@ defmodule BanchanWeb.LayoutView do
           <meta property="og:image" content={assigns[:page_small_image]}>
           <meta name="twitter:image:src" content={assigns[:page_image]}>
           <meta name="twitter:card" content="summary">
-        {#else}
-          <meta
-            property="og:image"
-            content={assigns[:page_image] ||
-              Routes.static_url(Endpoint, "/images/640x360.png")}
-          />
-          <meta
-            name="twitter:image:src"
-            content={assigns[:page_image] ||
-              Routes.static_url(Endpoint, "/images/640x360.png")}
-          />
+        {#elseif assigns[:page_image]}
+          <meta property="og:image" content={assigns[:page_image]}>
+          <meta name="twitter:image:src" content={assigns[:page_image]}>
           <meta name="twitter:card" content="summary_large_image">
         {/if}
         <meta name="twitter:site" content="@BanchanArt">
