@@ -67,6 +67,10 @@ defmodule BanchanWeb.StudioLive.Shop do
      |> assign(studio: %{socket.assigns.studio | stripe_details_submitted: submitted?})}
   end
 
+  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
+    {:noreply, socket |> assign(followers: new_count)}
+  end
+
   @impl true
   def handle_event("recheck_stripe", _, socket) do
     # No need to refresh the studio here. It'll get reloaded by the PubSub event(s)
@@ -119,6 +123,7 @@ defmodule BanchanWeb.StudioLive.Shop do
       current_user={@current_user}
       flashes={@flash}
       studio={@studio}
+      followers={@followers}
       current_user_member?={@current_user_member?}
       tab={:shop}
       uri={@uri}

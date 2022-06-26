@@ -166,6 +166,10 @@ defmodule BanchanWeb.StudioLive.Payouts do
      )}
   end
 
+  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
+    {:noreply, socket |> assign(followers: new_count)}
+  end
+
   defp payout_possible?(available) do
     !Enum.empty?(available) &&
       Enum.all?(available, &(&1.amount > 0))
@@ -192,6 +196,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
       current_user={@current_user}
       flashes={@flash}
       studio={@studio}
+      followers={@followers}
       current_user_member?={@current_user_member?}
       tab={:payouts}
       uri={@uri}

@@ -14,6 +14,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   prop current_user_member?, :boolean, required: true
   prop flashes, :string, required: true
   prop studio, :struct, required: true
+  prop followers, :integer, required: true
   prop tab, :atom
   prop uri, :string, required: true
   prop padding, :integer
@@ -62,15 +63,20 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
     ~F"""
     <Layout uri={@uri} padding={@padding} current_user={@current_user} flashes={@flashes}>
       <:hero>
-        <section class="bg-secondary">
-          <div class="ml-8 col-span-12">
-            <p class="text-3xl text-secondary-content font-bold flex-grow">
+        <section>
+          {#if @studio.header_img_id || @studio.card_img_id}
+            <img
+              class="object-cover aspect-header-image rounded-b-xl w-full"
+              src={Routes.public_image_path(Endpoint, :image, @studio.header_img_id || @studio.card_img_id)}
+            />
+          {#else}
+            <div class="rounded-b-xl aspect-header-image bg-base-300 w-full" />
+          {/if}
+          <div class="m-6">
+            <h1 class="font-medium text-2xl md:text-3xl flex flex-row">
               {@studio.name}
-            </p>
-            <p class="text-base text-secondary-content flex-grow">
-              {@studio.description}
               {#if @current_user}
-                <Button click="toggle_follow" class="glass btn-sm rounded-full px-2 py-0">
+                <Button click="toggle_follow" class="ml-auto btn-sm btn-outline rounded-full px-2 py-0">
                   {if @user_following? do
                     "Unfollow"
                   else
@@ -78,8 +84,23 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                   end}
                 </Button>
               {/if}
-            </p>
-            <br>
+            </h1>
+            <div>
+              <span class="font-bold">
+                {#if @followers > 9999}
+                  {Number.SI.number_to_si(@followers)}
+                {#else}
+                  {Number.Delimit.number_to_delimited(@followers, precision: 0)}
+                {/if}
+              </span>
+              <span>
+                {#if @followers == 1}
+                  Follower
+                {#else}
+                  Followers
+                {/if}
+              </span>
+            </div>
           </div>
           <div class="overflow-auto min-w-screen">
             <nav class="tabs px-2 flex flex-nowrap">

@@ -23,8 +23,16 @@ defmodule BanchanWeb.StudioLive.Helpers do
     socket =
       socket
       |> assign(page_title: studio.name)
-      |> assign(page_description: studio.description)
+      |> assign(
+        page_description:
+          studio.about && HtmlSanitizeEx.strip_tags(Earmark.as_html!(studio.about))
+      )
       |> assign(page_image: Routes.static_url(Endpoint, "/images/shop_card_default.png"))
+      |> assign(studio: studio)
+      |> assign(current_user_member?: current_user_member?)
+      |> assign(followers: Studios.Notifications.follower_count(studio))
+
+    Studios.Notifications.subscribe_to_follower_count(studio)
 
     cond do
       current_member && !current_user_member? ->
@@ -32,21 +40,11 @@ defmodule BanchanWeb.StudioLive.Helpers do
 
       requires_stripe && !Studios.charges_enabled?(studio, false) ->
         socket
-        |> assign(
-          page_title: studio.name,
-          studio: studio,
-          current_user_member?: current_user_member?
-        )
         |> put_flash(:error, "This studio is not ready to accept commissions yet.")
         |> redirect(to: Routes.studio_shop_path(Endpoint, :show, handle))
 
       true ->
         socket
-        |> assign(
-          page_title: studio.name,
-          studio: studio,
-          current_user_member?: current_user_member?
-        )
     end
   end
 end

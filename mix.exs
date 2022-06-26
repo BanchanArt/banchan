@@ -63,6 +63,7 @@ defmodule Banchan.MixProject do
       {:money, "~> 1.9"},
       {:surface, "~> 0.7.4"},
       {:slugify, "~> 1.3.1"},
+      {:number, "~> 1.0.3"},
       {:bamboo, "~> 2.2.0"},
       {:ex_aws, "~> 2.3.1"},
       {:ex_aws_s3, "~> 2.3.2"},

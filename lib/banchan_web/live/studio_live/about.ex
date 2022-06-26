@@ -21,6 +21,10 @@ defmodule BanchanWeb.StudioLive.About do
     {:noreply, socket |> assign(uri: uri)}
   end
 
+  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
+    {:noreply, socket |> assign(followers: new_count)}
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -29,13 +33,14 @@ defmodule BanchanWeb.StudioLive.About do
       current_user={@current_user}
       flashes={@flash}
       studio={@studio}
+      followers={@followers}
       current_user_member?={@current_user_member?}
       tab={:about}
       uri={@uri}
     >
       <div class="w-full mx-auto md:bg-base-300">
         <div class="max-w-prose w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
-          <Markdown content={@studio.summary} />
+          <Markdown content={@studio.about} />
         </div>
       </div>
     </StudioLayout>
