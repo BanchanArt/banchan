@@ -54,38 +54,6 @@ defmodule BanchanWeb.StudioLive.New do
   end
 
   @impl true
-  def render(assigns) do
-    ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <h1 class="text-2xl">New Studio</h1>
-          <Form
-            class="col-span-1"
-            for={@changeset}
-            change="change"
-            submit="submit"
-            opts={autocomplete: "off"}
-          >
-            <TextInput name={:name} icon="user" opts={required: true} />
-            <TextInput name={:handle} icon="at" opts={required: true} />
-            <MarkdownInput id="about" name={:about} opts={required: true} />
-            <Select name={:country} options={@countries} opts={required: true} />
-            <Select name={:default_currency} options={@currencies} opts={required: true} />
-            <MultipleSelect
-              name={:payment_currencies}
-              options={@currencies}
-              opts={required: true, default_value: :USD}
-            />
-            <Submit changeset={@changeset} label="Save" />
-          </Form>
-        </div>
-      </div>
-    </Layout>
-    """
-  end
-
-  @impl true
   def handle_event("change", %{"studio" => studio, "_target" => target}, socket) do
     studio =
       if target == ["studio", "name"] do
@@ -116,5 +84,37 @@ defmodule BanchanWeb.StudioLive.New do
       other ->
         other
     end
+  end
+
+  @impl true
+  def render(assigns) do
+    ~F"""
+    <Layout uri={@uri} padding={0} current_user={@current_user} flashes={@flash}>
+      <div class="w-full md:bg-base-300">
+        <div class="max-w-sm w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+          <Form
+            class="col-span-1"
+            for={@changeset}
+            change="change"
+            submit="submit"
+            opts={autocomplete: "off"}
+          >
+            <h1 class="text-2xl">New Studio</h1>
+            <TextInput name={:name} icon="user" opts={required: true} />
+            <TextInput name={:handle} icon="at" opts={required: true} />
+            <MarkdownInput id="about" name={:about} opts={required: true} />
+            <Select name={:country} options={@countries} opts={required: true} />
+            <Select name={:default_currency} options={@currencies} opts={required: true} />
+            <MultipleSelect
+              name={:payment_currencies}
+              options={@currencies}
+              opts={required: true, default_value: :USD}
+            />
+            <Submit changeset={@changeset} label="Save" />
+          </Form>
+        </div>
+      </div>
+    </Layout>
+    """
   end
 end
