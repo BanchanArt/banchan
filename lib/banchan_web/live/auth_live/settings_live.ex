@@ -61,7 +61,7 @@ defmodule BanchanWeb.SettingsLive do
   def handle_event("change_email", val, socket) do
     changeset =
       socket.assigns.current_user
-      |> User.email_changeset(val["user"])
+      |> User.email_changeset(val["change_email"])
       |> Map.put(:action, :update)
 
     socket = assign(socket, email_changeset: changeset)
@@ -72,8 +72,8 @@ defmodule BanchanWeb.SettingsLive do
   def handle_event("submit_email", val, socket) do
     case Accounts.apply_user_email(
            socket.assigns.current_user,
-           val["user"]["password"],
-           val["user"]
+           val["change_email"]["password"],
+           val["change_email"]
          ) do
       {:ok, applied_user} ->
         Accounts.deliver_update_email_instructions(
@@ -100,7 +100,7 @@ defmodule BanchanWeb.SettingsLive do
   def handle_event("change_password", val, socket) do
     changeset =
       socket.assigns.current_user
-      |> User.password_changeset(val["user"])
+      |> User.password_changeset(val["change_password"])
       |> Map.put(:action, :update)
 
     socket = assign(socket, password_changeset: changeset)
@@ -111,8 +111,8 @@ defmodule BanchanWeb.SettingsLive do
   def handle_event("submit_password", val, socket) do
     case Accounts.update_user_password(
            socket.assigns.current_user,
-           val["user"]["current_password"],
-           val["user"]
+           val["change_password"]["current_password"],
+           val["change_password"]
          ) do
       {:ok, _user} ->
         socket =
@@ -213,6 +213,7 @@ defmodule BanchanWeb.SettingsLive do
       <div class="divider" />
       <Form
         class="flex flex-col gap-4"
+        as={:change_email}
         for={@email_changeset}
         change="change_email"
         submit="submit_email"
@@ -228,6 +229,7 @@ defmodule BanchanWeb.SettingsLive do
       <div class="divider" />
       <Form
         class="flex flex-col gap-4"
+        as={:change_password}
         for={@password_changeset}
         change="change_password"
         submit="submit_password"
@@ -237,7 +239,7 @@ defmodule BanchanWeb.SettingsLive do
           Update Password
         </h3>
         <TextInput
-          name={:current_confirmation}
+          name={:current_password}
           icon="lock"
           label="Current Password"
           opts={required: true, type: :password}
