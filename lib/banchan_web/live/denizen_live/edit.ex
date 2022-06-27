@@ -32,26 +32,6 @@ defmodule BanchanWeb.DenizenLive.Edit do
   end
 
   @impl true
-  def render(assigns) do
-    ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <h1 class="text-2xl">Edit Profile for @{@user.handle}</h1>
-      <Form class="profile-info" for={@changeset} change="change" submit="submit">
-        <TextInput name={:name} icon="user" opts={required: true} />
-        <TextInput name={:handle} icon="at" opts={required: true} />
-        <TextArea name={:bio} />
-        <Submit changeset={@changeset} label="Save" />
-      </Form>
-      <h2 class="text-xl">Update profile picture</h2>
-      <Form class="pfp-upload" for={:pfp} change="change_pfp" submit="submit_pfp">
-        <UploadInput upload={@uploads.pfp} cancel="cancel_pfp_upload" />
-        <Submit label="Upload" />
-      </Form>
-    </Layout>
-    """
-  end
-
-  @impl true
   def handle_event("change", val, socket) do
     changeset =
       socket.assigns.user
@@ -117,5 +97,42 @@ defmodule BanchanWeb.DenizenLive.Edit do
     end)
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def render(assigns) do
+    ~F"""
+    <Layout uri={@uri} padding={0} current_user={@current_user} flashes={@flash}>
+      <div class="w-full md:bg-base-300">
+        <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+          <h1 class="text-2xl">Edit Profile for @{@user.handle}</h1>
+          <Form class="profile-info" for={@changeset} change="change" submit="submit">
+            <TextInput name={:name} icon="user" opts={required: true} />
+            <TextInput name={:handle} icon="at" opts={required: true} />
+            <TextArea name={:bio} />
+            <Submit changeset={@changeset} label="Save" />
+          </Form>
+          <h2 class="text-xl">Update profile picture</h2>
+          <Form class="pfp-upload" for={:pfp} change="change_pfp" submit="submit_pfp">
+            <div class="mx-auto my-4 flex flex-row">
+              <div class="avatar">
+                <div class="rounded-full w-32">
+                  {#if Enum.empty?(@uploads.pfp.entries) && !@user.pfp_img_id}
+                    <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
+                  {#elseif !Enum.empty?(@uploads.pfp.entries)}
+                    {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.pfp.entries, 0))}
+                  {#elseif @user.pfp_img_id}
+                    <img src={Routes.public_image_path(Endpoint, :image, @user.pfp_img_id)}>
+                  {/if}
+                </div>
+              </div>
+              <UploadInput label="Upload Profile Picture" upload={@uploads.pfp} cancel="cancel_pfp_upload" />
+            </div>
+            <Submit label="Upload" />
+          </Form>
+        </div>
+      </div>
+    </Layout>
+    """
   end
 end
