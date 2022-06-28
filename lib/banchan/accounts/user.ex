@@ -156,11 +156,39 @@ defmodule Banchan.Accounts.User do
   """
   def profile_changeset(user, attrs \\ %{}) do
     user
-    |> cast(attrs, [:handle, :name, :bio])
+    |> cast(attrs, [:handle, :name, :bio, :tags])
     |> validate_required([:handle])
     |> validate_handle()
     |> validate_name()
     |> validate_bio()
+    |> validate_tags()
+  end
+
+  def validate_tags(changeset) do
+    validate_change(changeset, :tags, fn field, tags ->
+      if tags |> Enum.map(&String.downcase/1) ==
+           tags |> Enum.map(&String.downcase/1) |> Enum.uniq() do
+        []
+      else
+        [{field, "cannot have duplicate tags."}]
+      end
+    end)
+    |> validate_change(changeset, :tags, fn field, tags ->
+      if Enum.count(tags) > 15 do
+        [{field, "cannot have more than 15 tags."}]
+      else
+        []
+      end
+    end)
+    |> validate_change(changeset, :tags, fn field, tags ->
+      if Enum.all?(tags, fn tag ->
+           String.match?(tag, ~r/^[[:alnum:]]*[[:alpha:]][[:alnum:]]*$/)
+         end) do
+        []
+      else
+        [{field, "Only letters and numbers are allowed in tags, with at least one letter."}]
+      end
+    end)
   end
 
   @doc """

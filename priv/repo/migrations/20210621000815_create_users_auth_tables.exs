@@ -31,7 +31,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :totp_activated, :boolean
       # Array fields are the best/fastest approach in most cases.
       # http://www.databasesoup.com/2015/01/tag-all-things.html
-      add :tags, {:array, :text}, default: [], null: false
+      add :tags, {:array, :citext}, default: [], null: false
       add :header_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :pfp_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :pfp_thumb_id, references(:uploads, on_delete: :nilify_all, type: :uuid)

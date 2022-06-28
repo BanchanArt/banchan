@@ -3,7 +3,7 @@ defmodule Banchan.Repo.Migrations.Tags do
 
   def change do
     create table(:tags) do
-      add :tag, :text, null: false
+      add :tag, :citext, null: false
       add :count, :integer, null: false, default: 0
     end
 

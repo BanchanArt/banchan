@@ -10,6 +10,7 @@ defmodule Banchan.Tags do
   def list_tags(opts \\ []) do
     page = Keyword.get(opts, :page, 1)
     page_size = Keyword.get(opts, :page_size, 20)
+
     from(tag in Tag,
       select: tag
     )
