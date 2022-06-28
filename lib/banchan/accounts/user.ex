@@ -20,6 +20,7 @@ defmodule Banchan.Accounts.User do
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
     field :totp_secret, :binary
     field :totp_activated, :boolean
+    field :tags, {:array, :string}
 
     belongs_to :header_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :pfp_img, Upload, on_replace: :nilify, type: :binary_id

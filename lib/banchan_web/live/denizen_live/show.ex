@@ -113,6 +113,11 @@ defmodule BanchanWeb.DenizenLive.Show do
           <div class="mx-6 my-4">
             {@user.bio}
           </div>
+          <div :if={!Enum.empty?(@user.tags)} class="mx-6 my-4 flex flex-col flex-wrap">
+            {#for tag <- @user.tags}
+              <div class="badge">#{tag}</div>
+            {/for}
+          </div>
           <div class="mx-6 flex flex-row my-4 gap-4">
             <div>
               <span class="font-bold">
