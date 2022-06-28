@@ -2,6 +2,8 @@ defmodule Banchan.Repo.Migrations.TextSearchExtensions do
   use Ecto.Migration
 
   def up do
+    execute "CREATE EXTENSION IF NOT EXISTS citext;"
+
     # TODO: enable these and set stuff up again once we're ready for a paid
     # gigalixir tier. This isn't supported on the free tier. :(
 
@@ -25,6 +27,8 @@ defmodule Banchan.Repo.Migrations.TextSearchExtensions do
   end
 
   def down do
+    execute "DROP EXTENSION citext;"
+
     # execute """
     # DROP EXTENSION unaccent;
     # """
