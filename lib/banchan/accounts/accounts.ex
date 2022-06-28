@@ -159,14 +159,41 @@ defmodule Banchan.Accounts do
 
   ## Examples
 
-      iex> update_user_profile(user, %{handle: ..., bio: ..., ...})
+      iex> update_user_profile(user, %{handle: ..., bio: ..., ...}, nil, nil)
       {:ok, %User{}}
 
   """
-  def update_user_profile(user, attrs) do
-    user
-    |> User.profile_changeset(attrs)
-    |> Repo.update()
+  def update_user_profile(user, attrs, pfp, header) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        changeset =
+          user
+          |> Repo.preload(:pfp_img)
+          |> Repo.preload(:header_img)
+          |> User.profile_changeset(attrs)
+
+        changeset =
+          case pfp do
+            {pfp, thumb} ->
+              changeset
+              |> Ecto.Changeset.put_assoc(:pfp_img, pfp)
+              |> Ecto.Changeset.put_assoc(:pfp_thumb, thumb)
+
+            nil ->
+              changeset
+          end
+
+        changeset =
+          if header do
+            changeset |> Ecto.Changeset.put_assoc(:header_img, header)
+          else
+            changeset
+          end
+
+        changeset |> Repo.update()
+      end)
+
+    ret
   end
 
   @doc """
@@ -557,7 +584,11 @@ defmodule Banchan.Accounts do
     Phoenix.PubSub.subscribe(@pubsub, UserAuth.pubsub_topic())
   end
 
-  def update_user_pfp(%User{} = user, src) do
+  def make_pfp_images!(_, _, false) do
+    {:error, :unauthorized}
+  end
+
+  def make_pfp_images!(%User{} = user, src, true) do
     mog =
       Mogrify.open(src)
       |> Mogrify.format("jpeg")
@@ -572,16 +603,28 @@ defmodule Banchan.Accounts do
       Mogrify.open(src)
       |> Mogrify.format("jpeg")
       |> Mogrify.gravity("Center")
-      |> Mogrify.resize_to_fill("64x64")
+      |> Mogrify.resize_to_fill("128x128")
       |> Mogrify.save(in_place: true)
 
     thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")
     File.rm!(mog.path)
 
-    user
-    |> User.changeset(%{})
-    |> Ecto.Changeset.put_assoc(:pfp_img, pfp)
-    |> Ecto.Changeset.put_assoc(:pfp_thumb, thumb)
-    |> Repo.update()
+    {pfp, thumb}
+  end
+
+  def make_header_image!(_, _, false) do
+    {:error, :unauthorized}
+  end
+
+  def make_header_image!(%User{} = user, src, true) do
+    mog =
+      Mogrify.open(src)
+      |> Mogrify.format("jpeg")
+      |> Mogrify.save(in_place: true)
+
+    header = Uploads.save_file!(user, mog.path, "image/jpeg", "header.jpg")
+    File.rm!(mog.path)
+
+    header
   end
 end
