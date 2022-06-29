@@ -155,6 +155,13 @@ defmodule Banchan.Accounts.User do
   A user changeset meant for general editing forms.
   """
   def profile_changeset(user, attrs \\ %{}) do
+    attrs =
+      if attrs["tags"] == "[]" do
+        Map.put(attrs, "tags", [])
+      else
+        attrs
+      end
+
     user
     |> cast(attrs, [:handle, :name, :bio, :tags])
     |> validate_required([:handle])
@@ -165,7 +172,8 @@ defmodule Banchan.Accounts.User do
   end
 
   def validate_tags(changeset) do
-    validate_change(changeset, :tags, fn field, tags ->
+    changeset
+    |> validate_change(:tags, fn field, tags ->
       if tags |> Enum.map(&String.downcase/1) ==
            tags |> Enum.map(&String.downcase/1) |> Enum.uniq() do
         []
@@ -173,14 +181,14 @@ defmodule Banchan.Accounts.User do
         [{field, "cannot have duplicate tags."}]
       end
     end)
-    |> validate_change(changeset, :tags, fn field, tags ->
+    |> validate_change(:tags, fn field, tags ->
       if Enum.count(tags) > 15 do
         [{field, "cannot have more than 15 tags."}]
       else
         []
       end
     end)
-    |> validate_change(changeset, :tags, fn field, tags ->
+    |> validate_change(:tags, fn field, tags ->
       if Enum.all?(tags, fn tag ->
            String.match?(tag, ~r/^[[:alnum:]]*[[:alpha:]][[:alnum:]]*$/)
          end) do

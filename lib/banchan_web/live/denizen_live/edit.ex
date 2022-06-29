@@ -8,7 +8,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
 
   alias Banchan.Accounts
 
-  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Submit, TagsInput, TextArea, TextInput}
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -18,7 +18,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
 
     {:ok,
      socket
-     |> assign(user: user, changeset: User.profile_changeset(user))
+     |> assign(user: user, changeset: User.profile_changeset(user), tags: user.tags)
      |> allow_upload(:pfp,
        accept: ~w(image/jpeg image/png),
        max_entries: 1,
@@ -44,6 +44,8 @@ defmodule BanchanWeb.DenizenLive.Edit do
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)
+
+    Ecto.Changeset.fetch_field(changeset, :tags)
 
     {:noreply, socket}
   end
@@ -142,6 +144,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
                 </div>
               </div>
             </div>
+            <TagsInput id="user_tags" name={:tags} />
             <TextInput name={:name} icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />
             <TextArea name={:bio} />
