@@ -41,6 +41,8 @@ defmodule Banchan.Accounts.User do
     field :picarto_channel, :string
     field :pixiv_url, :string
     field :pixiv_handle, :string
+    field :tiktok_handle, :string
+    field :artfight_handle, :string
 
     belongs_to :header_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :pfp_img, Upload, on_replace: :nilify, type: :binary_id
@@ -221,7 +223,9 @@ defmodule Banchan.Accounts.User do
       :twitch_channel,
       :picarto_channel,
       :pixiv_url,
-      :pixiv_handle
+      :pixiv_handle,
+      :tiktok_handle,
+      :artfight_handle
     ])
     |> validate_required([:handle])
     |> validate_handle()
@@ -368,6 +372,20 @@ defmodule Banchan.Accounts.User do
         []
       else
         [{field, "must be a valid Pixiv handle."}]
+      end
+    end)
+    |> validate_change(:tiktok_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid TikTok handle, without the @ sign."}]
+      end
+    end)
+    |> validate_change(:artfight_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Artfight handle, without the ~ sign."}]
       end
     end)
   end

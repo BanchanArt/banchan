@@ -43,6 +43,8 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :picarto_channel, :text
       add :pixiv_url, :text
       add :pixiv_handle, :text
+      add :tiktok_handle, :text
+      add :artfight_handle, :text
 
       # Array fields are the best/fastest approach in most cases.
       # http://www.databasesoup.com/2015/01/tag-all-things.html

@@ -195,6 +195,20 @@ defmodule BanchanWeb.DenizenLive.Show do
             >
               <img width="16" src={Routes.static_path(Endpoint, "/images/picarto-favicon.svg")}><div class="font-medium text-sm">{@user.pixiv_handle}</div>
             </a>
+            <a
+              :if={@user.tiktok_handle}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={"https://www.tiktok.com/@#{@user.tiktok_handle}"}
+            >
+              <i class="fa-brands fa-tiktok" /><div class="font-medium text-sm">@{@user.tiktok_handle}</div>
+            </a>
+            <a
+              :if={@user.artfight_handle}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={"https://artfight.net/~#{@user.artfight_handle}"}
+            >
+              <img width="16" src={Routes.static_path(Endpoint, "/images/artfight-favicon.svg")}><div class="font-medium text-sm">~{@user.artfight_handle}</div>
+            </a>
           </div>
           <div class="mx-6 flex flex-row my-4 gap-4">
             <div>

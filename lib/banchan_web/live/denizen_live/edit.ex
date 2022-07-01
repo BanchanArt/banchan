@@ -173,6 +173,8 @@ defmodule BanchanWeb.DenizenLive.Edit do
               <TextInput name={:picarto_channel} />
               <TextInput name={:pixiv_url} />
               <TextInput name={:pixiv_handle} />
+              <TextInput name={:tiktok_handle} />
+              <TextInput name={:artfight_handle} />
             </Collapse>
             <Submit label="Save" />
           </Form>
