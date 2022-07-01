@@ -9,7 +9,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
   alias Banchan.Accounts
 
   alias BanchanWeb.Components.Form.{Submit, TagsInput, TextArea, TextInput}
-  alias BanchanWeb.Components.Layout
+  alias BanchanWeb.Components.{Collapse, Layout}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -158,6 +158,24 @@ defmodule BanchanWeb.DenizenLive.Edit do
               opts={required: true}
             />
             <TextArea name={:bio} info="Tell us a little bit about yourself!" />
+            <Collapse id="socials" class="rounded-lg border border-primary">
+              <:header>
+                Social Media Links
+              </:header>
+              <TextInput name={:twitter_handle} />
+              <TextInput name={:instagram_handle} />
+              <TextInput name={:facebook_url} />
+              <TextInput name={:furaffinity_handle} />
+              <TextInput name={:discord_handle} />
+              <TextInput name={:artstation_handle} />
+              <TextInput name={:deviantart_handle} />
+              <TextInput name={:tumblr_handle} />
+              <TextInput name={:mastodon_handle} />
+              <TextInput name={:twitch_channel} />
+              <TextInput name={:picarto_channel} />
+              <TextInput name={:pixiv_url} />
+              <TextInput name={:pixiv_handle} />
+            </Collapse>
             <Submit label="Save" />
           </Form>
         </div>

@@ -121,6 +121,81 @@ defmodule BanchanWeb.DenizenLive.Show do
               <div class="badge badge-lg gap-2 badge-primary">{tag}</div>
             {/for}
           </div>
+          <div class="mx-6 my-4 flex flex-row flex-wrap gap-4">
+            <a
+              :if={@user.twitter_handle}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={"https://twitter.com/#{@user.twitter_handle}"}
+            >
+              <i class="fa-brands fa-twitter" /><div class="font-medium text-sm">@{@user.twitter_handle}</div>
+            </a>
+            <a
+              :if={@user.instagram_handle}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={"https://instagram.com/#{@user.instagram_handle}"}
+            >
+              <i class="fa-brands fa-instagram" /><div class="font-medium text-sm">@{@user.instagram_handle}</div>
+            </a>
+            <a
+              :if={@user.facebook_url}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={@user.facebook_url}
+            >
+              <i class="fa-brands fa-facebook" />
+            </a>
+            <a
+              :if={@user.furaffinity_handle}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={"https://www.furaffinity.com/user/#{@user.furaffinity_handle}"}
+            >
+              <img width="16" src={Routes.static_path(Endpoint, "/images/fa-favicon.svg")}><div class="font-medium text-sm">{@user.furaffinity_handle}</div>
+            </a>
+            <div :if={@user.discord_handle} class="flex flex-row flex-nowrap gap-1 items-center">
+              <i class="fa-brands fa-discord" /><div class="font-medium text-sm">{@user.discord_handle}</div>
+            </div>
+            <a
+              :if={@user.artstation_handle}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={"https://artstation.com/#{@user.artstation_handle}"}
+            >
+              <i class="fa-brands fa-artstation" /><div class="font-medium text-sm">{@user.artstation_handle}</div>
+            </a>
+            <a
+              :if={@user.deviantart_handle}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={"https://www.deviantart.com/#{@user.deviantart_handle}"}
+            >
+              <i class="fa-brands fa-deviantart" /><div class="font-medium text-sm">{@user.deviantart_handle}</div>
+            </a>
+            <a
+              :if={@user.tumblr_handle}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={"https://www.tumblr.com/blog/#{@user.tumblr_handle}"}
+            >
+              <i class="fa-brands fa-tumblr" /><div class="font-medium text-sm">{@user.tumblr_handle}</div>
+            </a>
+            <a
+              :if={@user.twitch_channel}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={"https://www.twitch.tv/#{@user.twitch_channel}"}
+            >
+              <i class="fa-brands fa-twitch" /><div class="font-medium text-sm">{@user.twitch_channel}</div>
+            </a>
+            <a
+              :if={@user.pixiv_handle && @user.pixiv_url}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={@user.pixiv_url}
+            >
+              <img width="16" src={Routes.static_path(Endpoint, "/images/pixiv-favicon.svg")}><div class="font-medium text-sm">{@user.pixiv_handle}</div>
+            </a>
+            <a
+              :if={@user.picarto_channel}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={"https://picarto.tv/#{@user.picarto_channel}"}
+            >
+              <img width="16" src={Routes.static_path(Endpoint, "/images/picarto-favicon.svg")}><div class="font-medium text-sm">{@user.pixiv_handle}</div>
+            </a>
+          </div>
           <div class="mx-6 flex flex-row my-4 gap-4">
             <div>
               <span class="font-bold">
