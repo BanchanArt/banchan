@@ -43,6 +43,13 @@ config :esbuild,
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 
+config :ueberauth, Ueberauth,
+  providers: [
+    twitter: {Ueberauth.Strategy.Twitter, []},
+    discord: {Ueberauth.Strategy.Discord, []},
+    google: {Ueberauth.Strategy.Google, []}
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

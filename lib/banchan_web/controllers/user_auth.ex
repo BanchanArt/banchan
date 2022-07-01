@@ -1,8 +1,11 @@
 defmodule BanchanWeb.UserAuth do
   @moduledoc false
+  use BanchanWeb, :controller
 
   import Plug.Conn
   import Phoenix.Controller
+
+  plug Ueberauth
 
   alias Banchan.Accounts
   alias BanchanWeb.Endpoint

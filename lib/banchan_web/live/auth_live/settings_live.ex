@@ -4,7 +4,7 @@ defmodule BanchanWeb.SettingsLive do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.Form
+  alias Surface.Components.{Form, LiveRedirect}
 
   alias Banchan.Accounts
   alias Banchan.Notifications
@@ -21,14 +21,24 @@ defmodule BanchanWeb.SettingsLive do
         Notifications.get_notification_settings(socket.assigns.current_user) ||
           %UserNotificationSettings{commission_email: true, commission_web: true}
 
-      {:ok,
-       assign(socket,
-         theme: nil,
-         email_changeset: User.email_changeset(socket.assigns.current_user, %{}),
-         password_changeset: User.password_changeset(socket.assigns.current_user, %{}),
-         notification_settings: settings,
-         notification_settings_changeset: UserNotificationSettings.changeset(settings, %{})
-       )}
+      if is_nil(socket.assigns.current_user.email) do
+        {:ok,
+         assign(socket,
+           theme: nil,
+           new_email_changeset: User.email_changeset(socket.assigns.current_user, %{}),
+           notification_settings: settings,
+           notification_settings_changeset: UserNotificationSettings.changeset(settings, %{})
+         )}
+      else
+        {:ok,
+         assign(socket,
+           theme: nil,
+           email_changeset: User.email_changeset(socket.assigns.current_user, %{}),
+           password_changeset: User.password_changeset(socket.assigns.current_user, %{}),
+           notification_settings: settings,
+           notification_settings_changeset: UserNotificationSettings.changeset(settings, %{})
+         )}
+      end
     else
       {:ok, socket}
     end
@@ -56,6 +66,43 @@ defmodule BanchanWeb.SettingsLive do
   @impl true
   def handle_event("theme_changed", %{"theme" => theme}, socket) do
     {:noreply, socket |> assign(theme: theme)}
+  end
+
+  def handle_event("change_new_email", val, socket) do
+    changeset =
+      socket.assigns.current_user
+      |> User.email_changeset(val["new_email"])
+      |> Map.put(:action, :update)
+
+    socket = assign(socket, new_email_changeset: changeset)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("submit_new_email", val, socket) do
+    case Accounts.apply_new_user_email(
+           socket.assigns.current_user,
+           val["new_email"]
+         ) do
+      {:ok, applied_user} ->
+        Accounts.deliver_update_email_instructions(
+          applied_user,
+          socket.assigns.current_user.email,
+          &Routes.user_settings_url(Endpoint, :confirm_email, &1)
+        )
+
+        socket =
+          socket
+          |> put_flash(
+            :info,
+            "A link to confirm your email change has been sent to the new address."
+          )
+
+        {:noreply, socket}
+
+      other ->
+        other
+    end
   end
 
   def handle_event("change_email", val, socket) do
@@ -211,53 +258,74 @@ defmodule BanchanWeb.SettingsLive do
         <Submit class="w-full" changeset={@notification_settings_changeset} label="Save" />
       </Form>
       <div class="divider" />
-      <Form
-        class="flex flex-col gap-4"
-        as={:change_email}
-        for={@email_changeset}
-        change="change_email"
-        submit="submit_email"
-        opts={autocomplete: "off"}
-      >
-        <h3 class="text-lg font-medium">
-          Update Email
-        </h3>
-        <EmailInput name={:email} icon="envelope" opts={required: true} />
-        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-        <Submit class="w-full" changeset={@email_changeset} label="Save" />
-      </Form>
-      <div class="divider" />
-      <Form
-        class="flex flex-col gap-4"
-        as={:change_password}
-        for={@password_changeset}
-        change="change_password"
-        submit="submit_password"
-        opts={autocomplete: "off"}
-      >
-        <h3 class="text-lg">
-          Update Password
-        </h3>
-        <TextInput
-          name={:current_password}
-          icon="lock"
-          label="Current Password"
-          opts={required: true, type: :password}
-        />
-        <TextInput
-          name={:password}
-          label="New Password"
-          icon="lock"
-          opts={required: true, type: :password}
-        />
-        <TextInput
-          name={:password_confirmation}
-          icon="lock"
-          label="New Password Confirmation"
-          opts={required: true, type: :password}
-        />
-        <Submit class="w-full" changeset={@password_changeset} label="Save" />
-      </Form>
+      {#if is_nil(@current_user.email)}
+        <Form
+          class="flex flex-col gap-4"
+          as={:new_email}
+          for={@new_email_changeset}
+          change="change_new_email"
+          submit="submit_new_email"
+          opts={autocomplete: "off"}
+        >
+          <h3 class="text-lg">Set Your Email</h3>
+          <div>
+            You created this account through third-party authentication that did not provide an email address. If you want to be able to log in with an email and password as well, please provide an email and we will send a password reset to it.
+          </div>
+          <EmailInput name={:email} icon="envelope" opts={required: true} />
+          <Submit class="w-full" changeset={@new_email_changeset} label="Save" />
+        </Form>
+      {#else}
+        <Form
+          class="flex flex-col gap-4"
+          as={:change_email}
+          for={@email_changeset}
+          change="change_email"
+          submit="submit_email"
+          opts={autocomplete: "off"}
+        >
+          <h3 class="text-lg font-medium">
+            Update Email
+          </h3>
+          <EmailInput name={:email} icon="envelope" opts={required: true} />
+          <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+          <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
+            Forgot your password?
+          </LiveRedirect>
+          <Submit class="w-full" changeset={@email_changeset} label="Save" />
+        </Form>
+        <div class="divider" />
+        <Form
+          class="flex flex-col gap-4"
+          as={:change_password}
+          for={@password_changeset}
+          change="change_password"
+          submit="submit_password"
+          opts={autocomplete: "off"}
+        >
+          <h3 class="text-lg">
+            Update Password
+          </h3>
+          <TextInput
+            name={:current_password}
+            icon="lock"
+            label="Current Password"
+            opts={required: true, type: :password}
+          />
+          <TextInput
+            name={:password}
+            label="New Password"
+            icon="lock"
+            opts={required: true, type: :password}
+          />
+          <TextInput
+            name={:password_confirmation}
+            icon="lock"
+            label="New Password Confirmation"
+            opts={required: true, type: :password}
+          />
+          <Submit class="w-full" changeset={@password_changeset} label="Save" />
+        </Form>
+      {/if}
     </AuthLayout>
     """
   end

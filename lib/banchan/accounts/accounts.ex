@@ -5,6 +5,8 @@ defmodule Banchan.Accounts do
 
   import Ecto.Query, warn: false
 
+  alias Ueberauth.Auth
+
   alias Banchan.Accounts.{User, UserNotifier, UserToken}
   alias Banchan.Repo
   alias Banchan.Uploads
@@ -12,8 +14,192 @@ defmodule Banchan.Accounts do
   alias BanchanWeb.UserAuth
 
   @pubsub Banchan.PubSub
+  @rand_pass_length 32
 
   ## Database getters
+
+  @doc """
+  Either find or create a user based on Ueberauth OAuth credentials.
+  """
+  def find_or_create_user(%Auth{provider: :twitter} = auth) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        case Repo.one(from u in User, where: u.twitter_uid == ^auth.uid) do
+          %User{} = user ->
+            {:ok, user}
+
+          nil ->
+            create_user_from_twitter(auth)
+            |> add_oauth_pfp(auth)
+        end
+      end)
+
+    ret
+  end
+
+  def find_or_create_user(%Auth{provider: :discord} = auth) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        case Repo.one(from u in User, where: u.discord_uid == ^auth.uid) do
+          %User{} = user ->
+            {:ok, user}
+
+          nil ->
+            create_user_from_discord(auth)
+            |> add_oauth_pfp(auth)
+        end
+      end)
+
+    ret
+  end
+
+  def find_or_create_user(%Auth{provider: :google} = auth) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        case Repo.one(from u in User, where: u.google_uid == ^auth.uid) do
+          %User{} = user ->
+            {:ok, user}
+
+          nil ->
+            create_user_from_google(auth)
+            |> add_oauth_pfp(auth)
+        end
+      end)
+
+    ret
+  end
+
+  def find_or_create_user(%Auth{}) do
+    {:error, :unsupported}
+  end
+
+  defp create_user_from_twitter(%Auth{} = auth) do
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    pw = random_password()
+
+    attrs = %{
+      twitter_uid: auth.uid,
+      email: auth.info.email,
+      handle: auth.info.nickname,
+      name: auth.info.name,
+      bio: auth.info.description,
+      twitter_handle: auth.info.nickname,
+      password: pw,
+      password_confirmation: pw,
+      confirmed_at: now
+    }
+
+    case %User{}
+         |> User.registration_oauth_changeset(attrs)
+         |> Repo.insert() do
+      {:ok, user} ->
+        {:ok, user}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        if Enum.any?(changeset.errors, fn {field, _} -> field == :handle end) do
+          %User{}
+          |> User.registration_oauth_changeset(%{
+            attrs
+            | handle: "user#{:rand.uniform(100_000_000)}"
+          })
+          |> Repo.insert()
+        else
+          {:error, changeset}
+        end
+    end
+  end
+
+  defp create_user_from_discord(%Auth{} = auth) do
+    pw = random_password()
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+    attrs = %{
+      discord_uid: auth.uid,
+      email: auth.info.email,
+      handle:
+        auth.extra.raw_info.user["username"] <> "_" <> auth.extra.raw_info.user["discriminator"],
+      name:
+        auth.extra.raw_info.user["username"] <> "#" <> auth.extra.raw_info.user["discriminator"],
+      discord_handle:
+        auth.extra.raw_info.user["username"] <> "#" <> auth.extra.raw_info.user["discriminator"],
+      password: pw,
+      password_confirmation: pw,
+      confirmed_at: now
+    }
+
+    case %User{}
+         |> User.registration_oauth_changeset(attrs)
+         |> Repo.insert() do
+      {:ok, user} ->
+        {:ok, user}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        if Enum.any?(changeset.errors, fn {field, _} -> field == :handle end) do
+          %User{}
+          |> User.registration_oauth_changeset(%{
+            attrs
+            | handle: "user#{:rand.uniform(100_000_000)}"
+          })
+          |> Repo.insert()
+        else
+          {:error, changeset}
+        end
+    end
+  end
+
+  def create_user_from_google(%Auth{} = auth) do
+    pw = random_password()
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+    attrs = %{
+      google_uid: auth.uid,
+      email: auth.info.email,
+      handle: "user#{:rand.uniform(100_000_000)}",
+      password: pw,
+      password_confirmation: pw,
+      confirmed_at: now
+    }
+
+    case %User{}
+         |> User.registration_oauth_changeset(attrs)
+         |> Repo.insert() do
+      {:ok, user} ->
+        {:ok, user}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        if Enum.any?(changeset.errors, fn {field, _} -> field == :email end) do
+          %User{}
+          |> User.registration_oauth_changeset(%{
+            attrs
+            | email: nil
+          })
+          |> Repo.insert()
+        else
+          {:error, changeset}
+        end
+    end
+  end
+
+  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: nil}}) do
+    {:ok, user}
+  end
+
+  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: url}}) when is_binary(url) do
+    tmp_file = Path.join([System.tmp_dir!(), "oauth-pfp-#{:rand.uniform(100_000_000)}"])
+    resp = HTTPoison.get!(url)
+    File.write!(tmp_file, resp.body)
+    pfp_info = make_pfp_images!(user, tmp_file, true)
+    File.rm!(tmp_file)
+    update_user_profile(user, %{}, pfp_info, nil)
+  end
+
+  defp add_oauth_pfp({:error, error}, _) do
+    {:error, error}
+  end
+
+  defp random_password do
+    :crypto.strong_rand_bytes(@rand_pass_length) |> Base.encode64()
+  end
 
   @doc """
   Gets a single user.
@@ -169,6 +355,7 @@ defmodule Banchan.Accounts do
         changeset =
           user
           |> Repo.preload(:pfp_img)
+          |> Repo.preload(:pfp_thumb)
           |> Repo.preload(:header_img)
           |> User.profile_changeset(attrs)
 
@@ -235,6 +422,22 @@ defmodule Banchan.Accounts do
   """
   def change_user_email(user, attrs \\ %{}) do
     User.email_changeset(user, attrs)
+  end
+
+  @doc """
+  Emulates that the email will change without actually changing it in the
+  database. Used exclusively for OAuth accounts that didn't have an email to
+  begin with, so password is not checked.
+
+  ## Examples
+
+      iex> apply_new_user_email(user, %{email: ...})
+      {:ok, %User{}}
+  """
+  def apply_new_user_email(user, attrs) do
+    user
+    |> User.email_changeset(attrs)
+    |> Ecto.Changeset.apply_action(:update)
   end
 
   @doc """

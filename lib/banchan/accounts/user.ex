@@ -22,6 +22,26 @@ defmodule Banchan.Accounts.User do
     field :totp_activated, :boolean
     field :tags, {:array, :string}
 
+    # OAuth UIDs
+    field :twitter_uid, :string
+    field :google_uid, :string
+    field :discord_uid, :string
+
+    # Social handles
+    field :twitter_handle, :string
+    field :instagram_handle, :string
+    field :facebook_url, :string
+    field :furaffinity_handle, :string
+    field :discord_handle, :string
+    field :artstation_handle, :string
+    field :deviantart_handle, :string
+    field :tumblr_handle, :string
+    field :mastodon_handle, :string
+    field :twitch_channel, :string
+    field :picarto_channel, :string
+    field :pixiv_url, :string
+    field :pixiv_handle, :string
+
     belongs_to :header_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :pfp_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :pfp_thumb, Upload, on_replace: :nilify, type: :binary_id
@@ -61,6 +81,7 @@ defmodule Banchan.Accounts.User do
     |> cast(attrs, [:handle, :email, :password])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
+    |> validate_required([:email])
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
@@ -74,6 +95,27 @@ defmodule Banchan.Accounts.User do
   def registration_test_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:handle, :email, :password, :confirmed_at, :totp_secret, :totp_activated])
+    |> validate_handle_unique(:handle)
+    |> unique_constraint(:handle)
+    |> validate_required([:email])
+    |> validate_email()
+    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_password(opts)
+  end
+
+  def registration_oauth_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [
+      :handle,
+      :email,
+      :name,
+      :bio,
+      :password,
+      :confirmed_at,
+      :twitter_uid,
+      :google_uid,
+      :discord_uid
+    ])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
     |> validate_email()
@@ -121,7 +163,6 @@ defmodule Banchan.Accounts.User do
 
   defp validate_email(changeset) do
     changeset
-    |> validate_required([:email])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
     |> unsafe_validate_unique(:email, Banchan.Repo)
@@ -163,12 +204,31 @@ defmodule Banchan.Accounts.User do
       end
 
     user
-    |> cast(attrs, [:handle, :name, :bio, :tags])
+    |> cast(attrs, [
+      :handle,
+      :name,
+      :bio,
+      :tags,
+      :twitter_handle,
+      :instagram_handle,
+      :facebook_url,
+      :furaffinity_handle,
+      :discord_handle,
+      :artstation_handle,
+      :deviantart_handle,
+      :tumblr_handle,
+      :mastodon_handle,
+      :twitch_channel,
+      :picarto_channel,
+      :pixiv_url,
+      :pixiv_handle
+    ])
     |> validate_required([:handle])
     |> validate_handle()
     |> validate_name()
     |> validate_bio()
     |> validate_tags()
+    |> validate_socials()
   end
 
   def validate_tags(changeset) do
@@ -199,12 +259,126 @@ defmodule Banchan.Accounts.User do
     end)
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def validate_socials(changeset) do
+    changeset
+    |> validate_change(:twitter_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Twitter handle, without the @ sign."}]
+      end
+    end)
+    |> validate_change(:instagram_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Instagram handle, without the @ sign."}]
+      end
+    end)
+    |> validate_change(:facebook_url, fn field, url ->
+      if String.match?(url, ~r/^https:\/\/(www\.)?facebook\.com\/.+$/) do
+        []
+      else
+        [{field, "must be a valid Facebook URL."}]
+      end
+    end)
+    |> validate_change(:furaffinity_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Furaffinity handle."}]
+      end
+    end)
+    |> validate_change(:discord_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+#\d{4}$/) do
+        []
+      else
+        [{field, "must be a valid Discord handle, including the number (myname#1234)."}]
+      end
+    end)
+    |> validate_change(:artstation_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Artstation handle."}]
+      end
+    end)
+    |> validate_change(:deviantart_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Deviantart handle."}]
+      end
+    end)
+    |> validate_change(:tumblr_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Tumblr handle."}]
+      end
+    end)
+    |> validate_change(:mastodon_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+@.+$/) do
+        []
+      else
+        [
+          {field,
+           "must be a valid Mastodon handle, without the preceding @. For example: `foo@mastodon.social`."}
+        ]
+      end
+    end)
+    |> validate_change(:twitch_channel, fn field, channel ->
+      if String.match?(channel, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Twitch channel name."}]
+      end
+    end)
+    |> validate_change(:picarto_channel, fn field, channel ->
+      if String.match?(channel, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Picarto channel name."}]
+      end
+    end)
+    |> validate_change(:pixiv_url, fn field, url ->
+      if String.match?(url, ~r/^https:\/\/www\.pixiv\.net\/en\/users\/\d+$/) do
+        []
+      else
+        [{field, "must be a valid Pixiv URL."}]
+      end
+    end)
+    |> validate_change(:pixiv_url, fn field, _ ->
+      if Ecto.Changeset.fetch_field(changeset, :pixiv_handle) == :error do
+        [{field, "Must provide both a pixiv handle and a pixiv url, or neither."}]
+      else
+        []
+      end
+    end)
+    |> validate_change(:pixiv_handle, fn field, _ ->
+      if Ecto.Changeset.fetch_field(changeset, :pixiv_url) == :error do
+        [{field, "Must provide both a pixiv handle and a pixiv url, or neither."}]
+      else
+        []
+      end
+    end)
+    |> validate_change(:pixiv_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Pixiv handle."}]
+      end
+    end)
+  end
+
   @doc """
   A user changeset for changing the email.
   """
   def email_changeset(user, attrs) do
     user
     |> cast(attrs, [:email])
+    |> validate_required([:email])
     |> validate_email()
   end
 
