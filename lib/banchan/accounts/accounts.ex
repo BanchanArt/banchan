@@ -64,6 +64,7 @@ defmodule Banchan.Accounts do
       handle: auth.info.nickname,
       name: auth.info.name,
       bio: auth.info.description,
+      twitter_handle: auth.info.nickname,
       password: pw,
       password_confirmation: pw
     }
@@ -82,6 +83,8 @@ defmodule Banchan.Accounts do
       handle:
         auth.extra.raw_info.user["username"] <> "_" <> auth.extra.raw_info.user["discriminator"],
       name:
+        auth.extra.raw_info.user["username"] <> "#" <> auth.extra.raw_info.user["discriminator"],
+      discord_handle:
         auth.extra.raw_info.user["username"] <> "#" <> auth.extra.raw_info.user["discriminator"],
       password: pw,
       password_confirmation: pw
