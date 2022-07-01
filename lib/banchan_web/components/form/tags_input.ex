@@ -18,6 +18,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
 
   data tags, :list, default: []
   data results, :list, default: []
+  data menu_selected, :integer
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
@@ -29,40 +30,84 @@ defmodule BanchanWeb.Components.Form.TagsInput do
   def handle_event("add_selected", %{"tag" => tag}, socket) do
     socket =
       socket
-      |> assign(tags: socket.assigns.tags ++ [tag], results: [])
+      |> assign(tags: socket.assigns.tags ++ [tag], results: [], menu_selected: nil)
       |> push_event("change", %{})
 
     {:noreply, socket}
   end
 
-  def handle_event("handle_input", %{"key" => key, "value" => value}, socket) do
-    cond do
-      key in ["Enter", "Tab"] && value != "" ->
-        socket =
-          socket
-          |> assign(tags: socket.assigns.tags ++ [value], results: [])
-          |> push_event("change", %{})
+  def handle_event("handle_input", %{"key" => key, "value" => value}, socket)
+      when key in ["Enter", "Tab"] and value != "" do
+    tag =
+      if is_nil(socket.assigns.menu_selected) do
+        value
+      else
+        Enum.at(socket.assigns.results, socket.assigns.menu_selected).tag
+      end
 
-        {:noreply, socket}
+    socket =
+      socket
+      |> assign(tags: socket.assigns.tags ++ [tag], results: [], menu_selected: nil)
+      |> push_event("change", %{})
 
-      key == "Backspace" && value == "" && !Enum.empty?(socket.assigns.tags) ->
-        socket =
-          socket
-          |> assign(
-            tags: socket.assigns.tags |> Enum.reverse() |> tl() |> Enum.reverse(),
-            results: []
-          )
-          |> push_event("change", %{})
+    {:noreply, socket}
+  end
 
-        {:noreply, socket}
+  def handle_event("handle_input", %{"key" => "Backspace", "value" => ""}, socket) do
+    if Enum.empty?(socket.assigns.results) do
+      {:noreply, socket}
+    else
+      socket =
+        socket
+        |> assign(
+          tags: socket.assigns.tags |> Enum.reverse() |> tl() |> Enum.reverse(),
+          results: [],
+          menu_selected: nil
+        )
+        |> push_event("change", %{})
 
-      true ->
-        {:noreply, socket}
+      {:noreply, socket}
     end
   end
 
+  def handle_event("handle_input", %{"key" => "ArrowDown"}, socket) do
+    if Enum.empty?(socket.assigns.results) do
+      {:noreply, socket}
+    else
+      index = socket.assigns.menu_selected || -1
+
+      {:noreply,
+       socket |> assign(menu_selected: rem(index + 1, Enum.count(socket.assigns.results)))}
+    end
+  end
+
+  def handle_event("handle_input", %{"key" => "ArrowUp"}, socket) do
+    if Enum.empty?(socket.assigns.results) do
+      {:noreply, socket}
+    else
+      result_len = Enum.count(socket.assigns.results)
+      index = socket.assigns.menu_selected || 0
+      index = rem(index - 1, result_len)
+
+      index =
+        if index < 0 do
+          result_len - 1
+        else
+          index
+        end
+
+      {:noreply, socket |> assign(menu_selected: index)}
+    end
+  end
+
+  def handle_event("handle_input", _, socket) do
+    {:noreply, socket}
+  end
+
   def handle_event("autocomplete", %{"value" => value}, socket) do
-    {:noreply, socket |> assign(results: Tags.list_tags(value <> "", page_size: 5).entries)}
+    {:noreply,
+     socket
+     |> assign(results: Tags.list_tags(value <> "", page_size: 5).entries, menu_selected: nil)}
   end
 
   def handle_event("remove", %{"index" => index}, socket) do
@@ -118,17 +163,23 @@ defmodule BanchanWeb.Components.Form.TagsInput do
               <li class="flex-1 relative min-w-fit w-8">
                 <input
                   id={Phoenix.HTML.Form.input_id(form, field) <> "_input"}
-                  class="input-field bg-base-100 input-sm w-full h-full min-w-10 focus:outline-none border-none focus:border-none border-transparent focus:border-transparent shadow-none focus:ring-0 focus:ring-transparent overflow-visible"
+                  class="input-field bg-base-100 input-sm w-full h-full focus:outline-none border-none focus:border-none border-transparent focus:border-transparent shadow-none focus:ring-0 focus:ring-transparent overflow-visible"
                   phx-keydown="handle_input"
+                  phx-update="ignore"
                   data-event-target={@myself}
                   phx-target={@myself}
                 />
                 <ol
                   :if={!Enum.empty?(@results)}
-                  class="absolute float-left menu menu-compact rounded-box bg-base-300"
+                  class="absolute float-left menu menu-compact rounded-box p-2 bg-base-300"
                 >
-                  {#for result <- @results}
-                    <li><button type="button" :on-click="add_selected" phx-value-tag={result.tag}>{result.tag}</button></li>
+                  {#for {result, index} <- Enum.with_index(@results)}
+                    <li><button
+                        class={"p-1", active: index == @menu_selected}
+                        type="button"
+                        :on-click="add_selected"
+                        phx-value-tag={result.tag}
+                      >{result.tag}</button></li>
                   {/for}
                 </ol>
                 <HiddenInput

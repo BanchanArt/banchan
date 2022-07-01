@@ -20,7 +20,8 @@ defmodule Banchan.Tags do
 
     from(tag in Tag,
       select: tag,
-      where: ilike(tag.tag, ^like)
+      where: ilike(tag.tag, ^like),
+      order_by: {:desc, tag.count}
     )
     |> Repo.paginate(page: page, page_size: page_size)
   end
