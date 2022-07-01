@@ -111,6 +111,7 @@ defmodule Banchan.Accounts.User do
       :name,
       :bio,
       :password,
+      :confirmed_at,
       :twitter_uid,
       :google_uid,
       :discord_uid

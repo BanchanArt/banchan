@@ -56,6 +56,7 @@ defmodule Banchan.Accounts do
   end
 
   defp create_user_from_twitter(%Auth{} = auth) do
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
     pw = random_password()
 
     attrs = %{
@@ -66,7 +67,8 @@ defmodule Banchan.Accounts do
       bio: auth.info.description,
       twitter_handle: auth.info.nickname,
       password: pw,
-      password_confirmation: pw
+      password_confirmation: pw,
+      confirmed_at: now
     }
 
     %User{}
@@ -76,6 +78,7 @@ defmodule Banchan.Accounts do
 
   defp create_user_from_discord(%Auth{} = auth) do
     pw = random_password()
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
 
     attrs = %{
       discord_uid: auth.uid,
@@ -87,7 +90,8 @@ defmodule Banchan.Accounts do
       discord_handle:
         auth.extra.raw_info.user["username"] <> "#" <> auth.extra.raw_info.user["discriminator"],
       password: pw,
-      password_confirmation: pw
+      password_confirmation: pw,
+      confirmed_at: now
     }
 
     %User{}
@@ -97,13 +101,15 @@ defmodule Banchan.Accounts do
 
   def create_user_from_google(%Auth{} = auth) do
     pw = random_password()
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
 
     attrs = %{
       google_uid: auth.uid,
       email: auth.info.email,
       handle: "user#{:rand.uniform(100_000_000)}",
       password: pw,
-      password_confirmation: pw
+      password_confirmation: pw,
+      confirmed_at: now
     }
 
     %User{}
