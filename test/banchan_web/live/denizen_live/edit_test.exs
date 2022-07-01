@@ -25,10 +25,15 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
     test "preloads current profile values", %{conn: conn, user: user} do
       {:ok, user} =
-        Accounts.update_user_profile(user, %{
-          name: "Name",
-          bio: "Bio"
-        })
+        Accounts.update_user_profile(
+          user,
+          %{
+            name: "Name",
+            bio: "Bio"
+          },
+          nil,
+          nil
+        )
 
       conn = log_in_user(conn, user)
 
@@ -44,33 +49,6 @@ defmodule BanchanWeb.DenizenLive.EditTest do
       assert rendered_html =~ user.handle
       assert rendered_html =~ user.bio
       assert rendered_html =~ user.name
-    end
-
-    test "disables submit button if there are no changes", %{conn: conn, user: user} do
-      {:ok, user} =
-        Accounts.update_user_profile(user, %{
-          name: "Name",
-          bio: "Bio"
-        })
-
-      conn = log_in_user(conn, user)
-
-      {:ok, page_live, _disconnected_html} =
-        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
-
-      assert page_live
-             |> element(".profile-info button[type=submit]")
-             |> render() =~ "disabled"
-
-      page_live
-      |> element(".profile-info")
-      |> render_change(%{
-        user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
-      })
-
-      refute page_live
-             |> element(".profile-info button[type=submit]")
-             |> render() =~ "disabled"
     end
 
     test "updates profile values on change, but does not change user in db", %{

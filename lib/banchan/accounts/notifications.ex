@@ -45,4 +45,20 @@ defmodule Banchan.Accounts.Notifications do
     )
     |> Repo.stream()
   end
+
+  def follower_count(%User{} = user) do
+    from(f in UserFollower,
+      where: f.target_id == ^user.id,
+      select: count(f)
+    )
+    |> Repo.one()
+  end
+
+  def following_count(%User{} = user) do
+    from(f in UserFollower,
+      where: f.user_id == ^user.id,
+      select: count(f)
+    )
+    |> Repo.one()
+  end
 end

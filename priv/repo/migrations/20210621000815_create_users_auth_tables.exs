@@ -2,8 +2,6 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
   use Ecto.Migration
 
   def change do
-    execute "CREATE EXTENSION IF NOT EXISTS citext", ""
-
     create table(:uploads, primary_key: false) do
       add :id, :uuid, primary_key: true
       add :name, :string
@@ -29,6 +27,9 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :bio, :string
       add :totp_secret, :binary
       add :totp_activated, :boolean
+      # Array fields are the best/fastest approach in most cases.
+      # http://www.databasesoup.com/2015/01/tag-all-things.html
+      add :tags, {:array, :citext}, default: [], null: false
       add :header_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :pfp_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :pfp_thumb_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
@@ -56,6 +57,21 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
           [],
           log: :info
         )
+
+        repo().query!(
+          """
+          CREATE INDEX users_tags ON users USING GIN (tags);
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!("""
+        CREATE TRIGGER users_tags_count_update
+        AFTER UPDATE OR INSERT OR DELETE ON users
+        FOR EACH ROW
+        EXECUTE PROCEDURE public.trigger_update_tags_count();
+        """)
       end,
       fn ->
         repo().query!(
@@ -65,6 +81,18 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
           [],
           log: :info
         )
+
+        repo().query!(
+          """
+          DROP INDEX users_tags;
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!("""
+        DROP TRIGGER users_tag_count_update;
+        """)
       end
     )
 

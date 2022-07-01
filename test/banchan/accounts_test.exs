@@ -371,11 +371,16 @@ defmodule Banchan.AccountsTest do
 
     test "validates profile", %{user: user} do
       {:error, changeset} =
-        Accounts.update_user_profile(user, %{
-          handle: "12",
-          name: String.duplicate("b", 40),
-          bio: String.duplicate("a", 461)
-        })
+        Accounts.update_user_profile(
+          user,
+          %{
+            handle: "12",
+            name: String.duplicate("b", 40),
+            bio: String.duplicate("a", 461)
+          },
+          nil,
+          nil
+        )
 
       assert %{
                bio: ["should be at most 160 character(s)"],
@@ -386,11 +391,16 @@ defmodule Banchan.AccountsTest do
 
     test "updates the user profile", %{user: user} do
       {:ok, user} =
-        Accounts.update_user_profile(user, %{
-          handle: "newhandle",
-          name: "New Name",
-          bio: "New Bio"
-        })
+        Accounts.update_user_profile(
+          user,
+          %{
+            handle: "newhandle",
+            name: "New Name",
+            bio: "New Bio"
+          },
+          nil,
+          nil
+        )
 
       assert Accounts.get_user_by_handle!(user.handle)
     end

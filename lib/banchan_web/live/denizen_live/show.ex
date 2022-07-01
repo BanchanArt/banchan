@@ -4,12 +4,12 @@ defmodule BanchanWeb.DenizenLive.Show do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.LiveRedirect
-
   alias Banchan.Accounts
   alias Banchan.Studios
 
-  alias BanchanWeb.Components.{Avatar, Button, Layout, StudioCard}
+  alias Surface.Components.LiveRedirect
+
+  alias BanchanWeb.Components.{Avatar, Button, Layout}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -21,6 +21,8 @@ defmodule BanchanWeb.DenizenLive.Show do
      assign(socket,
        user: user,
        studios: studios,
+       followers: Accounts.Notifications.follower_count(user),
+       following: Accounts.Notifications.following_count(user),
        user_following?:
          socket.assigns.current_user &&
            Accounts.Notifications.user_following?(socket.assigns.current_user, user),
@@ -44,6 +46,16 @@ defmodule BanchanWeb.DenizenLive.Show do
   def handle_event(
         "toggle_follow",
         _,
+        %{assigns: %{user: user, current_user: current_user}} = socket
+      )
+      when user.id == current_user.id do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "toggle_follow",
+        _,
         %{assigns: %{user_following?: user_following?, user: user, current_user: current_user}} =
           socket
       ) do
@@ -61,64 +73,86 @@ defmodule BanchanWeb.DenizenLive.Show do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <:hero>
-        <section class="grid grid-cols-2 bg-secondary">
-          <div class="col-span-12">
-            <article class="ml-8">
-              <Avatar class="w-32" user={@user} />
-              <h1 class="text-xl text-base-content font-bold">
-                {@user.handle}
+        <section>
+          {#if @user.header_img_id}
+            <img
+              class="object-cover aspect-header-image rounded-b-xl w-full"
+              src={Routes.public_image_path(Endpoint, :image, @user.header_img_id)}
+            />
+          {#else}
+            <div class="rounded-b-xl aspect-header-image bg-base-300 w-full" />
+          {/if}
+          <div class="flex flex-row">
+            <div class="relative w-32 h-20">
+              <div class="absolute -top-4 left-6">
+                <Avatar class="w-24 h-24" user={@user} />
+              </div>
+            </div>
+            <div class="m-4 flex flex-col">
+              <h1 class="text-xl font-bold">
+                {@user.name}
               </h1>
-              <br>
-              <p class="text-base text-secondary-content">
-                Witty phrase here.
-              </p>
-              {#if @current_user}
-                <Button click="toggle_follow" class="glass btn-sm rounded-full px-2 py-0">
-                  {if @user_following? do
-                    "Unfollow"
-                  else
-                    "Follow"
-                  end}
-                </Button>
-              {/if}
-            </article>
-          </div>
-          <nav class="tabs col-start-2 grid-cols-3 inline-grid">
-            <div class="tab tab-bordered tab-active bg-primary-focus text-center rounded-t-lg border-t-6 border-solid border-green-300"><a>Profile Home</a></div>
-            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Featured</a></div>
-            <div class="tab tab-bordered bg-primary bg-opacity-60 text-center rounded-t-lg text-secondary-content"><a>Characters</a></div>
-          </nav>
-        </section>
-      </:hero>
-      <div class="grid grid-cols-2 justify-items-stretch gap-6">
-        <div class="bg-base-200 p-4 shadow-lg">
-          <h2 class="text-xl text-secondary-content font-bold">Studios</h2>
-          <div class="denizen-studios">
-            {#for studio <- @studios}
-              <StudioCard studio={studio} />
-            {/for}
-          </div>
-        </div>
-        <div class="bg-base-200 p-4 shadow-lg">
-          <h2 class="text-xl text-secondary-content font-bold flex-grow">
-            About {@user.handle}
-          </h2>
-          <figure alt="denizen ID">
-            <Avatar class="w-10" user={@user} />
-          </figure>
-          <div class="content">
-            <p class="">Name: {@user.name}</p>
-            <p class="">Bio: {@user.bio}</p>
+              <span>@{@user.handle}</span>
+            </div>
             {#if @current_user && @current_user.id == @user.id}
               <LiveRedirect
-                label="Edit"
+                label="Edit Profile"
                 to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)}
-                class="text-center btn btn-sm btn-primary m-3"
+                class="btn btn-sm btn-primary btn-outline m-4 ml-auto rounded-full px-2 py-0"
               />
+            {#else}
+              <Button click="toggle_follow" class="btn-sm btn-outline m-4 ml-auto rounded-full px-2 py-0">
+                {if @user_following? do
+                  "Unfollow"
+                else
+                  "Follow"
+                end}
+              </Button>
             {/if}
           </div>
-        </div>
-      </div>
+          <div class="mx-6 my-4">
+            {@user.bio}
+          </div>
+          <div :if={!Enum.empty?(@user.tags)} class="mx-6 text-xl">
+            Interests
+          </div>
+          <div :if={!Enum.empty?(@user.tags)} class="mx-6 my-4 flex flex-row flex-wrap gap-1">
+            {#for tag <- @user.tags}
+              <div class="badge badge-lg gap-2 badge-primary">{tag}</div>
+            {/for}
+          </div>
+          <div class="mx-6 flex flex-row my-4 gap-4">
+            <div>
+              <span class="font-bold">
+                {#if @followers > 9999}
+                  {Number.SI.number_to_si(@followers)}
+                {#else}
+                  {Number.Delimit.number_to_delimited(@followers, precision: 0)}
+                {/if}
+              </span>
+              <span>
+                {#if @followers == 1}
+                  Follower
+                {#else}
+                  Followers
+                {/if}
+              </span>
+            </div>
+            <div>
+              <span class="font-bold">
+                {#if @following > 9999}
+                  {Number.SI.number_to_si(@following)}
+                {#else}
+                  {Number.Delimit.number_to_delimited(@following, precision: 0)}
+                {/if}
+              </span>
+              <span>
+                Following
+              </span>
+            </div>
+          </div>
+        </section>
+      </:hero>
     </Layout>
     """
   end

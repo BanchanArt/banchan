@@ -20,6 +20,7 @@ defmodule Banchan.Accounts.User do
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
     field :totp_secret, :binary
     field :totp_activated, :boolean
+    field :tags, {:array, :string}
 
     belongs_to :header_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :pfp_img, Upload, on_replace: :nilify, type: :binary_id
@@ -154,12 +155,48 @@ defmodule Banchan.Accounts.User do
   A user changeset meant for general editing forms.
   """
   def profile_changeset(user, attrs \\ %{}) do
+    attrs =
+      if attrs["tags"] == "[]" do
+        Map.put(attrs, "tags", [])
+      else
+        attrs
+      end
+
     user
-    |> cast(attrs, [:handle, :name, :bio])
+    |> cast(attrs, [:handle, :name, :bio, :tags])
     |> validate_required([:handle])
     |> validate_handle()
     |> validate_name()
     |> validate_bio()
+    |> validate_tags()
+  end
+
+  def validate_tags(changeset) do
+    changeset
+    |> validate_change(:tags, fn field, tags ->
+      if tags |> Enum.map(&String.downcase/1) ==
+           tags |> Enum.map(&String.downcase/1) |> Enum.uniq() do
+        []
+      else
+        [{field, "cannot have duplicate tags."}]
+      end
+    end)
+    |> validate_change(:tags, fn field, tags ->
+      if Enum.count(tags) > 10 do
+        [{field, "cannot have more than 10 tags."}]
+      else
+        []
+      end
+    end)
+    |> validate_change(:tags, fn field, tags ->
+      if Enum.all?(tags, fn tag ->
+           String.match?(tag, ~r/^.{0,100}$/)
+         end) do
+        []
+      else
+        [{field, "Tags can only be up to 100 characters long."}]
+      end
+    end)
   end
 
   @doc """
