@@ -22,33 +22,51 @@ defmodule Banchan.Accounts do
   Either find or create a user based on Ueberauth OAuth credentials.
   """
   def find_or_create_user(%Auth{provider: :twitter} = auth) do
-    case Repo.one(from u in User, where: u.twitter_uid == ^auth.uid) do
-      %User{} = user ->
-        {:ok, user}
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        case Repo.one(from u in User, where: u.twitter_uid == ^auth.uid) do
+          %User{} = user ->
+            {:ok, user}
 
-      nil ->
-        create_user_from_twitter(auth)
-    end
+          nil ->
+            create_user_from_twitter(auth)
+            |> add_oauth_pfp(auth)
+        end
+      end)
+
+    ret
   end
 
   def find_or_create_user(%Auth{provider: :discord} = auth) do
-    case Repo.one(from u in User, where: u.discord_uid == ^auth.uid) do
-      %User{} = user ->
-        {:ok, user}
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        case Repo.one(from u in User, where: u.discord_uid == ^auth.uid) do
+          %User{} = user ->
+            {:ok, user}
 
-      nil ->
-        create_user_from_discord(auth)
-    end
+          nil ->
+            create_user_from_discord(auth)
+            |> add_oauth_pfp(auth)
+        end
+      end)
+
+    ret
   end
 
   def find_or_create_user(%Auth{provider: :google} = auth) do
-    case Repo.one(from u in User, where: u.google_uid == ^auth.uid) do
-      %User{} = user ->
-        {:ok, user}
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        case Repo.one(from u in User, where: u.google_uid == ^auth.uid) do
+          %User{} = user ->
+            {:ok, user}
 
-      nil ->
-        create_user_from_google(auth)
-    end
+          nil ->
+            create_user_from_google(auth)
+            |> add_oauth_pfp(auth)
+        end
+      end)
+
+    ret
   end
 
   def find_or_create_user(%Auth{}) do
@@ -160,6 +178,23 @@ defmodule Banchan.Accounts do
           {:error, changeset}
         end
     end
+  end
+
+  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: nil}}) do
+    {:ok, user}
+  end
+
+  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: url}}) when is_binary(url) do
+    tmp_file = Path.join([System.tmp_dir!(), "oauth-pfp-#{:rand.uniform(100_000_000)}"])
+    resp = HTTPoison.get!(url)
+    File.write!(tmp_file, resp.body)
+    pfp_info = make_pfp_images!(user, tmp_file, true)
+    File.rm!(tmp_file)
+    update_user_profile(user, %{}, pfp_info, nil)
+  end
+
+  defp add_oauth_pfp({:error, error}, _) do
+    {:error, error}
   end
 
   defp random_password do
@@ -320,6 +355,7 @@ defmodule Banchan.Accounts do
         changeset =
           user
           |> Repo.preload(:pfp_img)
+          |> Repo.preload(:pfp_thumb)
           |> Repo.preload(:header_img)
           |> User.profile_changeset(attrs)
 

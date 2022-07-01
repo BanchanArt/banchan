@@ -68,6 +68,7 @@ defmodule Banchan.MixProject do
       {:ex_aws, "~> 2.3.1"},
       {:ex_aws_s3, "~> 2.3.2"},
       {:hackney, "~> 1.18"},
+      {:httpoison, "~> 1.8.1"},
       {:sweet_xml, "~> 0.6"},
       {:earmark, "~> 1.4.20"},
       {:html_sanitize_ex, "~> 1.4.2"},
