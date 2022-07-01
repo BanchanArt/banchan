@@ -71,9 +71,24 @@ defmodule Banchan.Accounts do
       confirmed_at: now
     }
 
-    %User{}
-    |> User.registration_oauth_changeset(attrs)
-    |> Repo.insert()
+    case %User{}
+         |> User.registration_oauth_changeset(attrs)
+         |> Repo.insert() do
+      {:ok, user} ->
+        {:ok, user}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        if Enum.any?(changeset.errors, fn {field, _} -> field == :handle end) do
+          %User{}
+          |> User.registration_oauth_changeset(%{
+            attrs
+            | handle: "user#{:rand.uniform(100_000_000)}"
+          })
+          |> Repo.insert()
+        else
+          {:error, changeset}
+        end
+    end
   end
 
   defp create_user_from_discord(%Auth{} = auth) do
@@ -94,9 +109,24 @@ defmodule Banchan.Accounts do
       confirmed_at: now
     }
 
-    %User{}
-    |> User.registration_oauth_changeset(attrs)
-    |> Repo.insert()
+    case %User{}
+         |> User.registration_oauth_changeset(attrs)
+         |> Repo.insert() do
+      {:ok, user} ->
+        {:ok, user}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        if Enum.any?(changeset.errors, fn {field, _} -> field == :handle end) do
+          %User{}
+          |> User.registration_oauth_changeset(%{
+            attrs
+            | handle: "user#{:rand.uniform(100_000_000)}"
+          })
+          |> Repo.insert()
+        else
+          {:error, changeset}
+        end
+    end
   end
 
   def create_user_from_google(%Auth{} = auth) do
