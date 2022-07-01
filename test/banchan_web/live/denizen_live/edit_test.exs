@@ -25,10 +25,15 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
     test "preloads current profile values", %{conn: conn, user: user} do
       {:ok, user} =
-        Accounts.update_user_profile(user, %{
-          name: "Name",
-          bio: "Bio"
-        }, nil, nil)
+        Accounts.update_user_profile(
+          user,
+          %{
+            name: "Name",
+            bio: "Bio"
+          },
+          nil,
+          nil
+        )
 
       conn = log_in_user(conn, user)
 

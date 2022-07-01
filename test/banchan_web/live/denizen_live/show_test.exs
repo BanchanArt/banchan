@@ -19,7 +19,12 @@ defmodule BanchanWeb.DenizenLive.ShowTest do
   describe "view profile page" do
     test "displays user data", %{conn: conn, user: user} do
       {:ok, user} =
-        Banchan.Accounts.update_user_profile(user, %{bio: "This is my bio", name: "New User"}, nil, nil)
+        Banchan.Accounts.update_user_profile(
+          user,
+          %{bio: "This is my bio", name: "New User"},
+          nil,
+          nil
+        )
 
       conn = Plug.Conn.assign(conn, :user, user)
 
