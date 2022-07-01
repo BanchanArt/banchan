@@ -30,6 +30,11 @@ defmodule BanchanWeb.Components.Layout do
           <#slot name="hero" />
         {/if}
         <section class={"flex flex-col flex-grow p-#{@padding} shadow-inner"}>
+          <div class="alert alert-info my-2" :if={@current_user && is_nil(@current_user.confirmed_at)}>
+            <div class="block">
+              ⚠️You need to verify your email address before you can do certain things on the site, such as submit new commissions. Please check your email or <LiveRedirect class="link" to={Routes.confirmation_path(Endpoint, :show)}>click here to resend your confirmation</LiveRedirect>.⚠️
+            </div>
+          </div>
           <Flash flashes={@flashes} />
           <#slot />
         </section>
