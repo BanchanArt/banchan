@@ -21,6 +21,9 @@ defmodule Banchan.Accounts.User do
     field :totp_secret, :binary
     field :totp_activated, :boolean
     field :tags, {:array, :string}
+    field :twitter_uid, :string
+    field :google_uid, :string
+    field :discord_uid, :string
 
     belongs_to :header_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :pfp_img, Upload, on_replace: :nilify, type: :binary_id
@@ -61,6 +64,7 @@ defmodule Banchan.Accounts.User do
     |> cast(attrs, [:handle, :email, :password])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
+    |> validate_required([:email])
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
@@ -74,6 +78,26 @@ defmodule Banchan.Accounts.User do
   def registration_test_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:handle, :email, :password, :confirmed_at, :totp_secret, :totp_activated])
+    |> validate_handle_unique(:handle)
+    |> unique_constraint(:handle)
+    |> validate_required([:email])
+    |> validate_email()
+    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_password(opts)
+  end
+
+  def registration_oauth_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [
+      :handle,
+      :email,
+      :name,
+      :bio,
+      :password,
+      :twitter_uid,
+      :google_uid,
+      :discord_uid
+    ])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
     |> validate_email()
@@ -121,7 +145,6 @@ defmodule Banchan.Accounts.User do
 
   defp validate_email(changeset) do
     changeset
-    |> validate_required([:email])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
     |> unsafe_validate_unique(:email, Banchan.Repo)
@@ -205,6 +228,7 @@ defmodule Banchan.Accounts.User do
   def email_changeset(user, attrs) do
     user
     |> cast(attrs, [:email])
+    |> validate_required([:email])
     |> validate_email()
   end
 

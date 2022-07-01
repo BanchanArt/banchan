@@ -117,6 +117,9 @@ defmodule BanchanWeb.Router do
       live("/studios/:handle/portfolio", StudioLive.Portfolio, :show)
 
       live("/confirm", ConfirmationLive, :show)
+
+      live("/reset_password", ForgotPasswordLive, :edit)
+      live("/reset_password/:token", ResetPasswordLive, :edit)
     end
   end
 
@@ -129,11 +132,14 @@ defmodule BanchanWeb.Router do
 
       live("/register", RegisterLive, :new)
       post("/register", UserRegistrationController, :create)
-
-      live("/reset_password", ForgotPasswordLive, :edit)
-
-      live("/reset_password/:token", ResetPasswordLive, :edit)
     end
+  end
+
+  scope "/auth", BanchanWeb do
+    pipe_through :browser
+
+    get "/:provider", UserOAuthController, :request
+    get "/:provider/callback", UserOAuthController, :callback
   end
 
   scope "/api", BanchanWeb do

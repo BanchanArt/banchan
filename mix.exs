@@ -78,6 +78,10 @@ defmodule Banchan.MixProject do
       {:nimble_totp, "~> 0.1.0"},
       {:qr_code, "~> 2.2.1"},
       {:stripity_stripe, "~> 2.15.0"},
+      {:ueberauth, "~> 0.7"},
+      {:ueberauth_discord, "~> 0.7.0"},
+      {:ueberauth_twitter, "~> 0.4.1"},
+      {:ueberauth_google, "~> 0.10.1"},
       {:phoenix_live_reload, "~> 1.3.3", only: :dev},
       {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
       # Testing and static analysis

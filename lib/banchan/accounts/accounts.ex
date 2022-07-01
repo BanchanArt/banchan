@@ -5,6 +5,8 @@ defmodule Banchan.Accounts do
 
   import Ecto.Query, warn: false
 
+  alias Ueberauth.Auth
+
   alias Banchan.Accounts.{User, UserNotifier, UserToken}
   alias Banchan.Repo
   alias Banchan.Uploads
@@ -12,8 +14,103 @@ defmodule Banchan.Accounts do
   alias BanchanWeb.UserAuth
 
   @pubsub Banchan.PubSub
+  @rand_pass_length 32
 
   ## Database getters
+
+  @doc """
+  Either find or create a user based on Ueberauth OAuth credentials.
+  """
+  def find_or_create_user(%Auth{provider: :twitter} = auth) do
+    case Repo.one(from u in User, where: u.twitter_uid == ^auth.uid) do
+      %User{} = user ->
+        {:ok, user}
+
+      nil ->
+        create_user_from_twitter(auth)
+    end
+  end
+
+  def find_or_create_user(%Auth{provider: :discord} = auth) do
+    case Repo.one(from u in User, where: u.discord_uid == ^auth.uid) do
+      %User{} = user ->
+        {:ok, user}
+
+      nil ->
+        create_user_from_discord(auth)
+    end
+  end
+
+  def find_or_create_user(%Auth{provider: :google} = auth) do
+    case Repo.one(from u in User, where: u.google_uid == ^auth.uid) do
+      %User{} = user ->
+        {:ok, user}
+
+      nil ->
+        create_user_from_google(auth)
+    end
+  end
+
+  def find_or_create_user(%Auth{}) do
+    {:error, :unsupported}
+  end
+
+  defp create_user_from_twitter(%Auth{} = auth) do
+    pw = random_password()
+
+    attrs = %{
+      twitter_uid: auth.uid,
+      email: auth.info.email,
+      handle: auth.info.nickname,
+      name: auth.info.name,
+      bio: auth.info.description,
+      password: pw,
+      password_confirmation: pw
+    }
+
+    %User{}
+    |> User.registration_oauth_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp create_user_from_discord(%Auth{} = auth) do
+    pw = random_password()
+
+    attrs = %{
+      discord_uid: auth.uid,
+      email: auth.info.email,
+      handle:
+        auth.extra.raw_info.user["username"] <> "_" <> auth.extra.raw_info.user["discriminator"],
+      name:
+        auth.extra.raw_info.user["username"] <> "#" <> auth.extra.raw_info.user["discriminator"],
+      password: pw,
+      password_confirmation: pw
+    }
+
+    %User{}
+    |> User.registration_oauth_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def create_user_from_google(%Auth{} = auth) do
+    pw = random_password()
+
+    attrs = %{
+      google_uid: auth.uid,
+      email: auth.info.email,
+      handle: "user#{:rand.uniform(100_000_000)}",
+      password: pw,
+      password_confirmation: pw
+    }
+
+    %User{}
+    |> User.registration_oauth_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp random_password do
+    :crypto.strong_rand_bytes(@rand_pass_length) |> Base.encode64()
+  end
 
   @doc """
   Gets a single user.
@@ -235,6 +332,22 @@ defmodule Banchan.Accounts do
   """
   def change_user_email(user, attrs \\ %{}) do
     User.email_changeset(user, attrs)
+  end
+
+  @doc """
+  Emulates that the email will change without actually changing it in the
+  database. Used exclusively for OAuth accounts that didn't have an email to
+  begin with, so password is not checked.
+
+  ## Examples
+
+      iex> apply_new_user_email(user, %{email: ...})
+      {:ok, %User{}}
+  """
+  def apply_new_user_email(user, attrs) do
+    user
+    |> User.email_changeset(attrs)
+    |> Ecto.Changeset.apply_action(:update)
   end
 
   @doc """

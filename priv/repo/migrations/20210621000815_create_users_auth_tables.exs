@@ -19,7 +19,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
 
     create table(:users) do
       add :handle, :citext, null: false
-      add :email, :citext, null: false
+      add :email, :citext
       add :hashed_password, :string, null: false
       add :confirmed_at, :naive_datetime
       add :roles, {:array, :string}, default: [], null: false
@@ -27,6 +27,9 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :bio, :string
       add :totp_secret, :binary
       add :totp_activated, :boolean
+      add :twitter_uid, :text
+      add :google_uid, :text
+      add :discord_uid, :text
       # Array fields are the best/fastest approach in most cases.
       # http://www.databasesoup.com/2015/01/tag-all-things.html
       add :tags, {:array, :citext}, default: [], null: false
