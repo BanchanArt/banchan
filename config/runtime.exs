@@ -126,7 +126,7 @@ if config_env() == :prod do
       You'll need an Elevated project.
       """
 
-  twitter_consume_secret =
+  twitter_consumer_secret =
     System.get_env("TWITTER_CONSUMER_SECRET") ||
       raise """
       environment variable TWITTER_CONSUMER_SECRET is missing.
