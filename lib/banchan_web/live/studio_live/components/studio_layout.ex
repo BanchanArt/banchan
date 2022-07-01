@@ -85,6 +85,11 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 </Button>
               {/if}
             </h1>
+            <div :if={!Enum.empty?(@studio.tags)} class="my-2 flex flex-row flex-wrap gap-1">
+              {#for tag <- @studio.tags}
+                <div class="badge badge-lg gap-2 badge-primary">{tag}</div>
+              {/for}
+            </div>
             <div>
               <span class="font-bold">
                 {#if @followers > 9999}

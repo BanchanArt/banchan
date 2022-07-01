@@ -7,6 +7,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :handle, :citext, null: false
       add :about, :text
       add :country, :string, null: false
+      add :tags, {:array, :citext}, default: [], null: false
       add :default_currency, :string, null: false
       add :payment_currencies, {:array, :string}, null: false
       add :header_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
@@ -41,6 +42,21 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           [],
           log: :info
         )
+
+        repo().query!(
+          """
+          CREATE INDEX studios_tags ON studios USING GIN (tags);
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!("""
+        CREATE TRIGGER studios_tags_count_update
+        AFTER UPDATE OR INSERT OR DELETE ON studios
+        FOR EACH ROW
+        EXECUTE PROCEDURE public.trigger_update_tags_count();
+        """)
       end,
       fn ->
         repo().query!(
@@ -50,6 +66,18 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           [],
           log: :info
         )
+
+        repo().query!(
+          """
+          DROP INDEX studios_tags;
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!("""
+        DROP TRIGGER studios_tag_count_update;
+        """)
       end
     )
 

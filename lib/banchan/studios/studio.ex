@@ -17,6 +17,7 @@ defmodule Banchan.Studios.Studio do
     field :country, Ecto.Enum, values: Common.supported_countries() |> Keyword.values()
     field :default_currency, Ecto.Enum, values: Common.supported_currencies()
     field :payment_currencies, {:array, Ecto.Enum}, values: Common.supported_currencies()
+    field :tags, {:array, :string}
 
     field :stripe_id, :string
     field :stripe_charges_enabled, :boolean
@@ -58,11 +59,19 @@ defmodule Banchan.Studios.Studio do
 
   @doc false
   def profile_changeset(studio, attrs) do
+    attrs =
+      if attrs["tags"] == "[]" do
+        Map.put(attrs, "tags", [])
+      else
+        attrs
+      end
+
     studio
     |> cast(attrs, [
       :name,
       :handle,
       :about,
+      :tags,
       :default_currency,
       :payment_currencies,
       :default_terms,
@@ -70,6 +79,7 @@ defmodule Banchan.Studios.Studio do
     ])
     |> validate_required([:name, :handle, :default_currency, :payment_currencies])
     |> validate_markdown(:about)
+    |> validate_tags()
     |> validate_markdown(:default_terms)
     |> validate_markdown(:default_template)
     |> validate_default_currency(:default_currency, :payment_currencies)
@@ -116,6 +126,34 @@ defmodule Banchan.Studios.Studio do
         []
       else
         [{field, "Disallowed HTML detected. Some tags, like <script>, are not allowed."}]
+      end
+    end)
+  end
+
+  def validate_tags(changeset) do
+    changeset
+    |> validate_change(:tags, fn field, tags ->
+      if tags |> Enum.map(&String.downcase/1) ==
+           tags |> Enum.map(&String.downcase/1) |> Enum.uniq() do
+        []
+      else
+        [{field, "cannot have duplicate tags."}]
+      end
+    end)
+    |> validate_change(:tags, fn field, tags ->
+      if Enum.count(tags) > 10 do
+        [{field, "cannot have more than 10 tags."}]
+      else
+        []
+      end
+    end)
+    |> validate_change(:tags, fn field, tags ->
+      if Enum.all?(tags, fn tag ->
+           String.match?(tag, ~r/^.{0,100}$/)
+         end) do
+        []
+      else
+        [{field, "Tags can only be up to 100 characters long."}]
       end
     end)
   end

@@ -45,8 +45,6 @@ defmodule BanchanWeb.DenizenLive.Edit do
 
     socket = assign(socket, changeset: changeset)
 
-    Ecto.Changeset.fetch_field(changeset, :tags)
-
     {:noreply, socket}
   end
 

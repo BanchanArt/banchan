@@ -18,6 +18,7 @@ defmodule BanchanWeb.StudioLive.Settings do
     MultipleSelect,
     Select,
     Submit,
+    TagsInput,
     TextInput,
     UploadInput
   }
@@ -37,6 +38,7 @@ defmodule BanchanWeb.StudioLive.Settings do
 
     {:ok,
      assign(socket,
+       tags: socket.assigns.studio.tags,
        changeset: Studio.profile_changeset(socket.assigns.studio, %{}),
        currencies: [{:"Currencies...", nil} | currencies],
        subscribed?:
@@ -180,6 +182,11 @@ defmodule BanchanWeb.StudioLive.Settings do
 
           <h2 class="text-xl py-6">Edit Studio Profile</h2>
           <Form class="flex flex-col gap-2" for={@changeset} change="change" submit="submit">
+            <TagsInput
+              id="studio_tags"
+              info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
+              name={:tags}
+            />
             <TextInput name={:name} info="Display name for studio" icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />
             <Select
