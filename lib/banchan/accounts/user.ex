@@ -182,19 +182,19 @@ defmodule Banchan.Accounts.User do
       end
     end)
     |> validate_change(:tags, fn field, tags ->
-      if Enum.count(tags) > 15 do
-        [{field, "cannot have more than 15 tags."}]
+      if Enum.count(tags) > 10 do
+        [{field, "cannot have more than 10 tags."}]
       else
         []
       end
     end)
     |> validate_change(:tags, fn field, tags ->
       if Enum.all?(tags, fn tag ->
-           String.match?(tag, ~r/^[[:alnum:]]*[[:alpha:]][[:alnum:]]*$/)
+           String.match?(tag, ~r/^.{0,100}$/)
          end) do
         []
       else
-        [{field, "Only letters and numbers are allowed in tags, with at least one letter."}]
+        [{field, "Tags can only be up to 100 characters long."}]
       end
     end)
   end
