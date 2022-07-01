@@ -17,5 +17,8 @@ defmodule Banchan.Commissions.CommissionFilter do
   def changeset(%__MODULE__{} = filter, attrs \\ %{}) do
     {filter, @types}
     |> cast(attrs, Map.keys(@types))
+    |> validate_length(:search, max: 200)
+    |> validate_length(:client, max: 200)
+    |> validate_length(:studio, max: 200)
   end
 end

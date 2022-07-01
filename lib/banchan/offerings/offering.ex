@@ -59,6 +59,11 @@ defmodule Banchan.Offerings.Offering do
     |> validate_number(:max_proposals, greater_than: 0)
     |> validate_markdown(:terms)
     |> validate_markdown(:template)
+    |> validate_length(:type, max: 32)
+    |> validate_length(:name, max: 50)
+    |> validate_length(:description, max: 140)
+    |> validate_length(:terms, max: 1500)
+    |> validate_length(:template, max: 1500)
     |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])
   end

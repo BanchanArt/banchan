@@ -25,6 +25,8 @@ defmodule Banchan.Commissions.LineItem do
     |> cast_assoc(:option)
     |> validate_money(:amount)
     |> validate_required([:amount, :name, :description])
+    |> validate_length(:name, max: 50)
+    |> validate_length(:description, max: 160)
   end
 
   @doc false
@@ -33,6 +35,8 @@ defmodule Banchan.Commissions.LineItem do
     |> cast(attrs, [:amount, :name, :description])
     |> validate_money(:amount)
     |> validate_required([:amount, :name, :description])
+    |> validate_length(:name, max: 50)
+    |> validate_length(:description, max: 160)
   end
 
   defp validate_money(changeset, field) do

@@ -32,10 +32,13 @@ defmodule Banchan.Commissions.Event do
     |> cast(attrs, [:type, :text, :amount, :status])
     |> validate_money(:amount)
     |> validate_required([:type])
+    |> validate_text()
   end
 
   def text_changeset(event, attrs) do
-    event |> cast(attrs, [:text])
+    event
+    |> cast(attrs, [:text])
+    |> validate_text()
   end
 
   def amount_changeset(event, attrs) do
@@ -50,6 +53,12 @@ defmodule Banchan.Commissions.Event do
     |> cast(attrs, [:text, :amount])
     |> validate_money(:amount)
     |> validate_required([:text])
+    |> validate_text()
+  end
+
+  defp validate_text(changeset) do
+    changeset
+    |> validate_length(:text, max: 1500)
   end
 
   defp validate_money(changeset, field) do
