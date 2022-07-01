@@ -144,10 +144,10 @@ defmodule BanchanWeb.DenizenLive.Edit do
                 </div>
               </div>
             </div>
-            <TagsInput id="user_tags" name={:tags} />
-            <TextInput name={:name} icon="user" opts={required: true} />
-            <TextInput name={:handle} icon="at" opts={required: true} />
-            <TextArea name={:bio} />
+            <TagsInput id="user_tags" label="Interests" info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter." name={:tags} />
+            <TextInput name={:name} icon="user" info="Your display name." opts={required: true} />
+            <TextInput name={:handle} icon="at" info="Your handle that people can @ you with." opts={required: true} />
+            <TextArea name={:bio} info="Tell us a little bit about yourself!" />
             <Submit label="Save" />
           </Form>
         </div>
