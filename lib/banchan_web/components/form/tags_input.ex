@@ -54,7 +54,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
   end
 
   def handle_event("handle_input", %{"key" => "Backspace", "value" => ""}, socket) do
-    if Enum.empty?(socket.assigns.results) do
+    if Enum.empty?(socket.assigns.tags) do
       {:noreply, socket}
     else
       socket =
