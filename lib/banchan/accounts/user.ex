@@ -17,10 +17,17 @@ defmodule Banchan.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :name, :string
     field :bio, :string
-    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist]
     field :totp_secret, :binary
     field :totp_activated, :boolean
     field :tags, {:array, :string}
+
+    # Roles and moderation
+    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist]
+    field :moderation_notes, :string
+    field :disabled_at, :naive_datetime
+    field :disabled_until, :naive_datetime
+    field :disabled_reason, :string
+    belongs_to :disabled_by, __MODULE__, on_replace: :nilify
 
     # OAuth UIDs
     field :twitter_uid, :string
@@ -192,6 +199,54 @@ defmodule Banchan.Accounts.User do
     else
       changeset
     end
+  end
+
+  @doc """
+  User changeset for admins to edit particular fields for users.
+  """
+  def admin_changeset(%__MODULE__{} = actor, %__MODULE__{} = user, attrs \\ %{}) do
+    user
+    |> cast(attrs, [
+      :roles,
+      :moderation_notes
+    ])
+    |> validate_change(:roles, fn field, roles ->
+      cond do
+        :admin in actor.roles ->
+          []
+
+        :mod in actor.roles && :admin not in roles ->
+          []
+
+        true ->
+          [{field, "Can't give user a role higher than your own."}]
+      end
+    end)
+    |> validate_length(:moderation_notes, max: 500)
+  end
+
+  def disable_changeset(user, attrs \\ %{}) do
+    changeset =
+      user
+      |> cast(attrs, [
+        :disabled_at,
+        :disabled_until,
+        :disabled_by,
+        :disabled_reason
+      ])
+      |> validate_length(:disabled_reason, max: 500)
+
+    changeset
+    |> validate_change(:disabled_until, fn field, until ->
+      if NaiveDateTime.compare(
+           Ecto.Changeset.get_field(changeset, :disabled_at, NaiveDateTime.utc_now()),
+           until
+         ) != :lt do
+        [{field, "Disabled-until time must be after the time when the user was disabled."}]
+      else
+        []
+      end
+    end)
   end
 
   @doc """

@@ -55,8 +55,8 @@ defmodule BanchanWeb.Components.Form.MultipleSelect do
               />
             </InputContext>
           </div>
-          <ErrorTag class="help is-danger" />
         </div>
+          <ErrorTag class="text-error" />
       </div>
     </Field>
     """

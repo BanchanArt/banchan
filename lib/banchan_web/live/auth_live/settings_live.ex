@@ -309,25 +309,25 @@ defmodule BanchanWeb.SettingsLive do
           <Submit class="w-full" changeset={@new_email_changeset} label="Save" />
         </Form>
       {#else}
-      <Form
-        class="flex flex-col gap-4"
-        as={:change_handle}
-        for={@handle_changeset}
-        change="change_handle"
-        submit="submit_handle"
-        opts={autocomplete: "off"}
-      >
-        <h3 class="text-lg font-medium">
-          Update Handle
-        </h3>
-        <TextInput name={:handle} icon="at" opts={required: true} />
-        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-        <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
-          Forgot your password?
-        </LiveRedirect>
-        <Submit class="w-full" changeset={@handle_changeset} label="Save" />
-      </Form>
-      <div class="divider" />
+        <Form
+          class="flex flex-col gap-4"
+          as={:change_handle}
+          for={@handle_changeset}
+          change="change_handle"
+          submit="submit_handle"
+          opts={autocomplete: "off"}
+        >
+          <h3 class="text-lg font-medium">
+            Update Handle
+          </h3>
+          <TextInput name={:handle} icon="at" opts={required: true} />
+          <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+          <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
+            Forgot your password?
+          </LiveRedirect>
+          <Submit class="w-full" changeset={@handle_changeset} label="Save" />
+        </Form>
+        <div class="divider" />
         <Form
           class="flex flex-col gap-4"
           as={:change_email}

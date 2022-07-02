@@ -341,6 +341,14 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  Updates admin-level fields for a user, such as their roles.
+  """
+  def update_admin_fields(%User{} = actor, %User{} = user, attrs \\ %{}) do
+    User.admin_changeset(actor, user, attrs)
+    |> Repo.update()
+  end
+
+  @doc """
   Updates the user profile fields.
 
   ## Examples

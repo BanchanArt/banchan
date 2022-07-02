@@ -18,18 +18,38 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
     create unique_index(:uploads, [:bucket, :key])
 
     create table(:users) do
+      # Identity/Auth
       add :handle, :citext, null: false
       add :email, :citext
       add :hashed_password, :string, null: false
       add :confirmed_at, :naive_datetime
-      add :roles, {:array, :string}, default: [], null: false
-      add :name, :string
-      add :bio, :string
       add :totp_secret, :binary
       add :totp_activated, :boolean
+
+      # OAuth
       add :twitter_uid, :text
       add :google_uid, :text
       add :discord_uid, :text
+
+      # Perms and Moderation
+      add :roles, {:array, :string}, default: [], null: false
+      add :moderation_notes, :text
+      add :disabled_reason, :text
+      add :disabled_at, :naive_datetime
+      add :disabled_until, :naive_datetime
+      add :disabled_by_id, references(:users, on_delete: :nilify_all)
+
+      # Profile
+      add :name, :string
+      add :bio, :string
+      # Array fields are the best/fastest approach in most cases.
+      # http://www.databasesoup.com/2015/01/tag-all-things.html
+      add :tags, {:array, :citext}, default: [], null: false
+      add :header_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
+      add :pfp_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
+      add :pfp_thumb_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
+
+      # Social Media
       add :twitter_handle, :text
       add :instagram_handle, :text
       add :facebook_url, :text
@@ -46,12 +66,6 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :tiktok_handle, :text
       add :artfight_handle, :text
 
-      # Array fields are the best/fastest approach in most cases.
-      # http://www.databasesoup.com/2015/01/tag-all-things.html
-      add :tags, {:array, :citext}, default: [], null: false
-      add :header_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
-      add :pfp_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
-      add :pfp_thumb_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       timestamps()
     end
 

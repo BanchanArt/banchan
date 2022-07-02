@@ -97,6 +97,14 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
+    live_session :mods_only, on_mount: BanchanWeb.UserLiveAuth do
+      pipe_through([:browser, :require_authenticated_user, :mod])
+
+      live("/denizens/:handle/admin_edit", DenizenLive.AdminEdit, :edit)
+    end
+  end
+
+  scope "/", BanchanWeb do
     pipe_through(:browser)
 
     get("/go/:handle", DispatchController, :dispatch)

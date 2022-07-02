@@ -95,6 +95,13 @@ defmodule BanchanWeb.DenizenLive.Show do
               <span>@{@user.handle}</span>
             </div>
             <div class="flex flex-row gap-2 place-content-end ml-auto m-4">
+              {#if @current_user && (:admin in @current_user.roles || :mod in @current_user.roles)}
+                <LiveRedirect
+                  label="Moderation"
+                  to={Routes.denizen_admin_edit_path(Endpoint, :edit, @user.handle)}
+                  class="btn btn-sm btn-warning btn-outline rounded-full m-2 px-2 py-0 grow-0"
+                />
+              {/if}
               {#if @current_user &&
                   (@current_user.id == @user.id || :admin in @current_user.roles || :mod in @current_user.roles)}
                 <LiveRedirect
