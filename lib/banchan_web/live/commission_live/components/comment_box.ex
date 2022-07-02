@@ -151,10 +151,10 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
             opts={required: true, placeholder: "Write a comment"}
           />
           {#if @current_user_member?}
-            <div class="flex flex-row gap-2">
+            <div class="flex flex-row gap-2 items-center">
               {#case @studio.payment_currencies}
                 {#match [_]}
-                  <div class="flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
+                  <div class="flex flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
                 {#match _}
                   <div class="flex-basis-1/4">
                     <Select
