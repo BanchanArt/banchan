@@ -16,39 +16,48 @@ defmodule BanchanWeb.UserLiveAuth do
         find_current_user(session)
       end)
 
-    allowed =
-      case auth do
-        :default ->
-          true
-
-        :users_only ->
-          !is_nil(socket.assigns.current_user)
-
-        :admins_only ->
-          !is_nil(socket.assigns.current_user) && :admin in socket.assigns.current_user.roles
-
-        :mods_only ->
-          !is_nil(socket.assigns.current_user) &&
-            (:mod in socket.assigns.current_user.roles ||
-               :admin in socket.assigns.current_user.roles)
-
-        :artists_only ->
-          !is_nil(socket.assigns.current_user) &&
-            (:artist in socket.assigns.current_user.roles ||
-               :mod in socket.assigns.current_user.roles ||
-               :admin in socket.assigns.current_user.roles)
-      end
-
-    if allowed do
-      # This is important so clients get booted when they log out elsewhere.
-      Accounts.subscribe_to_auth_events()
-
-      {:cont, socket}
-    else
+    if auth == :redirect_if_authed && socket.assigns.current_user do
       {:halt,
        socket
-       |> put_flash(:error, "You do not have access to this page.")
-       |> redirect(to: Routes.user_session_path(socket, :create))}
+       |> redirect(to: Routes.home_path(socket, :index))}
+    else
+      allowed =
+        case auth do
+          :default ->
+            true
+
+          :open ->
+            true
+
+          :users_only ->
+            !is_nil(socket.assigns.current_user)
+
+          :admins_only ->
+            !is_nil(socket.assigns.current_user) && :admin in socket.assigns.current_user.roles
+
+          :mods_only ->
+            !is_nil(socket.assigns.current_user) &&
+              (:mod in socket.assigns.current_user.roles ||
+                 :admin in socket.assigns.current_user.roles)
+
+          :artists_only ->
+            !is_nil(socket.assigns.current_user) &&
+              (:artist in socket.assigns.current_user.roles ||
+                 :mod in socket.assigns.current_user.roles ||
+                 :admin in socket.assigns.current_user.roles)
+        end
+
+      if allowed do
+        # This is important so clients get booted when they log out elsewhere.
+        Accounts.subscribe_to_auth_events()
+
+        {:cont, socket}
+      else
+        {:halt,
+         socket
+         |> put_flash(:error, "You do not have access to this page.")
+         |> redirect(to: Routes.user_session_path(socket, :create))}
+      end
     end
   end
 

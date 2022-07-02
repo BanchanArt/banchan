@@ -56,7 +56,7 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :users_only, on_mount: BanchanWeb.UserLiveAuth do
+    live_session :users_only, on_mount: {BanchanWeb.UserLiveAuth, :users_only} do
       pipe_through([:browser, :enabled_user])
 
       live("/denizens/:handle/edit", DenizenLive.Edit, :edit)
@@ -87,7 +87,7 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :artists_only, on_mount: BanchanWeb.UserLiveAuth do
+    live_session :artists_only, on_mount: {BanchanWeb.UserLiveAuth, :artists_only} do
       pipe_through([:browser, :enabled_user, :artist])
 
       live("/studios/new", StudioLive.New, :new)
@@ -102,7 +102,7 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :mods_only, on_mount: BanchanWeb.UserLiveAuth do
+    live_session :mods_only, on_mount: {BanchanWeb.UserLiveAuth, :mods_only} do
       pipe_through([:browser, :enabled_user, :mod])
 
       live("/denizens/:handle/admin_edit", DenizenLive.AdminEdit, :edit)
@@ -125,7 +125,7 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :open, on_mount: BanchanWeb.UserLiveAuth do
+    live_session :open, on_mount: {BanchanWeb.UserLiveAuth, :open} do
       pipe_through(:browser)
 
       live("/", HomeLive, :index)
@@ -147,7 +147,7 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :redirect_if_authed, on_mount: BanchanWeb.UserLiveAuth do
+    live_session :redirect_if_authed, on_mount: {BanchanWeb.UserLiveAuth, :redirect_if_authed} do
       pipe_through([:browser, :redirect_if_user_is_authenticated])
 
       live("/login", LoginLive, :new)
