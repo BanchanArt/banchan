@@ -4,12 +4,13 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   """
   use BanchanWeb, :component
 
-  alias Surface.Components.{LivePatch, LiveRedirect}
+  alias Surface.Components.LivePatch
 
   alias BanchanWeb.CommissionLive.Components.{
     CommentBox,
     DraftBox,
     StatusBox,
+    StudioBox,
     SummaryEditor,
     Timeline
   }
@@ -39,6 +40,8 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
       <div class="p-4">
         <div class="flex flex-col grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="flex flex-col md:col-span-2">
+            <StudioBox studio={@commission.studio} class="md:hidden rounded-box hover:bg-base-200 p-2 transition-all" />
+            <div class="divider" />
             <Timeline
               uri={@uri}
               commission={@commission}
@@ -63,24 +66,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           </div>
           <div class="divider md:hidden" />
           <div class="flex flex-col">
-            <LiveRedirect
-              class="hidden rounded-box hover:bg-base-200 p-2 transition-all"
-              to={Routes.studio_shop_path(Endpoint, :show, @commission.studio.handle)}
-            >
-              <img
-                :if={!is_nil(@commission.studio.header_img_id)}
-                src={Routes.public_image_path(Endpoint, :image, @commission.studio.header_img_id)}
-                class="aspect-header-image object-cover rounded-box"
-              />
-              <img
-                :if={is_nil(@commission.studio.header_img_id) && !is_nil(@commission.studio.card_img_id)}
-                src={Routes.public_image_path(Endpoint, :image, @commission.studio.card_img_id)}
-                class="aspect-header-image object-cover rounded-box"
-              />
-              <div class="px-2 text-xl font-medium">
-                By {@commission.studio.name}
-              </div>
-            </LiveRedirect>
+            <StudioBox studio={@commission.studio} class="hidden md:block rounded-box hover:bg-base-200 p-2 transition-all" />
             <div class="divider" />
             <DraftBox
               id="draft-box"
