@@ -4,8 +4,10 @@ defmodule Banchan.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Banchan.Accounts.DisableHistory
   alias Banchan.Identities
   alias Banchan.Notifications.{UserNotification, UserNotificationSettings}
+  alias Banchan.Studios.Studio
   alias Banchan.Uploads.Upload
 
   @derive {Inspect, except: [:password]}
@@ -24,10 +26,8 @@ defmodule Banchan.Accounts.User do
     # Roles and moderation
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist]
     field :moderation_notes, :string
-    field :disabled_at, :naive_datetime
-    field :disabled_until, :naive_datetime
-    field :disabled_reason, :string
-    belongs_to :disabled_by, __MODULE__, on_replace: :nilify
+    has_one :disable_info, DisableHistory, where: [lifted_at: nil]
+    has_many :disable_history, DisableHistory, preload_order: [:desc, :disabled_at]
 
     # OAuth UIDs
     field :twitter_uid, :string
@@ -59,7 +59,7 @@ defmodule Banchan.Accounts.User do
 
     has_many :notifications, UserNotification
 
-    many_to_many :studios, Banchan.Studios.Studio, join_through: "users_studios"
+    many_to_many :studios, Studio, join_through: "users_studios"
 
     timestamps()
   end
@@ -223,30 +223,6 @@ defmodule Banchan.Accounts.User do
       end
     end)
     |> validate_length(:moderation_notes, max: 500)
-  end
-
-  def disable_changeset(user, attrs \\ %{}) do
-    changeset =
-      user
-      |> cast(attrs, [
-        :disabled_at,
-        :disabled_until,
-        :disabled_by,
-        :disabled_reason
-      ])
-      |> validate_length(:disabled_reason, max: 500)
-
-    changeset
-    |> validate_change(:disabled_until, fn field, until ->
-      if NaiveDateTime.compare(
-           Ecto.Changeset.get_field(changeset, :disabled_at, NaiveDateTime.utc_now()),
-           until
-         ) != :lt do
-        [{field, "Disabled-until time must be after the time when the user was disabled."}]
-      else
-        []
-      end
-    end)
   end
 
   @doc """

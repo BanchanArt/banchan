@@ -1,10 +1,10 @@
-defmodule BanchanWeb.Components.Form.MultipleSelect do
+defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
   @moduledoc """
   Banchan-specific TextInput.
   """
   use BanchanWeb, :component
 
-  alias Surface.Components.Form.{ErrorTag, Field, Label, MultipleSelect}
+  alias Surface.Components.Form.{DateTimeLocalInput, ErrorTag, Field, Label}
   alias Surface.Components.Form.Input.InputContext
 
   prop name, :any, required: true
@@ -12,9 +12,8 @@ defmodule BanchanWeb.Components.Form.MultipleSelect do
   prop class, :css_class
   prop label, :string
   prop show_label, :boolean, default: true
-  prop icon, :string
   prop info, :string
-  prop options, :any, default: []
+  prop icon, :string
 
   def render(assigns) do
     ~F"""
@@ -42,21 +41,20 @@ defmodule BanchanWeb.Components.Form.MultipleSelect do
           {/if}
           <div class="control w-full">
             <InputContext :let={form: form, field: field}>
-              <MultipleSelect
+              <DateTimeLocalInput
                 class={
-                  "textarea",
-                  "textarea-bordered",
+                  "input",
+                  "input-bordered",
                   "w-full",
                   @class,
-                  "textarea-error": !Enum.empty?(Keyword.get_values(form.errors, field))
+                  "input-error": !Enum.empty?(Keyword.get_values(form.errors, field))
                 }
                 opts={@opts}
-                options={@options}
               />
             </InputContext>
           </div>
         </div>
-        <ErrorTag class="text-error" />
+        <ErrorTag class="help text-error" />
       </div>
     </Field>
     """

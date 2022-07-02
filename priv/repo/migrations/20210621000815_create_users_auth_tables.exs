@@ -34,10 +34,6 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       # Perms and Moderation
       add :roles, {:array, :string}, default: [], null: false
       add :moderation_notes, :text
-      add :disabled_reason, :text
-      add :disabled_at, :naive_datetime
-      add :disabled_until, :naive_datetime
-      add :disabled_by_id, references(:users, on_delete: :nilify_all)
 
       # Profile
       add :name, :string
@@ -152,5 +148,17 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
 
     create index(:users_tokens, [:user_id])
     create unique_index(:users_tokens, [:context, :token])
+
+    create table(:disable_history) do
+      add :user_id, references(:users, on_delete: :delete_all), null: false
+      add :disabled_by_id, references(:users, on_delete: :delete_all)
+      add :disabled_at, :naive_datetime
+      add :disabled_until, :naive_datetime
+      add :disabled_reason, :text
+      add :lifted_reason, :text
+      add :lifted_at, :naive_datetime
+    end
+
+    create index(:disable_history, [:user_id])
   end
 end

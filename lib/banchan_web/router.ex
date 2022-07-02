@@ -4,7 +4,7 @@ defmodule BanchanWeb.Router do
   import BanchanWeb.UserAuth
   import Phoenix.LiveDashboard.Router
 
-  alias BanchanWeb.EnsureRolePlug
+  alias BanchanWeb.{EnsureEnabledPlug, EnsureRolePlug}
 
   @host Application.compile_env!(:banchan, [BanchanWeb.Endpoint, :url, :host])
 
@@ -50,9 +50,14 @@ defmodule BanchanWeb.Router do
     plug(EnsureRolePlug, [:admin, :mod, :artist])
   end
 
+  pipeline :enabled_user do
+    plug(:require_authenticated_user)
+    plug(EnsureEnabledPlug, [])
+  end
+
   scope "/", BanchanWeb do
     live_session :users_only, on_mount: BanchanWeb.UserLiveAuth do
-      pipe_through([:browser, :require_authenticated_user])
+      pipe_through([:browser, :enabled_user])
 
       live("/denizens/:handle/edit", DenizenLive.Edit, :edit)
 
@@ -83,7 +88,7 @@ defmodule BanchanWeb.Router do
 
   scope "/", BanchanWeb do
     live_session :artists_only, on_mount: BanchanWeb.UserLiveAuth do
-      pipe_through([:browser, :require_authenticated_user, :artist])
+      pipe_through([:browser, :enabled_user, :artist])
 
       live("/studios/new", StudioLive.New, :new)
       live("/studios/:handle/settings", StudioLive.Settings, :show)
@@ -98,7 +103,7 @@ defmodule BanchanWeb.Router do
 
   scope "/", BanchanWeb do
     live_session :mods_only, on_mount: BanchanWeb.UserLiveAuth do
-      pipe_through([:browser, :require_authenticated_user, :mod])
+      pipe_through([:browser, :enabled_user, :mod])
 
       live("/denizens/:handle/admin_edit", DenizenLive.AdminEdit, :edit)
     end
@@ -136,6 +141,8 @@ defmodule BanchanWeb.Router do
 
       live("/reset_password", ForgotPasswordLive, :edit)
       live("/reset_password/:token", ResetPasswordLive, :edit)
+
+      live("/account_disabled", AccountDisabledLive, :show)
     end
   end
 

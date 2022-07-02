@@ -7,7 +7,7 @@ defmodule Banchan.Accounts do
 
   alias Ueberauth.Auth
 
-  alias Banchan.Accounts.{User, UserNotifier, UserToken}
+  alias Banchan.Accounts.{DisableHistory, User, UserNotifier, UserToken}
   alias Banchan.Repo
   alias Banchan.Uploads
 
@@ -420,6 +420,42 @@ defmodule Banchan.Accounts do
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  def disable_user(%User{} = actor, %User{} = user, attrs) do
+    %DisableHistory{
+      user_id: user.id,
+      disabled_by_id: actor.id,
+      disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    }
+    |> DisableHistory.disable_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Re-enable a previously disabled user.
+  """
+  def enable_user(actor, %User{} = user, reason) do
+    changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifte_reason: reason})
+
+    if changeset.valid? do
+      {_, [history | _]} =
+        Repo.update_all(
+          from(h in DisableHistory,
+            where: h.user_id == ^user.id,
+            select: h,
+            order_by: {:desc, :disabled_at}
+          ),
+          set: [
+            lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+            lifted_by_id: actor && actor.id
+          ]
+        )
+
+      {:ok, history}
+    else
+      {:error, changeset}
     end
   end
 
