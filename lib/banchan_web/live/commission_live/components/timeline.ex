@@ -56,7 +56,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                     added <strong>{event.text}</strong> ({Money.to_string(event.amount)})
                   </TimelineItem>
                 {#match :line_item_removed}
-                  <TimelineItem uri={@uri} icon="✕" event={event}>
+                  <TimelineItem uri={@uri} icon="✖" event={event}>
                     removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))})
                   </TimelineItem>
                 {#match :payment_processed}

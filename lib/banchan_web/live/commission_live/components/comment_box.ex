@@ -56,6 +56,15 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
     {:noreply, assign(socket, changeset: changeset)}
   end
 
+  def handle_event("change", %{"event" => event}, socket) do
+    changeset =
+      %Event{}
+      |> Event.comment_changeset(event)
+      |> Map.put(:action, :update)
+
+    {:noreply, assign(socket, changeset: changeset)}
+  end
+
   @impl true
   def handle_event("cancel_upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :attachment, ref)}
@@ -151,10 +160,10 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
             opts={required: true, placeholder: "Write a comment"}
           />
           {#if @current_user_member?}
-            <div class="flex flex-row gap-2">
+            <div class="flex flex-row gap-2 items-center">
               {#case @studio.payment_currencies}
                 {#match [_]}
-                  <div class="flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
+                  <div class="flex flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
                 {#match _}
                   <div class="flex-basis-1/4">
                     <Select
@@ -171,13 +180,13 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
               </div>
             </div>
             {#if Enum.empty?(@uploads.attachment.entries)}
-              <Submit changeset={@changeset} label="Post" />
+              <Submit changeset={@changeset} class="w-full md:w-fit" label="Post" />
             {#else}
               <Checkbox name={:required} label="Require Payment to View Draft" />
-              <Submit changeset={@changeset} label="Submit Draft" />
+              <Submit changeset={@changeset} class="w-full md:w-fit" label="Submit Draft" />
             {/if}
           {#else}
-            <Submit changeset={@changeset} label="Post" />
+            <Submit changeset={@changeset} class="w-full md:w-fit" label="Post" />
           {/if}
         </div>
       </Form>

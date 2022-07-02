@@ -162,6 +162,7 @@ defmodule Banchan.Commissions do
             (c.client_id == ^current_user.id or
                ^current_user.id == artist.id),
         preload: [
+          :studio,
           events: [:actor, invoice: [], attachments: [:upload, :thumbnail]],
           line_items: [:option],
           offering: [:options]

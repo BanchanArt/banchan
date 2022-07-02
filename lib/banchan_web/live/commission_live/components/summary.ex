@@ -42,24 +42,32 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
         end
       )
 
+    deposited =
+      if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
+        [Money.new(0, assigns.studio.default_currency)]
+      else
+        assigns.deposited |> Map.values()
+      end
+
     remaining =
-      assigns.deposited &&
+      if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
+        Map.values(estimate)
+      else
         assigns.deposited
         |> Enum.map(fn {currency, amount} ->
           Money.subtract(Map.get(estimate, currency, Money.new(0, currency)), amount)
         end)
+      end
 
     estimate = Map.values(estimate)
-    deposited = assigns.deposited && assigns.deposited |> Map.values()
 
     ~F"""
     <div class="flex flex-col">
       {#if @offering}
         <div class="px-2 text-2xl">{@offering.name}</div>
         <div class="px-2 text-sm">{@offering.description}</div>
-        <div class="divider" />
       {/if}
-      <ul class="flex flex-col">
+      <ul class="flex flex-col pt-4">
         {#for {item, idx} <- Enum.with_index(@line_items)}
           <li class="flex p-2 gap-2">
             {#if @allow_edits && !item.sticky}
@@ -87,18 +95,17 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
       </ul>
       <div class="divider" />
       {#if @deposited}
-        <div class="px-2 flex flex-row items-center">
-          <div class="font-bold grow">Quote:</div>
-          <div class="px-2 flex flex-col">
-            {#for val <- estimate}
-              <div>
-                {Money.to_string(val)}
-              </div>
-            {/for}
+        <div class="p-2 flex flex-col gap-2">
+          <div class="flex flex-row items-center">
+            <div class="font-bold grow">Quote:</div>
+            <div class="flex flex-col">
+              {#for val <- estimate}
+                <div>
+                  {Money.to_string(val)}
+                </div>
+              {/for}
+            </div>
           </div>
-        </div>
-        <div class="divider -py-2" />
-        <div class="px-2 flex flex-col gap-2">
           <div class="flex flex-row items-center">
             <div class="font-bold grow">Deposited:</div>
             <div class="flex flex-col">
@@ -109,9 +116,8 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
               {/for}
             </div>
           </div>
-          <div class="divider -px-2" />
           <div class="flex flex-row items-center">
-            <div class="font-bold grow">Remaining Balance:</div>
+            <div class="font-bold grow">Balance:</div>
             <div class="flex flex-col">
               {#for val <- remaining}
                 <div>
