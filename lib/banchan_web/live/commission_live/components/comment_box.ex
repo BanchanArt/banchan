@@ -171,13 +171,13 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
               </div>
             </div>
             {#if Enum.empty?(@uploads.attachment.entries)}
-              <Submit changeset={@changeset} label="Post" />
+              <Submit changeset={@changeset} class="w-full" label="Post" />
             {#else}
               <Checkbox name={:required} label="Require Payment to View Draft" />
-              <Submit changeset={@changeset} label="Submit Draft" />
+              <Submit changeset={@changeset} class="w-full" label="Submit Draft" />
             {/if}
           {#else}
-            <Submit changeset={@changeset} label="Post" />
+            <Submit changeset={@changeset} class="w-full" label="Post" />
           {/if}
         </div>
       </Form>
