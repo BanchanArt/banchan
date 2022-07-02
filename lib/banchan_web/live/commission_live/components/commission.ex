@@ -63,12 +63,23 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           </div>
           <div class="divider md:hidden" />
           <div class="flex flex-col">
-            <LiveRedirect class="rounded-box hover:bg-base-200 p-2 transition-all" to={Routes.studio_shop_path(Endpoint, :show, @commission.studio.handle)}>
-            <img :if={!is_nil(@commission.studio.header_img_id)} src={Routes.public_image_path(Endpoint, :image, @commission.studio.header_img_id)} class="aspect-header-image object-cover rounded-box" />
-            <img :if={is_nil(@commission.studio.header_img_id) && !is_nil(@commission.studio.card_img_id)} src={Routes.public_image_path(Endpoint, :image, @commission.studio.card_img_id)} class="aspect-header-image object-cover rounded-box" />
-            <div class="px-2 text-xl font-medium">
-              By {@commission.studio.name}
-            </div>
+            <LiveRedirect
+              class="hidden rounded-box hover:bg-base-200 p-2 transition-all"
+              to={Routes.studio_shop_path(Endpoint, :show, @commission.studio.handle)}
+            >
+              <img
+                :if={!is_nil(@commission.studio.header_img_id)}
+                src={Routes.public_image_path(Endpoint, :image, @commission.studio.header_img_id)}
+                class="aspect-header-image object-cover rounded-box"
+              />
+              <img
+                :if={is_nil(@commission.studio.header_img_id) && !is_nil(@commission.studio.card_img_id)}
+                src={Routes.public_image_path(Endpoint, :image, @commission.studio.card_img_id)}
+                class="aspect-header-image object-cover rounded-box"
+              />
+              <div class="px-2 text-xl font-medium">
+                By {@commission.studio.name}
+              </div>
             </LiveRedirect>
             <div class="divider" />
             <DraftBox
