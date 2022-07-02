@@ -46,8 +46,8 @@ defmodule BanchanWeb.Router do
     plug(EnsureRolePlug, [:admin, :mod])
   end
 
-  pipeline :creator do
-    plug(EnsureRolePlug, [:admin, :mod, :creator])
+  pipeline :artist do
+    plug(EnsureRolePlug, [:admin, :mod, :artist])
   end
 
   scope "/", BanchanWeb do
@@ -56,14 +56,7 @@ defmodule BanchanWeb.Router do
 
       live("/denizens/:handle/edit", DenizenLive.Edit, :edit)
 
-      live("/studios/new", StudioLive.New, :new)
-      live("/studios/:handle/settings", StudioLive.Settings, :show)
-      live("/studios/:handle/payouts", StudioLive.Payouts, :index)
-      live("/studios/:handle/payouts/:payout_id", StudioLive.Payouts, :show)
-      live("/studios/:handle/offerings/new", StudioLive.Offerings.New, :new)
-      live("/studios/:handle/offerings/edit/:offering_type", StudioLive.Offerings.Edit, :edit)
       live("/studios/:handle/commissions/new/:offering_type", StudioLive.Commissions.New, :new)
-      get("/studios/:handle/settings/stripe", StripeDashboardController, :dashboard)
 
       live("/commissions", CommissionLive, :index)
       live("/commissions/:commission_id", CommissionLive, :show)
@@ -85,6 +78,21 @@ defmodule BanchanWeb.Router do
 
       get("/settings/confirm_email/:token", UserSettingsController, :confirm_email)
       get("/settings/refresh_session/:return_to", UserSessionController, :refresh_session)
+    end
+  end
+
+  scope "/", BanchanWeb do
+    live_session :artists_only, on_mount: BanchanWeb.UserLiveAuth do
+      pipe_through([:browser, :require_authenticated_user, :artist])
+
+      live("/studios/new", StudioLive.New, :new)
+      live("/studios/:handle/settings", StudioLive.Settings, :show)
+      live("/studios/:handle/payouts", StudioLive.Payouts, :index)
+      live("/studios/:handle/payouts/:payout_id", StudioLive.Payouts, :show)
+      live("/studios/:handle/offerings/new", StudioLive.Offerings.New, :new)
+      live("/studios/:handle/offerings/edit/:offering_type", StudioLive.Offerings.Edit, :edit)
+
+      get("/studios/:handle/settings/stripe", StripeDashboardController, :dashboard)
     end
   end
 

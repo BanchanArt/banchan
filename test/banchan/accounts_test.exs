@@ -373,6 +373,7 @@ defmodule Banchan.AccountsTest do
       {:error, changeset} =
         Accounts.update_user_profile(
           user,
+          user,
           %{
             handle: "12",
             name: String.duplicate("b", 40),
@@ -392,6 +393,7 @@ defmodule Banchan.AccountsTest do
     test "updates the user profile", %{user: user} do
       {:ok, user} =
         Accounts.update_user_profile(
+          user,
           user,
           %{
             handle: "newhandle",

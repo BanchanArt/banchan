@@ -17,7 +17,7 @@ defmodule Banchan.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :name, :string
     field :bio, :string
-    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
+    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist]
     field :totp_secret, :binary
     field :totp_activated, :boolean
     field :tags, {:array, :string}
@@ -207,7 +207,6 @@ defmodule Banchan.Accounts.User do
 
     user
     |> cast(attrs, [
-      :handle,
       :name,
       :bio,
       :tags,
@@ -227,8 +226,6 @@ defmodule Banchan.Accounts.User do
       :tiktok_handle,
       :artfight_handle
     ])
-    |> validate_required([:handle])
-    |> validate_handle()
     |> validate_name()
     |> validate_bio()
     |> validate_tags()

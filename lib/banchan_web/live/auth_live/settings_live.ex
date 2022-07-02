@@ -33,6 +33,7 @@ defmodule BanchanWeb.SettingsLive do
         {:ok,
          assign(socket,
            theme: nil,
+           handle_changeset: User.handle_changeset(socket.assigns.current_user, %{}),
            email_changeset: User.email_changeset(socket.assigns.current_user, %{}),
            password_changeset: User.password_changeset(socket.assigns.current_user, %{}),
            notification_settings: settings,
@@ -66,6 +67,39 @@ defmodule BanchanWeb.SettingsLive do
   @impl true
   def handle_event("theme_changed", %{"theme" => theme}, socket) do
     {:noreply, socket |> assign(theme: theme)}
+  end
+
+  def handle_event("change_handle", val, socket) do
+    changeset =
+      socket.assigns.current_user
+      |> User.handle_changeset(val["change_handle"])
+      |> Map.put(:action, :update)
+
+    socket = assign(socket, handle_changeset: changeset)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("submit_handle", val, socket) do
+    case Accounts.update_user_handle(
+           socket.assigns.current_user,
+           val["change_handle"]["password"],
+           val["change_handle"]
+         ) do
+      {:ok, updated_user} ->
+        socket =
+          socket
+          |> put_flash(
+            :info,
+            "Your handle has been updated."
+          )
+          |> push_redirect(to: Routes.denizen_show_path(Endpoint, :show, updated_user.handle))
+
+        {:noreply, socket}
+
+      other ->
+        other
+    end
   end
 
   def handle_event("change_new_email", val, socket) do
@@ -269,12 +303,31 @@ defmodule BanchanWeb.SettingsLive do
         >
           <h3 class="text-lg">Set Your Email</h3>
           <div>
-            You created this account through third-party authentication that did not provide an email address. If you want to be able to log in with an email and password as well, please provide an email and we will send a password reset to it.
+            You created this account through third-party authentication that did not provide an email address. If you want to be able to log in with an email and password, or change your <code>@handle</code>, please provide an email and we will send you a password reset.
           </div>
           <EmailInput name={:email} icon="envelope" opts={required: true} />
           <Submit class="w-full" changeset={@new_email_changeset} label="Save" />
         </Form>
       {#else}
+      <Form
+        class="flex flex-col gap-4"
+        as={:change_handle}
+        for={@handle_changeset}
+        change="change_handle"
+        submit="submit_handle"
+        opts={autocomplete: "off"}
+      >
+        <h3 class="text-lg font-medium">
+          Update Handle
+        </h3>
+        <TextInput name={:handle} icon="at" opts={required: true} />
+        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+        <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
+          Forgot your password?
+        </LiveRedirect>
+        <Submit class="w-full" changeset={@handle_changeset} label="Save" />
+      </Form>
+      <div class="divider" />
         <Form
           class="flex flex-col gap-4"
           as={:change_email}
