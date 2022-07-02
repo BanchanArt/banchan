@@ -6,6 +6,8 @@ defmodule BanchanWeb.UserLiveAuth do
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
+  alias Banchan.Repo
+
   alias BanchanWeb.Router.Helpers, as: Routes
 
   def on_mount(auth, _params, session, socket) do
@@ -30,18 +32,23 @@ defmodule BanchanWeb.UserLiveAuth do
             true
 
           :users_only ->
-            !is_nil(socket.assigns.current_user)
+            !is_nil(socket.assigns.current_user) &&
+              is_nil(socket.assigns.current_user.disable_info)
 
           :admins_only ->
-            !is_nil(socket.assigns.current_user) && :admin in socket.assigns.current_user.roles
+            !is_nil(socket.assigns.current_user) &&
+              is_nil(socket.assigns.current_user.disable_info) &&
+              :admin in socket.assigns.current_user.roles
 
           :mods_only ->
-            !is_nil(socket.assigns.current_user) &&
+            !is_nil(socket.assigns.current_user &&
+              is_nil(socket.assigns.current_user.disable_info) &&
               (:mod in socket.assigns.current_user.roles ||
-                 :admin in socket.assigns.current_user.roles)
+                 :admin in socket.assigns.current_user.roles))
 
           :artists_only ->
             !is_nil(socket.assigns.current_user) &&
+              is_nil(socket.assigns.current_user.disable_info) &&
               (:artist in socket.assigns.current_user.roles ||
                  :mod in socket.assigns.current_user.roles ||
                  :admin in socket.assigns.current_user.roles)
@@ -64,6 +71,6 @@ defmodule BanchanWeb.UserLiveAuth do
   defp find_current_user(session) do
     with user_token when not is_nil(user_token) <- session["user_token"],
          %User{} = user <- Accounts.get_user_by_session_token(user_token),
-         do: user
+         do: user |> Repo.preload(:disable_info)
   end
 end

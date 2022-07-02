@@ -8,6 +8,7 @@ defmodule BanchanWeb.UserAuth do
   plug Ueberauth
 
   alias Banchan.Accounts
+  alias Banchan.Repo
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
 
@@ -105,7 +106,7 @@ defmodule BanchanWeb.UserAuth do
   def fetch_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Accounts.get_user_by_session_token(user_token)
-    assign(conn, :current_user, user)
+    assign(conn, :current_user, user |> Repo.preload(:disable_info))
   end
 
   defp ensure_user_token(conn) do
