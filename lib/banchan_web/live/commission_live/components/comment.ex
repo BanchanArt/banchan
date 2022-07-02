@@ -5,11 +5,12 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
   use BanchanWeb, :live_component
 
   alias Banchan.Commissions
+  alias Banchan.Repo
   alias Banchan.Uploads
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.{Avatar, Button, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Button, Markdown, UserHandle}
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
   alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox, MediaPreview}
 
@@ -29,13 +30,11 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
     time |> Timex.to_datetime() |> Timex.format!("{RFC822}")
   end
 
-  defp fmt_md(md) do
-    HtmlSanitizeEx.markdown_html(Earmark.as_html!(md || ""))
-  end
-
   @impl true
   def update(params, socket) do
-    {:ok, socket |> assign(params) |> assign(changeset: nil)}
+    socket = socket |> assign(params) |> assign(changeset: nil)
+    socket = socket |> assign(event: socket.assigns.event |> Repo.preload(history: [:changed_by]))
+    {:ok, socket}
   end
 
   @impl true
@@ -77,10 +76,14 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   @impl true
   def handle_event("submit_edit", %{"event" => event}, socket) do
-    case Commissions.update_event(socket.assigns.event, event) do
+    case Commissions.update_event(socket.assigns.current_user, socket.assigns.event, event) do
       {:ok, event} ->
-        # TODO: broadcast + update elsewhere?
-        {:noreply, socket |> assign(event: event, changeset: nil)}
+        {:noreply,
+         socket
+         |> assign(
+           event: event |> Repo.preload([:attachments, :actor, :invoice, history: [:changed_by]]),
+           changeset: nil
+         )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, socket |> assign(changeset: changeset)}
@@ -134,7 +137,30 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             >{fmt_time(@event.inserted_at)}</a>.
           </span>
           {#if @event.inserted_at != @event.updated_at}
-            <span class="text-xs italic">edited {fmt_time(@event.updated_at)}</span>
+            <div class="dropdown">
+              <label tabindex="0" class="text-xs italic hover:link">
+                edited {fmt_time(@event.updated_at)}
+              </label>
+              <ol tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box">
+                {#for history <- @event.history}
+                  <li class="block">
+                    <div class="flex flex-col place-items-start">
+                      <div>
+                        Comment from {fmt_time(history.written_at)} changed by <UserHandle user={history.changed_by} />
+                      </div>
+                      {#if :mod in @current_user.roles || :admin in @current_user.roles}
+                        <div class="font-bold">
+                          Original Text:
+                        </div>
+                        <div>
+                          <Markdown content={history.text} />
+                        </div>
+                      {/if}
+                    </div>
+                  </li>
+                {/for}
+              </ol>
+            </div>
           {/if}
         </div>
         {#if !@changeset && (@current_user_member? || @current_user.id == @event.actor.id)}
@@ -164,7 +190,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             </div>
           </Form>
         {#else}
-          {raw(fmt_md(@event.text))}
+          <Markdown content={@event.text} />
         {/if}
       </div>
 

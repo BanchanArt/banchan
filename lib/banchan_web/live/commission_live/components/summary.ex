@@ -43,13 +43,14 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
       )
 
     remaining =
-      assigns.deposited
-      |> Enum.map(fn {currency, amount} ->
-        Money.subtract(Map.get(estimate, currency, Money.new(0, currency)), amount)
-      end)
+      assigns.deposited &&
+        assigns.deposited
+        |> Enum.map(fn {currency, amount} ->
+          Money.subtract(Map.get(estimate, currency, Money.new(0, currency)), amount)
+        end)
 
     estimate = Map.values(estimate)
-    deposited = assigns.deposited |> Map.values()
+    deposited = assigns.deposited && assigns.deposited |> Map.values()
 
     ~F"""
     <div class="flex flex-col">

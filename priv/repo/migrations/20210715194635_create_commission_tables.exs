@@ -212,5 +212,12 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     end
 
     create unique_index(:invoices_payouts, [:invoice_id, :payout_id])
+
+    create table(:comment_history) do
+      add :event_id, references(:commission_events, on_delete: :nothing), null: false
+      add :changed_by_id, references(:users, on_delete: :nothing), null: false
+      add :text, :text, null: false
+      add :written_at, :naive_datetime, null: false
+    end
   end
 end

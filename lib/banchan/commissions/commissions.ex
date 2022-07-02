@@ -11,6 +11,7 @@ defmodule Banchan.Commissions do
   alias Banchan.Accounts.User
 
   alias Banchan.Commissions.{
+    CommentHistory,
     Commission,
     CommissionArchived,
     CommissionFilter,
@@ -560,10 +561,42 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_event(%Event{} = event, attrs) do
-    event
-    |> Event.changeset(attrs)
-    |> Repo.update()
+  def update_event(%User{} = actor, %Event{} = event, attrs) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        event = Repo.get!(Event, event.id)
+
+        changeset = Event.changeset(event, attrs)
+
+        changeset
+        |> Repo.update()
+        |> case do
+          {:ok, event} ->
+            if Ecto.Changeset.fetch_change(changeset, :text) == :error do
+              {:ok, event}
+            else
+              %CommentHistory{
+                text: event.text,
+                written_at: event.updated_at,
+                event_id: event.id,
+                changed_by_id: actor.id
+              }
+              |> Repo.insert()
+              |> case do
+                {:ok, _} ->
+                  {:ok, event}
+
+                {:error, err} ->
+                  {:error, err}
+              end
+            end
+
+          {:error, err} ->
+            {:error, err}
+        end
+      end)
+
+    ret
   end
 
   @doc """
