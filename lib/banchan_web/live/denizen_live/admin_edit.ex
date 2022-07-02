@@ -23,11 +23,12 @@ defmodule BanchanWeb.DenizenLive.AdminEdit do
 
   @impl true
   def mount(%{"handle" => handle}, _session, socket) do
-    if :admin in socket.assigns.current_user.roles || :mod in socket.assigns.current_user.roles do
-      user =
-        Accounts.get_user_by_handle!(handle)
-        |> Repo.preload(:disable_info)
+    user =
+      Accounts.get_user_by_handle!(handle)
+      |> Repo.preload(:disable_info)
 
+    if :admin in socket.assigns.current_user.roles ||
+         (:mod in socket.assigns.current_user.roles && :admin not in user.roles) do
       socket =
         socket
         |> assign(
