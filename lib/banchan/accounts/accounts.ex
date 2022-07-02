@@ -424,38 +424,49 @@ defmodule Banchan.Accounts do
   end
 
   def disable_user(%User{} = actor, %User{} = user, attrs) do
-    %DisableHistory{
-      user_id: user.id,
-      disabled_by_id: actor.id,
-      disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-    }
-    |> DisableHistory.disable_changeset(attrs)
-    |> Repo.insert()
+    if :admin in actor.roles ||
+         (:mod in actor.roles && :admin not in user.roles) do
+      %DisableHistory{
+        user_id: user.id,
+        disabled_by_id: actor.id,
+        disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+      }
+      |> DisableHistory.disable_changeset(attrs)
+      |> Repo.insert()
+    else
+      {:error, :unauthorized}
+    end
   end
 
   @doc """
   Re-enable a previously disabled user.
   """
   def enable_user(actor, %User{} = user, reason) do
-    changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifte_reason: reason})
+    if is_nil(actor) ||
+         :admin in actor.roles ||
+         (:mod in actor.roles && :admin not in user.roles) do
+      changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifte_reason: reason})
 
-    if changeset.valid? do
-      {_, [history | _]} =
-        Repo.update_all(
-          from(h in DisableHistory,
-            where: h.user_id == ^user.id,
-            select: h,
-            order_by: {:desc, :disabled_at}
-          ),
-          set: [
-            lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-            lifted_by_id: actor && actor.id
-          ]
-        )
+      if changeset.valid? do
+        {_, [history | _]} =
+          Repo.update_all(
+            from(h in DisableHistory,
+              where: h.user_id == ^user.id,
+              select: h,
+              order_by: {:desc, :disabled_at}
+            ),
+            set: [
+              lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+              lifted_by_id: actor && actor.id
+            ]
+          )
 
-      {:ok, history}
+        {:ok, history}
+      else
+        {:error, changeset}
+      end
     else
-      {:error, changeset}
+      {:error, :unauthorized}
     end
   end
 
