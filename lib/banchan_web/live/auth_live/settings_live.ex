@@ -376,6 +376,9 @@ defmodule BanchanWeb.SettingsLive do
             label="New Password Confirmation"
             opts={required: true, type: :password}
           />
+          <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
+            Forgot your password?
+          </LiveRedirect>
           <Submit class="w-full" changeset={@password_changeset} label="Save" />
         </Form>
       {/if}
