@@ -12,10 +12,7 @@ defmodule BanchanWeb.CommissionLive.Components.StudioBox do
 
   def render(assigns) do
     ~F"""
-    <LiveRedirect
-      class={@class}
-      to={Routes.studio_shop_path(Endpoint, :show, @studio.handle)}
-    >
+    <LiveRedirect class={@class} to={Routes.studio_shop_path(Endpoint, :show, @studio.handle)}>
       <img
         :if={!is_nil(@studio.header_img_id)}
         src={Routes.public_image_path(Endpoint, :image, @studio.header_img_id)}

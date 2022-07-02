@@ -40,7 +40,10 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
       <div class="p-4">
         <div class="flex flex-col grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="flex flex-col md:col-span-2">
-            <StudioBox studio={@commission.studio} class="md:hidden rounded-box hover:bg-base-200 p-2 transition-all" />
+            <StudioBox
+              studio={@commission.studio}
+              class="md:hidden rounded-box hover:bg-base-200 p-2 transition-all"
+            />
             <div class="divider" />
             <Timeline
               uri={@uri}
@@ -66,13 +69,9 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           </div>
           <div class="divider md:hidden" />
           <div class="flex flex-col">
-            <StudioBox studio={@commission.studio} class="hidden md:block rounded-box hover:bg-base-200 p-2 transition-all" />
-            <div class="divider" />
-            <DraftBox
-              id="draft-box"
-              current_user={@current_user}
-              current_user_member?={@current_user_member?}
-              commission={@commission}
+            <StudioBox
+              studio={@commission.studio}
+              class="hidden md:block rounded-box hover:bg-base-200 p-2 transition-all"
             />
             <div class="divider" />
             <SummaryEditor
@@ -81,6 +80,13 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               current_user_member?={@current_user_member?}
               commission={@commission}
               allow_edits={@current_user_member?}
+            />
+            <div class="divider" />
+            <DraftBox
+              id="draft-box"
+              current_user={@current_user}
+              current_user_member?={@current_user_member?}
+              commission={@commission}
             />
             <div class="divider" />
             <button type="button" :on-click={@toggle_subscribed} class="btn btn-primary btn-sm">
