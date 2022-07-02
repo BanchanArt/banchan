@@ -56,7 +56,6 @@ defmodule BanchanWeb.DenizenLive.ShowTest do
       refute html =~ ~r/>\s+Follow\s+</
     end
 
-
     test "displays edit profile button for self, admins, and mods only", %{conn: conn, user: user} do
       stranger_conn = log_in_user(conn, user_fixture())
       admin_conn = log_in_user(conn, user_fixture(%{roles: [:admin]}))

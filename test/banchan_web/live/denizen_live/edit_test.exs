@@ -25,7 +25,9 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
     test "redirects if logged in as a different non-admin user", %{conn: conn, user: user} do
       conn = log_in_user(conn, user_fixture())
-      {:error, {:live_redirect, info}} = live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
+
+      {:error, {:live_redirect, info}} =
+        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
 
       assert info.to =~ Routes.denizen_show_path(conn, :show, user.handle)
     end
