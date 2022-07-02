@@ -10,8 +10,13 @@ defmodule BanchanWeb.AccountDisabledLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok,
-     socket |> assign(current_user: socket.assigns.current_user |> Repo.preload(:disable_info))}
+    user = socket.assigns.current_user && Repo.preload(socket.assigns.current_user, :disable_info)
+
+    if is_nil(user) || is_nil(user.disable_info) do
+      {:ok, socket |> push_redirect(to: Routes.login_path(Endpoint, :new))}
+    else
+      {:ok, socket |> assign(current_user: user)}
+    end
   end
 
   @impl true

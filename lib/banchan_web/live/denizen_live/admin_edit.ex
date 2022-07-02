@@ -14,8 +14,7 @@ defmodule BanchanWeb.DenizenLive.AdminEdit do
     DateTimeLocalInput,
     MarkdownInput,
     MultipleSelect,
-    Submit,
-    TextInput
+    Submit
   }
 
   alias BanchanWeb.Components.Layout
@@ -122,7 +121,7 @@ defmodule BanchanWeb.DenizenLive.AdminEdit do
   def handle_event("change_enable", val, socket) do
     changeset =
       %DisableHistory{}
-      |> DisableHistory.enable_changeset(val["disable"])
+      |> DisableHistory.enable_changeset(val["enable"])
       |> Map.put(:action, :update)
 
     {:noreply, socket |> assign(enable_changeset: changeset)}
@@ -176,7 +175,7 @@ defmodule BanchanWeb.DenizenLive.AdminEdit do
               <div class="text-xl">
                 Re-enable @{@user.handle}
               </div>
-              <TextInput name={:lifted_reason} opts={required: true} />
+              <MarkdownInput id="lifted_reason" name={:lifted_reason} opts={required: true} />
               <Submit label="Enable" changeset={@enable_changeset} />
             </Form>
           {#else}
@@ -184,7 +183,7 @@ defmodule BanchanWeb.DenizenLive.AdminEdit do
               <div class="text-xl">
                 Disable @{@user.handle}
               </div>
-              <TextInput name={:disabled_reason} opts={required: true} />
+              <MarkdownInput id="disabled_reason" name={:disabled_reason} opts={required: true} />
               <DateTimeLocalInput name={:disabled_until} />
               <Submit label="Disable" changeset={@disable_changeset} />
             </Form>

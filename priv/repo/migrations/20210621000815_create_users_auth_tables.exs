@@ -155,6 +155,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :disabled_at, :naive_datetime
       add :disabled_until, :naive_datetime
       add :disabled_reason, :text
+      add :lifted_by_id, references(:users, on_delete: :delete_all)
       add :lifted_reason, :text
       add :lifted_at, :naive_datetime
     end

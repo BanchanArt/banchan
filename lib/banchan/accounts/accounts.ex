@@ -452,8 +452,7 @@ defmodule Banchan.Accounts do
           Repo.update_all(
             from(h in DisableHistory,
               where: h.user_id == ^user.id,
-              select: h,
-              order_by: {:desc, :disabled_at}
+              select: h
             ),
             set: [
               lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),

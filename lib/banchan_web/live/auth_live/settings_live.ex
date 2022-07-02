@@ -86,14 +86,14 @@ defmodule BanchanWeb.SettingsLive do
            val["change_handle"]["password"],
            val["change_handle"]
          ) do
-      {:ok, updated_user} ->
+      {:ok, _updated_user} ->
         socket =
           socket
           |> put_flash(
             :info,
-            "Your handle has been updated."
+            "Your handle has been updated. Please log in again."
           )
-          |> push_redirect(to: Routes.denizen_show_path(Endpoint, :show, updated_user.handle))
+          |> push_redirect(to: Routes.login_path(Endpoint, :new))
 
         {:noreply, socket}
 
