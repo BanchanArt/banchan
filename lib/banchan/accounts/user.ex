@@ -26,7 +26,7 @@ defmodule Banchan.Accounts.User do
     field :tags, {:array, :string}
 
     # Roles and moderation
-    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist]
+    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist], default: []
     field :moderation_notes, :string
     has_one :disable_info, DisableHistory, where: [lifted_at: nil]
     has_many :disable_history, DisableHistory, preload_order: [desc: :disabled_at]
@@ -105,9 +105,18 @@ defmodule Banchan.Accounts.User do
   """
   def registration_test_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:handle, :email, :password, :confirmed_at, :totp_secret, :totp_activated])
+    |> cast(attrs, [
+      :handle,
+      :email,
+      :password,
+      :roles,
+      :confirmed_at,
+      :totp_secret,
+      :totp_activated
+    ])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
+    |> validate_roles(nil)
     |> validate_required([:email])
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
@@ -212,18 +221,7 @@ defmodule Banchan.Accounts.User do
       :roles,
       :moderation_notes
     ])
-    |> validate_change(:roles, fn field, roles ->
-      cond do
-        :admin in actor.roles ->
-          []
-
-        :mod in actor.roles && :admin not in roles ->
-          []
-
-        true ->
-          [{field, "Can't give user a role higher than your own."}]
-      end
-    end)
+    |> validate_roles(actor)
     |> validate_length(:moderation_notes, max: 500)
     |> validate_markdown(:moderation_notes)
   end
@@ -500,6 +498,25 @@ defmodule Banchan.Accounts.User do
         []
       else
         [{current_field, "already exists"}]
+      end
+    end)
+  end
+
+  defp validate_roles(changeset, actor) do
+    changeset
+    |> validate_change(:roles, fn field, roles ->
+      cond do
+        is_nil(actor) ->
+          []
+
+        :admin in actor.roles ->
+          []
+
+        :mod in actor.roles && :admin not in roles ->
+          []
+
+        true ->
+          [{field, "Can't give user a role higher than your own."}]
       end
     end)
   end

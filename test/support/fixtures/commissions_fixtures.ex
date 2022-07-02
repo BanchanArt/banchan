@@ -19,7 +19,7 @@ defmodule Banchan.CommissionsFixtures do
   alias Banchan.Repo
 
   def commission_fixture(attrs \\ %{}) do
-    artist = Map.get(attrs, :artist) || user_fixture()
+    artist = Map.get(attrs, :artist) || user_fixture(%{roles: [:artist]})
     studio = Map.get(attrs, :studio) || studio_fixture([artist])
     offering = Map.get(attrs, :offering) || offering_fixture(studio)
 

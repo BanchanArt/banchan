@@ -27,6 +27,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
       {:ok, user} =
         Accounts.update_user_profile(
           user,
+          user,
           %{
             name: "Name",
             bio: "Bio"
@@ -91,17 +92,14 @@ defmodule BanchanWeb.DenizenLive.EditTest do
         |> element(".profile-info")
         |> render_change(%{
           user: %{
-            handle: "bad handle",
             bio: String.duplicate("a", 500),
             name: String.duplicate("b", 50)
           }
         })
 
-      assert rendered =~ "bad handle"
       assert rendered =~ "aaaaaaaaaaa"
       assert rendered =~ "bbbbbbbbbbb"
 
-      assert rendered =~ "only letters, numbers, and underscores allowed"
       assert rendered =~ "should be at most 160 character(s)"
       assert rendered =~ "should be at most 32 character(s)"
     end
@@ -118,14 +116,16 @@ defmodule BanchanWeb.DenizenLive.EditTest do
         user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
       })
 
-      assert_redirected(page_live, Routes.denizen_show_path(conn, :show, "newhandle"))
+      assert_redirected(page_live, Routes.denizen_show_path(conn, :show, user.handle))
 
       db_user = Accounts.get_user!(user.id)
 
       assert db_user.name == "new name"
       assert db_user.bio == "new bio"
-      assert db_user.handle == "newhandle"
+
+      # Handle and email cannot be updated through here.
       assert db_user.email == user.email
+      assert db_user.handle == user.handle
     end
   end
 end

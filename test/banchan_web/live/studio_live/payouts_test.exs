@@ -80,12 +80,13 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
              |> render() =~ "This studio is not ready to accept commissions yet."
     end
 
-    test "404 if user is not a member", %{conn: conn, client: client, studio: studio} do
+    test "redirect if user is not a member", %{conn: conn, client: client, studio: studio} do
       conn = log_in_user(conn, client)
 
-      assert_raise Ecto.NoResultsError, fn ->
-        live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
-      end
+      assert {:error,
+              {:redirect,
+               %{flash: %{"error" => "You are not authorized to perform this action."}, to: "/"}}} ==
+               live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
     end
 
     test "can navigate to and from listing", %{

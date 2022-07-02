@@ -375,7 +375,6 @@ defmodule Banchan.AccountsTest do
           user,
           user,
           %{
-            handle: "12",
             name: String.duplicate("b", 40),
             bio: String.duplicate("a", 461)
           },
@@ -385,7 +384,6 @@ defmodule Banchan.AccountsTest do
 
       assert %{
                bio: ["should be at most 160 character(s)"],
-               handle: ["should be at least 3 character(s)"],
                name: ["should be at most 32 character(s)"]
              } = errors_on(changeset)
     end

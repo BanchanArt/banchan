@@ -10,6 +10,7 @@ defmodule BanchanWeb.UserLiveAuth do
 
   alias BanchanWeb.Router.Helpers, as: Routes
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def on_mount(auth, _params, session, socket) do
     socket =
       socket
@@ -29,6 +30,9 @@ defmodule BanchanWeb.UserLiveAuth do
             true
 
           :open ->
+            true
+
+          :redirect_if_authed ->
             true
 
           :users_only ->

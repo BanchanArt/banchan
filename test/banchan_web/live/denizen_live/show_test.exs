@@ -21,6 +21,7 @@ defmodule BanchanWeb.DenizenLive.ShowTest do
       {:ok, user} =
         Banchan.Accounts.update_user_profile(
           user,
+          user,
           %{bio: "This is my bio", name: "New User"},
           nil,
           nil
