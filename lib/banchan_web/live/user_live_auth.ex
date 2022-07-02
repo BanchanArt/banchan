@@ -41,10 +41,12 @@ defmodule BanchanWeb.UserLiveAuth do
               :admin in socket.assigns.current_user.roles
 
           :mods_only ->
-            !is_nil(socket.assigns.current_user &&
-              is_nil(socket.assigns.current_user.disable_info) &&
-              (:mod in socket.assigns.current_user.roles ||
-                 :admin in socket.assigns.current_user.roles))
+            !is_nil(
+              socket.assigns.current_user &&
+                is_nil(socket.assigns.current_user.disable_info) &&
+                (:mod in socket.assigns.current_user.roles ||
+                   :admin in socket.assigns.current_user.roles)
+            )
 
           :artists_only ->
             !is_nil(socket.assigns.current_user) &&

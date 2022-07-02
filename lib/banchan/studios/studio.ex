@@ -4,6 +4,8 @@ defmodule Banchan.Studios.Studio do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Banchan.Validators
+
   alias Banchan.Identities
   alias Banchan.Studios.{Common, PortfolioImage}
   alias Banchan.Uploads.Upload
@@ -121,44 +123,6 @@ defmodule Banchan.Studios.Studio do
         []
       else
         [{current_field, "already exists"}]
-      end
-    end)
-  end
-
-  defp validate_markdown(changeset, field) do
-    validate_change(changeset, field, fn _, data ->
-      if data == HtmlSanitizeEx.markdown_html(data) do
-        []
-      else
-        [{field, "Disallowed HTML detected. Some tags, like <script>, are not allowed."}]
-      end
-    end)
-  end
-
-  def validate_tags(changeset) do
-    changeset
-    |> validate_change(:tags, fn field, tags ->
-      if tags |> Enum.map(&String.downcase/1) ==
-           tags |> Enum.map(&String.downcase/1) |> Enum.uniq() do
-        []
-      else
-        [{field, "cannot have duplicate tags."}]
-      end
-    end)
-    |> validate_change(:tags, fn field, tags ->
-      if Enum.count(tags) > 10 do
-        [{field, "cannot have more than 10 tags."}]
-      else
-        []
-      end
-    end)
-    |> validate_change(:tags, fn field, tags ->
-      if Enum.all?(tags, fn tag ->
-           String.match?(tag, ~r/^.{0,100}$/)
-         end) do
-        []
-      else
-        [{field, "Tags can only be up to 100 characters long."}]
       end
     end)
   end

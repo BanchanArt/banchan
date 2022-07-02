@@ -4,6 +4,8 @@ defmodule Banchan.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Banchan.Validators
+
   alias Banchan.Accounts.DisableHistory
   alias Banchan.Identities
   alias Banchan.Notifications.{UserNotification, UserNotificationSettings}
@@ -27,7 +29,7 @@ defmodule Banchan.Accounts.User do
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist]
     field :moderation_notes, :string
     has_one :disable_info, DisableHistory, where: [lifted_at: nil]
-    has_many :disable_history, DisableHistory, preload_order: [:desc, :disabled_at]
+    has_many :disable_history, DisableHistory, preload_order: [desc: :disabled_at]
 
     # OAuth UIDs
     field :twitter_uid, :string
@@ -223,6 +225,7 @@ defmodule Banchan.Accounts.User do
       end
     end)
     |> validate_length(:moderation_notes, max: 500)
+    |> validate_markdown(:moderation_notes)
   end
 
   @doc """
@@ -261,34 +264,6 @@ defmodule Banchan.Accounts.User do
     |> validate_bio()
     |> validate_tags()
     |> validate_socials()
-  end
-
-  def validate_tags(changeset) do
-    changeset
-    |> validate_change(:tags, fn field, tags ->
-      if tags |> Enum.map(&String.downcase/1) ==
-           tags |> Enum.map(&String.downcase/1) |> Enum.uniq() do
-        []
-      else
-        [{field, "cannot have duplicate tags."}]
-      end
-    end)
-    |> validate_change(:tags, fn field, tags ->
-      if Enum.count(tags) > 10 do
-        [{field, "cannot have more than 10 tags."}]
-      else
-        []
-      end
-    end)
-    |> validate_change(:tags, fn field, tags ->
-      if Enum.all?(tags, fn tag ->
-           String.match?(tag, ~r/^.{0,100}$/)
-         end) do
-        []
-      else
-        [{field, "Tags can only be up to 100 characters long."}]
-      end
-    end)
   end
 
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity

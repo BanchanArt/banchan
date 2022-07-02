@@ -105,7 +105,7 @@ defmodule BanchanWeb.Router do
     live_session :mods_only, on_mount: {BanchanWeb.UserLiveAuth, :mods_only} do
       pipe_through([:browser, :enabled_user, :mod])
 
-      live("/denizens/:handle/admin_edit", DenizenLive.AdminEdit, :edit)
+      live("/denizens/:handle/moderation", DenizenLive.Moderation, :edit)
     end
   end
 

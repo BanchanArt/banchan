@@ -1,4 +1,4 @@
-defmodule BanchanWeb.DenizenLive.AdminEdit do
+defmodule BanchanWeb.DenizenLive.Moderation do
   @moduledoc """
   Admin-level user editing, such as changing roles, disabling, and such.
   """
@@ -17,14 +17,14 @@ defmodule BanchanWeb.DenizenLive.AdminEdit do
     Submit
   }
 
-  alias BanchanWeb.Components.Layout
+  alias BanchanWeb.Components.{Avatar, Layout, Markdown, UserHandle}
   alias BanchanWeb.Endpoint
 
   @impl true
   def mount(%{"handle" => handle}, _session, socket) do
     user =
       Accounts.get_user_by_handle!(handle)
-      |> Repo.preload(:disable_info)
+      |> Repo.preload([:disable_info, disable_history: [:disabled_by, :lifted_by]])
 
     if :admin in socket.assigns.current_user.roles ||
          (:mod in socket.assigns.current_user.roles && :admin not in user.roles) do
@@ -188,6 +188,43 @@ defmodule BanchanWeb.DenizenLive.AdminEdit do
               <Submit label="Disable" changeset={@disable_changeset} />
             </Form>
           {/if}
+          <div :if={!Enum.empty?(@user.disable_history)} class="divider" />
+          <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+              <thead>
+                <tr>
+                  <th>Disabled At</th>
+                  <th>Disabled Reason</th>
+                  <th>Lifted At</th>
+                  <th>Lifted Reason</th>
+                </tr>
+              </thead>
+              {#for item <- @user.disable_history}
+                <tr>
+                  <td
+                    class="flex flex-col"
+                    title={item.disabled_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}
+                  >
+                    {item.disabled_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
+                    {#if item.disabled_until}
+                      <div class="badge badge-sm">Until {item.disabled_until |> Timex.to_datetime() |> Timex.format!("{RFC822}")}</div>
+                    {/if}
+                    <div class="text-sm">
+                      By <Avatar class="w-4" user={item.disabled_by} /> <UserHandle user={item.disabled_by} />
+                    </div>
+                  </td>
+                  <td><Markdown content={item.disabled_reason} /></td>
+                  <td title={item.lifted_at && item.lifted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>
+                    {item.lifted_at && item.lifted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
+                    <div class="text-sm">
+                      By <Avatar class="w-4" user={item.lifted_by} /> <UserHandle user={item.lifted_by} />
+                    </div>
+                  </td>
+                  <td><Markdown content={item.lifted_reason} /></td>
+                </tr>
+              {/for}
+            </table>
+          </div>
         </div>
       </div>
     </Layout>

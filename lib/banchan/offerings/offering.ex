@@ -5,6 +5,8 @@ defmodule Banchan.Offerings.Offering do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Banchan.Validators
+
   alias Banchan.Commissions.Commission
   alias Banchan.Offerings.{GalleryImage, OfferingOption}
   alias Banchan.Studios.Studio
@@ -66,15 +68,5 @@ defmodule Banchan.Offerings.Offering do
     |> validate_length(:template, max: 1500)
     |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])
-  end
-
-  defp validate_markdown(changeset, field) do
-    validate_change(changeset, field, fn _, data ->
-      if data == HtmlSanitizeEx.markdown_html(data) do
-        []
-      else
-        [{field, "Disallowed HTML detected. Some tags, like <script>, are not allowed."}]
-      end
-    end)
   end
 end
