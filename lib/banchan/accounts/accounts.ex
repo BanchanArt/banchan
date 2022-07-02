@@ -7,7 +7,7 @@ defmodule Banchan.Accounts do
 
   alias Ueberauth.Auth
 
-  alias Banchan.Accounts.{User, UserNotifier, UserToken}
+  alias Banchan.Accounts.{DisableHistory, User, UserNotifier, UserToken}
   alias Banchan.Repo
   alias Banchan.Uploads
 
@@ -190,7 +190,7 @@ defmodule Banchan.Accounts do
     File.write!(tmp_file, resp.body)
     pfp_info = make_pfp_images!(user, tmp_file, true)
     File.rm!(tmp_file)
-    update_user_profile(user, %{}, pfp_info, nil)
+    update_user_profile(user, user, %{}, pfp_info, nil)
   end
 
   defp add_oauth_pfp({:error, error}, _) do
@@ -341,6 +341,14 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  Updates admin-level fields for a user, such as their roles.
+  """
+  def update_admin_fields(%User{} = actor, %User{} = user, attrs \\ %{}) do
+    User.admin_changeset(actor, user, attrs)
+    |> Repo.update()
+  end
+
+  @doc """
   Updates the user profile fields.
 
   ## Examples
@@ -349,38 +357,42 @@ defmodule Banchan.Accounts do
       {:ok, %User{}}
 
   """
-  def update_user_profile(user, attrs, pfp, header) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        changeset =
-          user
-          |> Repo.preload(:pfp_img)
-          |> Repo.preload(:pfp_thumb)
-          |> Repo.preload(:header_img)
-          |> User.profile_changeset(attrs)
+  def update_user_profile(%User{} = actor, %User{} = user, attrs, pfp, header) do
+    if can_modify_user?(actor, user) do
+      {:ok, ret} =
+        Repo.transaction(fn ->
+          changeset =
+            user
+            |> Repo.preload(:pfp_img)
+            |> Repo.preload(:pfp_thumb)
+            |> Repo.preload(:header_img)
+            |> User.profile_changeset(attrs)
 
-        changeset =
-          case pfp do
-            {pfp, thumb} ->
+          changeset =
+            case pfp do
+              {pfp, thumb} ->
+                changeset
+                |> Ecto.Changeset.put_assoc(:pfp_img, pfp)
+                |> Ecto.Changeset.put_assoc(:pfp_thumb, thumb)
+
+              nil ->
+                changeset
+            end
+
+          changeset =
+            if header do
+              changeset |> Ecto.Changeset.put_assoc(:header_img, header)
+            else
               changeset
-              |> Ecto.Changeset.put_assoc(:pfp_img, pfp)
-              |> Ecto.Changeset.put_assoc(:pfp_thumb, thumb)
+            end
 
-            nil ->
-              changeset
-          end
+          changeset |> Repo.update()
+        end)
 
-        changeset =
-          if header do
-            changeset |> Ecto.Changeset.put_assoc(:header_img, header)
-          else
-            changeset
-          end
-
-        changeset |> Repo.update()
-      end)
-
-    ret
+      ret
+    else
+      {:error, :unauthorized}
+    end
   end
 
   @doc """
@@ -408,6 +420,52 @@ defmodule Banchan.Accounts do
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  def disable_user(%User{} = actor, %User{} = user, attrs) do
+    if :admin in actor.roles ||
+         (:mod in actor.roles && :admin not in user.roles) do
+      %DisableHistory{
+        user_id: user.id,
+        disabled_by_id: actor.id,
+        disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+      }
+      |> DisableHistory.disable_changeset(attrs)
+      |> Repo.insert()
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  @doc """
+  Re-enable a previously disabled user.
+  """
+  def enable_user(actor, %User{} = user, reason) do
+    if is_nil(actor) ||
+         :admin in actor.roles ||
+         (:mod in actor.roles && :admin not in user.roles) do
+      changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifte_reason: reason})
+
+      if changeset.valid? do
+        {_, [history | _]} =
+          Repo.update_all(
+            from(h in DisableHistory,
+              where: h.user_id == ^user.id,
+              select: h
+            ),
+            set: [
+              lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+              lifted_by_id: actor && actor.id
+            ]
+          )
+
+        {:ok, history}
+      else
+        {:error, changeset}
+      end
+    else
+      {:error, :unauthorized}
     end
   end
 
@@ -791,43 +849,53 @@ defmodule Banchan.Accounts do
     {:error, :unauthorized}
   end
 
-  def make_pfp_images!(%User{} = user, src, true) do
-    mog =
-      Mogrify.open(src)
-      |> Mogrify.format("jpeg")
-      |> Mogrify.gravity("Center")
-      |> Mogrify.resize_to_fill("512x512")
-      |> Mogrify.save(in_place: true)
+  def make_pfp_images!(%User{} = actor, %User{} = user, src) do
+    if can_modify_user?(actor, user) do
+      mog =
+        Mogrify.open(src)
+        |> Mogrify.format("jpeg")
+        |> Mogrify.gravity("Center")
+        |> Mogrify.resize_to_fill("512x512")
+        |> Mogrify.save(in_place: true)
 
-    pfp = Uploads.save_file!(user, mog.path, "image/jpeg", "profile.jpg")
-    File.rm!(mog.path)
+      pfp = Uploads.save_file!(user, mog.path, "image/jpeg", "profile.jpg")
+      File.rm!(mog.path)
 
-    mog =
-      Mogrify.open(src)
-      |> Mogrify.format("jpeg")
-      |> Mogrify.gravity("Center")
-      |> Mogrify.resize_to_fill("128x128")
-      |> Mogrify.save(in_place: true)
+      mog =
+        Mogrify.open(src)
+        |> Mogrify.format("jpeg")
+        |> Mogrify.gravity("Center")
+        |> Mogrify.resize_to_fill("128x128")
+        |> Mogrify.save(in_place: true)
 
-    thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")
-    File.rm!(mog.path)
+      thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")
+      File.rm!(mog.path)
 
-    {pfp, thumb}
+      {pfp, thumb}
+    else
+      raise "Unauthorized"
+    end
   end
 
-  def make_header_image!(_, _, false) do
-    {:error, :unauthorized}
+  def make_header_image!(%User{} = actor, %User{} = user, src) do
+    if can_modify_user?(actor, user) do
+      mog =
+        Mogrify.open(src)
+        |> Mogrify.format("jpeg")
+        |> Mogrify.save(in_place: true)
+
+      header = Uploads.save_file!(user, mog.path, "image/jpeg", "header.jpg")
+      File.rm!(mog.path)
+
+      header
+    else
+      raise "Unauthorized"
+    end
   end
 
-  def make_header_image!(%User{} = user, src, true) do
-    mog =
-      Mogrify.open(src)
-      |> Mogrify.format("jpeg")
-      |> Mogrify.save(in_place: true)
-
-    header = Uploads.save_file!(user, mog.path, "image/jpeg", "header.jpg")
-    File.rm!(mog.path)
-
-    header
+  def can_modify_user?(%User{} = actor, %User{} = target) do
+    actor.id == target.id ||
+      :admin in actor.roles ||
+      :mod in actor.roles
   end
 end

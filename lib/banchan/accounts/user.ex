@@ -4,8 +4,12 @@ defmodule Banchan.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Banchan.Validators
+
+  alias Banchan.Accounts.DisableHistory
   alias Banchan.Identities
   alias Banchan.Notifications.{UserNotification, UserNotificationSettings}
+  alias Banchan.Studios.Studio
   alias Banchan.Uploads.Upload
 
   @derive {Inspect, except: [:password]}
@@ -17,10 +21,15 @@ defmodule Banchan.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :name, :string
     field :bio, :string
-    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
     field :totp_secret, :binary
     field :totp_activated, :boolean
     field :tags, {:array, :string}
+
+    # Roles and moderation
+    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist], default: []
+    field :moderation_notes, :string
+    has_one :disable_info, DisableHistory, where: [lifted_at: nil]
+    has_many :disable_history, DisableHistory, preload_order: [desc: :disabled_at]
 
     # OAuth UIDs
     field :twitter_uid, :string
@@ -52,7 +61,7 @@ defmodule Banchan.Accounts.User do
 
     has_many :notifications, UserNotification
 
-    many_to_many :studios, Banchan.Studios.Studio, join_through: "users_studios"
+    many_to_many :studios, Studio, join_through: "users_studios"
 
     timestamps()
   end
@@ -96,9 +105,18 @@ defmodule Banchan.Accounts.User do
   """
   def registration_test_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:handle, :email, :password, :confirmed_at, :totp_secret, :totp_activated])
+    |> cast(attrs, [
+      :handle,
+      :email,
+      :password,
+      :roles,
+      :confirmed_at,
+      :totp_secret,
+      :totp_activated
+    ])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
+    |> validate_roles(nil)
     |> validate_required([:email])
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
@@ -195,6 +213,20 @@ defmodule Banchan.Accounts.User do
   end
 
   @doc """
+  User changeset for admins to edit particular fields for users.
+  """
+  def admin_changeset(%__MODULE__{} = actor, %__MODULE__{} = user, attrs \\ %{}) do
+    user
+    |> cast(attrs, [
+      :roles,
+      :moderation_notes
+    ])
+    |> validate_roles(actor)
+    |> validate_length(:moderation_notes, max: 500)
+    |> validate_markdown(:moderation_notes)
+  end
+
+  @doc """
   A user changeset meant for general editing forms.
   """
   def profile_changeset(user, attrs \\ %{}) do
@@ -207,7 +239,6 @@ defmodule Banchan.Accounts.User do
 
     user
     |> cast(attrs, [
-      :handle,
       :name,
       :bio,
       :tags,
@@ -227,40 +258,10 @@ defmodule Banchan.Accounts.User do
       :tiktok_handle,
       :artfight_handle
     ])
-    |> validate_required([:handle])
-    |> validate_handle()
     |> validate_name()
     |> validate_bio()
     |> validate_tags()
     |> validate_socials()
-  end
-
-  def validate_tags(changeset) do
-    changeset
-    |> validate_change(:tags, fn field, tags ->
-      if tags |> Enum.map(&String.downcase/1) ==
-           tags |> Enum.map(&String.downcase/1) |> Enum.uniq() do
-        []
-      else
-        [{field, "cannot have duplicate tags."}]
-      end
-    end)
-    |> validate_change(:tags, fn field, tags ->
-      if Enum.count(tags) > 10 do
-        [{field, "cannot have more than 10 tags."}]
-      else
-        []
-      end
-    end)
-    |> validate_change(:tags, fn field, tags ->
-      if Enum.all?(tags, fn tag ->
-           String.match?(tag, ~r/^.{0,100}$/)
-         end) do
-        []
-      else
-        [{field, "Tags can only be up to 100 characters long."}]
-      end
-    end)
   end
 
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
@@ -497,6 +498,25 @@ defmodule Banchan.Accounts.User do
         []
       else
         [{current_field, "already exists"}]
+      end
+    end)
+  end
+
+  defp validate_roles(changeset, actor) do
+    changeset
+    |> validate_change(:roles, fn field, roles ->
+      cond do
+        is_nil(actor) ->
+          []
+
+        :admin in actor.roles ->
+          []
+
+        :mod in actor.roles && :admin not in roles ->
+          []
+
+        true ->
+          [{field, "Can't give user a role higher than your own."}]
       end
     end)
   end

@@ -16,19 +16,28 @@ defmodule BanchanWeb.DenizenLive.Edit do
   def mount(%{"handle" => handle}, _session, socket) do
     user = Accounts.get_user_by_handle!(handle)
 
-    {:ok,
-     socket
-     |> assign(user: user, changeset: User.profile_changeset(user), tags: user.tags)
-     |> allow_upload(:pfp,
-       accept: ~w(image/jpeg image/png),
-       max_entries: 1,
-       max_file_size: 5_000_000
-     )
-     |> allow_upload(:header,
-       accept: ~w(image/jpeg image/png),
-       max_entries: 1,
-       max_file_size: 5_000_000
-     )}
+    if user.id != socket.assigns.current_user.id &&
+         :admin not in socket.assigns.current_user.roles &&
+         :mod not in socket.assigns.current_user.roles do
+      {:ok,
+       socket
+       |> put_flash(:error, "You are not authorized to access this page.")
+       |> push_redirect(to: Routes.denizen_show_path(Endpoint, :show, handle))}
+    else
+      {:ok,
+       socket
+       |> assign(user: user, changeset: User.profile_changeset(user), tags: user.tags)
+       |> allow_upload(:pfp,
+         accept: ~w(image/jpeg image/png),
+         max_entries: 1,
+         max_file_size: 5_000_000
+       )
+       |> allow_upload(:header,
+         accept: ~w(image/jpeg image/png),
+         max_entries: 1,
+         max_file_size: 5_000_000
+       )}
+    end
   end
 
   @impl true
@@ -54,9 +63,9 @@ defmodule BanchanWeb.DenizenLive.Edit do
       consume_uploaded_entries(socket, :pfp, fn %{path: path}, _entry ->
         {:ok,
          Accounts.make_pfp_images!(
+           socket.assigns.current_user,
            socket.assigns.user,
-           path,
-           socket.assigns.user.id == socket.assigns.current_user.id
+           path
          )}
       end)
 
@@ -64,13 +73,14 @@ defmodule BanchanWeb.DenizenLive.Edit do
       consume_uploaded_entries(socket, :header, fn %{path: path}, _entry ->
         {:ok,
          Accounts.make_header_image!(
+           socket.assigns.current_user,
            socket.assigns.user,
-           path,
-           socket.assigns.user.id == socket.assigns.current_user.id
+           path
          )}
       end)
 
     case Accounts.update_user_profile(
+           socket.assigns.current_user,
            socket.assigns.user,
            val["user"],
            Enum.at(pfp_images, 0),
@@ -95,6 +105,9 @@ defmodule BanchanWeb.DenizenLive.Edit do
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Form class="profile-info" for={@changeset} change="change" submit="submit">
+            <div :if={@current_user.id != @user.id} class="alert alert-warning">
+              You are editing @{@user.handle}'s profile as @{@current_user.handle}.
+            </div>
             <div class="relative">
               {#if Enum.empty?(@uploads.header.entries) && !@user.header_img_id}
                 <div class="bg-base-300 object-cover aspect-header-image rounded-b-xl w-full" />
@@ -142,21 +155,21 @@ defmodule BanchanWeb.DenizenLive.Edit do
                 </div>
               </div>
             </div>
+            <TextInput
+              name={:handle}
+              icon="at"
+              info="For security reasons, you can only change this on your Account Settings page."
+              opts={disabled: true}
+            />
+            <TextInput name={:name} icon="user" info="Your display name." opts={required: true} />
+            <TextArea name={:bio} info="Tell us a little bit about yourself!" />
             <TagsInput
               id="user_tags"
               label="Interests"
               info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
               name={:tags}
             />
-            <TextInput name={:name} icon="user" info="Your display name." opts={required: true} />
-            <TextInput
-              name={:handle}
-              icon="at"
-              info="Your handle that people can @ you with."
-              opts={required: true}
-            />
-            <TextArea name={:bio} info="Tell us a little bit about yourself!" />
-            <Collapse id="socials" class="rounded-lg border border-primary">
+            <Collapse id="socials" class="rounded-lg border border-primary my-2">
               <:header>
                 Social Media Links
               </:header>

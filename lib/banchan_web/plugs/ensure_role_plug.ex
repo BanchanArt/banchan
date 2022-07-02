@@ -45,7 +45,7 @@ defmodule BanchanWeb.EnsureRolePlug do
 
   defp maybe_halt(_any, conn) do
     conn
-    |> Controller.put_flash(:error, "Unauthorised")
+    |> Controller.put_flash(:error, "You are not authorized to perform this action.")
     |> Controller.redirect(to: signed_in_path(conn))
     |> halt()
   end

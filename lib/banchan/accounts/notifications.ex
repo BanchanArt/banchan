@@ -14,7 +14,7 @@ defmodule Banchan.Accounts.Notifications do
     |> Repo.exists?()
   end
 
-  def follow_user!(%User{} = target, %User{} = user) do
+  def follow_user!(%User{} = target, %User{} = user) when target.id != user.id do
     %UserFollower{user_id: user.id, target_id: target.id}
     |> Repo.insert(on_conflict: :nothing, conflict_target: [:user_id, :target_id])
 

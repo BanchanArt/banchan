@@ -30,7 +30,8 @@ defmodule BanchanWeb.StudioLive.Helpers do
     Studios.Notifications.subscribe_to_follower_count(studio)
 
     cond do
-      current_member && !current_user_member? ->
+      current_member && !current_user_member? && :admin not in socket.assigns.current_user.roles &&
+          :mod not in socket.assigns.current_user.roles ->
         raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
 
       requires_stripe && !Studios.charges_enabled?(studio, false) ->
