@@ -12,8 +12,24 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   prop current_user_member?, :boolean, required: true
   prop commission, :struct, required: true
 
+  data modal_open, :boolean, default: false
+
   def handle_event("update_status", %{"value" => status}, socket) do
     Commissions.update_status(socket.assigns.current_user, socket.assigns.commission, status)
+    {:noreply, socket |> assign(modal_open: false)}
+  end
+
+  def handle_event("toggle_modal", _, socket) do
+    {:noreply,
+     socket
+     |> assign(modal_open: !socket.assigns.modal_open)}
+  end
+
+  def handle_event("close_modal", _, socket) do
+    {:noreply, socket |> assign(modal_open: false)}
+  end
+
+  def handle_event("nothing", _, socket) do
     {:noreply, socket}
   end
 
@@ -38,7 +54,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
               The studio is waiting for your response before continuing work.
             {#match :ready_for_review}
               This commission is ready for your final review. If you approve it, you agree to release all payments to the studio for payout.
-              <Button click="update_status" value="approved" label="Approve" />
+              <Button click="toggle_modal" label="Approve" />
             {#match :approved}
               This commission has been approved. All deposits will be released to the studio.
             {#match :withdrawn}
@@ -57,14 +73,24 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
               This studio has accepted this commission but has not begun work on it yet.
               <div class="flex flex-col md:flex-row">
                 <Button class="flex-1" click="update_status" value="in_progress" label="Mark as In Progress" />
-                <Button class="flex-1" click="update_status" value="ready_for_review" label="Request Final Approval" />
+                <Button
+                  class="flex-1"
+                  click="update_status"
+                  value="ready_for_review"
+                  label="Request Final Approval"
+                />
               </div>
             {#match :rejected}
               This studio has rejected this commission and will not be working on it.
             {#match :in_progress}
               This commission is actively being worked on.
               <div class="flex flex-col md:flex-row">
-                <Button class="flex-1" click="update_status" value="ready_for_review" label="Request Final Approval" />
+                <Button
+                  class="flex-1"
+                  click="update_status"
+                  value="ready_for_review"
+                  label="Request Final Approval"
+                />
                 <Button class="flex-1" click="update_status" value="paused" label="Pause Work" />
                 <Button class="flex-1" click="update_status" value="waiting" label="Wait for Customer" />
               </div>
@@ -84,6 +110,25 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
               This commission has been approved by the client. Any deposits will be released to you for payout once available.
               <Button click="update_status" value="accepted" label="Reopen" />
           {/case}
+        </div>
+      {/if}
+
+      {!-- Approval confirmation modal --}
+      {#if @modal_open}
+        <div
+          class="modal modal-open"
+          :on-click="toggle_modal"
+          :on-window-keydown="close_modal"
+          phx-key="Escape"
+        >
+          <div :on-click="nothing" class="modal-box relative">
+            <div class="btn btn-sm btn-circle close-modal absolute right-2 top-2" :on-click="close_modal">✕</div>
+            <h3 class="text-lg font-bold">Confirm Final Approal</h3>
+            <p class="py-4">All deposited funds will be made available immediately to the studio and the commission will be closed. <p class="font-bold text-warning">WARNING: You will not be able to request a refund once approved.</p></p>
+            <div class="modal-action">
+              <Button disabled={!@modal_open} click="update_status" value="approved" label="Confirm" />
+            </div>
+          </div>
         </div>
       {/if}
     </div>
