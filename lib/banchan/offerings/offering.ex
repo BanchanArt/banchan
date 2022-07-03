@@ -17,10 +17,10 @@ defmodule Banchan.Offerings.Offering do
     field :index, :integer
     field :name, :string
     field :description, :string
-    field :open, :boolean, default: false
+    field :open, :boolean, default: true
     field :slots, :integer
     field :max_proposals, :integer
-    field :hidden, :boolean, default: true
+    field :hidden, :boolean, default: false
     field :terms, :string
     field :template, :string
     field :archived_at, :naive_datetime
