@@ -11,7 +11,14 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Select, Submit, TextInput}
+  alias BanchanWeb.Components.Form.{
+    Checkbox,
+    HiddenInput,
+    MarkdownInput,
+    Select,
+    Submit,
+    TextInput
+  }
 
   prop commission, :struct, required: true
   prop actor, :struct, required: true
@@ -51,15 +58,6 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
     changeset =
       %Event{}
       |> Event.comment_changeset(%{event | "amount" => Utils.moneyfy(amount, currency)})
-      |> Map.put(:action, :update)
-
-    {:noreply, assign(socket, changeset: changeset)}
-  end
-
-  def handle_event("change", %{"event" => event}, socket) do
-    changeset =
-      %Event{}
-      |> Event.comment_changeset(event)
       |> Map.put(:action, :update)
 
     {:noreply, assign(socket, changeset: changeset)}
@@ -164,6 +162,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
               {#case @studio.payment_currencies}
                 {#match [_]}
                   <div class="flex flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
+                  <HiddenInput name={:currency} value={@studio.default_currency} />
                 {#match _}
                   <div class="flex-basis-1/4">
                     <Select

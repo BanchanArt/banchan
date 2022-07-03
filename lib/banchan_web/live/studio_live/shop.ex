@@ -158,7 +158,9 @@ defmodule BanchanWeb.StudioLive.Shop do
               />
             </div>
           {#else}
-            This shop has no offerings currently available. Check back in later!
+            <div :if={!@current_user_member?} class="p-2">
+              This shop has no offerings currently available. Check back in later!
+            </div>
           {/for}
           {#if @current_user_member?}
             <div class="p-2">
