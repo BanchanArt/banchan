@@ -140,9 +140,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceModal do
         }
       >
         <Modal id={@id <> "_inner_modal"}>
-          <:title>Invoice Customer</:title>
+          <:title>Invoice Client</:title>
           <div class="py-4">
-            Use this form to submit an invoice. Once submitted, the invoice will appear in the commission timeline and the customer will be able to process the payment through Stripe.
+            Use this form to submit an invoice. Once submitted, the invoice will appear in the commission timeline and the client will be able to process the payment through Stripe.
           </div>
           <Field class="field" name={:amount}>
             <InputContext assigns={assigns}>
@@ -151,7 +151,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceModal do
                   Invoice Amount
                   <div
                     class="tooltip tooltip-right"
-                    data-tip="Total amount to invoice customer for. If you've configured multiple currencies, you may choose which one to invoice with."
+                    data-tip="Total amount to invoice client for. If you've configured multiple currencies, you may choose which one to invoice with."
                   >
                     <i class="fas fa-info-circle" />
                   </div>
