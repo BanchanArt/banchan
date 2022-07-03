@@ -62,8 +62,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
   @impl true
   def handle_event("change", val, socket) do
     changeset =
-      socket.assigns.user
-      |> User.admin_changeset(socket.assigns.current_user, val["user"])
+      User.admin_changeset(socket.assigns.current_user, socket.assigns.user, val["user"])
       |> Map.put(:action, :update)
 
     {:noreply, socket |> assign(changeset: changeset)}
