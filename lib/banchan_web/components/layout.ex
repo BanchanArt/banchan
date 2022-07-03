@@ -23,7 +23,7 @@ defmodule BanchanWeb.Components.Layout do
     <div class="drawer drawer-mobile h-screen w-full">
       <input type="checkbox" id="drawer-toggle" class="drawer-toggle">
       <div class="drawer-content h-screen flex flex-col">
-        <div class="top-0 z-30 sticky shadow-sm">
+        <div class="top-0 z-50 sticky shadow-sm">
           <Nav uri={@uri} current_user={@current_user} />
         </div>
         {#if slot_assigned?(:hero)}
@@ -38,7 +38,7 @@ defmodule BanchanWeb.Components.Layout do
           <Flash flashes={@flashes} />
           <#slot />
         </section>
-        <footer class="footer p-10 z-30 shadow-sm">
+        <footer class="footer p-10 shadow-sm">
           <div>
             <span class="footer-title">Co-op</span>
             {!-- # TODO: Fill these out --}
