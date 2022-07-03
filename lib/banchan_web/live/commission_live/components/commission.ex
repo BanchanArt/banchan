@@ -9,6 +9,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   alias BanchanWeb.CommissionLive.Components.{
     CommentBox,
     DraftBox,
+    InvoiceModal,
     StatusBox,
     StudioBox,
     SummaryEditor,
@@ -24,6 +25,8 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   prop toggle_subscribed, :event, required: true
   prop toggle_archived, :event, required: true
   prop withdraw, :event, required: true
+  prop invoice_modal_id, :string, required: true
+  prop open_invoice_modal, :event, required: true
 
   def render(assigns) do
     ~F"""
@@ -81,6 +84,14 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               commission={@commission}
               allow_edits={@current_user_member?}
             />
+            <button
+              type="button"
+              :if={@current_user_member?}
+              :on-click={@open_invoice_modal}
+              class="btn btn-primary my-2 w-full open-invoice-modal"
+            >
+              Send Invoice
+            </button>
             <div class="divider" />
             <DraftBox
               id="draft-box"
@@ -89,7 +100,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               commission={@commission}
             />
             <div class="divider" />
-            <button type="button" :on-click={@toggle_subscribed} class="btn btn-primary btn-sm">
+            <button type="button" :on-click={@toggle_subscribed} class="btn btn-sm">
               {#if @subscribed?}
                 Unsubscribe
               {#else}
@@ -115,6 +126,14 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           </div>
         </div>
       </div>
+      {#if @current_user_member?}
+        <InvoiceModal
+          id={@invoice_modal_id}
+          commission={@commission}
+          current_user={@current_user}
+          current_user_member?={@current_user_member?}
+        />
+      {/if}
     </div>
     """
   end

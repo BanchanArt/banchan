@@ -11,7 +11,7 @@ defmodule BanchanWeb.CommissionLive do
   alias Banchan.{Commissions, Studios}
   alias Banchan.Commissions.{CommissionFilter, Notifications}
 
-  alias BanchanWeb.CommissionLive.Components.CommissionRow
+  alias BanchanWeb.CommissionLive.Components.{CommissionRow, InvoiceModal}
   alias BanchanWeb.Components.{Collapse, InfiniteScroll, Layout}
   alias BanchanWeb.Components.Form.{Checkbox, MultipleSelect, TextInput}
 
@@ -198,6 +198,11 @@ defmodule BanchanWeb.CommissionLive do
     end
   end
 
+  def handle_event("open_invoice_modal", _, socket) do
+    InvoiceModal.show("invoice-modal")
+    {:noreply, socket}
+  end
+
   defp fetch(%{assigns: %{results: results, page: page, filter: changeset}} = socket) do
     socket
     |> assign(
@@ -272,6 +277,8 @@ defmodule BanchanWeb.CommissionLive do
               toggle_subscribed="toggle_subscribed"
               toggle_archived="toggle_archived"
               withdraw="withdraw"
+              invoice_modal_id="invoice-modal"
+              open_invoice_modal="open_invoice_modal"
             />
           </div>
         {/if}
