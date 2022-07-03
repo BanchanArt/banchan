@@ -188,7 +188,7 @@ defmodule Banchan.Accounts do
     tmp_file = Path.join([System.tmp_dir!(), "oauth-pfp-#{:rand.uniform(100_000_000)}"])
     resp = HTTPoison.get!(url)
     File.write!(tmp_file, resp.body)
-    pfp_info = make_pfp_images!(user, tmp_file, true)
+    pfp_info = make_pfp_images!(user, user, tmp_file)
     File.rm!(tmp_file)
     update_user_profile(user, user, %{}, pfp_info, nil)
   end
@@ -843,10 +843,6 @@ defmodule Banchan.Accounts do
 
   def subscribe_to_auth_events do
     Phoenix.PubSub.subscribe(@pubsub, UserAuth.pubsub_topic())
-  end
-
-  def make_pfp_images!(_, _, false) do
-    {:error, :unauthorized}
   end
 
   def make_pfp_images!(%User{} = actor, %User{} = user, src) do
