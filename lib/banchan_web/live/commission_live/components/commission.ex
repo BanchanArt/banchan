@@ -56,12 +56,6 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             />
             <div class="divider" />
             <div class="flex flex-col gap-4">
-              <StatusBox
-                id="action-box"
-                commission={@commission}
-                current_user={@current_user}
-                current_user_member?={@current_user_member?}
-              />
               <CommentBox
                 id="comment-box"
                 commission={@commission}
@@ -75,6 +69,13 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             <StudioBox
               studio={@commission.studio}
               class="hidden md:block rounded-box hover:bg-base-200 p-2 transition-all"
+            />
+            <div class="divider" />
+            <StatusBox
+              id="action-box"
+              commission={@commission}
+              current_user={@current_user}
+              current_user_member?={@current_user_member?}
             />
             <div class="divider" />
             <SummaryEditor
