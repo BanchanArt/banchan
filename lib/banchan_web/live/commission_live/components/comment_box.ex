@@ -155,7 +155,6 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
             class="w-full"
             upload={@uploads.attachment}
             cancel_upload="cancel_upload"
-            opts={required: true, placeholder: "Write a comment"}
           />
           {#if @current_user_member?}
             <div class="flex flex-row gap-2 items-center">

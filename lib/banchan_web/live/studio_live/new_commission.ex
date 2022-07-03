@@ -274,7 +274,6 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 cancel_upload="cancel_upload"
                 opts={
                   required: true,
-                  placeholder: "Here's what I'd like...",
                   value: Map.get(@changeset.changes, :description, @template)
                 }
               />

@@ -72,7 +72,6 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
             <div
               id={@id <> "-editor"}
               data-height={@height}
-              data-placeholder={Keyword.get(@opts || [], :placeholder)}
               phx-update="ignore"
               class="object-cover editor w-full h-full"
             />
