@@ -6,7 +6,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Button
+  alias BanchanWeb.Components.{Button, Modal}
   alias BanchanWeb.Components.Form.{Select, Submit, TextArea, TextInput}
 
   prop studio, :struct, required: true
@@ -18,12 +18,11 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   prop deposited, :struct
 
   prop custom_changeset, :struct
-  prop open_custom, :boolean, default: false
+  prop custom_modal_id, :string
+  prop open_custom_modal, :event
+  prop close_custom_modal, :event
   prop submit_custom, :event
   prop change_custom, :event
-  prop toggle_custom, :event
-  prop close_custom, :event
-  prop nothing, :event
 
   def render(assigns) do
     estimate =
@@ -161,7 +160,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
           {/for}
           {#if @custom_changeset}
             <li class="flex gap-2 p-2">
-              <button type="button" :on-click={@toggle_custom} class="w-8 text-xl fas fa-plus-circle" />
+              <button type="button" :on-click={@open_custom_modal} class="w-8 text-xl fas fa-plus-circle" />
               <div class="grow flex flex-col">
                 <div class="font-bold">Custom Option</div>
                 <div class="text-sm">Add a customized option to the summary.</div>
@@ -170,39 +169,31 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
             </li>
           {/if}
         </ul>
-        {#if @custom_changeset}
-          <div
-            class={"flex flex-col modal", "modal-open": @open_custom}
-            :on-click={@toggle_custom}
-            :on-window-keydown={@close_custom}
-            phx-key="Escape"
-          >
-            <div :on-click={@nothing} class="modal-box relative">
-              <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click={@close_custom}>✕</div>
-              <Form
-                class="flex flex-col gap-2"
-                for={@custom_changeset}
-                change={@change_custom}
-                submit={@submit_custom}
-              >
-                <h3 class="text-xl font-bold">Add Custom Option</h3>
-                <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
-                <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
-                <Select
-                  name={:currency}
-                  options={@studio.payment_currencies
-                  |> Enum.map(&{:"#{Money.Currency.name(&1)} (#{Money.Currency.symbol(&1)})", &1})}
-                  selected={@studio.default_currency}
-                  opts={required: true}
-                />
-                <TextInput name={:amount} label="Price" opts={required: true} />
-                <div class="modal-action">
-                  <Button primary={false} click={@toggle_custom} label="Cancel" />
-                  <Submit changeset={@custom_changeset} />
-                </div>
-              </Form>
-            </div>
-          </div>
+        {#if @custom_changeset && @custom_modal_id}
+          <Modal id={@custom_modal_id}>
+            <Form
+              class="flex flex-col gap-2"
+              for={@custom_changeset}
+              change={@change_custom}
+              submit={@submit_custom}
+            >
+              <h3 class="text-xl font-bold">Add Custom Option</h3>
+              <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
+              <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
+              <Select
+                name={:currency}
+                options={@studio.payment_currencies
+                |> Enum.map(&{:"#{Money.Currency.name(&1)} (#{Money.Currency.symbol(&1)})", &1})}
+                selected={@studio.default_currency}
+                opts={required: true}
+              />
+              <TextInput name={:amount} label="Price" opts={required: true} />
+              <div class="modal-action">
+                <Button primary={false} click={@close_custom_modal} label="Cancel" />
+                <Submit changeset={@custom_changeset} />
+              </div>
+            </Form>
+          </Modal>
         {/if}
       {/if}
     </div>

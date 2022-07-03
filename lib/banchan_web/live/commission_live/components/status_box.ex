@@ -6,30 +6,20 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
 
   alias Banchan.Commissions
 
-  alias BanchanWeb.Components.Button
+  alias BanchanWeb.Components.{Button, Modal}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
   prop commission, :struct, required: true
 
-  data modal_open, :boolean, default: false
-
   def handle_event("update_status", %{"value" => status}, socket) do
     Commissions.update_status(socket.assigns.current_user, socket.assigns.commission, status)
-    {:noreply, socket |> assign(modal_open: false)}
+    Modal.hide(socket.assigns.id <> "_approval_modal")
+    {:noreply, socket}
   end
 
-  def handle_event("toggle_modal", _, socket) do
-    {:noreply,
-     socket
-     |> assign(modal_open: !socket.assigns.modal_open)}
-  end
-
-  def handle_event("close_modal", _, socket) do
-    {:noreply, socket |> assign(modal_open: false)}
-  end
-
-  def handle_event("nothing", _, socket) do
+  def handle_event("open_approval_modal", _, socket) do
+    Modal.show(socket.assigns.id <> "_approval_modal")
     {:noreply, socket}
   end
 
@@ -54,7 +44,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
               The studio is waiting for your response before continuing work.
             {#match :ready_for_review}
               This commission is ready for your final review. If you approve it, you agree to release all payments to the studio for payout.
-              <Button click="toggle_modal" label="Approve" />
+              <Button click="open_approval_modal" label="Approve" />
             {#match :approved}
               This commission has been approved. All deposits will be released to the studio.
             {#match :withdrawn}
@@ -113,24 +103,15 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
         </div>
       {/if}
 
-      {!-- Approval confirmation modal --}
-      {#if @modal_open}
-        <div
-          class="modal modal-open"
-          :on-click="toggle_modal"
-          :on-window-keydown="close_modal"
-          phx-key="Escape"
-        >
-          <div :on-click="nothing" class="modal-box relative">
-            <div class="btn btn-sm btn-circle close-modal absolute right-2 top-2" :on-click="close_modal">✕</div>
-            <h3 class="text-lg font-bold">Confirm Final Approal</h3>
-            <p class="py-4">All deposited funds will be made available immediately to the studio and the commission will be closed. <p class="font-bold text-warning">WARNING: You will not be able to request a refund once approved.</p></p>
-            <div class="modal-action">
-              <Button disabled={!@modal_open} click="update_status" value="approved" label="Confirm" />
-            </div>
-          </div>
-        </div>
-      {/if}
+      <Modal id={@id <> "_approval_modal"}>
+        <:title>
+          Confirm Final Approal
+        </:title>
+        All deposited funds will be made available immediately to the studio and the commission will be closed. <p class="font-bold text-warning">WARNING: You will not be able to request a refund once approved.</p>
+        <:action>
+          <Button click="update_status" value="approved" label="Confirm" />
+        </:action>
+      </Modal>
     </div>
     """
   end

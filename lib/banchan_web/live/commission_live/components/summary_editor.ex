@@ -11,6 +11,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   alias Banchan.Utils
 
   alias BanchanWeb.CommissionLive.Components.Summary
+  alias BanchanWeb.Components.Modal
 
   prop commission, :struct, required: true
   prop current_user, :struct, required: true
@@ -136,17 +137,14 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   end
 
   @impl true
-  def handle_event("toggle_custom", _, socket) do
-    {:noreply, assign(socket, open_custom: !socket.assigns.open_custom)}
+  def handle_event("open_custom_modal", _, socket) do
+    Modal.show(socket.assigns.id <> "_custom_modal")
+    {:noreply, socket}
   end
 
   @impl true
-  def handle_event("close_custom", _, socket) do
-    {:noreply, assign(socket, open_custom: false)}
-  end
-
-  @impl true
-  def handle_event("nothing", _, socket) do
+  def handle_event("close_custom_modal", _, socket) do
+    Modal.hide(socket.assigns.id <> "_custom_modal")
     {:noreply, socket}
   end
 
@@ -203,9 +201,10 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
           socket.assigns.current_user_member?
         )
 
+      Modal.hide(socket.assigns.id <> "_custom_modal")
+
       {:noreply,
        assign(socket,
-         open_custom: false,
          custom_changeset: %LineItem{} |> LineItem.custom_changeset(%{})
        )}
     else
@@ -224,12 +223,11 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       add_item="add_item"
       remove_item="remove_item"
       custom_changeset={@custom_changeset}
-      open_custom={@open_custom}
-      close_custom="close_custom"
-      toggle_custom="toggle_custom"
+      custom_modal_id={@id <> "_custom_modal"}
+      open_custom_modal="open_custom_modal"
+      close_custom_modal="close_custom_modal"
       change_custom="change_custom"
       submit_custom="submit_custom"
-      nothing="nothing"
       deposited={@deposited}
       studio={@studio}
     />

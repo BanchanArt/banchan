@@ -10,13 +10,13 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   alias Banchan.Studios
   alias Banchan.Studios.Payout
 
-  alias BanchanWeb.Components.{Avatar, Button, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Button, Modal, UserHandle}
 
   prop studio, :struct, required: true
   prop payout, :struct, required: true
   prop data_pending, :boolean, default: false
 
-  data modal_open, :boolean, default: false
+  data modal_error_message, :any, default: nil
 
   def update(assigns, socket) do
     socket =
@@ -33,24 +33,16 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
      |> assign(assigns)}
   end
 
-  def handle_event("toggle_modal", _, socket) do
-    {:noreply, socket |> assign(modal_open: !socket.assigns.modal_open)}
-  end
-
-  def handle_event("close_modal", _, socket) do
-    {:noreply, socket |> assign(modal_open: false)}
-  end
-
-  def handle_event("nothing", _, socket) do
+  def handle_event("open_cancel_modal", _, socket) do
+    Modal.show(socket.assigns.id <> "_cancel_modal")
     {:noreply, socket}
   end
 
   def handle_event("cancel_payout", _, socket) do
     case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
       :ok ->
-        # TODO: add message
-        # add_flash: {:info, "Payout cancelled."}
-        {:noreply, socket |> assign(modal_open: false)}
+        Modal.hide(socket.assigns.id <> "_cancel_modal")
+        {:noreply, socket}
 
       {:error, err} ->
         # TODO: Show this message
@@ -70,26 +62,6 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
 
     ~F"""
     <div class="flex flex-col">
-      {!-- Cancellation modal --}
-      <div
-        class={"modal", "modal-open": @modal_open}
-        :on-click="toggle_modal"
-        :on-window-keydown="close_modal"
-        phx-key="Escape"
-      >
-        <div :on-click="nothing" class="modal-box relative">
-          <div class="btn btn-sm btn-circle absolute right-2 top-2" :on-click="close_modal">✕</div>
-          <h3 class="text-lg font-bold">Confirm Cancellation</h3>
-          <p class="py-4">Are you sure you want to cancel this payout? Note that the payout may have already completed (or failed).</p>
-          <div class="modal-action">
-            <Button
-              disabled={!@modal_open || cancel_disabled}
-              class="cancel-payout btn-error"
-              click="cancel_payout"
-            >Confirm</Button>
-          </div>
-        </div>
-      </div>
       {!-- Header --}
       <h1 class="text-3xl py-4 px-4 border-b-2 border-neutral-content bg-base-100 border-opacity-10">
         <LivePatch
@@ -134,7 +106,11 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
             {/if}
           </div>
           {#if !Payout.done?(@payout)}
-            <Button disabled={cancel_disabled} click="toggle_modal" class="open-modal modal-button btn-error">Cancel</Button>
+            <Button
+              disabled={cancel_disabled}
+              click="open_cancel_modal"
+              class="open-modal open-cancel-modal modal-button btn-error"
+            >Cancel</Button>
           {/if}
         </div>
         <div class="divider">Invoices</div>
@@ -222,6 +198,18 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
       {#else}
         <i class="fas fa-spinner animate-spin text-3xl mx-auto grow" />
       {/if}
+
+      {!-- Cancellation modal --}
+      <Modal id={@id <> "_cancel_modal"}>
+        <:title>Confirm Cancellation</:title>
+        {#if @modal_error_message}
+          <p class="alert alert-error" role="alert">{@modal_error_message}</p>
+        {/if}
+        Are you sure you want to cancel this payout? Note that the payout may have already completed (or failed).
+        <:action>
+          <Button class="cancel-payout btn-error" click="cancel_payout">Confirm</Button>
+        </:action>
+      </Modal>
     </div>
     """
   end

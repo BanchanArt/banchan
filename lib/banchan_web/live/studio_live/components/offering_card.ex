@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
 
   alias Banchan.Offerings
 
-  alias BanchanWeb.Components.{Button, Card, MasonryGallery}
+  alias BanchanWeb.Components.{Button, Card, MasonryGallery, Modal}
   alias BanchanWeb.Endpoint
 
   prop current_user, :struct, required: true
@@ -17,7 +17,6 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   prop offering, :struct, required: true
   prop unarchive, :event, required: true
 
-  data show_gallery, :boolean, default: false
   data gallery_images, :list, default: []
   data base_price, :list
   data available_slots, :integer
@@ -77,17 +76,8 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   end
 
   @impl true
-  def handle_event("toggle_gallery", _, socket) do
-    {:noreply, socket |> assign(show_gallery: !socket.assigns.show_gallery)}
-  end
-
-  @impl true
-  def handle_event("close_gallery", _, socket) do
-    {:noreply, socket |> assign(show_gallery: false)}
-  end
-
-  @impl true
-  def handle_event("nothing", _, socket) do
+  def handle_event("open_gallery", _, socket) do
+    Modal.show(socket.assigns.id <> "_gallery")
     {:noreply, socket}
   end
 
@@ -124,7 +114,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         <:image>
           <img
             draggable="false"
-            :on-click="toggle_gallery"
+            :on-click="open_gallery"
             class="object-cover hover:cursor-pointer hover:opacity-50 transition-all"
             src={if @offering.card_img_id do
               Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
@@ -168,41 +158,23 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
       </Card>
 
       {!-- Gallery modal --}
-      {#if @show_gallery}
-        <div
-          class="modal modal-open cursor-default"
-          :on-click="toggle_gallery"
-          :on-window-keydown="close_gallery"
-          phx-key="Escape"
-        >
-          {!--
-             NB(@zkat): This lg:w-8/12 is a crappy hack to prevent weird
-             z-index overlapping issues with the drawer. It can be taken out
-             if/when we figure out a different drawer situation than DaisyUI's
-             built-in one.
-          --}
-          <div :on-click="nothing" class="modal-box sm:w-11/12 sm:max-w-5xl lg:w-8/12 relative">
-            <div
-              class="close-modal btn btn-sm btn-circle absolute right-2 top-2 z-50"
-              :on-click="close_gallery"
-            >✕</div>
-            <div class="text-lg font-bold">{@offering.name}</div>
-            <div class="divider" />
-            {#if Enum.empty?(@gallery_images)}
-              <img
-                class="object-cover w-full h-full"
-                src={if @offering.card_img_id do
-                  Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
-                else
-                  Routes.static_path(Endpoint, "/images/640x360.png")
-                end}
-              />
-            {#else}
-              <MasonryGallery id={@id <> "-masonry-gallery"} images={@gallery_images} />
-            {/if}
-          </div>
-        </div>
-      {/if}
+      <div class="cursor-default">
+        <Modal id={@id <> "_gallery"}>
+          <:title>{@offering.name}</:title>
+          {#if Enum.empty?(@gallery_images)}
+            <img
+              class="object-cover w-full h-full"
+              src={if @offering.card_img_id do
+                Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
+              else
+                Routes.static_path(Endpoint, "/images/640x360.png")
+              end}
+            />
+          {#else}
+            <MasonryGallery id={@id <> "-masonry-gallery"} images={@gallery_images} />
+          {/if}
+        </Modal>
+      </div>
     </div>
     """
   end
