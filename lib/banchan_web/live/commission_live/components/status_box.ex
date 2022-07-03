@@ -57,14 +57,14 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
               This studio has accepted this commission but has not begun work on it yet.
               <div class="flex flex-col md:flex-row">
                 <Button class="flex-1" click="update_status" value="in_progress" label="Mark as In Progress" />
-                <Button class="flex-1" click="update_status" value="ready_for_review" label="Ready for Review" />
+                <Button class="flex-1" click="update_status" value="ready_for_review" label="Request Final Approval" />
               </div>
             {#match :rejected}
               This studio has rejected this commission and will not be working on it.
             {#match :in_progress}
               This commission is actively being worked on.
               <div class="flex flex-col md:flex-row">
-                <Button class="flex-1" click="update_status" value="ready_for_review" label="Ready for Review" />
+                <Button class="flex-1" click="update_status" value="ready_for_review" label="Request Final Approval" />
                 <Button class="flex-1" click="update_status" value="paused" label="Pause Work" />
                 <Button class="flex-1" click="update_status" value="waiting" label="Wait for Customer" />
               </div>
