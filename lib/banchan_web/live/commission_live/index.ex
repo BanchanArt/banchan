@@ -225,7 +225,7 @@ defmodule BanchanWeb.CommissionLive do
     ~F"""
     <Layout uri={@uri} padding={0} current_user={@current_user} flashes={@flash}>
       <div class="flex flex-row grow xl:grow-0">
-        <div class={"flex flex-col sidebar basis-full xl:basis-1/4", "hidden xl:flex": @commission}>
+        <div class={"flex flex-col pt-4 sidebar basis-full xl:basis-1/4", "hidden xl:flex": @commission}>
           <Form for={@filter} submit="filter" class="form-control px-4">
             <Field class="w-full input-group" name={:search}>
               <button :on-click="toggle_filter" type="button" class="btn btn-square btn-primary"><i class="fas fa-filter" /></button>
