@@ -25,7 +25,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   data release_modal_open, :boolean, default: false
 
-  data refund_error_message, :string
+  data refund_error_message, :string, default: nil
 
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
@@ -288,7 +288,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       {/if}
 
       {!-- Refund confirmation modal --}
-      <Modal id={@id <> "_refund_modal"}>
+      <Modal id={@id <> "_refund_modal"} class="refund-modal">
         <:title>Confirm Refund</:title>
         {#if @refund_error_message}
           <p class="alert alert-error" role="alert">{@refund_error_message}</p>
@@ -303,7 +303,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       </Modal>
 
       {!-- Release confirmation modal --}
-      <Modal id={@id <> "_release_modal"}>
+      <Modal id={@id <> "_release_modal"} class="release-modal">
         <:title>Confirm Fund Release</:title>
         Funds will be made available immediately to the studio, instead of waiting until the commission is approved. <p class="font-bold text-warning">WARNING: You will not be able to request a refund once released.</p>
         <:action>

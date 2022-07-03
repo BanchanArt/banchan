@@ -5,6 +5,8 @@ defmodule Banchan.Commissions.Event do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Banchan.Validators
+
   alias Banchan.Accounts.User
   alias Banchan.Commissions.{CommentHistory, Commission, Common, EventAttachment, Invoice}
 
@@ -51,14 +53,22 @@ defmodule Banchan.Commissions.Event do
 
   def comment_changeset(event, attrs) do
     event
+    |> cast(attrs, [:text])
+    |> validate_required([:text])
+    |> validate_text()
+  end
+
+  def invoice_changeset(event, attrs) do
+    event
     |> cast(attrs, [:text, :amount])
     |> validate_money(:amount)
-    |> validate_required([:text])
+    |> validate_required([:amount])
     |> validate_text()
   end
 
   defp validate_text(changeset) do
     changeset
+    |> validate_markdown(:text)
     |> validate_length(:text, max: 1500)
   end
 

@@ -62,7 +62,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               <CommentBox
                 id="comment-box"
                 commission={@commission}
-                actor={@current_user}
+                current_user={@current_user}
                 current_user_member?={@current_user_member?}
               />
             </div>

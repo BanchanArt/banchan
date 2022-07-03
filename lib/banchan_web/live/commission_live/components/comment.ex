@@ -117,7 +117,6 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
   def render(assigns) do
     ~F"""
     <div class="shadow-md bg-base-200 rounded-box pb-4">
-      <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} />
       <div class="flex flex-row text-sm p-2">
         <div class="inline-flex grow items-baseline flex-wrap space-x-1">
           <div class="self-center">
@@ -195,7 +194,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
       </div>
 
       {#if Enum.any?(@event.attachments)}
-        <div class="divider" />
+        <div :if={@event.text} class="divider" />
         <div class="px-4">
           {#if @event.invoice && @event.invoice.required && !Commissions.invoice_paid?(@event.invoice)}
             Payment is required to view draft.
@@ -212,7 +211,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
       {/if}
 
       {#if @event.invoice}
-        <div class="divider" />
+        <div :if={@event.text} class="divider" />
         <div class="pb-4">
           <InvoiceBox
             id={"invoice-box-#{@event.public_id}"}
@@ -224,6 +223,8 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
           />
         </div>
       {/if}
+
+      <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} />
     </div>
     """
   end

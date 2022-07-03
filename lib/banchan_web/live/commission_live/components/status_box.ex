@@ -6,6 +6,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
 
   alias Banchan.Commissions
 
+  alias BanchanWeb.CommissionLive.Components.InvoiceModal
   alias BanchanWeb.Components.{Button, Modal}
 
   prop current_user, :struct, required: true
@@ -20,6 +21,11 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
 
   def handle_event("open_approval_modal", _, socket) do
     Modal.show(socket.assigns.id <> "_approval_modal")
+    {:noreply, socket}
+  end
+
+  def handle_event("open_invoice_modal", _, socket) do
+    InvoiceModal.show(socket.assigns.id <> "_invoice_modal")
     {:noreply, socket}
   end
 
@@ -58,7 +64,10 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
           {#case @commission.status}
             {#match :submitted}
               This commission has been submitted for acceptance. Accepting it will mark slots as used if you've configured them for this commission. By accepting this commission, this studio commits to working on it soon.
-              <Button click="update_status" value="accepted" label="Accept" />
+              <div class="flex flex-col md:flex-row">
+                <Button class="flex-1" click="update_status" value="accepted" label="Accept" />
+                <Button class="open-invoice-modal flex-1" click="open_invoice_modal" label="New Invoice" />
+              </div>
             {#match :accepted}
               This studio has accepted this commission but has not begun work on it yet.
               <div class="flex flex-col md:flex-row">
@@ -69,6 +78,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
                   value="ready_for_review"
                   label="Request Final Approval"
                 />
+                <Button class="fopen-invoice-modal lex-1" click="open_invoice_modal" label="New Invoice" />
               </div>
             {#match :rejected}
               This studio has rejected this commission and will not be working on it.
@@ -83,19 +93,29 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
                 />
                 <Button class="flex-1" click="update_status" value="paused" label="Pause Work" />
                 <Button class="flex-1" click="update_status" value="waiting" label="Wait for Customer" />
+                <Button class="fopen-invoice-modal lex-1" click="open_invoice_modal" label="New Invoice" />
               </div>
             {#match :paused}
               Ths studio has temporarily paused work on this commission.
-              <Button click="update_status" value="in_progress" label="Resume" />
+              <div class="flex flex-col md:flex-row">
+                <Button class="flex-1" click="update_status" value="in_progress" label="Resume" />
+                <Button class="fopen-invoice-modal lex-1" click="open_invoice_modal" label="New Invoice" />
+              </div>
             {#match :waiting}
               The studio is waiting for your response before continuing work.
-              <Button click="update_status" value="in_progress" label="Resume" />
+              <div class="flex flex-col md:flex-row">
+                <Button class="flex-1" click="update_status" value="in_progress" label="Resume" />
+                <Button class="fopen-invoice-modal lex-1" click="open_invoice_modal" label="New Invoice" />
+              </div>
             {#match :ready_for_review}
               This commission has been marked for final review. The client will determine whether to close it out and pay out any money deposited so far.
-              <Button click="update_status" value="in_progress" label="Return to In Progress" />
+              <div class="flex flex-col md:flex-row">
+                <Button class="flex-1" click="update_status" value="in_progress" label="Return to In Progress" />
+                <Button class="fopen-invoice-modal lex-1" click="open_invoice_modal" label="New Invoice" />
+              </div>
             {#match :withdrawn}
               This commission has been withdrawn. It is recommended that you refund any deposits to the client.
-              <Button click="update_status" value="accepted" label="Reopen" />
+              <Button class="flex-1" click="update_status" value="accepted" label="Reopen" />
             {#match :approved}
               This commission has been approved by the client. Any deposits will be released to you for payout once available.
               <Button click="update_status" value="accepted" label="Reopen" />
@@ -112,6 +132,15 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
           <Button click="update_status" value="approved" label="Confirm" />
         </:action>
       </Modal>
+
+      {#if @current_user_member?}
+        <InvoiceModal
+          id={@id <> "_invoice_modal"}
+          commission={@commission}
+          current_user={@current_user}
+          current_user_member?={@current_user_member?}
+        />
+      {/if}
     </div>
     """
   end
