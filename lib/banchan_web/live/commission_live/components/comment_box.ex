@@ -179,14 +179,18 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
                 <TextInput name={:amount} show_label={false} opts={placeholder: "Invoice Amount (optional)"} />
               </div>
             </div>
-            {#if Enum.empty?(@uploads.attachment.entries)}
-              <Submit changeset={@changeset} class="w-full md:w-fit" label="Post" />
-            {#else}
-              <Checkbox name={:required} label="Require Payment to View Draft" />
-              <Submit changeset={@changeset} class="w-full md:w-fit" label="Submit Draft" />
-            {/if}
+            <div class="flex flex-row-reverse">
+              {#if Enum.empty?(@uploads.attachment.entries)}
+                <Submit changeset={@changeset} class="w-full md:w-fit ml-auto" label="Post" />
+              {#else}
+                <Checkbox name={:required} label="Require Payment to View Draft" />
+                <Submit changeset={@changeset} class="w-full md:w-fit ml-auto" label="Submit Draft" />
+              {/if}
+            </div>
           {#else}
-            <Submit changeset={@changeset} class="w-full md:w-fit" label="Post" />
+            <div class="flex flex-row-reverse">
+              <Submit changeset={@changeset} class="w-full md:w-fit ml-auto" label="Post" />
+            </div>
           {/if}
         </div>
       </Form>

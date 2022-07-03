@@ -184,9 +184,9 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
               show_label={false}
               class="w-full"
             />
-            <div class="flex">
+            <div class="flex flex-row-reverse">
               <Submit class="inline" label="Update" />
-              <Button class="inline btn-secondary" click="cancel_edit">Cancel</Button>
+              <Button class="inline btn-error" click="cancel_edit">Cancel</Button>
             </div>
           </Form>
         {#else}
