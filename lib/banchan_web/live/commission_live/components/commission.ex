@@ -32,7 +32,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
     ~F"""
     <div class="relative">
       <h1 class="text-3xl pt-4 px-4 sticky top-16 bg-base-100 z-30 pb-2 border-b-2 opacity-100">
-        <LivePatch class="xl:hidden px-2 py-4" to={Routes.commission_path(Endpoint, :index)}>
+        <LivePatch class="px-2 py-4" to={Routes.commission_path(Endpoint, :index)}>
           <i class="fas fa-arrow-left text-2xl" />
         </LivePatch>
         {@commission.title}
