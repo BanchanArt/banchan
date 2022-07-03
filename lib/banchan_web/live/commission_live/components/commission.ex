@@ -31,7 +31,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   def render(assigns) do
     ~F"""
     <div class="relative">
-      <h1 class="text-3xl pt-4 px-4 sticky top-16 bg-base-100 z-30 pb-2 border-b-2 border-neutral-content border-opacity-10 opacity-100 shadow-xl">
+      <h1 class="text-3xl pt-4 px-4 sticky top-16 bg-base-100 z-30 pb-2 border-b-2 opacity-100">
         <LivePatch class="xl:hidden px-2 py-4" to={Routes.commission_path(Endpoint, :index)}>
           <i class="fas fa-arrow-left text-2xl" />
         </LivePatch>
@@ -47,7 +47,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               studio={@commission.studio}
               class="md:hidden rounded-box hover:bg-base-200 p-2 transition-all"
             />
-            <div class="divider" />
+            <div class="divider md:hidden" />
             <Timeline
               uri={@uri}
               commission={@commission}
