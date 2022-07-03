@@ -78,8 +78,10 @@ defmodule BanchanWeb.StudioLive.New do
            val["studio"]
          ) do
       {:ok, studio} ->
-        put_flash(socket, :info, "Profile updated")
-        {:noreply, redirect(socket, to: Routes.studio_shop_path(Endpoint, :show, studio.handle))}
+        {:noreply,
+         socket
+         |> put_flash(:info, "Studio created")
+         |> redirect(to: Routes.studio_shop_path(Endpoint, :show, studio.handle))}
 
       other ->
         other
@@ -102,7 +104,7 @@ defmodule BanchanWeb.StudioLive.New do
             <h1 class="text-2xl">New Studio</h1>
             <TextInput name={:name} icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />
-            <MarkdownInput id="about" name={:about} opts={required: true} />
+            <MarkdownInput id="about" name={:about} />
             <Select name={:country} options={@countries} opts={required: true} />
             <Select name={:default_currency} options={@currencies} opts={required: true} />
             <MultipleSelect
