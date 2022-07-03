@@ -99,7 +99,7 @@ defmodule BanchanWeb.DenizenLive.Show do
                 <LiveRedirect
                   label="Moderation"
                   to={Routes.denizen_moderation_path(Endpoint, :edit, @user.handle)}
-                  class="btn btn-sm btn-warning btn-outline rounded-full m-2 px-2 py-0 grow-0"
+                  class="btn btn-sm btn-warning rounded-full m-2 px-2 py-0 grow-0"
                 />
               {/if}
               {#if @current_user &&
