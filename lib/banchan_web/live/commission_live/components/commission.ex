@@ -6,6 +6,8 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
 
   alias Surface.Components.LivePatch
 
+  alias BanchanWeb.Components.Collapse
+
   alias BanchanWeb.CommissionLive.Components.{
     CommentBox,
     DraftBox,
@@ -25,6 +27,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   prop toggle_subscribed, :event, required: true
   prop toggle_archived, :event, required: true
   prop withdraw, :event, required: true
+  prop withdraw_confirmation_id, :string, required: true
   prop invoice_modal_id, :string, required: true
   prop open_invoice_modal, :event, required: true
 
@@ -116,14 +119,27 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
                 Archive
               {/if}
             </button>
-            <button
-              disabled={@commission.status == :withdrawn || @current_user.id != @commission.client_id}
-              type="button"
-              :on-click={@withdraw}
-              class="btn btn-sm my-2 w-full"
-            >
-              Withdraw
-            </button>
+            {#if @current_user.id == @commission.client_id && @commission.status != :withdrawn}
+              <Collapse id={@withdraw_confirmation_id} show_arrow={false} class="w-full my-2 bg-base-200">
+                <:header>
+                  <button type="button" class="btn btn-sm w-full">
+                    Withdraw
+                  </button>
+                </:header>
+                <p>
+                  Your commission will be withdrawn and you won't be able to re-open it unless the studio does it for you.
+                </p>
+                <p class="py-2">Are you sure?</p>
+                <button
+                  disabled={@commission.status == :withdrawn || @current_user.id != @commission.client_id}
+                  type="button"
+                  :on-click={@withdraw}
+                  class="btn btn-sm btn-error my-2 w-full"
+                >
+                  Confirm
+                </button>
+              </Collapse>
+            {/if}
           </div>
         </div>
       </div>

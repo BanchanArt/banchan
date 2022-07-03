@@ -186,6 +186,7 @@ defmodule BanchanWeb.CommissionLive do
         "withdrawn"
       )
 
+    Collapse.set_open("withdraw-confirmation", false)
     {:noreply, socket}
   end
 
@@ -279,6 +280,7 @@ defmodule BanchanWeb.CommissionLive do
               withdraw="withdraw"
               invoice_modal_id="invoice-modal"
               open_invoice_modal="open_invoice_modal"
+              withdraw_confirmation_id="withdraw-confirmation"
             />
           </div>
         {/if}
