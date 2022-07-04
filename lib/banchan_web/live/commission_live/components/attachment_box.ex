@@ -21,7 +21,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
     ~F"""
     <div>
       <ul class="flex flex-row flex-wrap gap-4 p-2">
-        {#for attachment <- Enum.filter(@attachments, & &1.thumbnail)}
+        {#for attachment <- Enum.filter(@attachments, & &1.thumbnail_id)}
           <li class="h-32 w-32">
             <button
               class="relative"
@@ -58,7 +58,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
         {/for}
       </ul>
       <div class="flex flex-col p-2">
-        {#for attachment <- Enum.filter(@attachments, &(!&1.thumbnail))}
+        {#for attachment <- Enum.filter(@attachments, &(!&1.thumbnail_id))}
           <div class="relative">
             <a
               class="relative"
