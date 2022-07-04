@@ -20,7 +20,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
 
   data studio, :struct
   data custom_changeset, :struct
-  data deposited, :struct
   data open_custom, :boolean, default: false
   data loaded, :boolean, default: false
 
@@ -46,13 +45,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
           socket
         end
 
-      deposited =
-        Commissions.deposited_amount(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          socket.assigns.current_user_member?
-        )
-
       studio = (socket.assigns.commission |> Repo.preload(:studio)).studio
 
       {:ok,
@@ -60,24 +52,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
        |> assign(
          studio: studio,
          custom_changeset: custom_changeset,
-         deposited: deposited,
          loaded: true
        )}
-    end
-  end
-
-  def handle_info(%{event: "event_updated", payload: event}, socket) do
-    if event.invoice do
-      deposited =
-        Commissions.deposited_amount(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          socket.assigns.current_user_member?
-        )
-
-      {:noreply, socket |> assign(deposited: deposited)}
-    else
-      {:noreply, socket}
     end
   end
 
@@ -228,7 +204,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       close_custom_modal="close_custom_modal"
       change_custom="change_custom"
       submit_custom="submit_custom"
-      deposited={@deposited}
       studio={@studio}
     />
     """

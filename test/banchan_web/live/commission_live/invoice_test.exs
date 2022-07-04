@@ -45,7 +45,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> render_click()
 
       page_live
-      |> form("#action-box_invoice_modal form", %{"event[text]": "foo", "event[amount]": "420"})
+      |> form("#commission-invoice-modal form", %{"event[text]": "foo", "event[amount]": "420"})
       |> render_submit()
 
       Notifications.wait_for_notifications()

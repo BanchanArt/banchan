@@ -1,4 +1,4 @@
-defmodule BanchanWeb.CommissionLive.Components.DraftBox do
+defmodule BanchanWeb.CommissionLive.Components.UploadsBox do
   @moduledoc """
   Component for rendering the latest submitted draft on the commission page
   """
@@ -8,6 +8,7 @@ defmodule BanchanWeb.CommissionLive.Components.DraftBox do
   alias Banchan.Uploads
 
   alias BanchanWeb.CommissionLive.Components.{AttachmentBox, MediaPreview}
+  alias BanchanWeb.Components.Collapse
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
@@ -37,49 +38,10 @@ defmodule BanchanWeb.CommissionLive.Components.DraftBox do
 
       socket = socket |> assign(assigns)
 
-      event =
-        Commissions.latest_draft(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          socket.assigns.current_user_member?
-        )
+      attachments = Commissions.list_attachments(socket.assigns.commission)
 
-      {:ok, socket |> assign(attachments: event && event.attachments, loaded: true)}
+      {:ok, socket |> assign(attachments: attachments, loaded: true)}
     end
-  end
-
-  def handle_info(%{event: "new_events", payload: events}, socket) do
-    if Enum.any?(events, &(&1.type == :comment && !Enum.empty?(&1.attachments))) do
-      event =
-        Commissions.latest_draft(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          socket.assigns.current_user_member?
-        )
-
-      {:noreply, socket |> assign(attachments: event && event.attachments)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info(%{event: "event_updated", payload: events}, socket) do
-    if Enum.any?(events, &(&1.type == :comment && !Enum.empty?(&1.attachments))) do
-      event =
-        Commissions.latest_draft(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          socket.assigns.current_user_member?
-        )
-
-      {:noreply, socket |> assign(attachments: event && event.attachments)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info(_, socket) do
-    {:noreply, socket}
   end
 
   @impl true
@@ -98,13 +60,13 @@ defmodule BanchanWeb.CommissionLive.Components.DraftBox do
   def render(assigns) do
     ~F"""
     <div>
-      {#if @attachments && !Enum.empty?(@attachments)}
-        <h3 class="px-2 pb-2 text-xl">Latest Draft</h3>
-        <MediaPreview id="draft-preview" commission={@commission} />
+      <Collapse id={@id <> "-uploads-box"}>
+        <:header>
+          <div class="text-lg font-medium">Uploads ({Enum.count(@attachments)})</div>
+        </:header>
         <AttachmentBox commission={@commission} attachments={@attachments} open_preview="open_preview" />
-      {#else}
-        <h3 class="px-2 pb-2 text-xl">No Drafts Yet</h3>
-      {/if}
+      </Collapse>
+      <MediaPreview id="draft-preview" commission={@commission} />
     </div>
     """
   end

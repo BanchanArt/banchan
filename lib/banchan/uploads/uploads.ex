@@ -84,7 +84,7 @@ defmodule Banchan.Uploads do
     end
 
     %Upload{
-      uploader: user,
+      uploader_id: user.id,
       name: file_name,
       key: key,
       bucket: bucket,

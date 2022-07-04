@@ -163,7 +163,7 @@ defmodule Banchan.Commissions do
                ^current_user.id == artist.id),
         preload: [
           :studio,
-          events: [:actor, invoice: [], attachments: [:upload, :thumbnail]],
+          events: [invoice: [], attachments: [:upload, :thumbnail]],
           line_items: [:option],
           offering: [:options]
         ]
@@ -422,50 +422,52 @@ defmodule Banchan.Commissions do
   end
 
   def add_line_item(%User{} = actor, %Commission{} = commission, option, true) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        line_item =
-          case option do
-            %OfferingOption{} ->
-              %LineItem{
-                option: option,
-                amount: option.price,
-                name: option.name,
-                description: option.description
-              }
+    case option do
+      %OfferingOption{} ->
+        %LineItem{
+          commission_id: commission.id,
+          option: option,
+          amount: option.price,
+          name: option.name,
+          description: option.description
+        }
 
-            %{amount: amount, name: name, description: description} ->
-              %LineItem{
-                amount: amount,
-                name: name,
-                description: description
-              }
-          end
+      %{amount: amount, name: name, description: description} ->
+        %LineItem{
+          commission_id: commission.id,
+          amount: amount,
+          name: name,
+          description: description
+        }
+    end
+    |> Repo.insert()
+    |> case do
+      {:error, err} ->
+        {:error, err}
 
-        case commission
-             |> Commission.update_changeset()
-             |> Ecto.Changeset.put_assoc(:line_items, commission.line_items ++ [line_item])
-             |> Repo.update() do
+      {:ok, line_item} ->
+        line_item = line_item |> Repo.preload(:option)
+        line_items = commission.line_items ++ [line_item]
+        commission = %{commission | line_items: line_items}
+        {:ok, {line_item, commission}}
+    end
+    |> case do
+      {:error, err} ->
+        {:error, err}
+
+      {:ok, {line_item, commission}} ->
+        case create_event(:line_item_added, actor, commission, true, [], %{
+               amount: line_item.amount,
+               text: line_item.name
+             }) do
           {:error, err} ->
             {:error, err}
 
-          {:ok, commission} ->
-            # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_added, actor, commission, true, [], %{
-                   amount: line_item.amount,
-                   text: line_item.name
-                 }) do
-              {:error, err} ->
-                {:error, err}
-
-              {:ok, event} ->
-                Notifications.commission_line_items_changed(commission, actor)
-                {:ok, {commission, [event]}}
-            end
+          {:ok, event} ->
+            Notifications.commission_line_items_changed(commission, actor)
+            {:ok, {commission, [event]}}
         end
-      end)
-
-    ret
+    end
   end
 
   def remove_line_item(_, _, _, false) do
@@ -473,34 +475,34 @@ defmodule Banchan.Commissions do
   end
 
   def remove_line_item(%User{} = actor, %Commission{} = commission, line_item, true) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        line_items = Enum.filter(commission.line_items, &(&1.id != line_item.id))
+    line_item
+    |> Repo.delete()
+    |> case do
+      {:error, err} ->
+        {:error, err}
 
-        case commission
-             |> Commission.update_changeset()
-             |> Ecto.Changeset.put_assoc(:line_items, line_items)
-             |> Repo.update() do
+      {:ok, _} ->
+        line_items = Enum.filter(commission.line_items, &(&1.id != line_item.id))
+        commission = %{commission | line_items: line_items}
+        {:ok, {line_item, commission}}
+    end
+    |> case do
+      {:error, err} ->
+        {:error, err}
+
+      {:ok, {line_item, commission}} ->
+        case create_event(:line_item_removed, actor, commission, true, [], %{
+               amount: line_item.amount,
+               text: line_item.name
+             }) do
           {:error, err} ->
             {:error, err}
 
-          {:ok, commission} ->
-            # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_removed, actor, commission, true, [], %{
-                   amount: line_item.amount,
-                   text: line_item.name
-                 }) do
-              {:error, err} ->
-                {:error, err}
-
-              {:ok, event} ->
-                Notifications.commission_line_items_changed(commission, actor)
-                {:ok, {commission, [event]}}
-            end
+          {:ok, event} ->
+            Notifications.commission_line_items_changed(commission, actor)
+            {:ok, {commission, [event]}}
         end
-      end)
-
-    ret
+    end
   end
 
   @doc """
@@ -532,8 +534,8 @@ defmodule Banchan.Commissions do
     ret =
       %Event{
         type: type,
-        commission: commission,
-        actor: actor,
+        commission_id: commission.id,
+        actor_id: actor.id,
         attachments: attachments
       }
       |> Event.changeset(attrs)
@@ -1191,33 +1193,14 @@ defmodule Banchan.Commissions do
     end
   end
 
-  def latest_draft(%User{id: user_id}, %Commission{client_id: client_id}, current_user_member?)
-      when user_id != client_id and current_user_member? == false do
-    {:error, :unauthorized}
-  end
-
-  def latest_draft(_, %Commission{} = commission, _) do
-    case from(
-           e in Event,
-           join: us in "users_studios",
-           join: c in Commission,
-           join: ea in EventAttachment,
-           where:
-             e.type == :comment and
-               c.id == ^commission.id and
-               e.commission_id == c.id and
-               us.studio_id == c.studio_id and
-               e.actor_id == us.user_id and
-               ea.event_id == e.id,
-           select: e,
-           limit: 1,
-           order_by: {:desc, e.inserted_at},
-           preload: [attachments: [:upload, :thumbnail]]
-         )
-         |> Repo.all() do
-      [] -> nil
-      [event] -> event
-    end
+  def list_attachments(%Commission{} = commission) do
+    from(ea in EventAttachment,
+      join: e in assoc(ea, :event),
+      where: e.commission_id == ^commission.id,
+      order_by: [desc: e.inserted_at],
+      preload: [:upload]
+    )
+    |> Repo.all()
   end
 
   defp stripe_mod do

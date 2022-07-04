@@ -14,6 +14,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
   alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox, MediaPreview}
 
+  prop actor, :struct, required: true
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
   prop commission, :struct, required: true
@@ -58,7 +59,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
      socket
      |> assign(
        changeset:
-         (assigns.current_user_member? || assigns.current_user.id == assigns.event.actor.id) &&
+         (assigns.current_user_member? || assigns.current_user.id == assigns.actor.id) &&
            Commissions.change_event_text(assigns.event, %{})
      )}
   end
@@ -120,9 +121,9 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
       <div class="flex flex-row text-sm p-2">
         <div class="inline-flex grow items-baseline flex-wrap space-x-1">
           <div class="self-center">
-            <Avatar class="w-6" user={@event.actor} />
+            <Avatar class="w-6" user={@actor} />
           </div>
-          <UserHandle user={@event.actor} />
+          <UserHandle user={@actor} />
           <span>
             {#if @event.invoice}
               posted an invoice
@@ -162,7 +163,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             </div>
           {/if}
         </div>
-        {#if !@changeset && (@current_user_member? || @current_user.id == @event.actor.id)}
+        {#if !@changeset && (@current_user_member? || @current_user.id == @actor.id)}
           <button type="button" :on-click="edit" class="ml-auto hover:underline"><i class="fas fa-edit" /></button>
         {/if}
       </div>
