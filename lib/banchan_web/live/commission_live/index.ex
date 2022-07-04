@@ -59,7 +59,7 @@ defmodule BanchanWeb.CommissionLive do
                  socket.assigns.commission.public_id == commission_id do
               socket.assigns.commission
             else
-              if Map.has_key?(socket.assigns, :commission) do
+              if Map.has_key?(socket.assigns, :commission) && socket.assigns.commission do
                 Commissions.unsubscribe_from_commission_events(socket.assigns.commission)
               end
 
