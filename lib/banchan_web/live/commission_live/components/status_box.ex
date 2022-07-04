@@ -27,7 +27,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
     ~F"""
     <div class="flex flex-col gap-2 w-full">
       <div class="flex flex-row gap-2 items-center">
-        <div class="text-xl">
+        <div class="text-xl font-medium">
           Status:
         </div>
         <div class="badge badge-primary badge-lg flex flex-row gap-2 items-center">

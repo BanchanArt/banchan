@@ -9,9 +9,9 @@ defmodule BanchanWeb.CommissionLive do
   alias Surface.Components.Form.TextInput, as: SurfaceTextInput
 
   alias Banchan.{Commissions, Studios}
-  alias Banchan.Commissions.{CommissionFilter, Notifications}
+  alias Banchan.Commissions.CommissionFilter
 
-  alias BanchanWeb.CommissionLive.Components.{CommissionRow, InvoiceModal}
+  alias BanchanWeb.CommissionLive.Components.CommissionRow
   alias BanchanWeb.Components.{Collapse, InfiniteScroll, Layout}
   alias BanchanWeb.Components.Form.{Checkbox, MultipleSelect, TextInput}
 
@@ -25,10 +25,6 @@ defmodule BanchanWeb.CommissionLive do
 
   @impl true
   def handle_params(params, uri, socket) do
-    if Map.has_key?(socket.assigns, :commission) && socket.assigns.commission do
-      Commissions.unsubscribe_from_commission_events(socket.assigns.commission)
-    end
-
     socket =
       socket
       |> assign(
@@ -73,8 +69,6 @@ defmodule BanchanWeb.CommissionLive do
 
           assign(socket,
             commission: comm,
-            archived?: Commissions.archived?(socket.assigns.current_user, comm),
-            subscribed?: Notifications.user_subscribed?(socket.assigns.current_user, comm),
             current_user_member?:
               Studios.is_user_in_studio?(socket.assigns.current_user, %Studios.Studio{
                 id: comm.studio_id
@@ -130,27 +124,6 @@ defmodule BanchanWeb.CommissionLive do
   end
 
   @impl true
-  def handle_event("toggle_subscribed", _, socket) do
-    if socket.assigns.subscribed? do
-      Notifications.unsubscribe_user!(socket.assigns.current_user, socket.assigns.commission)
-    else
-      Notifications.subscribe_user!(socket.assigns.current_user, socket.assigns.commission)
-    end
-
-    {:noreply, assign(socket, subscribed?: !socket.assigns.subscribed?)}
-  end
-
-  def handle_event("toggle_archived", _, socket) do
-    {:ok, _} =
-      Commissions.update_archived(
-        socket.assigns.current_user,
-        socket.assigns.commission,
-        !socket.assigns.archived?
-      )
-
-    {:noreply, assign(socket, archived?: !socket.assigns.archived?)}
-  end
-
   def handle_event("filter", %{"commission_filter" => filter}, socket) do
     changeset = CommissionFilter.changeset(%CommissionFilter{}, filter)
 
@@ -178,18 +151,6 @@ defmodule BanchanWeb.CommissionLive do
     {:noreply, assign(socket, filter_open: !socket.assigns.filter_open)}
   end
 
-  def handle_event("withdraw", _, socket) do
-    {:ok, _} =
-      Commissions.update_status(
-        socket.assigns.current_user,
-        socket.assigns.commission,
-        "withdrawn"
-      )
-
-    Collapse.set_open("withdraw-confirmation", false)
-    {:noreply, socket}
-  end
-
   def handle_event("load_more", _, socket) do
     if socket.assigns.results.total_entries >
          socket.assigns.page * socket.assigns.results.page_size do
@@ -197,11 +158,6 @@ defmodule BanchanWeb.CommissionLive do
     else
       {:noreply, socket}
     end
-  end
-
-  def handle_event("open_invoice_modal", _, socket) do
-    InvoiceModal.show("invoice-modal")
-    {:noreply, socket}
   end
 
   defp fetch(%{assigns: %{results: results, page: page, filter: changeset}} = socket) do
@@ -269,18 +225,11 @@ defmodule BanchanWeb.CommissionLive do
         {#if @commission}
           <div class="basis-full">
             <Commission
+              id="commission"
               uri={@uri}
               current_user={@current_user}
               commission={@commission}
-              subscribed?={@subscribed?}
-              archived?={@archived?}
               current_user_member?={@current_user_member?}
-              toggle_subscribed="toggle_subscribed"
-              toggle_archived="toggle_archived"
-              withdraw="withdraw"
-              invoice_modal_id="invoice-modal"
-              open_invoice_modal="open_invoice_modal"
-              withdraw_confirmation_id="withdraw-confirmation"
             />
           </div>
         {/if}

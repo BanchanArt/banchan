@@ -6,7 +6,6 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.CommissionLive.Components.BalanceBox
   alias BanchanWeb.Components.{Button, Modal}
   alias BanchanWeb.Components.Form.{Select, Submit, TextArea, TextInput}
 
@@ -16,7 +15,6 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   prop offering, :struct
   prop add_item, :event
   prop remove_item, :event
-  prop deposited, :struct
 
   prop custom_changeset, :struct
   prop custom_modal_id, :string
@@ -29,10 +27,10 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
     ~F"""
     <div class="flex flex-col">
       {#if @offering}
-        <div class="px-2 text-2xl">{@offering.name}</div>
-        <div class="px-2 text-sm">{@offering.description}</div>
+        <div class="px-2 font-medium">{@offering.name}</div>
+        <div class="px-2 text-xs">{@offering.description}</div>
       {/if}
-      <ul class="flex flex-col pt-4">
+      <ul class="flex flex-col pt-2">
         {#for {item, idx} <- Enum.with_index(@line_items)}
           <li class="flex p-2 gap-2">
             {#if @allow_edits && !item.sticky}
@@ -51,22 +49,15 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
               />
             {/if}
             <div class="grow flex flex-col">
-              <div class="font-bold">{item.name}</div>
-              <div class="text-sm">{item.description}</div>
+              <div class="font-medium text-sm">{item.name}</div>
+              <div class="text-xs">{item.description}</div>
             </div>
-            <div class="p-2">{Money.to_string(item.amount)}</div>
+            <div class="p-2 font-medium text-sm">{Money.to_string(item.amount)}</div>
           </li>
         {/for}
       </ul>
-      <div class="divider" />
-      <BalanceBox
-        default_currency={@studio.default_currency}
-        deposited={@deposited}
-        line_items={@line_items}
-      />
-      <div class="divider" />
       {#if @offering && Enum.any?(@offering.options)}
-        <h5 class="text-xl px-2">Add-ons</h5>
+        <h5 class="px-2 font-medium">Add-ons:</h5>
         <ul class="flex flex-col">
           {#for {option, idx} <- Enum.with_index(@offering.options)}
             {#if option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
@@ -77,10 +68,10 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                   <div class="w-8" />
                 {/if}
                 <div class="grow flex flex-col">
-                  <div class="font-bold">{option.name}</div>
-                  <div class="text-sm">{option.description}</div>
+                  <div class="font-medium text-sm">{option.name}</div>
+                  <div class="text-xs">{option.description}</div>
                 </div>
-                <div class="p-2">{Money.to_string(option.price)}</div>
+                <div class="p-2 text-sm font-medium">{Money.to_string(option.price)}</div>
               </li>
             {/if}
           {/for}
@@ -88,10 +79,10 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
             <li class="flex gap-2 p-2">
               <button type="button" :on-click={@open_custom_modal} class="w-8 text-xl fas fa-plus-circle" />
               <div class="grow flex flex-col">
-                <div class="font-bold">Custom Option</div>
-                <div class="text-sm">Add a customized option to the summary.</div>
+                <div class="font-medium text-sm">Custom Option</div>
+                <div class="text-xs">Add a customized option to the summary.</div>
               </div>
-              <div class="p-2">TBD</div>
+              <div class="p-2 text-sm font-medium">TBD</div>
             </li>
           {/if}
         </ul>

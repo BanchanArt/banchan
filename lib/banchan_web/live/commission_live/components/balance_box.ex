@@ -50,30 +50,30 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
       {#if @deposited}
         <div class="p-2 flex flex-col gap-2">
           <div class="flex flex-row items-center">
-            <div class="font-bold grow">Quote:</div>
+            <div class="font-medium grow">Quote:</div>
             <div class="flex flex-col">
               {#for val <- estimate}
-                <div>
+                <div class="text-sm font-medium">
                   {Money.to_string(val)}
                 </div>
               {/for}
             </div>
           </div>
           <div class="flex flex-row items-center">
-            <div class="font-bold grow">Deposited:</div>
+            <div class="font-medium grow">Deposited:</div>
             <div class="flex flex-col">
               {#for val <- deposited}
-                <div>
+                <div class="text-sm font-medium">
                   {Money.to_string(val)}
                 </div>
               {/for}
             </div>
           </div>
           <div class="flex flex-row items-center">
-            <div class="font-bold grow">Balance:</div>
+            <div class="font-medium grow">Balance:</div>
             <div class="flex flex-col">
               {#for val <- remaining}
-                <div>
+                <div class="text-sm font-medium">
                   {Money.to_string(val)}
                 </div>
               {/for}
@@ -82,10 +82,10 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
         </div>
       {#else}
         <div class="px-2 flex">
-          <div class="font-bold grow">Quote:</div>
+          <div class="font-medium grow">Quote:</div>
           <div class="flex flex-col">
             {#for val <- estimate}
-              <div>
+              <div class="text-sm font-medium">
                 {Money.to_string(val)}
               </div>
             {/for}
