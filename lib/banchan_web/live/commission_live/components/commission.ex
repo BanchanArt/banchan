@@ -81,6 +81,17 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               current_user_member?={@current_user_member?}
             />
             <div class="divider" />
+            <div class="w-full">
+              <div class="text-sm pb-2">Notifications</div>
+              <button type="button" :on-click={@toggle_subscribed} class="btn btn-sm w-full">
+                {#if @subscribed?}
+                  Unsubscribe
+                {#else}
+                  Subscribe
+                {/if}
+              </button>
+            </div>
+            <div class="divider" />
             <SummaryEditor
               id="summary-editor"
               current_user={@current_user}
@@ -104,14 +115,6 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               current_user_member?={@current_user_member?}
               commission={@commission}
             />
-            <div class="divider" />
-            <button type="button" :on-click={@toggle_subscribed} class="btn btn-sm">
-              {#if @subscribed?}
-                Unsubscribe
-              {#else}
-                Subscribe
-              {/if}
-            </button>
             <div class="divider" />
             <button type="button" :on-click={@toggle_archived} class="btn btn-sm my-2 w-full">
               {#if @archived?}
