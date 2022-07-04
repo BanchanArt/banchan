@@ -679,11 +679,18 @@ defmodule Banchan.Commissions do
         join: c in assoc(e, :commission),
         join: s in assoc(c, :studio),
         join: artist in assoc(s, :artists),
+        left_join: i in assoc(e, :invoice),
         select: ea,
+        # Either the user is a studio member
+        # Or the user is the client
+        # And the invoice requires payment to view attachments and has succeeded
+        # Or the invoice doesn't require payment to view attachments
         where:
           c.public_id == ^commission and
             ul.key == ^key and
-            (c.client_id == ^user.id or artist.id == ^user.id),
+            (artist.id == ^user.id or
+               (c.client_id == ^user.id and
+                  ((i.required and i.status == :succeeded) or not i.required))),
         preload: [:upload, :thumbnail]
     )
   end

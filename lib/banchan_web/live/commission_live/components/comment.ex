@@ -194,23 +194,6 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
         {/if}
       </div>
 
-      {#if Enum.any?(@event.attachments)}
-        <div :if={@event.text} class="divider" />
-        <div class="px-4">
-          {#if @event.invoice && @event.invoice.required && !Commissions.invoice_paid?(@event.invoice)}
-            Payment is required to view draft.
-          {#else}
-            <AttachmentBox
-              editing={!is_nil(@changeset)}
-              commission={@commission}
-              attachments={@event.attachments}
-              open_preview="open_preview"
-              remove_attachment="remove_attachment"
-            />
-          {/if}
-        </div>
-      {/if}
-
       {#if @event.invoice}
         <div :if={@event.text} class="divider" />
         <div class="pb-4">
@@ -221,6 +204,21 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             uri={@uri}
             commission={@commission}
             event={@event}
+          />
+        </div>
+      {/if}
+
+      {#if Enum.any?(@event.attachments)}
+        <div :if={@event.text} class="divider" />
+        <div class="px-4">
+          <AttachmentBox
+            editing={!is_nil(@changeset)}
+            commission={@commission}
+            attachments={@event.attachments}
+            open_preview="open_preview"
+            remove_attachment="remove_attachment"
+            pending_payment={@event.invoice && @event.invoice.required && !Commissions.invoice_paid?(@event.invoice)}
+            current_user_member?={@current_user_member?}
           />
         </div>
       {/if}
