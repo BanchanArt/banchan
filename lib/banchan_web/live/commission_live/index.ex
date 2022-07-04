@@ -121,6 +121,7 @@ defmodule BanchanWeb.CommissionLive do
       |> Enum.sort(&(Timex.diff(&1.inserted_at, &2.inserted_at) < 0))
 
     commission = %{socket.assigns.commission | events: events}
+    Commission.events_updated("commission")
     {:noreply, assign(socket, users: users, commission: commission)}
   end
 
@@ -141,6 +142,7 @@ defmodule BanchanWeb.CommissionLive do
       end)
 
     commission = %{socket.assigns.commission | events: events}
+    Commission.events_updated("commission")
     {:noreply, assign(socket, commission: commission)}
   end
 

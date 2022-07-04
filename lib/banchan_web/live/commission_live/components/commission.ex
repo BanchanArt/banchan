@@ -33,6 +33,15 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
 
   data deposited, :struct
 
+  def events_updated(id) do
+    send_update(__MODULE__, id: id, events_updated: true)
+  end
+
+  def update(%{events_updated: true}, socket) do
+    UploadsBox.reload(socket.assigns.id <> "-uploads-box")
+    {:ok, socket}
+  end
+
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
 
@@ -165,7 +174,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             {/if}
             <div class="divider" />
             <UploadsBox
-              id="uploads-box"
+              id={@id <> "-uploads-box"}
               current_user={@current_user}
               current_user_member?={@current_user_member?}
               commission={@commission}

@@ -18,6 +18,16 @@ defmodule BanchanWeb.CommissionLive.Components.UploadsBox do
   data loaded, :boolean, default: false
   data previewing, :struct, default: nil
 
+  def reload(id) do
+    send_update(__MODULE__, id: id, reload: true)
+  end
+
+  def update(%{reload: true}, socket) do
+    attachments = Commissions.list_attachments(socket.assigns.commission)
+
+    {:ok, socket |> assign(attachments: attachments, loaded: true)}
+  end
+
   def update(assigns, socket) do
     current_comm = Map.get(socket.assigns, :commission)
     new_comm = Map.get(assigns, :commission)
