@@ -55,7 +55,7 @@ defmodule BanchanWeb.LoginLive do
       <div class="divider">OR</div>
       <div class="flex flex-col gap-4">
         <div class="text-xl mx-auto">
-          Use Third-party Login
+          Sign in with...
         </div>
         <div class="flex flex-row gap-2 justify-center">
           <Link
