@@ -22,6 +22,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
     Timeline
   }
 
+  prop users, :map, required: true
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
   prop commission, :struct, required: true
@@ -113,6 +114,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             <div class="divider md:hidden" />
             <Timeline
               uri={@uri}
+              users={@users}
               commission={@commission}
               current_user={@current_user}
               current_user_member?={@current_user_member?}

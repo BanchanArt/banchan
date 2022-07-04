@@ -48,40 +48,6 @@ defmodule BanchanWeb.CommissionLive.Components.DraftBox do
     end
   end
 
-  def handle_info(%{event: "new_events", payload: events}, socket) do
-    if Enum.any?(events, &(&1.type == :comment && !Enum.empty?(&1.attachments))) do
-      event =
-        Commissions.latest_draft(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          socket.assigns.current_user_member?
-        )
-
-      {:noreply, socket |> assign(attachments: event && event.attachments)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info(%{event: "event_updated", payload: events}, socket) do
-    if Enum.any?(events, &(&1.type == :comment && !Enum.empty?(&1.attachments))) do
-      event =
-        Commissions.latest_draft(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          socket.assigns.current_user_member?
-        )
-
-      {:noreply, socket |> assign(attachments: event && event.attachments)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info(_, socket) do
-    {:noreply, socket}
-  end
-
   @impl true
   def handle_event("open_preview", %{"key" => key, "bucket" => bucket}, socket) do
     if socket.assigns.current_user.id == socket.assigns.commission.client_id ||

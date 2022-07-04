@@ -8,7 +8,7 @@ defmodule BanchanWeb.CommissionLive do
   alias Surface.Components.Form.{Field, Submit}
   alias Surface.Components.Form.TextInput, as: SurfaceTextInput
 
-  alias Banchan.{Commissions, Studios}
+  alias Banchan.{Accounts, Commissions, Studios}
   alias Banchan.Commissions.CommissionFilter
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
@@ -59,6 +59,10 @@ defmodule BanchanWeb.CommissionLive do
                  socket.assigns.commission.public_id == commission_id do
               socket.assigns.commission
             else
+              if Map.has_key?(socket.assigns, :commission) do
+                Commissions.unsubscribe_from_commission_events(socket.assigns.commission)
+              end
+
               Commissions.get_commission!(
                 commission_id,
                 socket.assigns.current_user
@@ -67,8 +71,19 @@ defmodule BanchanWeb.CommissionLive do
 
           Commissions.subscribe_to_commission_events(comm)
 
+          users =
+            comm.events
+            |> Enum.reduce(%{}, fn ev, acc ->
+              if Map.has_key?(acc, ev.actor_id) do
+                acc
+              else
+                Map.put(acc, ev.actor_id, Accounts.get_user!(ev.actor_id))
+              end
+            end)
+
           assign(socket,
             commission: comm,
+            users: users,
             current_user_member?:
               Studios.is_user_in_studio?(socket.assigns.current_user, %Studios.Studio{
                 id: comm.studio_id
@@ -76,7 +91,7 @@ defmodule BanchanWeb.CommissionLive do
           )
 
         _ ->
-          assign(socket, commission: nil, current_user_member?: false)
+          assign(socket, commission: nil, users: %{}, current_user_member?: false)
       end
 
     {:noreply, socket |> assign(:uri, uri)}
@@ -87,7 +102,18 @@ defmodule BanchanWeb.CommissionLive do
     # TODO: I don't know why, but we sometimes get two `new_events` messages
     # for a single event addition. So we have to dedup here just in case until
     # that bug is... fixed? If it's even a bug vs something expected?
+    # events = events |> Enum.map(& Repo.preload(&1, [:actor]))
     events = socket.assigns.commission.events ++ events
+
+    users =
+      events
+      |> Enum.reduce(socket.assigns.users, fn ev, acc ->
+        if Map.has_key?(acc, ev.actor_id) do
+          acc
+        else
+          Map.put(acc, ev.actor_id, Accounts.get_user!(ev.actor_id))
+        end
+      end)
 
     events =
       events
@@ -95,7 +121,7 @@ defmodule BanchanWeb.CommissionLive do
       |> Enum.sort(&(Timex.diff(&1.inserted_at, &2.inserted_at) < 0))
 
     commission = %{socket.assigns.commission | events: events}
-    {:noreply, assign(socket, commission: commission)}
+    {:noreply, assign(socket, users: users, commission: commission)}
   end
 
   def handle_info(%{event: "new_status", payload: status}, socket) do
@@ -227,6 +253,7 @@ defmodule BanchanWeb.CommissionLive do
             <Commission
               id="commission"
               uri={@uri}
+              users={@users}
               current_user={@current_user}
               commission={@commission}
               current_user_member?={@current_user_member?}
