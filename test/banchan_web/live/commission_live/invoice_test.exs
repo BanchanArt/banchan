@@ -41,11 +41,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
 
       page_live
-      |> element(".open-invoice-modal")
-      |> render_click()
-
-      page_live
-      |> form("#commission-invoice-modal form", %{"event[text]": "foo", "event[amount]": "420"})
+      |> form("#commission-invoice-collapse form", %{"event[text]": "foo", "event[amount]": "420"})
       |> render_submit()
 
       Notifications.wait_for_notifications()
