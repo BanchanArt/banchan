@@ -107,7 +107,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
         <div class="flex flex-col grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="flex flex-col md:col-span-2">
             <StudioBox
-              studio={@commission.studio}
+              commission={@commission}
               class="md:hidden rounded-box hover:bg-base-200 p-2 transition-all"
             />
             <div class="divider md:hidden" />
@@ -130,10 +130,10 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           <div class="divider md:hidden" />
           <div class="flex flex-col">
             <StudioBox
-              studio={@commission.studio}
+              commission={@commission}
               class="hidden md:block rounded-box hover:bg-base-200 p-2 transition-all"
             />
-            <div class="hidden md:block divider" />
+            <div class="hidden md:flex md:divider" />
             <StatusBox
               id="action-box"
               commission={@commission}

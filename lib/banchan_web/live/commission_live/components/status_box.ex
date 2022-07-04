@@ -33,12 +33,12 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
         <div class="badge badge-primary badge-lg flex flex-row gap-2 items-center">
           {Commissions.Common.humanize_status(@commission.status)}
           {#if @current_user.id == @commission.client_id}
-            <div class="tooltip tooltip-left" data-tip={tooltip_message(@commission.status, false)}>
+            <div class="tooltip md:tooltip-left" data-tip={tooltip_message(@commission.status, false)}>
               <i class="fas fa-info-circle" />
             </div>
           {/if}
           {#if @current_user_member?}
-            <div class="tooltip tooltip-left" data-tip={tooltip_message(@commission.status, true)}>
+            <div class="tooltip md:tooltip-left" data-tip={tooltip_message(@commission.status, true)}>
               <i class="fas fa-info-circle" />
             </div>
           {/if}
