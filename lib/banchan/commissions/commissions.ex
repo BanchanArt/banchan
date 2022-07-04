@@ -1223,12 +1223,10 @@ defmodule Banchan.Commissions do
     from(ea in EventAttachment,
       join: e in assoc(ea, :event),
       left_join: i in assoc(e, :invoice),
-      where: e.commission_id == ^commission.id and (
-        is_nil(i.required) or
-        not i.required or (
-          i.required and i.status == :succeeded
-        )
-      ),
+      where:
+        e.commission_id == ^commission.id and
+          (is_nil(i.required) or
+             not i.required or (i.required and i.status == :succeeded)),
       order_by: [desc: e.inserted_at],
       preload: [:upload]
     )
