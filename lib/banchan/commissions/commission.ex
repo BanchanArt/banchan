@@ -64,4 +64,11 @@ defmodule Banchan.Commissions.Commission do
     |> cast_assoc(:line_items)
     |> cast_assoc(:events)
   end
+
+  @doc false
+  def update_title_changeset(commission, attrs \\ %{}) do
+    commission
+    |> cast(attrs, [:title])
+    |> validate_length(:title, max: 50)
+  end
 end

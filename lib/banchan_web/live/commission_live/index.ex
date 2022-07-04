@@ -126,8 +126,21 @@ defmodule BanchanWeb.CommissionLive do
   end
 
   def handle_info(%{event: "new_status", payload: status}, socket) do
-    commission = %{socket.assigns.commission | status: status}
-    {:noreply, assign(socket, commission: commission)}
+    if socket.assigns.commission do
+      commission = %{socket.assigns.commission | status: status}
+      {:noreply, assign(socket, commission: commission)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_info(%{event: "new_title", payload: title}, socket) do
+    if socket.assigns.commission do
+      commission = %{socket.assigns.commission | title: title}
+      {:noreply, assign(socket, commission: commission)}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_info(%{event: "event_updated", payload: event}, socket) do

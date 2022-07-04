@@ -289,6 +289,25 @@ defmodule Banchan.Commissions do
     )
   end
 
+  def update_title(%User{} = actor, %Commission{} = commission, attrs) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        commission
+        |> Commission.update_title_changeset(attrs)
+        |> Repo.update()
+        |> case do
+          {:ok, commission} ->
+            Notifications.commission_title_changed(commission, actor)
+            {:ok, commission}
+
+          {:error, err} ->
+            {:error, err}
+        end
+      end)
+
+    ret
+  end
+
   def update_status(%User{} = actor, %Commission{} = commission, status) do
     {:ok, ret} =
       Repo.transaction(fn ->
