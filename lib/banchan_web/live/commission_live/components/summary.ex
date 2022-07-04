@@ -6,6 +6,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
 
   alias Surface.Components.Form
 
+  alias BanchanWeb.CommissionLive.Components.BalanceBox
   alias BanchanWeb.Components.{Button, Modal}
   alias BanchanWeb.Components.Form.{Select, Submit, TextArea, TextInput}
 
@@ -25,41 +26,6 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   prop change_custom, :event
 
   def render(assigns) do
-    estimate =
-      Enum.reduce(
-        assigns.line_items,
-        %{},
-        fn item, acc ->
-          current =
-            Map.get(
-              acc,
-              item.amount.currency,
-              Money.new(0, item.amount.currency)
-            )
-
-          Map.put(acc, item.amount.currency, Money.add(current, item.amount))
-        end
-      )
-
-    deposited =
-      if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        [Money.new(0, assigns.studio.default_currency)]
-      else
-        assigns.deposited |> Map.values()
-      end
-
-    remaining =
-      if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        Map.values(estimate)
-      else
-        assigns.deposited
-        |> Enum.map(fn {currency, amount} ->
-          Money.subtract(Map.get(estimate, currency, Money.new(0, currency)), amount)
-        end)
-      end
-
-    estimate = Map.values(estimate)
-
     ~F"""
     <div class="flex flex-col">
       {#if @offering}
@@ -93,51 +59,11 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
         {/for}
       </ul>
       <div class="divider" />
-      {#if @deposited}
-        <div class="p-2 flex flex-col gap-2">
-          <div class="flex flex-row items-center">
-            <div class="font-bold grow">Quote:</div>
-            <div class="flex flex-col">
-              {#for val <- estimate}
-                <div>
-                  {Money.to_string(val)}
-                </div>
-              {/for}
-            </div>
-          </div>
-          <div class="flex flex-row items-center">
-            <div class="font-bold grow">Deposited:</div>
-            <div class="flex flex-col">
-              {#for val <- deposited}
-                <div>
-                  {Money.to_string(val)}
-                </div>
-              {/for}
-            </div>
-          </div>
-          <div class="flex flex-row items-center">
-            <div class="font-bold grow">Balance:</div>
-            <div class="flex flex-col">
-              {#for val <- remaining}
-                <div>
-                  {Money.to_string(val)}
-                </div>
-              {/for}
-            </div>
-          </div>
-        </div>
-      {#else}
-        <div class="px-2 flex">
-          <div class="font-bold grow">Quote:</div>
-          <div class="flex flex-col">
-            {#for val <- estimate}
-              <div>
-                {Money.to_string(val)}
-              </div>
-            {/for}
-          </div>
-        </div>
-      {/if}
+      <BalanceBox
+        default_currency={@studio.default_currency}
+        deposited={@deposited}
+        line_items={@line_items}
+      />
       <div class="divider" />
       {#if @offering && Enum.any?(@offering.options)}
         <h5 class="text-xl px-2">Add-ons</h5>
