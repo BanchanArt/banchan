@@ -14,12 +14,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   alias BanchanWeb.CommissionLive.Components.{
     BalanceBox,
     CommentBox,
-    DraftBox,
     InvoiceModal,
     StatusBox,
     StudioBox,
     SummaryEditor,
-    Timeline
+    Timeline,
+    UploadsBox
   }
 
   prop users, :map, required: true
@@ -143,6 +143,13 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               current_user_member?={@current_user_member?}
             />
             <div class="divider" />
+            <UploadsBox
+              id="uploads-box"
+              current_user={@current_user}
+              current_user_member?={@current_user_member?}
+              commission={@commission}
+            />
+            <div class="divider" />
             <div class="text-lg font-medium">Summary</div>
             <BalanceBox
               default_currency={@commission.studio.default_currency}
@@ -167,13 +174,6 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             >
               Send Invoice
             </button>
-            <div class="divider" />
-            <DraftBox
-              id="draft-box"
-              current_user={@current_user}
-              current_user_member?={@current_user_member?}
-              commission={@commission}
-            />
             <div class="divider" />
             <div class="w-full">
               <div class="text-sm font-medium pb-2">Notifications</div>

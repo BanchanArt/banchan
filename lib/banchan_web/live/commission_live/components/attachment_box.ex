@@ -20,7 +20,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
   def render(assigns) do
     ~F"""
     <div>
-      <ul class="flex flex-wrap gap-4 p-2">
+      <ul class="flex flex-row flex-wrap gap-4 p-2">
         {#for attachment <- Enum.filter(@attachments, & &1.thumbnail)}
           <li class="h-32 w-32">
             <button

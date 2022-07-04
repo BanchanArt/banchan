@@ -1193,33 +1193,14 @@ defmodule Banchan.Commissions do
     end
   end
 
-  def latest_draft(%User{id: user_id}, %Commission{client_id: client_id}, current_user_member?)
-      when user_id != client_id and current_user_member? == false do
-    {:error, :unauthorized}
-  end
-
-  def latest_draft(_, %Commission{} = commission, _) do
-    case from(
-           e in Event,
-           join: us in "users_studios",
-           join: c in Commission,
-           join: ea in EventAttachment,
-           where:
-             e.type == :comment and
-               c.id == ^commission.id and
-               e.commission_id == c.id and
-               us.studio_id == c.studio_id and
-               e.actor_id == us.user_id and
-               ea.event_id == e.id,
-           select: e,
-           limit: 1,
-           order_by: {:desc, e.inserted_at},
-           preload: [attachments: [:upload, :thumbnail]]
-         )
-         |> Repo.all() do
-      [] -> nil
-      [event] -> event
-    end
+  def list_attachments(%Commission{} = commission) do
+    from(ea in EventAttachment,
+      join: e in assoc(ea, :event),
+      where: e.commission_id == ^commission.id,
+      order_by: [desc: e.inserted_at],
+      preload: [:upload]
+    )
+    |> Repo.all()
   end
 
   defp stripe_mod do
