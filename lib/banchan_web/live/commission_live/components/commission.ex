@@ -169,6 +169,15 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               class="md:hidden rounded-box hover:bg-base-200 p-2 transition-all"
             />
             <div class="divider md:hidden" />
+            <div class="md:hidden">
+            <StatusBox
+              id="status-box-mobile"
+              commission={@commission}
+              current_user={@current_user}
+              current_user_member?={@current_user_member?}
+            />
+            </div>
+            <div class="divider md:hidden" />
             <Timeline
               uri={@uri}
               users={@users}
@@ -193,13 +202,15 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               class="hidden md:block rounded-box hover:bg-base-200 p-2 transition-all"
             />
             <div class="hidden md:flex md:divider" />
-            <StatusBox
-              id="action-box"
-              commission={@commission}
-              current_user={@current_user}
-              current_user_member?={@current_user_member?}
-            />
-            <div class="divider" />
+            <div class="hidden md:block">
+              <StatusBox
+                id="status-box-desktop"
+                commission={@commission}
+                current_user={@current_user}
+                current_user_member?={@current_user_member?}
+              />
+            </div>
+            <div class="hidden md:flex md:divider" />
             <div class="text-lg font-medium">Summary</div>
             <BalanceBox
               default_currency={@commission.studio.default_currency}
