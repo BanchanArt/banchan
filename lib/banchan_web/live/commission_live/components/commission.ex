@@ -88,11 +88,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               commission={@commission}
               allow_edits={@current_user_member?}
             />
+            <div class="divider" />
             <button
               type="button"
               :if={@current_user_member?}
               :on-click={@open_invoice_modal}
-              class="btn btn-primary my-2 w-full open-invoice-modal"
+              class="btn btn-primary btn-sm w-full open-invoice-modal"
             >
               Send Invoice
             </button>
