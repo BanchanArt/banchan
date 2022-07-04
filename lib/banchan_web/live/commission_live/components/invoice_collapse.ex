@@ -131,11 +131,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
           phx_target: @myself
         }
       >
-        <Collapse id={@id <> "-invoice-collapse"} show_arrow={false} class="w-full mt-2 bg-base-200">
+        <Collapse id={@id <> "-invoice-collapse"} class="w-full mt-2">
           <:header>
-            <button type="button" class="btn btn-primary btn-sm w-full open-invoice-collapse">
-              Send Invoice
-            </button>
+            <div class="text-lg font-medium">Send Invoice</div>
           </:header>
           <Field class="field" name={:amount}>
             <InputContext assigns={assigns}>
