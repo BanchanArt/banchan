@@ -7,7 +7,7 @@ defmodule BanchanWeb.LayoutView do
     <html lang="en" class="h-full bg-base-100" data-theme="">
       <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
         {live_title_tag(assigns[:page_title] || "Art Goes Here", prefix: "Banchan Art | ")}
         {Phoenix.HTML.Tag.csrf_meta_tag()}
 
