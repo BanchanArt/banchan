@@ -1,4 +1,4 @@
-defmodule BanchanWeb.CommissionLive.Components.InvoiceModal do
+defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
   @moduledoc """
   Modal pop-up for posting invoices.
   """
@@ -13,7 +13,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceModal do
   alias Banchan.Repo
   alias Banchan.Utils
 
-  alias BanchanWeb.Components.Modal
+  alias BanchanWeb.Components.Collapse
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
@@ -31,14 +31,6 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceModal do
   data changeset, :struct
   data uploads, :map
   data studio, :struct
-
-  def show(modal_id) do
-    Modal.show(modal_id <> "_inner_modal")
-  end
-
-  def hide(modal_id) do
-    Modal.hide(modal_id <> "_inner_modal")
-  end
 
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
@@ -101,7 +93,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceModal do
            %{event | "amount" => Utils.moneyfy(amount, currency)}
          ) do
       {:ok, _event} ->
-        hide(socket.assigns.id)
+        Collapse.set_open(socket.assigns.id <> "-invoice-collapse", false)
 
         {:noreply,
          assign(socket,
@@ -127,7 +119,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceModal do
 
   def render(assigns) do
     ~F"""
-    <invoice-modal id={@id}>
+    <invoice-collapse id={@id}>
       <Form
         for={@changeset}
         change="change"
@@ -139,18 +131,19 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceModal do
           phx_target: @myself
         }
       >
-        <Modal id={@id <> "_inner_modal"}>
-          <:title>Invoice Client</:title>
-          <div class="py-4">
-            Use this form to submit an invoice. Once submitted, the invoice will appear in the commission timeline and the client will be able to process the payment through Stripe.
-          </div>
+        <Collapse id={@id <> "-invoice-collapse"} show_arrow={false} class="w-full mt-2 bg-base-200">
+          <:header>
+            <button type="button" class="btn btn-primary btn-sm w-full open-invoice-collapse">
+              Send Invoice
+            </button>
+          </:header>
           <Field class="field" name={:amount}>
             <InputContext assigns={assigns}>
               <Label class="label py-2">
                 <span class="label-text">
                   Invoice Amount
                   <div
-                    class="tooltip tooltip-right"
+                    class="tooltip"
                     data-tip="Total amount to invoice client for. If you've configured multiple currencies, you may choose which one to invoice with."
                   >
                     <i class="fas fa-info-circle" />
@@ -188,19 +181,17 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceModal do
             upload={@uploads.attachment}
             cancel_upload="cancel_upload"
           />
-          <:action>
-            <div class="flex flex-col items-end">
-              {#if Enum.empty?(@uploads.attachment.entries)}
-                <Submit changeset={@changeset} class="w-full md:w-fit" label="Post" />
-              {#else}
-                <Checkbox name={:required} label="Require Payment to View Attachment(s)" />
-                <Submit changeset={@changeset} class="w-full md:w-fit" label="Post" />
-              {/if}
-            </div>
-          </:action>
-        </Modal>
+          <div class="flex flex-col items-end">
+            {#if Enum.empty?(@uploads.attachment.entries)}
+              <Submit changeset={@changeset} class="w-full md:w-fit" label="Post" />
+            {#else}
+              <Checkbox name={:required} label="Require Payment to View Attachment(s)" />
+              <Submit changeset={@changeset} class="w-full md:w-fit" label="Post" />
+            {/if}
+          </div>
+        </Collapse>
       </Form>
-    </invoice-modal>
+    </invoice-collapse>
     """
   end
 end

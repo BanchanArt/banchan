@@ -14,7 +14,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   alias BanchanWeb.CommissionLive.Components.{
     BalanceBox,
     CommentBox,
-    InvoiceModal,
+    InvoiceCollapse,
     StatusBox,
     StudioBox,
     SummaryEditor,
@@ -87,11 +87,6 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
     {:noreply, assign(socket, archived?: !socket.assigns.archived?)}
   end
 
-  def handle_event("open_invoice_modal", _, socket) do
-    InvoiceModal.show(socket.assigns.id <> "-invoice-modal")
-    {:noreply, socket}
-  end
-
   def render(assigns) do
     ~F"""
     <div class="relative">
@@ -159,14 +154,15 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
                 allow_edits={@current_user_member?}
               />
             </Collapse>
-            <button
-              type="button"
-              :if={@current_user_member?}
-              :on-click="open_invoice_modal"
-              class="btn btn-primary btn-sm w-full open-invoice-modal mt-2"
-            >
-              Send Invoice
-            </button>
+            {#if @current_user_member?}
+              <div class="divider" />
+              <InvoiceCollapse
+                id={@id <> "-invoice-collapse"}
+                commission={@commission}
+                current_user={@current_user}
+                current_user_member?={@current_user_member?}
+              />
+            {/if}
             <div class="divider" />
             <UploadsBox
               id="uploads-box"
@@ -218,12 +214,6 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
         </div>
       </div>
       {#if @current_user_member?}
-        <InvoiceModal
-          id={@id <> "-invoice-modal"}
-          commission={@commission}
-          current_user={@current_user}
-          current_user_member?={@current_user_member?}
-        />
       {/if}
     </div>
     """
