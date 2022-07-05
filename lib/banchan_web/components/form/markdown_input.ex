@@ -84,7 +84,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
                 Drop Files Here <i class="fas fa-file-upload" />
               </div>
             {/if}
-            <label class="absolute right-1 bottom-10 z-20">
+            <label class="absolute right-2 top-36 z-30">
               <i class="fas fa-file-upload text-2xl hover:cursor-pointer" />
               <LiveFileInput class="h-0 w-0 overflow-hidden" upload={@upload} />
             </label>
