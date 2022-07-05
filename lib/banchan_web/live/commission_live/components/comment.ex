@@ -34,7 +34,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
   @impl true
   def update(params, socket) do
     socket = socket |> assign(params) |> assign(changeset: nil)
-    socket = socket |> assign(event: socket.assigns.event |> Repo.preload(history: [:changed_by]))
+    socket = socket |> assign(event: socket.assigns.event)
     {:ok, socket}
   end
 
@@ -82,7 +82,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
         {:noreply,
          socket
          |> assign(
-           event: event |> Repo.preload([:attachments, :actor, :invoice, history: [:changed_by]]),
+           event: event |> Repo.preload([:attachments, :actor, :invoice]),
            changeset: nil
          )}
 
@@ -109,6 +109,12 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
     )
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("load_history", _, socket) do
+    {:noreply,
+     socket |> assign(event: socket.assigns.event |> Repo.preload(history: [:changed_by]))}
   end
 
   defp replace_fragment(uri, event) do
@@ -138,27 +144,29 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
           </span>
           {#if @event.inserted_at != @event.updated_at}
             <div class="dropdown">
-              <label tabindex="0" class="text-xs italic hover:link">
+              <label :on-click="load_history" tabindex="0" class="text-xs italic hover:link">
                 edited {fmt_time(@event.updated_at)}
               </label>
               <ol tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box">
-                {#for history <- @event.history}
-                  <li class="block">
-                    <div class="flex flex-col place-items-start">
-                      <div>
-                        Comment from {fmt_time(history.written_at)} changed by <UserHandle user={history.changed_by} />
-                      </div>
-                      {#if :mod in @current_user.roles || :admin in @current_user.roles}
-                        <div class="font-bold">
-                          Original Text:
-                        </div>
+                {#if Ecto.assoc_loaded?(@event.history)}
+                  {#for history <- @event.history}
+                    <li class="block">
+                      <div class="flex flex-col place-items-start">
                         <div>
-                          <Markdown content={history.text} />
+                          Comment from {fmt_time(history.written_at)} changed by <UserHandle user={history.changed_by} />
                         </div>
-                      {/if}
-                    </div>
-                  </li>
-                {/for}
+                        {#if :mod in @current_user.roles || :admin in @current_user.roles}
+                          <div class="font-bold">
+                            Original Text:
+                          </div>
+                          <div>
+                            <Markdown content={history.text} />
+                          </div>
+                        {/if}
+                      </div>
+                    </li>
+                  {/for}
+                {/if}
               </ol>
             </div>
           {/if}
