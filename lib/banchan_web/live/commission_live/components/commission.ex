@@ -157,7 +157,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
                 <div class="badge badge-warning badge-lg">Archived</div>
               {/if}
             </div>
-            <Button label="Edit Title" class="btn-sm btn-link" click="edit_title" />
+            <Button label="Edit Title" class="hidden md:flex btn-sm btn-link" click="edit_title" />
           </div>
         {/if}
       </h1>
