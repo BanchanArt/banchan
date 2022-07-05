@@ -239,7 +239,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
       <div class={"divider md:hidden": !desktop?, "hidden md:divider md:flex": desktop?} />
       <div class="w-full">
         <div class="text-sm font-medium pb-2">Notifications</div>
-        <button type="button" :on-click="toggle_subscribed" class="btn btn-sm w-full">
+        <button
+          type="button"
+          :on-click="toggle_subscribed"
+          class="btn btn-sm w-full"
+          phx-target={@myself}
+        >
           {#if @subscribed?}
             Unsubscribe
           {#else}
@@ -248,7 +253,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
         </button>
       </div>
       <div class="divider" />
-      <button type="button" :on-click="toggle_archived" class="btn btn-sm my-2 w-full">
+      <button
+        type="button"
+        :on-click="toggle_archived"
+        class="btn btn-sm my-2 w-full"
+        phx-target={@myself}
+      >
         {#if @archived?}
           Unarchive
         {#else}
