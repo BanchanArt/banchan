@@ -133,7 +133,7 @@ defmodule Banchan.Notifications do
 
       email_setting = is_nil(settings) || settings.commission_email
 
-      if email_setting && (!actor || notify_actor) do
+      if email_setting && (!actor || notify_actor) && !is_nil(email) do
         send_email(email, notification, opts)
       end
     end)
