@@ -99,13 +99,13 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
             {entry.client_name}
             <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
             {#for err <- upload_errors(@upload, entry)}
-              <p>{error_to_string(err)}</p>
+              <p class="text-error">{error_to_string(err)}</p>
             {/for}
           </li>
         {/for}
       </ul>
       {#for err <- upload_errors(@upload)}
-        <p>{error_to_string(err)}</p>
+        <p class="text-error">{error_to_string(err)}</p>
       {/for}
     </Field>
     """
