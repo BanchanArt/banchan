@@ -86,27 +86,27 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
             {/if}
             <label class="absolute right-2 top-36 z-30">
               <i class="fas fa-file-upload text-2xl hover:cursor-pointer" />
-              <LiveFileInput class="h-0 w-0 overflow-hidden" upload={@upload} />
+              <LiveFileInput class="hidden overflow-hidden" upload={@upload} />
             </label>
-            <ul>
-              {#for entry <- @upload.entries}
-                <li>
-                  <button type="button" class="text-2xl" :on-click={@cancel_upload} phx-value-ref={entry.ref}>&times;</button>
-                  {entry.client_name}
-                  <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
-                  {#for err <- upload_errors(@upload, entry)}
-                    <p>{error_to_string(err)}</p>
-                  {/for}
-                </li>
-              {/for}
-            </ul>
-            {#for err <- upload_errors(@upload)}
-              <p>{error_to_string(err)}</p>
-            {/for}
           {/if}
         </div>
       </div>
       <ErrorTag class="help text-error" />
+      <ul>
+        {#for entry <- @upload.entries}
+          <li>
+            <button type="button" class="text-2xl" :on-click={@cancel_upload} phx-value-ref={entry.ref}>&times;</button>
+            {entry.client_name}
+            <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
+            {#for err <- upload_errors(@upload, entry)}
+              <p>{error_to_string(err)}</p>
+            {/for}
+          </li>
+        {/for}
+      </ul>
+      {#for err <- upload_errors(@upload)}
+        <p>{error_to_string(err)}</p>
+      {/for}
     </Field>
     """
   end
