@@ -54,7 +54,10 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
           </li>
         {/for}
       </ul>
-      {#if @offering && Enum.any?(@offering.options)}
+      {#if @offering &&
+          Enum.any?(@offering.options, fn option ->
+            option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))
+          end)}
         <h5 class="px-2 font-medium">Add-ons:</h5>
         <ul class="flex flex-col">
           {#for {option, idx} <- Enum.with_index(@offering.options)}
