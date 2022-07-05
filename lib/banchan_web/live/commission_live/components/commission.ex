@@ -162,55 +162,17 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
         {/if}
       </h1>
       <div class="p-4">
-        <div class="flex flex-col grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="flex flex-col md:col-span-2">
-            <StudioBox
-              commission={@commission}
-              class="md:hidden rounded-box hover:bg-base-200 p-2 transition-all"
-            />
-            <div class="divider md:hidden" />
-            <div class="md:hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="flex flex-col md:order-2">
+            <StudioBox commission={@commission} class="rounded-box hover:bg-base-200 p-2 transition-all" />
+            <div class="divider" />
             <StatusBox
-              id="status-box-mobile"
-              commission={@commission}
-              current_user={@current_user}
-              current_user_member?={@current_user_member?}
-            />
-            </div>
-            <div class="divider md:hidden" />
-            <Timeline
-              uri={@uri}
-              users={@users}
+              id="status-box"
               commission={@commission}
               current_user={@current_user}
               current_user_member?={@current_user_member?}
             />
             <div class="divider" />
-            <div class="flex flex-col gap-4">
-              <CommentBox
-                id="comment-box"
-                commission={@commission}
-                current_user={@current_user}
-                current_user_member?={@current_user_member?}
-              />
-            </div>
-          </div>
-          <div class="divider md:hidden" />
-          <div class="flex flex-col">
-            <StudioBox
-              commission={@commission}
-              class="hidden md:block rounded-box hover:bg-base-200 p-2 transition-all"
-            />
-            <div class="hidden md:flex md:divider" />
-            <div class="hidden md:block">
-              <StatusBox
-                id="status-box-desktop"
-                commission={@commission}
-                current_user={@current_user}
-                current_user_member?={@current_user_member?}
-              />
-            </div>
-            <div class="hidden md:flex md:divider" />
             <div class="text-lg font-medium">Summary</div>
             <BalanceBox
               default_currency={@commission.studio.default_currency}
@@ -243,50 +205,80 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               current_user_member?={@current_user_member?}
               commission={@commission}
             />
+            {bottom_buttons(assigns, true)}
+          </div>
+          <div class="divider md:hidden" />
+          <div class="flex flex-col md:col-span-2 md:order-1">
+            <Timeline
+              uri={@uri}
+              users={@users}
+              commission={@commission}
+              current_user={@current_user}
+              current_user_member?={@current_user_member?}
+            />
             <div class="divider" />
-            <div class="w-full">
-              <div class="text-sm font-medium pb-2">Notifications</div>
-              <button type="button" :on-click="toggle_subscribed" class="btn btn-sm w-full">
-                {#if @subscribed?}
-                  Unsubscribe
-                {#else}
-                  Subscribe
-                {/if}
-              </button>
+            <div class="flex flex-col gap-4">
+              <CommentBox
+                id="comment-box"
+                commission={@commission}
+                current_user={@current_user}
+                current_user_member?={@current_user_member?}
+              />
             </div>
-            <div class="divider" />
-            <button type="button" :on-click="toggle_archived" class="btn btn-sm my-2 w-full">
-              {#if @archived?}
-                Unarchive
-              {#else}
-                Archive
-              {/if}
-            </button>
-            {#if @current_user.id == @commission.client_id && @commission.status != :withdrawn}
-              <Collapse id={@id <> "-withdraw-confirmation"} show_arrow={false} class="w-full my-2 bg-base-200">
-                <:header>
-                  <button type="button" class="btn btn-sm w-full">
-                    Withdraw
-                  </button>
-                </:header>
-                <p>
-                  Your commission will be withdrawn and you won't be able to re-open it unless the studio does it for you.
-                </p>
-                <p class="py-2">Are you sure?</p>
-                <button
-                  disabled={@commission.status == :withdrawn || @current_user.id != @commission.client_id}
-                  type="button"
-                  :on-click="withdraw"
-                  class="btn btn-sm btn-error my-2 w-full"
-                >
-                  Confirm
-                </button>
-              </Collapse>
-            {/if}
+            {bottom_buttons(assigns, false)}
           </div>
         </div>
       </div>
-      {#if @current_user_member?}
+    </div>
+    """
+  end
+
+  def bottom_buttons(assigns, desktop?) do
+    ~F"""
+    <div class={"md:hidden": !desktop?, "hidden md:block": desktop?}>
+      <div class={"divider md:hidden": !desktop?, "hidden md:divider md:flex": desktop?} />
+      <div class="w-full">
+        <div class="text-sm font-medium pb-2">Notifications</div>
+        <button type="button" :on-click="toggle_subscribed" class="btn btn-sm w-full">
+          {#if @subscribed?}
+            Unsubscribe
+          {#else}
+            Subscribe
+          {/if}
+        </button>
+      </div>
+      <div class="divider" />
+      <button type="button" :on-click="toggle_archived" class="btn btn-sm my-2 w-full">
+        {#if @archived?}
+          Unarchive
+        {#else}
+          Archive
+        {/if}
+      </button>
+      {#if @current_user.id == @commission.client_id && @commission.status != :withdrawn}
+        <Collapse
+          id={@id <> "-withdraw-confirmation" <> if desktop?, do: "-desktop", else: "-mobile"}
+          show_arrow={false}
+          class="w-full my-2 bg-base-200"
+        >
+          <:header>
+            <button type="button" class="btn btn-sm w-full">
+              Withdraw
+            </button>
+          </:header>
+          <p>
+            Your commission will be withdrawn and you won't be able to re-open it unless the studio does it for you.
+          </p>
+          <p class="py-2">Are you sure?</p>
+          <button
+            disabled={@commission.status == :withdrawn || @current_user.id != @commission.client_id}
+            type="button"
+            :on-click="withdraw"
+            class="btn btn-sm btn-error my-2 w-full"
+          >
+            Confirm
+          </button>
+        </Collapse>
       {/if}
     </div>
     """
