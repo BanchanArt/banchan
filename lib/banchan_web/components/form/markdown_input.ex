@@ -95,21 +95,23 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
         </div>
       </div>
       <ErrorTag class="help text-error" />
-      <ul>
-        {#for entry <- @upload.entries}
-          <li>
-            <button type="button" class="text-2xl" :on-click={@cancel_upload} phx-value-ref={entry.ref}>&times;</button>
-            {entry.client_name}
-            <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
-            {#for err <- upload_errors(@upload, entry)}
-              <p class="text-error">{error_to_string(err)}</p>
-            {/for}
-          </li>
+      {#if @upload}
+        <ul>
+          {#for entry <- @upload.entries}
+            <li>
+              <button type="button" class="text-2xl" :on-click={@cancel_upload} phx-value-ref={entry.ref}>&times;</button>
+              {entry.client_name}
+              <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
+              {#for err <- upload_errors(@upload, entry)}
+                <p class="text-error">{error_to_string(err)}</p>
+              {/for}
+            </li>
+          {/for}
+        </ul>
+        {#for err <- upload_errors(@upload)}
+          <p class="text-error">{error_to_string(err)}</p>
         {/for}
-      </ul>
-      {#for err <- upload_errors(@upload)}
-        <p class="text-error">{error_to_string(err)}</p>
-      {/for}
+      {/if}
     </Field>
     """
   end
