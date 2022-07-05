@@ -36,7 +36,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                 type="button"
                 :on-click={@remove_item}
                 value={idx}
-                class="text-xl w-8 fas fa-times-circle"
+                class="text-xl w-8 fas fa-times-circle text-error"
               />
             {#else}
               <button
@@ -46,7 +46,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                 class="w-8 place-self-center text-xl fas fa-thumbtack"
               />
             {/if}
-            <div class="grow flex flex-col">
+            <div class="grow w-full flex flex-col">
               <div class="font-medium text-sm">{item.name}</div>
               <div class="text-xs">{item.description}</div>
             </div>
@@ -64,11 +64,16 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
             {#if option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
               <li class="flex flex-row gap-2 p-2">
                 {#if @allow_edits}
-                  <button type="button" :on-click={@add_item} value={idx} class="w-8 text-xl fas fa-plus-circle" />
+                  <button
+                    type="button"
+                    :on-click={@add_item}
+                    value={idx}
+                    class="w-8 text-xl fas fa-plus-circle text-success"
+                  />
                 {#else}
                   <div class="w-8" />
                 {/if}
-                <div class="grow flex flex-col">
+                <div class="grow w-full flex flex-col">
                   <div class="font-medium text-sm">{option.name}</div>
                   <div class="text-xs">{option.description}</div>
                 </div>
@@ -77,11 +82,11 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
             {/if}
           {/for}
           {#if @custom_changeset}
-            <li class="p-2">
+            <li class="p-2 pr-4">
               <Collapse id={@custom_collapse_id}>
                 <:header>
                   <div class="flex flex-row gap-2">
-                    <i type="button" class="w-8 text-xl fas fa-plus-circle" />
+                    <i type="button" class="w-8 text-xl fas fa-plus-circle text-success" />
                     <div class="grow flex flex-col">
                       <div class="font-medium text-sm">Custom Option</div>
                       <div class="text-xs">Add a customized option to the summary.</div>
