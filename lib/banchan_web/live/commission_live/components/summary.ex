@@ -6,8 +6,8 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.{Button, Modal}
-  alias BanchanWeb.Components.Form.{Select, Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Collapse
+  alias BanchanWeb.Components.Form.{HiddenInput, Select, Submit, TextArea, TextInput}
 
   prop studio, :struct, required: true
   prop line_items, :list, required: true
@@ -17,9 +17,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   prop remove_item, :event
 
   prop custom_changeset, :struct
-  prop custom_modal_id, :string
-  prop open_custom_modal, :event
-  prop close_custom_modal, :event
+  prop custom_collapse_id, :string
   prop submit_custom, :event
   prop change_custom, :event
 
@@ -32,7 +30,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
       {/if}
       <ul class="flex flex-col pt-2">
         {#for {item, idx} <- Enum.with_index(@line_items)}
-          <li class="flex p-2 gap-2">
+          <li class="flex flex-row p-2 gap-2">
             {#if @allow_edits && !item.sticky}
               <button
                 type="button"
@@ -61,7 +59,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
         <ul class="flex flex-col">
           {#for {option, idx} <- Enum.with_index(@offering.options)}
             {#if option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
-              <li class="flex gap-2 p-2">
+              <li class="flex flex-row gap-2 p-2">
                 {#if @allow_edits}
                   <button type="button" :on-click={@add_item} value={idx} class="w-8 text-xl fas fa-plus-circle" />
                 {#else}
@@ -76,42 +74,51 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
             {/if}
           {/for}
           {#if @custom_changeset}
-            <li class="flex gap-2 p-2">
-              <button type="button" :on-click={@open_custom_modal} class="w-8 text-xl fas fa-plus-circle" />
-              <div class="grow flex flex-col">
-                <div class="font-medium text-sm">Custom Option</div>
-                <div class="text-xs">Add a customized option to the summary.</div>
-              </div>
-              <div class="p-2 text-sm font-medium">TBD</div>
+            <li class="p-2">
+              <Collapse id={@custom_collapse_id}>
+                <:header>
+                  <div class="flex flex-row gap-2">
+                    <i type="button" class="w-8 text-xl fas fa-plus-circle" />
+                    <div class="grow flex flex-col">
+                      <div class="font-medium text-sm">Custom Option</div>
+                      <div class="text-xs">Add a customized option to the summary.</div>
+                    </div>
+                  </div>
+                </:header>
+                <Form
+                  class="flex flex-col gap-2"
+                  for={@custom_changeset}
+                  change={@change_custom}
+                  submit={@submit_custom}
+                >
+                  <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
+                  <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
+                  <div class="flex flex-row gap-2 items-center py-2">
+                    {#case @studio.payment_currencies}
+                      {#match [_]}
+                        <div class="flex flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
+                        <HiddenInput name={:currency} value={@studio.default_currency} />
+                      {#match _}
+                        <div class="flex-basis-1/4">
+                          <Select
+                            name={:currency}
+                            show_label={false}
+                            options={@studio.payment_currencies
+                            |> Enum.map(&{"#{to_string(&1)}#{Money.Currency.symbol(&1)}", &1})}
+                            selected={@studio.default_currency}
+                          />
+                        </div>
+                    {/case}
+                    <div class="grow">
+                      <TextInput name={:amount} show_label={false} opts={required: true, placeholder: "12.34"} />
+                    </div>
+                  </div>
+                  <Submit class="w-full" changeset={@custom_changeset} />
+                </Form>
+              </Collapse>
             </li>
           {/if}
         </ul>
-        {#if @custom_changeset && @custom_modal_id}
-          <Modal id={@custom_modal_id}>
-            <Form
-              class="flex flex-col gap-2"
-              for={@custom_changeset}
-              change={@change_custom}
-              submit={@submit_custom}
-            >
-              <h3 class="text-xl font-bold">Add Custom Option</h3>
-              <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
-              <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
-              <Select
-                name={:currency}
-                options={@studio.payment_currencies
-                |> Enum.map(&{:"#{Money.Currency.name(&1)} (#{Money.Currency.symbol(&1)})", &1})}
-                selected={@studio.default_currency}
-                opts={required: true}
-              />
-              <TextInput name={:amount} label="Price" opts={required: true} />
-              <div class="modal-action">
-                <Button primary={false} click={@close_custom_modal} label="Cancel" />
-                <Submit changeset={@custom_changeset} />
-              </div>
-            </Form>
-          </Modal>
-        {/if}
       {/if}
     </div>
     """

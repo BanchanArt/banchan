@@ -20,7 +20,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
 
   data studio, :struct
   data custom_changeset, :struct
-  data open_custom, :boolean, default: false
   data loaded, :boolean, default: false
 
   def update(assigns, socket) do
@@ -113,18 +112,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   end
 
   @impl true
-  def handle_event("open_custom_modal", _, socket) do
-    Modal.show(socket.assigns.id <> "_custom_modal")
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("close_custom_modal", _, socket) do
-    Modal.hide(socket.assigns.id <> "_custom_modal")
-    {:noreply, socket}
-  end
-
-  @impl true
   def handle_event(
         "change_custom",
         %{
@@ -199,9 +186,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       add_item="add_item"
       remove_item="remove_item"
       custom_changeset={@custom_changeset}
-      custom_modal_id={@id <> "_custom_modal"}
-      open_custom_modal="open_custom_modal"
-      close_custom_modal="close_custom_modal"
+      custom_collapse_id={@id <> "_custom_collapse"}
       change_custom="change_custom"
       submit_custom="submit_custom"
       studio={@studio}
