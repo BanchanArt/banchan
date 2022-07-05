@@ -27,8 +27,11 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
         assigns.name
       )
 
+    socket = socket |> assign(assigns)
+
     {:ok,
-     socket |> assign(assigns) |> push_event("#{assigns.id}-hook:updated", %{"value" => val})}
+     socket
+     |> push_event("markdown-input-updated", %{id: socket.assigns.id <> "-hook", value: val || ""})}
   end
 
   def handle_event("dragstart", _, socket) do

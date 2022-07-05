@@ -171,7 +171,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
             </div>
           </div>
           <MarkdownInput
-            id="{@id}-markdown-input"
+            id={@id <> "-markdown-input"}
             name={:text}
             label="Invoice Text"
             info="Brief summary of what this invoice is meant to cover, for the record."
