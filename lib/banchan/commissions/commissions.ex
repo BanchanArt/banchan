@@ -690,7 +690,7 @@ defmodule Banchan.Commissions do
             ul.key == ^key and
             (artist.id == ^user.id or
                (c.client_id == ^user.id and
-                  ((i.required and i.status == :succeeded) or not i.required))),
+                  ((i.required and i.status == :succeeded) or not i.required or is_nil(i.required)))),
         preload: [:upload, :thumbnail]
     )
   end
