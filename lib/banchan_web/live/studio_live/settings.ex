@@ -101,8 +101,9 @@ defmodule BanchanWeb.StudioLive.Settings do
            socket.assigns.studio,
            socket.assigns.current_user_member?,
            Enum.into(val["studio"], %{
-             "card_img_id" => card_image && card_image.id,
-             "header_img_id" => header_image && header_image.id
+             "card_img_id" => (card_image && card_image.id) || socket.assigns.studio.card_img_id,
+             "header_img_id" =>
+               (header_image && header_image.id) || socket.assigns.studio.header_img_id
            })
          ) do
       {:ok, studio} ->
