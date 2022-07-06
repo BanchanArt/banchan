@@ -77,7 +77,9 @@ defmodule Banchan.Studios.Studio do
       :default_currency,
       :payment_currencies,
       :default_terms,
-      :default_template
+      :default_template,
+      :card_img_id,
+      :header_img_id
     ])
     |> validate_required([:name, :handle, :default_currency, :payment_currencies])
     |> validate_markdown(:about)
@@ -91,6 +93,8 @@ defmodule Banchan.Studios.Studio do
     |> validate_tags()
     |> validate_default_currency(:default_currency, :payment_currencies)
     |> validate_handle_unique(:handle)
+    |> foreign_key_constraint(:card_img_id)
+    |> foreign_key_constraint(:header_img_id)
   end
 
   def portfolio_changeset(studio, images) do

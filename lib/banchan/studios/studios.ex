@@ -41,51 +41,39 @@ defmodule Banchan.Studios do
   @doc """
   Updates the studio profile fields.
   """
-  def update_studio_profile(studio, current_user_member?, attrs, card_img, header_img)
+  def update_studio_profile(studio, current_user_member?, attrs)
 
-  def update_studio_profile(_, false, _, _, _) do
+  def update_studio_profile(_, false, _) do
     {:error, :unauthorized}
   end
 
-  def update_studio_profile(%Studio{} = studio, _, attrs, card_img, header_img) do
+  def update_studio_profile(%Studio{} = studio, _, attrs) do
     {:ok, ret} =
       Repo.transaction(fn ->
         changeset =
           studio
-          |> Repo.preload(:card_img)
-          |> Repo.preload(:header_img)
           |> Studio.profile_changeset(attrs)
 
-        changeset =
-          if is_nil(card_img) do
-            changeset
-          else
-            changeset |> Ecto.Changeset.put_assoc(:card_img, card_img)
-          end
-
-        changeset =
-          if is_nil(header_img) do
-            changeset
-          else
-            changeset |> Ecto.Changeset.put_assoc(:header_img, header_img)
-          end
-
-        {:ok, _} =
-          stripe_mod().update_account(studio.stripe_id, %{
-            business_profile: %{
-              name: Ecto.Changeset.get_field(changeset, :name),
-              url:
-                String.replace(
-                  Routes.studio_shop_url(
-                    Endpoint,
-                    :show,
-                    Ecto.Changeset.get_field(changeset, :handle)
-                  ),
-                  "localhost:4000",
-                  "banchan.art"
-                )
-            }
-          })
+        if changeset.valid? &&
+             (Ecto.Changeset.fetch_change(changeset, :name) != :error ||
+                Ecto.Changeset.fetch_change(changeset, :handle) != :error) do
+          {:ok, _} =
+            stripe_mod().update_account(studio.stripe_id, %{
+              business_profile: %{
+                name: Ecto.Changeset.get_field(changeset, :name),
+                url:
+                  String.replace(
+                    Routes.studio_shop_url(
+                      Endpoint,
+                      :show,
+                      Ecto.Changeset.get_field(changeset, :handle)
+                    ),
+                    "localhost:4000",
+                    "banchan.art"
+                  )
+              }
+            })
+        end
 
         changeset |> Repo.update(returning: true)
       end)

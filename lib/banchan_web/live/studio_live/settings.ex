@@ -75,7 +75,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   end
 
   def handle_event("submit", val, socket) do
-    card_images =
+    card_image =
       consume_uploaded_entries(socket, :card_image, fn %{path: path}, _entry ->
         {:ok,
          Studios.make_card_image!(
@@ -84,8 +84,9 @@ defmodule BanchanWeb.StudioLive.Settings do
            socket.assigns.current_user_member?
          )}
       end)
+      |> Enum.at(0)
 
-    header_images =
+    header_image =
       consume_uploaded_entries(socket, :header_image, fn %{path: path}, _entry ->
         {:ok,
          Studios.make_header_image!(
@@ -94,13 +95,15 @@ defmodule BanchanWeb.StudioLive.Settings do
            socket.assigns.current_user_member?
          )}
       end)
+      |> Enum.at(0)
 
     case Studios.update_studio_profile(
            socket.assigns.studio,
            socket.assigns.current_user_member?,
-           val["studio"],
-           Enum.at(card_images, 0),
-           Enum.at(header_images, 0)
+           Enum.into(val["studio"], %{
+             "card_img_id" => card_image && card_image.id,
+             "header_img_id" => header_image && header_image.id
+           })
          ) do
       {:ok, studio} ->
         socket =

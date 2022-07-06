@@ -110,9 +110,7 @@ defmodule Banchan.StudiosTest do
         Studios.update_studio_profile(
           studio,
           false,
-          attrs,
-          nil,
-          nil
+          attrs
         )
 
       from_db = Repo.get!(Studio, studio.id) |> Repo.preload(:artists)
@@ -136,9 +134,7 @@ defmodule Banchan.StudiosTest do
         Studios.update_studio_profile(
           studio,
           true,
-          attrs,
-          nil,
-          nil
+          attrs
         )
 
       assert studio.name == "new name"
