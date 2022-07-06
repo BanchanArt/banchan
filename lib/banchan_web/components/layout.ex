@@ -57,8 +57,8 @@ defmodule BanchanWeb.Components.Layout do
           <div>
             <span class="footer-title">Social</span>
             <div class="grid grid-flow-col gap-4">
-              <a href="https://twitter.com/BanchanArt"><i class="fab fa-twitter text-xl" /></a>
-              <a href="https://discord.gg/jgat3hsX5V"><i class="fab fa-discord text-xl" /></a>
+              <a href="https://twitter.com/BanchanArt" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter text-xl" /></a>
+              <a href="https://discord.gg/jgat3hsX5V" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord text-xl" /></a>
             </div>
           </div>
         </footer>
