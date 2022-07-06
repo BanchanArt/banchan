@@ -588,6 +588,7 @@ defmodule Banchan.Commissions do
       Repo.transaction(fn ->
         event = Repo.get!(Event, event.id)
 
+        original_text = event.text
         changeset = Event.changeset(event, attrs)
 
         changeset
@@ -598,7 +599,7 @@ defmodule Banchan.Commissions do
               {:ok, event}
             else
               %CommentHistory{
-                text: event.text,
+                text: original_text,
                 written_at: event.updated_at,
                 event_id: event.id,
                 changed_by_id: actor.id
