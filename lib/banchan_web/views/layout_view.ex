@@ -48,7 +48,7 @@ defmodule BanchanWeb.LayoutView do
           src={Routes.static_path(@conn, "/assets/app.js")}
         />
       </head>
-      <body>
+      <body class="bg-base-100">
         {@inner_content}
       </body>
     </html>
