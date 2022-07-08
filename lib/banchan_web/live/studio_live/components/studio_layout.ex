@@ -87,7 +87,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
             </h1>
             <div :if={!Enum.empty?(@studio.tags)} class="my-2 flex flex-row flex-wrap gap-1">
               {#for tag <- @studio.tags}
-                <div class="badge badge-lg gap-2 badge-primary">{tag}</div>
+                <div class="badge badge-lg gap-2 badge-primary cursor-default">{tag}</div>
               {/for}
             </div>
             <div>

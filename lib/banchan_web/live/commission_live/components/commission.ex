@@ -154,7 +154,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             <div class="grow w-full flex flex-row items-center gap-2">
               {@commission.title}
               {#if @archived?}
-                <div class="badge badge-warning badge-lg">Archived</div>
+                <div class="badge badge-warning badge-lg cursor-default">Archived</div>
               {/if}
             </div>
             <Button label="Edit Title" class="hidden md:flex btn-sm btn-link" click="edit_title" />

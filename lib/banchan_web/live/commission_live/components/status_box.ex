@@ -30,7 +30,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
         <div class="text-xl font-medium">
           Status:
         </div>
-        <div class="badge badge-primary badge-lg flex flex-row gap-2 items-center">
+        <div class="badge badge-primary badge-lg flex flex-row gap-2 items-center cursor-default">
           {Commissions.Common.humanize_status(@commission.status)}
           {#if @current_user.id == @commission.client_id}
             <div class="tooltip md:tooltip-left" data-tip={tooltip_message(@commission.status, false)}>

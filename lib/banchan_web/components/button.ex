@@ -24,8 +24,7 @@ defmodule BanchanWeb.Components.Button do
         "py-1",
         "px-5 m-1",
         @class,
-        "btn-primary": @primary,
-        "btn-secondary": !@primary
+        "btn-primary": @primary
       }
       value={@value}
       type="button"

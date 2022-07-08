@@ -99,16 +99,16 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         </:header>
         <:header_aside>
           {#if @offering.open && !is_nil(@offering.slots)}
-            <div class="whitespace-nowrap badge badge-outline badge-success">{@available_slots}/{@offering.slots} Slots</div>
+            <div class="whitespace-nowrap badge badge-outline badge-success cursor-default">{@available_slots}/{@offering.slots} Slots</div>
           {#elseif !@offering.open && !is_nil(@offering.slots)}
-            <div class="badge badge-error badge-outline">0/{@offering.slots} Slots</div>
+            <div class="badge badge-error badge-outline cursor-default">0/{@offering.slots} Slots</div>
           {#elseif @offering.open}
-            <div class="badge badge-success badge-outline">Open</div>
+            <div class="badge badge-success badge-outline cursor-default">Open</div>
           {#else}
-            <div class="badge badge-error badge-outline">Closed</div>
+            <div class="badge badge-error badge-outline cursor-default">Closed</div>
           {/if}
           {#if @offering.hidden}
-            <div class="badge badge-error badge-outline">Hidden</div>
+            <div class="badge badge-error badge-outline cursor-default">Hidden</div>
           {/if}
         </:header_aside>
         <:image>
@@ -139,7 +139,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
             {#if @current_user_member?}
               <LiveRedirect
                 to={Routes.studio_offerings_edit_path(Endpoint, :edit, @studio.handle, @offering.type)}
-                class="btn text-center btn-secondary"
+                class="btn text-center btn-primary"
               >Edit</LiveRedirect>
             {/if}
             {#if @offering.open}

@@ -164,7 +164,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                   <Submit class="pay-invoice btn-sm w-full" changeset={@changeset} label="Pay" />
                   {#if @current_user_member?}
                     <Button
-                      class="cancel-payment-request btn-sm w-full"
+                      class="cancel-payment-request btn-xs btn-link w-full"
                       click="force_expire"
                       label="Cancel Payment"
                     />
@@ -176,7 +176,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 <div class="stat-desc">Waiting for Payment</div>
                 {#if @current_user_member?}
                   <div class="stat-actions">
-                    <Button class="cancel-payment-request btn-sm" click="force_expire" label="Cancel Payment" />
+                    <Button class="cancel-payment-request btn-xs btn-link btn-warning" primary={false} click="force_expire" label="Cancel Payment" />
                   </div>
                 {/if}
               {/if}
@@ -192,7 +192,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                     <Button class="continue-payment btn-sm" click="continue_payment" label="Continue Payment" />
                   {/if}
                   {#if @current_user_member?}
-                    <Button class="cancel-payment-request btn-sm" click="force_expire" label="Cancel Payment" />
+                    <Button primary={false} class="cancel-payment-request btn-xs btn-link" click="force_expire" label="Cancel Payment" />
                   {/if}
                 </div>
               </div>
@@ -213,14 +213,14 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                     <Button
                       label="Refund Payment"
                       click="open_refund_modal"
-                      class="open-refund-modal modal-button btn-warning btn-sm w-full"
+                      class="open-refund-modal modal-button btn-xs btn-link w-full"
                     />
                   {/if}
                   {#if @current_user.id == @commission.client_id}
                     <Button
                       label="Release Now"
                       click="open_release_modal"
-                      class="open-release-modal modal-button btn-success btn-sm w-full"
+                      class="open-release-modal modal-button btn-link btn-xs w-full"
                     />
                   {/if}
                 </div>
@@ -298,7 +298,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           WARNING: The Stripe portion of the platform fee can't be reimbursed, but Banchan's portion will be returned.
         </p>
         <:action>
-          <Button class="refund-btn btn-warning" click="refund">Confirm</Button>
+          <Button class="refund-btn" click="refund">Confirm</Button>
         </:action>
       </Modal>
 
@@ -307,7 +307,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         <:title>Confirm Fund Release</:title>
         Funds will be made available immediately to the studio, instead of waiting until the commission is approved. <p class="font-bold text-warning">WARNING: You will not be able to request a refund once released.</p>
         <:action>
-          <Button class="release-btn btn-success" click="release">Confirm</Button>
+          <Button class="release-btn" click="release">Confirm</Button>
         </:action>
       </Modal>
     </div>

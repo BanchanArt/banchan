@@ -72,7 +72,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
         </LivePatch>
         Payout
         {#if !@data_pending}
-          <div class="badge badge-secondary badge-lg">{Payout.humanize_status(@payout.status)}</div>
+          <div class="badge badge-primary badge-lg cursor-default">{Payout.humanize_status(@payout.status)}</div>
         {/if}
       </h1>
       {#if !@data_pending}

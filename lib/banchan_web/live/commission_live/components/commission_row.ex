@@ -27,9 +27,9 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
         <div>
           <div class="text-xl flex flex-row gap-2 flex-wrap">
             <span>{@result.commission.title}</span>
-            <div class="badge badge-secondary badge-sm">{Common.humanize_status(@result.commission.status)}</div>
+            <div class="badge badge-primary badge-sm cursor-default">{Common.humanize_status(@result.commission.status)}</div>
             {#if @result.archived}
-              <div class="badge badge-warning badge-sm">Archived</div>
+              <div class="badge badge-warning badge-sm cursor-default">Archived</div>
             {/if}
           </div>
           <div class="text-xs text-left">
