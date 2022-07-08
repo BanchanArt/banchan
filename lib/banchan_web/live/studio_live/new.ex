@@ -102,7 +102,7 @@ defmodule BanchanWeb.StudioLive.New do
             opts={autocomplete: "off"}
           >
             <h1 class="text-2xl">New Studio</h1>
-            <TextInput name={:name} icon="user" opts={required: true} />
+            <TextInput name={:name} icon="user" opts={required: true, phx_debounce: "200"} />
             <TextInput name={:handle} icon="at" opts={required: true} />
             <MarkdownInput id="about" name={:about} />
             <Select name={:country} options={@countries} opts={required: true} />
