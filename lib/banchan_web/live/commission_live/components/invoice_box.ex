@@ -176,7 +176,12 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 <div class="stat-desc">Waiting for Payment</div>
                 {#if @current_user_member?}
                   <div class="stat-actions">
-                    <Button class="cancel-payment-request btn-xs btn-link btn-warning" primary={false} click="force_expire" label="Cancel Payment" />
+                    <Button
+                      class="cancel-payment-request btn-xs btn-link btn-warning"
+                      primary={false}
+                      click="force_expire"
+                      label="Cancel Payment"
+                    />
                   </div>
                 {/if}
               {/if}
@@ -192,7 +197,12 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                     <Button class="continue-payment btn-sm" click="continue_payment" label="Continue Payment" />
                   {/if}
                   {#if @current_user_member?}
-                    <Button primary={false} class="cancel-payment-request btn-xs btn-link" click="force_expire" label="Cancel Payment" />
+                    <Button
+                      primary={false}
+                      class="cancel-payment-request btn-xs btn-link"
+                      click="force_expire"
+                      label="Cancel Payment"
+                    />
                   {/if}
                 </div>
               </div>
