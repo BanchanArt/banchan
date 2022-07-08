@@ -43,7 +43,11 @@ defmodule BanchanWeb.Components.Modal do
              if/when we figure out a different drawer situation than DaisyUI's
              built-in one.
           --}
-      <div :on-click="nothing" class={"modal-box relative", "sm:w-11/12 sm:max-w-5xl lg:w-8/12": @big}>
+      <div
+        :if={@modal_open}
+        :on-click="nothing"
+        class={"modal-box relative", "sm:w-11/12 sm:max-w-5xl lg:w-8/12": @big}
+      >
         <div
           class="btn btn-circle btn-ghost close-modal absolute right-2 top-2 text-xl"
           :on-click="close_modal"
