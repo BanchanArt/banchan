@@ -241,50 +241,52 @@ defmodule Banchan.Offerings do
       ) do
     q =
       from o in Offering,
+        as: :offering,
         where: o.studio_id == ^studio.id,
         where: ^current_user_member? or o.hidden == false,
         left_join: sub in OfferingSubscription,
         on:
           sub.user_id == ^current_user.id and sub.offering_id == o.id and
             sub.silenced != true,
-        left_join:
+        left_lateral_join:
           used_slots in subquery(
             from c in Commission,
-              where: c.status not in [:withdrawn, :approved, :submitted, :rejected],
+              where:
+                c.offering_id == parent_as(:offering).id and
+                  c.status not in [:withdrawn, :approved, :submitted, :rejected],
               group_by: [c.offering_id],
-              select: %{offering_id: c.offering_id, used_slots: count(c)}
+              select: %{used_slots: count(c.id)}
           ),
-        on: used_slots.offering_id == o.id,
-        left_join:
+        left_lateral_join:
           default_prices in subquery(
             from oo in OfferingOption,
+              where: oo.offering_id == parent_as(:offering).id,
               group_by: [oo.offering_id],
               select: %{
-                offering_id: oo.offering_id,
                 prices:
                   type(fragment("array_agg(?)", oo.price), {:array, Money.Ecto.Composite.Type})
               }
           ),
-        on: default_prices.offering_id == o.id,
-        left_join:
-          gallery_img_ids in subquery(
+        left_lateral_join:
+          gallery_uploads in subquery(
             from i in GalleryImage,
+              where: i.offering_id == parent_as(:offering).id,
+              join: u in assoc(i, :upload),
               group_by: [i.offering_id],
-              select: %{
-                offering_id: i.offering_id,
-                ids: type(fragment("array_agg(?)", i.upload_id), {:array, :binary_id})
-              }
+              select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
           ),
-        on: gallery_img_ids.offering_id == o.id,
         order_by: [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index],
         select:
           merge(o, %{
             user_subscribed?: not is_nil(sub.id),
             used_slots: coalesce(used_slots.used_slots, 0),
-            gallery_img_ids:
+            gallery_uploads:
               type(
-                coalesce(gallery_img_ids.ids, fragment("ARRAY[]::uuid[]")),
-                {:array, :binary_id}
+                coalesce(
+                  gallery_uploads.uploads,
+                  fragment("ARRAY[]::json[]")
+                ),
+                {:array, Upload}
               ),
             option_prices:
               type(

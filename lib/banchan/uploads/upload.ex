@@ -3,6 +3,7 @@ defmodule Banchan.Uploads.Upload do
   Main module for upload data.
   """
   use Ecto.Schema
+  use Ecto.Type
   import Ecto.Changeset
 
   alias Banchan.Accounts.User
@@ -29,4 +30,21 @@ defmodule Banchan.Uploads.Upload do
     |> validate_required([:key, :bucket])
     |> unique_constraint([:bucket, :key])
   end
+
+  def type, do: :map
+
+  def cast(%__MODULE__{} = upload), do: {:ok, upload}
+  def cast(_), do: :error
+
+  def load(data) when is_map(data) do
+    data =
+      for {key, val} <- data do
+        {String.to_existing_atom(key), val}
+      end
+
+    {:ok, struct!(__MODULE__, data)}
+  end
+
+  def dump(%__MODULE__{} = upload), do: {:ok, Map.from_struct(upload)}
+  def dump(_), do: :error
 end

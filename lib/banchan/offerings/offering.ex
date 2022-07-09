@@ -28,7 +28,7 @@ defmodule Banchan.Offerings.Offering do
     field :option_prices, {:array, Money.Ecto.Composite.Type}, virtual: true
     field :used_slots, :integer, virtual: true
     field :user_subscribed?, :boolean, virtual: true
-    field :gallery_img_ids, {:array, :binary_id}, virtual: true
+    field :gallery_uploads, {:array, Upload}, virtual: true
 
     belongs_to :studio, Studio
     belongs_to :card_img, Upload, on_replace: :nilify, type: :binary_id

@@ -7,7 +7,6 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   alias Surface.Components.LiveRedirect
 
   alias Banchan.Offerings
-  alias Banchan.Uploads.Upload
 
   alias BanchanWeb.Components.{Button, Card, MasonryGallery, Modal}
   alias BanchanWeb.Endpoint
@@ -30,8 +29,8 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
     available_slots = Offerings.offering_available_slots(socket.assigns.offering)
 
     gallery_images =
-      socket.assigns.offering.gallery_img_ids
-      |> Enum.map(&{:existing, %Upload{id: &1}})
+      socket.assigns.offering.gallery_uploads
+      |> Enum.map(&{:existing, &1})
 
     {:ok,
      socket
