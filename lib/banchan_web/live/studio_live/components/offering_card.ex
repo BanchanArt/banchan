@@ -92,11 +92,11 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         </:header>
         <:header_aside>
           {#if @offering.open && !is_nil(@offering.slots)}
-            <div class="whitespace-nowrap badge badge-outline badge-success cursor-default">{@available_slots}/{@offering.slots} Slots</div>
+            <div class="whitespace-nowrap badge badge-outline badge-primary cursor-default">{@available_slots}/{@offering.slots} Slots</div>
           {#elseif !@offering.open && !is_nil(@offering.slots)}
             <div class="badge badge-error badge-outline cursor-default">0/{@offering.slots} Slots</div>
           {#elseif @offering.open}
-            <div class="badge badge-success badge-outline cursor-default">Open</div>
+            <div class="badge badge-primary badge-outline cursor-default">Open</div>
           {#else}
             <div class="badge badge-error badge-outline cursor-default">Closed</div>
           {/if}
@@ -117,13 +117,13 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           />
         </:image>
         <div class="flex flex-col grow">
-          <p class="mt-2 grow flex text-ellipsis overflow-hidden h-full">{@offering.description}</p>
+          <p class="grow flex text-ellipsis overflow-hidden h-full">{@offering.description}</p>
           <ul class="flex flex-row flex-wrap gap-1">
             {#for tag <- @offering.tags}
               <li class="badge badge-sm badge-primary p-2 cursor-default">{tag}</li>
             {/for}
           </ul>
-          <p class="text-success mt-2 grow-0">
+          <p class="text-primary mt-2 grow-0">
             <span class="font-bold">Base Price:</span>
             {#if @base_price && !Enum.empty?(@base_price)}
               <span class="float-right">{@base_price |> Enum.map(fn {_, amt} -> Money.to_string(amt) end) |> Enum.join(" + ")}</span>
