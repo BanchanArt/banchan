@@ -21,6 +21,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     MarkdownInput,
     Select,
     Submit,
+    TagsInput,
     TextArea,
     TextInput,
     UploadInput
@@ -290,6 +291,11 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           name={:description}
           info="Description of the offering, as it should appear in the offering card."
           opts={required: true}
+        />
+        <TagsInput
+          id={@id <> "-tags"}
+          info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
+          name={:tags}
         />
         <TextInput
           name={:slots}

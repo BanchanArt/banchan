@@ -37,7 +37,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
 
         repo().query!(
           """
-          CREATE INDEX studios_search_idx ON users USING GIN (search_vector);
+          CREATE INDEX studios_search_idx ON studios USING GIN (search_vector);
           """,
           [],
           log: :info

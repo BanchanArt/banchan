@@ -118,6 +118,11 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         </:image>
         <div class="flex flex-col grow">
           <p class="mt-2 grow flex text-ellipsis overflow-hidden h-full">{@offering.description}</p>
+          <ul class="flex flex-row flex-wrap gap-1">
+            {#for tag <- @offering.tags}
+              <li class="badge badge-sm badge-primary p-2 cursor-default">{tag}</li>
+            {/for}
+          </ul>
           <p class="text-success mt-2 grow-0">
             <span class="font-bold">Base Price:</span>
             {#if @base_price && !Enum.empty?(@base_price)}

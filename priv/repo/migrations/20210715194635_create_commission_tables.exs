@@ -14,6 +14,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :terms, :text
       add :template, :text
       add :archived_at, :naive_datetime
+      add :tags, {:array, :citext}, default: [], null: false
 
       add :card_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :studio_id, references(:studios), null: false
@@ -22,6 +23,66 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     end
 
     create unique_index(:offerings, [:type, :studio_id])
+
+    execute(
+      fn ->
+        repo().query!(
+          """
+          ALTER TABLE offerings ADD COLUMN search_vector tsvector
+            GENERATED ALWAYS AS (
+              setweight(to_tsvector('banchan_fts', name), 'A') ||
+              setweight(to_tsvector('banchan_fts', description), 'B')
+            ) STORED;
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!(
+          """
+          CREATE INDEX offerings_search_idx ON offerings USING GIN (search_vector);
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!(
+          """
+          CREATE INDEX offerings_tags ON offerings USING GIN (tags);
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!("""
+        CREATE TRIGGER offerings_tags_count_update
+        AFTER UPDATE OR INSERT OR DELETE ON offerings
+        FOR EACH ROW
+        EXECUTE PROCEDURE public.trigger_update_tags_count();
+        """)
+      end,
+      fn ->
+        repo().query!(
+          """
+          DROP INDEX offerings_search_idx;
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!(
+          """
+          DROP INDEX offerings_tags;
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!("""
+        DROP TRIGGER offerings_tag_count_update;
+        """)
+      end
+    )
 
     create table(:offering_options) do
       add :name, :string, null: false
