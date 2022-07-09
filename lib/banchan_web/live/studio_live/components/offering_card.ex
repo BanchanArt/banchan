@@ -7,6 +7,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   alias Surface.Components.LiveRedirect
 
   alias Banchan.Offerings
+  alias Banchan.Uploads.Upload
 
   alias BanchanWeb.Components.{Button, Card, MasonryGallery, Modal}
   alias BanchanWeb.Endpoint
@@ -20,29 +21,22 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   data gallery_images, :list, default: []
   data base_price, :list
   data available_slots, :integer
-  data subscribed?, :boolean
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
+
     base_price = Offerings.offering_base_price(socket.assigns.offering)
+
     available_slots = Offerings.offering_available_slots(socket.assigns.offering)
 
     gallery_images =
-      Offerings.offering_gallery_uploads(socket.assigns.offering)
-      |> Enum.map(&{:existing, &1})
-
-    subscribed? =
-      socket.assigns.current_user &&
-        Offerings.Notifications.user_subscribed?(
-          socket.assigns.current_user,
-          socket.assigns.offering
-        )
+      socket.assigns.offering.gallery_img_ids
+      |> Enum.map(&{:existing, %Upload{id: &1}})
 
     {:ok,
      socket
      |> assign(base_price: base_price)
      |> assign(available_slots: available_slots)
-     |> assign(subscribed?: subscribed?)
      |> assign(gallery_images: gallery_images)}
   end
 
@@ -147,10 +141,10 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
                 to={Routes.studio_commissions_new_path(Endpoint, :new, @studio.handle, @offering.type)}
                 class="btn text-center btn-info"
               >Request</LiveRedirect>
-            {#elseif !@subscribed?}
+            {#elseif !@offering.user_subscribed?}
               <Button class="btn-info" click="notify_me">Notify Me</Button>
             {/if}
-            {#if @subscribed?}
+            {#if @offering.user_subscribed?}
               <Button class="btn-info" click="unnotify_me">Unsubscribe</Button>
             {/if}
           </div>

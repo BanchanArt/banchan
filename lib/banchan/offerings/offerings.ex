@@ -6,7 +6,15 @@ defmodule Banchan.Offerings do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Commission
-  alias Banchan.Offerings.{GalleryImage, Notifications, Offering}
+
+  alias Banchan.Offerings.{
+    GalleryImage,
+    Notifications,
+    Offering,
+    OfferingOption,
+    OfferingSubscription
+  }
+
   alias Banchan.Repo
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
@@ -215,13 +223,91 @@ defmodule Banchan.Offerings do
     ret
   end
 
+  @doc """
+  List offerings offered by a studio. Will take into account visibility
+  based on whether the current user is a member of the studio and whether the
+  offering is published.
+
+  ## Examples
+
+      iex> list_studio_offerings(studio, current_studio_member?)
+      [%Offering{}, %Offering{}, %Offering{}]
+  """
+  def list_studio_offerings(
+        %Studio{} = studio,
+        %User{} = current_user,
+        current_user_member?,
+        include_archived? \\ false
+      ) do
+    q =
+      from o in Offering,
+        where: o.studio_id == ^studio.id,
+        where: ^current_user_member? or o.hidden == false,
+        left_join: sub in OfferingSubscription,
+        on:
+          sub.user_id == ^current_user.id and sub.offering_id == o.id and
+            sub.silenced != true,
+        left_join:
+          used_slots in subquery(
+            from c in Commission,
+              where: c.status not in [:withdrawn, :approved, :submitted, :rejected],
+              group_by: [c.offering_id],
+              select: %{offering_id: c.offering_id, used_slots: count(c)}
+          ),
+        on: used_slots.offering_id == o.id,
+        left_join:
+          default_prices in subquery(
+            from oo in OfferingOption,
+              group_by: [oo.offering_id],
+              select: %{
+                offering_id: oo.offering_id,
+                prices:
+                  type(fragment("array_agg(?)", oo.price), {:array, Money.Ecto.Composite.Type})
+              }
+          ),
+        on: default_prices.offering_id == o.id,
+        left_join:
+          gallery_img_ids in subquery(
+            from i in GalleryImage,
+              group_by: [i.offering_id],
+              select: %{
+                offering_id: i.offering_id,
+                ids: type(fragment("array_agg(?)", i.upload_id), {:array, :binary_id})
+              }
+          ),
+        on: gallery_img_ids.offering_id == o.id,
+        order_by: [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index],
+        select:
+          merge(o, %{
+            user_subscribed?: not is_nil(sub.id),
+            used_slots: coalesce(used_slots.used_slots, 0),
+            gallery_img_ids:
+              type(
+                coalesce(gallery_img_ids.ids, fragment("ARRAY[]::uuid[]")),
+                {:array, :binary_id}
+              ),
+            option_prices:
+              type(
+                coalesce(default_prices.prices, fragment("ARRAY[]::money_with_currency[]")),
+                {:array, Money.Ecto.Composite.Type}
+              )
+          })
+
+    q =
+      if include_archived? do
+        q
+      else
+        q |> where([o], is_nil(o.archived_at))
+      end
+
+    Repo.all(q)
+  end
+
   def offering_base_price(%Offering{} = offering) do
-    if Enum.empty?(offering.options) do
+    if Enum.empty?(offering.option_prices) do
       nil
     else
-      offering.options
-      |> Enum.filter(& &1.default)
-      |> Enum.map(& &1.price)
+      offering.option_prices
       |> Enum.reduce(%{}, fn price, acc ->
         current =
           Map.get(
@@ -235,29 +321,30 @@ defmodule Banchan.Offerings do
     end
   end
 
-  def offering_available_slots(%Offering{} = offering) do
-    {slots, count} =
-      Repo.one(
-        from(o in Offering,
-          left_join: c in Commission,
-          on:
-            c.offering_id == o.id and
-              c.status not in [:withdrawn, :approved, :submitted, :rejected],
-          where: o.id == ^offering.id,
-          group_by: [o.id, o.slots],
-          select: {o.slots, count(c)}
+  def offering_available_slots(%Offering{} = offering, reload \\ false) do
+    {slots, used_slots} =
+      if reload do
+        Repo.one(
+          from o in Offering,
+            left_join: c in assoc(o, :commissions),
+            on: c.status not in [:withdrawn, :approved, :submitted, :rejected],
+            where: o.id == ^offering.id,
+            group_by: [o.id, o.slots],
+            select: {o.slots, count(c)}
         )
-      )
+      else
+        {offering.slots, offering.used_slots}
+      end
 
     cond do
       is_nil(slots) ->
         nil
 
-      count > slots ->
+      used_slots > slots ->
         0
 
       true ->
-        slots - count
+        slots - used_slots
     end
   end
 

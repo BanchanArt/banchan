@@ -19,11 +19,11 @@ defmodule BanchanWeb.StudioLive.Shop do
   def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, false, false)
     studio = socket.assigns.studio
-    members = Studios.list_studio_members(studio)
 
     offerings =
-      Studios.list_studio_offerings(
+      Offerings.list_studio_offerings(
         studio,
+        socket.assigns.current_user,
         socket.assigns.current_user_member?,
         socket.assigns.current_user_member?
       )
@@ -42,7 +42,6 @@ defmodule BanchanWeb.StudioLive.Shop do
     # that picks up everything we need for this listing.
     {:ok,
      assign(socket,
-       members: members,
        offerings: offerings,
        stripe_onboarding_url: stripe_onboarding_url
      )}
@@ -87,8 +86,9 @@ defmodule BanchanWeb.StudioLive.Shop do
       )
 
     offerings =
-      Studios.list_studio_offerings(
+      Offerings.list_studio_offerings(
         socket.assigns.studio,
+        socket.assigns.current_user,
         socket.assigns.current_user_member?,
         socket.assigns.current_user_member?
       )
@@ -106,8 +106,9 @@ defmodule BanchanWeb.StudioLive.Shop do
       )
 
     offerings =
-      Studios.list_studio_offerings(
+      Offerings.list_studio_offerings(
         socket.assigns.studio,
+        socket.assigns.current_user,
         socket.assigns.current_user_member?,
         socket.assigns.current_user_member?
       )

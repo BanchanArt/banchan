@@ -445,7 +445,7 @@ defmodule Banchan.Accounts do
     if is_nil(actor) ||
          :admin in actor.roles ||
          (:mod in actor.roles && :admin not in user.roles) do
-      changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifte_reason: reason})
+      changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifted_reason: reason})
 
       if changeset.valid? do
         {_, [history | _]} =

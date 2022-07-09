@@ -25,6 +25,11 @@ defmodule Banchan.Offerings.Offering do
     field :template, :string
     field :archived_at, :naive_datetime
 
+    field :option_prices, {:array, Money.Ecto.Composite.Type}, virtual: true
+    field :used_slots, :integer, virtual: true
+    field :user_subscribed?, :boolean, virtual: true
+    field :gallery_img_ids, {:array, :binary_id}, virtual: true
+
     belongs_to :studio, Studio
     belongs_to :card_img, Upload, on_replace: :nilify, type: :binary_id
 

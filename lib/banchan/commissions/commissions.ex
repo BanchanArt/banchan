@@ -319,7 +319,7 @@ defmodule Banchan.Commissions do
 
         if commission.status == :accepted do
           offering = Repo.preload(commission, :offering).offering
-          available_slot_count = Offerings.offering_available_slots(offering)
+          available_slot_count = Offerings.offering_available_slots(offering, true)
 
           # Make sure we close the offering if we're out of slots.
           close = !is_nil(available_slot_count) && available_slot_count <= 1
