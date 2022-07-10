@@ -153,7 +153,6 @@ defmodule BanchanWeb.StudioLive.Shop do
                 id={"offering-" <> offering.type}
                 current_user={@current_user}
                 current_user_member?={@current_user_member?}
-                studio={@studio}
                 offering={offering}
                 unarchive="unarchive"
               />

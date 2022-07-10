@@ -12,10 +12,9 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   alias BanchanWeb.Endpoint
 
   prop current_user, :struct, required: true
-  prop current_user_member?, :boolean, required: true
-  prop studio, :struct, required: true
+  prop current_user_member?, :boolean, default: false
   prop offering, :struct, required: true
-  prop unarchive, :event, required: true
+  prop unarchive, :event
 
   data gallery_images, :list, default: []
   data base_price, :list
@@ -77,7 +76,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   def render(assigns) do
     ~F"""
     <offering-card class="w-full relative cursor-pointer" :on-click="open_gallery">
-      {#if @offering.archived_at}
+      {#if @offering.archived_at && @unarchive}
         <Button
           class="btn-primary z-50 absolute top-4 right-4"
           click={@unarchive}
@@ -143,13 +142,13 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
             <div :if={is_nil(@offering.archived_at)} class="pt-2 flex flex-row justify-end card-actions">
               {#if @current_user_member?}
                 <LiveRedirect
-                  to={Routes.studio_offerings_edit_path(Endpoint, :edit, @studio.handle, @offering.type)}
+                  to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}
                   class="btn text-center btn-primary"
                 >Edit</LiveRedirect>
               {/if}
               {#if @offering.open}
                 <LiveRedirect
-                  to={Routes.studio_commissions_new_path(Endpoint, :new, @studio.handle, @offering.type)}
+                  to={Routes.studio_commissions_new_path(Endpoint, :new, @offering.studio.handle, @offering.type)}
                   class="btn text-center btn-info"
                 >Request</LiveRedirect>
               {#elseif !@offering.user_subscribed?}

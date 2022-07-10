@@ -241,6 +241,7 @@ defmodule Banchan.Offerings do
     q =
       from o in Offering,
         as: :offering,
+        join: s in assoc(o, :studio),
         where: ^current_user_member? or o.hidden == false,
         left_join: sub in OfferingSubscription,
         on:
@@ -276,6 +277,7 @@ defmodule Banchan.Offerings do
         order_by: [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index],
         select:
           merge(o, %{
+            studio: s,
             user_subscribed?: not is_nil(sub.id),
             used_slots: coalesce(used_slots.used_slots, 0),
             gallery_uploads:
