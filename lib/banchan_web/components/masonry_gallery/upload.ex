@@ -4,42 +4,14 @@ defmodule BanchanWeb.Components.MasonryGallery.Upload do
   """
   use BanchanWeb, :component
 
-  alias Banchan.Uploads.Upload
-
   prop upload, :struct, required: true
   prop editable, :boolean
   prop deleted, :event
 
-  defp calculate_span(%Upload{width: width, height: height}) do
-    ratio = width / height * 100
-
-    cond do
-      ratio >= 180 ->
-        # Very Wide
-        "sm:row-span-1"
-
-      ratio < 180 && ratio >= 120 ->
-        # Wide
-        "sm:row-span-2"
-
-      ratio < 120 && ratio >= 80 ->
-        # Square-ish
-        "sm:row-span-3"
-
-      ratio < 80 && ratio >= 30 ->
-        # Tall
-        "sm:row-span-4"
-
-      ratio < 30 ->
-        # Very tall
-        "sm:row-span-5"
-    end
-  end
-
   def render(assigns) do
     ~F"""
     <div
-      class={"masonry-item upload-preview relative", calculate_span(@upload), "hover:cursor-move": @editable}
+      class={"my-0 sm:mb-2 masonry-item upload-preview relative", "hover:cursor-move": @editable}
       data-type="existing"
       data-id={@upload.id}
       draggable={if @editable do

@@ -100,7 +100,7 @@ defmodule BanchanWeb.Components.MasonryGallery do
     ~F"""
     <div
       :hook="MasonryGallery"
-      class={"grid gap-0.5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4", @class}
+      class={"gap-0 sm:gap-2 columns-2 sm:columns-3 md:columns-4", @class}
     >
       {#for image <- @images}
         {#case image}

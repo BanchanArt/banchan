@@ -15,8 +15,7 @@ defmodule BanchanWeb.Components.MasonryGallery.LiveImgPreview do
       id={"-entry-" <> @entry.uuid}
       data-type="live"
       data-id={@entry.ref}
-      :hook="LiveImgPreview"
-      class={"masonry-item live-preview relative", "hover:cursor-move": @editable}
+      class={"my-0 sm:mb-2 masonry-item live-preview relative", "hover:cursor-move": @editable}
       draggable={if @editable do
         "true"
       else
