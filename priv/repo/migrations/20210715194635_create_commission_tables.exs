@@ -31,7 +31,8 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           ALTER TABLE offerings ADD COLUMN search_vector tsvector
             GENERATED ALWAYS AS (
               setweight(to_tsvector('banchan_fts', name), 'A') ||
-              setweight(to_tsvector('banchan_fts', description), 'B')
+              setweight(to_tsvector('banchan_fts', immutable_array_to_string(tags, ' ')), 'B') ||
+              setweight(to_tsvector('banchan_fts', description), 'C')
             ) STORED;
           """,
           [],

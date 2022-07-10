@@ -14,6 +14,16 @@ defmodule Banchan.Repo.Migrations.Tags do
       fn ->
         repo().query(
           """
+          CREATE OR REPLACE FUNCTION public.immutable_array_to_string(text[], text)
+              RETURNS text as $$ SELECT array_to_string($1, $2); $$
+          LANGUAGE sql IMMUTABLE;
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query(
+          """
           CREATE OR REPLACE FUNCTION public.trigger_update_tags_count()
             RETURNS trigger
             LANGUAGE plpgsql
@@ -56,6 +66,14 @@ defmodule Banchan.Repo.Migrations.Tags do
 
       # Down
       fn ->
+        repo().query(
+          """
+          DROP FUNCTION public.immutable_array_to_string();
+          """,
+          [],
+          log: :info
+        )
+
         repo().query(
           """
           DROP FUNCTION public.trigger_update_tags_count();

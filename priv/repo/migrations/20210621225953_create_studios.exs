@@ -28,7 +28,8 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           ALTER TABLE studios ADD COLUMN search_vector tsvector
             GENERATED ALWAYS AS (
               setweight(to_tsvector('banchan_fts', handle), 'A') ||
-              setweight(to_tsvector('banchan_fts', name), 'B')
+              setweight(to_tsvector('banchan_fts', name), 'B') ||
+              setweight(to_tsvector('banchan_fts', immutable_array_to_string(tags, ' ')), 'C')
             ) STORED;
           """,
           [],
