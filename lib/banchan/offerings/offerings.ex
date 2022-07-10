@@ -412,8 +412,6 @@ defmodule Banchan.Offerings do
     mog =
       Mogrify.open(src)
       |> Mogrify.format("jpeg")
-      |> Mogrify.gravity("Center")
-      |> Mogrify.resize_to_fill("640x360")
       |> Mogrify.save(in_place: true)
 
     image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")

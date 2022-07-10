@@ -108,6 +108,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         </:header_aside>
         <:image>
           <img
+            class="object-contain aspect-video"
             draggable="false"
             src={if @offering.card_img_id do
               Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
@@ -162,7 +163,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           <div class="pt-4">
             {#if Enum.empty?(@gallery_images)}
               <img
-                class="object-cover w-full h-full"
+                class="w-full h-full"
                 src={if @offering.card_img_id do
                   Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
                 else

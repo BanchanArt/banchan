@@ -325,16 +325,16 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           <div class="relative pb-video pt-2">
             {#if Enum.empty?(@uploads.card_image.entries) && !(@offering && @offering.card_img_id)}
               <img
-                class="absolute h-full w-full object-cover rounded-lg"
+                class="absolute h-full w-full object-contain rounded-lg"
                 src={Routes.static_path(Endpoint, "/images/640x360.png")}
               />
             {#elseif !Enum.empty?(@uploads.card_image.entries)}
               {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
-                class: "absolute h-full w-full object-cover rounded-lg"
+                class: "absolute h-full w-full object-contain rounded-lg"
               )}
             {#else}
               <img
-                class="absolute h-full w-full object-cover rounded-lg"
+                class="absolute h-full w-full object-contain rounded-lg"
                 src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
               />
             {/if}
