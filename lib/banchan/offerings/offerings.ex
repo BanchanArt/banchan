@@ -338,7 +338,12 @@ defmodule Banchan.Offerings do
     q =
       case Keyword.fetch(opts, :order_by) do
         {:ok, :index} ->
-          q |> order_by([o], [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index])
+          q
+          |> order_by([o], [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index])
+
+        {:ok, :featured} ->
+          q |> order_by([o, s], [{:desc, o.inserted_at}, {:desc, s.inserted_at}])
+
         :error ->
           q
       end
