@@ -76,7 +76,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
 
   def render(assigns) do
     ~F"""
-    <offering-card class="w-full relative cursor-pointer hover:opacity-50 transition-all" :on-click="open_gallery">
+    <offering-card class="w-full relative cursor-pointer" :on-click="open_gallery">
       {#if @offering.archived_at}
         <Button
           class="btn-primary z-50 absolute top-4 right-4"
@@ -87,7 +87,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         >Unarchive</Button>
       {/if}
 
-      <Card class={"h-full", "opacity-50": !is_nil(@offering.archived_at)}>
+      <Card class={"h-full hover:scale-105 hover:z-10 transition-all", "opacity-50": !is_nil(@offering.archived_at)}>
         <:header>
           <div class="text-lg font-bold">{@offering.name}</div>
         </:header>

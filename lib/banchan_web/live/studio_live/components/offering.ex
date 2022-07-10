@@ -280,7 +280,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <TextInput
           name={:name}
           info="Name of the offering, as it should appear in the offering card."
-          opts={required: true}
+          opts={required: true, phx_debounce: "200"}
         />
         <TextInput
           name={:type}
