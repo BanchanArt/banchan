@@ -87,7 +87,10 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         >Unarchive</Button>
       {/if}
 
-      <Card class={"h-full sm:hover:scale-105 sm:hover:z-10 transition-all", "opacity-50": !is_nil(@offering.archived_at)}>
+      <Card class={
+        "h-full sm:hover:scale-105 sm:hover:z-10 transition-all",
+        "opacity-50": !is_nil(@offering.archived_at)
+      }>
         <:header>
           <div class="text-lg font-bold">{@offering.name}</div>
         </:header>
