@@ -76,7 +76,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
 
   def render(assigns) do
     ~F"""
-    <div class="h-full relative">
+    <offering-card class="w-full relative cursor-pointer hover:opacity-50 transition-all" :on-click="open_gallery">
       {#if @offering.archived_at}
         <Button
           class="btn-primary z-50 absolute top-4 right-4"
@@ -86,29 +86,27 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           }
         >Unarchive</Button>
       {/if}
+
       <Card class={"h-full", "opacity-50": !is_nil(@offering.archived_at)}>
         <:header>
           <div class="text-lg font-bold">{@offering.name}</div>
         </:header>
         <:header_aside>
-          {#if @offering.open && !is_nil(@offering.slots)}
-            <div class="whitespace-nowrap badge badge-outline badge-primary cursor-default">{@available_slots}/{@offering.slots} Slots</div>
-          {#elseif !@offering.open && !is_nil(@offering.slots)}
-            <div class="badge badge-error badge-outline cursor-default">0/{@offering.slots} Slots</div>
-          {#elseif @offering.open}
-            <div class="badge badge-primary badge-outline cursor-default">Open</div>
-          {#else}
-            <div class="badge badge-error badge-outline cursor-default">Closed</div>
-          {/if}
           {#if @offering.hidden}
-            <div class="badge badge-error badge-outline cursor-default">Hidden</div>
+            <div class="badge badge-error badge-outline">Hidden</div>
+          {#elseif @offering.open && !is_nil(@offering.slots)}
+            <div class="whitespace-nowrap badge badge-outline badge-primary">{@available_slots}/{@offering.slots} Slots</div>
+          {#elseif !@offering.open && !is_nil(@offering.slots)}
+            <div class="badge badge-error badge-outline">0/{@offering.slots} Slots</div>
+          {#elseif @offering.open}
+            <div class="badge badge-primary badge-outline">Open</div>
+          {#else}
+            <div class="badge badge-error badge-outline">Closed</div>
           {/if}
         </:header_aside>
         <:image>
           <img
             draggable="false"
-            :on-click="open_gallery"
-            class="object-cover hover:cursor-pointer hover:opacity-50 transition-all"
             src={if @offering.card_img_id do
               Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
             else
@@ -117,63 +115,67 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           />
         </:image>
         <div class="flex flex-col grow">
-          <p class="grow flex text-ellipsis overflow-hidden h-full">{@offering.description}</p>
-          <ul class="flex flex-row flex-wrap gap-1">
-            {#for tag <- @offering.tags}
-              <li class="badge badge-sm badge-primary p-2 cursor-default">{tag}</li>
-            {/for}
-          </ul>
-          <p class="text-primary mt-2 grow-0">
-            <span class="font-bold">Base Price:</span>
+          <p class="flex flex-row items-end">
+            <span class="font-bold grow">Base Price:</span>
             {#if @base_price && !Enum.empty?(@base_price)}
-              <span class="float-right">{@base_price |> Enum.map(fn {_, amt} -> Money.to_string(amt) end) |> Enum.join(" + ")}</span>
+              <span>{@base_price |> Enum.map(fn {_, amt} -> Money.to_string(amt) end) |> Enum.join(" + ")}</span>
             {#else}
-              <span class="float-right">Inquire</span>
+              <span>Inquire</span>
             {/if}
           </p>
         </div>
-        <:footer>
-          <div :if={is_nil(@offering.archived_at)} class="flex flex-row justify-end card-actions">
-            {#if @current_user_member?}
-              <LiveRedirect
-                to={Routes.studio_offerings_edit_path(Endpoint, :edit, @studio.handle, @offering.type)}
-                class="btn text-center btn-primary"
-              >Edit</LiveRedirect>
-            {/if}
-            {#if @offering.open}
-              <LiveRedirect
-                to={Routes.studio_commissions_new_path(Endpoint, :new, @studio.handle, @offering.type)}
-                class="btn text-center btn-info"
-              >Request</LiveRedirect>
-            {#elseif !@offering.user_subscribed?}
-              <Button class="btn-info" click="notify_me">Notify Me</Button>
-            {/if}
-            {#if @offering.user_subscribed?}
-              <Button class="btn-info" click="unnotify_me">Unsubscribe</Button>
-            {/if}
-          </div>
-        </:footer>
       </Card>
 
       {!-- Gallery modal --}
       <div class="cursor-default">
-        <Modal id={@id <> "_gallery"}>
-          <:title>{@offering.name}</:title>
-          {#if Enum.empty?(@gallery_images)}
-            <img
-              class="object-cover w-full h-full"
-              src={if @offering.card_img_id do
-                Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
-              else
-                Routes.static_path(Endpoint, "/images/640x360.png")
-              end}
-            />
-          {#else}
-            <MasonryGallery id={@id <> "-masonry-gallery"} images={@gallery_images} />
-          {/if}
+        <Modal id={@id <> "_gallery"} big>
+          <div class="px-4">
+            <span class="text-xl font-bold">{@offering.name}</span>
+            <p class="pb-4 prose">
+              {@offering.description}
+            </p>
+            <ul class="flex flex-row flex-wrap gap-1">
+              {#for tag <- @offering.tags}
+                <li class="badge badge-sm badge-primary p-2 cursor-default overflow-hidden">{tag}</li>
+              {/for}
+            </ul>
+            <div :if={is_nil(@offering.archived_at)} class="pt-2 flex flex-row justify-end card-actions">
+              {#if @current_user_member?}
+                <LiveRedirect
+                  to={Routes.studio_offerings_edit_path(Endpoint, :edit, @studio.handle, @offering.type)}
+                  class="btn text-center btn-primary btn-sm"
+                >Edit</LiveRedirect>
+              {/if}
+              {#if @offering.open}
+                <LiveRedirect
+                  to={Routes.studio_commissions_new_path(Endpoint, :new, @studio.handle, @offering.type)}
+                  class="btn text-center btn-info btn-sm"
+                >Request</LiveRedirect>
+              {#elseif !@offering.user_subscribed?}
+                <Button class="btn-info btn-sm" click="notify_me">Notify Me</Button>
+              {/if}
+              {#if @offering.user_subscribed?}
+                <Button class="btn-info btn-sm" click="unnotify_me">Unsubscribe</Button>
+              {/if}
+            </div>
+          </div>
+          <div class="pt-4">
+            {#if Enum.empty?(@gallery_images)}
+              <img
+                class="object-cover w-full h-full"
+                src={if @offering.card_img_id do
+                  Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
+                else
+                  Routes.static_path(Endpoint, "/images/640x360.png")
+                end}
+              />
+            {#else}
+              <MasonryGallery id={@id <> "-masonry-gallery"} images={@gallery_images} />
+            {/if}
+          </div>
         </Modal>
       </div>
-    </div>
+    </offering-card>
     """
   end
 end

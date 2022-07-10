@@ -133,12 +133,12 @@ defmodule BanchanWeb.StudioLive.Shop do
         <div
           id="offering-cards"
           :hook="DragDropCards"
-          class="flex flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 auto-rows-fr pt-4"
+          class="sm:px-2 grid grid-cols-2 sm:gap-2 sm:grid-cols-3 md:grid-cols-4 auto-rows-fr pt-4"
         >
           {#for offering <- @offerings}
             <div
               class={
-                "offering-card p-2",
+                "offering-card",
                 "cursor-move select-none": @current_user_member? && is_nil(offering.archived_at),
                 archived: !is_nil(offering.archived_at)
               }
@@ -164,13 +164,11 @@ defmodule BanchanWeb.StudioLive.Shop do
             </div>
           {/for}
           {#if @current_user_member?}
-            <div class="p-2">
-              <LiveRedirect to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}>
-                <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full transition-all">
-                  <span class="text-6xl mx-auto my-auto flex items-center justify-center h-full">+</span>
-                </Card>
-              </LiveRedirect>
-            </div>
+            <LiveRedirect to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}>
+              <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full transition-all">
+                <span class="text-6xl mx-auto my-auto flex items-center justify-center h-full">+</span>
+              </Card>
+            </LiveRedirect>
           {/if}
         </div>
       {#else}

@@ -46,21 +46,23 @@ defmodule BanchanWeb.Components.Modal do
       <div
         :if={@modal_open}
         :on-click="nothing"
-        class={"modal-box relative", "sm:w-11/12 sm:max-w-5xl lg:w-8/12": @big}
+        class={"modal-box p-0 pt-3 relative", "sm:w-11/12 sm:max-w-5xl lg:w-8/12": @big}
       >
         <div
           class="btn btn-circle btn-ghost close-modal absolute right-2 top-2 text-xl"
           :on-click="close_modal"
         >✕</div>
-        <h3 class="text-lg font-bold">
-          <#slot name="title" />
-        </h3>
-        <p class="py-4">
-          <#slot />
-        </p>
-        <div class="modal-action">
-          <#slot name="action" />
-        </div>
+        {#if slot_assigned?(:title)}
+          <h3 class="text-lg font-bold">
+            <#slot name="title" />
+          </h3>
+        {/if}
+        <#slot />
+        {#if slot_assigned?(:action)}
+          <div class="modal-action">
+            <#slot name="action" />
+          </div>
+        {/if}
       </div>
     </div>
     """
