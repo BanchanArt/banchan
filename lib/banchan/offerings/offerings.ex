@@ -230,19 +230,17 @@ defmodule Banchan.Offerings do
 
   ## Examples
 
-      iex> list_studio_offerings(studio, current_studio_member?)
+      iex> list_offerings(current_user, current_studio_member?)
       [%Offering{}, %Offering{}, %Offering{}]
   """
-  def list_studio_offerings(
-        %Studio{} = studio,
+  def list_offerings(
         %User{} = current_user,
         current_user_member?,
-        include_archived? \\ false
+        opts \\ []
       ) do
     q =
       from o in Offering,
         as: :offering,
-        where: o.studio_id == ^studio.id,
         where: ^current_user_member? or o.hidden == false,
         left_join: sub in OfferingSubscription,
         on:
@@ -296,10 +294,21 @@ defmodule Banchan.Offerings do
           })
 
     q =
-      if include_archived? do
-        q
-      else
-        q |> where([o], is_nil(o.archived_at))
+      case Keyword.fetch(opts, :include_archived?) do
+        {:ok, true} ->
+          q |> where([o], is_nil(o.archived_at))
+
+        _ ->
+          q
+      end
+
+    q =
+      case Keyword.fetch(opts, :studio) do
+        {:ok, %Studio{} = studio} ->
+          q |> where([o], o.studio_id == ^studio.id)
+
+        :error ->
+          q
       end
 
     Repo.all(q)
