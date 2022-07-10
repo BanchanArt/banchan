@@ -11,6 +11,7 @@ defmodule Banchan.Studios.Studio do
   alias Banchan.Uploads.Upload
 
   schema "studios" do
+    # TODO: use trigger functions to track follower counts
     field :name, :string
     field :handle, :string
     field :about, :string

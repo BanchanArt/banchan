@@ -15,7 +15,7 @@ defmodule Banchan.Studios do
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Invoice
   alias Banchan.Repo
-  alias Banchan.Studios.{Notifications, Payout, PortfolioImage, Studio}
+  alias Banchan.Studios.{Notifications, Payout, PortfolioImage, Studio, StudioFollower}
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
 
@@ -210,13 +210,32 @@ defmodule Banchan.Studios do
       [%Studio{}, %Studio{}, %Studio{}, ...]
   """
   def list_studios(opts \\ []) do
-    q = from(s in Studio)
+    q = from(s in Studio, as: :studio)
 
     q =
       case Keyword.fetch(opts, :order_by) do
+        {:ok, :oldest} ->
+          q |> order_by([s], asc: s.inserted_at)
+
+        {:ok, :newest} ->
+          q |> order_by([s], desc: s.inserted_at)
+
+        {:ok, :followers} ->
+          q
+          |> join(
+            :left_lateral,
+            [_s],
+            followers in subquery(
+              from follower in StudioFollower,
+                where: parent_as(:studio).id == follower.studio_id,
+                select: %{followers: count(follower)}
+            )
+          )
+          |> order_by([_s, followers], desc: followers.followers)
+
         {:ok, :featured} ->
           q
-          |> order_by([s], [{:desc, s.inserted_at}])
+          |> order_by([s], desc: s.inserted_at)
           |> where([s], not is_nil(s.about) and s.about != "")
           |> where([s], not is_nil(s.card_img_id))
 
