@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
 
   alias Banchan.Offerings
 
-  alias BanchanWeb.Components.{Button, Card, MasonryGallery, Modal}
+  alias BanchanWeb.Components.{Button, Card, Markdown, MasonryGallery, Modal}
   alias BanchanWeb.Endpoint
 
   prop current_user, :struct, required: true
@@ -131,9 +131,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         <Modal id={@id <> "_gallery"} big>
           <div class="px-4">
             <span class="text-xl font-bold">{@offering.name}</span>
-            <p class="pb-4 prose">
-              {@offering.description}
-            </p>
+            <Markdown class="pb-4" content={@offering.description} />
             <ul class="flex flex-row flex-wrap gap-1">
               {#for tag <- @offering.tags}
                 <li class="badge badge-sm badge-primary p-2 cursor-default overflow-hidden">{tag}</li>

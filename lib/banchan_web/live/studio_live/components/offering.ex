@@ -287,9 +287,10 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           info="Lowercase, no-spaces, limited characters. This is what will show up in the url and must be unique."
           opts={required: true}
         />
-        <TextArea
+        <MarkdownInput
+          id={@id <> "-description-input"}
           name={:description}
-          info="Description of the offering, as it should appear in the offering card."
+          info="Description of the offering, as it should appear when the offering is expanded."
           opts={required: true}
         />
         <TagsInput
