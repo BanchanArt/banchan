@@ -202,15 +202,32 @@ defmodule Banchan.Studios do
   end
 
   @doc """
-  List all studios
+  List all studios with pagination
 
   ## Examples
 
-      iex> list_studios()
+      iex> list_studios().entries
       [%Studio{}, %Studio{}, %Studio{}, ...]
   """
-  def list_studios do
-    Repo.all(Studio)
+  def list_studios(opts \\ []) do
+    q = from(s in Studio)
+
+    q =
+      case Keyword.fetch(opts, :order_by) do
+        {:ok, :featured} ->
+          q
+          |> order_by([s], [{:desc, s.inserted_at}])
+          |> where([s], not is_nil(s.about) and s.about != "")
+          |> where([s], not is_nil(s.card_img_id))
+
+        :error ->
+          q
+      end
+
+    Repo.paginate(q,
+      page_size: Keyword.get(opts, :page_size, 24),
+      page: Keyword.get(opts, :page, 1)
+    )
   end
 
   @doc """

@@ -342,7 +342,15 @@ defmodule Banchan.Offerings do
           |> order_by([o], [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index])
 
         {:ok, :featured} ->
-          q |> order_by([o, s], [{:desc, o.inserted_at}, {:desc, s.inserted_at}])
+          q
+          |> order_by([o, s], [{:desc, o.inserted_at}, {:desc, s.inserted_at}])
+          |> where([o], not is_nil(o.description) and o.description != "")
+          |> where([o], not is_nil(o.card_img_id))
+          |> where(
+            [_o, _s, _used_slots, _default_prices, gallery_uploads],
+            not is_nil(gallery_uploads.uploads) and
+              fragment("array_length(?, 1) > 0", gallery_uploads.uploads)
+          )
 
         :error ->
           q
