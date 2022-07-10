@@ -93,14 +93,6 @@ defmodule BanchanWeb.Components.Layout do
                 <span>Art</span>
               </li>
               <li>
-                <a href="#">
-                  <span>
-                    <i class="fas fa-search" />
-                    Discover
-                  </span>
-                </a>
-              </li>
-              <li>
                 <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
                   <span>
                     <i class="fas fa-palette" />
@@ -111,8 +103,8 @@ defmodule BanchanWeb.Components.Layout do
               <li>
                 <a href="#">
                   <span>
-                    <i class="fas fa-list" />
-                    Subscriptions
+                    <i class="fas fa-search" />
+                    Discover
                   </span>
                 </a>
               </li>
