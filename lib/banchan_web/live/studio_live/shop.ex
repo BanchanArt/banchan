@@ -11,7 +11,7 @@ defmodule BanchanWeb.StudioLive.Shop do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.Components.{Button, Card}
+  alias BanchanWeb.Components.{Button, Card, InfiniteScroll}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{OfferingCard, StudioLayout}
 
@@ -19,14 +19,6 @@ defmodule BanchanWeb.StudioLive.Shop do
   def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, false, false)
     studio = socket.assigns.studio
-
-    offerings =
-      Offerings.list_offerings(
-        studio: socket.assigns.studio,
-        include_archived?: socket.assigns.current_user_member?,
-        current_user: socket.assigns.current_user,
-        current_user_member?: socket.assigns.current_user_member?
-      )
 
     Studios.subscribe_to_stripe_state(studio)
 
@@ -42,7 +34,7 @@ defmodule BanchanWeb.StudioLive.Shop do
     # that picks up everything we need for this listing.
     {:ok,
      assign(socket,
-       offerings: offerings,
+       offerings: list_offerings(socket),
        stripe_onboarding_url: stripe_onboarding_url
      )}
   end
@@ -70,6 +62,15 @@ defmodule BanchanWeb.StudioLive.Shop do
     {:noreply, socket |> assign(followers: new_count)}
   end
 
+  def handle_event("load_more", _, socket) do
+    if socket.assigns.offerings.total_entries >
+         socket.assigns.offerings.page_number * socket.assigns.offerings.page_size do
+      {:noreply, fetch(socket.assigns.offerings.page_number + 1, socket)}
+    else
+      {:noreply, socket}
+    end
+  end
+
   @impl true
   def handle_event("recheck_stripe", _, socket) do
     # No need to refresh the studio here. It'll get reloaded by the PubSub event(s)
@@ -85,15 +86,9 @@ defmodule BanchanWeb.StudioLive.Shop do
         socket.assigns.current_user_member?
       )
 
-    offerings =
-      Offerings.list_offerings(
-        studio: socket.assigns.studio,
-        include_archived?: socket.assigns.current_user_member?,
-        current_user: socket.assigns.current_user,
-        current_user_member?: socket.assigns.current_user_member?
-      )
+    offerings = list_offerings(socket)
 
-    {:noreply, socket |> assign(offerings: offerings)}
+    {:noreply, socket |> assign(offerings: offerings, page: 1)}
   end
 
   @impl true
@@ -105,15 +100,32 @@ defmodule BanchanWeb.StudioLive.Shop do
         socket.assigns.current_user_member?
       )
 
-    offerings =
-      Offerings.list_offerings(
-        studio: socket.assigns.studio,
-        include_archived?: socket.assigns.current_user_member?,
-        current_user: socket.assigns.current_user,
-        current_user_member?: socket.assigns.current_user_member?
-      )
+    offerings = list_offerings(socket)
 
     {:noreply, socket |> assign(offerings: offerings)}
+  end
+
+  defp list_offerings(socket, page \\ 1) do
+    Offerings.list_offerings(
+      studio: socket.assigns.studio,
+      include_archived?: socket.assigns.current_user_member?,
+      current_user: socket.assigns.current_user,
+      current_user_member?: socket.assigns.current_user_member?,
+      page_size: 16,
+      page: page
+    )
+  end
+
+  defp fetch(page, %{assigns: %{offerings: offerings}} = socket) do
+    socket
+    |> assign(
+      :offerings,
+      %{
+        offerings
+        | page_number: page,
+          entries: offerings.entries ++ list_offerings(socket, page).entries
+      }
+    )
   end
 
   @impl true
@@ -135,7 +147,7 @@ defmodule BanchanWeb.StudioLive.Shop do
           :hook="DragDropCards"
           class="sm:px-2 grid grid-cols-2 sm:gap-2 sm:grid-cols-3 md:grid-cols-4 auto-rows-fr pt-4"
         >
-          {#for offering <- @offerings}
+          {#for offering <- @offerings.entries}
             <div
               class={
                 "offering-card",
@@ -169,6 +181,7 @@ defmodule BanchanWeb.StudioLive.Shop do
               </Card>
             </LiveRedirect>
           {/if}
+          <InfiniteScroll id="shop-infinite-scroll" page={@offerings.page_number} load_more="load_more" />
         </div>
       {#else}
         <div class="w-full mx-auto md:bg-base-300">
