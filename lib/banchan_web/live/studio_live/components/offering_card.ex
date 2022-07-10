@@ -141,19 +141,19 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
               {#if @current_user_member?}
                 <LiveRedirect
                   to={Routes.studio_offerings_edit_path(Endpoint, :edit, @studio.handle, @offering.type)}
-                  class="btn text-center btn-primary btn-sm"
+                  class="btn text-center btn-primary"
                 >Edit</LiveRedirect>
               {/if}
               {#if @offering.open}
                 <LiveRedirect
                   to={Routes.studio_commissions_new_path(Endpoint, :new, @studio.handle, @offering.type)}
-                  class="btn text-center btn-info btn-sm"
+                  class="btn text-center btn-info"
                 >Request</LiveRedirect>
               {#elseif !@offering.user_subscribed?}
-                <Button class="btn-info btn-sm" click="notify_me">Notify Me</Button>
+                <Button class="btn-info" click="notify_me">Notify Me</Button>
               {/if}
               {#if @offering.user_subscribed?}
-                <Button class="btn-info btn-sm" click="unnotify_me">Unsubscribe</Button>
+                <Button class="btn-info" click="unnotify_me">Unsubscribe</Button>
               {/if}
             </div>
           </div>
