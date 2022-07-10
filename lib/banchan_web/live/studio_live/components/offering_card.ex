@@ -87,7 +87,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         >Unarchive</Button>
       {/if}
 
-      <Card class={"h-full hover:scale-105 hover:z-10 transition-all", "opacity-50": !is_nil(@offering.archived_at)}>
+      <Card class={"h-full sm:hover:scale-105 sm:hover:z-10 transition-all", "opacity-50": !is_nil(@offering.archived_at)}>
         <:header>
           <div class="text-lg font-bold">{@offering.name}</div>
         </:header>
@@ -118,9 +118,9 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           <p class="flex flex-row items-end">
             <span class="font-bold grow">Base Price:</span>
             {#if @base_price && !Enum.empty?(@base_price)}
-              <span>{@base_price |> Enum.map(fn {_, amt} -> Money.to_string(amt) end) |> Enum.join(" + ")}</span>
+              <span class="font-semibold">{@base_price |> Enum.map(fn {_, amt} -> Money.to_string(amt) end) |> Enum.join(" + ")}</span>
             {#else}
-              <span>Inquire</span>
+              <span class="font-semibold">Inquire</span>
             {/if}
           </p>
         </div>
