@@ -336,7 +336,10 @@ defmodule Banchan.Offerings do
           q |> where([o], o.hidden == false)
       end
 
-    Repo.paginate(q, page: Keyword.get(opts, :page, 1), page_size: Keyword.get(opts, :page_size, 20))
+    Repo.paginate(q,
+      page: Keyword.get(opts, :page, 1),
+      page_size: Keyword.get(opts, :page_size, 20)
+    )
   end
 
   def offering_base_price(%Offering{} = offering) do

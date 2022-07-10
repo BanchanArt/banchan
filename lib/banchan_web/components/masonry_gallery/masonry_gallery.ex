@@ -98,10 +98,7 @@ defmodule BanchanWeb.Components.MasonryGallery do
 
   def render(assigns) do
     ~F"""
-    <div
-      :hook="MasonryGallery"
-      class={"gap-0 sm:gap-2 columns-2 sm:columns-3 md:columns-4", @class}
-    >
+    <div :hook="MasonryGallery" class={"gap-0 sm:gap-2 columns-2 sm:columns-3 md:columns-4", @class}>
       {#for image <- @images}
         {#case image}
           {#match {:existing, upload}}
