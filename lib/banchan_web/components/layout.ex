@@ -104,7 +104,7 @@ defmodule BanchanWeb.Components.Layout do
                 <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
                   <span>
                     <i class="fas fa-palette" />
-                    Commissions
+                    My Commissions
                   </span>
                 </LiveRedirect>
               </li>
@@ -132,6 +132,14 @@ defmodule BanchanWeb.Components.Layout do
                   <span>
                     <i class="fas fa-user-circle" />
                     Your Profile
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li :if={:artist in @current_user.roles}>
+                <LiveRedirect to={Routes.studio_new_path(Endpoint, :new)}>
+                  <span>
+                    <i class="fas fa-palette" />
+                    Create a Studio
                   </span>
                 </LiveRedirect>
               </li>

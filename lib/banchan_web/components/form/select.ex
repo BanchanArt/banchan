@@ -14,6 +14,7 @@ defmodule BanchanWeb.Components.Form.Select do
   prop show_label, :boolean, default: true
   prop icon, :string
   prop info, :string
+  prop prompt, :string
   prop selected, :any
   prop options, :any, default: []
 
@@ -51,6 +52,7 @@ defmodule BanchanWeb.Components.Form.Select do
                   @class,
                   "select-error": !Enum.empty?(Keyword.get_values(form.errors, field))
                 }
+                prompt={@prompt}
                 selected={@selected}
                 opts={@opts}
                 options={@options}
