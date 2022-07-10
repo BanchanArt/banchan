@@ -266,7 +266,6 @@ defmodule Banchan.Offerings do
               group_by: [i.offering_id],
               select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
           ),
-        order_by: [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index],
         select:
           merge(o, %{
             studio: s,
@@ -334,6 +333,14 @@ defmodule Banchan.Offerings do
 
         :error ->
           q |> where([o], o.hidden == false)
+      end
+
+    q =
+      case Keyword.fetch(opts, :order_by) do
+        {:ok, :index} ->
+          q |> order_by([o], [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index])
+        :error ->
+          q
       end
 
     Repo.paginate(q,

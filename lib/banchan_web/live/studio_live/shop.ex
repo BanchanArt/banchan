@@ -111,6 +111,7 @@ defmodule BanchanWeb.StudioLive.Shop do
       include_archived?: socket.assigns.current_user_member?,
       current_user: socket.assigns.current_user,
       current_user_member?: socket.assigns.current_user_member?,
+      order_by: :index,
       page_size: 16,
       page: page
     )
