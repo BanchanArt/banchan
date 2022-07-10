@@ -22,10 +22,10 @@ defmodule BanchanWeb.StudioLive.Shop do
 
     offerings =
       Offerings.list_offerings(
-        socket.assigns.current_user,
-        socket.assigns.current_user_member?,
-        studio: studio,
-        include_archived?: socket.assigns.current_user_member?
+        studio: socket.assigns.studio,
+        include_archived?: socket.assigns.current_user_member?,
+        current_user: socket.assigns.current_user,
+        current_user_member?: socket.assigns.current_user_member?
       )
 
     Studios.subscribe_to_stripe_state(studio)
@@ -87,10 +87,10 @@ defmodule BanchanWeb.StudioLive.Shop do
 
     offerings =
       Offerings.list_offerings(
-        socket.assigns.current_user,
-        socket.assigns.current_user_member?,
         studio: socket.assigns.studio,
-        include_archived?: socket.assigns.current_user_member?
+        include_archived?: socket.assigns.current_user_member?,
+        current_user: socket.assigns.current_user,
+        current_user_member?: socket.assigns.current_user_member?
       )
 
     {:noreply, socket |> assign(offerings: offerings)}
@@ -107,10 +107,10 @@ defmodule BanchanWeb.StudioLive.Shop do
 
     offerings =
       Offerings.list_offerings(
-        socket.assigns.current_user,
-        socket.assigns.current_user_member?,
         studio: socket.assigns.studio,
-        include_archived?: socket.assigns.current_user_member?
+        include_archived?: socket.assigns.current_user_member?,
+        current_user: socket.assigns.current_user,
+        current_user_member?: socket.assigns.current_user_member?
       )
 
     {:noreply, socket |> assign(offerings: offerings)}

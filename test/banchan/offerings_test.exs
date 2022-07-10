@@ -117,7 +117,7 @@ defmodule Banchan.OfferingsTest do
         })
 
       get_slots = fn ->
-        Offerings.list_offerings(client, false, studio: studio)
+        Offerings.list_offerings(studio: studio, current_user: client)
         |> List.first()
         |> Offerings.offering_available_slots()
       end

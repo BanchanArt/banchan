@@ -233,20 +233,12 @@ defmodule Banchan.Offerings do
       iex> list_offerings(current_user, current_studio_member?)
       [%Offering{}, %Offering{}, %Offering{}]
   """
-  def list_offerings(
-        %User{} = current_user,
-        current_user_member?,
-        opts \\ []
-      ) do
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def list_offerings(opts \\ []) do
     q =
       from o in Offering,
         as: :offering,
         join: s in assoc(o, :studio),
-        where: ^current_user_member? or o.hidden == false,
-        left_join: sub in OfferingSubscription,
-        on:
-          sub.user_id == ^current_user.id and sub.offering_id == o.id and
-            sub.silenced != true,
         left_lateral_join:
           used_slots in subquery(
             from c in Commission,
@@ -278,7 +270,6 @@ defmodule Banchan.Offerings do
         select:
           merge(o, %{
             studio: s,
-            user_subscribed?: not is_nil(sub.id),
             used_slots: coalesce(used_slots.used_slots, 0),
             gallery_uploads:
               type(
@@ -306,11 +297,43 @@ defmodule Banchan.Offerings do
 
     q =
       case Keyword.fetch(opts, :studio) do
+        {:ok, nil} ->
+          q
+
         {:ok, %Studio{} = studio} ->
           q |> where([o], o.studio_id == ^studio.id)
 
         :error ->
           q
+      end
+
+    q =
+      case Keyword.fetch(opts, :current_user) do
+        {:ok, nil} ->
+          q |> select_merge(%{user_subscribed?: false})
+
+        {:ok, %User{} = current_user} ->
+          q
+          |> join(:left, [o], sub in OfferingSubscription,
+            on:
+              sub.user_id == ^current_user.id and sub.offering_id == o.id and
+                sub.silenced != true
+          )
+          |> select_merge([o, _studio, _used_slots, _default_prices, _gallery_uploads, sub], %{
+            user_subscribed?: not is_nil(sub.id)
+          })
+
+        :error ->
+          q |> select_merge(%{user_subscribed?: false})
+      end
+
+    q =
+      case Keyword.fetch(opts, :current_user_member?) do
+        {:ok, current_user_member?} ->
+          q |> where([o], ^current_user_member? or o.hidden == false)
+
+        :error ->
+          q |> where([o], o.hidden == false)
       end
 
     Repo.all(q)

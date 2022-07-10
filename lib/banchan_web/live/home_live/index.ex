@@ -11,7 +11,7 @@ defmodule BanchanWeb.HomeLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    offerings = Offerings.list_offerings(socket.assigns.current_user, false)
+    offerings = Offerings.list_offerings(current_user: socket.assigns.current_user)
     {:ok, assign(socket, :offerings, offerings)}
   end
 
@@ -27,11 +27,7 @@ defmodule BanchanWeb.HomeLive do
       <h1 class="text-3xl">Home</h1>
       <div class="sm:px-2 grid grid-cols-2 sm:gap-2 sm:grid-cols-3 md:grid-cols-4 auto-rows-fr">
         {#for {offering, idx} <- Enum.with_index(@offerings)}
-          <OfferingCard
-            id={"offering-#{idx}"}
-            current_user={@current_user}
-            offering={offering}
-          />
+          <OfferingCard id={"offering-#{idx}"} current_user={@current_user} offering={offering} />
         {/for}
       </div>
     </Layout>
