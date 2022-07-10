@@ -80,21 +80,11 @@ defmodule BanchanWeb.Components.Layout do
                 <span>Admin</span>
               </li>
               <li>
-                <LiveRedirect to="/admin/dashboard">
-                  <span>
-                    <i class="fas fa-tachometer-alt" />
-                    Dashboard
-                  </span>
-                </LiveRedirect>
+                <a href="/admin/dashboard" target="_blank" rel="noopener noreferrer"><i class="fas fa-tachometer-alt" /> Dashboard</a>
               </li>
               {#if Mix.env() == :dev}
                 <li>
-                  <LiveRedirect to="/admin/sent_emails">
-                    <span>
-                      <i class="fas fa-paper-plane" />
-                      Sent Emails
-                    </span>
-                  </LiveRedirect>
+                  <a href="/admin/sent_emails" target="_blank" rel="noopener noreferrer"><i class="fas fa-paper-plane" /> Sent Emails</a>
                 </li>
               {/if}
             {/if}
