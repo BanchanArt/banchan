@@ -101,12 +101,12 @@ defmodule BanchanWeb.Components.Layout do
                 </LiveRedirect>
               </li>
               <li>
-                <a href="#">
+                <LiveRedirect to={Routes.discover_index_path(Endpoint, :index)}>
                   <span>
                     <i class="fas fa-search" />
                     Discover
                   </span>
-                </a>
+                </LiveRedirect>
               </li>
               <li>
                 <LiveRedirect to={Routes.offering_index_path(Endpoint, :index)}>

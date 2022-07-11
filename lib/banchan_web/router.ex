@@ -130,6 +130,8 @@ defmodule BanchanWeb.Router do
 
       live("/", HomeLive, :index)
 
+      live("/discover", DiscoverLive.Index, :index)
+
       live("/denizens/:handle", DenizenLive.Show, :show)
 
       live("/offerings", OfferingLive.Index, :index)
