@@ -101,17 +101,9 @@ defmodule BanchanWeb.Components.Layout do
                 </LiveRedirect>
               </li>
               <li>
-                <LiveRedirect to={Routes.discover_index_path(Endpoint, :index)}>
-                  <span>
-                    <i class="fas fa-search" />
-                    Discover
-                  </span>
-                </LiveRedirect>
-              </li>
-              <li>
                 <LiveRedirect to={Routes.offering_index_path(Endpoint, :index)}>
                   <span>
-                    <i class="fas fa-store" />
+                    <i class="fas fa-paint-brush" />
                     Offerings
                   </span>
                 </LiveRedirect>
@@ -119,7 +111,7 @@ defmodule BanchanWeb.Components.Layout do
               <li>
                 <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
                   <span>
-                    <i class="fas fa-paint-brush" />
+                    <i class="fas fa-store" />
                     Studios
                   </span>
                 </LiveRedirect>
