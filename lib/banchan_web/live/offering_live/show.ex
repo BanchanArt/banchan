@@ -86,7 +86,7 @@ defmodule BanchanWeb.OfferingLive.Show do
             end}
           />
         {#else}
-          <MasonryGallery id={@id <> "-masonry-gallery"} images={@gallery_images} />
+          <MasonryGallery id="masonry-gallery" images={@gallery_images} />
         {/if}
       </div>
     </Layout>

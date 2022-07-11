@@ -11,7 +11,7 @@ defmodule BanchanWeb.Components.MasonryGallery.Upload do
   def render(assigns) do
     ~F"""
     <div
-      class={"my-0 sm:mb-2 masonry-item upload-preview relative", "hover:cursor-move": @editable}
+      class="my-0 sm:mb-2 masonry-item upload-preview relative hover:opacity-50 cursor-pointer transition-all"
       data-type="existing"
       data-id={@upload.id}
       draggable={if @editable do
