@@ -27,13 +27,20 @@ defmodule BanchanWeb.OfferingLive.Show do
       offering.gallery_uploads
       |> Enum.map(&{:existing, &1})
 
-    {:noreply,
-     socket
-     |> assign(
-       uri: uri,
-       offering: offering,
-       gallery_images: gallery_images
-     )}
+    if is_nil(offering.archived_at) || socket.assigns.current_user_member? do
+      {:noreply,
+       socket
+       |> assign(
+         uri: uri,
+         offering: offering,
+         gallery_images: gallery_images
+       )}
+    else
+      {:noreply,
+       socket
+       |> put_flash(:error, "This offering is unavailable.")
+       |> push_redirect(to: Routes.offering_index_path(Endpoint, :index))}
+    end
   end
 
   @impl true
@@ -48,7 +55,7 @@ defmodule BanchanWeb.OfferingLive.Show do
             <li class="badge badge-sm badge-primary p-2 cursor-default overflow-hidden">{tag}</li>
           {/for}
         </ul>
-        <div :if={is_nil(@offering.archived_at)} class="pt-2 flex flex-row justify-end card-actions">
+        <div class="pt-2 flex flex-row justify-end card-actions">
           {#if @current_user_member?}
             <LiveRedirect
               to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}
