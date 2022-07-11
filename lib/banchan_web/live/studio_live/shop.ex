@@ -112,6 +112,7 @@ defmodule BanchanWeb.StudioLive.Shop do
       current_user: socket.assigns.current_user,
       current_user_member?: socket.assigns.current_user_member?,
       order_by: :index,
+      show_closed: true,
       page_size: 16,
       page: page
     )

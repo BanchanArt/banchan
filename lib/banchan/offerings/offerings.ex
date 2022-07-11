@@ -255,7 +255,10 @@ defmodule Banchan.Offerings do
               group_by: [oo.offering_id],
               select: %{
                 prices:
-                  type(fragment("array_agg(?)", oo.price), {:array, Money.Ecto.Composite.Type})
+                  type(fragment("array_agg(?)", oo.price), {:array, Money.Ecto.Composite.Type}),
+                # NB(zkat): This is hacky to the point of uselessness if we end up
+                # having a ton of different currencies listed, but it's serviceable for now.
+                sum: fragment("sum((?).amount)", oo.price)
               }
           ),
         left_lateral_join:
@@ -360,8 +363,28 @@ defmodule Banchan.Offerings do
           q
           |> order_by([o], [{:desc, o.inserted_at}])
 
+        {:ok, :price_high} ->
+          q
+          |> order_by([_o, _s, _used_slots, default_prices], [desc: default_prices.sum])
+
+        {:ok, :price_low} ->
+          q
+          |> order_by([_o, _s, _used_slots, default_prices], [asc: default_prices.sum])
+
         :error ->
           q
+      end
+
+    q =
+      case Keyword.fetch(opts, :show_closed) do
+        {:ok, true} ->
+          q
+
+        {:ok, _} ->
+          q |> where([o], o.open)
+
+        :error ->
+          q |> where([o], o.open)
       end
 
     Repo.paginate(q,

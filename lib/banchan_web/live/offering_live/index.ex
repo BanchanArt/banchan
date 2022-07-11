@@ -75,7 +75,9 @@ defmodule BanchanWeb.OfferingLive.Index do
             options={
               "For You": :featured,
               Newest: :newest,
-              Earliest: :oldest
+              Earliest: :oldest,
+              Cheapest: :price_low,
+              Fanciest: :price_high
             }
           />
         </Form>
