@@ -61,7 +61,7 @@ defmodule BanchanWeb.Router do
 
       live("/denizens/:handle/edit", DenizenLive.Edit, :edit)
 
-      live("/studios/:handle/commissions/new/:offering_type", StudioLive.Commissions.New, :new)
+      live("/offerings/:handle/:offering_type/request", OfferingLive.Request, :new)
 
       live("/commissions", CommissionLive, :index)
       live("/commissions/:commission_id", CommissionLive, :show)
@@ -90,12 +90,13 @@ defmodule BanchanWeb.Router do
     live_session :artists_only, on_mount: {BanchanWeb.UserLiveAuth, :artists_only} do
       pipe_through([:browser, :enabled_user, :artist])
 
+      live("/offerings/:handle/:offering_type/edit", StudioLive.Offerings.Edit, :edit)
+
       live("/studios/new", StudioLive.New, :new)
       live("/studios/:handle/settings", StudioLive.Settings, :show)
       live("/studios/:handle/payouts", StudioLive.Payouts, :index)
       live("/studios/:handle/payouts/:payout_id", StudioLive.Payouts, :show)
       live("/studios/:handle/offerings/new", StudioLive.Offerings.New, :new)
-      live("/studios/:handle/offerings/edit/:offering_type", StudioLive.Offerings.Edit, :edit)
 
       get("/studios/:handle/settings/stripe", StripeDashboardController, :dashboard)
     end
@@ -133,6 +134,7 @@ defmodule BanchanWeb.Router do
       live("/denizens/:handle", DenizenLive.Show, :show)
 
       live("/offerings", OfferingLive.Index, :index)
+      live("/offerings/:handle/:offering_type", OfferingLive.Show, :show)
 
       live("/studios", StudioLive.Index, :index)
       live("/studios/:handle", StudioLive.Shop, :show)

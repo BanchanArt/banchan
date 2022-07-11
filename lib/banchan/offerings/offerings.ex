@@ -155,11 +155,31 @@ defmodule Banchan.Offerings do
   def get_offering_by_type!(%Studio{} = studio, type, current_user_member?) do
     Repo.one!(
       from o in Offering,
+        as: :offering,
+        left_lateral_join:
+          gallery_uploads in subquery(
+            from i in GalleryImage,
+              where: i.offering_id == parent_as(:offering).id,
+              join: u in assoc(i, :upload),
+              group_by: [i.offering_id],
+              select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
+          ),
         where:
           o.studio_id == ^studio.id and o.type == ^type and
-            (^current_user_member? or not o.hidden)
+            (^current_user_member? or not o.hidden),
+        select:
+          merge(o, %{
+            gallery_uploads:
+              type(
+                coalesce(
+                  gallery_uploads.uploads,
+                  fragment("ARRAY[]::json[]")
+                ),
+                {:array, Upload}
+              )
+          })
     )
-    |> Repo.preload(:options)
+    |> Repo.preload([:options, :studio])
   end
 
   def change_offering(%Offering{} = offering, attrs \\ %{}) do
