@@ -352,6 +352,14 @@ defmodule Banchan.Offerings do
               fragment("array_length(?, 1) > 0", gallery_uploads.uploads)
           )
 
+        {:ok, :oldest} ->
+          q
+          |> order_by([o], [{:asc, o.inserted_at}])
+
+        {:ok, :newest} ->
+          q
+          |> order_by([o], [{:desc, o.inserted_at}])
+
         :error ->
           q
       end

@@ -109,6 +109,14 @@ defmodule BanchanWeb.Components.Layout do
                 </a>
               </li>
               <li>
+                <LiveRedirect to={Routes.offering_index_path(Endpoint, :index)}>
+                  <span>
+                    <i class="fas fa-store" />
+                    Offerings
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
                 <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
                   <span>
                     <i class="fas fa-paint-brush" />
