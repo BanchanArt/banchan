@@ -365,11 +365,11 @@ defmodule Banchan.Offerings do
 
         {:ok, :price_high} ->
           q
-          |> order_by([_o, _s, _used_slots, default_prices], [desc: default_prices.sum])
+          |> order_by([_o, _s, _used_slots, default_prices], desc: default_prices.sum)
 
         {:ok, :price_low} ->
           q
-          |> order_by([_o, _s, _used_slots, default_prices], [asc: default_prices.sum])
+          |> order_by([_o, _s, _used_slots, default_prices], asc: default_prices.sum)
 
         :error ->
           q
