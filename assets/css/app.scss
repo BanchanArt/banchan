@@ -13,6 +13,8 @@ $fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
 @import "../node_modules/@toast-ui/editor/dist/toastui-editor";
 @import "../node_modules/@toast-ui/editor/dist/theme/toastui-editor-dark";
 
+@import "../node_modules/@splidejs/splide/src/css/themes/default/index";
+
 :root {
   --rounded-box: 1rem;        /* border-radius for cards and other big elements */
   --rounded-btn: 0.5rem;      /* border-radius for buttons and similar elements */

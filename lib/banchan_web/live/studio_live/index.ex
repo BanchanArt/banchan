@@ -14,7 +14,7 @@ defmodule BanchanWeb.StudioLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    socket = socket |> assign(order_by: :featured)
+    socket = socket |> assign(order_by: :homepage)
     {:ok, socket |> assign(studios: list_studios(socket))}
   end
 
@@ -71,7 +71,7 @@ defmodule BanchanWeb.StudioLive.Index do
             name={:sort_by}
             show_label={false}
             options={
-              Featured: :featured,
+              "For You": :homepage,
               Newest: :newest,
               Earliest: :oldest,
               Followers: :followers

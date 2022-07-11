@@ -20,6 +20,7 @@
     "topbar": "^0.1.4"
   },
   "devDependencies": {
+    "@splidejs/splide": "^4.0.7",
     "autoprefixer": "^10.4.2",
     "cross-env": "^7.0.3",
     "postcss": "^8.4.5",

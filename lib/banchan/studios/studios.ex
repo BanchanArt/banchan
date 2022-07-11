@@ -152,6 +152,23 @@ defmodule Banchan.Studios do
     ret
   end
 
+  def update_featured(%User{} = actor, %Studio{} = studio, attrs) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+
+        if :admin in actor.roles do
+          studio
+          |> Studio.featured_changeset(attrs)
+          |> Repo.update()
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
+  end
+
   @doc """
   Creates a new studio.
 
@@ -233,11 +250,17 @@ defmodule Banchan.Studios do
           )
           |> order_by([_s, followers], desc: followers.followers)
 
-        {:ok, :featured} ->
+        {:ok, :homepage} ->
           q
           |> order_by([s], desc: s.inserted_at)
           |> where([s], not is_nil(s.about) and s.about != "")
           |> where([s], not is_nil(s.card_img_id))
+
+        {:ok, :featured} ->
+          q
+          |> order_by([s], desc: s.inserted_at)
+          |> where([s], s.featured == true)
+          |> where([s], not is_nil(s.header_img_id) or not is_nil(s.card_img_id))
 
         :error ->
           q

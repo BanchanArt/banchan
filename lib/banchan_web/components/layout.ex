@@ -22,7 +22,7 @@ defmodule BanchanWeb.Components.Layout do
     ~F"""
     <div class="drawer drawer-mobile h-screen w-full">
       <input type="checkbox" id="drawer-toggle" class="drawer-toggle">
-      <div class="drawer-content h-screen flex flex-col">
+      <div class="drawer-content h-screen flex flex-col flex-grow">
         <div class="top-0 z-50 sticky shadow-sm">
           <Nav uri={@uri} current_user={@current_user} />
         </div>

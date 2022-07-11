@@ -20,6 +20,7 @@ defmodule Banchan.Studios.Studio do
     field :country, Ecto.Enum, values: Common.supported_countries() |> Keyword.values()
     field :default_currency, Ecto.Enum, values: Common.supported_currencies()
     field :payment_currencies, {:array, Ecto.Enum}, values: Common.supported_currencies()
+    field :featured, :boolean, default: false
     field :tags, {:array, :string}
 
     field :stripe_id, :string
@@ -102,6 +103,11 @@ defmodule Banchan.Studios.Studio do
     studio
     |> Ecto.Changeset.change()
     |> put_assoc(:portfolio_imgs, images)
+  end
+
+  def featured_changeset(studio, attrs) do
+    studio
+    |> cast(attrs, [:featured])
   end
 
   defp validate_default_currency(changeset, default_field, currencies_field)
