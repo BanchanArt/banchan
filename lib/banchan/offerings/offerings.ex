@@ -251,7 +251,7 @@ defmodule Banchan.Offerings do
         left_lateral_join:
           default_prices in subquery(
             from oo in OfferingOption,
-              where: oo.offering_id == parent_as(:offering).id,
+              where: oo.offering_id == parent_as(:offering).id and oo.default,
               group_by: [oo.offering_id],
               select: %{
                 prices:
