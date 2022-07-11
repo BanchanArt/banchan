@@ -144,14 +144,6 @@ defmodule BanchanWeb.Components.Layout do
                 </LiveRedirect>
               </li>
               <li>
-                <a href="#">
-                  <span>
-                    <i class="fas fa-comment-alt" />
-                    Messages
-                  </span>
-                </a>
-              </li>
-              <li>
                 <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
                   <span>
                     <i class="fas fa-cog" />
