@@ -53,12 +53,16 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           log: :info
         )
 
-        repo().query!("""
-        CREATE TRIGGER studios_tags_count_update
-        AFTER UPDATE OR INSERT OR DELETE ON studios
-        FOR EACH ROW
-        EXECUTE PROCEDURE public.trigger_update_tags_count();
-        """)
+        repo().query!(
+          """
+          CREATE TRIGGER studios_tags_count_update
+          AFTER UPDATE OR INSERT OR DELETE ON studios
+          FOR EACH ROW
+          EXECUTE PROCEDURE public.trigger_update_tags_count();
+          """,
+          [],
+          log: :info
+        )
       end,
       fn ->
         repo().query!(
@@ -77,9 +81,13 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           log: :info
         )
 
-        repo().query!("""
-        DROP TRIGGER studios_tag_count_update;
-        """)
+        repo().query!(
+          """
+          DROP TRIGGER studios_tag_count_update;
+          """,
+          [],
+          log: :info
+        )
       end
     )
 

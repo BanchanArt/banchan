@@ -55,12 +55,16 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           log: :info
         )
 
-        repo().query!("""
-        CREATE TRIGGER offerings_tags_count_update
-        AFTER UPDATE OR INSERT OR DELETE ON offerings
-        FOR EACH ROW
-        EXECUTE PROCEDURE public.trigger_update_tags_count();
-        """)
+        repo().query!(
+          """
+          CREATE TRIGGER offerings_tags_count_update
+          AFTER UPDATE OR INSERT OR DELETE ON offerings
+          FOR EACH ROW
+          EXECUTE PROCEDURE public.trigger_update_tags_count();
+          """,
+          [],
+          log: :info
+        )
       end,
       fn ->
         repo().query!(
@@ -79,9 +83,13 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           log: :info
         )
 
-        repo().query!("""
-        DROP TRIGGER offerings_tag_count_update;
-        """)
+        repo().query!(
+          """
+          DROP TRIGGER offerings_tag_count_update;
+          """,
+          [],
+          log: :info
+        )
       end
     )
 
