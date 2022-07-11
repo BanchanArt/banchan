@@ -381,10 +381,10 @@ defmodule Banchan.Offerings do
           q
 
         {:ok, _} ->
-          q |> where([o], o.open)
+          q |> where([o], o.open == true)
 
         :error ->
-          q |> where([o], o.open)
+          q |> where([o], o.open == true)
       end
 
     Repo.paginate(q,
