@@ -407,6 +407,29 @@ defmodule Banchan.Offerings do
           q |> where([o], o.open == true)
       end
 
+    q =
+      case Keyword.fetch(opts, :related_to) do
+        {:ok, %Offering{} = related} ->
+          q
+          |> join(:inner, [o], rel in Offering,
+            on: rel.id == ^related.id and rel.id != o.id,
+            as: :related_to
+          )
+          |> where(
+            [o, related_to: related_to],
+            # TODO: Cache this db-side somehow? This seems like a lot of work
+            # to be doing on the fly.
+            fragment(
+              "to_tsquery('banchan_fts', array_to_string(tsvector_to_array(?), ' | ')) @@ ?",
+              related_to.search_vector,
+              o.search_vector
+            )
+          )
+
+        :error ->
+          q
+      end
+
     Repo.paginate(q,
       page: Keyword.get(opts, :page, 1),
       page_size: Keyword.get(opts, :page_size, 20)

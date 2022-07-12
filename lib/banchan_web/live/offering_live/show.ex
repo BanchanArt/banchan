@@ -13,6 +13,7 @@ defmodule BanchanWeb.OfferingLive.Show do
 
   alias BanchanWeb.CommissionLive.Components.Summary
   alias BanchanWeb.Components.{Button, Layout, Lightbox, Markdown, MasonryGallery}
+  alias BanchanWeb.StudioLive.Components.OfferingCard
 
   @impl true
   def handle_params(%{"offering_type" => offering_type} = params, uri, socket) do
@@ -42,6 +43,13 @@ defmodule BanchanWeb.OfferingLive.Show do
         }
       end)
 
+    related =
+      Offerings.list_offerings(
+        related_to: offering,
+        order_by: :featured,
+        page_size: 6
+      )
+
     if is_nil(offering.archived_at) || socket.assigns.current_user_member? do
       {:noreply,
        socket
@@ -49,7 +57,8 @@ defmodule BanchanWeb.OfferingLive.Show do
          uri: uri,
          offering: offering,
          gallery_images: gallery_images,
-         line_items: line_items
+         line_items: line_items,
+         related: related
        )}
     else
       {:noreply,
@@ -66,8 +75,11 @@ defmodule BanchanWeb.OfferingLive.Show do
       <h1 class="text-3xl">{@offering.name}</h1>
       <div class="divider" />
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="flex flex-col md:order-2">
-          <Lightbox id="card-lightbox-mobile" class="md:hidden w-full h-full bg-base-300 rounded-lg aspect-video mb-4">
+        <div class="flex flex-col md:order-2 gap-2">
+          <Lightbox
+            id="card-lightbox-mobile"
+            class="md:hidden w-full h-full bg-base-300 rounded-lg aspect-video mb-4"
+          >
             <Lightbox.Item>
               <img
                 class="w-full h-full object-contain aspect-video"
@@ -108,10 +120,23 @@ defmodule BanchanWeb.OfferingLive.Show do
               <Button class="btn-info" click="unnotify_me">Unsubscribe</Button>
             {/if}
           </div>
+          {#if !Enum.empty?(@related)}
+            <div class="hidden md:flex md:flex-col">
+              <div class="pt-4 text-2xl">Discover More</div>
+              <div class="p-2 flex flex-col">
+                {#for {rel, idx} <- Enum.with_index(@related)}
+                  <OfferingCard id={"related-desktop-#{idx}"} current_user={@current_user} offering={rel} />
+                {/for}
+              </div>
+            </div>
+          {/if}
         </div>
         <div class="divider md:hidden" />
         <div class="flex flex-col md:col-span-2 md:order-1 gap-4">
-          <Lightbox id="card-lightbox-md" class="hidden md:block w-full h-full bg-base-300 rounded-lg aspect-video">
+          <Lightbox
+            id="card-lightbox-md"
+            class="hidden md:block w-full h-full bg-base-300 rounded-lg aspect-video"
+          >
             <Lightbox.Item>
               <img
                 class="w-full h-full object-contain aspect-video"
@@ -128,6 +153,16 @@ defmodule BanchanWeb.OfferingLive.Show do
           {#if !Enum.empty?(@gallery_images)}
             <div class="text-2xl">Gallery</div>
             <MasonryGallery id="masonry-gallery" images={@gallery_images} />
+          {/if}
+          {#if !Enum.empty?(@related)}
+            <div class="flex flex-col md:hidden">
+              <div class="pt-4 text-2xl">Discover More</div>
+              <div class="p-2 flex flex-col">
+                {#for {rel, idx} <- Enum.with_index(@related)}
+                  <OfferingCard id={"related-mobile-#{idx}"} current_user={@current_user} offering={rel} />
+                {/for}
+              </div>
+            </div>
           {/if}
         </div>
       </div>
