@@ -72,7 +72,9 @@ defmodule BanchanWeb.OfferingLive.Show do
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <h1 class="text-3xl">{@offering.name}</h1>
+      <h1 class="text-3xl">
+        {@offering.name}
+      </h1>
       <div class="divider" />
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="flex flex-col md:order-2 gap-2">
@@ -91,12 +93,25 @@ defmodule BanchanWeb.OfferingLive.Show do
               />
             </Lightbox.Item>
           </Lightbox>
-          <div class="md:text-xl">
-            By
-            <LiveRedirect
-              class="hover:link font-bold"
-              to={Routes.studio_shop_path(Endpoint, :show, @offering.studio.handle)}
-            >{@offering.studio.name}</LiveRedirect>
+          <div class="flex flex-row flex-wrap items-center">
+            <div class="md:text-xl grow">
+              By
+              <LiveRedirect
+                class="hover:link font-bold"
+                to={Routes.studio_shop_path(Endpoint, :show, @offering.studio.handle)}
+              >{@offering.studio.name}</LiveRedirect>
+            </div>
+            {#if @offering.hidden}
+              <div class="badge badge-error badge-outline">Hidden</div>
+            {#elseif @offering.open && !is_nil(@offering.slots)}
+              <div class="whitespace-nowrap badge badge-outline badge-primary">{@available_slots}/{@offering.slots} Slots</div>
+            {#elseif !@offering.open && !is_nil(@offering.slots)}
+              <div class="badge badge-error badge-outline">0/{@offering.slots} Slots</div>
+            {#elseif @offering.open}
+              <div class="badge badge-primary badge-outline">Open</div>
+            {#else}
+              <div class="badge badge-error badge-outline">Closed</div>
+            {/if}
           </div>
           <div class="divider" />
           <Summary line_items={@line_items} hide_header offering={@offering} studio={@studio} />
