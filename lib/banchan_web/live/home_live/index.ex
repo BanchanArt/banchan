@@ -64,7 +64,7 @@ defmodule BanchanWeb.HomeLive do
                     src={Routes.public_image_path(Endpoint, :image, studio.header_img_id || studio.card_img_id)}
                   />
                 </LiveRedirect>
-                <div class="absolute top-2 left-2 md:top-6 md:left-6 text-3xl sm:text-3xl md:text-6xl font-bold">
+                <div class="absolute top-2 left-2 md:top-6 md:left-6 text-3xl sm:text-3xl md:text-6xl font-bold text-white">
                   {studio.name}
                 </div>
               </Carousel.Slide>
