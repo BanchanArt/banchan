@@ -212,7 +212,13 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
       {:ok, offering} ->
         {:noreply,
          redirect(socket,
-           to: Routes.offering_show_path(Endpoint, :show, socket.assigns.studio.handle, offering.type)
+           to:
+             Routes.offering_show_path(
+               Endpoint,
+               :show,
+               socket.assigns.studio.handle,
+               offering.type
+             )
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->

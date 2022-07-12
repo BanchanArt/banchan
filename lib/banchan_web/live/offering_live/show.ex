@@ -91,6 +91,14 @@ defmodule BanchanWeb.OfferingLive.Show do
               />
             </Lightbox.Item>
           </Lightbox>
+          <div class="md:text-xl">
+            By
+            <LiveRedirect
+              class="hover:link font-bold"
+              to={Routes.studio_shop_path(Endpoint, :show, @offering.studio.handle)}
+            >{@offering.studio.name}</LiveRedirect>
+          </div>
+          <div class="divider" />
           <Summary line_items={@line_items} hide_header offering={@offering} studio={@studio} />
           {#if !Enum.empty?(@offering.tags)}
             <h3 class="pt-2 text-lg">Tags</h3>
@@ -148,11 +156,17 @@ defmodule BanchanWeb.OfferingLive.Show do
               />
             </Lightbox.Item>
           </Lightbox>
-          <div class="text-2xl">Description</div>
-          <Markdown class="pb-4" content={@offering.description} />
+          <div class="rounded-lg shadow-lg bg-base-200 p-4">
+            <div class="text-2xl">Description</div>
+            <div class="divider" />
+            <Markdown class="pb-4" content={@offering.description} />
+          </div>
           {#if !Enum.empty?(@gallery_images)}
-            <div class="text-2xl">Gallery</div>
-            <MasonryGallery id="masonry-gallery" images={@gallery_images} />
+            <div class="rounded-lg shadow-lg bg-base-200 p-4">
+              <div class="text-2xl">Gallery</div>
+              <div class="divider" />
+              <MasonryGallery id="masonry-gallery" images={@gallery_images} />
+            </div>
           {/if}
           {#if !Enum.empty?(@related)}
             <div class="flex flex-col md:hidden">
