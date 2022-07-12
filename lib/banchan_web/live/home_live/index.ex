@@ -79,7 +79,7 @@ defmodule BanchanWeb.HomeLive do
               Selected Offerings
             </div>
             <div class="text-md">
-              <a href="#" class="hover:link text-primary">View All</a>
+              <LiveRedirect class="hover:link text-primary" to={Routes.offering_index_path(Endpoint, :index)}>View All</LiveRedirect>
             </div>
           </div>
           <div class="divider" />
