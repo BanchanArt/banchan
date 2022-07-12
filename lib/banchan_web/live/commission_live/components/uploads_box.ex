@@ -5,9 +5,8 @@ defmodule BanchanWeb.CommissionLive.Components.UploadsBox do
   use BanchanWeb, :live_component
 
   alias Banchan.Commissions
-  alias Banchan.Uploads
 
-  alias BanchanWeb.CommissionLive.Components.{AttachmentBox, MediaPreview}
+  alias BanchanWeb.CommissionLive.Components.AttachmentBox
   alias BanchanWeb.Components.Collapse
 
   prop current_user, :struct, required: true
@@ -54,19 +53,6 @@ defmodule BanchanWeb.CommissionLive.Components.UploadsBox do
     end
   end
 
-  @impl true
-  def handle_event("open_preview", %{"key" => key, "bucket" => bucket}, socket) do
-    if socket.assigns.current_user.id == socket.assigns.commission.client_id ||
-         socket.assigns.current_user_member? do
-      MediaPreview.open(
-        "draft-preview",
-        Uploads.get_upload!(bucket, key)
-      )
-    end
-
-    {:noreply, socket}
-  end
-
   def render(assigns) do
     ~F"""
     <div>
@@ -74,9 +60,12 @@ defmodule BanchanWeb.CommissionLive.Components.UploadsBox do
         <:header>
           <div class="text-lg font-medium">Uploads ({Enum.count(@attachments)})</div>
         </:header>
-        <AttachmentBox commission={@commission} attachments={@attachments} open_preview="open_preview" />
+        <AttachmentBox
+          base_id={@id <> "-attachments"}
+          commission={@commission}
+          attachments={@attachments}
+        />
       </Collapse>
-      <MediaPreview id="draft-preview" commission={@commission} />
     </div>
     """
   end
