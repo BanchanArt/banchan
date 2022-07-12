@@ -5,7 +5,7 @@ defmodule BanchanWeb.Components.Lightbox.Item do
   use BanchanWeb, :component
 
   prop class, :css_class
-  prop src, :string, required: true
+  prop src, :string
 
   # Type of media. Can be :image or :video
   # TODO: Finish adding video support.

@@ -5,6 +5,8 @@ defmodule BanchanWeb.Components.MasonryGallery.LiveImgPreview do
   """
   use BanchanWeb, :component
 
+  alias BanchanWeb.Components.Lightbox
+
   prop entry, :struct, required: true
   prop editable, :boolean
   prop deleted, :event
@@ -31,9 +33,11 @@ defmodule BanchanWeb.Components.MasonryGallery.LiveImgPreview do
           :on-click={@deleted}
         >✕</button>
       {/if}
-      {Phoenix.LiveView.Helpers.live_img_preview(@entry,
-        class: "w-full h-full object-cover"
-      )}
+      <Lightbox.Item>
+        {Phoenix.LiveView.Helpers.live_img_preview(@entry,
+          class: "w-full h-full object-cover"
+        )}
+      </Lightbox.Item>
     </div>
     """
   end

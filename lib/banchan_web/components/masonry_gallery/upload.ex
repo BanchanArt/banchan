@@ -4,6 +4,8 @@ defmodule BanchanWeb.Components.MasonryGallery.Upload do
   """
   use BanchanWeb, :component
 
+  alias BanchanWeb.Components.Lightbox
+
   prop upload, :struct, required: true
   prop editable, :boolean
   prop deleted, :event
@@ -29,10 +31,12 @@ defmodule BanchanWeb.Components.MasonryGallery.Upload do
           :on-click={@deleted}
         >✕</button>
       {/if}
-      <img
-        class="w-full h-full object-cover"
-        src={Routes.public_image_path(Endpoint, :image, @upload.id)}
-      />
+      <Lightbox.Item>
+        <img
+          class="w-full h-full object-cover"
+          src={Routes.public_image_path(Endpoint, :image, @upload.id)}
+        />
+      </Lightbox.Item>
     </div>
     """
   end
