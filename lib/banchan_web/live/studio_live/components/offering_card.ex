@@ -80,19 +80,26 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           "opacity-50": !is_nil(@offering.archived_at)
         }>
           <:header>
-            <div class="text-lg font-bold">{@offering.name}</div>
+            <div class="text-sm sm:text-lg font-bold">{@offering.name}</div>
           </:header>
           <:header_aside>
-            {#if @offering.hidden}
-              <div class="badge badge-error badge-outline">Hidden</div>
-            {#elseif @offering.open && !is_nil(@offering.slots)}
-              <div class="whitespace-nowrap badge badge-outline badge-primary">{@available_slots}/{@offering.slots} Slots</div>
-            {#elseif !@offering.open && !is_nil(@offering.slots)}
-              <div class="badge badge-error badge-outline">0/{@offering.slots} Slots</div>
-            {#elseif @offering.open}
-              <div class="badge badge-primary badge-outline">Open</div>
+            <div class="hidden sm:flex flex-row flex-wrap">
+              {#if @offering.hidden}
+                <div class="badge badge-error badge-outline">Hidden</div>
+              {#elseif @offering.open && !is_nil(@offering.slots)}
+                <div class="whitespace-nowrap badge badge-outline badge-primary">{@available_slots}/{@offering.slots} Slots</div>
+              {#elseif !@offering.open && !is_nil(@offering.slots)}
+                <div class="badge badge-error badge-outline">0/{@offering.slots} Slots</div>
+              {#elseif @offering.open}
+                <div class="badge badge-primary badge-outline">Open</div>
+              {#else}
+                <div class="badge badge-error badge-outline">Closed</div>
+              {/if}
+            </div>
+            {#if @base_price && !Enum.empty?(@base_price)}
+              <span class="sm:hidden font-semibold text-sm">{@base_price |> Enum.map(fn {_, amt} -> Money.to_string(amt) end) |> Enum.join(" + ")}</span>
             {#else}
-              <div class="badge badge-error badge-outline">Closed</div>
+              <span class="sm:hidden font-semibold text-sm">Inquire</span>
             {/if}
           </:header_aside>
           <:image>
@@ -106,7 +113,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
               end}
             />
           </:image>
-          <div class="flex flex-col grow">
+          <div class="hidden sm:flex flex-col grow">
             <p class="flex flex-row items-end">
               <span class="font-bold grow">Base Price:</span>
               {#if @base_price && !Enum.empty?(@base_price)}
