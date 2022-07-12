@@ -43,6 +43,9 @@ defmodule BanchanWeb.OfferingLive.Show do
         }
       end)
 
+    available_slots =
+      Offerings.offering_available_slots(offering)
+
     related =
       Offerings.list_offerings(
         related_to: offering,
@@ -58,6 +61,7 @@ defmodule BanchanWeb.OfferingLive.Show do
          offering: offering,
          gallery_images: gallery_images,
          line_items: line_items,
+         available_slots: available_slots,
          related: related
        )}
     else

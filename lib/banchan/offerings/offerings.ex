@@ -164,11 +164,21 @@ defmodule Banchan.Offerings do
               group_by: [i.offering_id],
               select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
           ),
+        left_lateral_join:
+          used_slots in subquery(
+            from c in Commission,
+              where:
+                c.offering_id == parent_as(:offering).id and
+                  c.status not in [:withdrawn, :approved, :submitted, :rejected],
+              group_by: [c.offering_id],
+              select: %{used_slots: count(c.id)}
+          ),
         where:
           o.studio_id == ^studio.id and o.type == ^type and
             (^current_user_member? or not o.hidden),
         select:
           merge(o, %{
+            used_slots: coalesce(used_slots.used_slots, 0),
             gallery_uploads:
               type(
                 coalesce(
