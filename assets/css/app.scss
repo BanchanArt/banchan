@@ -15,7 +15,7 @@ $fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
 
 @import "../node_modules/@splidejs/splide/src/css/themes/default/index";
 
-@import "../node_modules/spotlight.js/dist/css/spotlight.min";
+@import "./spotlight";
 
 :root {
   --rounded-box: 1rem;        /* border-radius for cards and other big elements */
