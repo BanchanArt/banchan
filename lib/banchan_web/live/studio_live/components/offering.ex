@@ -209,10 +209,10 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
            socket.assigns.studio,
            socket.assigns.current_user_member?
          ) do
-      {:ok, _offering} ->
+      {:ok, offering} ->
         {:noreply,
          redirect(socket,
-           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+           to: Routes.offering_show_path(Endpoint, :show, socket.assigns.studio.handle, offering.type)
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
