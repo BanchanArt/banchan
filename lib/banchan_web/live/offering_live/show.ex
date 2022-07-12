@@ -43,8 +43,7 @@ defmodule BanchanWeb.OfferingLive.Show do
         }
       end)
 
-    available_slots =
-      Offerings.offering_available_slots(offering)
+    available_slots = Offerings.offering_available_slots(offering)
 
     related =
       Offerings.list_offerings(
