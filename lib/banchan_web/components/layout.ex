@@ -63,7 +63,7 @@ defmodule BanchanWeb.Components.Layout do
           </div>
         </footer>
       </div>
-      <div :if={!is_nil(@current_user)} class="drawer-side">
+      <div class="drawer-side">
         <label for="drawer-toggle" class="drawer-overlay" />
         <aside class="bg-base-200 w-48 shadow">
           <ul tabindex="0" class="menu flex flex-col p-2 gap-2">
@@ -75,7 +75,7 @@ defmodule BanchanWeb.Components.Layout do
                 </span>
               </LiveRedirect>
             </li>
-            {#if :admin in @current_user.roles}
+            {#if @current_user && :admin in @current_user.roles}
               <li class="menu-title">
                 <span>Admin</span>
               </li>
@@ -88,44 +88,44 @@ defmodule BanchanWeb.Components.Layout do
                 </li>
               {/if}
             {/if}
+            <li class="menu-title">
+              <span>Art</span>
+            </li>
+            <li>
+              <input
+                type="text"
+                class="input p-2 input-sm cursor-text hover:cursor-text"
+                placeholder="Search"
+              />
+            </li>
+            <li :if={@current_user}>
+              <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
+                <span>
+                  <i class="fas fa-palette" />
+                  My Commissions
+                </span>
+              </LiveRedirect>
+            </li>
+            <li>
+              <LiveRedirect to={Routes.offering_index_path(Endpoint, :index)}>
+                <span>
+                  <i class="fas fa-paint-brush" />
+                  Offerings
+                </span>
+              </LiveRedirect>
+            </li>
+            <li>
+              <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
+                <span>
+                  <i class="fas fa-store" />
+                  Studios
+                </span>
+              </LiveRedirect>
+            </li>
+            <li class="menu-title">
+              <span>Account</span>
+            </li>
             {#if @current_user}
-              <li class="menu-title">
-                <span>Art</span>
-              </li>
-              <li>
-                <input
-                  type="text"
-                  class="input p-2 input-sm cursor-text hover:cursor-text"
-                  placeholder="Search"
-                />
-              </li>
-              <li>
-                <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
-                  <span>
-                    <i class="fas fa-palette" />
-                    My Commissions
-                  </span>
-                </LiveRedirect>
-              </li>
-              <li>
-                <LiveRedirect to={Routes.offering_index_path(Endpoint, :index)}>
-                  <span>
-                    <i class="fas fa-paint-brush" />
-                    Offerings
-                  </span>
-                </LiveRedirect>
-              </li>
-              <li>
-                <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
-                  <span>
-                    <i class="fas fa-store" />
-                    Studios
-                  </span>
-                </LiveRedirect>
-              </li>
-              <li class="menu-title">
-                <span>Account</span>
-              </li>
               <li>
                 <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
                   <span>
@@ -165,6 +165,23 @@ defmodule BanchanWeb.Components.Layout do
                     Log out
                   </span>
                 </Link>
+              </li>
+            {#else}
+              <li>
+                <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
+                  <span>
+                    <i class="fas fa-sign-in-alt" />
+                    Log in
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
+                <LiveRedirect to={Routes.register_path(Endpoint, :new)}>
+                  <span>
+                    <i class="fas fa-user-plus" />
+                    Register
+                  </span>
+                </LiveRedirect>
               </li>
             {/if}
           </ul>
