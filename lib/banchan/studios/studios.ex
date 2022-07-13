@@ -226,6 +226,7 @@ defmodule Banchan.Studios do
       iex> list_studios().entries
       [%Studio{}, %Studio{}, %Studio{}, ...]
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def list_studios(opts \\ []) do
     q = from(s in Studio, as: :studio)
 

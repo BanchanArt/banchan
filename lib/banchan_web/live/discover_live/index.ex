@@ -5,9 +5,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
   use BanchanWeb, :surface_view
 
   alias Surface.Components.{Form, LivePatch}
-  alias Surface.Components.Form.{Field, Submit}
-  alias Surface.Components.Form.TextInput
-  alias Surface.Components.Form.Select
+  alias Surface.Components.Form.{Field, Select, Submit, TextInput}
 
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.DiscoverLive.Components.{Offerings, Studios}
@@ -19,6 +17,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
   end
 
   @impl true
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_event("change", search, socket) do
     if search["_target"] == ["sort_by"] do
       sort_by = search["sort_by"] && String.to_existing_atom(search["sort_by"])
