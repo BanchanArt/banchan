@@ -93,7 +93,7 @@ defmodule Banchan.Accounts.User do
     |> cast(attrs, [:handle, :email, :password])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
-    |> validate_required([:email])
+    |> validate_required([:handle, :email])
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)

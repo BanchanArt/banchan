@@ -33,6 +33,26 @@ defmodule BanchanWeb.RegisterLive do
   end
 
   @impl true
+  def handle_event("change", val, socket) do
+    changeset =
+      %User{}
+      |> Accounts.change_user_registration(val["user"])
+      |> Map.put(:action, :update)
+
+    socket = assign(socket, changeset: changeset)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("submit", val, socket) do
+    changeset =
+      %User{}
+      |> Accounts.change_user_registration(val["user"])
+
+    {:noreply, assign(socket, changeset: changeset, trigger_submit: true)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
@@ -45,11 +65,28 @@ defmodule BanchanWeb.RegisterLive do
         trigger_action={@trigger_submit}
       >
         <h1 class="text-2xl">Register</h1>
-        <EmailInput name={:email} icon="envelope" opts={required: true} />
-        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+        <TextInput
+          name={:handle}
+          info="Your unique @handle that can be used to refer to you."
+          icon="at"
+          opts={required: true, type: :password}
+        />
+        <EmailInput
+          name={:email}
+          info="A valid email address. You'll need to confirm this."
+          icon="envelope"
+          opts={required: true}
+        />
+        <TextInput
+          name={:password}
+          info="Your new password. Must be between 12 and 80 characters."
+          icon="lock"
+          opts={required: true, type: :password}
+        />
         <TextInput
           name={:password_confirmation}
           label="Confirm Password"
+          info="Must match your password above!"
           icon="lock"
           opts={required: true, type: :password}
         />
@@ -83,25 +120,5 @@ defmodule BanchanWeb.RegisterLive do
       </div>
     </AuthLayout>
     """
-  end
-
-  @impl true
-  def handle_event("change", val, socket) do
-    changeset =
-      %User{}
-      |> Accounts.change_user_registration(val["user"])
-      |> Map.put(:action, :update)
-
-    socket = assign(socket, changeset: changeset)
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("submit", val, socket) do
-    changeset =
-      %User{}
-      |> Accounts.change_user_registration(val["user"])
-
-    {:noreply, assign(socket, changeset: changeset, trigger_submit: true)}
   end
 end
