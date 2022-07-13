@@ -34,6 +34,14 @@ defmodule BanchanWeb.StudioLive.Helpers do
           :mod not in socket.assigns.current_user.roles ->
         raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
 
+      studio.mature && !socket.assigns.current_user_member.mature_ok ->
+        socket
+        |> put_flash(
+          :error,
+          "This studio is marked as mature, but you have not enabled mature content. You can enable this in your user settings."
+        )
+        |> redirect(to: Routes.discover_index_path(Endpoint, :index, "studios"))
+
       requires_stripe && !Studios.charges_enabled?(studio, false) ->
         socket
         |> put_flash(:error, "This studio is not ready to accept commissions yet.")

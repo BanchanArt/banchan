@@ -22,6 +22,7 @@ defmodule Banchan.Studios.Studio do
     field :payment_currencies, {:array, Ecto.Enum}, values: Common.supported_currencies()
     field :featured, :boolean, default: false
     field :tags, {:array, :string}
+    field :mature, :boolean, default: false
 
     field :stripe_id, :string
     field :stripe_charges_enabled, :boolean
@@ -51,6 +52,7 @@ defmodule Banchan.Studios.Studio do
       :name,
       :handle,
       :about,
+      :mature,
       :country,
       :default_currency,
       :payment_currencies
@@ -75,6 +77,7 @@ defmodule Banchan.Studios.Studio do
       :name,
       :handle,
       :about,
+      :mature,
       :tags,
       :default_currency,
       :payment_currencies,

@@ -34,6 +34,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
 
   defp list_offerings(socket, page \\ 1) do
     Offerings.list_offerings(
+      current_user: socket.assigns.current_user,
       order_by: socket.assigns.order_by,
       query: socket.assigns.query,
       page_size: socket.assigns.page_size,

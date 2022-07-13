@@ -319,8 +319,13 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         />
         <Checkbox
           name={:hidden}
-          label="Hide from Shop"
-          info="Hide this offering from the shop. You will still be able to link people to it."
+          label="Hide"
+          info="Hide this offering from the shop, search, and listings. You will still be able to link people to it."
+        />
+        <Checkbox
+          name={:mature}
+          label="Mature"
+          info="Mark this offering as mature content. Note: if you plan on doing mature/NSFW commissions through this offering, this MUST be checked."
         />
         <Collapse id={@id <> "-images"} class="rounded-lg border border-primary">
           <:header>

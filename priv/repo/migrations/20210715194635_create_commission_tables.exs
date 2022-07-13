@@ -15,6 +15,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
       add :template, :text
       add :archived_at, :naive_datetime
       add :tags, {:array, :citext}, default: [], null: false
+      add :mature, :boolean, null: false
 
       add :card_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :studio_id, references(:studios), null: false

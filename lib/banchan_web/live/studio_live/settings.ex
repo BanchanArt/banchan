@@ -14,6 +14,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   alias BanchanWeb.Components.Button
 
   alias BanchanWeb.Components.Form.{
+    Checkbox,
     MarkdownInput,
     MultipleSelect,
     Select,
@@ -193,6 +194,11 @@ defmodule BanchanWeb.StudioLive.Settings do
             />
             <TextInput name={:name} info="Display name for studio" icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />
+            <Checkbox
+              name={:mature}
+              label="Mature"
+              info="Mark this studio as exclusively for mature content. You can still make indiviual mature offerings if this is unchecked."
+            />
             <Select
               name={:default_currency}
               info="Default currency to display in currencies dropdown when entering invoice amounts."

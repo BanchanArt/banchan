@@ -354,11 +354,12 @@ defmodule Banchan.Offerings do
 
     q =
       case Keyword.fetch(opts, :current_user) do
-        {:ok, nil} ->
-          q |> select_merge(%{user_subscribed?: false})
-
         {:ok, %User{} = current_user} ->
           q
+          |> where(
+            [o],
+            o.mature != true or (o.mature == true and ^current_user.mature_ok == true)
+          )
           |> join(:left, [o], sub in OfferingSubscription,
             on:
               sub.user_id == ^current_user.id and sub.offering_id == o.id and
@@ -368,8 +369,10 @@ defmodule Banchan.Offerings do
             user_subscribed?: not is_nil(sub.id)
           })
 
-        :error ->
-          q |> select_merge(%{user_subscribed?: false})
+        _ ->
+          q
+          |> where([o], o.mature != true)
+          |> select_merge(%{user_subscribed?: false})
       end
 
     q =

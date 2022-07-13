@@ -25,6 +25,8 @@ defmodule Banchan.Accounts.User do
     field :totp_secret, :binary
     field :totp_activated, :boolean
     field :tags, {:array, :string}
+    field :mature_ok, :boolean, default: false
+    field :uncensored_mature, :boolean, default: false
 
     # Roles and moderation
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist], default: []
@@ -442,6 +444,14 @@ defmodule Banchan.Accounts.User do
 
     user
     |> cast(attrs, [:totp_secret, :totp_activated])
+  end
+
+  @doc """
+  User changeset for setting maturity flag.
+  """
+  def maturity_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:mature_ok, :uncensored_mature])
   end
 
   @doc """

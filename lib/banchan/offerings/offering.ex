@@ -25,6 +25,7 @@ defmodule Banchan.Offerings.Offering do
     field :template, :string
     field :archived_at, :naive_datetime
     field :tags, {:array, :string}
+    field :mature, :boolean, default: false
 
     field :option_prices, {:array, Money.Ecto.Composite.Type}, virtual: true
     field :used_slots, :integer, virtual: true
@@ -65,7 +66,8 @@ defmodule Banchan.Offerings.Offering do
       :hidden,
       :terms,
       :template,
-      :tags
+      :tags,
+      :mature
     ])
     |> cast_assoc(:options)
     |> validate_format(:type, ~r/^[0-9a-z-]+$/,

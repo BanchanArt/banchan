@@ -33,6 +33,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
 
   defp list_studios(socket, page \\ 1) do
     Studios.list_studios(
+      current_user: socket.assigns.current_user,
       order_by: socket.assigns.order_by,
       query: socket.assigns.query,
       page_size: socket.assigns.page_size,

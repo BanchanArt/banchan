@@ -52,22 +52,33 @@ defmodule BanchanWeb.OfferingLive.Show do
         page_size: 6
       )
 
-    if is_nil(offering.archived_at) || socket.assigns.current_user_member? do
-      {:noreply,
-       socket
-       |> assign(
-         uri: uri,
-         offering: offering,
-         gallery_images: gallery_images,
-         line_items: line_items,
-         available_slots: available_slots,
-         related: related
-       )}
-    else
-      {:noreply,
-       socket
-       |> put_flash(:error, "This offering is unavailable.")
-       |> push_redirect(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
+    cond do
+      (offering.mature || offering.studio.mature) && !socket.assigns.current_user.mature_ok ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "This offering is marked as mature, but you have not enabled mature content. You can enable this in your user settings."
+         )
+         |> push_redirect(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
+
+      is_nil(offering.archived_at) || socket.assigns.current_user_member? ->
+        {:noreply,
+         socket
+         |> assign(
+           uri: uri,
+           offering: offering,
+           gallery_images: gallery_images,
+           line_items: line_items,
+           available_slots: available_slots,
+           related: related
+         )}
+
+      true ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "This offering is unavailable.")
+         |> push_redirect(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
     end
   end
 
@@ -96,7 +107,7 @@ defmodule BanchanWeb.OfferingLive.Show do
               />
             </Lightbox.Item>
           </Lightbox>
-          <div class="flex flex-row flex-wrap items-center">
+          <div class="flex flex-row flex-wrap items-center gap-2">
             <div class="md:text-xl grow">
               By
               <LiveRedirect
@@ -104,6 +115,9 @@ defmodule BanchanWeb.OfferingLive.Show do
                 to={Routes.studio_shop_path(Endpoint, :show, @offering.studio.handle)}
               >{@offering.studio.name}</LiveRedirect>
             </div>
+            {#if @offering.mature}
+              <div class="badge badge-error badge-outline">18+</div>
+            {/if}
             {#if @offering.hidden}
               <div class="badge badge-error badge-outline">Hidden</div>
             {#elseif @offering.open && !is_nil(@offering.slots)}

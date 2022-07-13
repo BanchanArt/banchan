@@ -10,7 +10,15 @@ defmodule BanchanWeb.StudioLive.New do
   alias Banchan.Studios
   alias Banchan.Studios.Studio
 
-  alias BanchanWeb.Components.Form.{MarkdownInput, MultipleSelect, Select, Submit, TextInput}
+  alias BanchanWeb.Components.Form.{
+    Checkbox,
+    MarkdownInput,
+    MultipleSelect,
+    Select,
+    Submit,
+    TextInput
+  }
+
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
@@ -118,6 +126,11 @@ defmodule BanchanWeb.StudioLive.New do
               id="about"
               info="Tell us about your studio, what kind of art it's for, and what makes it different!"
               name={:about}
+            />
+            <Checkbox
+              name={:mature}
+              label="Mature"
+              info="Mark this studio as exclusively for mature content. You can still make indiviual mature offerings if this is unchecked."
             />
             <Select
               name={:country}

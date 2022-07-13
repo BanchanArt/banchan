@@ -29,9 +29,6 @@ defmodule BanchanWeb.StudioLive.Shop do
         nil
       end
 
-    # TODO: This page does a TON of requests right now (partly because of
-    # OfferingCard). This should be replaced with a single "general" query
-    # that picks up everything we need for this listing.
     {:ok,
      assign(socket,
        offerings: list_offerings(socket),

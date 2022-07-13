@@ -25,6 +25,8 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :confirmed_at, :naive_datetime
       add :totp_secret, :binary
       add :totp_activated, :boolean
+      add :mature_ok, :boolean, null: false
+      add :uncensored_mature, :boolean, null: false
 
       # OAuth
       add :twitter_uid, :text

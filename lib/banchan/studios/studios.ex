@@ -231,6 +231,20 @@ defmodule Banchan.Studios do
     q = from(s in Studio, as: :studio)
 
     q =
+      case Keyword.fetch(opts, :current_user) do
+        {:ok, %User{} = current_user} ->
+          q
+          |> where(
+            [s],
+            s.mature != true or (s.mature == true and ^current_user.mature_ok == true)
+          )
+
+        _ ->
+          q
+          |> where([s], s.mature != true)
+      end
+
+    q =
       case Keyword.fetch(opts, :include_pending) do
         {:ok, true} ->
           q

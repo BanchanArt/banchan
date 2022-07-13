@@ -686,6 +686,12 @@ defmodule Banchan.Accounts do
     end
   end
 
+  def update_maturity(user, attrs) do
+    user
+    |> User.maturity_changeset(attrs)
+    |> Repo.update()
+  end
+
   ## Session
 
   @doc """

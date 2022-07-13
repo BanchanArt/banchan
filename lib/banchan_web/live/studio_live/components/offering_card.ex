@@ -84,6 +84,9 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           </:header>
           <:header_aside>
             <div class="hidden sm:flex flex-row flex-wrap">
+              {#if @offering.mature}
+                <div class="badge badge-error badge-outline">18+</div>
+              {/if}
               {#if @offering.hidden}
                 <div class="badge badge-error badge-outline">Hidden</div>
               {#elseif @offering.open && !is_nil(@offering.slots)}
@@ -104,7 +107,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           </:header_aside>
           <:image>
             <img
-              class="object-contain aspect-video"
+              class={"object-contain aspect-video", "blur-lg": @offering.mature && !@current_user.uncensored_mature}
               draggable="false"
               src={if @offering.card_img_id do
                 Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
@@ -113,7 +116,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
               end}
             />
           </:image>
-          <div class="hidden sm:flex flex-col grow">
+          <div class="hidden sm:flex flex-col grow z-20">
             <p class="flex flex-row items-end">
               <span class="font-bold grow">Base Price:</span>
               {#if @base_price && !Enum.empty?(@base_price)}

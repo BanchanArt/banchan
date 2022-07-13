@@ -174,9 +174,9 @@ defmodule BanchanWeb.DiscoverLive.Index do
         </Form>
       </div>
       {#if @type == "studios"}
-        <Studios id="studios" query={@query} order_by={@order_by} />
+        <Studios id="studios" current_user={@current_user} query={@query} order_by={@order_by} />
       {#elseif @type == "offerings"}
-        <Offerings id="offerings" query={@query} order_by={@order_by} />
+        <Offerings id="offerings" current_user={@current_user} query={@query} order_by={@order_by} />
       {#else}
         <div class="px-2 flex flex-row items-end">
           <div class="text-xl grow">

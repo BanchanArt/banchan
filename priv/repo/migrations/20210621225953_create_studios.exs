@@ -19,6 +19,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :stripe_charges_enabled, :boolean, default: false
       add :stripe_details_submitted, :boolean, default: false
       add :platform_fee, :decimal, null: false
+      add :mature, :boolean, null: false
       timestamps()
     end
 

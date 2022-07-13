@@ -27,7 +27,8 @@ defmodule BanchanWeb.SettingsLive do
            theme: nil,
            new_email_changeset: User.email_changeset(socket.assigns.current_user, %{}),
            notification_settings: settings,
-           notification_settings_changeset: UserNotificationSettings.changeset(settings, %{})
+           notification_settings_changeset: UserNotificationSettings.changeset(settings, %{}),
+           maturity_changeset: User.maturity_changeset(socket.assigns.current_user, %{})
          )}
       else
         {:ok,
@@ -37,7 +38,8 @@ defmodule BanchanWeb.SettingsLive do
            email_changeset: User.email_changeset(socket.assigns.current_user, %{}),
            password_changeset: User.password_changeset(socket.assigns.current_user, %{}),
            notification_settings: settings,
-           notification_settings_changeset: UserNotificationSettings.changeset(settings, %{})
+           notification_settings_changeset: UserNotificationSettings.changeset(settings, %{}),
+           maturity_changeset: User.maturity_changeset(socket.assigns.current_user, %{})
          )}
       end
     else
@@ -252,6 +254,35 @@ defmodule BanchanWeb.SettingsLive do
     end
   end
 
+  def handle_event("change_maturity", val, socket) do
+    changeset =
+      socket.assigns.current_user
+      |> User.maturity_changeset(val["change_maturity"])
+      |> Map.put(:action, :update)
+
+    socket = assign(socket, maturity_changeset: changeset)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("submit_maturity", val, socket) do
+    case Accounts.update_maturity(
+           socket.assigns.current_user,
+           val["change_maturity"]
+         ) do
+      {:ok, updated_user} ->
+        {:noreply,
+         socket
+         |> assign(
+           current_user: updated_user,
+           maturity_changeset: User.maturity_changeset(updated_user, %{})
+         )}
+
+      other ->
+        other
+    end
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -382,6 +413,28 @@ defmodule BanchanWeb.SettingsLive do
           <Submit class="w-full" changeset={@password_changeset} label="Save" />
         </Form>
       {/if}
+      <div class="divider" />
+      <Form
+        class="flex flex-col gap-4"
+        for={@maturity_changeset}
+        as={:change_maturity}
+        change="change_maturity"
+        submit="submit_maturity"
+      >
+        <h3 class="text-lg">Mature Content</h3>
+        <p>By choosing to display mature content on the site, you assert that you are at least 18 years or older and able to view this content.</p>
+        <Checkbox
+          name={:mature_ok}
+          info="Whether to show mature content items (studios, offerings, etc) at all."
+          label="List Mature Content"
+        />
+        <Checkbox
+          name={:uncensored_mature}
+          info="Whether to show mature content uncensored. By default, you need to click through to view mature content you come aross."
+          label="Uncensor Mature Content by Default"
+        />
+        <Submit class="w-full" changeset={@maturity_changeset} label="Save" />
+      </Form>
     </AuthLayout>
     """
   end
