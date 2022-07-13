@@ -230,6 +230,16 @@ defmodule Banchan.Studios do
     q = from(s in Studio, as: :studio)
 
     q =
+      case Keyword.fetch(opts, :include_pending) do
+        {:ok, true} ->
+          q
+
+        _ ->
+          q
+          |> where([s], s.stripe_charges_enabled == true)
+      end
+
+    q =
       case Keyword.fetch(opts, :order_by) do
         {:ok, :oldest} ->
           q |> order_by([s], asc: s.inserted_at)
