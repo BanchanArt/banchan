@@ -72,7 +72,8 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
           ALTER TABLE users ADD COLUMN search_vector tsvector
             GENERATED ALWAYS AS (
               setweight(to_tsvector('banchan_fts', handle), 'A') ||
-              setweight(to_tsvector('banchan_fts', coalesce(name, '')), 'B')
+              setweight(to_tsvector('banchan_fts', coalesce(name, '')), 'B') ||
+              setweight(to_tsvector('banchan_fts', immutable_array_to_string(tags, ' ')), 'C')
             ) STORED;
           """,
           [],
@@ -95,12 +96,16 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
           log: :info
         )
 
-        repo().query!("""
-        CREATE TRIGGER users_tags_count_update
-        AFTER UPDATE OR INSERT OR DELETE ON users
-        FOR EACH ROW
-        EXECUTE PROCEDURE public.trigger_update_tags_count();
-        """)
+        repo().query!(
+          """
+          CREATE TRIGGER users_tags_count_update
+          AFTER UPDATE OR INSERT OR DELETE ON users
+          FOR EACH ROW
+          EXECUTE PROCEDURE public.trigger_update_tags_count();
+          """,
+          [],
+          log: :info
+        )
       end,
       fn ->
         repo().query!(
@@ -119,9 +124,13 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
           log: :info
         )
 
-        repo().query!("""
-        DROP TRIGGER users_tag_count_update;
-        """)
+        repo().query!(
+          """
+          DROP TRIGGER users_tag_count_update;
+          """,
+          [],
+          log: :info
+        )
       end
     )
 

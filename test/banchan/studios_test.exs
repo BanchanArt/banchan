@@ -188,7 +188,7 @@ defmodule Banchan.StudiosTest do
       user = user_fixture()
       studio = studio_fixture([user])
 
-      assert studio.id in Enum.map(Studios.list_studios(), & &1.id)
+      assert studio.id in Enum.map(Studios.list_studios(include_pending: true), & &1.id)
     end
 
     test "list user studios and studio members" do

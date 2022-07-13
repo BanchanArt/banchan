@@ -21,6 +21,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     MarkdownInput,
     Select,
     Submit,
+    TagsInput,
     TextArea,
     TextInput,
     UploadInput
@@ -208,10 +209,16 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
            socket.assigns.studio,
            socket.assigns.current_user_member?
          ) do
-      {:ok, _offering} ->
+      {:ok, offering} ->
         {:noreply,
          redirect(socket,
-           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+           to:
+             Routes.offering_show_path(
+               Endpoint,
+               :show,
+               socket.assigns.studio.handle,
+               offering.type
+             )
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -279,17 +286,23 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <TextInput
           name={:name}
           info="Name of the offering, as it should appear in the offering card."
-          opts={required: true}
+          opts={required: true, phx_debounce: "200"}
         />
         <TextInput
           name={:type}
           info="Lowercase, no-spaces, limited characters. This is what will show up in the url and must be unique."
           opts={required: true}
         />
-        <TextArea
+        <MarkdownInput
+          id={@id <> "-description-input"}
           name={:description}
-          info="Description of the offering, as it should appear in the offering card."
+          info="Description of the offering, as it should appear when the offering is expanded."
           opts={required: true}
+        />
+        <TagsInput
+          id={@id <> "-tags"}
+          info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
+          name={:tags}
         />
         <TextInput
           name={:slots}
@@ -318,16 +331,16 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           <div class="relative pb-video pt-2">
             {#if Enum.empty?(@uploads.card_image.entries) && !(@offering && @offering.card_img_id)}
               <img
-                class="absolute h-full w-full object-cover rounded-lg"
+                class="absolute h-full w-full object-contain rounded-lg"
                 src={Routes.static_path(Endpoint, "/images/640x360.png")}
               />
             {#elseif !Enum.empty?(@uploads.card_image.entries)}
               {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
-                class: "absolute h-full w-full object-cover rounded-lg"
+                class: "absolute h-full w-full object-contain rounded-lg"
               )}
             {#else}
               <img
-                class="absolute h-full w-full object-cover rounded-lg"
+                class="absolute h-full w-full object-contain rounded-lg"
                 src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
               />
             {/if}

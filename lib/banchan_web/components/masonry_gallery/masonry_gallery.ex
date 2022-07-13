@@ -4,7 +4,7 @@ defmodule BanchanWeb.Components.MasonryGallery do
   """
   use BanchanWeb, :live_component
 
-  alias BanchanWeb.Components.MasonryGallery
+  alias BanchanWeb.Components.{Lightbox, MasonryGallery}
 
   prop editable, :boolean, default: false
   prop images, :list, required: true
@@ -98,18 +98,23 @@ defmodule BanchanWeb.Components.MasonryGallery do
 
   def render(assigns) do
     ~F"""
-    <div
-      :hook="MasonryGallery"
-      class={"grid gap-0.5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4", @class}
-    >
-      {#for image <- @images}
-        {#case image}
-          {#match {:existing, upload}}
-            <MasonryGallery.Upload deleted="item_deleted" upload={upload} editable={@editable} />
-          {#match {:live, entry}}
-            <MasonryGallery.LiveImgPreview deleted="item_deleted" entry={entry} editable={@editable} />
-        {/case}
-      {/for}
+    <div class={@class}>
+      <Lightbox id={@id <> "-lightbox"}>
+        <div
+          id={@id <> "-gallery-hook-wrapper"}
+          :hook="MasonryGallery"
+          class="gap-0 sm:gap-2 columns-2 sm:columns-3 md:columns-4"
+        >
+          {#for image <- @images}
+            {#case image}
+              {#match {:existing, upload}}
+                <MasonryGallery.Upload deleted="item_deleted" upload={upload} editable={@editable} />
+              {#match {:live, entry}}
+                <MasonryGallery.LiveImgPreview deleted="item_deleted" entry={entry} editable={@editable} />
+            {/case}
+          {/for}
+        </div>
+      </Lightbox>
     </div>
     """
   end

@@ -41,6 +41,13 @@ defmodule BanchanWeb.LayoutView do
         <meta name="theme-color" content="#ffffff">
         <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}>
 
+        <script type="text/javascript">
+          let theme = localStorage.getItem("theme")
+          if (!theme) {
+            theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+          }
+          document.documentElement.setAttribute("data-theme", theme);
+        </script>
         <script
           defer
           phx-track-static

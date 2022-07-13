@@ -11,7 +11,7 @@ defmodule BanchanWeb.StudioLive.Shop do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.Components.{Button, Card}
+  alias BanchanWeb.Components.{Button, Card, InfiniteScroll}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{OfferingCard, StudioLayout}
 
@@ -19,14 +19,6 @@ defmodule BanchanWeb.StudioLive.Shop do
   def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, false, false)
     studio = socket.assigns.studio
-
-    offerings =
-      Offerings.list_studio_offerings(
-        studio,
-        socket.assigns.current_user,
-        socket.assigns.current_user_member?,
-        socket.assigns.current_user_member?
-      )
 
     Studios.subscribe_to_stripe_state(studio)
 
@@ -42,7 +34,7 @@ defmodule BanchanWeb.StudioLive.Shop do
     # that picks up everything we need for this listing.
     {:ok,
      assign(socket,
-       offerings: offerings,
+       offerings: list_offerings(socket),
        stripe_onboarding_url: stripe_onboarding_url
      )}
   end
@@ -70,6 +62,15 @@ defmodule BanchanWeb.StudioLive.Shop do
     {:noreply, socket |> assign(followers: new_count)}
   end
 
+  def handle_event("load_more", _, socket) do
+    if socket.assigns.offerings.total_entries >
+         socket.assigns.offerings.page_number * socket.assigns.offerings.page_size do
+      {:noreply, fetch(socket.assigns.offerings.page_number + 1, socket)}
+    else
+      {:noreply, socket}
+    end
+  end
+
   @impl true
   def handle_event("recheck_stripe", _, socket) do
     # No need to refresh the studio here. It'll get reloaded by the PubSub event(s)
@@ -85,15 +86,9 @@ defmodule BanchanWeb.StudioLive.Shop do
         socket.assigns.current_user_member?
       )
 
-    offerings =
-      Offerings.list_studio_offerings(
-        socket.assigns.studio,
-        socket.assigns.current_user,
-        socket.assigns.current_user_member?,
-        socket.assigns.current_user_member?
-      )
+    offerings = list_offerings(socket)
 
-    {:noreply, socket |> assign(offerings: offerings)}
+    {:noreply, socket |> assign(offerings: offerings, page: 1)}
   end
 
   @impl true
@@ -105,15 +100,34 @@ defmodule BanchanWeb.StudioLive.Shop do
         socket.assigns.current_user_member?
       )
 
-    offerings =
-      Offerings.list_studio_offerings(
-        socket.assigns.studio,
-        socket.assigns.current_user,
-        socket.assigns.current_user_member?,
-        socket.assigns.current_user_member?
-      )
+    offerings = list_offerings(socket)
 
     {:noreply, socket |> assign(offerings: offerings)}
+  end
+
+  defp list_offerings(socket, page \\ 1) do
+    Offerings.list_offerings(
+      studio: socket.assigns.studio,
+      include_archived?: socket.assigns.current_user_member?,
+      current_user: socket.assigns.current_user,
+      current_user_member?: socket.assigns.current_user_member?,
+      order_by: :index,
+      show_closed: true,
+      page_size: 16,
+      page: page
+    )
+  end
+
+  defp fetch(page, %{assigns: %{offerings: offerings}} = socket) do
+    socket
+    |> assign(
+      :offerings,
+      %{
+        offerings
+        | page_number: page,
+          entries: offerings.entries ++ list_offerings(socket, page).entries
+      }
+    )
   end
 
   @impl true
@@ -133,12 +147,12 @@ defmodule BanchanWeb.StudioLive.Shop do
         <div
           id="offering-cards"
           :hook="DragDropCards"
-          class="flex flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 auto-rows-fr pt-4"
+          class="sm:px-2 grid grid-cols-2 sm:gap-2 sm:grid-cols-3 md:grid-cols-4 auto-rows-fr pt-4"
         >
-          {#for offering <- @offerings}
+          {#for offering <- @offerings.entries}
             <div
               class={
-                "offering-card p-2",
+                "offering-card",
                 "cursor-move select-none": @current_user_member? && is_nil(offering.archived_at),
                 archived: !is_nil(offering.archived_at)
               }
@@ -153,7 +167,6 @@ defmodule BanchanWeb.StudioLive.Shop do
                 id={"offering-" <> offering.type}
                 current_user={@current_user}
                 current_user_member?={@current_user_member?}
-                studio={@studio}
                 offering={offering}
                 unarchive="unarchive"
               />
@@ -164,14 +177,13 @@ defmodule BanchanWeb.StudioLive.Shop do
             </div>
           {/for}
           {#if @current_user_member?}
-            <div class="p-2">
-              <LiveRedirect to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}>
-                <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full transition-all">
-                  <span class="text-6xl mx-auto my-auto flex items-center justify-center h-full">+</span>
-                </Card>
-              </LiveRedirect>
-            </div>
+            <LiveRedirect to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}>
+              <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full transition-all">
+                <span class="text-6xl mx-auto my-auto flex items-center justify-center h-full">+</span>
+              </Card>
+            </LiveRedirect>
           {/if}
+          <InfiniteScroll id="shop-infinite-scroll" page={@offerings.page_number} load_more="load_more" />
         </div>
       {#else}
         <div class="w-full mx-auto md:bg-base-300">

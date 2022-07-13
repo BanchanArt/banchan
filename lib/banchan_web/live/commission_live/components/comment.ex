@@ -6,13 +6,12 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   alias Banchan.Commissions
   alias Banchan.Repo
-  alias Banchan.Uploads
 
   alias Surface.Components.Form
 
   alias BanchanWeb.Components.{Avatar, Button, Markdown, UserHandle}
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
-  alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox, MediaPreview}
+  alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox}
 
   prop actor, :struct, required: true
   prop current_user, :struct, required: true
@@ -36,19 +35,6 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
     socket = socket |> assign(params) |> assign(changeset: nil)
     socket = socket |> assign(event: socket.assigns.event)
     {:ok, socket}
-  end
-
-  @impl true
-  def handle_event("open_preview", %{"key" => key, "bucket" => bucket}, socket) do
-    if socket.assigns.current_user.id == socket.assigns.commission.client_id ||
-         socket.assigns.current_user_member? do
-      MediaPreview.open(
-        "preview-#{socket.assigns.event.public_id}",
-        Uploads.get_upload!(bucket, key)
-      )
-    end
-
-    {:noreply, socket}
   end
 
   @impl true
@@ -218,6 +204,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
         <div :if={@event.text} class="divider" />
         <div class="px-4">
           <AttachmentBox
+            base_id={@id <> "-attachments"}
             editing={!is_nil(@changeset)}
             commission={@commission}
             attachments={@event.attachments}
@@ -228,8 +215,6 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
           />
         </div>
       {/if}
-
-      <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} />
     </div>
     """
   end

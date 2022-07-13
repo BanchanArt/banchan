@@ -15,7 +15,7 @@ defmodule Banchan.Studios do
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Invoice
   alias Banchan.Repo
-  alias Banchan.Studios.{Notifications, Payout, PortfolioImage, Studio}
+  alias Banchan.Studios.{Notifications, Payout, PortfolioImage, Studio, StudioFollower}
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
 
@@ -152,6 +152,23 @@ defmodule Banchan.Studios do
     ret
   end
 
+  def update_featured(%User{} = actor, %Studio{} = studio, attrs) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+
+        if :admin in actor.roles do
+          studio
+          |> Studio.featured_changeset(attrs)
+          |> Repo.update()
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
+  end
+
   @doc """
   Creates a new studio.
 
@@ -202,15 +219,84 @@ defmodule Banchan.Studios do
   end
 
   @doc """
-  List all studios
+  List all studios with pagination
 
   ## Examples
 
-      iex> list_studios()
+      iex> list_studios().entries
       [%Studio{}, %Studio{}, %Studio{}, ...]
   """
-  def list_studios do
-    Repo.all(Studio)
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def list_studios(opts \\ []) do
+    q = from(s in Studio, as: :studio)
+
+    q =
+      case Keyword.fetch(opts, :include_pending) do
+        {:ok, true} ->
+          q
+
+        _ ->
+          q
+          |> where([s], s.stripe_charges_enabled == true)
+      end
+
+    q =
+      case Keyword.fetch(opts, :query) do
+        {:ok, nil} ->
+          q
+
+        {:ok, query} ->
+          q
+          |> where([s], fragment("websearch_to_tsquery(?) @@ (?).search_vector", ^query, s))
+
+        :error ->
+          q
+      end
+
+    q =
+      case Keyword.fetch(opts, :order_by) do
+        {:ok, nil} ->
+          q
+
+        {:ok, :oldest} ->
+          q |> order_by([s], asc: s.inserted_at)
+
+        {:ok, :newest} ->
+          q |> order_by([s], desc: s.inserted_at)
+
+        {:ok, :followers} ->
+          q
+          |> join(
+            :left_lateral,
+            [_s],
+            followers in subquery(
+              from follower in StudioFollower,
+                where: parent_as(:studio).id == follower.studio_id,
+                select: %{followers: count(follower)}
+            )
+          )
+          |> order_by([_s, followers], desc: followers.followers)
+
+        {:ok, :homepage} ->
+          q
+          |> order_by([s], desc: s.inserted_at)
+          |> where([s], not is_nil(s.about) and s.about != "")
+          |> where([s], not is_nil(s.card_img_id))
+
+        {:ok, :featured} ->
+          q
+          |> order_by([s], desc: s.inserted_at)
+          |> where([s], s.featured == true)
+          |> where([s], not is_nil(s.header_img_id) or not is_nil(s.card_img_id))
+
+        :error ->
+          q
+      end
+
+    Repo.paginate(q,
+      page_size: Keyword.get(opts, :page_size, 24),
+      page: Keyword.get(opts, :page, 1)
+    )
   end
 
   @doc """
@@ -682,7 +768,7 @@ defmodule Banchan.Studios do
             end
         },
         business_profile: %{
-          # Digital Media
+          # Commercial Photograpy, Art, and Graphics
           mcc: "7333",
           # NB(zkat): This replacement is so this code will actually work in dev environments.
           url: String.replace(studio_url, "localhost:4000", "banchan.art")

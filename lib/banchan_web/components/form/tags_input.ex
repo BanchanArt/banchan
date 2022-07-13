@@ -23,7 +23,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
   def update(assigns, socket) do
     socket = assign(socket, assigns)
     form = Map.get(socket.assigns.__context__, {Surface.Components.Form, :form})
-    socket = assign(socket, tags: Phoenix.HTML.Form.input_value(form, socket.assigns.name))
+    socket = assign(socket, tags: Phoenix.HTML.Form.input_value(form, socket.assigns.name) || [])
     {:ok, socket}
   end
 

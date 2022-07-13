@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   alias BanchanWeb.Components.{Button, Layout}
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.TabButton
+  alias BanchanWeb.StudioLive.Components.{FeaturedToggle, TabButton}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
@@ -73,8 +73,13 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
             <div class="rounded-b-xl aspect-header-image bg-base-300 w-full" />
           {/if}
           <div class="m-6">
-            <h1 class="font-medium text-2xl md:text-3xl flex flex-row">
-              {@studio.name}
+            <h1 class="font-medium text-2xl md:text-3xl flex flex-row gap-2">
+              <div class="grow">
+                {@studio.name}
+              </div>
+              {#if @current_user && :admin in @current_user.roles}
+                <FeaturedToggle id="featured-toggle" current_user={@current_user} studio={@studio} />
+              {/if}
               {#if @current_user}
                 <Button click="toggle_follow" class="ml-auto btn-sm btn-outline rounded-full px-2 py-0">
                   {if @user_following? do

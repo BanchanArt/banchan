@@ -155,11 +155,41 @@ defmodule Banchan.Offerings do
   def get_offering_by_type!(%Studio{} = studio, type, current_user_member?) do
     Repo.one!(
       from o in Offering,
+        as: :offering,
+        left_lateral_join:
+          gallery_uploads in subquery(
+            from i in GalleryImage,
+              where: i.offering_id == parent_as(:offering).id,
+              join: u in assoc(i, :upload),
+              group_by: [i.offering_id],
+              select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
+          ),
+        left_lateral_join:
+          used_slots in subquery(
+            from c in Commission,
+              where:
+                c.offering_id == parent_as(:offering).id and
+                  c.status not in [:withdrawn, :approved, :submitted, :rejected],
+              group_by: [c.offering_id],
+              select: %{used_slots: count(c.id)}
+          ),
         where:
           o.studio_id == ^studio.id and o.type == ^type and
-            (^current_user_member? or not o.hidden)
+            (^current_user_member? or not o.hidden),
+        select:
+          merge(o, %{
+            used_slots: coalesce(used_slots.used_slots, 0),
+            gallery_uploads:
+              type(
+                coalesce(
+                  gallery_uploads.uploads,
+                  fragment("ARRAY[]::json[]")
+                ),
+                {:array, Upload}
+              )
+          })
     )
-    |> Repo.preload(:options)
+    |> Repo.preload([:options, :studio])
   end
 
   def change_offering(%Offering{} = offering, attrs \\ %{}) do
@@ -230,24 +260,15 @@ defmodule Banchan.Offerings do
 
   ## Examples
 
-      iex> list_studio_offerings(studio, current_studio_member?)
+      iex> list_offerings(current_user, current_studio_member?)
       [%Offering{}, %Offering{}, %Offering{}]
   """
-  def list_studio_offerings(
-        %Studio{} = studio,
-        %User{} = current_user,
-        current_user_member?,
-        include_archived? \\ false
-      ) do
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def list_offerings(opts \\ []) do
     q =
       from o in Offering,
         as: :offering,
-        where: o.studio_id == ^studio.id,
-        where: ^current_user_member? or o.hidden == false,
-        left_join: sub in OfferingSubscription,
-        on:
-          sub.user_id == ^current_user.id and sub.offering_id == o.id and
-            sub.silenced != true,
+        join: s in assoc(o, :studio),
         left_lateral_join:
           used_slots in subquery(
             from c in Commission,
@@ -260,11 +281,14 @@ defmodule Banchan.Offerings do
         left_lateral_join:
           default_prices in subquery(
             from oo in OfferingOption,
-              where: oo.offering_id == parent_as(:offering).id,
+              where: oo.offering_id == parent_as(:offering).id and oo.default,
               group_by: [oo.offering_id],
               select: %{
                 prices:
-                  type(fragment("array_agg(?)", oo.price), {:array, Money.Ecto.Composite.Type})
+                  type(fragment("array_agg(?)", oo.price), {:array, Money.Ecto.Composite.Type}),
+                # NB(zkat): This is hacky to the point of uselessness if we end up
+                # having a ton of different currencies listed, but it's serviceable for now.
+                sum: fragment("sum((?).amount)", oo.price)
               }
           ),
         left_lateral_join:
@@ -275,10 +299,9 @@ defmodule Banchan.Offerings do
               group_by: [i.offering_id],
               select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
           ),
-        order_by: [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index],
         select:
           merge(o, %{
-            user_subscribed?: not is_nil(sub.id),
+            studio: s,
             used_slots: coalesce(used_slots.used_slots, 0),
             gallery_uploads:
               type(
@@ -296,13 +319,147 @@ defmodule Banchan.Offerings do
           })
 
     q =
-      if include_archived? do
-        q
-      else
-        q |> where([o], is_nil(o.archived_at))
+      case Keyword.fetch(opts, :query) do
+        {:ok, nil} ->
+          q
+
+        {:ok, query} ->
+          q
+          |> where([s], fragment("websearch_to_tsquery(?) @@ (?).search_vector", ^query, s))
+
+        :error ->
+          q
       end
 
-    Repo.all(q)
+    q =
+      case Keyword.fetch(opts, :include_archived?) do
+        {:ok, true} ->
+          q |> where([o], is_nil(o.archived_at))
+
+        _ ->
+          q
+      end
+
+    q =
+      case Keyword.fetch(opts, :studio) do
+        {:ok, nil} ->
+          q
+
+        {:ok, %Studio{} = studio} ->
+          q |> where([o], o.studio_id == ^studio.id)
+
+        :error ->
+          q
+      end
+
+    q =
+      case Keyword.fetch(opts, :current_user) do
+        {:ok, nil} ->
+          q |> select_merge(%{user_subscribed?: false})
+
+        {:ok, %User{} = current_user} ->
+          q
+          |> join(:left, [o], sub in OfferingSubscription,
+            on:
+              sub.user_id == ^current_user.id and sub.offering_id == o.id and
+                sub.silenced != true
+          )
+          |> select_merge([o, _studio, _used_slots, _default_prices, _gallery_uploads, sub], %{
+            user_subscribed?: not is_nil(sub.id)
+          })
+
+        :error ->
+          q |> select_merge(%{user_subscribed?: false})
+      end
+
+    q =
+      case Keyword.fetch(opts, :current_user_member?) do
+        {:ok, current_user_member?} ->
+          q |> where([o], ^current_user_member? or o.hidden == false)
+
+        :error ->
+          q |> where([o], o.hidden == false)
+      end
+
+    q =
+      case Keyword.fetch(opts, :order_by) do
+        {:ok, nil} ->
+          q
+
+        {:ok, :index} ->
+          q
+          |> order_by([o], [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index])
+
+        {:ok, :featured} ->
+          q
+          |> order_by([o, s], [{:desc, o.inserted_at}, {:desc, s.inserted_at}])
+          |> where([o], not is_nil(o.description) and o.description != "")
+          |> where([o], not is_nil(o.card_img_id))
+          |> where(
+            [_o, _s, _used_slots, _default_prices, gallery_uploads],
+            not is_nil(gallery_uploads.uploads) and
+              fragment("array_length(?, 1) > 0", gallery_uploads.uploads)
+          )
+
+        {:ok, :oldest} ->
+          q
+          |> order_by([o], [{:asc, o.inserted_at}])
+
+        {:ok, :newest} ->
+          q
+          |> order_by([o], [{:desc, o.inserted_at}])
+
+        {:ok, :price_high} ->
+          q
+          |> order_by([_o, _s, _used_slots, default_prices], desc: default_prices.sum)
+
+        {:ok, :price_low} ->
+          q
+          |> order_by([_o, _s, _used_slots, default_prices], asc: default_prices.sum)
+
+        :error ->
+          q
+      end
+
+    q =
+      case Keyword.fetch(opts, :show_closed) do
+        {:ok, true} ->
+          q
+
+        {:ok, _} ->
+          q |> where([o], o.open == true)
+
+        :error ->
+          q |> where([o], o.open == true)
+      end
+
+    q =
+      case Keyword.fetch(opts, :related_to) do
+        {:ok, %Offering{} = related} ->
+          q
+          |> join(:inner, [o], rel in Offering,
+            on: rel.id == ^related.id and rel.id != o.id,
+            as: :related_to
+          )
+          |> where(
+            [o, related_to: related_to],
+            # TODO: Cache this db-side somehow? This seems like a lot of work
+            # to be doing on the fly.
+            fragment(
+              "to_tsquery('banchan_fts', array_to_string(tsvector_to_array(?), ' | ')) @@ ?",
+              related_to.search_vector,
+              o.search_vector
+            )
+          )
+
+        :error ->
+          q
+      end
+
+    Repo.paginate(q,
+      page: Keyword.get(opts, :page, 1),
+      page_size: Keyword.get(opts, :page_size, 20)
+    )
   end
 
   def offering_base_price(%Offering{} = offering) do
@@ -378,8 +535,6 @@ defmodule Banchan.Offerings do
     mog =
       Mogrify.open(src)
       |> Mogrify.format("jpeg")
-      |> Mogrify.gravity("Center")
-      |> Mogrify.resize_to_fill("640x360")
       |> Mogrify.save(in_place: true)
 
     image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")

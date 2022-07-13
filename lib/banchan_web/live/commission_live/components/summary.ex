@@ -24,10 +24,6 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   def render(assigns) do
     ~F"""
     <div class="flex flex-col">
-      {#if @offering}
-        <div class="px-2 font-medium">{@offering.name}</div>
-        <div class="px-2 text-xs">{@offering.description}</div>
-      {/if}
       <ul class="flex flex-col pt-2">
         {#for {item, idx} <- Enum.with_index(@line_items)}
           <li class="flex flex-row p-2 gap-2">

@@ -24,6 +24,7 @@ defmodule Banchan.Offerings.Offering do
     field :terms, :string
     field :template, :string
     field :archived_at, :naive_datetime
+    field :tags, {:array, :string}
 
     field :option_prices, {:array, Money.Ecto.Composite.Type}, virtual: true
     field :used_slots, :integer, virtual: true
@@ -45,6 +46,13 @@ defmodule Banchan.Offerings.Offering do
 
   @doc false
   def changeset(offering, attrs) do
+    attrs =
+      if attrs["tags"] == "[]" do
+        Map.put(attrs, "tags", [])
+      else
+        attrs
+      end
+
     offering
     |> cast(attrs, [
       :type,
@@ -56,7 +64,8 @@ defmodule Banchan.Offerings.Offering do
       :max_proposals,
       :hidden,
       :terms,
-      :template
+      :template,
+      :tags
     ])
     |> cast_assoc(:options)
     |> validate_format(:type, ~r/^[0-9a-z-]+$/,
@@ -64,13 +73,16 @@ defmodule Banchan.Offerings.Offering do
     )
     |> validate_number(:slots, greater_than: 0)
     |> validate_number(:max_proposals, greater_than: 0)
+    |> validate_markdown(:description)
     |> validate_markdown(:terms)
     |> validate_markdown(:template)
     |> validate_length(:type, max: 32)
     |> validate_length(:name, max: 50)
-    |> validate_length(:description, max: 140)
+    |> validate_length(:description, max: 500)
     |> validate_length(:terms, max: 1500)
     |> validate_length(:template, max: 1500)
+    |> validate_tags()
+    |> validate_length(:tags, max: 5)
     |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])
   end

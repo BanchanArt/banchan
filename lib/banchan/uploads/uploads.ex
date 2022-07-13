@@ -65,7 +65,10 @@ defmodule Banchan.Uploads do
     size = File.stat!(src).size
 
     {width, height} =
-      if image?(type) || video?(type) do
+      if image?(type) do
+        # TODO: We might need ffmpeg for this, actually...
+        # if image?(type) || video?(type) do
+
         %{width: width, height: height} = Mogrify.identify(src)
         {width, height}
       else

@@ -13,6 +13,10 @@ $fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
 @import "../node_modules/@toast-ui/editor/dist/toastui-editor";
 @import "../node_modules/@toast-ui/editor/dist/theme/toastui-editor-dark";
 
+@import "../node_modules/@splidejs/splide/src/css/themes/default/index";
+
+@import "./spotlight";
+
 :root {
   --rounded-box: 1rem;        /* border-radius for cards and other big elements */
   --rounded-btn: 0.5rem;      /* border-radius for buttons and similar elements */
@@ -28,34 +32,15 @@ $fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
   --border-btn: 2px;          /* default border size for button */
 }
 
-.phx-click-loading.btn-loadable {
-  @apply loading;
-}
-
-.phx-change-loading.btn-loadable {
-  @apply loading;
-}
-
-.phx-submit-loading.btn-loadable {
-  @apply loading;
-}
-
-.phx-focus-loading.btn-loadable {
-  @apply loading;
-}
-
-.phx-blur-loading.btn-loadable {
-  @apply loading;
-}
-
-.phx-keydown-loading.btn-loadable {
-  @apply loading;
-}
-
-.phx-keyup-loading.btn-loadable {
-  @apply loading;
-}
-
-.phx-loading {
-  @apply loading;
+.btn-loadable {
+  &.phx-click-loading,
+  &.phx-change-loading,
+  &.phx-submit-loading,
+  &.phx-focus-loading,
+  &.phx-blur-loading,
+  &.phx-keyup-loading,
+  &.phx-keydown-loading,
+  &.phx-loading {
+    @apply loading;
+  }
 }

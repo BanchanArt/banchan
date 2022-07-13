@@ -10,6 +10,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :tags, {:array, :citext}, default: [], null: false
       add :default_currency, :string, null: false
       add :payment_currencies, {:array, :string}, null: false
+      add :featured, :boolean, default: false, null: false
       add :header_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :card_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :default_terms, :text
@@ -28,7 +29,8 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           ALTER TABLE studios ADD COLUMN search_vector tsvector
             GENERATED ALWAYS AS (
               setweight(to_tsvector('banchan_fts', handle), 'A') ||
-              setweight(to_tsvector('banchan_fts', name), 'B')
+              setweight(to_tsvector('banchan_fts', name), 'B') ||
+              setweight(to_tsvector('banchan_fts', immutable_array_to_string(tags, ' ')), 'C')
             ) STORED;
           """,
           [],
@@ -37,7 +39,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
 
         repo().query!(
           """
-          CREATE INDEX studios_search_idx ON users USING GIN (search_vector);
+          CREATE INDEX studios_search_idx ON studios USING GIN (search_vector);
           """,
           [],
           log: :info
@@ -51,12 +53,16 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           log: :info
         )
 
-        repo().query!("""
-        CREATE TRIGGER studios_tags_count_update
-        AFTER UPDATE OR INSERT OR DELETE ON studios
-        FOR EACH ROW
-        EXECUTE PROCEDURE public.trigger_update_tags_count();
-        """)
+        repo().query!(
+          """
+          CREATE TRIGGER studios_tags_count_update
+          AFTER UPDATE OR INSERT OR DELETE ON studios
+          FOR EACH ROW
+          EXECUTE PROCEDURE public.trigger_update_tags_count();
+          """,
+          [],
+          log: :info
+        )
       end,
       fn ->
         repo().query!(
@@ -75,9 +81,13 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           log: :info
         )
 
-        repo().query!("""
-        DROP TRIGGER studios_tag_count_update;
-        """)
+        repo().query!(
+          """
+          DROP TRIGGER studios_tag_count_update;
+          """,
+          [],
+          log: :info
+        )
       end
     )
 

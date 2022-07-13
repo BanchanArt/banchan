@@ -1,4 +1,4 @@
-defmodule BanchanWeb.StudioLive.Commissions.New do
+defmodule BanchanWeb.OfferingLive.Request do
   @moduledoc """
   Subpage for creating a new commission based on an offering type.
   """
@@ -12,14 +12,13 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.CommissionLive.Components.Summary
+  alias BanchanWeb.CommissionLive.Components.{OfferingBox, Summary}
   alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
-  alias BanchanWeb.Components.Markdown
+  alias BanchanWeb.Components.{Layout, Markdown}
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.StudioLayout
 
   @impl true
-  def mount(%{"offering_type" => offering_type} = params, _session, socket) do
+  def handle_params(%{"offering_type" => offering_type} = params, uri, socket) do
     socket = assign_studio_defaults(params, socket, false, true)
 
     offering =
@@ -60,9 +59,10 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
             }
           end)
 
-        {:ok,
+        {:noreply,
          socket
          |> assign(
+           uri: uri,
            changeset: Commission.creation_changeset(%Commission{}, %{}),
            line_items: default_items,
            offering: offering,
@@ -85,16 +85,11 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
             "This commission offering is currently unavailable."
           )
 
-        {:ok,
+        {:noreply,
          push_redirect(socket,
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
     end
-  end
-
-  @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
   end
 
   @impl true
@@ -230,30 +225,15 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout
-      id="studio-layout"
-      current_user={@current_user}
-      flashes={@flash}
-      studio={@studio}
-      followers={@followers}
-      current_user_member?={@current_user_member?}
-      tab={:shop}
-      uri={@uri}
-    >
+    <Layout current_user={@current_user} flashes={@flash} uri={@uri}>
+      <h1 class="text-2xl font-bold">Request a Commission</h1>
+      <div class="divider" />
       <div class="flex flex-col space-y-2 md:container md:mx-auto p-2">
-        <h1 class="text-3xl px-2">{@offering.name}</h1>
-        <h2 class="text-xl px-2">{@offering.description}</h2>
         <Form for={@changeset} change="change" submit="submit">
-          <div class="flex flex-col md:grid md:grid-cols-3 gap-4">
-            <div class="md:order-1 md:col-span-2">
-              <TextInput
-                name={:title}
-                show_label={false}
-                class="w-full"
-                opts={required: true, placeholder: "A Brief Title"}
-              />
-            </div>
-            <div class="md:order-2 md:col-span-1 md:row-span-5">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex flex-col md:order-2">
+              <OfferingBox offering={@offering} class="rounded-box hover:bg-base-200 p-2 transition-all" />
+              <div class="divider" />
               <Summary
                 add_item="add_item"
                 allow_edits
@@ -263,13 +243,19 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                 studio={@studio}
               />
             </div>
-            <div class="md:order-2 md:col-span-2 md:row-span-2">
+            <div class="divider md:hidden" />
+            <div class="flex flex-col md:col-span-2 md:order-1 gap-4">
+              <TextInput
+                name={:title}
+                show_label={false}
+                class="w-full"
+                opts={required: true, placeholder: "A Brief Title"}
+              />
               <MarkdownInput
                 id="initial-message"
                 name={:description}
                 show_label={false}
-                class="w-full h-96"
-                height="384px"
+                class="w-full"
                 upload={@uploads.attachment}
                 cancel_upload="cancel_upload"
                 opts={
@@ -277,8 +263,6 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
                   value: Map.get(@changeset.changes, :description, @template)
                 }
               />
-            </div>
-            <div class="md:col-span-2 md:order-4 md:row-span-2">
               <div class="pt-2">
                 <h3 class="py-4 font-bold text-xl">Commission Terms and Conditions</h3>
                 <div class="p-2 border-2 rounded border-neutral max-h-60 overflow-auto">
@@ -299,7 +283,7 @@ defmodule BanchanWeb.StudioLive.Commissions.New do
           </div>
         </Form>
       </div>
-    </StudioLayout>
+    </Layout>
     """
   end
 end

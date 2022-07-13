@@ -165,7 +165,7 @@ defmodule Banchan.Commissions do
           :studio,
           events: [invoice: [], attachments: [:upload, :thumbnail]],
           line_items: [:option],
-          offering: [:options]
+          offering: [:options, :studio]
         ]
     )
   end

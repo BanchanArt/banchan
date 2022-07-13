@@ -6,6 +6,9 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
 
   alias Banchan.Uploads
 
+  alias BanchanWeb.Components.Lightbox
+
+  prop base_id, :string, required: true
   prop commission, :struct, required: true
   prop attachments, :list, required: true
   prop editing, :boolean, default: false
@@ -27,9 +30,9 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
           These files will be available after payment is processed.
         </div>
       {/if}
-      <ul class="flex flex-row flex-wrap gap-4 p-2">
-        {#for attachment <- Enum.filter(@attachments, & &1.thumbnail_id)}
-          <li class="h-32 w-32">
+      <Lightbox id={@base_id <> "-attachment-box-lightbox"} class="flex flex-row flex-wrap gap-4 p-2">
+        {#for attachment <- Enum.filter(@attachments, &(&1.thumbnail_id && !Uploads.video?(&1.upload)))}
+          <div class="h-32 w-32">
             {#if @pending_payment && !@current_user_member?}
               <div
                 class="w-full h-full rounded-box bg-base-content flex justify-center items-center"
@@ -40,15 +43,20 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                 </div>
               </div>
             {#else}
-              <button
+              <Lightbox.Item
                 class="relative"
-                :on-click={@open_preview}
-                phx-value-key={attachment.upload.key}
-                phx-value-bucket={attachment.upload.bucket}
+                media={if Uploads.video?(attachment.upload) do
+                  :video
+                else
+                  :image
+                end}
+                src={Routes.commission_attachment_path(
+                  Endpoint,
+                  :show,
+                  @commission.public_id,
+                  attachment.upload.key
+                )}
               >
-                {#if Uploads.video?(attachment.upload)}
-                  <i class="fas fa-play text-4xl absolute top-10 left-10" />
-                {/if}
                 {#if @editing}
                   <a
                     href="#"
@@ -70,13 +78,16 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                     attachment.upload.key
                   )}
                 />
-              </button>
+                {#if Uploads.video?(attachment.upload)}
+                  <i class="fas fa-play text-4xl absolute top-10 left-10" />
+                {/if}
+              </Lightbox.Item>
             {/if}
-          </li>
+          </div>
         {/for}
-      </ul>
+      </Lightbox>
       <div class="flex flex-col p-2">
-        {#for attachment <- Enum.filter(@attachments, &(!&1.thumbnail_id))}
+        {#for attachment <- Enum.filter(@attachments, &(!&1.thumbnail_id || Uploads.video?(&1.upload)))}
           {#if @pending_payment && !@current_user_member?}
             <div title={attachment.upload.name} class="border-2 p-4 m-1">
               <i class="float-right fas fa-lock" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>

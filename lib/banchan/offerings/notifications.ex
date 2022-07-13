@@ -69,7 +69,7 @@ defmodule Banchan.Offerings.Notifications do
           studio = Repo.preload(offering, :studio).studio
 
           url =
-            Routes.studio_commissions_new_url(
+            Routes.offering_request_url(
               Endpoint,
               :new,
               studio.handle,

@@ -26,8 +26,8 @@ defmodule BanchanWeb.StudioLive.New do
     socket =
       socket
       |> assign(
-        countries: [{:"Choose your country...", nil} | Studios.Common.supported_countries()],
-        currencies: [{:"Currencies...", nil} | currencies]
+        countries: Studios.Common.supported_countries(),
+        currencies: currencies
       )
 
     if is_nil(socket.assigns.current_user.confirmed_at) do
@@ -40,7 +40,7 @@ defmodule BanchanWeb.StudioLive.New do
 
       {:ok,
        push_redirect(socket,
-         to: Routes.studio_index_path(Endpoint, :index)
+         to: Routes.confirmation_path(Endpoint, :show)
        )}
     else
       changeset = Studio.creation_changeset(%Studio{}, %{})
@@ -102,15 +102,42 @@ defmodule BanchanWeb.StudioLive.New do
             opts={autocomplete: "off"}
           >
             <h1 class="text-2xl">New Studio</h1>
-            <TextInput name={:name} icon="user" opts={required: true, phx_debounce: "200"} />
-            <TextInput name={:handle} icon="at" opts={required: true} />
-            <MarkdownInput id="about" name={:about} />
-            <Select name={:country} options={@countries} opts={required: true} />
-            <Select name={:default_currency} options={@currencies} opts={required: true} />
+            <TextInput
+              name={:name}
+              icon="user"
+              info="The studio's display name, as it should appear on studio cards and its home page."
+              opts={required: true, phx_debounce: "200"}
+            />
+            <TextInput
+              name={:handle}
+              icon="at"
+              info="Unique studio handle, as it will appear in the URL."
+              opts={required: true}
+            />
+            <MarkdownInput
+              id="about"
+              info="Tell us about your studio, what kind of art it's for, and what makes it different!"
+              name={:about}
+            />
+            <Select
+              name={:country}
+              info="Country where you are based. This must be the same country where your bank is, and it's the only reason we collect this information."
+              options={@countries}
+              opts={required: true}
+            />
+            <Select
+              name={:default_currency}
+              info="Currency that will appear by default in your currency drop down (if you choose more than one currency)."
+              prompt="Pick a currency..."
+              options={@currencies}
+              opts={required: true}
+            />
             <MultipleSelect
               name={:payment_currencies}
+              info="Currencies you want to invoice with. Note that people from other countries can still pay you even if their local currency isn't listed here, so you can just pick based on what will look right for your clients."
               options={@currencies}
-              opts={required: true, default_value: :USD}
+              selected={:USD}
+              opts={required: true}
             />
             <Submit changeset={@changeset} label="Save" />
           </Form>

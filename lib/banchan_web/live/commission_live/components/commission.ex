@@ -16,8 +16,8 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
     BalanceBox,
     CommentBox,
     InvoiceCollapse,
+    OfferingBox,
     StatusBox,
-    StudioBox,
     SummaryEditor,
     Timeline,
     UploadsBox
@@ -164,7 +164,10 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
       <div class="p-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="flex flex-col md:order-2">
-            <StudioBox commission={@commission} class="rounded-box hover:bg-base-200 p-2 transition-all" />
+            <OfferingBox
+              offering={@commission.offering}
+              class="rounded-box hover:bg-base-200 p-2 transition-all"
+            />
             <div class="divider" />
             <StatusBox
               id="status-box"
