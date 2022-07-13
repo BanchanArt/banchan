@@ -124,13 +124,13 @@ defmodule BanchanWeb.DiscoverLive.Index do
           <LivePatch to={Routes.discover_index_path(Endpoint, :index, "studios")}>Studios</LivePatch>
         </div>
       </div>
-      <div class="form-control mx-auto max-w-3xl py-4">
-        <Form for={:search} change="change" submit="submit">
-          <div class="flex flex-row flex-nowrap grow">
+      <div class="form-control mx-auto max-w-3xl py-4 w-full md:w-content">
+        <Form for={:search} change="change" submit="submit" class="w-full">
+          <div class="flex flex-row flex-nowrap grow w-full">
             {#if @type == "studios"}
               <Select
                 name={:sort_by}
-                class="select select-bordered select-lg"
+                class="select select-bordered md:select-lg"
                 selected={@order_by}
                 options={
                   "For You": :homepage,
@@ -142,7 +142,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
             {#elseif @type == "offerings"}
               <Select
                 name={:sort_by}
-                class="select select-bordered select-lg"
+                class="select select-bordered md:select-lg"
                 selected={@order_by}
                 options={
                   "For You": :featured,
@@ -153,11 +153,11 @@ defmodule BanchanWeb.DiscoverLive.Index do
                 }
               />
             {/if}
-            <Field name={:query}>
+            <Field name={:query} class="w-full">
               <TextInput
                 name={:query}
                 value={@query}
-                class="grow w-full input input-bordered input-lg"
+                class="grow w-full input input-bordered md:input-lg"
                 opts={
                   placeholder:
                     case @type do
@@ -168,7 +168,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
                 }
               />
             </Field>
-            <Submit class="btn btn-round btn-lg">
+            <Submit class="btn btn-round md:btn-lg">
               <i class="fas fa-search" />
             </Submit>
           </div>

@@ -67,7 +67,7 @@ defmodule BanchanWeb.OfferingLive.Show do
       {:noreply,
        socket
        |> put_flash(:error, "This offering is unavailable.")
-       |> push_redirect(to: Routes.offering_index_path(Endpoint, :index))}
+       |> push_redirect(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
     end
   end
 

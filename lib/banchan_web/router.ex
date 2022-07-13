@@ -136,10 +136,8 @@ defmodule BanchanWeb.Router do
       live("/discover", DiscoverLive.Index, :index)
       live("/discover/:type", DiscoverLive.Index, :index)
 
-      live("/offerings", OfferingLive.Index, :index)
       live("/offerings/:handle/:offering_type", OfferingLive.Show, :show)
 
-      live("/studios", StudioLive.Index, :index)
       live("/studios/:handle", StudioLive.Shop, :show)
       live("/studios/:handle/about", StudioLive.About, :show)
       live("/studios/:handle/portfolio", StudioLive.Portfolio, :show)

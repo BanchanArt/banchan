@@ -40,7 +40,7 @@ defmodule BanchanWeb.StudioLive.New do
 
       {:ok,
        push_redirect(socket,
-         to: Routes.studio_index_path(Endpoint, :index)
+         to: Routes.confirmation_path(Endpoint, :show)
        )}
     else
       changeset = Studio.creation_changeset(%Studio{}, %{})

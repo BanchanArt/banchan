@@ -91,14 +91,6 @@ defmodule BanchanWeb.Components.Layout do
             <li class="menu-title">
               <span>Art</span>
             </li>
-            <li>
-              <LiveRedirect to={Routes.discover_index_path(Endpoint, :index)}>
-                <span>
-                  <i class="fas fa-search" />
-                  Discover
-                </span>
-              </LiveRedirect>
-            </li>
             <li :if={@current_user}>
               <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
                 <span>
@@ -108,7 +100,15 @@ defmodule BanchanWeb.Components.Layout do
               </LiveRedirect>
             </li>
             <li>
-              <LiveRedirect to={Routes.offering_index_path(Endpoint, :index)}>
+              <LiveRedirect to={Routes.discover_index_path(Endpoint, :index)}>
+                <span>
+                  <i class="fas fa-search" />
+                  Discover
+                </span>
+              </LiveRedirect>
+            </li>
+            <li>
+              <LiveRedirect to={Routes.discover_index_path(Endpoint, :index, "offerings")}>
                 <span>
                   <i class="fas fa-paint-brush" />
                   Offerings
@@ -116,7 +116,7 @@ defmodule BanchanWeb.Components.Layout do
               </LiveRedirect>
             </li>
             <li>
-              <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
+              <LiveRedirect to={Routes.discover_index_path(Endpoint, :index, "studios")}>
                 <span>
                   <i class="fas fa-store" />
                   Studios

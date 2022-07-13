@@ -7,7 +7,9 @@ defmodule BanchanWeb.HomeLive do
   alias Banchan.Offerings
   alias Banchan.Studios
 
-  alias Surface.Components.LiveRedirect
+  alias Surface.Components.{Form, LiveRedirect}
+  alias Surface.Components.Form.{Field, Submit}
+  alias Surface.Components.Form.TextInput
 
   alias BanchanWeb.Components.{Carousel, Layout, StudioCard}
   alias BanchanWeb.StudioLive.Components.OfferingCard
@@ -43,6 +45,22 @@ defmodule BanchanWeb.HomeLive do
   end
 
   @impl true
+  def handle_event("search", search, socket) do
+    params = []
+
+    params =
+      if search["query"] && search["query"] != "" do
+        [{:q, search["query"]} | params]
+      else
+        params
+      end
+
+    {:noreply,
+     socket
+     |> push_redirect(to: Routes.discover_index_path(Endpoint, :index, "offerings", params))}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
@@ -73,8 +91,22 @@ defmodule BanchanWeb.HomeLive do
         </div>
       </:hero>
       <div class="flex flex-col">
+        <Form for={:search} submit="search" class="w-full">
+          <div class="flex flex-row flex-nowrap w-full md:w-content max-w-xl mx-auto">
+            <Field name={:query} class="w-full">
+              <TextInput
+                name={:query}
+                class="w-full input input-bordered"
+                opts={placeholder: "Search for offerings..."}
+              />
+            </Field>
+            <Submit class="btn btn-round">
+              <i class="fas fa-search" />
+            </Submit>
+          </div>
+        </Form>
         <div class="homepage-offerings">
-          <div class="px-2 flex flex-row items-end">
+          <div class="pt-6 px-2 flex flex-row items-end">
             <div class="text-xl grow">
               Selected Offerings
             </div>
