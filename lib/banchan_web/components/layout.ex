@@ -92,11 +92,12 @@ defmodule BanchanWeb.Components.Layout do
               <span>Art</span>
             </li>
             <li>
-              <input
-                type="text"
-                class="input p-2 input-sm cursor-text hover:cursor-text"
-                placeholder="Search"
-              />
+              <LiveRedirect to={Routes.discover_index_path(Endpoint, :index)}>
+                <span>
+                  <i class="fas fa-search" />
+                  Discover
+                </span>
+              </LiveRedirect>
             </li>
             <li :if={@current_user}>
               <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>

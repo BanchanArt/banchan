@@ -240,7 +240,23 @@ defmodule Banchan.Studios do
       end
 
     q =
+      case Keyword.fetch(opts, :query) do
+        {:ok, nil} ->
+          q
+
+        {:ok, query} ->
+          q
+          |> where([s], fragment("websearch_to_tsquery(?) @@ (?).search_vector", ^query, s))
+
+        :error ->
+          q
+      end
+
+    q =
       case Keyword.fetch(opts, :order_by) do
+        {:ok, nil} ->
+          q
+
         {:ok, :oldest} ->
           q |> order_by([s], asc: s.inserted_at)
 

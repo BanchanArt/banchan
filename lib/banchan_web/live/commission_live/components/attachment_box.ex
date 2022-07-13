@@ -54,7 +54,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                   Endpoint,
                   :show,
                   @commission.public_id,
-                  IO.inspect(attachment.upload.key)
+                  attachment.upload.key
                 )}
               >
                 {#if @editing}

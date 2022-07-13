@@ -79,7 +79,10 @@ defmodule BanchanWeb.HomeLive do
               Selected Offerings
             </div>
             <div class="text-md">
-              <LiveRedirect class="hover:link text-primary" to={Routes.offering_index_path(Endpoint, :index)}>View All</LiveRedirect>
+              <LiveRedirect
+                class="hover:link text-primary"
+                to={Routes.discover_index_path(Endpoint, :index, "offerings")}
+              >Discover More</LiveRedirect>
             </div>
           </div>
           <div class="divider" />
@@ -97,7 +100,10 @@ defmodule BanchanWeb.HomeLive do
               Selected Studios
             </div>
             <div class="text-md">
-              <LiveRedirect class="hover:link text-primary" to={Routes.studio_index_path(Endpoint, :index)}>View All</LiveRedirect>
+              <LiveRedirect
+                class="hover:link text-primary"
+                to={Routes.discover_index_path(Endpoint, :index, "studios")}
+              >Discover More</LiveRedirect>
             </div>
           </div>
           <div class="divider" />

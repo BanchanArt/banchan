@@ -319,6 +319,19 @@ defmodule Banchan.Offerings do
           })
 
     q =
+      case Keyword.fetch(opts, :query) do
+        {:ok, nil} ->
+          q
+
+        {:ok, query} ->
+          q
+          |> where([s], fragment("websearch_to_tsquery(?) @@ (?).search_vector", ^query, s))
+
+        :error ->
+          q
+      end
+
+    q =
       case Keyword.fetch(opts, :include_archived?) do
         {:ok, true} ->
           q |> where([o], is_nil(o.archived_at))
@@ -370,6 +383,9 @@ defmodule Banchan.Offerings do
 
     q =
       case Keyword.fetch(opts, :order_by) do
+        {:ok, nil} ->
+          q
+
         {:ok, :index} ->
           q
           |> order_by([o], [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index])
