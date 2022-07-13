@@ -68,7 +68,7 @@ defmodule Banchan.Repo.Migrations.Tags do
       fn ->
         repo().query(
           """
-          DROP FUNCTION public.immutable_array_to_string();
+          DROP FUNCTION IF EXISTS public.immutable_array_to_string();
           """,
           [],
           log: :info
@@ -76,7 +76,7 @@ defmodule Banchan.Repo.Migrations.Tags do
 
         repo().query(
           """
-          DROP FUNCTION public.trigger_update_tags_count();
+          DROP FUNCTION IF EXISTS public.trigger_update_tags_count();
           """,
           [],
           log: :info

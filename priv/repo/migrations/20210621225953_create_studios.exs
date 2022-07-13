@@ -80,14 +80,6 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           [],
           log: :info
         )
-
-        repo().query!(
-          """
-          DROP TRIGGER studios_tag_count_update;
-          """,
-          [],
-          log: :info
-        )
       end
     )
 

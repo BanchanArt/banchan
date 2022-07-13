@@ -82,14 +82,6 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           [],
           log: :info
         )
-
-        repo().query!(
-          """
-          DROP TRIGGER offerings_tag_count_update;
-          """,
-          [],
-          log: :info
-        )
       end
     )
 

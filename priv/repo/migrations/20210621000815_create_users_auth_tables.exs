@@ -123,14 +123,6 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
           [],
           log: :info
         )
-
-        repo().query!(
-          """
-          DROP TRIGGER users_tag_count_update;
-          """,
-          [],
-          log: :info
-        )
       end
     )
 
