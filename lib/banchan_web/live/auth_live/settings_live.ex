@@ -466,7 +466,7 @@ defmodule BanchanWeb.SettingsLive do
         submit="submit_maturity"
       >
         <h3 class="text-lg">Mature Content</h3>
-        <p>By choosing to display mature content on the site, you assert that you are at least 18 years or older and able to view this content.</p>
+        <p>By choosing to display mature content on the site, you assert that you are legally an adult in your country and able to view this content.</p>
         <Checkbox
           name={:mature_ok}
           info="Whether to show mature content items (studios, offerings, etc) at all."

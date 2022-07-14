@@ -116,7 +116,7 @@ defmodule BanchanWeb.OfferingLive.Show do
               >{@offering.studio.name}</LiveRedirect>
             </div>
             {#if @offering.mature}
-              <div class="badge badge-error badge-outline">18+</div>
+              <div class="badge badge-error badge-outline">Mature</div>
             {/if}
             {#if @offering.hidden}
               <div class="badge badge-error badge-outline">Hidden</div>
