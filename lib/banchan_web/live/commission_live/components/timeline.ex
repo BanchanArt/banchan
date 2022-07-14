@@ -35,7 +35,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
         {#if List.first(chunk).type == :comment}
           <div class="flex flex-col space-y-4">
             {#for event <- chunk}
-              <article class="timeline-item scroll-mt-32 snap-start" id={"event-#{event.public_id}"}>
+              <article class="timeline-item scroll-mt-40 snap-start" id={"event-#{event.public_id}"}>
                 <Comment
                   id={"event-#{event.public_id}"}
                   uri={@uri}
