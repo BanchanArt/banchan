@@ -271,7 +271,11 @@ defmodule Banchan.Studios do
         {:ok, true} ->
           q
 
-        _ ->
+        {:ok, false} ->
+          q
+          |> where([studio: s], s.stripe_charges_enabled == true)
+
+        :error ->
           case Keyword.fetch(opts, :current_user) do
             {:ok, %User{} = user} ->
               q
@@ -319,9 +323,10 @@ defmodule Banchan.Studios do
               from follower in StudioFollower,
                 where: parent_as(:studio).id == follower.studio_id,
                 select: %{followers: count(follower)}
-            )
+            ),
+            as: :followers
           )
-          |> order_by([_s, followers], desc: followers.followers)
+          |> order_by([followers: followers], desc: followers.followers)
 
         {:ok, :homepage} ->
           q

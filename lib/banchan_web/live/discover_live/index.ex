@@ -100,7 +100,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
   defp param_filters(socket, params) do
     query = params["q"]
     type = params["type"]
-    order_by = params["sort"] && String.to_existing_atom(params["order_by"])
+    order_by = params["sort_by"] && String.to_existing_atom(params["sort_by"])
 
     socket
     |> assign(query: query, type: type, order_by: order_by)
