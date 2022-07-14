@@ -8,7 +8,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   alias Banchan.Commissions.Event
   alias Banchan.Utils
 
-  alias Surface.Components.Form
+  alias Surface.Components.{Form, LiveRedirect}
 
   alias BanchanWeb.Components.{Button, Modal}
   alias BanchanWeb.Components.Form.{Submit, TextInput}
@@ -294,6 +294,12 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       {#elseif @event.invoice.status == :released}
         <span class="italic p-4 text-xs">
           Note: Banchan.Art has released these funds to the studio for payout.
+          {#if @current_user_member?}
+            (<LiveRedirect
+              to={Routes.studio_payouts_path(Endpoint, :index, @commission.studio.handle)}
+              class="link font-semibold"
+            >Go to Studio Payouts</LiveRedirect>)
+          {/if}
         </span>
       {/if}
 
