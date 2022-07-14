@@ -29,6 +29,11 @@ defmodule BanchanWeb.Components.StudioCard do
           <:header>
             <div class="text-lg font-bold">{@studio.name}</div>
           </:header>
+          <:header_aside>
+            {#if !@studio.stripe_charges_enabled}
+              <div class="badge badge-warning">Pending</div>
+            {/if}
+          </:header_aside>
           <div class="content">
             {@studio.about && raw(HtmlSanitizeEx.strip_tags(Earmark.as_html!(@studio.about)))}
           </div>

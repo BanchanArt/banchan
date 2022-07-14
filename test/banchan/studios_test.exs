@@ -210,9 +210,11 @@ defmodule Banchan.StudiosTest do
           })
         )
 
-      assert Enum.map(Studios.list_studios_for_user(user), & &1.id) == [studio.id]
-      assert Enum.map(Studios.list_studio_members(studio), & &1.id) == [user.id]
       assert Studios.is_user_in_studio?(user, studio)
+      assert Enum.map(Studios.list_studio_members(studio), & &1.id) == [user.id]
+
+      assert Enum.map(Studios.list_studios(with_member: user, include_pending: true), & &1.id) ==
+               [studio.id]
     end
   end
 

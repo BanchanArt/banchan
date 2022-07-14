@@ -228,7 +228,23 @@ defmodule Banchan.Studios do
   """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def list_studios(opts \\ []) do
-    q = from(s in Studio, as: :studio)
+    q =
+      from(
+        s in Studio,
+        as: :studio,
+        join: artist in assoc(s, :artists),
+        as: :artist
+      )
+
+    q =
+      case Keyword.fetch(opts, :with_member) do
+        {:ok, %User{} = member} ->
+          q
+          |> where([artist: artist], artist.id == ^member.id)
+
+        _ ->
+          q
+      end
 
     q =
       case Keyword.fetch(opts, :current_user) do
@@ -256,8 +272,18 @@ defmodule Banchan.Studios do
           q
 
         _ ->
-          q
-          |> where([s], s.stripe_charges_enabled == true)
+          case Keyword.fetch(opts, :current_user) do
+            {:ok, %User{} = user} ->
+              q
+              |> where(
+                [studio: s, artist: a],
+                s.stripe_charges_enabled == true or ^user.id == a.id
+              )
+
+            _ ->
+              q
+              |> where([studio: s], s.stripe_charges_enabled == true)
+          end
       end
 
     q =
@@ -317,18 +343,6 @@ defmodule Banchan.Studios do
       page_size: Keyword.get(opts, :page_size, 24),
       page: Keyword.get(opts, :page, 1)
     )
-  end
-
-  @doc """
-  List studios belonging to a user
-
-  ## Examples
-
-      iex> list_studios_for_user(user)
-      [%Studio{}, %Studio{}, %Studio{}]
-  """
-  def list_studios_for_user(%User{} = user) do
-    Repo.all(Ecto.assoc(user, :studios))
   end
 
   @doc """
