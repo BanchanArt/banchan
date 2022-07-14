@@ -53,6 +53,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
      )}
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def update(assigns, socket) do
     old_assigns = socket.assigns
     socket = socket |> assign(assigns)
@@ -77,7 +78,11 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
     {:ok,
      socket
-     |> assign(changeset: Offering.changeset(socket.assigns.offering || %Offering{}, %{}))
+     |> assign(
+       changeset:
+         old_assigns[:changeset] ||
+           Offering.changeset(socket.assigns.offering || %Offering{}, %{})
+     )
      |> assign(
        gallery_images:
          if socket.assigns.offering && is_nil(assigns[:gallery_images]) do
@@ -275,11 +280,11 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     ~F"""
     <Form
       for={@changeset}
-      change="change"
       opts={
         autocomplete: "off",
         phx_target: @myself,
-        phx_submit: "submit"
+        phx_submit: "submit",
+        phx_change: "change"
       }
     >
       <div class="flex flex-col gap-2">
