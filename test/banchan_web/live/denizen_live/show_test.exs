@@ -22,9 +22,7 @@ defmodule BanchanWeb.DenizenLive.ShowTest do
         Banchan.Accounts.update_user_profile(
           user,
           user,
-          %{bio: "This is my bio", name: "New User"},
-          nil,
-          nil
+          %{bio: "This is my bio", name: "New User"}
         )
 
       conn = Plug.Conn.assign(conn, :user, user)

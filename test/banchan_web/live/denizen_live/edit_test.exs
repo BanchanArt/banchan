@@ -40,9 +40,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
           %{
             name: "Name",
             bio: "Bio"
-          },
-          nil,
-          nil
+          }
         )
 
       conn = log_in_user(conn, user)

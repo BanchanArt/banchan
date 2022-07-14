@@ -377,9 +377,7 @@ defmodule Banchan.AccountsTest do
           %{
             name: String.duplicate("b", 40),
             bio: String.duplicate("a", 461)
-          },
-          nil,
-          nil
+          }
         )
 
       assert %{
@@ -397,9 +395,7 @@ defmodule Banchan.AccountsTest do
             handle: "newhandle",
             name: "New Name",
             bio: "New Bio"
-          },
-          nil,
-          nil
+          }
         )
 
       assert Accounts.get_user_by_handle!(user.handle)

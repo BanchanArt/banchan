@@ -8,7 +8,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
 
   alias Banchan.Accounts
 
-  alias BanchanWeb.Components.Form.{Submit, TagsInput, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{HiddenInput, Submit, TagsInput, TextArea, TextInput}
   alias BanchanWeb.Components.{Collapse, Layout}
   alias BanchanWeb.Endpoint
 
@@ -26,7 +26,13 @@ defmodule BanchanWeb.DenizenLive.Edit do
     else
       {:ok,
        socket
-       |> assign(user: user, changeset: User.profile_changeset(user), tags: user.tags)
+       |> assign(
+         user: user,
+         changeset: User.profile_changeset(user),
+         tags: user.tags,
+         remove_header: false,
+         remove_pfp: false
+       )
        |> allow_upload(:pfp,
          accept: ~w(image/jpeg image/png),
          max_entries: 1,
@@ -58,18 +64,26 @@ defmodule BanchanWeb.DenizenLive.Edit do
   end
 
   @impl true
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_event("submit", val, socket) do
-    pfp_images =
-      consume_uploaded_entries(socket, :pfp, fn %{path: path}, _entry ->
-        {:ok,
-         Accounts.make_pfp_images!(
-           socket.assigns.current_user,
-           socket.assigns.user,
-           path
-         )}
-      end)
+    {pfp, thumb} =
+      case consume_uploaded_entries(socket, :pfp, fn %{path: path}, _entry ->
+             {:ok,
+              Accounts.make_pfp_images!(
+                socket.assigns.current_user,
+                socket.assigns.user,
+                path
+              )}
+           end)
+           |> Enum.at(0) do
+        {pfp, thumb} ->
+          {pfp, thumb}
 
-    header_images =
+        nil ->
+          {nil, nil}
+      end
+
+    header_image =
       consume_uploaded_entries(socket, :header, fn %{path: path}, _entry ->
         {:ok,
          Accounts.make_header_image!(
@@ -78,13 +92,17 @@ defmodule BanchanWeb.DenizenLive.Edit do
            path
          )}
       end)
+      |> Enum.at(0)
 
     case Accounts.update_user_profile(
            socket.assigns.current_user,
            socket.assigns.user,
-           val["user"],
-           Enum.at(pfp_images, 0),
-           Enum.at(header_images, 0)
+           Enum.into(val["user"], %{
+             "pfp_img_id" => (pfp && pfp.id) || val["user"]["pfp_image_id"],
+             "pfp_thumb_id" => (thumb && thumb.id) || val["user"]["pfp_thumbnail_id"],
+             "header_img_id" =>
+               (header_image && header_image.id) || val["user"]["header_image_id"]
+           })
          ) do
       {:ok, user} ->
         socket = assign(socket, changeset: User.profile_changeset(user), user: user)
@@ -99,6 +117,24 @@ defmodule BanchanWeb.DenizenLive.Edit do
   end
 
   @impl true
+  def handle_event("cancel_pfp_upload", %{"ref" => ref}, socket) do
+    {:noreply, socket |> cancel_upload(:pfp, ref)}
+  end
+
+  @impl true
+  def handle_event("cancel_header_upload", %{"ref" => ref}, socket) do
+    {:noreply, socket |> cancel_upload(:header, ref)}
+  end
+
+  def handle_event("remove_pfp", _, socket) do
+    {:noreply, assign(socket, remove_pfp: true)}
+  end
+
+  def handle_event("remove_header", _, socket) do
+    {:noreply, assign(socket, remove_header: true)}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} padding={0} current_user={@current_user} flashes={@flash}>
@@ -109,13 +145,26 @@ defmodule BanchanWeb.DenizenLive.Edit do
               You are editing @{@user.handle}'s profile as @{@current_user.handle}.
             </div>
             <div class="relative">
-              {#if Enum.empty?(@uploads.header.entries) && !@user.header_img_id}
+              {#if Enum.empty?(@uploads.header.entries) && (@remove_header || !@user.header_img_id)}
+                <HiddenInput name={:header_image_id} value={nil} />
                 <div class="bg-base-300 object-cover aspect-header-image rounded-b-xl w-full" />
               {#elseif !Enum.empty?(@uploads.header.entries)}
+                <button
+                  type="button"
+                  phx-value-ref={(@uploads.header.entries |> Enum.at(0)).ref}
+                  class="btn btn-xs btn-circle absolute right-2 top-2 z-20"
+                  :on-click="cancel_header_upload"
+                >✕</button>
                 {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.header.entries, 0),
                   class: "object-cover aspect-header-image rounded-b-xl w-full"
                 )}
               {#elseif @user.header_img_id}
+                <button
+                  type="button"
+                  class="btn btn-xs btn-circle absolute right-2 top-2 z-20"
+                  :on-click="remove_header"
+                >✕</button>
+                <HiddenInput name={:header_image_id} value={@user.header_img_id} />
                 <img
                   class="object-cover aspect-header-image rounded-b-xl w-full"
                   src={Routes.public_image_path(Endpoint, :image, @user.header_img_id)}
@@ -136,12 +185,23 @@ defmodule BanchanWeb.DenizenLive.Edit do
                 <div class="relative flex justify-center items-center w-24">
                   <div class="avatar">
                     <div class="rounded-full w-24">
-                      {#if Enum.empty?(@uploads.pfp.entries) && !@user.pfp_img_id}
+                      {#if Enum.empty?(@uploads.pfp.entries) && (@remove_pfp || !(@user.pfp_img_id && @user.pfp_thumb_id))}
+                        <HiddenInput name={:pfp_image_id} value={nil} />
+                        <HiddenInput name={:pfp_thumbnail_id} value={nil} />
                         <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
                       {#elseif !Enum.empty?(@uploads.pfp.entries)}
+                        <button
+                          type="button"
+                          phx-value-ref={(@uploads.pfp.entries |> Enum.at(0)).ref}
+                          class="btn btn-xs btn-circle absolute right-2 top-2"
+                          :on-click="cancel_pfp_upload"
+                        >✕</button>
                         {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.pfp.entries, 0))}
-                      {#elseif @user.pfp_img_id}
-                        <img src={Routes.public_image_path(Endpoint, :image, @user.pfp_img_id)}>
+                      {#else}
+                        <button type="button" class="btn btn-xs btn-circle absolute right-2 top-2" :on-click="remove_pfp">✕</button>
+                        <HiddenInput name={:pfp_image_id} value={@user.pfp_img_id} />
+                        <HiddenInput name={:pfp_thumb_id} value={@user.pfp_thumb_id} />
+                        <img src={Routes.public_image_path(Endpoint, :image, @user.pfp_thumb_id)}>
                       {/if}
                     </div>
                   </div>

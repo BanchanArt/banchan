@@ -246,6 +246,9 @@ defmodule Banchan.Accounts.User do
       :name,
       :bio,
       :tags,
+      :pfp_img_id,
+      :pfp_thumb_id,
+      :header_img_id,
       :twitter_handle,
       :instagram_handle,
       :facebook_url,
@@ -266,6 +269,9 @@ defmodule Banchan.Accounts.User do
     |> validate_bio()
     |> validate_tags()
     |> validate_socials()
+    |> foreign_key_constraint(:pfp_img_id)
+    |> foreign_key_constraint(:pfp_thumb_id)
+    |> foreign_key_constraint(:header_img_id)
   end
 
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity

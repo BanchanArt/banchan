@@ -188,9 +188,13 @@ defmodule Banchan.Accounts do
     tmp_file = Path.join([System.tmp_dir!(), "oauth-pfp-#{:rand.uniform(100_000_000)}"])
     resp = HTTPoison.get!(url)
     File.write!(tmp_file, resp.body)
-    pfp_info = make_pfp_images!(user, user, tmp_file)
+    {pfp, thumb} = make_pfp_images!(user, user, tmp_file)
     File.rm!(tmp_file)
-    update_user_profile(user, user, %{}, pfp_info, nil)
+
+    update_user_profile(user, user, %{
+      "pfp_img_id" => pfp.id,
+      "pfp_thumb_id" => thumb.id
+    })
   end
 
   defp add_oauth_pfp({:error, error}, _) do
@@ -353,43 +357,15 @@ defmodule Banchan.Accounts do
 
   ## Examples
 
-      iex> update_user_profile(user, %{handle: ..., bio: ..., ...}, nil, nil)
+      iex> update_user_profile(actor, user, %{handle: ..., bio: ..., ...})
       {:ok, %User{}}
 
   """
-  def update_user_profile(%User{} = actor, %User{} = user, attrs, pfp, header) do
+  def update_user_profile(%User{} = actor, %User{} = user, attrs) do
     if can_modify_user?(actor, user) do
-      {:ok, ret} =
-        Repo.transaction(fn ->
-          changeset =
-            user
-            |> Repo.preload(:pfp_img)
-            |> Repo.preload(:pfp_thumb)
-            |> Repo.preload(:header_img)
-            |> User.profile_changeset(attrs)
-
-          changeset =
-            case pfp do
-              {pfp, thumb} ->
-                changeset
-                |> Ecto.Changeset.put_assoc(:pfp_img, pfp)
-                |> Ecto.Changeset.put_assoc(:pfp_thumb, thumb)
-
-              nil ->
-                changeset
-            end
-
-          changeset =
-            if header do
-              changeset |> Ecto.Changeset.put_assoc(:header_img, header)
-            else
-              changeset
-            end
-
-          changeset |> Repo.update()
-        end)
-
-      ret
+      user
+      |> User.profile_changeset(attrs)
+      |> Repo.update()
     else
       {:error, :unauthorized}
     end

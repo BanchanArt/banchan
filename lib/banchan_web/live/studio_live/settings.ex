@@ -15,6 +15,7 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
+    HiddenInput,
     MarkdownInput,
     MultipleSelect,
     Select,
@@ -42,6 +43,8 @@ defmodule BanchanWeb.StudioLive.Settings do
        tags: socket.assigns.studio.tags,
        changeset: Studio.profile_changeset(socket.assigns.studio, %{}),
        currencies: [{:"Currencies...", nil} | currencies],
+       remove_card: false,
+       remove_header: false,
        subscribed?:
          Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.studio)
      )
@@ -102,9 +105,9 @@ defmodule BanchanWeb.StudioLive.Settings do
            socket.assigns.studio,
            socket.assigns.current_user_member?,
            Enum.into(val["studio"], %{
-             "card_img_id" => (card_image && card_image.id) || socket.assigns.studio.card_img_id,
+             "card_img_id" => (card_image && card_image.id) || val["studio"]["card_image_id"],
              "header_img_id" =>
-               (header_image && header_image.id) || socket.assigns.studio.header_img_id
+               (header_image && header_image.id) || val["studio"]["header_image_id"]
            })
          ) do
       {:ok, studio} ->
@@ -139,6 +142,14 @@ defmodule BanchanWeb.StudioLive.Settings do
   @impl true
   def handle_event("cancel_header_upload", %{"ref" => ref}, socket) do
     {:noreply, socket |> cancel_upload(:header_image, ref)}
+  end
+
+  def handle_event("remove_card", _, socket) do
+    {:noreply, assign(socket, remove_card: true)}
+  end
+
+  def handle_event("remove_header", _, socket) do
+    {:noreply, assign(socket, remove_header: true)}
   end
 
   def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
@@ -211,32 +222,73 @@ defmodule BanchanWeb.StudioLive.Settings do
               options={@currencies}
               opts={required: true}
             />
-            {#if Enum.empty?(@uploads.card_image.entries) && !(@studio && @studio.card_img_id)}
-              <div class="aspect-video bg-base-300 w-full" />
-            {#elseif !Enum.empty?(@uploads.card_image.entries)}
-              {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
-                class: "object-cover aspect-video rounded-xl w-full"
-              )}
-            {#else}
-              <img
-                class="object-cover aspect-video rounded-xl w-full"
-                src={Routes.public_image_path(Endpoint, :image, @studio.card_img_id)}
-              />
-            {/if}
-            <UploadInput label="Card Image" upload={@uploads.card_image} cancel="cancel_card_upload" />
-            {#if Enum.empty?(@uploads.header_image.entries) && !(@studio && @studio.header_img_id)}
-              <div class="aspect-header-image bg-base-300 w-full" />
-            {#elseif !Enum.empty?(@uploads.header_image.entries)}
-              {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.header_image.entries, 0),
-                class: "object-cover aspect-header-image rounded-xl w-full"
-              )}
-            {#else}
-              <img
-                class="object-cover aspect-header-image rounded-xl w-full"
-                src={Routes.public_image_path(Endpoint, :image, @studio.header_img_id)}
-              />
-            {/if}
-            <UploadInput label="Header Image" upload={@uploads.header_image} cancel="cancel_header_upload" />
+            <div class="relative">
+              {#if Enum.empty?(@uploads.card_image.entries) && (@remove_card || !(@studio && @studio.card_img_id))}
+                <HiddenInput name={:card_image_id} value={nil} />
+                <div class="aspect-video bg-base-300 w-full" />
+              {#elseif !Enum.empty?(@uploads.card_image.entries)}
+                <button
+                  type="button"
+                  phx-value-ref={(@uploads.card_image.entries |> Enum.at(0)).ref}
+                  class="btn btn-xs btn-circle absolute right-2 top-2"
+                  :on-click="cancel_card_upload"
+                >✕</button>
+                {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
+                  class: "object-cover aspect-video rounded-xl w-full"
+                )}
+              {#else}
+                <button
+                  type="button"
+                  class="btn btn-xs btn-circle absolute right-2 top-2"
+                  :on-click="remove_card"
+                >✕</button>
+                <HiddenInput name={:card_image_id} value={@studio.card_img_id} />
+                <img
+                  class="object-cover aspect-video rounded-xl w-full"
+                  src={Routes.public_image_path(Endpoint, :image, @studio.card_img_id)}
+                />
+              {/if}
+            </div>
+            <UploadInput
+              label="Card Image"
+              hide_list
+              upload={@uploads.card_image}
+              cancel="cancel_card_upload"
+            />
+            <div class="relative">
+              {#if Enum.empty?(@uploads.header_image.entries) &&
+                  (@remove_header || !(@studio && @studio.header_img_id))}
+                <HiddenInput name={:header_image_id} value={nil} />
+                <div class="aspect-header-image bg-base-300 w-full" />
+              {#elseif !Enum.empty?(@uploads.header_image.entries)}
+                <button
+                  type="button"
+                  phx-value-ref={(@uploads.header_image.entries |> Enum.at(0)).ref}
+                  class="btn btn-xs btn-circle absolute right-2 top-2"
+                  :on-click="cancel_header_upload"
+                >✕</button>
+                {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.header_image.entries, 0),
+                  class: "object-cover aspect-header-image rounded-xl w-full"
+                )}
+              {#else}
+                <button
+                  type="button"
+                  class="btn btn-xs btn-circle absolute right-2 top-2"
+                  :on-click="remove_header"
+                >✕</button>
+                <HiddenInput name={:header_image_id} value={@studio.header_img_id} />
+                <img
+                  class="object-cover aspect-header-image rounded-xl w-full"
+                  src={Routes.public_image_path(Endpoint, :image, @studio.header_img_id)}
+                />
+              {/if}
+            </div>
+            <UploadInput
+              label="Header Image"
+              hide_list
+              upload={@uploads.header_image}
+              cancel="cancel_header_upload"
+            />
             <MarkdownInput
               id="about"
               info="Displayed in the 'About' page. The first few dozen characters will also be displayed as the description in studio cards."
