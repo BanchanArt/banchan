@@ -15,6 +15,7 @@ defmodule Banchan.Commissions do
     Commission,
     CommissionArchived,
     CommissionFilter,
+    Common,
     Event,
     EventAttachment,
     Invoice,
@@ -33,28 +34,33 @@ defmodule Banchan.Commissions do
   def list_commission_data_for_dashboard(
         %User{} = user,
         %CommissionFilter{} = filter,
-        page,
-        page_size \\ 10
+        opts \\ []
       ) do
     main_dashboard_query(user)
     |> dashboard_query_filter(filter)
-    |> Repo.paginate(page: page, page_size: page_size)
+    |> dashboard_order_by(opts)
+    |> Repo.paginate(
+      page_size: Keyword.get(opts, :page_size, 24),
+      page: Keyword.get(opts, :page, 1)
+    )
   end
 
   defp main_dashboard_query(%User{} = user) do
     from s in Studio,
       join: c in Commission,
       on: c.studio_id == s.id,
+      as: :commission,
       join: artist in assoc(s, :artists),
       left_join: a in CommissionArchived,
       on: a.commission_id == c.id and a.user_id == ^user.id,
       join: client in assoc(c, :client),
       join: e in assoc(c, :events),
+      as: :events,
       where:
         c.client_id == ^user.id or
           artist.id == ^user.id,
       group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name, a.archived],
-      order_by: {:desc, max(e.inserted_at)},
+      # order_by: {:desc, max(e.inserted_at)},
       select: %{
         commission: %Commission{
           id: c.id,
@@ -77,6 +83,40 @@ defmodule Banchan.Commissions do
         archived: coalesce(a.archived, false),
         updated_at: max(e.inserted_at)
       }
+  end
+
+  defmacro status_order(arg) do
+    cases =
+      Common.status_values()
+      |> Enum.with_index()
+      |> Enum.map_join("\n", fn {status, idx} ->
+        # NB(zkat): I'm sorry for not using fragment(). I don't think I can.
+        "WHEN '#{status}' THEN #{idx}"
+      end)
+
+    quote do
+      fragment(unquote("CASE ? #{cases} ELSE NULL END"), unquote(arg))
+    end
+  end
+
+  defp dashboard_order_by(q, opts) do
+    case Keyword.fetch(opts, :order_by) do
+      {:ok, :recently_updated} ->
+        q
+        |> order_by([events: e], {:desc, max(e.inserted_at)})
+
+      {:ok, :oldest_updated} ->
+        q
+        |> order_by([events: e], {:asc, max(e.inserted_at)})
+
+      {:ok, :status} ->
+        q
+        |> order_by([commission: comm], {:asc, status_order(comm.status)})
+
+      :error ->
+        q
+        |> order_by([events: e], {:desc, max(e.inserted_at)})
+    end
   end
 
   defp dashboard_query_filter(query, %CommissionFilter{} = filter) do

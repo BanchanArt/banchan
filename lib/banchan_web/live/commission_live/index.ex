@@ -13,7 +13,7 @@ defmodule BanchanWeb.CommissionLive do
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
   alias BanchanWeb.Components.{Collapse, InfiniteScroll, Layout}
-  alias BanchanWeb.Components.Form.{Checkbox, MultipleSelect, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, MultipleSelect, Select, TextInput}
 
   alias BanchanWeb.CommissionLive.Components.Commission
 
@@ -29,21 +29,21 @@ defmodule BanchanWeb.CommissionLive do
       socket
       |> assign(
         :filter,
-        Map.get(socket.assigns, :filter, CommissionFilter.changeset(%CommissionFilter{}))
+        CommissionFilter.changeset(filter_from_params(params))
       )
 
     socket =
       socket
       |> assign(page: 1)
+      |> assign(order_by: order_from_params(params))
       |> assign(status_options: @status_options)
       |> assign(filter_open: Map.get(socket.assigns, :filter_open, false))
+
+    socket =
+      socket
       |> assign(
         :results,
-        Commissions.list_commission_data_for_dashboard(
-          socket.assigns.current_user,
-          Ecto.Changeset.apply_changes(socket.assigns.filter),
-          1
-        )
+        list_comms(socket)
       )
 
     socket =
@@ -165,26 +165,91 @@ defmodule BanchanWeb.CommissionLive do
   end
 
   @impl true
+  def handle_event("reset", _, socket) do
+    {:noreply,
+     socket
+     |> push_patch(
+       to:
+         Routes.commission_path(
+           Endpoint,
+           :index,
+           %CommissionFilter{}
+           |> filter_to_params()
+         )
+     )}
+  end
+
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def handle_event("change", %{"commission_filter" => filter, "_target" => target}, socket) do
+    if target == ["commission_filter", "sort_by"] do
+      sort_by = filter["sort_by"] && String.to_existing_atom(filter["sort_by"])
+
+      params =
+        %CommissionFilter{}
+        |> CommissionFilter.changeset(filter)
+        |> Ecto.Changeset.apply_changes()
+        |> filter_to_params()
+
+      params =
+        case sort_by do
+          :recently_updated ->
+            params
+
+          sort_by ->
+            [{:sort_by, sort_by} | params]
+        end
+
+      {:noreply,
+       socket
+       |> push_patch(
+         to:
+           Routes.commission_path(
+             Endpoint,
+             :index,
+             params
+           )
+       )}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
   def handle_event("filter", %{"commission_filter" => filter}, socket) do
-    changeset = CommissionFilter.changeset(%CommissionFilter{}, filter)
+    sort_by = filter["sort_by"] && String.to_existing_atom(filter["sort_by"])
 
-    socket =
-      if changeset.valid? do
-        socket
-        |> assign(page: 1)
-        |> assign(
-          :results,
-          Commissions.list_commission_data_for_dashboard(
-            socket.assigns.current_user,
-            Ecto.Changeset.apply_changes(changeset),
-            1
-          )
-        )
-      else
-        socket
-      end
+    changeset =
+      %CommissionFilter{}
+      |> CommissionFilter.changeset(filter)
 
-    {:noreply, assign(socket, filter: changeset)}
+    if changeset.valid? do
+      params =
+        changeset
+        |> Ecto.Changeset.apply_changes()
+        |> filter_to_params()
+
+      params =
+        case sort_by do
+          :recently_updated ->
+            params
+
+          sort_by ->
+            [{:sort_by, sort_by} | params]
+        end
+
+      {:noreply,
+       socket
+       |> push_patch(
+         to:
+           Routes.commission_path(
+             Endpoint,
+             :index,
+             params
+           )
+       )}
+    else
+      {:noreply, assign(socket, filter: changeset)}
+    end
   end
 
   def handle_event("toggle_filter", _, socket) do
@@ -201,7 +266,7 @@ defmodule BanchanWeb.CommissionLive do
     end
   end
 
-  defp fetch(%{assigns: %{results: results, page: page, filter: changeset}} = socket) do
+  defp fetch(%{assigns: %{results: results, page: page}} = socket) do
     socket
     |> assign(
       :results,
@@ -209,13 +274,77 @@ defmodule BanchanWeb.CommissionLive do
         results
         | entries:
             results.entries ++
-              Commissions.list_commission_data_for_dashboard(
-                socket.assigns.current_user,
-                Ecto.Changeset.apply_changes(changeset),
-                page
-              ).entries
+              list_comms(socket, page).entries
       }
     )
+  end
+
+  defp list_comms(socket, page \\ 1) do
+    Commissions.list_commission_data_for_dashboard(
+      socket.assigns.current_user,
+      Ecto.Changeset.apply_changes(socket.assigns.filter),
+      page: page,
+      page_size: 10,
+      order_by: socket.assigns.order_by
+    )
+  end
+
+  defp order_from_params(params) do
+    (params["sort_by"] || "recently_updated") |> String.to_existing_atom()
+  end
+
+  defp filter_from_params(params) do
+    search = params["q"]
+
+    %CommissionFilter{}
+    |> CommissionFilter.changeset(
+      Enum.into(params, %{
+        "search" => search
+      })
+    )
+    |> Ecto.Changeset.apply_changes()
+  end
+
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  defp filter_to_params(%CommissionFilter{} = filter) do
+    params = []
+
+    params =
+      if filter.search && filter.search != "" do
+        Keyword.put(params, :q, filter.search)
+      else
+        params
+      end
+
+    params =
+      if filter.client && filter.client != "" do
+        Keyword.put(params, :client, filter.client)
+      else
+        params
+      end
+
+    params =
+      if filter.studio && filter.studio != "" do
+        Keyword.put(params, :studio, filter.studio)
+      else
+        params
+      end
+
+    params =
+      if filter.show_archived do
+        Keyword.put(params, :show_archived, filter.show_archived)
+      else
+        params
+      end
+
+    params =
+      if filter.statuses && !Enum.empty?(filter.statuses) do
+        Keyword.put(params, :statuses, filter.statuses)
+      else
+        params
+      end
+
+    params
   end
 
   @impl true
@@ -230,11 +359,14 @@ defmodule BanchanWeb.CommissionLive do
         <div class={"flex flex-col pt-4 sidebar basis-full", hidden: @commission}>
           <Form
             for={@filter}
+            change="change"
             submit="filter"
             class="form-control px-4 mx-auto max-w-3xl pb-6 w-full md:w-content"
           >
-            <Field class="w-full input-group" name={:search}>
-              <button :on-click="toggle_filter" type="button" class="btn btn-square"><i class="fas fa-filter" /></button>
+            <Field class="w-full input-group grow" name={:search}>
+              <button :on-click="toggle_filter" type="button" class="btn btn-square">
+                <i class="fas fa-filter" />
+              </button>
               <SurfaceTextInput class="input input-bordered w-full" />
               <Submit class="btn btn-square">
                 <i class="fas fa-search" />
@@ -248,10 +380,23 @@ defmodule BanchanWeb.CommissionLive do
               <TextInput name={:client} />
               <TextInput name={:studio} />
               <MultipleSelect name={:statuses} options={@status_options} />
+              <Select
+                name={:sort_by}
+                class="select select-bordered shrink"
+                selected={@order_by}
+                options={
+                  "Recently Updated": :recently_updated,
+                  "Earliest Updated": :oldest_updated,
+                  Status: :status
+                }
+              />
               <div class="py-2">
                 <Checkbox label="Show Archived" name={:show_archived} />
               </div>
-              <Submit label="Apply" class="btn btn-square btn-primary w-full" />
+              <div class="grid grid-cols-3 gap-2">
+                <Submit label="Apply" class="btn btn-square btn-primary col-span-2 w-full" />
+                <button type="button" :on-click="reset" class="btn-btn-square btn-link w-full">Reset</button>
+              </div>
             </Collapse>
           </Form>
           {#if Enum.empty?(@results)}
