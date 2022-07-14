@@ -135,8 +135,8 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   def render(assigns) do
     ~F"""
     <div class="relative">
-      <h1 class="text-3xl flex flex-row items-center pt-4 px-4 sticky top-16 bg-base-100 z-30 pb-2 border-b-2 border-base-content border-opacity-10 opacity-100">
-        <LivePatch class="px-2 py-4" to={Routes.commission_path(Endpoint, :index)}>
+      <h1 class="text-3xl flex flex-row items-center px-4 sticky top-16 bg-base-100 z-30 pb-2 border-b-2 border-base-content border-opacity-10 opacity-100 items-center">
+        <LivePatch class="px-2 pb-4" to={Routes.commission_path(Endpoint, :index)}>
           <i class="fas fa-arrow-left text-2xl" />
         </LivePatch>
         {#if @title_changeset}
@@ -150,7 +150,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             </div>
           </Form>
         {#else}
-          <div class="px-2 flex flex-row w-full items-center">
+          <div class="px-2 pb-2 flex flex-row w-full items-center">
             <div class="grow w-full flex flex-row items-center gap-2">
               {@commission.title}
               {#if @archived?}

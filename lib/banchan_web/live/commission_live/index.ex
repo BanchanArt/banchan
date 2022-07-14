@@ -221,14 +221,22 @@ defmodule BanchanWeb.CommissionLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} padding={0} current_user={@current_user} flashes={@flash}>
+    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+      {#if !@commission}
+        <h1 class="text-3xl">My Commissions</h1>
+        <div class="divider" />
+      {/if}
       <div class="flex flex-row grow xl:grow-0">
         <div class={"flex flex-col pt-4 sidebar basis-full", hidden: @commission}>
-          <Form for={@filter} submit="filter" class="form-control px-4">
+          <Form
+            for={@filter}
+            submit="filter"
+            class="form-control px-4 mx-auto max-w-3xl pb-6 w-full md:w-content"
+          >
             <Field class="w-full input-group" name={:search}>
-              <button :on-click="toggle_filter" type="button" class="btn btn-square btn-primary"><i class="fas fa-filter" /></button>
+              <button :on-click="toggle_filter" type="button" class="btn btn-square"><i class="fas fa-filter" /></button>
               <SurfaceTextInput class="input input-bordered w-full" />
-              <Submit class="btn btn-square btn-primary">
+              <Submit class="btn btn-square">
                 <i class="fas fa-search" />
               </Submit>
             </Field>
@@ -246,22 +254,21 @@ defmodule BanchanWeb.CommissionLive do
               <Submit label="Apply" class="btn btn-square btn-primary w-full" />
             </Collapse>
           </Form>
-          <div class="divider">Commissions</div>
-          <ul class="menu menu-compact gap-2 p-2">
-            {#for result <- @results.entries}
-              <CommissionRow
-                result={result}
-                highlight={@commission && @commission.public_id == result.commission.public_id}
-              />
-            {#else}
-              <li>
-                <div class="py-2 px-4 text-xl">
-                  No Results
-                </div>
-              </li>
-            {/for}
-          </ul>
-          <InfiniteScroll id="commissions-infinite-scroll" page={@page} load_more="load_more" />
+          {#if Enum.empty?(@results)}
+            <div class="py-2 px-4 text-xl">
+              No Results
+            </div>
+          {#else}
+            <ul class="menu menu-compact gap-2 p-2">
+              {#for result <- @results}
+                <CommissionRow
+                  result={result}
+                  highlight={@commission && @commission.public_id == result.commission.public_id}
+                />
+              {/for}
+            </ul>
+            <InfiniteScroll id="commissions-infinite-scroll" page={@page} load_more="load_more" />
+          {/if}
         </div>
         {#if @commission}
           <div class="basis-full">
