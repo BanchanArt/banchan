@@ -692,6 +692,12 @@ defmodule Banchan.Accounts do
     |> Repo.update()
   end
 
+  def update_muted(user, attrs) do
+    user
+    |> User.muted_changeset(attrs)
+    |> Repo.update()
+  end
+
   ## Session
 
   @doc """

@@ -365,6 +365,12 @@ defmodule Banchan.Offerings do
               sub.user_id == ^current_user.id and sub.offering_id == o.id and
                 sub.silenced != true
           )
+          |> join(:inner, [], user in User, on: user.id == ^current_user.id, as: :current_user)
+          |> where(
+            [o, current_user: current_user],
+            is_nil(current_user.muted) or
+              not fragment("(?).muted_filter_query @@ (?).search_vector", current_user, o)
+          )
           |> select_merge([o, _studio, _used_slots, _default_prices, _gallery_uploads, sub], %{
             user_subscribed?: not is_nil(sub.id)
           })

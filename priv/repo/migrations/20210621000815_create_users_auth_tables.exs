@@ -27,6 +27,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :totp_activated, :boolean
       add :mature_ok, :boolean, null: false
       add :uncensored_mature, :boolean, null: false
+      add :muted, :text
 
       # OAuth
       add :twitter_uid, :text
@@ -76,6 +77,17 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
               setweight(to_tsvector('banchan_fts', handle), 'A') ||
               setweight(to_tsvector('banchan_fts', coalesce(name, '')), 'B') ||
               setweight(to_tsvector('banchan_fts', immutable_array_to_string(tags, ' ')), 'C')
+            ) STORED;
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!(
+          """
+          ALTER TABLE users ADD COLUMN muted_filter_query tsquery
+            GENERATED ALWAYS AS (
+              websearch_to_tsquery('banchan_fts', muted)
             ) STORED;
           """,
           [],

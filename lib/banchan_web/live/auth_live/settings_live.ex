@@ -11,7 +11,7 @@ defmodule BanchanWeb.SettingsLive do
   alias Banchan.Notifications.UserNotificationSettings
 
   alias BanchanWeb.AuthLive.Components.AuthLayout
-  alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -28,7 +28,8 @@ defmodule BanchanWeb.SettingsLive do
            new_email_changeset: User.email_changeset(socket.assigns.current_user, %{}),
            notification_settings: settings,
            notification_settings_changeset: UserNotificationSettings.changeset(settings, %{}),
-           maturity_changeset: User.maturity_changeset(socket.assigns.current_user, %{})
+           maturity_changeset: User.maturity_changeset(socket.assigns.current_user, %{}),
+           muted_changeset: User.muted_changeset(socket.assigns.current_user, %{})
          )}
       else
         {:ok,
@@ -39,7 +40,8 @@ defmodule BanchanWeb.SettingsLive do
            password_changeset: User.password_changeset(socket.assigns.current_user, %{}),
            notification_settings: settings,
            notification_settings_changeset: UserNotificationSettings.changeset(settings, %{}),
-           maturity_changeset: User.maturity_changeset(socket.assigns.current_user, %{})
+           maturity_changeset: User.maturity_changeset(socket.assigns.current_user, %{}),
+           muted_changeset: User.muted_changeset(socket.assigns.current_user, %{})
          )}
       end
     else
@@ -283,6 +285,35 @@ defmodule BanchanWeb.SettingsLive do
     end
   end
 
+  def handle_event("change_muted", val, socket) do
+    changeset =
+      socket.assigns.current_user
+      |> User.muted_changeset(val["change_muted"])
+      |> Map.put(:action, :update)
+
+    socket = assign(socket, muted_changeset: changeset)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("submit_muted", val, socket) do
+    case Accounts.update_muted(
+           socket.assigns.current_user,
+           val["change_muted"]
+         ) do
+      {:ok, updated_user} ->
+        {:noreply,
+         socket
+         |> assign(
+           current_user: updated_user,
+           muted_changeset: User.muted_changeset(updated_user, %{})
+         )}
+
+      other ->
+        other
+    end
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -413,6 +444,19 @@ defmodule BanchanWeb.SettingsLive do
           <Submit class="w-full" changeset={@password_changeset} label="Save" />
         </Form>
       {/if}
+      <div class="divider" />
+      <Form
+        class="flex flex-col gap-4"
+        for={@muted_changeset}
+        as={:change_muted}
+        change="change_muted"
+        submit="submit_muted"
+      >
+        <h3 class="text-lg">Muted Words</h3>
+        <p>Words here will be used to filter out content that appears in the homepage and in discovery searches.</p>
+        <TextArea name={:muted} info="Enter your desired muted words" label="Muted Words" />
+        <Submit class="w-full" changeset={@muted_changeset} label="Save" />
+      </Form>
       <div class="divider" />
       <Form
         class="flex flex-col gap-4"

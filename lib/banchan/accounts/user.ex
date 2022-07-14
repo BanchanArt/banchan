@@ -27,6 +27,7 @@ defmodule Banchan.Accounts.User do
     field :tags, {:array, :string}
     field :mature_ok, :boolean, default: false
     field :uncensored_mature, :boolean, default: false
+    field :muted, :string
 
     # Roles and moderation
     field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist], default: []
@@ -452,6 +453,15 @@ defmodule Banchan.Accounts.User do
   def maturity_changeset(user, attrs) do
     user
     |> cast(attrs, [:mature_ok, :uncensored_mature])
+  end
+
+  @doc """
+  User changeset for setting muted words.
+  """
+  def muted_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:muted])
+    |> validate_length(:muted, max: 1000)
   end
 
   @doc """

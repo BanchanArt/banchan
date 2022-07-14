@@ -238,6 +238,12 @@ defmodule Banchan.Studios do
             [s],
             s.mature != true or (s.mature == true and ^current_user.mature_ok == true)
           )
+          |> join(:inner, [], user in User, on: user.id == ^current_user.id, as: :current_user)
+          |> where(
+            [o, current_user: current_user],
+            is_nil(current_user.muted) or
+              not fragment("(?).muted_filter_query @@ (?).search_vector", current_user, o)
+          )
 
         _ ->
           q

@@ -13,6 +13,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def assign_studio_defaults(%{"handle" => handle}, socket, current_member, requires_stripe) do
     studio = Studios.get_studio_by_handle!(handle)
 
