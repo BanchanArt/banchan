@@ -83,6 +83,14 @@ defmodule Banchan.Studios.Notifications do
     |> Repo.one()
   end
 
+  def following_count(%User{} = user) do
+    from(f in StudioFollower,
+      where: f.user_id == ^user.id,
+      select: count(f)
+    )
+    |> Repo.one()
+  end
+
   def subscribe_to_follower_count(%Studio{} = studio) do
     Phoenix.PubSub.subscribe(@pubsub, "follower_count:#{studio.handle}")
   end

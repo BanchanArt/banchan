@@ -39,6 +39,7 @@ defmodule Banchan.Studios.Studio do
       preload_order: [asc: :index]
 
     many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
+    many_to_many :followers, Banchan.Accounts.User, join_through: "studio_followers"
 
     has_many :offerings, Banchan.Offerings.Offering, preload_order: [:asc, :index]
 

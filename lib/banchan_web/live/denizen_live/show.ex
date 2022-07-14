@@ -7,24 +7,21 @@ defmodule BanchanWeb.DenizenLive.Show do
   alias Banchan.Accounts
   alias Banchan.Studios
 
-  alias Surface.Components.LiveRedirect
+  alias Surface.Components.{LivePatch, LiveRedirect}
 
-  alias BanchanWeb.Components.{Avatar, Button, InfiniteScroll, Layout, StudioCard}
+  alias BanchanWeb.Components.{Avatar, InfiniteScroll, Layout, StudioCard}
   alias BanchanWeb.Endpoint
 
   @impl true
-  def mount(%{"handle" => handle}, _session, socket) do
+  def handle_params(%{"handle" => handle}, uri, socket) do
     user = Accounts.get_user_by_handle!(handle)
     socket = socket |> assign(user: user)
 
-    {:ok,
+    {:noreply,
      assign(socket,
+       uri: uri,
        studios: list_studios(socket),
-       followers: Accounts.Notifications.follower_count(user),
-       following: Accounts.Notifications.following_count(user),
-       user_following?:
-         socket.assigns.current_user &&
-           Accounts.Notifications.user_following?(socket.assigns.current_user, user),
+       following: Studios.Notifications.following_count(user),
        page_title: "#{user.name} (@#{user.handle})",
        page_description: user.bio,
        page_small_image:
@@ -34,37 +31,6 @@ defmodule BanchanWeb.DenizenLive.Show do
            Routes.static_url(Endpoint, "/images/denizen_default_icon.png")
          end
      )}
-  end
-
-  @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
-  def handle_event(
-        "toggle_follow",
-        _,
-        %{assigns: %{user: user, current_user: current_user}} = socket
-      )
-      when user.id == current_user.id do
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event(
-        "toggle_follow",
-        _,
-        %{assigns: %{user_following?: user_following?, user: user, current_user: current_user}} =
-          socket
-      ) do
-    if user_following? do
-      Accounts.Notifications.unfollow_user!(user, current_user)
-    else
-      Accounts.Notifications.follow_user!(user, current_user)
-    end
-
-    {:noreply, socket |> assign(user_following?: !user_following?)}
   end
 
   @impl true
@@ -78,12 +44,23 @@ defmodule BanchanWeb.DenizenLive.Show do
   end
 
   defp list_studios(socket, page \\ 1) do
-    Studios.list_studios(
-      current_user: socket.assigns.current_user,
-      with_member: socket.assigns.user,
-      page_size: 24,
-      page: page
-    )
+    case socket.assigns.live_action do
+      :show ->
+        Studios.list_studios(
+          current_user: socket.assigns.current_user,
+          with_member: socket.assigns.user,
+          page_size: 24,
+          page: page
+        )
+
+      :following ->
+        Studios.list_studios(
+          current_user: socket.assigns.current_user,
+          with_follower: socket.assigns.current_user,
+          page_size: 24,
+          page: page
+        )
+    end
   end
 
   defp fetch(page, %{assigns: %{studios: studios}} = socket) do
@@ -139,15 +116,6 @@ defmodule BanchanWeb.DenizenLive.Show do
                   to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)}
                   class="btn btn-sm btn-primary btn-outline rounded-full m-2 px-2 py-0 grow-0"
                 />
-              {/if}
-              {#if @current_user && @current_user.id != @user.id}
-                <Button click="toggle_follow" class="btn-sm btn-outline m-2 rounded-full px-2 py-0 grow-0">
-                  {if @user_following? do
-                    "Unfollow"
-                  else
-                    "Follow"
-                  end}
-                </Button>
               {/if}
             </div>
           </div>
@@ -249,23 +217,7 @@ defmodule BanchanWeb.DenizenLive.Show do
             </a>
           </div>
           <div class="mx-6 flex flex-row my-4 gap-4">
-            <div>
-              <span class="font-bold">
-                {#if @followers > 9999}
-                  {Number.SI.number_to_si(@followers)}
-                {#else}
-                  {Number.Delimit.number_to_delimited(@followers, precision: 0)}
-                {/if}
-              </span>
-              <span>
-                {#if @followers == 1}
-                  Follower
-                {#else}
-                  Followers
-                {/if}
-              </span>
-            </div>
-            <div>
+            <LivePatch class="hover:link" to={Routes.denizen_show_path(Endpoint, :following, @user.handle)}>
               <span class="font-bold">
                 {#if @following > 9999}
                   {Number.SI.number_to_si(@following)}
@@ -276,12 +228,16 @@ defmodule BanchanWeb.DenizenLive.Show do
               <span>
                 Following
               </span>
-            </div>
+            </LivePatch>
           </div>
         </section>
       </:hero>
+      {#if @live_action == :show}
+        <div class="text-2xl pb-6">Artist for:</div>
+      {#elseif @live_action == :following}
+        <div class="text-2xl pb-6">Following:</div>
+      {/if}
       {#if !Enum.empty?(@studios)}
-        <div class="text-2xl">Artist for:</div>
         <div class="studio-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
           {#for studio <- @studios}
             <StudioCard studio={studio} />

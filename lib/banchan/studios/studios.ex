@@ -339,6 +339,17 @@ defmodule Banchan.Studios do
           q
       end
 
+    q =
+      case Keyword.fetch(opts, :with_follower) do
+        {:ok, %User{} = follower} ->
+          q
+          |> join(:inner, [studio: s], follower in assoc(s, :followers), as: :follower)
+          |> where([follower: f], f.id == ^follower.id)
+
+        _ ->
+          q
+      end
+
     Repo.paginate(q,
       page_size: Keyword.get(opts, :page_size, 24),
       page: Keyword.get(opts, :page, 1)
