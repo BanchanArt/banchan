@@ -45,7 +45,6 @@ defmodule BanchanWeb.Components.Layout do
             <a href="#" class="link link-hover">About us</a>
             <a href="#" class="link link-hover">Contact</a>
             <a href="#" class="link link-hover">Membership</a>
-            <a href="#" class="link link-hover">Press kit</a>
           </div>
           <div>
             {!-- # TODO: Fill these out --}
