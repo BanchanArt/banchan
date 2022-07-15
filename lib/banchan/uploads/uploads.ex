@@ -75,7 +75,8 @@ defmodule Banchan.Uploads do
         {nil, nil}
       end
 
-    if Mix.env() == :prod || !is_nil(Application.get_env(:ex_aws, :region)) do
+    if Application.fetch_env!(:banchan, :env) == :prod ||
+         !is_nil(Application.get_env(:ex_aws, :region)) do
       src
       |> ExAws.S3.Upload.stream_file()
       |> ExAws.S3.upload(bucket, key)

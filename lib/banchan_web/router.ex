@@ -8,7 +8,7 @@ defmodule BanchanWeb.Router do
 
   @host Application.compile_env!(:banchan, [BanchanWeb.Endpoint, :url, :host])
 
-  @content_security_policy (case Mix.env() do
+  @content_security_policy (case Application.compile_env!(:banchan, :env) do
                               :prod ->
                                 "default-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src wss://#{@host};img-src 'self' blob: data:; font-src data:;"
 
@@ -177,7 +177,10 @@ defmodule BanchanWeb.Router do
 
   scope "/admin" do
     # Enable admin stuff dev/test side but restrict it in prod
-    pipe_through([:browser | if(Mix.env() in [:dev, :test], do: [], else: [:admin])])
+    pipe_through([
+      :browser
+      | if(Application.fetch_env!(:banchan, :env) in [:dev, :test], do: [], else: [:admin])
+    ])
 
     live_dashboard("/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo)
     forward("/sent_emails", Bamboo.SentEmailViewerPlug)

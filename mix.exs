@@ -105,6 +105,9 @@ defmodule Banchan.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
+      "deploy.dev": [
+        "cmd fly deploy -a banchan-dev --build-arg BANCHAN_HOST=dev.banchan.art"
+      ],
       "stripe.local": [
         "cmd stripe listen --forward-to localhost:4000/api/stripe_webhook"
       ],

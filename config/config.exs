@@ -8,6 +8,7 @@
 import Config
 
 config :banchan,
+  env: config_env(),
   namespace: Banchan,
   stripe_mod: Banchan.StripeAPI,
   ecto_repos: [Banchan.Repo],
@@ -16,7 +17,6 @@ config :banchan,
 
 # Configures the endpoint
 config :banchan, BanchanWeb.Endpoint,
-  url: [host: "localhost"],
   render_errors: [view: BanchanWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Banchan.PubSub,
   live_view: [signing_salt: "qB2PgmVY"]

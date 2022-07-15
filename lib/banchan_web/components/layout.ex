@@ -81,7 +81,7 @@ defmodule BanchanWeb.Components.Layout do
               <li>
                 <a href="/admin/dashboard" target="_blank" rel="noopener noreferrer"><i class="fas fa-tachometer-alt" /> Dashboard</a>
               </li>
-              {#if Mix.env() == :dev}
+              {#if Application.fetch_env!(:banchan, :env) == :dev}
                 <li>
                   <a href="/admin/sent_emails" target="_blank" rel="noopener noreferrer"><i class="fas fa-paper-plane" /> Sent Emails</a>
                 </li>

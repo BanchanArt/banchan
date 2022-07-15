@@ -10,7 +10,7 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-if Mix.env() == :test do
+if Application.fetch_env!(:banchan, :env) == :test do
   Mox.defmock(Banchan.StripeAPI.Mock, for: Banchan.StripeAPI.Base)
 
   Banchan.StripeAPI.Mock
