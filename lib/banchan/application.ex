@@ -16,7 +16,9 @@ defmodule Banchan.Application do
       # Start the Endpoint (http/https)
       BanchanWeb.Endpoint,
       # Start the Task supervisor for handling notifications
-      {Task.Supervisor, name: Banchan.NotificationTaskSupervisor}
+      {Task.Supervisor, name: Banchan.NotificationTaskSupervisor},
+      # Start Oban
+      {Oban, Application.fetch_env!(:banchan, Oban)}
       # Start a worker by calling: Banchan.Worker.start_link(arg)
       # {Banchan.Worker, arg}
     ]
