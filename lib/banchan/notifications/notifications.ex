@@ -2,11 +2,10 @@ defmodule Banchan.Notifications do
   @moduledoc """
   Context module for notification-related operations.
   """
-  alias Bamboo.Email
   import Ecto.Query, warn: false
 
   alias Banchan.Accounts.User
-  alias Banchan.Mailer
+  alias Banchan.Workers.Mailer
 
   alias Banchan.Notifications.{
     UserNotification,
@@ -147,16 +146,11 @@ defmodule Banchan.Notifications do
         notification.title
       end
 
-    Email.new_email(
+    Mailer.deliver(
       to: email,
-      from:
-        "notifications@" <>
-          (Application.get_env(:banchan, Banchan.Mailer)[:sendgrid_domain] ||
-             "noreply.banchan.art"),
       subject: title,
       html_body: notification.html_body,
       text_body: notification.text_body
     )
-    |> Mailer.deliver_later!()
   end
 end
