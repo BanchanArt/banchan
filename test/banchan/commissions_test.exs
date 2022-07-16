@@ -152,14 +152,13 @@ defmodule Banchan.CommissionsTest do
   describe "events" do
     test "make_attachment" do
       user = user_fixture()
-      src = "test/support/fixtures/file-types/image/squid.png"
+      src = "test/support/fixtures/file-types/image/test.png"
       type = "image/png"
-      name = "squid"
+      name = "test"
 
       {:ok, attachment} = Commissions.make_attachment!(user, src, type, name)
 
       assert user == attachment.uploader
-      assert "squid.jpeg" = attachment.thumbnail
     end
   end
 
