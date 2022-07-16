@@ -73,6 +73,7 @@ defmodule Banchan.MixProject do
       {:uuid, "~> 1.1"},
       {:timex, "~> 3.7.6"},
       {:mogrify, "~> 0.9.1"},
+      {:ffmpex, "~> 0.10.0"},
       {:scrivener_ecto, "~> 2.7.0"},
       {:nimble_totp, "~> 0.1.0"},
       {:qr_code, "~> 2.2.1"},

@@ -4,6 +4,8 @@ defmodule Banchan.Commissions do
   """
 
   import Ecto.Query, warn: false
+  import FFmpex, warn: false
+  use FFmpex.Options
   require Logger
 
   alias Banchan.Repo
@@ -41,7 +43,7 @@ defmodule Banchan.Commissions do
   end
 
   defp main_dashboard_query(%User{} = user) do
-    from s in Studio,
+    from(s in Studio,
       join: c in Commission,
       on: c.studio_id == s.id,
       join: artist in assoc(s, :artists),
@@ -76,6 +78,7 @@ defmodule Banchan.Commissions do
         archived: coalesce(a.archived, false),
         updated_at: max(e.inserted_at)
       }
+    )
   end
 
   defp dashboard_query_filter(query, %CommissionFilter{} = filter) do
@@ -153,7 +156,7 @@ defmodule Banchan.Commissions do
   """
   def get_commission!(public_id, current_user) do
     Repo.one!(
-      from c in Commission,
+      from(c in Commission,
         join: s in assoc(c, :studio),
         join: artist in assoc(s, :artists),
         where:
@@ -165,6 +168,7 @@ defmodule Banchan.Commissions do
           line_items: [:option],
           offering: [:options]
         ]
+      )
     )
   end
 
@@ -618,7 +622,7 @@ defmodule Banchan.Commissions do
   # This one expects binaries for everything because it looks everything up in one fell swoop.
   def get_attachment_if_allowed!(commission, key, user) do
     Repo.one!(
-      from ea in EventAttachment,
+      from(ea in EventAttachment,
         join: ul in assoc(ea, :upload),
         join: e in assoc(ea, :event),
         join: c in assoc(e, :commission),
@@ -630,6 +634,7 @@ defmodule Banchan.Commissions do
             ul.key == ^key and
             (c.client_id == ^user.id or artist.id == ^user.id),
         preload: [:upload, :thumbnail]
+      )
     )
   end
 
@@ -677,7 +682,25 @@ defmodule Banchan.Commissions do
               image
 
             Uploads.video?(upload) ->
-              nil
+              output_path = Path.join([System.tmp_dir!(), upload.key <> ".jpeg"])
+
+              command =
+                FFmpex.new_command()
+                |> add_global_option(option_y())
+                |> add_input_file(tmp_file)
+                |> add_output_file(output_path)
+                |> add_file_option(option_filter("scale=128:128"))
+                |> add_file_option(option_ss(0))
+                |> add_file_option(option_vframes(1))
+
+              {:ok, _} = execute(command)
+
+              image = Uploads.save_file!(user, output_path, "image/jpeg", "thumbnail.jpeg")
+
+              File.rm!(tmp_file)
+              File.rm!(output_path)
+
+              image
           end
 
         thumb
