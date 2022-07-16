@@ -5,6 +5,7 @@ defmodule Banchan.Commissions.Notifications do
   import Ecto.Query, warn: false
 
   alias Banchan.Accounts.User
+  alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, CommissionSubscription, Common, Event}
   alias Banchan.Notifications
   alias Banchan.Repo
@@ -101,7 +102,9 @@ defmodule Banchan.Commissions.Notifications do
     end)
   end
 
-  def commission_event_updated(%Commission{} = commission, %Event{} = event, _actor \\ nil) do
+  def commission_event_updated(comm, ev, _actor \\ nil)
+
+  def commission_event_updated(%Commission{} = commission, %Event{} = event, _actor) do
     Notifications.with_task(fn ->
       Phoenix.PubSub.broadcast!(
         @pubsub,
@@ -116,6 +119,15 @@ defmodule Banchan.Commissions.Notifications do
       # NOTE: No notifications in this case. event_updated is for things like
       # edits, that we don't want to spam users with.
     end)
+  end
+
+  def commission_event_updated(commission_id, event_id, _actor)
+      when is_number(commission_id) and is_number(event_id) do
+    commission_event_updated(
+      %Commission{public_id: Commissions.get_public_id!(commission_id)},
+      Repo.get!(Event, event_id)
+      |> Repo.preload(attachments: [:upload, :preview, :thumbnail], invoice: [])
+    )
   end
 
   def new_commission_events(%Commission{} = commission, events, actor \\ nil) do

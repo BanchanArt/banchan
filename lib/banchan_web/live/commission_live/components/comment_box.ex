@@ -7,6 +7,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
   alias Banchan.Commissions
   alias Banchan.Commissions.Event
   alias Banchan.Repo
+  alias Banchan.Uploads
 
   alias Surface.Components.Form
 
@@ -93,7 +94,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
   defp process_uploads(socket) do
     consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
       {:ok,
-       Commissions.make_attachment!(
+       Uploads.save_file!(
          socket.assigns.current_user,
          path,
          entry.client_type,

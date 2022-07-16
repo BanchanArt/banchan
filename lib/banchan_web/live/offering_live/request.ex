@@ -7,6 +7,7 @@ defmodule BanchanWeb.OfferingLive.Request do
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, LineItem}
   alias Banchan.Offerings
+  alias Banchan.Uploads
 
   alias Surface.Components.Form
 
@@ -169,7 +170,7 @@ defmodule BanchanWeb.OfferingLive.Request do
     attachments =
       consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
         {:ok,
-         Commissions.make_attachment!(
+         Uploads.save_file!(
            socket.assigns.current_user,
            path,
            entry.client_type,

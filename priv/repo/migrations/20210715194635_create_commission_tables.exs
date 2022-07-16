@@ -233,6 +233,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
     create table(:event_attachments) do
       add :event_id, references(:commission_events, on_delete: :delete_all)
       add :upload_id, references(:uploads, on_delete: :delete_all, type: :uuid)
+      add :preview_id, references(:uploads, on_delete: :delete_all, type: :uuid)
       add :thumbnail_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
 
       timestamps()

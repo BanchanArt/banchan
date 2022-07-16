@@ -16,8 +16,7 @@ defmodule Banchan.Uploads.Upload do
     field :key, :string
     field :type, :string
     field :size, :integer
-    field :width, :integer
-    field :height, :integer
+    field :pending, :boolean, default: true
 
     belongs_to :uploader, User
     timestamps()
@@ -26,9 +25,14 @@ defmodule Banchan.Uploads.Upload do
   @doc false
   def changeset(upload, attrs) do
     upload
-    |> cast(attrs, [:name, :key, :bucket, :type])
+    |> cast(attrs, [:name, :key, :bucket, :type, :size, :pending])
     |> validate_required([:key, :bucket])
     |> unique_constraint([:bucket, :key])
+  end
+
+  def update_changeset(upload, attrs) do
+    upload
+    |> cast(attrs, [:name, :type, :size, :pending])
   end
 
   def type, do: :map

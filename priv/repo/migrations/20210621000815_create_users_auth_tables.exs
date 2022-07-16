@@ -8,9 +8,8 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :bucket, :string, null: false
       add :key, :string, null: false
       add :type, :string
-      add :size, :integer, null: false
-      add :width, :integer
-      add :height, :integer
+      add :size, :integer
+      add :pending, :boolean, default: true, null: false
 
       timestamps()
     end
