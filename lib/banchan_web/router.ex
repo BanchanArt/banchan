@@ -81,6 +81,12 @@ defmodule BanchanWeb.Router do
         :thumbnail
       )
 
+      get(
+        "/commissions/:commission_id/attachment/:key/preview",
+        CommissionAttachmentController,
+        :preview
+      )
+
       get("/settings/confirm_email/:token", UserSettingsController, :confirm_email)
       get("/settings/refresh_session/:return_to", UserSessionController, :refresh_session)
     end

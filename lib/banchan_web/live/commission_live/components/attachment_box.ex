@@ -42,6 +42,11 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                   <i class="fas fa-lock" />
                 </div>
               </div>
+            {#elseif attachment.thumbnail.pending || attachment.preview.pending}
+              <div
+                class="w-full h-full rounded-box bg-base-content flex justify-center items-center animate-pulse"
+                title={attachment.upload.name}
+              />
             {#else}
               <Lightbox.Item
                 class="relative"
@@ -52,7 +57,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                 end}
                 src={Routes.commission_attachment_path(
                   Endpoint,
-                  :show,
+                  :preview,
                   @commission.public_id,
                   attachment.upload.key
                 )}

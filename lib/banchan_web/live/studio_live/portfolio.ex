@@ -79,7 +79,9 @@ defmodule BanchanWeb.StudioLive.Portfolio do
           Studios.make_portfolio_image!(
             socket.assigns.current_user,
             path,
-            socket.assigns.current_user_member?
+            socket.assigns.current_user_member?,
+            entry.client_type,
+            entry.client_name
           )}}
       end)
 

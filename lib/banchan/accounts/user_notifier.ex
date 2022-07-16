@@ -1,20 +1,16 @@
 defmodule Banchan.Accounts.UserNotifier do
   @moduledoc false
 
-  alias Bamboo.Email
-
-  alias Banchan.Mailer
+  alias Banchan.Workers.Mailer
 
   defp deliver(to, subject, body) do
-    Email.new_email(
-      to: to,
-      from:
-        "noreply@" <>
-          (Application.get_env(:banchan, Banchan.Mailer)[:sendgrid_domain] || "banchan.art"),
-      subject: subject,
-      text_body: body
-    )
-    |> Mailer.deliver_later!()
+    {:ok, _} =
+      Mailer.deliver(
+        to: to,
+        subject: subject,
+        html_body: body,
+        text_body: body
+      )
 
     {:ok, %{to: to, body: body}}
   end

@@ -31,12 +31,16 @@ defmodule BanchanWeb.Components.MasonryGallery.Upload do
           :on-click={@deleted}
         >✕</button>
       {/if}
-      <Lightbox.Item>
-        <img
-          class="w-full h-full object-cover"
-          src={Routes.public_image_path(Endpoint, :image, @upload.id)}
-        />
-      </Lightbox.Item>
+      {#if @upload.pending}
+        <div class="w-full h-full bg-base-content animate-pulse" />
+      {#else}
+        <Lightbox.Item>
+          <img
+            class="w-full h-full object-cover"
+            src={Routes.public_image_path(Endpoint, :image, @upload.id)}
+          />
+        </Lightbox.Item>
+      {/if}
     </div>
     """
   end

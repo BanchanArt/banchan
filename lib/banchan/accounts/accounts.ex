@@ -10,6 +10,7 @@ defmodule Banchan.Accounts do
   alias Banchan.Accounts.{DisableHistory, User, UserNotifier, UserToken}
   alias Banchan.Repo
   alias Banchan.Uploads
+  alias Banchan.Workers.Thumbnailer
 
   alias BanchanWeb.UserAuth
 
@@ -185,10 +186,19 @@ defmodule Banchan.Accounts do
   end
 
   defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: url}}) when is_binary(url) do
-    tmp_file = Path.join([System.tmp_dir!(), "oauth-pfp-#{:rand.uniform(100_000_000)}"])
+    tmp_file =
+      Path.join([
+        System.tmp_dir!(),
+        "oauth-pfp-#{:rand.uniform(100_000_000)}" <> Path.extname(url)
+      ])
+
     resp = HTTPoison.get!(url)
     File.write!(tmp_file, resp.body)
-    {pfp, thumb} = make_pfp_images!(user, user, tmp_file)
+    %{format: format} = Mogrify.identify(tmp_file)
+
+    {pfp, thumb} =
+      make_pfp_images!(user, user, tmp_file, "image/#{format}", Path.basename(tmp_file))
+
     File.rm!(tmp_file)
 
     update_user_profile(user, user, %{
@@ -833,27 +843,23 @@ defmodule Banchan.Accounts do
     Phoenix.PubSub.subscribe(@pubsub, UserAuth.pubsub_topic())
   end
 
-  def make_pfp_images!(%User{} = actor, %User{} = user, src) do
+  def make_pfp_images!(%User{} = actor, %User{} = user, src, type, name) do
     if can_modify_user?(actor, user) do
-      mog =
-        Mogrify.open(src)
-        |> Mogrify.format("jpeg")
-        |> Mogrify.gravity("Center")
-        |> Mogrify.resize_to_fill("512x512")
-        |> Mogrify.save(in_place: true)
+      upload = Uploads.save_file!(user, src, type, name)
 
-      pfp = Uploads.save_file!(user, mog.path, "image/jpeg", "profile.jpg")
-      File.rm!(mog.path)
+      {:ok, pfp} =
+        Thumbnailer.thumbnail(
+          upload,
+          dimensions: "512x512",
+          name: "profile.jpg"
+        )
 
-      mog =
-        Mogrify.open(src)
-        |> Mogrify.format("jpeg")
-        |> Mogrify.gravity("Center")
-        |> Mogrify.resize_to_fill("128x128")
-        |> Mogrify.save(in_place: true)
-
-      thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")
-      File.rm!(mog.path)
+      {:ok, thumb} =
+        Thumbnailer.thumbnail(
+          upload,
+          dimensions: "128x128",
+          name: "thumbnail.jpg"
+        )
 
       {pfp, thumb}
     else
@@ -861,15 +867,16 @@ defmodule Banchan.Accounts do
     end
   end
 
-  def make_header_image!(%User{} = actor, %User{} = user, src) do
+  def make_header_image!(%User{} = actor, %User{} = user, src, type, name) do
     if can_modify_user?(actor, user) do
-      mog =
-        Mogrify.open(src)
-        |> Mogrify.format("jpeg")
-        |> Mogrify.save(in_place: true)
+      upload = Uploads.save_file!(user, src, type, name)
 
-      header = Uploads.save_file!(user, mog.path, "image/jpeg", "header.jpg")
-      File.rm!(mog.path)
+      {:ok, header} =
+        Thumbnailer.thumbnail(
+          upload,
+          dimensions: "1200",
+          name: "header.jpg"
+        )
 
       header
     else

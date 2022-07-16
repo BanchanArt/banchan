@@ -8,6 +8,7 @@ defmodule BanchanWeb.Components.Avatar do
 
   prop user, :struct, required: true
   prop link, :boolean, default: true
+  prop thumb, :boolean, default: true
   prop class, :css_class
 
   def render(assigns) do
@@ -16,8 +17,10 @@ defmodule BanchanWeb.Components.Avatar do
       <div class={"rounded-full", @class, "bg-neutral-focus text-neutral-content": !@user.pfp_thumb_id}>
         {#if @link}
           <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @user.handle)}>
-            {#if @user.pfp_thumb_id}
+            {#if @thumb && @user.pfp_thumb_id}
               <img src={Routes.public_image_path(Endpoint, :image, @user.pfp_thumb_id)}>
+            {#elseif !@thumb && @user.pfp_img_id}
+              <img src={Routes.public_image_path(Endpoint, :image, @user.pfp_img_id)}>
             {#else}
               <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
             {/if}

@@ -8,8 +8,6 @@ defmodule Banchan.Commissions do
 
   alias Banchan.Repo
 
-  alias Banchan.Accounts.User
-
   alias Banchan.Commissions.{
     CommentHistory,
     Commission,
@@ -23,11 +21,13 @@ defmodule Banchan.Commissions do
     Notifications
   }
 
+  alias Banchan.Accounts.User
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
   alias Banchan.Studios
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
+  alias Banchan.Workers.Thumbnailer
 
   @pubsub Banchan.PubSub
 
@@ -203,11 +203,24 @@ defmodule Banchan.Commissions do
                ^current_user.id == artist.id),
         preload: [
           :studio,
-          events: [invoice: [], attachments: [:upload, :thumbnail]],
+          events: [invoice: [], attachments: [:upload, :thumbnail, :preview]],
           line_items: [:option],
           offering: [:options, :studio]
         ]
     )
+  end
+
+  def get_public_id!(commission_id) do
+    %{public_id: public_id} =
+      Repo.one!(
+        from c in Commission,
+          where: c.id == ^commission_id,
+          select: %{
+            public_id: c.public_id
+          }
+      )
+
+    public_id
   end
 
   # TODO: maybe this is too wide a net? We can separate this into user-level
@@ -286,30 +299,40 @@ defmodule Banchan.Commissions do
   end
 
   defp insert_commission(actor, studio, offering, line_items, attachments, attrs) do
-    case %Commission{
-           studio: studio,
-           offering: offering,
-           client: actor,
-           line_items: line_items,
-           events: [
-             %{
-               actor: actor,
-               type: :comment,
-               text: Map.get(attrs, "description", ""),
-               attachments: attachments
-             }
-           ]
-         }
-         |> Commission.creation_changeset(attrs)
-         |> Repo.insert() do
-      {:ok, %Commission{} = commission} ->
-        Notifications.subscribe_user!(actor, commission)
-        Notifications.new_commission(commission, actor)
-        {:ok, commission}
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        comm_changeset =
+          %Commission{
+            studio: studio,
+            offering: offering,
+            client: actor,
+            line_items: line_items
+          }
+          |> Commission.creation_changeset(attrs)
 
-      {:error, err} ->
-        {:error, err}
-    end
+        with {:ok, %Commission{} = commission} <- Repo.insert(comm_changeset),
+             _ <- Notifications.subscribe_user!(actor, commission),
+             {:ok, _} <-
+               create_event(
+                 :comment,
+                 actor,
+                 commission,
+                 true,
+                 attachments,
+                 %{
+                   text: Map.get(attrs, "description", "")
+                 },
+                 false
+               ) do
+          commission =
+            commission |> Repo.preload(events: [attachments: [:upload, :thumbnail, :preview]])
+
+          Notifications.new_commission(commission, actor)
+          {:ok, commission}
+        end
+      end)
+
+    ret
   end
 
   def archived?(%User{} = user, %Commission{} = commission) do
@@ -382,7 +405,7 @@ defmodule Banchan.Commissions do
             join: i in assoc(e, :invoice),
             where: i.commission_id == ^commission.id and i.status == :released,
             select: e,
-            preload: [:actor, invoice: [], attachments: [:upload, :thumbnail]]
+            preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
           )
           |> Repo.all()
           |> Enum.each(fn ev ->
@@ -413,7 +436,7 @@ defmodule Banchan.Commissions do
       from(e in Event,
         where: e.id == ^invoice.event_id,
         select: e,
-        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail]]
+        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
       )
       |> Repo.one!()
 
@@ -567,17 +590,27 @@ defmodule Banchan.Commissions do
   @doc """
   Creates a event.
   """
-  def create_event(type, actor, commission, current_user_member?, attachments, attrs)
+  def create_event(
+        type,
+        actor,
+        commission,
+        current_user_member?,
+        attachments,
+        attrs,
+        notify \\ true
+      )
 
   def create_event(
         _type,
         %User{id: user_id},
         %Commission{client_id: client_id},
         current_user_member?,
-        _,
-        _attrs
+        attachments,
+        _attrs,
+        _notify
       )
       when user_id != client_id and current_user_member? == false do
+    Enum.each(attachments, &File.rm!(&1.path))
     {:error, :unauthorized}
   end
 
@@ -587,26 +620,31 @@ defmodule Banchan.Commissions do
         %Commission{} = commission,
         _current_user_member?,
         attachments,
-        attrs
+        attrs,
+        notify
       )
       when is_atom(type) do
-    ret =
-      %Event{
-        type: type,
-        commission_id: commission.id,
-        actor_id: actor.id,
-        attachments: attachments
-      }
-      |> Event.changeset(attrs)
-      |> Repo.insert()
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        changeset =
+          %Event{
+            type: type,
+            commission_id: commission.id,
+            actor_id: actor.id
+          }
+          |> Event.changeset(attrs)
 
-    case ret do
-      {:ok, event} ->
-        Notifications.new_commission_events(commission, [%{event | invoice: nil}], actor)
+        with {:ok, event} <- Repo.insert(changeset),
+             :ok <- add_attachments(event, attachments) do
+          event = event |> Repo.preload(attachments: [:upload, :thumbnail, :preview])
 
-      _ ->
-        nil
-    end
+          if notify do
+            Notifications.new_commission_events(commission, [%{event | invoice: nil}], actor)
+          end
+
+          {:ok, event}
+        end || {:error, :event_failure}
+      end)
 
     ret
   end
@@ -700,7 +738,7 @@ defmodule Banchan.Commissions do
       from(e in Event,
         where: e.id == ^event_id,
         select: e,
-        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail]]
+        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
       )
       |> Repo.one!()
 
@@ -732,46 +770,48 @@ defmodule Banchan.Commissions do
             (artist.id == ^user.id or
                (c.client_id == ^user.id and
                   ((i.required and i.status == :succeeded) or not i.required or is_nil(i.required)))),
-        preload: [:upload, :thumbnail]
+        preload: [:upload, :thumbnail, :preview]
     )
   end
 
-  def make_attachment!(%User{} = user, src, type, name) do
-    upload = Uploads.save_file!(user, src, type, name)
+  def add_attachments(%Event{} = event, attachments) do
+    {:ok, _} =
+      Repo.transaction(fn ->
+        Enum.each(attachments, fn upload ->
+          {:ok, thumbnail} =
+            if Uploads.image?(upload) do
+              Thumbnailer.thumbnail(
+                upload,
+                target_size: "5kb",
+                dimensions: "128x128",
+                callback: [
+                  Notifications,
+                  :commission_event_updated,
+                  [event.commission_id, event.id]
+                ]
+              )
+            else
+              {:ok, nil}
+            end
 
-    thumbnail =
-      if Uploads.image?(upload) || Uploads.video?(upload) do
-        # SECURITY: No fs traversal here because Path.extname(name) is safe. We do need that extension, tho.
-        tmp_file = Path.join([System.tmp_dir!(), upload.key <> Path.extname(name)])
-        File.mkdir_p!(Path.dirname(tmp_file))
-        File.rename(src, tmp_file)
+          {:ok, preview} =
+            if Uploads.image?(upload) do
+              Thumbnailer.thumbnail(upload, target_size: "40kb", name: "preview.jpg")
+            else
+              {:ok, nil}
+            end
 
-        # SECURITY: If someone uploads an .exe as a media type, this will crash, so we're safe :)
-        mog =
-          Mogrify.open(tmp_file)
-          |> Mogrify.format("jpeg")
-          |> Mogrify.gravity("Center")
-          |> Mogrify.resize_to_fill("128x128")
-          |> Mogrify.save()
+          %EventAttachment{
+            event: event,
+            upload: upload,
+            thumbnail: thumbnail,
+            preview: preview
+          }
+          |> Repo.insert!()
+        end)
+      end)
 
-        final_path =
-          if Uploads.video?(upload) do
-            mog.path |> String.replace(~r/\.jpeg$/, "-0.jpeg")
-          else
-            mog.path
-          end
-
-        thumb = Uploads.save_file!(user, final_path, "image/jpeg", "thumbnail.jpg")
-        File.rm!(tmp_file)
-        File.rm!(final_path)
-
-        thumb
-      end
-
-    %EventAttachment{
-      upload: upload,
-      thumbnail: thumbnail
-    }
+    :ok
   end
 
   def delete_attachment!(
@@ -1159,7 +1199,12 @@ defmodule Banchan.Commissions do
                    join: i in assoc(e, :invoice),
                    where: i.id == ^invoice_id,
                    select: e,
-                   preload: [:actor, :commission, invoice: [], attachments: [:upload, :thumbnail]]
+                   preload: [
+                     :actor,
+                     :commission,
+                     invoice: [],
+                     attachments: [:upload, :thumbnail, :preview]
+                   ]
                  )
                  |> Repo.one() do
               %Event{} = ev -> {:ok, ev}
@@ -1269,7 +1314,7 @@ defmodule Banchan.Commissions do
           (is_nil(i.required) or
              not i.required or (i.required and i.status == :succeeded)),
       order_by: [desc: e.inserted_at],
-      preload: [:upload]
+      preload: [:upload, :thumbnail, :preview]
     )
     |> Repo.all()
   end

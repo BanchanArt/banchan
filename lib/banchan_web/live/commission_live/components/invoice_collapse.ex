@@ -11,6 +11,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
   alias Banchan.Commissions
   alias Banchan.Commissions.Event
   alias Banchan.Repo
+  alias Banchan.Uploads
   alias Banchan.Utils
 
   alias BanchanWeb.Components.Collapse
@@ -108,12 +109,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
   defp process_uploads(socket) do
     consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
       {:ok,
-       Commissions.make_attachment!(
-         socket.assigns.current_user,
-         path,
-         entry.client_type,
-         entry.client_name
-       )}
+       Uploads.save_file!(socket.assigns.current_user, path, entry.client_type, entry.client_name)}
     end)
   end
 

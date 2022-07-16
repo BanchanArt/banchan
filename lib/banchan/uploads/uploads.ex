@@ -59,33 +59,52 @@ defmodule Banchan.Uploads do
     Repo.one!(from u in Upload, where: u.bucket == ^bucket and u.key == ^key)
   end
 
-  def save_file!(%User{} = user, src, type, file_name, bucket \\ get_bucket()) do
-    bucket = bucket || "default-uploads-bucket"
+  def save_file!(%User{} = user, src, type, file_name) do
+    bucket = get_bucket() || "default-uploads-bucket"
     key = gen_key()
     size = File.stat!(src).size
 
-    {width, height} =
-      if image?(type) do
-        # TODO: We might need ffmpeg for this, actually...
-        # if image?(type) || video?(type) do
+    upload = %Upload{
+      uploader_id: user.id,
+      name: file_name,
+      key: key,
+      bucket: bucket,
+      type: type,
+      size: size,
+      pending: false
+    }
 
-        %{width: width, height: height} = Mogrify.identify(src)
-        {width, height}
-      else
-        {nil, nil}
-      end
+    upload_file!(upload, src)
 
+    upload
+    |> Repo.insert!()
+  end
+
+  def upload_file!(%Upload{} = upload, src) do
     if Application.fetch_env!(:banchan, :env) == :prod ||
          !is_nil(Application.get_env(:ex_aws, :region)) do
       src
       |> ExAws.S3.Upload.stream_file()
-      |> ExAws.S3.upload(bucket, key)
+      |> ExAws.S3.upload(upload.bucket, upload.key)
       |> ExAws.request!()
     else
-      local = Path.join([local_upload_dir(), bucket, key])
+      local = Path.join([local_upload_dir(), upload.bucket, upload.key])
       File.mkdir_p!(Path.dirname(local))
       File.cp!(src, local)
     end
+
+    :ok
+  end
+
+  def update_upload!(%Upload{} = upload, attrs) do
+    upload
+    |> Upload.update_changeset(attrs)
+    |> Repo.update!()
+  end
+
+  def gen_pending(%User{} = user, type, file_name) do
+    bucket = get_bucket() || "default-uploads-bucket"
+    key = gen_key()
 
     %Upload{
       uploader_id: user.id,
@@ -93,11 +112,8 @@ defmodule Banchan.Uploads do
       key: key,
       bucket: bucket,
       type: type,
-      size: size,
-      width: width,
-      height: height
+      pending: true
     }
-    |> Repo.insert!()
   end
 
   @doc """
@@ -110,6 +126,10 @@ defmodule Banchan.Uploads do
   """
   def get_data!(upload) do
     local = Path.join([local_upload_dir(), upload.bucket, upload.key])
+
+    if upload.pending do
+      raise "Tried to get data for a pending upload"
+    end
 
     if File.exists?(local) do
       File.read!(local)
@@ -131,11 +151,32 @@ defmodule Banchan.Uploads do
   def stream_data!(upload) do
     local = Path.join([local_upload_dir(), upload.bucket, upload.key])
 
+    if upload.pending do
+      raise "Tried to get data for a pending upload"
+    end
+
     if File.exists?(local) do
       File.stream!(local, [], 32_768)
     else
       ExAws.S3.download_file(upload.bucket, upload.key, :memory)
       |> ExAws.stream!()
+    end
+  end
+
+  @doc """
+  Write Upload data to disk.
+
+  ## Examples
+      iex> write_data!(upload, "/tmp/file.txt")
+      :ok
+  """
+  def write_data!(%Upload{} = upload, dest) do
+    local = Path.join([local_upload_dir(), upload.bucket, upload.key])
+
+    if File.exists?(local) do
+      File.cp!(local, dest)
+    else
+      ExAws.S3.download_file(upload.bucket, upload.key, dest)
     end
   end
 

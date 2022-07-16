@@ -67,12 +67,14 @@ defmodule BanchanWeb.DenizenLive.Edit do
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_event("submit", val, socket) do
     {pfp, thumb} =
-      case consume_uploaded_entries(socket, :pfp, fn %{path: path}, _entry ->
+      case consume_uploaded_entries(socket, :pfp, fn %{path: path}, entry ->
              {:ok,
               Accounts.make_pfp_images!(
                 socket.assigns.current_user,
                 socket.assigns.user,
-                path
+                path,
+                entry.client_type,
+                entry.client_name
               )}
            end)
            |> Enum.at(0) do
@@ -84,12 +86,14 @@ defmodule BanchanWeb.DenizenLive.Edit do
       end
 
     header_image =
-      consume_uploaded_entries(socket, :header, fn %{path: path}, _entry ->
+      consume_uploaded_entries(socket, :header, fn %{path: path}, entry ->
         {:ok,
          Accounts.make_header_image!(
            socket.assigns.current_user,
            socket.assigns.user,
-           path
+           path,
+           entry.client_type,
+           entry.client_name
          )}
       end)
       |> Enum.at(0)
@@ -201,7 +205,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
                         <button type="button" class="btn btn-xs btn-circle absolute right-2 top-2" :on-click="remove_pfp">✕</button>
                         <HiddenInput name={:pfp_image_id} value={@user.pfp_img_id} />
                         <HiddenInput name={:pfp_thumb_id} value={@user.pfp_thumb_id} />
-                        <img src={Routes.public_image_path(Endpoint, :image, @user.pfp_thumb_id)}>
+                        <img src={Routes.public_image_path(Endpoint, :image, @user.pfp_img_id)}>
                       {/if}
                     </div>
                   </div>

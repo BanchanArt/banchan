@@ -172,12 +172,14 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     offering = moneyfy_offering(offering)
 
     card_images =
-      consume_uploaded_entries(socket, :card_image, fn %{path: path}, _entry ->
+      consume_uploaded_entries(socket, :card_image, fn %{path: path}, entry ->
         {:ok,
          Offerings.make_card_image!(
            socket.assigns.current_user,
            path,
-           socket.assigns.current_user_member?
+           socket.assigns.current_user_member?,
+           entry.client_type,
+           entry.client_name
          )}
       end)
 
@@ -188,7 +190,9 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           Offerings.make_gallery_image!(
             socket.assigns.current_user,
             path,
-            socket.assigns.current_user_member?
+            socket.assigns.current_user_member?,
+            entry.client_type,
+            entry.client_name
           )}}
       end)
 

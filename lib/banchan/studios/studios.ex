@@ -18,6 +18,7 @@ defmodule Banchan.Studios do
   alias Banchan.Studios.{Notifications, Payout, PortfolioImage, Studio, StudioFollower}
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
+  alias Banchan.Workers.Thumbnailer
 
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
@@ -35,7 +36,7 @@ defmodule Banchan.Studios do
 
   """
   def get_studio_by_handle!(handle) when is_binary(handle) do
-    Repo.get_by!(Studio, handle: handle)
+    Repo.get_by!(Studio, handle: handle) |> Repo.preload([:header_img, :card_img])
   end
 
   @doc """
@@ -81,36 +82,43 @@ defmodule Banchan.Studios do
     ret
   end
 
-  def make_card_image!(%User{} = uploader, src, true) do
-    mog =
-      Mogrify.open(src)
-      |> Mogrify.format("jpeg")
-      |> Mogrify.save(in_place: true)
+  def make_card_image!(%User{} = user, src, true, type, name) do
+    upload = Uploads.save_file!(user, src, type, name)
 
-    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")
-    File.rm!(mog.path)
-    image
+    {:ok, card} =
+      Thumbnailer.thumbnail(
+        upload,
+        dimensions: "600",
+        name: "card_image.jpg"
+      )
+
+    card
   end
 
-  def make_header_image!(%User{} = uploader, src, true) do
-    mog =
-      Mogrify.open(src)
-      |> Mogrify.format("jpeg")
-      |> Mogrify.save(in_place: true)
+  def make_header_image!(%User{} = user, src, true, type, name) do
+    upload = Uploads.save_file!(user, src, type, name)
 
-    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")
-    File.rm!(mog.path)
-    image
+    {:ok, header} =
+      Thumbnailer.thumbnail(
+        upload,
+        dimensions: "1200",
+        name: "header_image.jpg"
+      )
+
+    header
   end
 
-  def make_portfolio_image!(%User{} = uploader, src, true) do
-    mog =
-      Mogrify.open(src)
-      |> Mogrify.format("jpeg")
-      |> Mogrify.save(in_place: true)
+  def make_portfolio_image!(%User{} = user, src, true, type, name) do
+    # TODO: Save the original image so it can be downloaded.
+    upload = Uploads.save_file!(user, src, type, name)
 
-    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "gallery_image.jpg")
-    File.rm!(mog.path)
+    {:ok, image} =
+      Thumbnailer.thumbnail(
+        upload,
+        dimensions: "1200",
+        name: "portfolio_image.jpg"
+      )
+
     image
   end
 
