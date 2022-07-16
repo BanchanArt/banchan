@@ -6,6 +6,7 @@ defmodule Banchan.Offerings do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Commission
+
   alias Banchan.Offerings.{
     GalleryImage,
     Notifications,
@@ -13,6 +14,7 @@ defmodule Banchan.Offerings do
     OfferingOption,
     OfferingSubscription
   }
+
   alias Banchan.Repo
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
