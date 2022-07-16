@@ -25,8 +25,8 @@ defmodule BanchanWeb.DenizenLive.Show do
        page_title: "#{user.name} (@#{user.handle})",
        page_description: user.bio,
        page_small_image:
-         if user.pfp_thumb_id do
-           Routes.public_image_url(Endpoint, :image, user.pfp_thumb_id)
+         if user.pfp_img_id do
+           Routes.public_image_url(Endpoint, :image, user.pfp_img_id)
          else
            Routes.static_url(Endpoint, "/images/denizen_default_icon.png")
          end
@@ -92,7 +92,7 @@ defmodule BanchanWeb.DenizenLive.Show do
           <div class="flex flex-row">
             <div class="relative w-32 h-20">
               <div class="absolute -top-4 left-6">
-                <Avatar class="w-24 h-24" user={@user} />
+                <Avatar thumb={false} class="w-24 h-24" user={@user} />
               </div>
             </div>
             <div class="m-4 flex flex-col">
