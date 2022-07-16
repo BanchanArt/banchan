@@ -151,6 +151,10 @@ defmodule Banchan.Uploads do
   def stream_data!(upload) do
     local = Path.join([local_upload_dir(), upload.bucket, upload.key])
 
+    if upload.pending do
+      raise "Tried to get data for a pending upload"
+    end
+
     if File.exists?(local) do
       File.stream!(local, [], 32_768)
     else

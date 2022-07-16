@@ -89,8 +89,23 @@ defmodule Banchan.Workers.Thumbnailer do
     tmp_dest = Path.join([System.tmp_dir!(), dest.key <> Path.extname(dest.name)])
     File.mkdir_p!(Path.dirname(tmp_dest))
 
+    # https://www.smashingmagazine.com/2015/06/efficient-image-resizing-with-imagemagick/
     Mogrify.open(tmp_src)
     |> Mogrify.format(opts["format"])
+    |> Mogrify.custom("filter", "Triangle")
+    |> Mogrify.custom("define", "filter:support=2")
+    |> Mogrify.custom("unsharp", "0.25x0.25+8+0.065")
+    |> Mogrify.custom("dither", "None")
+    |> Mogrify.custom("posterize", "136")
+    |> Mogrify.custom("quality", "82")
+    |> Mogrify.custom("define", "jpeg:fancy-upsampling=off")
+    |> Mogrify.custom("define", "png:compression-filter=5")
+    |> Mogrify.custom("define", "png:compression-level=9")
+    |> Mogrify.custom("define", "png:compression-strategy=1")
+    |> Mogrify.custom("define", "png:exclude-chunk=all")
+    |> Mogrify.custom("interlace", "none")
+    |> Mogrify.custom("colorspace", "sRGB")
+    |> Mogrify.custom("strip")
     |> then(fn mog ->
       if opts["target_size"] do
         mog
@@ -103,7 +118,7 @@ defmodule Banchan.Workers.Thumbnailer do
       if opts["dimensions"] do
         mog
         |> Mogrify.gravity("Center")
-        |> Mogrify.resize_to_fill(opts["dimensions"])
+        |> Mogrify.custom("thumbnail", opts["dimensions"])
       else
         mog
       end

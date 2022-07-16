@@ -186,11 +186,19 @@ defmodule Banchan.Accounts do
   end
 
   defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: url}}) when is_binary(url) do
-    tmp_file = Path.join([System.tmp_dir!(), "oauth-pfp-#{:rand.uniform(100_000_000)}" <> Path.extname(url)])
+    tmp_file =
+      Path.join([
+        System.tmp_dir!(),
+        "oauth-pfp-#{:rand.uniform(100_000_000)}" <> Path.extname(url)
+      ])
+
     resp = HTTPoison.get!(url)
     File.write!(tmp_file, resp.body)
     %{format: format} = Mogrify.identify(tmp_file)
-    {pfp, thumb} = make_pfp_images!(user, user, tmp_file, "image/#{format}", Path.basename(tmp_file))
+
+    {pfp, thumb} =
+      make_pfp_images!(user, user, tmp_file, "image/#{format}", Path.basename(tmp_file))
+
     File.rm!(tmp_file)
 
     update_user_profile(user, user, %{
@@ -839,19 +847,21 @@ defmodule Banchan.Accounts do
     if can_modify_user?(actor, user) do
       upload = Uploads.save_file!(user, src, type, name)
 
-      {:ok, pfp} = Thumbnailer.thumbnail(
-        upload,
-        target_size: "30kb",
-        dimensions: "512x512",
-        name: "profile.jpg"
-      )
+      {:ok, pfp} =
+        Thumbnailer.thumbnail(
+          upload,
+          target_size: "30kb",
+          dimensions: "512x512",
+          name: "profile.jpg"
+        )
 
-      {:ok, thumb} = Thumbnailer.thumbnail(
-        upload,
-        target_size: "5kb",
-        dimensions: "128x128",
-        name: "thumbnail.jpg"
-      )
+      {:ok, thumb} =
+        Thumbnailer.thumbnail(
+          upload,
+          target_size: "5kb",
+          dimensions: "128x128",
+          name: "thumbnail.jpg"
+        )
 
       {pfp, thumb}
     else
@@ -863,11 +873,12 @@ defmodule Banchan.Accounts do
     if can_modify_user?(actor, user) do
       upload = Uploads.save_file!(user, src, type, name)
 
-      {:ok, header} = Thumbnailer.thumbnail(
-        upload,
-        target_size: "100kb",
-        name: "header.jpg"
-      )
+      {:ok, header} =
+        Thumbnailer.thumbnail(
+          upload,
+          target_size: "100kb",
+          name: "header.jpg"
+        )
 
       header
     else

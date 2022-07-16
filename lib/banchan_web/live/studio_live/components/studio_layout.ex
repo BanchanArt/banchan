@@ -64,10 +64,10 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
     <Layout uri={@uri} padding={@padding} current_user={@current_user} flashes={@flashes}>
       <:hero>
         <section>
-          {#if @studio.header_img_id || @studio.card_img_id}
+          {#if @studio.header_img && !@studio.header_img.pending}
             <img
               class="object-cover aspect-header-image rounded-b-xl w-full"
-              src={Routes.public_image_path(Endpoint, :image, @studio.header_img_id || @studio.card_img_id)}
+              src={Routes.public_image_path(Endpoint, :image, @studio.header_img_id)}
             />
           {#else}
             <div class="rounded-b-xl aspect-header-image bg-base-300 w-full" />
