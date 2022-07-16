@@ -99,7 +99,7 @@ defmodule BanchanWeb.OfferingLive.Show do
             <Lightbox.Item>
               <img
                 class="w-full h-full object-contain aspect-video"
-                src={if @offering.card_img_id do
+                src={if @offering.card_img && !@offering.card_img.pending do
                   Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
                 else
                   Routes.static_path(Endpoint, "/images/640x360.png")
@@ -180,7 +180,7 @@ defmodule BanchanWeb.OfferingLive.Show do
             <Lightbox.Item>
               <img
                 class="w-full h-full object-contain aspect-video"
-                src={if @offering.card_img_id do
+                src={if @offering.card_img && !@offering.card_img.pending do
                   Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
                 else
                   Routes.static_path(Endpoint, "/images/640x360.png")

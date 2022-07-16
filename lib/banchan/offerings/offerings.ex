@@ -6,7 +6,6 @@ defmodule Banchan.Offerings do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Commission
-
   alias Banchan.Offerings.{
     GalleryImage,
     Notifications,
@@ -14,11 +13,11 @@ defmodule Banchan.Offerings do
     OfferingOption,
     OfferingSubscription
   }
-
   alias Banchan.Repo
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
+  alias Banchan.Workers.Thumbnailer
 
   def new_offering(_, false, _, _, _) do
     {:error, :unauthorized}
@@ -189,7 +188,7 @@ defmodule Banchan.Offerings do
               )
           })
     )
-    |> Repo.preload([:options, :studio])
+    |> Repo.preload([:options, :studio, :card_img])
   end
 
   def change_offering(%Offering{} = offering, attrs \\ %{}) do
@@ -540,15 +539,19 @@ defmodule Banchan.Offerings do
     end
   end
 
-  def make_card_image!(%User{} = uploader, src, true) do
-    mog =
-      Mogrify.open(src)
-      |> Mogrify.format("jpeg")
-      |> Mogrify.save(in_place: true)
+  def make_card_image!(%User{} = user, src, true, type, name) do
+    # TODO: need two versions here, the smaller card image and "preview"
+    # version for the offering page.
+    upload = Uploads.save_file!(user, src, type, name)
 
-    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")
-    File.rm!(mog.path)
-    image
+    {:ok, card} =
+      Thumbnailer.thumbnail(
+        upload,
+        dimensions: "1200",
+        name: "card_image.jpg"
+      )
+
+    card
   end
 
   def offering_gallery_uploads(%Offering{} = offering) do
@@ -561,14 +564,17 @@ defmodule Banchan.Offerings do
     |> Repo.all()
   end
 
-  def make_gallery_image!(%User{} = uploader, src, true) do
-    mog =
-      Mogrify.open(src)
-      |> Mogrify.format("jpeg")
-      |> Mogrify.save(in_place: true)
+  def make_gallery_image!(%User{} = user, src, true, type, name) do
+    # TODO: Save the original for download, too
+    upload = Uploads.save_file!(user, src, type, name)
 
-    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "gallery_image.jpg")
-    File.rm!(mog.path)
+    {:ok, image} =
+      Thumbnailer.thumbnail(
+        upload,
+        dimensions: "1200",
+        name: "gallery_image.jpg"
+      )
+
     image
   end
 end
