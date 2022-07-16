@@ -119,6 +119,7 @@ defmodule Banchan.Workers.Thumbnailer do
         mog
         |> Mogrify.gravity("Center")
         |> Mogrify.custom("thumbnail", opts["dimensions"])
+        |> Mogrify.custom("extent", opts["dimensions"])
       else
         mog
       end

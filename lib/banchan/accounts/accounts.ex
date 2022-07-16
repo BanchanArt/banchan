@@ -850,7 +850,6 @@ defmodule Banchan.Accounts do
       {:ok, pfp} =
         Thumbnailer.thumbnail(
           upload,
-          target_size: "30kb",
           dimensions: "512x512",
           name: "profile.jpg"
         )
@@ -858,7 +857,6 @@ defmodule Banchan.Accounts do
       {:ok, thumb} =
         Thumbnailer.thumbnail(
           upload,
-          target_size: "5kb",
           dimensions: "128x128",
           name: "thumbnail.jpg"
         )
@@ -876,7 +874,7 @@ defmodule Banchan.Accounts do
       {:ok, header} =
         Thumbnailer.thumbnail(
           upload,
-          target_size: "100kb",
+          dimensions: "1200",
           name: "header.jpg"
         )
 

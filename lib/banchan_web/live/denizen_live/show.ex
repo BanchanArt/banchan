@@ -81,7 +81,7 @@ defmodule BanchanWeb.DenizenLive.Show do
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <:hero>
         <section>
-          {#if @user.header_img_id}
+          {#if @user.header_img && !@user.header_img.pending}
             <img
               class="object-cover aspect-header-image rounded-b-xl w-full"
               src={Routes.public_image_path(Endpoint, :image, @user.header_img_id)}
