@@ -9,11 +9,12 @@ defmodule BanchanWeb.Components.Form.UploadInput do
   prop upload, :struct, required: true
   prop label, :string, default: "Upload attachments"
   prop cancel, :event, required: true
+  prop class, :css_class
   prop hide_list, :boolean
 
   def render(assigns) do
     ~F"""
-    <ul>
+    <ul class={@class}>
       {#for entry <- @upload.entries}
         <li>
           {#if @hide_list}

@@ -114,7 +114,7 @@ defmodule Banchan.AccountsTest do
   describe "change_user_registration/2" do
     test "returns a changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_registration(%User{})
-      assert changeset.required == [:password, :email]
+      assert changeset.required == [:password, :handle, :email]
     end
 
     test "allows fields to be set" do
@@ -371,26 +371,32 @@ defmodule Banchan.AccountsTest do
 
     test "validates profile", %{user: user} do
       {:error, changeset} =
-        Accounts.update_user_profile(user, %{
-          handle: "12",
-          name: String.duplicate("b", 40),
-          bio: String.duplicate("a", 461)
-        })
+        Accounts.update_user_profile(
+          user,
+          user,
+          %{
+            name: String.duplicate("b", 40),
+            bio: String.duplicate("a", 461)
+          }
+        )
 
       assert %{
                bio: ["should be at most 160 character(s)"],
-               handle: ["should be at least 3 character(s)"],
                name: ["should be at most 32 character(s)"]
              } = errors_on(changeset)
     end
 
     test "updates the user profile", %{user: user} do
       {:ok, user} =
-        Accounts.update_user_profile(user, %{
-          handle: "newhandle",
-          name: "New Name",
-          bio: "New Bio"
-        })
+        Accounts.update_user_profile(
+          user,
+          user,
+          %{
+            handle: "newhandle",
+            name: "New Name",
+            bio: "New Bio"
+          }
+        )
 
       assert Accounts.get_user_by_handle!(user.handle)
     end

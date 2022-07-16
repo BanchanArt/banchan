@@ -4,11 +4,11 @@ defmodule BanchanWeb.Router do
   import BanchanWeb.UserAuth
   import Phoenix.LiveDashboard.Router
 
-  alias BanchanWeb.EnsureRolePlug
+  alias BanchanWeb.{EnsureEnabledPlug, EnsureRolePlug}
 
   @host Application.compile_env!(:banchan, [BanchanWeb.Endpoint, :url, :host])
 
-  @content_security_policy (case Mix.env() do
+  @content_security_policy (case Application.compile_env!(:banchan, :env) do
                               :prod ->
                                 "default-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src wss://#{@host};img-src 'self' blob: data:; font-src data:;"
 
@@ -46,23 +46,22 @@ defmodule BanchanWeb.Router do
     plug(EnsureRolePlug, [:admin, :mod])
   end
 
-  pipeline :creator do
-    plug(EnsureRolePlug, [:admin, :mod, :creator])
+  pipeline :artist do
+    plug(EnsureRolePlug, [:admin, :mod, :artist])
+  end
+
+  pipeline :enabled_user do
+    plug(:require_authenticated_user)
+    plug(EnsureEnabledPlug, [])
   end
 
   scope "/", BanchanWeb do
-    live_session :users_only, on_mount: BanchanWeb.UserLiveAuth do
-      pipe_through([:browser, :require_authenticated_user])
+    live_session :users_only, on_mount: {BanchanWeb.UserLiveAuth, :users_only} do
+      pipe_through([:browser, :enabled_user])
 
       live("/denizens/:handle/edit", DenizenLive.Edit, :edit)
 
-      live("/studios/new", StudioLive.New, :new)
-      live("/studios/:handle/settings", StudioLive.Settings, :show)
-      live("/studios/:handle/payouts", StudioLive.Payouts, :index)
-      live("/studios/:handle/payouts/:payout_id", StudioLive.Payouts, :show)
-      live("/studios/:handle/offerings/new", StudioLive.Offerings.New, :new)
-      live("/studios/:handle/offerings/edit/:offering_type", StudioLive.Offerings.Edit, :edit)
-      live("/studios/:handle/commissions/new/:offering_type", StudioLive.Commissions.New, :new)
+      live("/offerings/:handle/:offering_type/request", OfferingLive.Request, :new)
 
       live("/commissions", CommissionLive, :index)
       live("/commissions/:commission_id", CommissionLive, :show)
@@ -88,6 +87,30 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
+    live_session :artists_only, on_mount: {BanchanWeb.UserLiveAuth, :artists_only} do
+      pipe_through([:browser, :enabled_user, :artist])
+
+      live("/offerings/:handle/:offering_type/edit", StudioLive.Offerings.Edit, :edit)
+
+      live("/studios/new", StudioLive.New, :new)
+      live("/studios/:handle/settings", StudioLive.Settings, :show)
+      live("/studios/:handle/payouts", StudioLive.Payouts, :index)
+      live("/studios/:handle/payouts/:payout_id", StudioLive.Payouts, :show)
+      live("/studios/:handle/offerings/new", StudioLive.Offerings.New, :new)
+
+      get("/studios/:handle/settings/stripe", StripeDashboardController, :dashboard)
+    end
+  end
+
+  scope "/", BanchanWeb do
+    live_session :mods_only, on_mount: {BanchanWeb.UserLiveAuth, :mods_only} do
+      pipe_through([:browser, :enabled_user, :mod])
+
+      live("/denizens/:handle/moderation", DenizenLive.Moderation, :edit)
+    end
+  end
+
+  scope "/", BanchanWeb do
     pipe_through(:browser)
 
     get("/go/:handle", DispatchController, :dispatch)
@@ -103,24 +126,34 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :open, on_mount: BanchanWeb.UserLiveAuth do
+    live_session :open, on_mount: {BanchanWeb.UserLiveAuth, :open} do
       pipe_through(:browser)
 
       live("/", HomeLive, :index)
 
       live("/denizens/:handle", DenizenLive.Show, :show)
+      live("/denizens/:handle/following", DenizenLive.Show, :following)
 
-      live("/studios", StudioLive.Index, :index)
+      live("/discover", DiscoverLive.Index, :index)
+      live("/discover/:type", DiscoverLive.Index, :index)
+
+      live("/offerings/:handle/:offering_type", OfferingLive.Show, :show)
+
       live("/studios/:handle", StudioLive.Shop, :show)
       live("/studios/:handle/about", StudioLive.About, :show)
       live("/studios/:handle/portfolio", StudioLive.Portfolio, :show)
 
       live("/confirm", ConfirmationLive, :show)
+
+      live("/reset_password", ForgotPasswordLive, :edit)
+      live("/reset_password/:token", ResetPasswordLive, :edit)
+
+      live("/account_disabled", AccountDisabledLive, :show)
     end
   end
 
   scope "/", BanchanWeb do
-    live_session :redirect_if_authed, on_mount: BanchanWeb.UserLiveAuth do
+    live_session :redirect_if_authed, on_mount: {BanchanWeb.UserLiveAuth, :redirect_if_authed} do
       pipe_through([:browser, :redirect_if_user_is_authenticated])
 
       live("/login", LoginLive, :new)
@@ -128,11 +161,14 @@ defmodule BanchanWeb.Router do
 
       live("/register", RegisterLive, :new)
       post("/register", UserRegistrationController, :create)
-
-      live("/reset_password", ForgotPasswordLive, :edit)
-
-      live("/reset_password/:token", ResetPasswordLive, :edit)
     end
+  end
+
+  scope "/auth", BanchanWeb do
+    pipe_through :browser
+
+    get "/:provider", UserOAuthController, :request
+    get "/:provider/callback", UserOAuthController, :callback
   end
 
   scope "/api", BanchanWeb do
@@ -141,7 +177,10 @@ defmodule BanchanWeb.Router do
 
   scope "/admin" do
     # Enable admin stuff dev/test side but restrict it in prod
-    pipe_through([:browser | if(Mix.env() in [:dev, :test], do: [], else: [:admin])])
+    pipe_through([
+      :browser
+      | if(Application.fetch_env!(:banchan, :env) in [:dev, :test], do: [], else: [:admin])
+    ])
 
     live_dashboard("/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo)
     forward("/sent_emails", Bamboo.SentEmailViewerPlug)

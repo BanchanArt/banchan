@@ -4,12 +4,17 @@ defmodule Banchan.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Banchan.Validators
+
+  alias Banchan.Accounts.DisableHistory
   alias Banchan.Identities
   alias Banchan.Notifications.{UserNotification, UserNotificationSettings}
+  alias Banchan.Studios.Studio
   alias Banchan.Uploads.Upload
 
   @derive {Inspect, except: [:password]}
   schema "users" do
+    # TODO: use trigger functions to track follower/following counts
     field :email, :string
     field :handle, :string, autogenerate: {__MODULE__, :auto_username, []}
     field :password, :string, virtual: true
@@ -17,9 +22,40 @@ defmodule Banchan.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :name, :string
     field :bio, :string
-    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :creator]
     field :totp_secret, :binary
     field :totp_activated, :boolean
+    field :tags, {:array, :string}
+    field :mature_ok, :boolean, default: false
+    field :uncensored_mature, :boolean, default: false
+    field :muted, :string
+
+    # Roles and moderation
+    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist], default: []
+    field :moderation_notes, :string
+    has_one :disable_info, DisableHistory, where: [lifted_at: nil]
+    has_many :disable_history, DisableHistory, preload_order: [desc: :disabled_at]
+
+    # OAuth UIDs
+    field :twitter_uid, :string
+    field :google_uid, :string
+    field :discord_uid, :string
+
+    # Social handles
+    field :twitter_handle, :string
+    field :instagram_handle, :string
+    field :facebook_url, :string
+    field :furaffinity_handle, :string
+    field :discord_handle, :string
+    field :artstation_handle, :string
+    field :deviantart_handle, :string
+    field :tumblr_handle, :string
+    field :mastodon_handle, :string
+    field :twitch_channel, :string
+    field :picarto_channel, :string
+    field :pixiv_url, :string
+    field :pixiv_handle, :string
+    field :tiktok_handle, :string
+    field :artfight_handle, :string
 
     belongs_to :header_img, Upload, on_replace: :nilify, type: :binary_id
     belongs_to :pfp_img, Upload, on_replace: :nilify, type: :binary_id
@@ -29,7 +65,7 @@ defmodule Banchan.Accounts.User do
 
     has_many :notifications, UserNotification
 
-    many_to_many :studios, Banchan.Studios.Studio, join_through: "users_studios"
+    many_to_many :studios, Studio, join_through: "users_studios"
 
     timestamps()
   end
@@ -60,6 +96,7 @@ defmodule Banchan.Accounts.User do
     |> cast(attrs, [:handle, :email, :password])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
+    |> validate_required([:handle, :email])
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
@@ -72,7 +109,37 @@ defmodule Banchan.Accounts.User do
   """
   def registration_test_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:handle, :email, :password, :confirmed_at, :totp_secret, :totp_activated])
+    |> cast(attrs, [
+      :handle,
+      :email,
+      :password,
+      :roles,
+      :confirmed_at,
+      :totp_secret,
+      :totp_activated
+    ])
+    |> validate_handle_unique(:handle)
+    |> unique_constraint(:handle)
+    |> validate_roles(nil)
+    |> validate_required([:email])
+    |> validate_email()
+    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_password(opts)
+  end
+
+  def registration_oauth_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [
+      :handle,
+      :email,
+      :name,
+      :bio,
+      :password,
+      :confirmed_at,
+      :twitter_uid,
+      :google_uid,
+      :discord_uid
+    ])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
     |> validate_email()
@@ -120,7 +187,6 @@ defmodule Banchan.Accounts.User do
 
   defp validate_email(changeset) do
     changeset
-    |> validate_required([:email])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
     |> unsafe_validate_unique(:email, Banchan.Repo)
@@ -151,15 +217,188 @@ defmodule Banchan.Accounts.User do
   end
 
   @doc """
+  User changeset for admins to edit particular fields for users.
+  """
+  def admin_changeset(%__MODULE__{} = actor, %__MODULE__{} = user, attrs \\ %{}) do
+    user
+    |> cast(attrs, [
+      :roles,
+      :moderation_notes
+    ])
+    |> validate_roles(actor)
+    |> validate_length(:moderation_notes, max: 500)
+    |> validate_markdown(:moderation_notes)
+  end
+
+  @doc """
   A user changeset meant for general editing forms.
   """
   def profile_changeset(user, attrs \\ %{}) do
+    attrs =
+      if attrs["tags"] == "[]" do
+        Map.put(attrs, "tags", [])
+      else
+        attrs
+      end
+
     user
-    |> cast(attrs, [:handle, :name, :bio])
-    |> validate_required([:handle])
-    |> validate_handle()
+    |> cast(attrs, [
+      :name,
+      :bio,
+      :tags,
+      :pfp_img_id,
+      :pfp_thumb_id,
+      :header_img_id,
+      :twitter_handle,
+      :instagram_handle,
+      :facebook_url,
+      :furaffinity_handle,
+      :discord_handle,
+      :artstation_handle,
+      :deviantart_handle,
+      :tumblr_handle,
+      :mastodon_handle,
+      :twitch_channel,
+      :picarto_channel,
+      :pixiv_url,
+      :pixiv_handle,
+      :tiktok_handle,
+      :artfight_handle
+    ])
     |> validate_name()
     |> validate_bio()
+    |> validate_tags()
+    |> validate_socials()
+    |> foreign_key_constraint(:pfp_img_id)
+    |> foreign_key_constraint(:pfp_thumb_id)
+    |> foreign_key_constraint(:header_img_id)
+  end
+
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def validate_socials(changeset) do
+    changeset
+    |> validate_change(:twitter_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Twitter handle, without the @ sign."}]
+      end
+    end)
+    |> validate_change(:instagram_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Instagram handle, without the @ sign."}]
+      end
+    end)
+    |> validate_change(:facebook_url, fn field, url ->
+      if String.match?(url, ~r/^https:\/\/(www\.)?facebook\.com\/.+$/) do
+        []
+      else
+        [{field, "must be a valid Facebook URL."}]
+      end
+    end)
+    |> validate_change(:furaffinity_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Furaffinity handle."}]
+      end
+    end)
+    |> validate_change(:discord_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+#\d{4}$/) do
+        []
+      else
+        [{field, "must be a valid Discord handle, including the number (myname#1234)."}]
+      end
+    end)
+    |> validate_change(:artstation_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Artstation handle."}]
+      end
+    end)
+    |> validate_change(:deviantart_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Deviantart handle."}]
+      end
+    end)
+    |> validate_change(:tumblr_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Tumblr handle."}]
+      end
+    end)
+    |> validate_change(:mastodon_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+@.+$/) do
+        []
+      else
+        [
+          {field,
+           "must be a valid Mastodon handle, without the preceding @. For example: `foo@mastodon.social`."}
+        ]
+      end
+    end)
+    |> validate_change(:twitch_channel, fn field, channel ->
+      if String.match?(channel, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Twitch channel name."}]
+      end
+    end)
+    |> validate_change(:picarto_channel, fn field, channel ->
+      if String.match?(channel, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Picarto channel name."}]
+      end
+    end)
+    |> validate_change(:pixiv_url, fn field, url ->
+      if String.match?(url, ~r/^https:\/\/www\.pixiv\.net\/en\/users\/\d+$/) do
+        []
+      else
+        [{field, "must be a valid Pixiv URL."}]
+      end
+    end)
+    |> validate_change(:pixiv_url, fn field, _ ->
+      if Ecto.Changeset.fetch_field(changeset, :pixiv_handle) == :error do
+        [{field, "Must provide both a pixiv handle and a pixiv url, or neither."}]
+      else
+        []
+      end
+    end)
+    |> validate_change(:pixiv_handle, fn field, _ ->
+      if Ecto.Changeset.fetch_field(changeset, :pixiv_url) == :error do
+        [{field, "Must provide both a pixiv handle and a pixiv url, or neither."}]
+      else
+        []
+      end
+    end)
+    |> validate_change(:pixiv_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Pixiv handle."}]
+      end
+    end)
+    |> validate_change(:tiktok_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid TikTok handle, without the @ sign."}]
+      end
+    end)
+    |> validate_change(:artfight_handle, fn field, handle ->
+      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
+        []
+      else
+        [{field, "must be a valid Artfight handle, without the ~ sign."}]
+      end
+    end)
   end
 
   @doc """
@@ -168,6 +407,7 @@ defmodule Banchan.Accounts.User do
   def email_changeset(user, attrs) do
     user
     |> cast(attrs, [:email])
+    |> validate_required([:email])
     |> validate_email()
   end
 
@@ -211,6 +451,23 @@ defmodule Banchan.Accounts.User do
 
     user
     |> cast(attrs, [:totp_secret, :totp_activated])
+  end
+
+  @doc """
+  User changeset for setting maturity flag.
+  """
+  def maturity_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:mature_ok, :uncensored_mature])
+  end
+
+  @doc """
+  User changeset for setting muted words.
+  """
+  def muted_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:muted])
+    |> validate_length(:muted, max: 1000)
   end
 
   @doc """
@@ -268,6 +525,25 @@ defmodule Banchan.Accounts.User do
         []
       else
         [{current_field, "already exists"}]
+      end
+    end)
+  end
+
+  defp validate_roles(changeset, actor) do
+    changeset
+    |> validate_change(:roles, fn field, roles ->
+      cond do
+        is_nil(actor) ->
+          []
+
+        :admin in actor.roles ->
+          []
+
+        :mod in actor.roles && :admin not in roles ->
+          []
+
+        true ->
+          [{field, "Can't give user a role higher than your own."}]
       end
     end)
   end

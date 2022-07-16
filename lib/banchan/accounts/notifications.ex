@@ -14,7 +14,7 @@ defmodule Banchan.Accounts.Notifications do
     |> Repo.exists?()
   end
 
-  def follow_user!(%User{} = target, %User{} = user) do
+  def follow_user!(%User{} = target, %User{} = user) when target.id != user.id do
     %UserFollower{user_id: user.id, target_id: target.id}
     |> Repo.insert(on_conflict: :nothing, conflict_target: [:user_id, :target_id])
 
@@ -44,5 +44,21 @@ defmodule Banchan.Accounts.Notifications do
       }
     )
     |> Repo.stream()
+  end
+
+  def follower_count(%User{} = user) do
+    from(f in UserFollower,
+      where: f.target_id == ^user.id,
+      select: count(f)
+    )
+    |> Repo.one()
+  end
+
+  def following_count(%User{} = user) do
+    from(f in UserFollower,
+      where: f.user_id == ^user.id,
+      select: count(f)
+    )
+    |> Repo.one()
   end
 end

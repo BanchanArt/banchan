@@ -19,7 +19,10 @@ defmodule Banchan.StudiosFixtures do
 
     Enum.into(attrs, %{
       name: name,
-      handle: name <> "-handle"
+      handle: name <> "-handle",
+      country: "US",
+      default_currency: "USD",
+      payment_currencies: ["USD", "EUR", "JPY"]
     })
   end
 
@@ -36,7 +39,6 @@ defmodule Banchan.StudiosFixtures do
     {:ok, studio} =
       Banchan.Studios.new_studio(
         %Studio{artists: artists},
-        "http://localhost:4000/studios/#{Map.get(attrs, :handle, "studio#{System.unique_integer()}")}",
         valid_studio_attributes(attrs)
       )
 

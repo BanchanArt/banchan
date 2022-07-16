@@ -41,7 +41,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
 
       page_live
-      |> form("#comment-box form", %{"event[text]": "foo", "event[amount]": "420"})
+      |> form("#commission-invoice-collapse form", %{"event[text]": "foo", "event[amount]": "420"})
       |> render_submit()
 
       Notifications.wait_for_notifications()
@@ -183,8 +183,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         assert line_items == params.line_items
 
         assert %{
-                 application_fee_amount: platform_fee.amount,
                  transfer_data: %{
+                   amount: (amount |> Money.add(tip) |> Money.subtract(platform_fee)).amount,
                    destination: studio.stripe_id
                  }
                } == params.payment_intent_data
@@ -233,11 +233,32 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
 
       intent_id = "stripe_intent_mock_id#{System.unique_integer()}"
       txn_id = "stripe_txn_mock_id#{System.unique_integer()}"
+      trans_id = "stripe_transfer_mock_id#{System.unique_integer()}"
+
       # Let's complete the session
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_payment_intent, fn id, _params, _opts ->
         assert intent_id == id
-        {:ok, %Stripe.PaymentIntent{id: id, charges: %{data: [%{balance_transaction: txn_id}]}}}
+
+        {:ok,
+         %Stripe.PaymentIntent{
+           id: id,
+           charges: %{data: [%{balance_transaction: txn_id, transfer: trans_id}]}
+         }}
+      end)
+      |> expect(:retrieve_transfer, fn id ->
+        assert id == trans_id
+
+        {:ok,
+         %Stripe.Transfer{
+           id: trans_id,
+           destination_payment: %{
+             balance_transaction: %{
+               amount: Money.add(amount, tip).amount,
+               currency: amount.currency |> to_string |> String.downcase()
+             }
+           }
+         }}
       end)
       |> expect(:retrieve_balance_transaction, fn id, _opts ->
         assert txn_id == id
@@ -308,23 +329,17 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
 
       refute artist_page_live
-             |> render() =~ "Confirm Refund"
-
-      refute artist_page_live
-             |> has_element?(".invoice-box .modal")
+             |> has_element?(".invoice-box .modal.modal-open")
 
       refute client_page_live
              |> has_element?(".invoice-box .open-refund-modal")
-
-      refute client_page_live
-             |> has_element?(".invoice-box .modal")
 
       artist_page_live
       |> element(".invoice-box .open-refund-modal")
       |> render_click()
 
       refute client_page_live
-             |> has_element?(".invoice-box .modal")
+             |> has_element?(".invoice-box .modal.modal-open")
 
       modal =
         artist_page_live
@@ -336,18 +351,18 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       assert modal =~ ~r/<button[^<]+Confirm</
 
       artist_page_live
-      |> element(".invoice-box .modal .close-modal")
+      |> element(".invoice-box .refund-modal .close-modal")
       |> render_click()
 
       refute artist_page_live
-             |> has_element?(".invoice-box .modal")
+             |> has_element?(".invoice-box .modal.modal-open")
 
       artist_page_live
       |> element(".invoice-box .open-refund-modal")
       |> render_click()
 
       assert artist_page_live
-             |> has_element?(".invoice-box .modal")
+             |> has_element?(".invoice-box .modal.modal-open")
 
       intent_id = "stripe_intent_mock_id#{System.unique_integer()}"
       charge_id = "stripe_charge_mock_id#{System.unique_integer()}"
@@ -387,7 +402,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       artist_page_live |> render()
 
       refute artist_page_live
-             |> has_element?(".invoice-box .modal")
+             |> has_element?(".invoice-box .modal.modal-open")
 
       invoice_box =
         artist_page_live
@@ -478,7 +493,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       refute modal =~ ~r/<button[^>]disabled/
 
       artist_page_live
-      |> element(".invoice-box .modal .close-modal")
+      |> element(".invoice-box .refund-modal .close-modal")
       |> render_click()
 
       invoice_box =
@@ -854,7 +869,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
 
       modal =
         client_page_live
-        |> element(".invoice-box .modal.modal-open")
+        |> element(".invoice-box .release-modal.modal-open")
         |> render()
 
       assert modal =~ "Confirm Fund Release"
@@ -862,11 +877,11 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       assert modal =~ ~r/<button[^<]+Confirm</
 
       client_page_live
-      |> element(".invoice-box .modal .close-modal")
+      |> element(".invoice-box .release-modal .close-modal")
       |> render_click()
 
       refute client_page_live
-             |> has_element?(".invoice-box .modal")
+             |> has_element?(".invoice-box .modal.modal-open")
 
       client_page_live
       |> element(".invoice-box .open-release-modal")
@@ -877,7 +892,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> render_click()
 
       refute client_page_live
-             |> has_element?(".invoice-box .modal")
+             |> has_element?(".invoice-box .modal.modal-open")
 
       invoice_box =
         client_page_live

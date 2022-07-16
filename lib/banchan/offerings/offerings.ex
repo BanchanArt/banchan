@@ -6,8 +6,17 @@ defmodule Banchan.Offerings do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Commission
-  alias Banchan.Offerings.{GalleryImage, Notifications, Offering}
+
+  alias Banchan.Offerings.{
+    GalleryImage,
+    Notifications,
+    Offering,
+    OfferingOption,
+    OfferingSubscription
+  }
+
   alias Banchan.Repo
+  alias Banchan.Studios.Studio
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
 
@@ -143,12 +152,44 @@ defmodule Banchan.Offerings do
     ret
   end
 
-  def get_offering_by_type!(type, current_user_member?) do
+  def get_offering_by_type!(%Studio{} = studio, type, current_user_member?) do
     Repo.one!(
       from o in Offering,
-        where: o.type == ^type and (^current_user_member? or not o.hidden)
+        as: :offering,
+        left_lateral_join:
+          gallery_uploads in subquery(
+            from i in GalleryImage,
+              where: i.offering_id == parent_as(:offering).id,
+              join: u in assoc(i, :upload),
+              group_by: [i.offering_id],
+              select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
+          ),
+        left_lateral_join:
+          used_slots in subquery(
+            from c in Commission,
+              where:
+                c.offering_id == parent_as(:offering).id and
+                  c.status not in [:withdrawn, :approved, :submitted, :rejected],
+              group_by: [c.offering_id],
+              select: %{used_slots: count(c.id)}
+          ),
+        where:
+          o.studio_id == ^studio.id and o.type == ^type and
+            (^current_user_member? or not o.hidden),
+        select:
+          merge(o, %{
+            used_slots: coalesce(used_slots.used_slots, 0),
+            gallery_uploads:
+              type(
+                coalesce(
+                  gallery_uploads.uploads,
+                  fragment("ARRAY[]::json[]")
+                ),
+                {:array, Upload}
+              )
+          })
     )
-    |> Repo.preload(:options)
+    |> Repo.preload([:options, :studio])
   end
 
   def change_offering(%Offering{} = offering, attrs \\ %{}) do
@@ -212,40 +253,266 @@ defmodule Banchan.Offerings do
     ret
   end
 
+  @doc """
+  List offerings offered by a studio. Will take into account visibility
+  based on whether the current user is a member of the studio and whether the
+  offering is published.
+
+  ## Examples
+
+      iex> list_offerings(current_user, current_studio_member?)
+      [%Offering{}, %Offering{}, %Offering{}]
+  """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def list_offerings(opts \\ []) do
+    q =
+      from o in Offering,
+        as: :offering,
+        join: s in assoc(o, :studio),
+        left_lateral_join:
+          used_slots in subquery(
+            from c in Commission,
+              where:
+                c.offering_id == parent_as(:offering).id and
+                  c.status not in [:withdrawn, :approved, :submitted, :rejected],
+              group_by: [c.offering_id],
+              select: %{used_slots: count(c.id)}
+          ),
+        left_lateral_join:
+          default_prices in subquery(
+            from oo in OfferingOption,
+              where: oo.offering_id == parent_as(:offering).id and oo.default,
+              group_by: [oo.offering_id],
+              select: %{
+                prices:
+                  type(fragment("array_agg(?)", oo.price), {:array, Money.Ecto.Composite.Type}),
+                # NB(zkat): This is hacky to the point of uselessness if we end up
+                # having a ton of different currencies listed, but it's serviceable for now.
+                sum: fragment("sum((?).amount)", oo.price)
+              }
+          ),
+        left_lateral_join:
+          gallery_uploads in subquery(
+            from i in GalleryImage,
+              where: i.offering_id == parent_as(:offering).id,
+              join: u in assoc(i, :upload),
+              group_by: [i.offering_id],
+              select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
+          ),
+        select:
+          merge(o, %{
+            studio: s,
+            used_slots: coalesce(used_slots.used_slots, 0),
+            gallery_uploads:
+              type(
+                coalesce(
+                  gallery_uploads.uploads,
+                  fragment("ARRAY[]::json[]")
+                ),
+                {:array, Upload}
+              ),
+            option_prices:
+              type(
+                coalesce(default_prices.prices, fragment("ARRAY[]::money_with_currency[]")),
+                {:array, Money.Ecto.Composite.Type}
+              )
+          })
+
+    q =
+      case Keyword.fetch(opts, :query) do
+        {:ok, nil} ->
+          q
+
+        {:ok, query} ->
+          q
+          |> where([s], fragment("websearch_to_tsquery(?) @@ (?).search_vector", ^query, s))
+
+        :error ->
+          q
+      end
+
+    q =
+      case Keyword.fetch(opts, :include_archived?) do
+        {:ok, true} ->
+          q |> where([o], is_nil(o.archived_at))
+
+        _ ->
+          q
+      end
+
+    q =
+      case Keyword.fetch(opts, :studio) do
+        {:ok, nil} ->
+          q
+
+        {:ok, %Studio{} = studio} ->
+          q |> where([o], o.studio_id == ^studio.id)
+
+        :error ->
+          q
+      end
+
+    q =
+      case Keyword.fetch(opts, :current_user) do
+        {:ok, %User{} = current_user} ->
+          q
+          |> where(
+            [o],
+            o.mature != true or (o.mature == true and ^current_user.mature_ok == true)
+          )
+          |> join(:left, [o], sub in OfferingSubscription,
+            on:
+              sub.user_id == ^current_user.id and sub.offering_id == o.id and
+                sub.silenced != true
+          )
+          |> join(:inner, [], user in User, on: user.id == ^current_user.id, as: :current_user)
+          |> where(
+            [o, current_user: current_user],
+            is_nil(current_user.muted) or
+              not fragment("(?).muted_filter_query @@ (?).search_vector", current_user, o)
+          )
+          |> select_merge([o, _studio, _used_slots, _default_prices, _gallery_uploads, sub], %{
+            user_subscribed?: not is_nil(sub.id)
+          })
+
+        _ ->
+          q
+          |> where([o], o.mature != true)
+          |> select_merge(%{user_subscribed?: false})
+      end
+
+    q =
+      case Keyword.fetch(opts, :current_user_member?) do
+        {:ok, current_user_member?} ->
+          q |> where([o], ^current_user_member? or o.hidden == false)
+
+        :error ->
+          q |> where([o], o.hidden == false)
+      end
+
+    q =
+      case Keyword.fetch(opts, :order_by) do
+        {:ok, nil} ->
+          q
+
+        {:ok, :index} ->
+          q
+          |> order_by([o], [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index])
+
+        {:ok, :featured} ->
+          q
+          |> order_by([o, s], [{:desc, o.inserted_at}, {:desc, s.inserted_at}])
+          |> where([o], not is_nil(o.description) and o.description != "")
+          |> where([o], not is_nil(o.card_img_id))
+          |> where(
+            [_o, _s, _used_slots, _default_prices, gallery_uploads],
+            not is_nil(gallery_uploads.uploads) and
+              fragment("array_length(?, 1) > 0", gallery_uploads.uploads)
+          )
+
+        {:ok, :oldest} ->
+          q
+          |> order_by([o], [{:asc, o.inserted_at}])
+
+        {:ok, :newest} ->
+          q
+          |> order_by([o], [{:desc, o.inserted_at}])
+
+        {:ok, :price_high} ->
+          q
+          |> order_by([_o, _s, _used_slots, default_prices], desc: default_prices.sum)
+
+        {:ok, :price_low} ->
+          q
+          |> order_by([_o, _s, _used_slots, default_prices], asc: default_prices.sum)
+
+        :error ->
+          q
+      end
+
+    q =
+      case Keyword.fetch(opts, :show_closed) do
+        {:ok, true} ->
+          q
+
+        {:ok, _} ->
+          q |> where([o], o.open == true)
+
+        :error ->
+          q |> where([o], o.open == true)
+      end
+
+    q =
+      case Keyword.fetch(opts, :related_to) do
+        {:ok, %Offering{} = related} ->
+          q
+          |> join(:inner, [o], rel in Offering,
+            on: rel.id == ^related.id and rel.id != o.id,
+            as: :related_to
+          )
+          |> where(
+            [o, related_to: related_to],
+            # TODO: Cache this db-side somehow? This seems like a lot of work
+            # to be doing on the fly.
+            fragment(
+              "to_tsquery('banchan_fts', array_to_string(tsvector_to_array(?), ' | ')) @@ ?",
+              related_to.search_vector,
+              o.search_vector
+            )
+          )
+
+        :error ->
+          q
+      end
+
+    Repo.paginate(q,
+      page: Keyword.get(opts, :page, 1),
+      page_size: Keyword.get(opts, :page_size, 20)
+    )
+  end
+
   def offering_base_price(%Offering{} = offering) do
-    if Enum.empty?(offering.options) do
+    if Enum.empty?(offering.option_prices) do
       nil
     else
-      offering.options
-      |> Enum.filter(& &1.default)
-      |> Enum.map(&(&1.price || Money.new(0, :USD)))
-      |> Enum.reduce(Money.new(0, :USD), &Money.add(&1, &2))
+      offering.option_prices
+      |> Enum.reduce(%{}, fn price, acc ->
+        current =
+          Map.get(
+            acc,
+            price.currency,
+            Money.new(0, price.currency)
+          )
+
+        Map.put(acc, price.currency, Money.add(current, price))
+      end)
     end
   end
 
-  def offering_available_slots(%Offering{} = offering) do
-    {slots, count} =
-      Repo.one(
-        from(o in Offering,
-          left_join: c in Commission,
-          on:
-            c.offering_id == o.id and
-              c.status not in [:withdrawn, :approved, :submitted, :rejected],
-          where: o.id == ^offering.id,
-          group_by: [o.id, o.slots],
-          select: {o.slots, count(c)}
+  def offering_available_slots(%Offering{} = offering, reload \\ false) do
+    {slots, used_slots} =
+      if reload do
+        Repo.one(
+          from o in Offering,
+            left_join: c in assoc(o, :commissions),
+            on: c.status not in [:withdrawn, :approved, :submitted, :rejected],
+            where: o.id == ^offering.id,
+            group_by: [o.id, o.slots],
+            select: {o.slots, count(c)}
         )
-      )
+      else
+        {offering.slots, offering.used_slots}
+      end
 
     cond do
       is_nil(slots) ->
         nil
 
-      count > slots ->
+      used_slots > slots ->
         0
 
       true ->
-        slots - count
+        slots - used_slots
     end
   end
 
@@ -277,8 +544,6 @@ defmodule Banchan.Offerings do
     mog =
       Mogrify.open(src)
       |> Mogrify.format("jpeg")
-      |> Mogrify.gravity("Center")
-      |> Mogrify.resize_to_fill("640x360")
       |> Mogrify.save(in_place: true)
 
     image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")

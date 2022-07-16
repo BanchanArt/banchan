@@ -13,6 +13,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def assign_studio_defaults(%{"handle" => handle}, socket, current_member, requires_stripe) do
     studio = Studios.get_studio_by_handle!(handle)
 
@@ -22,31 +23,46 @@ defmodule BanchanWeb.StudioLive.Helpers do
 
     socket =
       socket
-      |> assign(page_title: studio.name)
-      |> assign(page_description: studio.description)
-      |> assign(page_image: Routes.static_url(Endpoint, "/images/shop_card_default.png"))
+      |> assign_card_props(studio)
+      |> assign(studio: studio)
+      |> assign(current_user_member?: current_user_member?)
+      |> assign(followers: Studios.Notifications.follower_count(studio))
+
+    Studios.Notifications.subscribe_to_follower_count(studio)
 
     cond do
-      current_member && !current_user_member? ->
+      current_member && !current_user_member? && :admin not in socket.assigns.current_user.roles &&
+          :mod not in socket.assigns.current_user.roles ->
         raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
+
+      studio.mature && !socket.assigns.current_user_member.mature_ok ->
+        socket
+        |> put_flash(
+          :error,
+          "This studio is marked as mature, but you have not enabled mature content. You can enable this in your user settings."
+        )
+        |> redirect(to: Routes.discover_index_path(Endpoint, :index, "studios"))
 
       requires_stripe && !Studios.charges_enabled?(studio, false) ->
         socket
-        |> assign(
-          page_title: studio.name,
-          studio: studio,
-          current_user_member?: current_user_member?
-        )
         |> put_flash(:error, "This studio is not ready to accept commissions yet.")
         |> redirect(to: Routes.studio_shop_path(Endpoint, :show, handle))
 
       true ->
         socket
-        |> assign(
-          page_title: studio.name,
-          studio: studio,
-          current_user_member?: current_user_member?
-        )
     end
+  end
+
+  def assign_card_props(socket, studio) do
+    socket
+    |> assign(page_title: studio.name)
+    |> assign(
+      page_description: studio.about && HtmlSanitizeEx.strip_tags(Earmark.as_html!(studio.about))
+    )
+    |> assign(
+      page_image:
+        (studio.card_img_id || studio.header_img_id) &&
+          Routes.public_image_url(Endpoint, :image, studio.card_img_id || studio.header_img_id)
+    )
   end
 end

@@ -209,7 +209,7 @@ defmodule BanchanWeb.Components.Notifications do
     <div class="relative" :on-click-away="close_menu">
       <div class="indicator">
         {#if @notifications && @notifications.total_entries > 0}
-          <span class="indicator-item indicator-bottom indicator-start badge badge-secondary">
+          <span class="indicator-item indicator-bottom indicator-start badge badge-primary">
             {#if @notifications.total_entries > 99}
               99+
             {#else}
@@ -222,7 +222,7 @@ defmodule BanchanWeb.Components.Notifications do
         </button>
       </div>
       {#if @open}
-        <div class="translate-x-px translate-y-px origin-top right-0 absolute menu rounded-box shadow-2xl bg-base-300 p-2 w-80 z-50 divide-y-2 divide-neutral-content divide-opacity-10 text-base-content">
+        <div class="translate-x-px translate-y-px origin-top right-0 absolute menu rounded-box shadow-2xl bg-base-300 p-2 w-80 z-30 divide-y-2 divide-neutral-content divide-opacity-10 text-base-content">
           {#if !@notifications || Enum.empty?(@notifications.entries)}
             <div class="px-8 m-2">No notifications</div>
           {#else}
@@ -240,7 +240,7 @@ defmodule BanchanWeb.Components.Notifications do
                   <LiveRedirect to={annotated_url(notification)}>
                     <div class="indicator">
                       {#if !notification.read}
-                        <span class="indicator-item indicator-middle indicator-start badge badge-xs badge-secondary" />
+                        <span class="indicator-item indicator-middle indicator-start badge badge-xs badge-primary cursor-default" />
                       {/if}
                       <div class="pl-6 flex flex-col">
                         <div class="text-lg">{notification.title}</div>

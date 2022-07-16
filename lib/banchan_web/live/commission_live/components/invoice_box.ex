@@ -8,9 +8,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   alias Banchan.Commissions.Event
   alias Banchan.Utils
 
-  alias Surface.Components.Form
+  alias Surface.Components.{Form, LiveRedirect}
 
-  alias BanchanWeb.Components.Button
+  alias BanchanWeb.Components.{Button, Modal}
   alias BanchanWeb.Components.Form.{Submit, TextInput}
 
   prop current_user_member?, :boolean, required: true
@@ -25,8 +25,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   data release_modal_open, :boolean, default: false
 
-  data refund_modal_open, :boolean, default: false
-  data refund_error_message, :string
+  data refund_error_message, :string, default: nil
 
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
@@ -36,7 +35,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   def handle_event("change", %{"event" => %{"amount" => amount}}, socket) do
     changeset =
       %Event{}
-      |> Event.amount_changeset(%{"amount" => Utils.moneyfy(amount)})
+      |> Event.amount_changeset(%{
+        "amount" => Utils.moneyfy(amount, socket.assigns.event.invoice.amount.currency)
+      })
       |> Map.put(:action, :insert)
 
     {:noreply, socket |> assign(:changeset, changeset)}
@@ -46,7 +47,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   def handle_event("submit", %{"event" => %{"amount" => amount}}, socket) do
     changeset =
       %Event{}
-      |> Event.amount_changeset(%{"amount" => Utils.moneyfy(amount)})
+      |> Event.amount_changeset(%{
+        "amount" => Utils.moneyfy(amount, socket.assigns.event.invoice.amount.currency)
+      })
       |> Map.put(:action, :insert)
 
     if changeset.valid? do
@@ -56,7 +59,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           socket.assigns.event,
           socket.assigns.commission,
           replace_fragment(socket.assigns.uri, socket.assigns.event),
-          Utils.moneyfy(amount)
+          Utils.moneyfy(amount, socket.assigns.event.invoice.amount.currency)
         )
 
       {:noreply, socket |> redirect(external: url)}
@@ -99,9 +102,8 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
            current_user_member?
          ) do
       {:ok, _} ->
-        {:noreply,
-         socket
-         |> assign(refund_modal_open: false, refund_error_message: nil)}
+        Modal.hide(socket.assigns.id <> "_refund_modal")
+        {:noreply, socket |> assign(refund_error_message: nil)}
 
       {:error, %Stripe.Error{} = error} ->
         {:noreply,
@@ -128,86 +130,23 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       event.invoice
     )
 
-    {:noreply, socket |> assign(release_modal_open: false)}
-  end
-
-  def handle_event("toggle_release_modal", _, socket) do
-    {:noreply, socket |> assign(release_modal_open: !socket.assigns.release_modal_open)}
-  end
-
-  def handle_event("close_release_modal", _, socket) do
-    {:noreply, socket |> assign(release_modal_open: false)}
-  end
-
-  def handle_event("toggle_refund_modal", _, socket) do
-    {:noreply,
-     socket
-     |> assign(refund_error_message: nil, refund_modal_open: !socket.assigns.refund_modal_open)}
-  end
-
-  def handle_event("close_refund_modal", _, socket) do
-    {:noreply, socket |> assign(refund_error_message: nil, refund_modal_open: false)}
-  end
-
-  def handle_event("nothing", _, socket) do
+    Modal.hide(socket.assigns.id <> "_release_modal")
     {:noreply, socket}
+  end
+
+  def handle_event("open_release_modal", _, socket) do
+    Modal.show(socket.assigns.id <> "_release_modal")
+    {:noreply, socket}
+  end
+
+  def handle_event("open_refund_modal", _, socket) do
+    Modal.show(socket.assigns.id <> "_refund_modal")
+    {:noreply, socket |> assign(refund_error_message: nil)}
   end
 
   def render(assigns) do
     ~F"""
     <div class="flex flex-col invoice-box">
-      {!-- Refund confirmation modal --}
-      {#if @refund_modal_open}
-        <div
-          class="modal modal-open"
-          :on-click="toggle_refund_modal"
-          :on-window-keydown="close_refund_modal"
-          phx-key="Escape"
-        >
-          <div :on-click="nothing" class="modal-box relative">
-            <div
-              class="close-modal btn btn-sm btn-circle absolute right-2 top-2"
-              :on-click="close_refund_modal"
-            >✕</div>
-            <h3 class="text-lg font-bold">Confirm Refund</h3>
-            {#if @refund_error_message}
-              <p class="alert alert-danger" role="alert">{@refund_error_message}</p>
-            {/if}
-            <p class="py-4">
-              Are you sure you want to refund this payment?
-              <p class="font-bold text-warning">
-                WARNING: The Stripe portion of the platform fee can't be reimbursed, but Banchan's portion will be returned.
-              </p>
-            </p>
-            <div class="modal-action">
-              <Button disabled={!@refund_modal_open} class="refund-btn btn-warning" click="refund">Confirm</Button>
-            </div>
-          </div>
-        </div>
-      {/if}
-
-      {!-- Release confirmation modal --}
-      {#if @release_modal_open}
-        <div
-          class="modal modal-open"
-          :on-click="toggle_release_modal"
-          :on-window-keydown="close_release_modal"
-          phx-key="Escape"
-        >
-          <div :on-click="nothing" class="modal-box relative">
-            <div
-              class="btn btn-sm btn-circle close-modal absolute right-2 top-2"
-              :on-click="close_release_modal"
-            >✕</div>
-            <h3 class="text-lg font-bold">Confirm Fund Release</h3>
-            <p class="py-4">Funds will be made available immediately to the studio, instead of waiting until the commission is approved. <p class="font-bold text-warning">WARNING: You will not be able to request a refund once released.</p></p>
-            <div class="modal-action">
-              <Button disabled={!@release_modal_open} class="release-btn btn-success" click="release">Confirm</Button>
-            </div>
-          </div>
-        </div>
-      {/if}
-
       {!-- Invoice box --}
       <div class="place-self-center stats">
         <div class="stat">
@@ -218,11 +157,14 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
                 <div class="stat-desc">Please consider adding a tip!</div>
                 <Form for={@changeset} class="stat-actions flex flex-col gap-2" change="change" submit="submit">
-                  <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
+                  <div class="flex flex-row gap-2">
+                    {Money.Currency.symbol(@event.invoice.amount)}
+                    <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
+                  </div>
                   <Submit class="pay-invoice btn-sm w-full" changeset={@changeset} label="Pay" />
                   {#if @current_user_member?}
                     <Button
-                      class="cancel-payment-request btn-sm w-full"
+                      class="cancel-payment-request btn-xs btn-link w-full"
                       click="force_expire"
                       label="Cancel Payment"
                     />
@@ -234,7 +176,12 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 <div class="stat-desc">Waiting for Payment</div>
                 {#if @current_user_member?}
                   <div class="stat-actions">
-                    <Button class="cancel-payment-request btn-sm" click="force_expire" label="Cancel Payment" />
+                    <Button
+                      class="cancel-payment-request btn-xs btn-link btn-warning"
+                      primary={false}
+                      click="force_expire"
+                      label="Cancel Payment"
+                    />
                   </div>
                 {/if}
               {/if}
@@ -250,7 +197,12 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                     <Button class="continue-payment btn-sm" click="continue_payment" label="Continue Payment" />
                   {/if}
                   {#if @current_user_member?}
-                    <Button class="cancel-payment-request btn-sm" click="force_expire" label="Cancel Payment" />
+                    <Button
+                      primary={false}
+                      class="cancel-payment-request btn-xs btn-link"
+                      click="force_expire"
+                      label="Cancel Payment"
+                    />
                   {/if}
                 </div>
               </div>
@@ -270,15 +222,15 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                   {#if @current_user_member?}
                     <Button
                       label="Refund Payment"
-                      click="toggle_refund_modal"
-                      class="open-refund-modal modal-button btn-warning btn-sm w-full"
+                      click="open_refund_modal"
+                      class="open-refund-modal modal-button btn-xs btn-link w-full"
                     />
                   {/if}
                   {#if @current_user.id == @commission.client_id}
                     <Button
                       label="Release Now"
-                      click="toggle_release_modal"
-                      class="open-release-modal modal-button btn-success btn-sm w-full"
+                      click="open_release_modal"
+                      class="open-release-modal modal-button btn-link btn-xs w-full"
                     />
                   {/if}
                 </div>
@@ -342,8 +294,38 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       {#elseif @event.invoice.status == :released}
         <span class="italic p-4 text-xs">
           Note: Banchan.Art has released these funds to the studio for payout.
+          {#if @current_user_member?}
+            (<LiveRedirect
+              to={Routes.studio_payouts_path(Endpoint, :index, @commission.studio.handle)}
+              class="link font-semibold"
+            >Go to Studio Payouts</LiveRedirect>)
+          {/if}
         </span>
       {/if}
+
+      {!-- Refund confirmation modal --}
+      <Modal id={@id <> "_refund_modal"} class="refund-modal">
+        <:title>Confirm Refund</:title>
+        {#if @refund_error_message}
+          <p class="alert alert-error" role="alert">{@refund_error_message}</p>
+        {/if}
+        Are you sure you want to refund this payment?
+        <p class="font-bold text-warning">
+          WARNING: The Stripe portion of the platform fee can't be reimbursed, but Banchan's portion will be returned.
+        </p>
+        <:action>
+          <Button class="refund-btn" click="refund">Confirm</Button>
+        </:action>
+      </Modal>
+
+      {!-- Release confirmation modal --}
+      <Modal id={@id <> "_release_modal"} class="release-modal">
+        <:title>Confirm Fund Release</:title>
+        Funds will be made available immediately to the studio, instead of waiting until the commission is approved. <p class="font-bold text-warning">WARNING: You will not be able to request a refund once released.</p>
+        <:action>
+          <Button class="release-btn" click="release">Confirm</Button>
+        </:action>
+      </Modal>
     </div>
     """
   end

@@ -20,7 +20,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
     ~F"""
     <Field class="form-control" name={@name}>
       <Label class={"label cursor-pointer", @wrapper_class}>
-        <div class="label-text">
+        <div class="label-text px-2">
           <#slot>{@label}</#slot>
           {#if @info}
             <div class="tooltip" data-tip={@info}>

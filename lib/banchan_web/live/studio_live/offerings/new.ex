@@ -26,6 +26,10 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
      |> assign(gallery_images: images)}
   end
 
+  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
+    {:noreply, socket |> assign(followers: new_count)}
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -34,6 +38,7 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
       current_user={@current_user}
       flashes={@flash}
       studio={@studio}
+      followers={@followers}
       current_user_member?={@current_user_member?}
       tab={:shop}
       uri={@uri}

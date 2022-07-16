@@ -5,7 +5,7 @@ defmodule BanchanWeb.RegisterLive do
   use BanchanWeb, :surface_view
   on_mount BanchanWeb.UserLiveAuth
 
-  alias Surface.Components.{Form, LiveRedirect}
+  alias Surface.Components.{Form, Link, LiveRedirect}
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
@@ -33,39 +33,6 @@ defmodule BanchanWeb.RegisterLive do
   end
 
   @impl true
-  def render(assigns) do
-    ~F"""
-    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <Form
-        class="flex flex-col gap-4"
-        for={@changeset}
-        action={Routes.user_registration_path(Endpoint, :create)}
-        change="change"
-        submit="submit"
-        trigger_action={@trigger_submit}
-      >
-        <h1 class="text-2xl">Register</h1>
-        <EmailInput name={:email} icon="envelope" opts={required: true} />
-        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-        <TextInput
-          name={:password_confirmation}
-          label="Confirm Password"
-          icon="lock"
-          opts={required: true, type: :password}
-        />
-        <Submit class="w-full" changeset={@changeset} label="Register" />
-      </Form>
-      <div class="divider">OR</div>
-      <div class="mx-auto">
-        <LiveRedirect class="btn btn-link btn-sm w-full" to={Routes.login_path(Endpoint, :new)}>
-          Log In
-        </LiveRedirect>
-      </div>
-    </AuthLayout>
-    """
-  end
-
-  @impl true
   def handle_event("change", val, socket) do
     changeset =
       %User{}
@@ -83,5 +50,75 @@ defmodule BanchanWeb.RegisterLive do
       |> Accounts.change_user_registration(val["user"])
 
     {:noreply, assign(socket, changeset: changeset, trigger_submit: true)}
+  end
+
+  @impl true
+  def render(assigns) do
+    ~F"""
+    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
+      <Form
+        class="flex flex-col gap-4"
+        for={@changeset}
+        action={Routes.user_registration_path(Endpoint, :create)}
+        change="change"
+        submit="submit"
+        trigger_action={@trigger_submit}
+      >
+        <h1 class="text-2xl">Register</h1>
+        <TextInput
+          name={:handle}
+          info="Your unique @handle that can be used to refer to you."
+          icon="at"
+          opts={required: true, type: :password}
+        />
+        <EmailInput
+          name={:email}
+          info="A valid email address. You'll need to confirm this."
+          icon="envelope"
+          opts={required: true}
+        />
+        <TextInput
+          name={:password}
+          info="Your new password. Must be between 12 and 80 characters."
+          icon="lock"
+          opts={required: true, type: :password}
+        />
+        <TextInput
+          name={:password_confirmation}
+          label="Confirm Password"
+          info="Must match your password above!"
+          icon="lock"
+          opts={required: true, type: :password}
+        />
+        <Submit class="w-full" changeset={@changeset} label="Register" />
+      </Form>
+      <div class="divider">OR</div>
+      <div class="flex flex-col gap-4">
+        <div class="text-xl mx-auto">
+          Register with...
+        </div>
+        <div class="flex flex-row gap-2 justify-center">
+          <Link
+            class="btn bg-twitter flex-1 text-xl"
+            to={Routes.user_o_auth_path(Endpoint, :request, "twitter")}
+          ><i class="px-2 fa-brands fa-twitter" /></Link>
+          <Link
+            class="btn bg-discord flex-1 text-xl"
+            to={Routes.user_o_auth_path(Endpoint, :request, "discord")}
+          ><i class="px-2 fa-brands fa-discord" /></Link>
+          <Link
+            class="btn bg-google flex-1 text-xl"
+            to={Routes.user_o_auth_path(Endpoint, :request, "google")}
+          ><i class="px-2 fa-brands fa-google" /></Link>
+        </div>
+      </div>
+      <div class="divider">OR</div>
+      <div class="mx-auto">
+        <LiveRedirect class="btn btn-link btn-sm w-full" to={Routes.login_path(Endpoint, :new)}>
+          Log In
+        </LiveRedirect>
+      </div>
+    </AuthLayout>
+    """
   end
 end

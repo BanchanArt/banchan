@@ -4,9 +4,13 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
   def change do
     create table(:studios) do
       add :name, :string, null: false
-      add :summary, :text
       add :handle, :citext, null: false
-      add :description, :text
+      add :about, :text
+      add :country, :string, null: false
+      add :tags, {:array, :citext}, default: [], null: false
+      add :default_currency, :string, null: false
+      add :payment_currencies, {:array, :string}, null: false
+      add :featured, :boolean, default: false, null: false
       add :header_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :card_img_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
       add :default_terms, :text
@@ -15,6 +19,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
       add :stripe_charges_enabled, :boolean, default: false
       add :stripe_details_submitted, :boolean, default: false
       add :platform_fee, :decimal, null: false
+      add :mature, :boolean, null: false
       timestamps()
     end
 
@@ -25,7 +30,8 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           ALTER TABLE studios ADD COLUMN search_vector tsvector
             GENERATED ALWAYS AS (
               setweight(to_tsvector('banchan_fts', handle), 'A') ||
-              setweight(to_tsvector('banchan_fts', name), 'B')
+              setweight(to_tsvector('banchan_fts', name), 'B') ||
+              setweight(to_tsvector('banchan_fts', immutable_array_to_string(tags, ' ')), 'C')
             ) STORED;
           """,
           [],
@@ -34,7 +40,26 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
 
         repo().query!(
           """
-          CREATE INDEX studios_search_idx ON users USING GIN (search_vector);
+          CREATE INDEX studios_search_idx ON studios USING GIN (search_vector);
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!(
+          """
+          CREATE INDEX studios_tags ON studios USING GIN (tags);
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!(
+          """
+          CREATE TRIGGER studios_tags_count_update
+          AFTER UPDATE OR INSERT OR DELETE ON studios
+          FOR EACH ROW
+          EXECUTE PROCEDURE public.trigger_update_tags_count();
           """,
           [],
           log: :info
@@ -44,6 +69,14 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
         repo().query!(
           """
           DROP INDEX studios_search_idx;
+          """,
+          [],
+          log: :info
+        )
+
+        repo().query!(
+          """
+          DROP INDEX studios_tags;
           """,
           [],
           log: :info
@@ -79,5 +112,15 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
     create unique_index(:studio_payouts, [:public_id])
     create unique_index(:studio_payouts, [:stripe_payout_id])
     create index(:studio_payouts, [:studio_id])
+
+    create table(:studio_portfolio_images) do
+      add :studio_id, references(:studios, on_delete: :delete_all), null: false
+      add :upload_id, references(:uploads, on_delete: :delete_all, type: :uuid), null: false
+      add :index, :integer, null: false
+
+      timestamps()
+    end
+
+    create unique_index(:studio_portfolio_images, [:studio_id, :upload_id])
   end
 end

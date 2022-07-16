@@ -14,6 +14,7 @@ defmodule BanchanWeb.Components.Form.MultipleSelect do
   prop show_label, :boolean, default: true
   prop icon, :string
   prop info, :string
+  prop selected, :any
   prop options, :any, default: []
 
   def render(assigns) do
@@ -50,13 +51,14 @@ defmodule BanchanWeb.Components.Form.MultipleSelect do
                   @class,
                   "textarea-error": !Enum.empty?(Keyword.get_values(form.errors, field))
                 }
+                selected={@selected}
                 opts={@opts}
                 options={@options}
               />
             </InputContext>
           </div>
-          <ErrorTag class="help is-danger" />
         </div>
+        <ErrorTag class="text-error" />
       </div>
     </Field>
     """

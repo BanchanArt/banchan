@@ -6,6 +6,7 @@ defmodule BanchanWeb.CommissionLive.Components.TimelineItem do
 
   alias BanchanWeb.Components.{Avatar, UserHandle}
 
+  prop actor, :struct, required: true
   prop event, :struct, required: true
   prop icon, :string, default: ""
   prop uri, :string, required: true
@@ -26,13 +27,13 @@ defmodule BanchanWeb.CommissionLive.Components.TimelineItem do
 
   def render(assigns) do
     ~F"""
-    <div id={"event-#{@event.public_id}"} data-content={@icon} class="step">
+    <div id={"event-#{@event.public_id}"} data-content={@icon} class="step scroll-mt-36 snap-start">
       <div class="text-xs text-left">
         <div class="inline-flex items-baseline space-x-1">
           <div class="self-center">
-            <Avatar class="w-4" user={@event.actor} />
+            <Avatar class="w-4" user={@actor} />
           </div>
-          <UserHandle user={@event.actor} />
+          <UserHandle user={@actor} />
         </div>
         <#slot />
         <a

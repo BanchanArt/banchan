@@ -27,6 +27,8 @@ defmodule Banchan.Offerings.OfferingOption do
     |> validate_money(:price)
     |> validate_sticky_also_default()
     |> validate_required([:name, :description, :price])
+    |> validate_length(:name, max: 50)
+    |> validate_length(:description, max: 140)
   end
 
   defp validate_money(changeset, field) do

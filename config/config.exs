@@ -8,6 +8,7 @@
 import Config
 
 config :banchan,
+  env: config_env(),
   namespace: Banchan,
   stripe_mod: Banchan.StripeAPI,
   ecto_repos: [Banchan.Repo],
@@ -16,7 +17,6 @@ config :banchan,
 
 # Configures the endpoint
 config :banchan, BanchanWeb.Endpoint,
-  url: [host: "localhost"],
   render_errors: [view: BanchanWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Banchan.PubSub,
   live_view: [signing_salt: "qB2PgmVY"]
@@ -41,6 +41,13 @@ config :esbuild,
       ~w(js/app.js --bundle --target=es2016 --outdir=../priv/static/assets --external:/images --external:favicon.ico --external:robots.txt),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ]
+
+config :ueberauth, Ueberauth,
+  providers: [
+    twitter: {Ueberauth.Strategy.Twitter, []},
+    discord: {Ueberauth.Strategy.Discord, []},
+    google: {Ueberauth.Strategy.Google, []}
   ]
 
 # Import environment specific config. This must remain at the bottom

@@ -7,18 +7,19 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.LineItem
+  alias Banchan.Repo
   alias Banchan.Utils
 
   alias BanchanWeb.CommissionLive.Components.Summary
+  alias BanchanWeb.Components.Modal
 
   prop commission, :struct, required: true
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
   prop allow_edits, :boolean, required: true
 
+  data studio, :struct
   data custom_changeset, :struct
-  data deposited, :struct
-  data open_custom, :boolean, default: false
   data loaded, :boolean, default: false
 
   def update(assigns, socket) do
@@ -43,30 +44,15 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
           socket
         end
 
-      deposited =
-        Commissions.deposited_amount(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          socket.assigns.current_user_member?
-        )
+      studio = (socket.assigns.commission |> Repo.preload(:studio)).studio
 
       {:ok,
-       socket |> assign(custom_changeset: custom_changeset, deposited: deposited, loaded: true)}
-    end
-  end
-
-  def handle_info(%{event: "event_updated", payload: event}, socket) do
-    if event.invoice do
-      deposited =
-        Commissions.deposited_amount(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          socket.assigns.current_user_member?
-        )
-
-      {:noreply, socket |> assign(deposited: deposited)}
-    else
-      {:noreply, socket}
+       socket
+       |> assign(
+         studio: studio,
+         custom_changeset: custom_changeset,
+         loaded: true
+       )}
     end
   end
 
@@ -126,24 +112,16 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   end
 
   @impl true
-  def handle_event("toggle_custom", _, socket) do
-    {:noreply, assign(socket, open_custom: !socket.assigns.open_custom)}
-  end
-
-  @impl true
-  def handle_event("close_custom", _, socket) do
-    {:noreply, assign(socket, open_custom: false)}
-  end
-
-  @impl true
-  def handle_event("nothing", _, socket) do
-    {:noreply, socket}
-  end
-
-  @impl true
   def handle_event(
         "change_custom",
-        %{"line_item" => %{"name" => name, "description" => description, "amount" => amount}},
+        %{
+          "line_item" => %{
+            "name" => name,
+            "description" => description,
+            "amount" => amount,
+            "currency" => currency
+          }
+        },
         socket
       ) do
     changeset =
@@ -151,7 +129,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       |> LineItem.custom_changeset(%{
         name: name,
         description: description,
-        amount: Utils.moneyfy(amount)
+        amount: Utils.moneyfy(amount, currency)
       })
       |> Map.put(:action, :insert)
 
@@ -161,7 +139,14 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   @impl true
   def handle_event(
         "submit_custom",
-        %{"line_item" => %{"name" => name, "description" => description, "amount" => amount}},
+        %{
+          "line_item" => %{
+            "name" => name,
+            "description" => description,
+            "amount" => amount,
+            "currency" => currency
+          }
+        },
         socket
       ) do
     commission = socket.assigns.commission
@@ -174,14 +159,15 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
           %{
             name: name,
             description: description,
-            amount: Utils.moneyfy(amount)
+            amount: Utils.moneyfy(amount, currency)
           },
           socket.assigns.current_user_member?
         )
 
+      Modal.hide(socket.assigns.id <> "_custom_modal")
+
       {:noreply,
        assign(socket,
-         open_custom: false,
          custom_changeset: %LineItem{} |> LineItem.custom_changeset(%{})
        )}
     else
@@ -200,13 +186,10 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       add_item="add_item"
       remove_item="remove_item"
       custom_changeset={@custom_changeset}
-      open_custom={@open_custom}
-      close_custom="close_custom"
-      toggle_custom="toggle_custom"
+      custom_collapse_id={@id <> "_custom_collapse"}
       change_custom="change_custom"
       submit_custom="submit_custom"
-      nothing="nothing"
-      deposited={@deposited}
+      studio={@studio}
     />
     """
   end

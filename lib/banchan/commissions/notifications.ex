@@ -198,6 +198,20 @@ defmodule Banchan.Commissions.Notifications do
     "The commission status has been changed to #{Common.humanize_status(status)}."
   end
 
+  def commission_title_changed(%Commission{} = commission, _actor \\ nil) do
+    Notifications.with_task(fn ->
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "commission:#{commission.public_id}",
+        %Phoenix.Socket.Broadcast{
+          topic: "commission:#{commission.public_id}",
+          event: "new_title",
+          payload: commission.title
+        }
+      )
+    end)
+  end
+
   def commission_status_changed(%Commission{} = commission, _actor \\ nil) do
     Notifications.with_task(fn ->
       Phoenix.PubSub.broadcast!(

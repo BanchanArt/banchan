@@ -10,12 +10,34 @@ defmodule BanchanWeb.StudioLive.New do
   alias Banchan.Studios
   alias Banchan.Studios.Studio
 
-  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{
+    Checkbox,
+    MarkdownInput,
+    MultipleSelect,
+    Select,
+    Submit,
+    TextInput
+  }
+
   alias BanchanWeb.Components.Layout
   alias BanchanWeb.Endpoint
 
   @impl true
   def mount(_params, _session, socket) do
+    currencies =
+      Studios.Common.supported_currencies()
+      |> Enum.map(fn currency ->
+        %{name: name, symbol: symbol} = Money.Currency.get(currency)
+        {:"#{name} (#{symbol})", currency}
+      end)
+
+    socket =
+      socket
+      |> assign(
+        countries: Studios.Common.supported_countries(),
+        currencies: currencies
+      )
+
     if is_nil(socket.assigns.current_user.confirmed_at) do
       socket =
         put_flash(
@@ -26,10 +48,10 @@ defmodule BanchanWeb.StudioLive.New do
 
       {:ok,
        push_redirect(socket,
-         to: Routes.studio_index_path(Endpoint, :index)
+         to: Routes.confirmation_path(Endpoint, :show)
        )}
     else
-      changeset = Studio.profile_changeset(%Studio{}, %{})
+      changeset = Studio.creation_changeset(%Studio{}, %{})
       {:ok, assign(socket, changeset: changeset)}
     end
   end
@@ -37,33 +59,6 @@ defmodule BanchanWeb.StudioLive.New do
   @impl true
   def handle_params(_params, uri, socket) do
     {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
-  def render(assigns) do
-    ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <div class="shadow bg-base-200 text-base-content">
-        <div class="p-6">
-          <h1 class="text-2xl">New Studio</h1>
-          <Form
-            class="col-span-1"
-            for={@changeset}
-            change="change"
-            submit="submit"
-            opts={autocomplete: "off"}
-          >
-            <TextInput name={:name} icon="user" opts={required: true} />
-            <TextInput name={:handle} icon="at" opts={required: true} />
-            <TextArea name={:description} opts={required: true} />
-            <TextArea name={:summary} />
-            <TextArea name={:default_terms} />
-            <Submit changeset={@changeset} label="Save" />
-          </Form>
-        </div>
-      </div>
-    </Layout>
-    """
   end
 
   @impl true
@@ -88,15 +83,80 @@ defmodule BanchanWeb.StudioLive.New do
   def handle_event("submit", val, socket) do
     case Studios.new_studio(
            %Studio{artists: [socket.assigns.current_user]},
-           Routes.studio_shop_url(Endpoint, :show, val["studio"]["handle"]),
            val["studio"]
          ) do
       {:ok, studio} ->
-        put_flash(socket, :info, "Profile updated")
-        {:noreply, redirect(socket, to: Routes.studio_shop_path(Endpoint, :show, studio.handle))}
+        {:noreply,
+         socket
+         |> put_flash(:info, "Studio created")
+         |> redirect(to: Routes.studio_shop_path(Endpoint, :show, studio.handle))}
 
       other ->
         other
     end
+  end
+
+  @impl true
+  def render(assigns) do
+    ~F"""
+    <Layout uri={@uri} padding={0} current_user={@current_user} flashes={@flash}>
+      <div class="w-full md:bg-base-300">
+        <div class="max-w-sm w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+          <Form
+            class="col-span-1"
+            for={@changeset}
+            change="change"
+            submit="submit"
+            opts={autocomplete: "off"}
+          >
+            <h1 class="text-2xl">New Studio</h1>
+            <TextInput
+              name={:name}
+              icon="user"
+              info="The studio's display name, as it should appear on studio cards and its home page."
+              opts={required: true, phx_debounce: "200"}
+            />
+            <TextInput
+              name={:handle}
+              icon="at"
+              info="Unique studio handle, as it will appear in the URL."
+              opts={required: true}
+            />
+            <MarkdownInput
+              id="about"
+              info="Tell us about your studio, what kind of art it's for, and what makes it different!"
+              name={:about}
+            />
+            <Checkbox
+              name={:mature}
+              label="Mature"
+              info="Mark this studio as exclusively for mature content. You can still make indiviual mature offerings if this is unchecked."
+            />
+            <Select
+              name={:country}
+              info="Country where you are based. This must be the same country where your bank is, and it's the only reason we collect this information."
+              options={@countries}
+              opts={required: true}
+            />
+            <Select
+              name={:default_currency}
+              info="Currency that will appear by default in your currency drop down (if you choose more than one currency)."
+              prompt="Pick a currency..."
+              options={@currencies}
+              opts={required: true}
+            />
+            <MultipleSelect
+              name={:payment_currencies}
+              info="Currencies you want to invoice with. Note that people from other countries can still pay you even if their local currency isn't listed here, so you can just pick based on what will look right for your clients."
+              options={@currencies}
+              selected={:USD}
+              opts={required: true}
+            />
+            <Submit changeset={@changeset} label="Save" />
+          </Form>
+        </div>
+      </div>
+    </Layout>
+    """
   end
 end

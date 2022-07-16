@@ -13,9 +13,11 @@ defmodule Banchan.Commissions do
   alias Banchan.Accounts.User
 
   alias Banchan.Commissions.{
+    CommentHistory,
     Commission,
     CommissionArchived,
     CommissionFilter,
+    Common,
     Event,
     EventAttachment,
     Invoice,
@@ -34,28 +36,33 @@ defmodule Banchan.Commissions do
   def list_commission_data_for_dashboard(
         %User{} = user,
         %CommissionFilter{} = filter,
-        page,
-        page_size \\ 10
+        opts \\ []
       ) do
     main_dashboard_query(user)
     |> dashboard_query_filter(filter)
-    |> Repo.paginate(page: page, page_size: page_size)
+    |> dashboard_order_by(opts)
+    |> Repo.paginate(
+      page_size: Keyword.get(opts, :page_size, 24),
+      page: Keyword.get(opts, :page, 1)
+    )
   end
 
   defp main_dashboard_query(%User{} = user) do
     from(s in Studio,
       join: c in Commission,
       on: c.studio_id == s.id,
+      as: :commission,
       join: artist in assoc(s, :artists),
       left_join: a in CommissionArchived,
       on: a.commission_id == c.id and a.user_id == ^user.id,
       join: client in assoc(c, :client),
       join: e in assoc(c, :events),
+      as: :events,
       where:
         c.client_id == ^user.id or
           artist.id == ^user.id,
       group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name, a.archived],
-      order_by: {:desc, max(e.inserted_at)},
+      # order_by: {:desc, max(e.inserted_at)},
       select: %{
         commission: %Commission{
           id: c.id,
@@ -79,6 +86,40 @@ defmodule Banchan.Commissions do
         updated_at: max(e.inserted_at)
       }
     )
+  end
+
+  defmacro status_order(arg) do
+    cases =
+      Common.status_values()
+      |> Enum.with_index()
+      |> Enum.map_join("\n", fn {status, idx} ->
+        # NB(zkat): I'm sorry for not using fragment(). I don't think I can.
+        "WHEN '#{status}' THEN #{idx}"
+      end)
+
+    quote do
+      fragment(unquote("CASE ? #{cases} ELSE NULL END"), unquote(arg))
+    end
+  end
+
+  defp dashboard_order_by(q, opts) do
+    case Keyword.fetch(opts, :order_by) do
+      {:ok, :recently_updated} ->
+        q
+        |> order_by([events: e], {:desc, max(e.inserted_at)})
+
+      {:ok, :oldest_updated} ->
+        q
+        |> order_by([events: e], {:asc, max(e.inserted_at)})
+
+      {:ok, :status} ->
+        q
+        |> order_by([commission: comm], {:asc, status_order(comm.status)})
+
+      :error ->
+        q
+        |> order_by([events: e], {:desc, max(e.inserted_at)})
+    end
   end
 
   defp dashboard_query_filter(query, %CommissionFilter{} = filter) do
@@ -164,9 +205,10 @@ defmodule Banchan.Commissions do
             (c.client_id == ^current_user.id or
                ^current_user.id == artist.id),
         preload: [
-          events: [:actor, invoice: [], attachments: [:upload, :thumbnail]],
+          :studio,
+          events: [invoice: [], attachments: [:upload, :thumbnail]],
           line_items: [:option],
-          offering: [:options]
+          offering: [:options, :studio]
         ]
       )
     )
@@ -291,6 +333,25 @@ defmodule Banchan.Commissions do
     )
   end
 
+  def update_title(%User{} = actor, %Commission{} = commission, attrs) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        commission
+        |> Commission.update_title_changeset(attrs)
+        |> Repo.update()
+        |> case do
+          {:ok, commission} ->
+            Notifications.commission_title_changed(commission, actor)
+            {:ok, commission}
+
+          {:error, err} ->
+            {:error, err}
+        end
+      end)
+
+    ret
+  end
+
   def update_status(%User{} = actor, %Commission{} = commission, status) do
     {:ok, ret} =
       Repo.transaction(fn ->
@@ -302,7 +363,7 @@ defmodule Banchan.Commissions do
 
         if commission.status == :accepted do
           offering = Repo.preload(commission, :offering).offering
-          available_slot_count = Offerings.offering_available_slots(offering)
+          available_slot_count = Offerings.offering_available_slots(offering, true)
 
           # Make sure we close the offering if we're out of slots.
           close = !is_nil(available_slot_count) && available_slot_count <= 1
@@ -424,50 +485,52 @@ defmodule Banchan.Commissions do
   end
 
   def add_line_item(%User{} = actor, %Commission{} = commission, option, true) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        line_item =
-          case option do
-            %OfferingOption{} ->
-              %LineItem{
-                option: option,
-                amount: option.price || Money.new(0, :USD),
-                name: option.name,
-                description: option.description
-              }
+    case option do
+      %OfferingOption{} ->
+        %LineItem{
+          commission_id: commission.id,
+          option: option,
+          amount: option.price,
+          name: option.name,
+          description: option.description
+        }
 
-            %{amount: amount, name: name, description: description} ->
-              %LineItem{
-                amount: amount,
-                name: name,
-                description: description
-              }
-          end
+      %{amount: amount, name: name, description: description} ->
+        %LineItem{
+          commission_id: commission.id,
+          amount: amount,
+          name: name,
+          description: description
+        }
+    end
+    |> Repo.insert()
+    |> case do
+      {:error, err} ->
+        {:error, err}
 
-        case commission
-             |> Commission.update_changeset()
-             |> Ecto.Changeset.put_assoc(:line_items, commission.line_items ++ [line_item])
-             |> Repo.update() do
+      {:ok, line_item} ->
+        line_item = line_item |> Repo.preload(:option)
+        line_items = commission.line_items ++ [line_item]
+        commission = %{commission | line_items: line_items}
+        {:ok, {line_item, commission}}
+    end
+    |> case do
+      {:error, err} ->
+        {:error, err}
+
+      {:ok, {line_item, commission}} ->
+        case create_event(:line_item_added, actor, commission, true, [], %{
+               amount: line_item.amount,
+               text: line_item.name
+             }) do
           {:error, err} ->
             {:error, err}
 
-          {:ok, commission} ->
-            # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_added, actor, commission, true, [], %{
-                   amount: line_item.amount,
-                   text: line_item.name
-                 }) do
-              {:error, err} ->
-                {:error, err}
-
-              {:ok, event} ->
-                Notifications.commission_line_items_changed(commission, actor)
-                {:ok, {commission, [event]}}
-            end
+          {:ok, event} ->
+            Notifications.commission_line_items_changed(commission, actor)
+            {:ok, {commission, [event]}}
         end
-      end)
-
-    ret
+    end
   end
 
   def remove_line_item(_, _, _, false) do
@@ -475,34 +538,34 @@ defmodule Banchan.Commissions do
   end
 
   def remove_line_item(%User{} = actor, %Commission{} = commission, line_item, true) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        line_items = Enum.filter(commission.line_items, &(&1.id != line_item.id))
+    line_item
+    |> Repo.delete()
+    |> case do
+      {:error, err} ->
+        {:error, err}
 
-        case commission
-             |> Commission.update_changeset()
-             |> Ecto.Changeset.put_assoc(:line_items, line_items)
-             |> Repo.update() do
+      {:ok, _} ->
+        line_items = Enum.filter(commission.line_items, &(&1.id != line_item.id))
+        commission = %{commission | line_items: line_items}
+        {:ok, {line_item, commission}}
+    end
+    |> case do
+      {:error, err} ->
+        {:error, err}
+
+      {:ok, {line_item, commission}} ->
+        case create_event(:line_item_removed, actor, commission, true, [], %{
+               amount: line_item.amount,
+               text: line_item.name
+             }) do
           {:error, err} ->
             {:error, err}
 
-          {:ok, commission} ->
-            # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-            case create_event(:line_item_removed, actor, commission, true, [], %{
-                   amount: line_item.amount,
-                   text: line_item.name
-                 }) do
-              {:error, err} ->
-                {:error, err}
-
-              {:ok, event} ->
-                Notifications.commission_line_items_changed(commission, actor)
-                {:ok, {commission, [event]}}
-            end
+          {:ok, event} ->
+            Notifications.commission_line_items_changed(commission, actor)
+            {:ok, {commission, [event]}}
         end
-      end)
-
-    ret
+    end
   end
 
   @doc """
@@ -534,8 +597,8 @@ defmodule Banchan.Commissions do
     ret =
       %Event{
         type: type,
-        commission: commission,
-        actor: actor,
+        commission_id: commission.id,
+        actor_id: actor.id,
         attachments: attachments
       }
       |> Event.changeset(attrs)
@@ -564,10 +627,43 @@ defmodule Banchan.Commissions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_event(%Event{} = event, attrs) do
-    event
-    |> Event.changeset(attrs)
-    |> Repo.update()
+  def update_event(%User{} = actor, %Event{} = event, attrs) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        event = Repo.get!(Event, event.id)
+
+        original_text = event.text
+        changeset = Event.changeset(event, attrs)
+
+        changeset
+        |> Repo.update()
+        |> case do
+          {:ok, event} ->
+            if Ecto.Changeset.fetch_change(changeset, :text) == :error do
+              {:ok, event}
+            else
+              %CommentHistory{
+                text: original_text,
+                written_at: event.updated_at,
+                event_id: event.id,
+                changed_by_id: actor.id
+              }
+              |> Repo.insert()
+              |> case do
+                {:ok, _} ->
+                  {:ok, event}
+
+                {:error, err} ->
+                  {:error, err}
+              end
+            end
+
+          {:error, err} ->
+            {:error, err}
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -628,11 +724,18 @@ defmodule Banchan.Commissions do
         join: c in assoc(e, :commission),
         join: s in assoc(c, :studio),
         join: artist in assoc(s, :artists),
+        left_join: i in assoc(e, :invoice),
         select: ea,
+        # Either the user is a studio member
+        # Or the user is the client
+        # And the invoice requires payment to view attachments and has succeeded
+        # Or the invoice doesn't require payment to view attachments
         where:
           c.public_id == ^commission and
             ul.key == ^key and
-            (c.client_id == ^user.id or artist.id == ^user.id),
+            (artist.id == ^user.id or
+               (c.client_id == ^user.id and
+                  ((i.required and i.status == :succeeded) or not i.required or is_nil(i.required)))),
         preload: [:upload, :thumbnail]
       )
     )
@@ -815,6 +918,7 @@ defmodule Banchan.Commissions do
       |> Repo.one!()
 
     platform_fee = Money.multiply(Money.add(amount, tip), platform_fee)
+    transfer_amt = amount |> Money.add(tip) |> Money.subtract(platform_fee)
 
     {:ok, session} =
       stripe_mod().create_session(%{
@@ -824,8 +928,8 @@ defmodule Banchan.Commissions do
         success_url: uri,
         line_items: items,
         payment_intent_data: %{
-          application_fee_amount: platform_fee.amount,
           transfer_data: %{
+            amount: transfer_amt.amount,
             destination: stripe_id
           }
         }
@@ -847,13 +951,22 @@ defmodule Banchan.Commissions do
   end
 
   def process_payment_succeeded!(session) do
-    {:ok, %{charges: %{data: [%{balance_transaction: txn_id}]}}} =
+    {:ok, %{charges: %{data: [%{balance_transaction: txn_id, transfer: transfer}]}}} =
       stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, [])
 
     {:ok, %{available_on: available_on, amount: amt, currency: curr}} =
       stripe_mod().retrieve_balance_transaction(txn_id, [])
 
-    amount = Money.new(amt, String.to_atom(String.upcase(curr)))
+    {:ok, transfer} = stripe_mod().retrieve_transfer(transfer)
+
+    total_charged = Money.new(amt, String.to_atom(String.upcase(curr)))
+    final_transfer_txn = transfer.destination_payment.balance_transaction
+
+    total_transferred =
+      Money.new(
+        final_transfer_txn.amount,
+        String.to_atom(String.upcase(final_transfer_txn.currency))
+      )
 
     {:ok, available_on} = DateTime.from_unix(available_on)
 
@@ -864,7 +977,9 @@ defmodule Banchan.Commissions do
           |> Repo.update_all(
             set: [
               status: :succeeded,
-              payout_available_on: available_on
+              payout_available_on: available_on,
+              total_charged: total_charged,
+              total_transferred: total_transferred
             ]
           )
 
@@ -877,7 +992,7 @@ defmodule Banchan.Commissions do
           true,
           [],
           %{
-            amount: amount
+            amount: invoice.amount |> Money.add(invoice.tip)
           }
         )
 
@@ -1148,11 +1263,17 @@ defmodule Banchan.Commissions do
     if Ecto.assoc_loaded?(commission.events) do
       Enum.reduce(
         commission.events,
-        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-        Money.new(0, :USD),
+        %{},
         fn event, acc ->
           if event.invoice && event.invoice.status in [:succeeded, :released] do
-            Money.add(acc, event.invoice.amount)
+            current =
+              Map.get(
+                acc,
+                event.invoice.amount.currency,
+                Money.new(0, event.invoice.amount.currency)
+              )
+
+            Map.put(acc, event.invoice.amount.currency, Money.add(current, event.invoice.amount))
           else
             acc
           end
@@ -1171,40 +1292,27 @@ defmodule Banchan.Commissions do
 
       Enum.reduce(
         deposits,
-        # TODO: Using :USD here is a bad idea for later, but idk how to do it better yet.
-        Money.new(0, :USD),
-        fn dep, acc -> Money.add(acc, dep.amount) end
+        %{},
+        fn dep, acc ->
+          current = Map.get(acc, dep.amount.currency, Money.new(0, dep.amount.currency))
+          Map.put(acc, dep.amount.currency, Money.add(current, dep.amount))
+        end
       )
     end
   end
 
-  def latest_draft(%User{id: user_id}, %Commission{client_id: client_id}, current_user_member?)
-      when user_id != client_id and current_user_member? == false do
-    {:error, :unauthorized}
-  end
-
-  def latest_draft(_, %Commission{} = commission, _) do
-    case from(
-           e in Event,
-           join: us in "users_studios",
-           join: c in Commission,
-           join: ea in EventAttachment,
-           where:
-             e.type == :comment and
-               c.id == ^commission.id and
-               e.commission_id == c.id and
-               us.studio_id == c.studio_id and
-               e.actor_id == us.user_id and
-               ea.event_id == e.id,
-           select: e,
-           limit: 1,
-           order_by: {:desc, e.inserted_at},
-           preload: [attachments: [:upload, :thumbnail]]
-         )
-         |> Repo.all() do
-      [] -> nil
-      [event] -> event
-    end
+  def list_attachments(%Commission{} = commission) do
+    from(ea in EventAttachment,
+      join: e in assoc(ea, :event),
+      left_join: i in assoc(e, :invoice),
+      where:
+        e.commission_id == ^commission.id and
+          (is_nil(i.required) or
+             not i.required or (i.required and i.status == :succeeded)),
+      order_by: [desc: e.inserted_at],
+      preload: [:upload]
+    )
+    |> Repo.all()
   end
 
   defp stripe_mod do

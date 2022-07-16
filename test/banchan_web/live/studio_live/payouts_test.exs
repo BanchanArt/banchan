@@ -80,12 +80,13 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
              |> render() =~ "This studio is not ready to accept commissions yet."
     end
 
-    test "404 if user is not a member", %{conn: conn, client: client, studio: studio} do
+    test "redirect if user is not a member", %{conn: conn, client: client, studio: studio} do
       conn = log_in_user(conn, client)
 
-      assert_raise Ecto.NoResultsError, fn ->
-        live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
-      end
+      assert {:error,
+              {:redirect,
+               %{flash: %{"error" => "You are not authorized to perform this action."}, to: "/"}}} ==
+               live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
     end
 
     test "can navigate to and from listing", %{
@@ -203,7 +204,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       assert page_live
              |> element("#available")
-             |> render() =~ "$0.00"
+             |> render() =~ "No Balance Available"
     end
 
     test "Shows available balance", %{
@@ -440,62 +441,6 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       %{conn: log_in_user(conn, artist)}
     end
 
-    test "cancel button disabled if something happened and there's no stripe id", %{
-      conn: conn,
-      artist: artist,
-      client: client,
-      studio: studio,
-      commission: commission
-    } do
-      net = Money.new(39_124, :USD)
-      mock_balance(studio, [net], [])
-      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
-      approve_commission(commission)
-
-      Banchan.StripeAPI.Mock
-      |> expect(:retrieve_balance, fn _ ->
-        {:ok,
-         %Stripe.Balance{
-           available: [
-             %{
-               currency: "usd",
-               amount: net.amount
-             }
-           ],
-           pending: [
-             %{
-               currency: "usd",
-               amount: 0
-             }
-           ]
-         }}
-      end)
-      |> expect(:create_payout, fn _, _ ->
-        {:error,
-         %Stripe.Error{
-           message: "internal message",
-           user_message: "external message",
-           code: :unknown_error,
-           extra: %{},
-           request_id: "whatever",
-           source: :stripe
-         }}
-      end)
-
-      capture_log(fn ->
-        {:error, %Stripe.Error{}} = Studios.payout_studio(artist, studio)
-      end)
-
-      [payout] = Studios.list_payouts(studio).entries
-
-      {:ok, page_live, _html} =
-        live(conn, Routes.studio_payouts_path(conn, :show, studio.handle, payout.public_id))
-
-      assert page_live
-             |> element(".cancel-payout")
-             |> render() =~ "disabled=\"disabled\""
-    end
-
     test "cancels payout when it's pending", %{
       conn: conn,
       artist: artist,
@@ -550,11 +495,6 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       {:ok, page_live, _html} =
         live(conn, Routes.studio_payouts_path(conn, :show, studio.handle, payout.public_id))
 
-      # Make sure the cancel confirmation button itself is disabled if the modal is closed.
-      assert page_live
-             |> element(".cancel-payout")
-             |> render() =~ "disabled=\"disabled\""
-
       page_live
       |> element(".open-modal")
       |> render_click()
@@ -589,17 +529,9 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
              |> element(".payout .badge")
              |> render() =~ "Canceled"
 
-      assert page_live
-             |> element(".open-modal")
-             |> render() =~ "disabled=\"disabled\""
-
-      assert page_live
-             |> element(".cancel-payout")
-             |> render() =~ "disabled=\"disabled\""
-
+      # We remove the modal from the page if cancellation is disabled.
       refute page_live
-             |> element(".cancel-payout")
-             |> render() =~ "loading"
+             |> has_element?(".open-modal")
     end
   end
 end

@@ -10,6 +10,7 @@ config :banchan, Banchan.Repo, show_sensitive_data_on_connection_error: true
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :banchan, BanchanWeb.Endpoint,
+  url: [host: "localhost"],
   http: [port: 4000],
   debug_errors: true,
   code_reloader: true,

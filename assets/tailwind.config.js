@@ -9,6 +9,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      aspectRatio: {
+        'video': '16 / 9',
+        'header-image': '3.5 / 1'
+      },
       spacing: {
         '128': '32rem',
         'video': '56.25%',
@@ -18,6 +22,11 @@ module.exports = {
       },
       gridTemplateColumns: {
         'gallery': 'repeat(auto-fill, minmax(30%, 1fr))'
+      },
+      colors: {
+        discord: '#5865F2',
+        google: '#4285F4',
+        twitter: '#1DA1F2'
       }
     }
   },

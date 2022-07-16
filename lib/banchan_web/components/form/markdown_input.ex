@@ -8,9 +8,8 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   alias Surface.Components.Form.Input.InputContext
   alias Surface.Components.LiveFileInput
 
-  alias BanchanWeb.Components.Markdown
-
   prop name, :any, required: true
+  prop height, :string, default: "224px"
   prop opts, :keyword, default: []
   prop label, :string
   prop show_label, :boolean, default: true
@@ -20,15 +19,19 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   prop cancel_upload, :event
 
   data dragging, :boolean, default: false
-  data previewing, :boolean, default: false
 
-  @impl true
-  def handle_event("markdown", _, socket) do
-    {:noreply, assign(socket, previewing: false)}
-  end
+  def update(assigns, socket) do
+    val =
+      Phoenix.HTML.Form.input_value(
+        Map.get(assigns[:__context__], {Surface.Components.Form, :form}),
+        assigns.name
+      )
 
-  def handle_event("preview", _, socket) do
-    {:noreply, assign(socket, previewing: true)}
+    socket = socket |> assign(assigns)
+
+    {:ok,
+     socket
+     |> push_event("markdown-input-updated", %{id: socket.assigns.id <> "-hook", value: val || ""})}
   end
 
   def handle_event("dragstart", _, socket) do
@@ -61,75 +64,54 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
         </InputContext>
       {/if}
       <div class="control">
-        <InputContext :let={form: form, field: field}>
-          <div class="tabs flex flex-nowrap">
-            <a :on-click="markdown" class={"tab tab-lifted flex-1 tab-lg", "tab-active": !@previewing}>Write</a>
-            <a :on-click="preview" class={"tab tab-lifted flex-1 tab-lg", "tab-active": @previewing}>Preview</a>
+        <div class="relative">
+          <div
+            class={@class}
+            phx-update="ignore"
+            phx-drop-target={@upload && @upload.ref}
+            :hook="MarkdownInput"
+            id={@id <> "-hook"}
+          >
+            <div
+              id={@id <> "-editor"}
+              data-height={@height}
+              phx-update="ignore"
+              class="object-cover editor w-full h-full"
+            />
+            <TextArea class="hidden input-textarea" opts={@opts} />
           </div>
-          <div>
-            {#if @previewing}
-              <div class="h-40 border-2 overflow-auto border-neutral rounded">
-                <div class="p-2 text-sm">
-                  {#if Phoenix.HTML.FormData.input_value(nil, form, field)}
-                    <Markdown content={Phoenix.HTML.FormData.input_value(nil, form, field)} />
-                  {#else}
-                    Nothing to preview
-                  {/if}
-                </div>
-              </div>
-            {#else}
-              <div
-                class="relative flex h-40 w-full"
-                phx-drop-target={@upload && @upload.ref}
-                :hook="MarkdownInput"
-                id={@id <> "-hook"}
-              >
-                <TextArea
-                  class={
-                    "textarea",
-                    "textarea-bordered",
-                    "h-40",
-                    "w-full",
-                    @class,
-                    "textarea-error": !Enum.empty?(Keyword.get_values(form.errors, field))
-                  }
-                  opts={@opts}
-                />
-                {#if @upload}
-                  {#if @dragging}
-                    <div class="absolute h-full w-full opacity-25 bg-neutral border-dashed border-2" />
-                    <div class="absolute h-full w-full text-center my-auto">
-                      Drop Files Here <i class="fas fa-file-upload" />
-                    </div>
-                  {/if}
-                  <label class="absolute right-2 bottom-2">
-                    <i class="fas fa-file-upload text-2xl hover:cursor-pointer" />
-                    <LiveFileInput class="h-0 w-0 overflow-hidden" upload={@upload} />
-                  </label>
-                {/if}
+          {#if @upload}
+            {#if @dragging}
+              <div class="absolute h-full w-full opacity-25 bg-neutral border-dashed border-2" />
+              <div class="absolute h-full w-full text-center my-auto">
+                Drop Files Here <i class="fas fa-file-upload" />
               </div>
             {/if}
-            {#if @upload}
-              <ul>
-                {#for entry <- @upload.entries}
-                  <li>
-                    <button type="button" class="text-2xl" :on-click={@cancel_upload} phx-value-ref={entry.ref}>&times;</button>
-                    {entry.client_name}
-                    <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
-                    {#for err <- upload_errors(@upload, entry)}
-                      <p>{error_to_string(err)}</p>
-                    {/for}
-                  </li>
-                {/for}
-              </ul>
-              {#for err <- upload_errors(@upload)}
-                <p>{error_to_string(err)}</p>
-              {/for}
-            {/if}
-          </div>
-        </InputContext>
+            <label class="absolute right-2 top-36 z-30">
+              <i class="fas fa-file-upload text-2xl hover:cursor-pointer" />
+              <LiveFileInput class="hidden overflow-hidden" upload={@upload} />
+            </label>
+          {/if}
+        </div>
       </div>
       <ErrorTag class="help text-error" />
+      {#if @upload}
+        <ul>
+          {#for entry <- @upload.entries}
+            <li>
+              <button type="button" class="text-2xl" :on-click={@cancel_upload} phx-value-ref={entry.ref}>&times;</button>
+              {entry.client_name}
+              <progress class="progress progress-primary" value={entry.progress} max="100">{entry.progress}%</progress>
+              {#for err <- upload_errors(@upload, entry)}
+                <p class="text-error">{error_to_string(err)}</p>
+              {/for}
+            </li>
+          {/for}
+        </ul>
+        {#for err <- upload_errors(@upload)}
+          <p class="text-error">{error_to_string(err)}</p>
+        {/for}
+      {/if}
     </Field>
     """
   end

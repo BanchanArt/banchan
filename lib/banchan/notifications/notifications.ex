@@ -107,39 +107,36 @@ defmodule Banchan.Notifications do
   # Not bothering with this one.
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def notify_subscribers!(actor, subs, %UserNotification{} = notification, opts \\ []) do
-    {:ok, _} =
-      Repo.transaction(fn ->
-        Enum.each(subs, fn %User{
-                             id: id,
-                             handle: handle,
-                             email: email,
-                             notification_settings: settings
-                           } ->
-          notify_actor = (actor && actor.id != id) || @notify_actor
+    Enum.each(subs, fn %User{
+                         id: id,
+                         handle: handle,
+                         email: email,
+                         notification_settings: settings
+                       } ->
+      notify_actor = (actor && actor.id != id) || @notify_actor
 
-          web_setting = is_nil(settings) || settings.commission_web
+      web_setting = is_nil(settings) || settings.commission_web
 
-          if web_setting && (!actor || notify_actor) do
-            notification = Repo.insert!(%{notification | user_id: id}, returning: [:ref])
+      if web_setting && (!actor || notify_actor) do
+        notification = Repo.insert!(%{notification | user_id: id}, returning: [:ref])
 
-            Phoenix.PubSub.broadcast!(
-              @pubsub,
-              "notification:#{handle}",
-              %Phoenix.Socket.Broadcast{
-                topic: "notification:#{handle}",
-                event: "new_notification",
-                payload: notification
-              }
-            )
-          end
+        Phoenix.PubSub.broadcast!(
+          @pubsub,
+          "notification:#{handle}",
+          %Phoenix.Socket.Broadcast{
+            topic: "notification:#{handle}",
+            event: "new_notification",
+            payload: notification
+          }
+        )
+      end
 
-          email_setting = is_nil(settings) || settings.commission_email
+      email_setting = is_nil(settings) || settings.commission_email
 
-          if email_setting && (!actor || notify_actor) do
-            send_email(email, notification, opts)
-          end
-        end)
-      end)
+      if email_setting && (!actor || notify_actor) && !is_nil(email) do
+        send_email(email, notification, opts)
+      end
+    end)
   end
 
   defp send_email(email, %UserNotification{} = notification, opts) do

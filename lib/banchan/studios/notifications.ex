@@ -39,6 +39,18 @@ defmodule Banchan.Studios.Notifications do
     %StudioFollower{user_id: user.id, studio_id: studio.id}
     |> Repo.insert(on_conflict: :nothing, conflict_target: [:user_id, :studio_id])
 
+    Notifications.with_task(fn ->
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "follower_count:#{studio.handle}",
+        %Phoenix.Socket.Broadcast{
+          topic: "follower_count:#{studio.handle}",
+          event: "follower_count_changed",
+          payload: follower_count(studio)
+        }
+      )
+    end)
+
     :ok
   end
 
@@ -48,7 +60,43 @@ defmodule Banchan.Studios.Notifications do
     )
     |> Repo.delete_all()
 
+    Notifications.with_task(fn ->
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        "follower_count:#{studio.handle}",
+        %Phoenix.Socket.Broadcast{
+          topic: "follower_count:#{studio.handle}",
+          event: "follower_count_changed",
+          payload: follower_count(studio)
+        }
+      )
+    end)
+
     :ok
+  end
+
+  def follower_count(%Studio{} = studio) do
+    from(f in StudioFollower,
+      where: f.studio_id == ^studio.id,
+      select: count(f)
+    )
+    |> Repo.one()
+  end
+
+  def following_count(%User{} = user) do
+    from(f in StudioFollower,
+      where: f.user_id == ^user.id,
+      select: count(f)
+    )
+    |> Repo.one()
+  end
+
+  def subscribe_to_follower_count(%Studio{} = studio) do
+    Phoenix.PubSub.subscribe(@pubsub, "follower_count:#{studio.handle}")
+  end
+
+  def unsubscribe_from_follower_count(%Studio{} = studio) do
+    Phoenix.PubSub.unsubscribe(@pubsub, "follower_count:#{studio.handle}")
   end
 
   def subscribers(%Studio{} = studio) do

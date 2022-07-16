@@ -5,15 +5,205 @@ defmodule Banchan.Accounts do
 
   import Ecto.Query, warn: false
 
-  alias Banchan.Accounts.{User, UserNotifier, UserToken}
+  alias Ueberauth.Auth
+
+  alias Banchan.Accounts.{DisableHistory, User, UserNotifier, UserToken}
   alias Banchan.Repo
   alias Banchan.Uploads
 
   alias BanchanWeb.UserAuth
 
   @pubsub Banchan.PubSub
+  @rand_pass_length 32
 
   ## Database getters
+
+  @doc """
+  Either find or create a user based on Ueberauth OAuth credentials.
+  """
+  def find_or_create_user(%Auth{provider: :twitter} = auth) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        case Repo.one(from u in User, where: u.twitter_uid == ^auth.uid) do
+          %User{} = user ->
+            {:ok, user}
+
+          nil ->
+            create_user_from_twitter(auth)
+            |> add_oauth_pfp(auth)
+        end
+      end)
+
+    ret
+  end
+
+  def find_or_create_user(%Auth{provider: :discord} = auth) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        case Repo.one(from u in User, where: u.discord_uid == ^auth.uid) do
+          %User{} = user ->
+            {:ok, user}
+
+          nil ->
+            create_user_from_discord(auth)
+            |> add_oauth_pfp(auth)
+        end
+      end)
+
+    ret
+  end
+
+  def find_or_create_user(%Auth{provider: :google} = auth) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        case Repo.one(from u in User, where: u.google_uid == ^auth.uid) do
+          %User{} = user ->
+            {:ok, user}
+
+          nil ->
+            create_user_from_google(auth)
+            |> add_oauth_pfp(auth)
+        end
+      end)
+
+    ret
+  end
+
+  def find_or_create_user(%Auth{}) do
+    {:error, :unsupported}
+  end
+
+  defp create_user_from_twitter(%Auth{} = auth) do
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    pw = random_password()
+
+    attrs = %{
+      twitter_uid: auth.uid,
+      email: auth.info.email,
+      handle: auth.info.nickname,
+      name: auth.info.name,
+      bio: auth.info.description,
+      twitter_handle: auth.info.nickname,
+      password: pw,
+      password_confirmation: pw,
+      confirmed_at: now
+    }
+
+    case %User{}
+         |> User.registration_oauth_changeset(attrs)
+         |> Repo.insert() do
+      {:ok, user} ->
+        {:ok, user}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        if Enum.any?(changeset.errors, fn {field, _} -> field == :handle end) do
+          %User{}
+          |> User.registration_oauth_changeset(%{
+            attrs
+            | handle: "user#{:rand.uniform(100_000_000)}"
+          })
+          |> Repo.insert()
+        else
+          {:error, changeset}
+        end
+    end
+  end
+
+  defp create_user_from_discord(%Auth{} = auth) do
+    pw = random_password()
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+    attrs = %{
+      discord_uid: auth.uid,
+      email: auth.info.email,
+      handle:
+        auth.extra.raw_info.user["username"] <> "_" <> auth.extra.raw_info.user["discriminator"],
+      name:
+        auth.extra.raw_info.user["username"] <> "#" <> auth.extra.raw_info.user["discriminator"],
+      discord_handle:
+        auth.extra.raw_info.user["username"] <> "#" <> auth.extra.raw_info.user["discriminator"],
+      password: pw,
+      password_confirmation: pw,
+      confirmed_at: now
+    }
+
+    case %User{}
+         |> User.registration_oauth_changeset(attrs)
+         |> Repo.insert() do
+      {:ok, user} ->
+        {:ok, user}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        if Enum.any?(changeset.errors, fn {field, _} -> field == :handle end) do
+          %User{}
+          |> User.registration_oauth_changeset(%{
+            attrs
+            | handle: "user#{:rand.uniform(100_000_000)}"
+          })
+          |> Repo.insert()
+        else
+          {:error, changeset}
+        end
+    end
+  end
+
+  def create_user_from_google(%Auth{} = auth) do
+    pw = random_password()
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+    attrs = %{
+      google_uid: auth.uid,
+      email: auth.info.email,
+      handle: "user#{:rand.uniform(100_000_000)}",
+      password: pw,
+      password_confirmation: pw,
+      confirmed_at: now
+    }
+
+    case %User{}
+         |> User.registration_oauth_changeset(attrs)
+         |> Repo.insert() do
+      {:ok, user} ->
+        {:ok, user}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        if Enum.any?(changeset.errors, fn {field, _} -> field == :email end) do
+          %User{}
+          |> User.registration_oauth_changeset(%{
+            attrs
+            | email: nil
+          })
+          |> Repo.insert()
+        else
+          {:error, changeset}
+        end
+    end
+  end
+
+  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: nil}}) do
+    {:ok, user}
+  end
+
+  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: url}}) when is_binary(url) do
+    tmp_file = Path.join([System.tmp_dir!(), "oauth-pfp-#{:rand.uniform(100_000_000)}"])
+    resp = HTTPoison.get!(url)
+    File.write!(tmp_file, resp.body)
+    {pfp, thumb} = make_pfp_images!(user, user, tmp_file)
+    File.rm!(tmp_file)
+
+    update_user_profile(user, user, %{
+      "pfp_img_id" => pfp.id,
+      "pfp_thumb_id" => thumb.id
+    })
+  end
+
+  defp add_oauth_pfp({:error, error}, _) do
+    {:error, error}
+  end
+
+  defp random_password do
+    :crypto.strong_rand_bytes(@rand_pass_length) |> Base.encode64()
+  end
 
   @doc """
   Gets a single user.
@@ -155,18 +345,30 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  Updates admin-level fields for a user, such as their roles.
+  """
+  def update_admin_fields(%User{} = actor, %User{} = user, attrs \\ %{}) do
+    User.admin_changeset(actor, user, attrs)
+    |> Repo.update()
+  end
+
+  @doc """
   Updates the user profile fields.
 
   ## Examples
 
-      iex> update_user_profile(user, %{handle: ..., bio: ..., ...})
+      iex> update_user_profile(actor, user, %{handle: ..., bio: ..., ...})
       {:ok, %User{}}
 
   """
-  def update_user_profile(user, attrs) do
-    user
-    |> User.profile_changeset(attrs)
-    |> Repo.update()
+  def update_user_profile(%User{} = actor, %User{} = user, attrs) do
+    if can_modify_user?(actor, user) do
+      user
+      |> User.profile_changeset(attrs)
+      |> Repo.update()
+    else
+      {:error, :unauthorized}
+    end
   end
 
   @doc """
@@ -197,6 +399,52 @@ defmodule Banchan.Accounts do
     end
   end
 
+  def disable_user(%User{} = actor, %User{} = user, attrs) do
+    if :admin in actor.roles ||
+         (:mod in actor.roles && :admin not in user.roles) do
+      %DisableHistory{
+        user_id: user.id,
+        disabled_by_id: actor.id,
+        disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+      }
+      |> DisableHistory.disable_changeset(attrs)
+      |> Repo.insert()
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  @doc """
+  Re-enable a previously disabled user.
+  """
+  def enable_user(actor, %User{} = user, reason) do
+    if is_nil(actor) ||
+         :admin in actor.roles ||
+         (:mod in actor.roles && :admin not in user.roles) do
+      changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifted_reason: reason})
+
+      if changeset.valid? do
+        {_, [history | _]} =
+          Repo.update_all(
+            from(h in DisableHistory,
+              where: h.user_id == ^user.id,
+              select: h
+            ),
+            set: [
+              lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+              lifted_by_id: actor && actor.id
+            ]
+          )
+
+        {:ok, history}
+      else
+        {:error, changeset}
+      end
+    else
+      {:error, :unauthorized}
+    end
+  end
+
   @doc """
   Returns an `%Ecto.Changeset{}` for changing the user email.
 
@@ -208,6 +456,22 @@ defmodule Banchan.Accounts do
   """
   def change_user_email(user, attrs \\ %{}) do
     User.email_changeset(user, attrs)
+  end
+
+  @doc """
+  Emulates that the email will change without actually changing it in the
+  database. Used exclusively for OAuth accounts that didn't have an email to
+  begin with, so password is not checked.
+
+  ## Examples
+
+      iex> apply_new_user_email(user, %{email: ...})
+      {:ok, %User{}}
+  """
+  def apply_new_user_email(user, attrs) do
+    user
+    |> User.email_changeset(attrs)
+    |> Ecto.Changeset.apply_action(:update)
   end
 
   @doc """
@@ -398,6 +662,18 @@ defmodule Banchan.Accounts do
     end
   end
 
+  def update_maturity(user, attrs) do
+    user
+    |> User.maturity_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def update_muted(user, attrs) do
+    user
+    |> User.muted_changeset(attrs)
+    |> Repo.update()
+  end
+
   ## Session
 
   @doc """
@@ -557,31 +833,53 @@ defmodule Banchan.Accounts do
     Phoenix.PubSub.subscribe(@pubsub, UserAuth.pubsub_topic())
   end
 
-  def update_user_pfp(%User{} = user, src) do
-    mog =
-      Mogrify.open(src)
-      |> Mogrify.format("jpeg")
-      |> Mogrify.gravity("Center")
-      |> Mogrify.resize_to_fill("512x512")
-      |> Mogrify.save(in_place: true)
+  def make_pfp_images!(%User{} = actor, %User{} = user, src) do
+    if can_modify_user?(actor, user) do
+      mog =
+        Mogrify.open(src)
+        |> Mogrify.format("jpeg")
+        |> Mogrify.gravity("Center")
+        |> Mogrify.resize_to_fill("512x512")
+        |> Mogrify.save(in_place: true)
 
-    pfp = Uploads.save_file!(user, mog.path, "image/jpeg", "profile.jpg")
-    File.rm!(mog.path)
+      pfp = Uploads.save_file!(user, mog.path, "image/jpeg", "profile.jpg")
+      File.rm!(mog.path)
 
-    mog =
-      Mogrify.open(src)
-      |> Mogrify.format("jpeg")
-      |> Mogrify.gravity("Center")
-      |> Mogrify.resize_to_fill("64x64")
-      |> Mogrify.save(in_place: true)
+      mog =
+        Mogrify.open(src)
+        |> Mogrify.format("jpeg")
+        |> Mogrify.gravity("Center")
+        |> Mogrify.resize_to_fill("128x128")
+        |> Mogrify.save(in_place: true)
 
-    thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")
-    File.rm!(mog.path)
+      thumb = Uploads.save_file!(user, mog.path, "image/jpeg", "thumbnail.jpg")
+      File.rm!(mog.path)
 
-    user
-    |> User.changeset(%{})
-    |> Ecto.Changeset.put_assoc(:pfp_img, pfp)
-    |> Ecto.Changeset.put_assoc(:pfp_thumb, thumb)
-    |> Repo.update()
+      {pfp, thumb}
+    else
+      raise "Unauthorized"
+    end
+  end
+
+  def make_header_image!(%User{} = actor, %User{} = user, src) do
+    if can_modify_user?(actor, user) do
+      mog =
+        Mogrify.open(src)
+        |> Mogrify.format("jpeg")
+        |> Mogrify.save(in_place: true)
+
+      header = Uploads.save_file!(user, mog.path, "image/jpeg", "header.jpg")
+      File.rm!(mog.path)
+
+      header
+    else
+      raise "Unauthorized"
+    end
+  end
+
+  def can_modify_user?(%User{} = actor, %User{} = target) do
+    actor.id == target.id ||
+      :admin in actor.roles ||
+      :mod in actor.roles
   end
 end

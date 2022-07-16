@@ -39,8 +39,8 @@ defmodule Banchan.Commissions.Common do
   def humanize_status(:rejected), do: "Rejected"
   def humanize_status(:paused), do: "Paused"
   def humanize_status(:in_progress), do: "In Progress"
-  def humanize_status(:waiting), do: "Waiting for Client"
-  def humanize_status(:ready_for_review), do: "Ready for Review"
+  def humanize_status(:waiting), do: "Waiting"
+  def humanize_status(:ready_for_review), do: "Final Review"
   def humanize_status(:approved), do: "Approved"
   def humanize_status(:withdrawn), do: "Withdrawn"
 

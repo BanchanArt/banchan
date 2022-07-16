@@ -17,7 +17,8 @@ config :banchan, Banchan.Repo,
   database: "banchan_test#{System.get_env("MIX_TEST_PARTITION")}",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: 10
+  pool_size: 10,
+  queue_target: 500
 
 if System.get_env("GITHUB_ACTIONS") do
   config :banchan, Banchan.Repo,
@@ -39,6 +40,7 @@ config :banchan, Banchan.Mailer, adapter: Bamboo.TestAdapter
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :banchan, BanchanWeb.Endpoint,
+  url: [host: "localhost"],
   http: [port: 4002],
   server: false,
   secret_key_base: "wE/ZQmiSLP77ZAfprMlRRB1D+JP9p2/wMrLhjVXyB8U6/JpoxWfWCsoE4bm3IoY/"

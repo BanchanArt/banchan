@@ -3,7 +3,7 @@ defmodule Banchan.Studios do
   The Studios context.
   """
   @dialyzer [
-    {:nowarn_function, create_stripe_account: 1},
+    {:nowarn_function, create_stripe_account: 2},
     :no_return
   ]
 
@@ -14,9 +14,13 @@ defmodule Banchan.Studios do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Invoice
-  alias Banchan.Offerings.Offering
   alias Banchan.Repo
-  alias Banchan.Studios.{Notifications, Payout, Studio}
+  alias Banchan.Studios.{Notifications, Payout, PortfolioImage, Studio, StudioFollower}
+  alias Banchan.Uploads
+  alias Banchan.Uploads.Upload
+
+  alias BanchanWeb.Endpoint
+  alias BanchanWeb.Router.Helpers, as: Routes
 
   @doc """
   Gets a studio by its handle.
@@ -34,10 +38,6 @@ defmodule Banchan.Studios do
     Repo.get_by!(Studio, handle: handle)
   end
 
-  def get_offering_by_type!(%Studio{} = studio, type) do
-    Repo.get_by!(Offering, type: type, studio_id: studio.id)
-  end
-
   @doc """
   Updates the studio profile fields.
   """
@@ -48,9 +48,125 @@ defmodule Banchan.Studios do
   end
 
   def update_studio_profile(%Studio{} = studio, _, attrs) do
-    studio
-    |> Studio.profile_changeset(attrs)
-    |> Repo.update(returning: true)
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        changeset =
+          studio
+          |> Studio.profile_changeset(attrs)
+
+        if changeset.valid? &&
+             (Ecto.Changeset.fetch_change(changeset, :name) != :error ||
+                Ecto.Changeset.fetch_change(changeset, :handle) != :error) do
+          {:ok, _} =
+            stripe_mod().update_account(studio.stripe_id, %{
+              business_profile: %{
+                name: Ecto.Changeset.get_field(changeset, :name),
+                url:
+                  String.replace(
+                    Routes.studio_shop_url(
+                      Endpoint,
+                      :show,
+                      Ecto.Changeset.get_field(changeset, :handle)
+                    ),
+                    "localhost:4000",
+                    "banchan.art"
+                  )
+              }
+            })
+        end
+
+        changeset |> Repo.update(returning: true)
+      end)
+
+    ret
+  end
+
+  def make_card_image!(%User{} = uploader, src, true) do
+    mog =
+      Mogrify.open(src)
+      |> Mogrify.format("jpeg")
+      |> Mogrify.save(in_place: true)
+
+    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")
+    File.rm!(mog.path)
+    image
+  end
+
+  def make_header_image!(%User{} = uploader, src, true) do
+    mog =
+      Mogrify.open(src)
+      |> Mogrify.format("jpeg")
+      |> Mogrify.save(in_place: true)
+
+    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "card_image.jpg")
+    File.rm!(mog.path)
+    image
+  end
+
+  def make_portfolio_image!(%User{} = uploader, src, true) do
+    mog =
+      Mogrify.open(src)
+      |> Mogrify.format("jpeg")
+      |> Mogrify.save(in_place: true)
+
+    image = Uploads.save_file!(uploader, mog.path, "image/jpeg", "gallery_image.jpg")
+    File.rm!(mog.path)
+    image
+  end
+
+  def studio_portfolio_uploads(%Studio{} = studio) do
+    from(i in PortfolioImage,
+      join: u in assoc(i, :upload),
+      where: i.studio_id == ^studio.id,
+      order_by: [asc: i.index],
+      select: u
+    )
+    |> Repo.all()
+  end
+
+  def update_portfolio(studio, current_user_member?, portfolio_images)
+
+  def update_portfolio(_, false, _) do
+    {:error, :unauthorized}
+  end
+
+  def update_portfolio(%Studio{} = studio, true, portfolio_images) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        portfolio_images =
+          (portfolio_images || [])
+          |> Enum.with_index()
+          |> Enum.map(fn {%Upload{} = upload, index} ->
+            %PortfolioImage{
+              index: index,
+              upload_id: upload.id
+            }
+          end)
+
+        studio
+        |> Repo.preload(:portfolio_imgs)
+        |> Studio.portfolio_changeset(portfolio_images)
+        |> Repo.update(returning: true)
+      end)
+
+    ret
+  end
+
+  def update_featured(%User{} = actor, %Studio{} = studio, attrs) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+
+        if :admin in actor.roles do
+          studio
+          |> Studio.featured_changeset(attrs)
+          |> Repo.update()
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -61,15 +177,29 @@ defmodule Banchan.Studios do
       iex> new_studio(studio, %{handle: ..., name: ..., ...})
       {:ok, %Studio{}}
   """
-  def new_studio(%Studio{artists: artists} = studio, url, attrs) do
+  def new_studio(%Studio{artists: artists} = studio, attrs) do
     if Enum.any?(artists, &is_nil(&1.confirmed_at)) do
       {:error, :unconfirmed_artist}
     else
-      changeset = studio |> Studio.profile_changeset(attrs)
+      changeset = studio |> Studio.creation_changeset(attrs)
 
       changeset =
         if changeset.valid? do
-          %{changeset | data: %{studio | stripe_id: create_stripe_account(url)}}
+          %{
+            changeset
+            | data: %{
+                studio
+                | stripe_id:
+                    create_stripe_account(
+                      Routes.studio_shop_url(
+                        Endpoint,
+                        :show,
+                        Ecto.Changeset.get_field(changeset, :handle)
+                      ),
+                      Ecto.Changeset.get_field(changeset, :country)
+                    )
+              }
+          }
         else
           changeset
         end
@@ -89,27 +219,146 @@ defmodule Banchan.Studios do
   end
 
   @doc """
-  List all studios
+  List all studios with pagination
 
   ## Examples
 
-      iex> list_studios()
+      iex> list_studios().entries
       [%Studio{}, %Studio{}, %Studio{}, ...]
   """
-  def list_studios do
-    Repo.all(Studio)
-  end
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def list_studios(opts \\ []) do
+    q =
+      from(
+        s in Studio,
+        as: :studio,
+        join: artist in assoc(s, :artists),
+        as: :artist
+      )
 
-  @doc """
-  List studios belonging to a user
+    q =
+      case Keyword.fetch(opts, :with_member) do
+        {:ok, %User{} = member} ->
+          q
+          |> where([artist: artist], artist.id == ^member.id)
 
-  ## Examples
+        _ ->
+          q
+      end
 
-      iex> list_studios_for_user(user)
-      [%Studio{}, %Studio{}, %Studio{}]
-  """
-  def list_studios_for_user(%User{} = user) do
-    Repo.all(Ecto.assoc(user, :studios))
+    q =
+      case Keyword.fetch(opts, :current_user) do
+        {:ok, %User{} = current_user} ->
+          q
+          |> where(
+            [s],
+            s.mature != true or (s.mature == true and ^current_user.mature_ok == true)
+          )
+          |> join(:inner, [], user in User, on: user.id == ^current_user.id, as: :current_user)
+          |> where(
+            [o, current_user: current_user],
+            is_nil(current_user.muted) or
+              not fragment("(?).muted_filter_query @@ (?).search_vector", current_user, o)
+          )
+
+        _ ->
+          q
+          |> where([s], s.mature != true)
+      end
+
+    q =
+      case Keyword.fetch(opts, :include_pending) do
+        {:ok, true} ->
+          q
+
+        {:ok, false} ->
+          q
+          |> where([studio: s], s.stripe_charges_enabled == true)
+
+        :error ->
+          case Keyword.fetch(opts, :current_user) do
+            {:ok, %User{} = user} ->
+              q
+              |> where(
+                [studio: s, artist: a],
+                s.stripe_charges_enabled == true or ^user.id == a.id
+              )
+
+            _ ->
+              q
+              |> where([studio: s], s.stripe_charges_enabled == true)
+          end
+      end
+
+    q =
+      case Keyword.fetch(opts, :query) do
+        {:ok, nil} ->
+          q
+
+        {:ok, query} ->
+          q
+          |> where([s], fragment("websearch_to_tsquery(?) @@ (?).search_vector", ^query, s))
+
+        :error ->
+          q
+      end
+
+    q =
+      case Keyword.fetch(opts, :order_by) do
+        {:ok, nil} ->
+          q
+
+        {:ok, :oldest} ->
+          q |> order_by([s], asc: s.inserted_at)
+
+        {:ok, :newest} ->
+          q |> order_by([s], desc: s.inserted_at)
+
+        {:ok, :followers} ->
+          q
+          |> join(
+            :left_lateral,
+            [_s],
+            followers in subquery(
+              from follower in StudioFollower,
+                where: parent_as(:studio).id == follower.studio_id,
+                select: %{followers: count(follower)}
+            ),
+            as: :followers
+          )
+          |> order_by([followers: followers], desc: followers.followers)
+
+        {:ok, :homepage} ->
+          q
+          |> order_by([s], desc: s.inserted_at)
+          |> where([s], not is_nil(s.about) and s.about != "")
+          |> where([s], not is_nil(s.card_img_id))
+
+        {:ok, :featured} ->
+          q
+          |> order_by([s], desc: s.inserted_at)
+          |> where([s], s.featured == true)
+          |> where([s], not is_nil(s.header_img_id) or not is_nil(s.card_img_id))
+
+        :error ->
+          q
+      end
+
+    q =
+      case Keyword.fetch(opts, :with_follower) do
+        {:ok, %User{} = follower} ->
+          q
+          |> join(:inner, [studio: s], follower in assoc(s, :followers), as: :follower)
+          |> where([follower: f], f.id == ^follower.id)
+
+        _ ->
+          q
+      end
+
+    Repo.paginate(q,
+      page_size: Keyword.get(opts, :page_size, 24),
+      page: Keyword.get(opts, :page, 1)
+    )
   end
 
   @doc """
@@ -122,33 +371,6 @@ defmodule Banchan.Studios do
   """
   def list_studio_members(%Studio{} = studio) do
     Repo.all(Ecto.assoc(studio, :artists))
-  end
-
-  @doc """
-  List offerings offered by this studio. Will take into account visibility
-  based on whether the current user is a member of the studio and whether the
-  offering is published.
-
-  ## Examples
-
-      iex> list_studio_offerings(studio, current_studio_member?)
-      [%Offering{}, %Offering{}, %Offering{}]
-  """
-  def list_studio_offerings(%Studio{} = studio, current_user_member?, include_archived? \\ false) do
-    q =
-      from o in Ecto.assoc(studio, :offerings),
-        where: ^current_user_member? or o.hidden == false,
-        order_by: [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index],
-        preload: [:options]
-
-    q =
-      if include_archived? do
-        q
-      else
-        q |> where([o], is_nil(o.archived_at))
-      end
-
-    Repo.all(q)
   end
 
   @doc """
@@ -204,9 +426,7 @@ defmodule Banchan.Studios do
                   WHEN ? = 'released' THEN 'released'
                   ELSE 'held_back'
                 END", p.status, p.status, p.status, i.status),
-          fragment("(?).currency", i.amount),
-          fragment("(?).currency", i.tip),
-          fragment("(?).currency", i.platform_fee)
+          fragment("(?).currency", i.total_transferred)
         ],
         select: %{
           status:
@@ -218,19 +438,13 @@ defmodule Banchan.Studios do
                 END", p.status, p.status, p.status, i.status),
               :string
             ),
-          charged:
+          final:
             type(
-              fragment("(sum((?).amount), (?).currency)", i.amount, i.amount),
-              Money.Ecto.Composite.Type
-            ),
-          tips:
-            type(
-              fragment("(sum((?).amount), (?).currency)", i.tip, i.tip),
-              Money.Ecto.Composite.Type
-            ),
-          fees:
-            type(
-              fragment("(sum((?).amount), (?).currency)", i.platform_fee, i.platform_fee),
+              fragment(
+                "(sum((?).amount), (?).currency)",
+                i.total_transferred,
+                i.total_transferred
+              ),
               Money.Ecto.Composite.Type
             )
         }
@@ -255,20 +469,18 @@ defmodule Banchan.Studios do
   defp get_net_values(results) do
     Enum.reduce(results, {[], [], [], []}, fn %{status: status} = res,
                                               {released, held_back, on_the_way, paid} ->
-      net = Money.subtract(Money.add(res.charged, res.tips), res.fees)
-
       case status do
         "released" ->
-          {[net | released], held_back, on_the_way, paid}
+          {[res.final | released], held_back, on_the_way, paid}
 
         "held_back" ->
-          {released, [net | held_back], on_the_way, paid}
+          {released, [res.final | held_back], on_the_way, paid}
 
         "on_the_way" ->
-          {released, held_back, [net | on_the_way], paid}
+          {released, held_back, [res.final | on_the_way], paid}
 
         "paid" ->
-          {released, held_back, on_the_way, [net | paid]}
+          {released, held_back, on_the_way, [res.final | paid]}
       end
     end)
   end
@@ -361,7 +573,7 @@ defmodule Banchan.Studios do
       where:
         c.studio_id == ^studio.id and i.status == :released and
           (is_nil(p.id) or p.status not in [:pending, :in_transit, :paid]) and
-          fragment("(c0.amount).currency = ?::char(3)", ^currency_str) and
+          fragment("(?).currency = ?::char(3)", i.total_transferred, ^currency_str) and
           i.payout_available_on < ^now,
       order_by: {:asc, i.updated_at}
     )
@@ -369,10 +581,7 @@ defmodule Banchan.Studios do
     |> Enum.reduce_while({[], 0, Money.new(0, avail.currency)}, fn invoice,
                                                                    {invoice_ids, invoice_count,
                                                                     total} = acc ->
-      invoice_total =
-        invoice.amount
-        |> Money.add(invoice.tip)
-        |> Money.subtract(invoice.platform_fee)
+      invoice_total = invoice.total_transferred
 
       if invoice_total.amount + total.amount > avail.amount do
         {:halt, acc}
@@ -592,18 +801,24 @@ defmodule Banchan.Studios do
     Phoenix.PubSub.unsubscribe(@pubsub, "studio_stripe_state:#{stripe_id}")
   end
 
-  defp create_stripe_account(studio_url) do
+  defp create_stripe_account(studio_url, country) do
     # NOTE: I don't know why dialyzer complains about this. It works just fine.
     {:ok, acct} =
       stripe_mod().create_account(%{
         type: "express",
+        country: to_string(country),
         settings: %{payouts: %{schedule: %{interval: "manual"}}},
-        # TODO: this should only be done for _international_ accounts.
-        # tos_acceptance: %{
-        #   service_agreement: "recipient"
-        # },
+        capabilities: %{transfers: %{requested: true}},
+        tos_acceptance: %{
+          service_agreement:
+            if country == :US do
+              "full"
+            else
+              "recipient"
+            end
+        },
         business_profile: %{
-          # Digital Media
+          # Commercial Photograpy, Art, and Graphics
           mcc: "7333",
           # NB(zkat): This replacement is so this code will actually work in dev environments.
           url: String.replace(studio_url, "localhost:4000", "banchan.art")
@@ -611,6 +826,15 @@ defmodule Banchan.Studios do
       })
 
     acct.id
+  end
+
+  def express_dashboard_link(%Studio{} = studio, redirect_url) do
+    stripe_mod().create_login_link(
+      studio.stripe_id,
+      %{
+        redirect_url: redirect_url
+      }
+    )
   end
 
   defp stripe_mod do

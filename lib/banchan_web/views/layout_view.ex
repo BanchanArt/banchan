@@ -7,7 +7,7 @@ defmodule BanchanWeb.LayoutView do
     <html lang="en" class="h-full bg-base-100" data-theme="">
       <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
         {live_title_tag(assigns[:page_title] || "Art Goes Here", prefix: "Banchan Art | ")}
         {Phoenix.HTML.Tag.csrf_meta_tag()}
 
@@ -23,17 +23,9 @@ defmodule BanchanWeb.LayoutView do
           <meta property="og:image" content={assigns[:page_small_image]}>
           <meta name="twitter:image:src" content={assigns[:page_image]}>
           <meta name="twitter:card" content="summary">
-        {#else}
-          <meta
-            property="og:image"
-            content={assigns[:page_image] ||
-              Routes.static_url(Endpoint, "/images/640x360.png")}
-          />
-          <meta
-            name="twitter:image:src"
-            content={assigns[:page_image] ||
-              Routes.static_url(Endpoint, "/images/640x360.png")}
-          />
+        {#elseif assigns[:page_image]}
+          <meta property="og:image" content={assigns[:page_image]}>
+          <meta name="twitter:image:src" content={assigns[:page_image]}>
           <meta name="twitter:card" content="summary_large_image">
         {/if}
         <meta name="twitter:site" content="@BanchanArt">
@@ -49,6 +41,13 @@ defmodule BanchanWeb.LayoutView do
         <meta name="theme-color" content="#ffffff">
         <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}>
 
+        <script type="text/javascript">
+          let theme = localStorage.getItem("theme")
+          if (!theme) {
+            theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+          }
+          document.documentElement.setAttribute("data-theme", theme);
+        </script>
         <script
           defer
           phx-track-static
@@ -56,7 +55,7 @@ defmodule BanchanWeb.LayoutView do
           src={Routes.static_path(@conn, "/assets/app.js")}
         />
       </head>
-      <body>
+      <body class="bg-base-100">
         {@inner_content}
       </body>
     </html>

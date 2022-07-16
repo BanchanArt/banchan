@@ -13,7 +13,6 @@ if config_env() == :prod do
       """
 
   config :banchan, Banchan.Repo,
-    # ssl: true,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
 
@@ -99,4 +98,60 @@ if config_env() == :prod do
   config :banchan, Banchan.Mailer,
     api_key: sendgrid_api_key,
     sendgrid_domain: sendgrid_domain
+
+  discord_client_id =
+    System.get_env("DISCORD_CLIENT_ID") ||
+      raise """
+      environment variable DISCORD_CLIENT_ID is missing.
+      You can find your Discord Client ID at https://discordapp.com/developers/applications.
+      """
+
+  discord_client_secret =
+    System.get_env("DISCORD_CLIENT_SECRET") ||
+      raise """
+      environment variable DISCORD_CLIENT_SECRET is missing.
+      You can find your Discord Client Secret at https://discordapp.com/developers/applications.
+      """
+
+  config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
+    client_id: discord_client_id,
+    client_secret: discord_client_secret
+
+  twitter_consumer_key =
+    System.get_env("TWITTER_CONSUMER_KEY") ||
+      raise """
+      environment variable TWITTER_CONSUMER_KEY is missing.
+      You can find your Twitter Consumer Key at https://developer.twitter.com/en/portal/dashboard.
+      You'll need an Elevated project.
+      """
+
+  twitter_consumer_secret =
+    System.get_env("TWITTER_CONSUMER_SECRET") ||
+      raise """
+      environment variable TWITTER_CONSUMER_SECRET is missing.
+      You can find your Twitter Consumer Secret at https://developer.twitter.com/en/portal/dashboard.
+      You'll need an Elevated project.
+      """
+
+  config :ueberauth, Ueberauth.Strategy.Twitter.OAuth,
+    consumer_key: twitter_consumer_key,
+    consumer_secret: twitter_consumer_secret
+
+  google_client_id =
+    System.get_env("GOOGLE_CLIENT_ID") ||
+      raise """
+      environment variable GOOGLE_CLIENT_ID is missing.
+      You can find your Google Client ID at https://console.developers.google.com/apis/credentials.
+      """
+
+  google_client_secret =
+    System.get_env("GOOGLE_CLIENT_SECRET") ||
+      raise """
+      environment variable GOOGLE_CLIENT_SECRET is missing.
+      You can find your Google Client Secret at https://console.developers.google.com/apis/credentials.
+      """
+
+  config :ueberauth, Ueberauth.Strategy.Google.OAuth,
+    client_id: google_client_id,
+    client_secret: google_client_secret
 end

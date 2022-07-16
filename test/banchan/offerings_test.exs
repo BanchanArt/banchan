@@ -116,8 +116,13 @@ defmodule Banchan.OfferingsTest do
           slots: 3
         })
 
-      assert 3 == offering.slots
-      assert 3 == Offerings.offering_available_slots(offering)
+      get_slots = fn ->
+        Offerings.list_offerings(studio: studio, current_user: client, show_closed: true).entries
+        |> List.first()
+        |> Offerings.offering_available_slots()
+      end
+
+      assert 3 == get_slots.()
 
       comm1 =
         commission_fixture(%{
@@ -127,16 +132,16 @@ defmodule Banchan.OfferingsTest do
           offering: offering
         })
 
-      assert 3 == Offerings.offering_available_slots(offering)
+      assert 3 == get_slots.()
 
       Commissions.update_status(artist, comm1, :accepted)
-      assert 2 == Offerings.offering_available_slots(offering)
+      assert 2 == get_slots.()
 
       Commissions.update_status(artist, comm1 |> Repo.reload(), :in_progress)
-      assert 2 == Offerings.offering_available_slots(offering)
+      assert 2 == get_slots.()
 
       Commissions.update_status(artist, comm1 |> Repo.reload(), :ready_for_review)
-      assert 2 == Offerings.offering_available_slots(offering)
+      assert 2 == get_slots.()
 
       comm2 =
         commission_fixture(%{
@@ -163,14 +168,14 @@ defmodule Banchan.OfferingsTest do
         })
 
       # No change to slots because commissions aren't accepted yet.
-      assert 2 == Offerings.offering_available_slots(offering)
+      assert 2 == get_slots.()
 
       # Now we accept each new commission
       Commissions.update_status(artist, comm2, :accepted)
-      assert 1 == Offerings.offering_available_slots(offering)
+      assert 1 == get_slots.()
 
       Commissions.update_status(artist, comm3, :accepted)
-      assert 0 == Offerings.offering_available_slots(offering)
+      assert 0 == get_slots.()
 
       # Creating new commissions is blocked.
       assert {:error, :offering_closed} ==
@@ -189,11 +194,11 @@ defmodule Banchan.OfferingsTest do
 
       # Overflow is fine. Just get 0 back.
       Commissions.update_status(artist, comm4, :accepted)
-      assert 0 == Offerings.offering_available_slots(offering)
+      assert 0 == get_slots.()
 
       # We're still dealing with the overflow, so still 0
       Commissions.update_status(client, comm1 |> Repo.reload(), :approved)
-      assert 0 == Offerings.offering_available_slots(offering)
+      assert 0 == get_slots.()
 
       # Still can't make that comm...
       assert {:error, :offering_closed} ==
@@ -213,7 +218,7 @@ defmodule Banchan.OfferingsTest do
       # Give back slots one by one.
       Commissions.update_status(artist, comm2 |> Repo.reload(), :ready_for_review)
       Commissions.update_status(client, comm2 |> Repo.reload(), :approved)
-      assert 1 == Offerings.offering_available_slots(offering)
+      assert 1 == get_slots.()
 
       # Still closed!
       assert {:error, :offering_closed} ==
@@ -251,11 +256,11 @@ defmodule Banchan.OfferingsTest do
 
       Commissions.update_status(artist, comm3 |> Repo.reload(), :ready_for_review)
       Commissions.update_status(client, comm3 |> Repo.reload(), :approved)
-      assert 2 == Offerings.offering_available_slots(offering)
+      assert 2 == get_slots.()
 
       Commissions.update_status(artist, comm4 |> Repo.reload(), :ready_for_review)
       Commissions.update_status(client, comm4 |> Repo.reload(), :approved)
-      assert 3 == Offerings.offering_available_slots(offering)
+      assert 3 == get_slots.()
     end
   end
 

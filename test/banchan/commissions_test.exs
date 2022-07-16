@@ -190,6 +190,7 @@ defmodule Banchan.CommissionsTest do
       amount = Money.new(420, :USD)
       tip = Money.new(69, :USD)
       fee = Money.multiply(Money.add(amount, tip), studio.platform_fee)
+      net = amount |> Money.add(tip) |> Money.subtract(fee)
 
       invoice =
         invoice_fixture(user, commission, %{
@@ -204,7 +205,7 @@ defmodule Banchan.CommissionsTest do
         assert uri == sess.cancel_url
         assert uri == sess.success_url
 
-        assert fee.amount == sess.payment_intent_data.application_fee_amount
+        assert sess.payment_intent_data.transfer_data.amount == net.amount
 
         assert studio.stripe_id == sess.payment_intent_data.transfer_data.destination
 
@@ -282,12 +283,26 @@ defmodule Banchan.CommissionsTest do
       available_on = DateTime.add(DateTime.utc_now(), -2)
 
       txn_id = "stripe-mock-txn-id#{System.unique_integer()}"
+      trans_id = "stripe-mock-transfer-id#{System.unique_integer()}"
       payment_intent_id = "stripe-mock-payment-intent-id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_payment_intent, fn id, _, _ ->
         assert payment_intent_id == id
-        {:ok, %{charges: %{data: [%{balance_transaction: txn_id}]}}}
+        {:ok, %{charges: %{data: [%{balance_transaction: txn_id, transfer: trans_id}]}}}
+      end)
+      |> expect(:retrieve_transfer, fn id ->
+        assert trans_id == id
+
+        {:ok,
+         %Stripe.Transfer{
+           destination_payment: %{
+             balance_transaction: %{
+               amount: Money.add(amount, tip).amount,
+               currency: "usd"
+             }
+           }
+         }}
       end)
       |> expect(:retrieve_balance_transaction, fn id, _ ->
         assert txn_id == id

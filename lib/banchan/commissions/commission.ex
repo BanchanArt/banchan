@@ -41,6 +41,8 @@ defmodule Banchan.Commissions.Commission do
   def creation_changeset(commission, attrs) do
     commission
     |> cast(attrs, [:title, :description, :tos_ok])
+    |> validate_length(:title, max: 50)
+    |> validate_length(:description, max: 160)
     |> cast_assoc(:line_items)
     |> cast_assoc(:events)
     |> validate_change(:tos_ok, fn field, tos_ok ->
@@ -57,7 +59,16 @@ defmodule Banchan.Commissions.Commission do
   def update_changeset(commission, attrs \\ %{}) do
     commission
     |> cast(attrs, [:title, :description])
+    |> validate_length(:title, max: 50)
+    |> validate_length(:description, max: 160)
     |> cast_assoc(:line_items)
     |> cast_assoc(:events)
+  end
+
+  @doc false
+  def update_title_changeset(commission, attrs \\ %{}) do
+    commission
+    |> cast(attrs, [:title])
+    |> validate_length(:title, max: 50)
   end
 end

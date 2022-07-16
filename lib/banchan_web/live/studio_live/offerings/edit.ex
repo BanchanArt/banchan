@@ -13,7 +13,13 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
   @impl true
   def mount(%{"offering_type" => offering_type} = params, _session, socket) do
     socket = assign_studio_defaults(params, socket, true, false)
-    offering = Offerings.get_offering_by_type!(offering_type, socket.assigns.current_user_member?)
+
+    offering =
+      Offerings.get_offering_by_type!(
+        socket.assigns.studio,
+        offering_type,
+        socket.assigns.current_user_member?
+      )
 
     {:ok, assign(socket, offering: offering, gallery_images: nil)}
   end
@@ -29,6 +35,10 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
      |> assign(gallery_images: images)}
   end
 
+  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
+    {:noreply, socket |> assign(followers: new_count)}
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -37,6 +47,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
       current_user={@current_user}
       flashes={@flash}
       studio={@studio}
+      followers={@followers}
       current_user_member?={@current_user_member?}
       tab={:shop}
       uri={@uri}

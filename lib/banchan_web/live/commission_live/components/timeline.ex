@@ -8,6 +8,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
 
   alias BanchanWeb.CommissionLive.Components.{Comment, TimelineItem}
 
+  prop users, :map, required: true
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
   prop commission, :any, required: true
@@ -29,15 +30,16 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
       )
 
     ~F"""
-    <div>
+    <div class="snap-y">
       {#for chunk <- event_chunks}
         {#if List.first(chunk).type == :comment}
           <div class="flex flex-col space-y-4">
             {#for event <- chunk}
-              <article class="timeline-item" id={"event-#{event.public_id}"}>
+              <article class="timeline-item scroll-mt-36 snap-start" id={"event-#{event.public_id}"}>
                 <Comment
                   id={"event-#{event.public_id}"}
                   uri={@uri}
+                  actor={Map.get(@users, event.actor_id)}
                   event={event}
                   commission={@commission}
                   current_user={@current_user}
@@ -47,27 +49,38 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
             {/for}
           </div>
         {#else}
-          <div class="steps steps-vertical">
+          {!-- NB(@zkat): This is a load-bearing `overflow-visible` to fix anchor-links into timeline step events. --}
+          <div class="steps steps-vertical overflow-visible">
             {#for event <- chunk}
               {#case event.type}
                 {#match :line_item_added}
-                  <TimelineItem uri={@uri} icon="➕" event={event}>
+                  <TimelineItem uri={@uri} icon="➕" actor={Map.get(@users, event.actor_id)} event={event}>
                     added <strong>{event.text}</strong> ({Money.to_string(event.amount)})
                   </TimelineItem>
                 {#match :line_item_removed}
-                  <TimelineItem uri={@uri} icon="✕" event={event}>
+                  <TimelineItem uri={@uri} icon="✖" actor={Map.get(@users, event.actor_id)} event={event}>
                     removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))})
                   </TimelineItem>
                 {#match :payment_processed}
-                  <TimelineItem uri={@uri} icon="$" event={event}>
+                  <TimelineItem
+                    uri={@uri}
+                    icon={Money.Currency.symbol(event.amount)}
+                    actor={Map.get(@users, event.actor_id)}
+                    event={event}
+                  >
                     paid {Money.to_string(event.amount)}
                   </TimelineItem>
                 {#match :refund_processed}
-                  <TimelineItem uri={@uri} icon="$" event={event}>
+                  <TimelineItem
+                    uri={@uri}
+                    icon={Money.Currency.symbol(event.amount)}
+                    actor={Map.get(@users, event.actor_id)}
+                    event={event}
+                  >
                     refunded {Money.to_string(event.amount)}
                   </TimelineItem>
                 {#match :status}
-                  <TimelineItem uri={@uri} icon="S" event={event}>
+                  <TimelineItem uri={@uri} icon="S" actor={Map.get(@users, event.actor_id)} event={event}>
                     changed the status to <strong>{Common.humanize_status(event.status)}</strong>
                   </TimelineItem>
               {/case}

@@ -6,23 +6,35 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.Event
-  alias Banchan.Utils
+  alias Banchan.Repo
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput}
+  alias BanchanWeb.Components.Form.{
+    MarkdownInput,
+    Submit
+  }
 
   prop commission, :struct, required: true
-  prop actor, :struct, required: true
+  prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
 
   data changeset, :struct
   data uploads, :map
+  data studio, :struct
 
   def update(assigns, socket) do
+    studio =
+      if socket.assigns[:studio] && socket.assigns[:studio].id == assigns[:commission].studio_id do
+        socket.assigns.studio
+      else
+        (assigns[:commission] |> Repo.preload(:studio)).studio
+      end
+
     {:ok,
      socket
      |> assign(assigns)
+     |> assign(studio: studio)
      |> assign(changeset: Event.comment_changeset(%Event{}, %{}))
      # TODO: move max file size somewhere configurable.
      # TODO: constrain :accept?
@@ -33,16 +45,11 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
      )}
   end
 
-  def handle_event("change", %{"event" => %{"amount" => amount} = event}, socket) do
-    changeset =
-      %Event{}
-      |> Event.comment_changeset(%{event | "amount" => Utils.moneyfy(amount)})
-      |> Map.put(:action, :update)
-
-    {:noreply, assign(socket, changeset: changeset)}
-  end
-
-  def handle_event("change", %{"event" => event}, socket) do
+  def handle_event(
+        "change",
+        %{"event" => event},
+        socket
+      ) do
     changeset =
       %Event{}
       |> Event.comment_changeset(event)
@@ -56,33 +63,11 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
     {:noreply, cancel_upload(socket, :attachment, ref)}
   end
 
-  def handle_event("add_comment", %{"event" => %{"amount" => amount} = event}, socket)
-      when amount != "" do
-    attachments = process_uploads(socket)
-
-    case Commissions.invoice(
-           socket.assigns.actor,
-           socket.assigns.commission,
-           socket.assigns.current_user_member?,
-           attachments,
-           %{event | "amount" => Utils.moneyfy(amount)}
-         ) do
-      {:ok, _event} ->
-        {:noreply,
-         assign(socket,
-           changeset: Event.comment_changeset(%Event{}, %{})
-         )}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, changeset: changeset)}
-    end
-  end
-
   def handle_event("add_comment", %{"event" => %{"text" => text}}, socket) do
     attachments = process_uploads(socket)
 
     case Commissions.add_comment(
-           socket.assigns.actor,
+           socket.assigns.current_user,
            socket.assigns.commission,
            socket.assigns.current_user_member?,
            attachments,
@@ -109,7 +94,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
     consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
       {:ok,
        Commissions.make_attachment!(
-         socket.assigns.actor,
+         socket.assigns.current_user,
          path,
          entry.client_type,
          entry.client_name
@@ -124,6 +109,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
         for={@changeset}
         change="change"
         opts={
+          id: @id <> "_form",
           # NOTE: This is a workaround for a Surface bug in >=0.7.1: https://github.com/surface-ui/surface/issues/582
           # TODO: make this a regular submit="add_comment" when the bug gets fixed.
           phx_submit: "add_comment",
@@ -132,25 +118,16 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
       >
         <div class="block space-y-4">
           <MarkdownInput
-            id="initial-message"
+            id={@id <> "_markdown_input"}
             name={:text}
             show_label={false}
             class="w-full"
             upload={@uploads.attachment}
             cancel_upload="cancel_upload"
-            opts={required: true, placeholder: "Write a comment"}
           />
-          {#if @current_user_member?}
-            <TextInput name={:amount} show_label={false} opts={placeholder: "Invoice Amount (optional)"} />
-            {#if Enum.empty?(@uploads.attachment.entries)}
-              <Submit changeset={@changeset} label="Post" />
-            {#else}
-              <Checkbox name={:required} label="Require Payment to View Draft" />
-              <Submit changeset={@changeset} label="Submit Draft" />
-            {/if}
-          {#else}
-            <Submit changeset={@changeset} label="Post" />
-          {/if}
+          <div class="flex flex-row-reverse">
+            <Submit changeset={@changeset} class="w-full md:w-fit ml-auto" label="Post" />
+          </div>
         </div>
       </Form>
     </div>

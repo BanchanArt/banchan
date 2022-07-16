@@ -5,6 +5,8 @@ defmodule Banchan.Offerings.Offering do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Banchan.Validators
+
   alias Banchan.Commissions.Commission
   alias Banchan.Offerings.{GalleryImage, OfferingOption}
   alias Banchan.Studios.Studio
@@ -15,13 +17,20 @@ defmodule Banchan.Offerings.Offering do
     field :index, :integer
     field :name, :string
     field :description, :string
-    field :open, :boolean, default: false
+    field :open, :boolean, default: true
     field :slots, :integer
     field :max_proposals, :integer
-    field :hidden, :boolean, default: true
+    field :hidden, :boolean, default: false
     field :terms, :string
     field :template, :string
     field :archived_at, :naive_datetime
+    field :tags, {:array, :string}
+    field :mature, :boolean, default: false
+
+    field :option_prices, {:array, Money.Ecto.Composite.Type}, virtual: true
+    field :used_slots, :integer, virtual: true
+    field :user_subscribed?, :boolean, virtual: true
+    field :gallery_uploads, {:array, Upload}, virtual: true
 
     belongs_to :studio, Studio
     belongs_to :card_img, Upload, on_replace: :nilify, type: :binary_id
@@ -38,6 +47,13 @@ defmodule Banchan.Offerings.Offering do
 
   @doc false
   def changeset(offering, attrs) do
+    attrs =
+      if attrs["tags"] == "[]" do
+        Map.put(attrs, "tags", [])
+      else
+        attrs
+      end
+
     offering
     |> cast(attrs, [
       :type,
@@ -49,7 +65,9 @@ defmodule Banchan.Offerings.Offering do
       :max_proposals,
       :hidden,
       :terms,
-      :template
+      :template,
+      :tags,
+      :mature
     ])
     |> cast_assoc(:options)
     |> validate_format(:type, ~r/^[0-9a-z-]+$/,
@@ -57,19 +75,17 @@ defmodule Banchan.Offerings.Offering do
     )
     |> validate_number(:slots, greater_than: 0)
     |> validate_number(:max_proposals, greater_than: 0)
+    |> validate_markdown(:description)
     |> validate_markdown(:terms)
     |> validate_markdown(:template)
+    |> validate_length(:type, max: 32)
+    |> validate_length(:name, max: 50)
+    |> validate_length(:description, max: 500)
+    |> validate_length(:terms, max: 1500)
+    |> validate_length(:template, max: 1500)
+    |> validate_tags()
+    |> validate_length(:tags, max: 5)
     |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])
-  end
-
-  defp validate_markdown(changeset, field) do
-    validate_change(changeset, field, fn _, data ->
-      if data == HtmlSanitizeEx.markdown_html(data) do
-        []
-      else
-        [{field, "Disallowed HTML detected. Some tags, like <script>, are not allowed."}]
-      end
-    end)
   end
 end

@@ -5,6 +5,8 @@ defmodule BanchanWeb.Components.MasonryGallery.LiveImgPreview do
   """
   use BanchanWeb, :component
 
+  alias BanchanWeb.Components.Lightbox
+
   prop entry, :struct, required: true
   prop editable, :boolean
   prop deleted, :event
@@ -15,8 +17,7 @@ defmodule BanchanWeb.Components.MasonryGallery.LiveImgPreview do
       id={"-entry-" <> @entry.uuid}
       data-type="live"
       data-id={@entry.ref}
-      :hook="LiveImgPreview"
-      class={"masonry-item live-preview relative", "hover:cursor-move": @editable}
+      class="my-0 sm:mb-2 masonry-item live-preview relative sm:hover:scale-105 sm:hover:z-10 transition-all cursor-pointer"
       draggable={if @editable do
         "true"
       else
@@ -32,9 +33,11 @@ defmodule BanchanWeb.Components.MasonryGallery.LiveImgPreview do
           :on-click={@deleted}
         >✕</button>
       {/if}
-      {Phoenix.LiveView.Helpers.live_img_preview(@entry,
-        class: "w-full h-full object-cover"
-      )}
+      <Lightbox.Item>
+        {Phoenix.LiveView.Helpers.live_img_preview(@entry,
+          class: "w-full h-full object-cover"
+        )}
+      </Lightbox.Item>
     </div>
     """
   end

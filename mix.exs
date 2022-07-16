@@ -63,10 +63,12 @@ defmodule Banchan.MixProject do
       {:money, "~> 1.9"},
       {:surface, "~> 0.7.4"},
       {:slugify, "~> 1.3.1"},
+      {:number, "~> 1.0.3"},
       {:bamboo, "~> 2.2.0"},
       {:ex_aws, "~> 2.3.1"},
       {:ex_aws_s3, "~> 2.3.2"},
       {:hackney, "~> 1.18"},
+      {:httpoison, "~> 1.8.1"},
       {:sweet_xml, "~> 0.6"},
       {:earmark, "~> 1.4.20"},
       {:html_sanitize_ex, "~> 1.4.2"},
@@ -78,6 +80,10 @@ defmodule Banchan.MixProject do
       {:nimble_totp, "~> 0.1.0"},
       {:qr_code, "~> 2.2.1"},
       {:stripity_stripe, "~> 2.15.0"},
+      {:ueberauth, "~> 0.7"},
+      {:ueberauth_discord, "~> 0.7.0"},
+      {:ueberauth_twitter, "~> 0.4.1"},
+      {:ueberauth_google, "~> 0.10.1"},
       {:phoenix_live_reload, "~> 1.3.3", only: :dev},
       {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
       # Testing and static analysis
@@ -100,6 +106,9 @@ defmodule Banchan.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
+      "deploy.dev": [
+        "cmd fly deploy -a banchan-dev --build-arg BANCHAN_HOST=dev.banchan.art"
+      ],
       "stripe.local": [
         "cmd stripe listen --forward-to localhost:4000/api/stripe_webhook"
       ],

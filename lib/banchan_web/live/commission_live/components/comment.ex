@@ -5,14 +5,15 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
   use BanchanWeb, :live_component
 
   alias Banchan.Commissions
-  alias Banchan.Uploads
+  alias Banchan.Repo
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.{Avatar, Button, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Button, Markdown, UserHandle}
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
-  alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox, MediaPreview}
+  alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox}
 
+  prop actor, :struct, required: true
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
   prop commission, :struct, required: true
@@ -29,26 +30,11 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
     time |> Timex.to_datetime() |> Timex.format!("{RFC822}")
   end
 
-  defp fmt_md(md) do
-    HtmlSanitizeEx.markdown_html(Earmark.as_html!(md || ""))
-  end
-
   @impl true
   def update(params, socket) do
-    {:ok, socket |> assign(params) |> assign(changeset: nil)}
-  end
-
-  @impl true
-  def handle_event("open_preview", %{"key" => key, "bucket" => bucket}, socket) do
-    if socket.assigns.current_user.id == socket.assigns.commission.client_id ||
-         socket.assigns.current_user_member? do
-      MediaPreview.open(
-        "preview-#{socket.assigns.event.public_id}",
-        Uploads.get_upload!(bucket, key)
-      )
-    end
-
-    {:noreply, socket}
+    socket = socket |> assign(params) |> assign(changeset: nil)
+    socket = socket |> assign(event: socket.assigns.event)
+    {:ok, socket}
   end
 
   @impl true
@@ -59,7 +45,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
      socket
      |> assign(
        changeset:
-         (assigns.current_user_member? || assigns.current_user.id == assigns.event.actor.id) &&
+         (assigns.current_user_member? || assigns.current_user.id == assigns.actor.id) &&
            Commissions.change_event_text(assigns.event, %{})
      )}
   end
@@ -77,10 +63,14 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   @impl true
   def handle_event("submit_edit", %{"event" => event}, socket) do
-    case Commissions.update_event(socket.assigns.event, event) do
+    case Commissions.update_event(socket.assigns.current_user, socket.assigns.event, event) do
       {:ok, event} ->
-        # TODO: broadcast + update elsewhere?
-        {:noreply, socket |> assign(event: event, changeset: nil)}
+        {:noreply,
+         socket
+         |> assign(
+           event: event |> Repo.preload([:attachments, :actor, :invoice]),
+           changeset: nil
+         )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, socket |> assign(changeset: changeset)}
@@ -107,6 +97,12 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("load_history", _, socket) do
+    {:noreply,
+     socket |> assign(event: socket.assigns.event |> Repo.preload(history: [:changed_by]))}
+  end
+
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
   end
@@ -114,13 +110,10 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
   def render(assigns) do
     ~F"""
     <div class="shadow-md bg-base-200 rounded-box pb-4">
-      <MediaPreview id={"preview-#{@event.public_id}"} commission={@commission} />
-      <div class="flex flex-row text-sm p-2">
-        <div class="inline-flex grow items-baseline flex-wrap space-x-1">
-          <div class="self-center">
-            <Avatar class="w-6" user={@event.actor} />
-          </div>
-          <UserHandle user={@event.actor} />
+      <div class="flex flex-row text-sm pt-2 px-2 -mb-4">
+        <div class="inline-flex grow items-center flex-wrap space-x-1">
+          <Avatar class="w-6" user={@actor} />
+          <UserHandle user={@actor} />
           <span>
             {#if @event.invoice}
               posted an invoice
@@ -134,55 +127,67 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             >{fmt_time(@event.inserted_at)}</a>.
           </span>
           {#if @event.inserted_at != @event.updated_at}
-            <span class="text-xs italic">edited {fmt_time(@event.updated_at)}</span>
+            <div class="dropdown">
+              <label :on-click="load_history" tabindex="0" class="text-xs italic hover:link">
+                edited {fmt_time(@event.updated_at)}
+              </label>
+              <ol tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box">
+                {#if Ecto.assoc_loaded?(@event.history)}
+                  {#for history <- @event.history}
+                    <li class="block">
+                      <div class="flex flex-col place-items-start">
+                        <div>
+                          Comment from {fmt_time(history.written_at)} changed by <UserHandle user={history.changed_by} />
+                        </div>
+                        {#if :mod in @current_user.roles || :admin in @current_user.roles}
+                          <div class="font-bold">
+                            Original Text:
+                          </div>
+                          <div>
+                            <Markdown content={history.text} />
+                          </div>
+                        {/if}
+                      </div>
+                    </li>
+                  {/for}
+                {/if}
+              </ol>
+            </div>
           {/if}
         </div>
-        {#if !@changeset && (@current_user_member? || @current_user.id == @event.actor.id)}
+        {#if !@changeset && (@current_user_member? || @current_user.id == @actor.id)}
           <button type="button" :on-click="edit" class="ml-auto hover:underline"><i class="fas fa-edit" /></button>
         {/if}
       </div>
 
-      <hr class="pb-4 opacity-10 h-0.5">
+      <div class="divider" />
 
       <div class="content px-4 user-markdown">
         {#if @changeset}
-          {!-- # TODO: fix styling when in edit mode --}
-          <Form for={@changeset} change="change_edit" submit="submit_edit">
+          <Form
+            for={@changeset}
+            change="change_edit"
+            submit="submit_edit"
+            opts={id: "editing-event-#{@event.public_id}"}
+          >
             <MarkdownInput
               id={"editing-event-#{@event.public_id}"}
               name={:text}
               show_label={false}
               class="w-full"
             />
-            <div class="flex">
+            <div class="flex flex-row-reverse">
               <Submit class="inline" label="Update" />
-              <Button class="inline btn-secondary" click="cancel_edit">Cancel</Button>
+              <Button class="inline btn-error" click="cancel_edit">Cancel</Button>
             </div>
           </Form>
         {#else}
-          {raw(fmt_md(@event.text))}
+          <Markdown content={@event.text} />
         {/if}
       </div>
 
-      {#if Enum.any?(@event.attachments)}
-        <div class="divider" />
-        <div class="px-4">
-          {#if @event.invoice && @event.invoice.required && !Commissions.invoice_paid?(@event.invoice)}
-            Payment is required to view draft.
-          {#else}
-            <AttachmentBox
-              editing={!is_nil(@changeset)}
-              commission={@commission}
-              attachments={@event.attachments}
-              open_preview="open_preview"
-              remove_attachment="remove_attachment"
-            />
-          {/if}
-        </div>
-      {/if}
-
       {#if @event.invoice}
-        <div class="divider" />
+        <div :if={@event.text} class="divider" />
         <div class="pb-4">
           <InvoiceBox
             id={"invoice-box-#{@event.public_id}"}
@@ -191,6 +196,22 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             uri={@uri}
             commission={@commission}
             event={@event}
+          />
+        </div>
+      {/if}
+
+      {#if Enum.any?(@event.attachments)}
+        <div :if={@event.text} class="divider" />
+        <div class="px-4">
+          <AttachmentBox
+            base_id={@id <> "-attachments"}
+            editing={!is_nil(@changeset)}
+            commission={@commission}
+            attachments={@event.attachments}
+            open_preview="open_preview"
+            remove_attachment="remove_attachment"
+            pending_payment={@event.invoice && @event.invoice.required && !Commissions.invoice_paid?(@event.invoice)}
+            current_user_member?={@current_user_member?}
           />
         </div>
       {/if}

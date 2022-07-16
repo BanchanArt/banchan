@@ -14,12 +14,14 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias Banchan.Offerings.{Offering, OfferingOption}
   alias Banchan.Utils
 
-  alias BanchanWeb.Components.{Button, MasonryGallery}
+  alias BanchanWeb.Components.{Button, Collapse, MasonryGallery}
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
     MarkdownInput,
+    Select,
     Submit,
+    TagsInput,
     TextArea,
     TextInput,
     UploadInput
@@ -51,6 +53,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
      )}
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def update(assigns, socket) do
     old_assigns = socket.assigns
     socket = socket |> assign(assigns)
@@ -75,7 +78,11 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
     {:ok,
      socket
-     |> assign(changeset: Offering.changeset(socket.assigns.offering || %Offering{}, %{}))
+     |> assign(
+       changeset:
+         old_assigns[:changeset] ||
+           Offering.changeset(socket.assigns.offering || %Offering{}, %{})
+     )
      |> assign(
        gallery_images:
          if socket.assigns.offering && is_nil(assigns[:gallery_images]) do
@@ -207,10 +214,16 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
            socket.assigns.studio,
            socket.assigns.current_user_member?
          ) do
-      {:ok, _offering} ->
+      {:ok, offering} ->
         {:noreply,
          redirect(socket,
-           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+           to:
+             Routes.offering_show_path(
+               Endpoint,
+               :show,
+               socket.assigns.studio.handle,
+               offering.type
+             )
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -243,11 +256,23 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   defp moneyfy_offering(offering) do
     # *sigh*
     Map.update(offering, "options", [], fn options ->
-      Map.new(
-        Enum.map(Enum.with_index(Map.values(options)), fn {opt, idx} ->
-          {to_string(idx), Map.update(opt, "price", "", &Utils.moneyfy/1)}
-        end)
-      )
+      Map.values(options)
+      |> Enum.with_index()
+      |> Enum.map(fn {opt, idx} ->
+        key = to_string(idx)
+
+        opt =
+          case Map.fetch(opt, "currency") do
+            {:ok, currency} ->
+              Map.update(opt, "price", "", &Utils.moneyfy(&1, currency))
+
+            :error ->
+              opt
+          end
+
+        {key, opt}
+      end)
+      |> Map.new()
     end)
   end
 
@@ -255,28 +280,34 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     ~F"""
     <Form
       for={@changeset}
-      change="change"
       opts={
         autocomplete: "off",
         phx_target: @myself,
-        phx_submit: "submit"
+        phx_submit: "submit",
+        phx_change: "change"
       }
     >
       <div class="flex flex-col gap-2">
         <TextInput
           name={:name}
           info="Name of the offering, as it should appear in the offering card."
-          opts={required: true}
+          opts={required: true, phx_debounce: "200"}
         />
         <TextInput
           name={:type}
           info="Lowercase, no-spaces, limited characters. This is what will show up in the url and must be unique."
           opts={required: true}
         />
-        <TextArea
+        <MarkdownInput
+          id={@id <> "-description-input"}
           name={:description}
-          info="Description of the offering, as it should appear in the offering card."
+          info="Description of the offering, as it should appear when the offering is expanded."
           opts={required: true}
+        />
+        <TagsInput
+          id={@id <> "-tags"}
+          info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
+          name={:tags}
         />
         <TextInput
           name={:slots}
@@ -293,63 +324,81 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         />
         <Checkbox
           name={:hidden}
-          label="Hide from Shop"
-          info="Hide this offering from the shop. You will still be able to link people to it."
+          label="Hide"
+          info="Hide this offering from the shop, search, and listings. You will still be able to link people to it."
         />
-        <div tabindex="0" class="collapse collapse-arrow">
-          <input phx-update="ignore" type="checkbox">
-          <div class="collapse-title text-xl rounded-lg border border-primary">
-            Images
+        <Checkbox
+          name={:mature}
+          label="Mature"
+          info="Mark this offering as mature content. Note: if you plan on doing mature/NSFW commissions through this offering, this MUST be checked."
+        />
+        <Collapse id={@id <> "-images"} class="rounded-lg border border-primary">
+          <:header>
+            <h3 class="text-xl">
+              Images
+            </h3>
+          </:header>
+          <div class="relative pb-video pt-2">
+            {#if Enum.empty?(@uploads.card_image.entries) && !(@offering && @offering.card_img_id)}
+              <img
+                class="absolute h-full w-full object-contain rounded-lg"
+                src={Routes.static_path(Endpoint, "/images/640x360.png")}
+              />
+            {#elseif !Enum.empty?(@uploads.card_image.entries)}
+              {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
+                class: "absolute h-full w-full object-contain rounded-lg"
+              )}
+            {#else}
+              <img
+                class="absolute h-full w-full object-contain rounded-lg"
+                src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
+              />
+            {/if}
           </div>
-          <div class="collapse-content flex flex-col gap-2">
-            <div class="relative pb-video pt-2">
-              {#if Enum.empty?(@uploads.card_image.entries) && !(@offering && @offering.card_img_id)}
-                <img
-                  class="absolute h-full w-full object-cover rounded-lg"
-                  src={Routes.static_path(Endpoint, "/images/640x360.png")}
-                />
-              {#elseif !Enum.empty?(@uploads.card_image.entries)}
-                {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
-                  class: "absolute h-full w-full object-cover rounded-lg"
-                )}
-              {#else}
-                <img
-                  class="absolute h-full w-full object-cover rounded-lg"
-                  src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
-                />
-              {/if}
-            </div>
-            <UploadInput label="Card Image" upload={@uploads.card_image} cancel="cancel_card_upload" />
-            <MasonryGallery
-              id="gallery-preview"
-              class="py-2 rounded-lg"
-              send_updates_to={self()}
-              images={@gallery_images}
-              editable
-              entries={@uploads.gallery_images.entries}
-            />
-            <UploadInput
-              label="Gallery Images"
-              upload={@uploads.gallery_images}
-              cancel="cancel_gallery_upload"
-              hide_list
-            />
-          </div>
-        </div>
+          <UploadInput label="Card Image" upload={@uploads.card_image} cancel="cancel_card_upload" />
+          <MasonryGallery
+            id={@id <> "-gallery-preview"}
+            class="py-2 rounded-lg"
+            send_updates_to={self()}
+            images={@gallery_images}
+            editable
+            entries={@uploads.gallery_images.entries}
+          />
+          <UploadInput
+            label="Gallery Images"
+            upload={@uploads.gallery_images}
+            cancel="cancel_gallery_upload"
+            hide_list
+          />
+        </Collapse>
         <h3 class="text-2xl pt-10">Options</h3>
         <div class="divider" />
         <ul class="flex flex-col gap-2">
           <InputContext :let={form: form}>
             <Inputs form={form} for={:options} :let={index: index}>
-              <li tabindex="0" class="collapse collapse-arrow">
-                <input phx-update="ignore" type="checkbox">
-                <div class="collapse-title text-xl rounded-lg border border-primary">
-                  {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
-                  (opt.name || "New Option") <> " - " <> Money.to_string(opt.price || Money.new(0, :USD))}
-                </div>
-                <div class="collapse-content">
+              <li>
+                <Collapse id={@id <> "-option-" <> "#{index}"} class="rounded-lg border border-primary">
+                  <:header>
+                    <h3 class="text-xl">
+                      {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
+
+                      (opt.name || "New Option") <>
+                        if opt.price do
+                          " - " <> Money.to_string(opt.price)
+                        else
+                          ""
+                        end}
+                    </h3>
+                  </:header>
                   <TextInput name={:name} info="Name of the option." opts={required: true} />
                   <TextArea name={:description} info="Description for the option." opts={required: true} />
+                  <Select
+                    name={:currency}
+                    info="Currency for the price."
+                    options={@studio.payment_currencies}
+                    selected={@studio.default_currency}
+                    opts={required: true}
+                  />
                   <TextInput name={:price} info="Quoted price for adding this option." opts={required: true} />
                   <Checkbox
                     name={:multiple}
@@ -363,7 +412,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                     label="Default"
                   />
                   <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
-                </div>
+                </Collapse>
               </li>
             </Inputs>
           </InputContext>
@@ -374,22 +423,21 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           </li>
         </ul>
         <div class="divider" />
-        <div tabindex="0" class="collapse collapse-arrow">
-          <input phx-update="ignore" type="checkbox">
-          <h3 class="collapse-title rounded-lg border border-primary text-2xl">Terms and Template</h3>
-          <div class="collapse-content">
-            <MarkdownInput
-              id="tos"
-              name={:terms}
-              info="Terms of service specific to this offering. Leave blank to use your studio's default terms."
-            />
-            <MarkdownInput
-              id="template"
-              name={:template}
-              info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
-            />
-          </div>
-        </div>
+        <Collapse class="rounded-lg border border-primary" id={@id <> "-terms-collapse"}>
+          <:header>
+            <h3 class="text-2xl">Terms and Template</h3>
+          </:header>
+          <MarkdownInput
+            id={@id <> "-tos"}
+            name={:terms}
+            info="Terms of service specific to this offering. Leave blank to use your studio's default terms."
+          />
+          <MarkdownInput
+            id={@id <> "-template"}
+            name={:template}
+            info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
+          />
+        </Collapse>
         <div class="divider" />
         <div class="flex flex-row">
           <Submit label="Save" />

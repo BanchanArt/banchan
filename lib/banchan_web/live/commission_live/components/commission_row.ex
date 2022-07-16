@@ -25,14 +25,14 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
     <li class={bordered: @highlight}>
       <LivePatch to={commission_url}>
         <div>
-          <div class="text-xl flex flex-col">
+          <div class="text-2xl flex flex-row gap-2 flex-wrap items-center">
             <span>{@result.commission.title}</span>
-            <div class="badge badge-secondary badge-sm">{Common.humanize_status(@result.commission.status)}</div>
+            <div class="badge badge-primary badge-sm cursor-default">{Common.humanize_status(@result.commission.status)}</div>
             {#if @result.archived}
-              <div class="badge badge-warning badge-sm">Archived</div>
+              <div class="badge badge-warning badge-sm cursor-default">Archived</div>
             {/if}
           </div>
-          <div class="text-xs text-left">
+          <div class="text-sm text-left">
             <div class="inline">
               <div class="self-center inline">
                 Submitted to
