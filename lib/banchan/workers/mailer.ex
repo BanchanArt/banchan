@@ -46,7 +46,7 @@ defmodule Banchan.Workers.Mailer do
       to: Keyword.fetch!(opts, :to),
       subject: Keyword.fetch!(opts, :subject),
       html_body: Keyword.fetch!(opts, :html_body),
-      text_body: Keyword.fetch!(opts, :text_body)
+      text_body: Keyword.get(opts, :text_body)
     }
     |> __MODULE__.new()
     |> Oban.insert()

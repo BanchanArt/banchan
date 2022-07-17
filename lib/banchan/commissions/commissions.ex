@@ -983,17 +983,21 @@ defmodule Banchan.Commissions do
           )
 
         event = Repo.get!(Event, invoice.event_id)
+        client = Repo.reload!(%User{id: invoice.client_id})
+        commission = Repo.reload!(%Commission{id: event.commission_id})
 
         create_event(
           :payment_processed,
-          Repo.reload!(%User{id: invoice.client_id}),
-          Repo.reload!(%Commission{id: event.commission_id}),
+          client,
+          commission,
           true,
           [],
           %{
             amount: invoice.amount |> Money.add(invoice.tip)
           }
         )
+
+        Notifications.send_receipt(invoice, client, commission)
 
         send_event_update!(invoice.event_id)
       end)
@@ -1298,11 +1302,28 @@ defmodule Banchan.Commissions do
         deposits,
         %{},
         fn dep, acc ->
-          current = Map.get(acc, dep.amount.currency, Money.new(0, dep.amount.currency))
-          Map.put(acc, dep.amount.currency, Money.add(current, dep.amount))
+          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
+          Map.put(acc, dep.currency, Money.add(current, dep))
         end
       )
     end
+  end
+
+  def line_item_estimate(line_items) do
+    Enum.reduce(
+      line_items,
+      %{},
+      fn item, acc ->
+        current =
+          Map.get(
+            acc,
+            item.amount.currency,
+            Money.new(0, item.amount.currency)
+          )
+
+        Map.put(acc, item.amount.currency, Money.add(current, item.amount))
+      end
+    )
   end
 
   def list_attachments(%Commission{} = commission) do
