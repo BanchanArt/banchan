@@ -8,6 +8,7 @@ defmodule BanchanWeb.OfferingLive.Show do
 
   alias Banchan.Commissions.LineItem
   alias Banchan.Offerings
+  alias Banchan.Offerings.Notifications
 
   alias Surface.Components.LiveRedirect
 
@@ -17,6 +18,10 @@ defmodule BanchanWeb.OfferingLive.Show do
 
   @impl true
   def handle_params(%{"offering_type" => offering_type} = params, uri, socket) do
+    if socket.assigns[:offering] do
+      Notifications.unsubscribe_from_offering_updates(socket.assigns.offering)
+    end
+
     socket = assign_studio_defaults(params, socket, false, true)
 
     offering =
@@ -25,6 +30,8 @@ defmodule BanchanWeb.OfferingLive.Show do
         offering_type,
         socket.assigns.current_user_member?
       )
+
+    Notifications.subscribe_to_offering_updates(offering)
 
     gallery_images =
       offering.gallery_uploads
@@ -80,6 +87,21 @@ defmodule BanchanWeb.OfferingLive.Show do
          |> put_flash(:error, "This offering is unavailable.")
          |> push_redirect(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
     end
+  end
+
+  def handle_info(%{event: "images_updated"}, socket) do
+    offering =
+      Offerings.get_offering_by_type!(
+        socket.assigns.studio,
+        socket.assigns.offering.type,
+        socket.assigns.current_user_member?
+      )
+
+    gallery_images =
+      offering.gallery_uploads
+      |> Enum.map(&{:existing, &1})
+
+    {:noreply, socket |> assign(offering: offering, gallery_images: gallery_images)}
   end
 
   @impl true

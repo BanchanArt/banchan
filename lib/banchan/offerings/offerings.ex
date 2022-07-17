@@ -550,7 +550,8 @@ defmodule Banchan.Offerings do
       Thumbnailer.thumbnail(
         upload,
         dimensions: "1200",
-        name: "card_image.jpg"
+        name: "card_image.jpg",
+        callback: [__MODULE__.Notifications, :notify_images_updated]
       )
 
     card
@@ -574,7 +575,8 @@ defmodule Banchan.Offerings do
       Thumbnailer.thumbnail(
         upload,
         dimensions: "1200",
-        name: "gallery_image.jpg"
+        name: "gallery_image.jpg",
+        callback: [__MODULE__.Notifications, :notify_images_updated]
       )
 
     image

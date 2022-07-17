@@ -144,6 +144,13 @@ defmodule Banchan.Workers.Thumbnailer do
           args
         )
 
+      [module, name] ->
+        apply(
+          String.to_existing_atom(module),
+          String.to_existing_atom(name),
+          [dest]
+        )
+
       _ ->
         nil
     end
