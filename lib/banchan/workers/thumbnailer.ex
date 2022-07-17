@@ -8,6 +8,8 @@ defmodule Banchan.Workers.Thumbnailer do
     tags: ["thumbnailer", "media"]
 
   require Logger
+  import FFmpex, warn: false
+  use FFmpex.Options
 
   alias Banchan.Accounts.User
   alias Banchan.Repo
@@ -36,48 +38,106 @@ defmodule Banchan.Workers.Thumbnailer do
   end
 
   def thumbnail(%Upload{} = upload, opts \\ []) do
-    if Uploads.image?(upload) do
-      {:ok, ret} =
-        Repo.transaction(fn ->
-          pending =
-            Uploads.gen_pending(
-              %User{id: upload.uploader_id},
-              "image/jpeg",
-              Keyword.get(opts, :name, "thumbnail.jpg")
-            )
+    cond do
+      Uploads.image?(upload) ->
+        {:ok, ret} =
+          Repo.transaction(fn ->
+            pending =
+              Uploads.gen_pending(
+                %User{id: upload.uploader_id},
+                "image/jpeg",
+                Keyword.get(opts, :name, "thumbnail.jpg")
+              )
 
-          with {:ok, pending} <- Repo.insert(pending),
-               {:ok, _} <-
-                 Oban.insert(
-                   __MODULE__.new(%{
-                     src: %{
-                       id: upload.id,
-                       bucket: upload.bucket,
-                       key: upload.key,
-                       name: upload.name
-                     },
-                     dest: %{
-                       id: pending.id,
-                       bucket: pending.bucket,
-                       key: pending.key,
-                       name: pending.name
-                     },
-                     opts: %{
-                       target_size: Keyword.get(opts, :target_size),
-                       format: Keyword.get(opts, :format, "jpeg"),
-                       dimensions: Keyword.get(opts, :dimensions),
-                       callback: Keyword.get(opts, :callback)
-                     }
-                   })
-                 ) do
-            {:ok, pending}
-          end
-        end)
+            with {:ok, pending} <- Repo.insert(pending),
+                 {:ok, _} <-
+                   Oban.insert(
+                     __MODULE__.new(%{
+                       src: %{
+                         id: upload.id,
+                         bucket: upload.bucket,
+                         key: upload.key,
+                         name: upload.name
+                       },
+                       dest: %{
+                         id: pending.id,
+                         bucket: pending.bucket,
+                         key: pending.key,
+                         name: pending.name
+                       },
+                       opts: %{
+                         target_size: Keyword.get(opts, :target_size),
+                         format: Keyword.get(opts, :format, "jpeg"),
+                         dimensions: Keyword.get(opts, :dimensions),
+                         callback: Keyword.get(opts, :callback)
+                       }
+                     })
+                   ) do
+              {:ok, pending}
+            end
+          end)
 
-      ret
-    else
-      # Only images can be thumbnailed right now.
-      {:error, :unsupported_input}
+        ret
+
+      Uploads.video?(upload) ->
+        tmp_src = Path.join([System.tmp_dir!(), upload.key <> Path.extname(upload.name)])
+        File.mkdir_p!(Path.dirname(tmp_src))
+        Uploads.write_data!(upload, tmp_src)
+
+        output_src = Path.join([System.tmp_dir!(), upload.key <> ".jpeg"])
+
+        command =
+          FFmpex.new_command()
+          |> add_global_option(option_y())
+          |> add_input_file(tmp_src)
+          |> add_output_file(output_src)
+          |> add_file_option(option_filter("scale=128:128"))
+          |> add_file_option(option_ss(0))
+          |> add_file_option(option_vframes(1))
+
+        {:ok, _} = execute(command)
+
+        {:ok, ret} =
+          Repo.transaction(fn ->
+            pending =
+              Uploads.gen_pending(
+                %User{id: upload.uploader_id},
+                "image/jpeg",
+                Keyword.get(opts, :name, "thumbnail.jpg")
+              )
+
+            with {:ok, pending} <- Repo.insert(pending),
+                 {:ok, _} <-
+                   Oban.insert(
+                     __MODULE__.new(%{
+                       src: %{
+                         id: upload.id,
+                         bucket: upload.bucket,
+                         key: upload.key,
+                         name: upload.key <> ".jpeg"
+                       },
+                       dest: %{
+                         id: pending.id,
+                         bucket: pending.bucket,
+                         key: pending.key,
+                         name: pending.name
+                       },
+                       opts: %{
+                         target_size: Keyword.get(opts, :target_size),
+                         format: Keyword.get(opts, :format, "jpeg"),
+                         dimensions: Keyword.get(opts, :dimensions),
+                         callback: Keyword.get(opts, :callback)
+                       }
+                     })
+                   ) do
+              {:ok, pending}
+            end
+          end)
+
+        ret
+
+      true ->
+        {:error, :unsupported_input}
     end
   end
 

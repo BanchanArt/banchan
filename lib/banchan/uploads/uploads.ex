@@ -10,8 +10,9 @@ defmodule Banchan.Uploads do
 
   @image_formats ~w(
     image/bmp image/gif image/png image/jpeg image/jpg
-    image/x-icon image/jp2 image/psd image/vnd.adobe.photoshop
-    image/tiff image/webp
+    image/jp2 image/psd image/vnd.adobe.photoshop image/x-icon
+    image/vnd.microsoft.icon image/tiff image/webp
+    image/heic image/svg+xml image/x-xcf
   )
 
   @video_formats ~w(

@@ -779,7 +779,7 @@ defmodule Banchan.Commissions do
       Repo.transaction(fn ->
         Enum.each(attachments, fn upload ->
           {:ok, thumbnail} =
-            if Uploads.image?(upload) do
+            if Uploads.image?(upload) || Uploads.video?(upload) do
               Thumbnailer.thumbnail(
                 upload,
                 target_size: "5kb",
