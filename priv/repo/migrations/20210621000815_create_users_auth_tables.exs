@@ -10,6 +10,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
       add :type, :string
       add :size, :integer
       add :pending, :boolean, default: true, null: false
+      add :original_id, references(:uploads, on_delete: :nilify_all, type: :uuid)
 
       timestamps()
     end

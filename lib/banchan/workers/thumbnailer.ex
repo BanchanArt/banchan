@@ -42,6 +42,7 @@ defmodule Banchan.Workers.Thumbnailer do
           pending =
             Uploads.gen_pending(
               %User{id: upload.uploader_id},
+              upload,
               "image/jpeg",
               Keyword.get(opts, :name, "thumbnail.jpg")
             )

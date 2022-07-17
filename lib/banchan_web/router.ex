@@ -123,6 +123,8 @@ defmodule BanchanWeb.Router do
 
     get("/images/:id", PublicImageController, :image)
 
+    get("/images/:id/download", PublicImageController, :download)
+
     get("/studios/:handle/connect_to_stripe", StripeAccountController, :account_link)
 
     get("/confirm/:token", UserConfirmationController, :confirm)

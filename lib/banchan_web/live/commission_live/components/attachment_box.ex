@@ -55,6 +55,12 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                 else
                   :image
                 end}
+                download={Routes.commission_attachment_path(
+                  Endpoint,
+                  :show,
+                  @commission.public_id,
+                  attachment.upload.key
+                )}
                 src={Routes.commission_attachment_path(
                   Endpoint,
                   :preview,

@@ -568,7 +568,6 @@ defmodule Banchan.Offerings do
   end
 
   def make_gallery_image!(%User{} = user, src, true, type, name) do
-    # TODO: Save the original for download, too
     upload = Uploads.save_file!(user, src, type, name)
 
     {:ok, image} =

@@ -218,7 +218,7 @@
   background-image: url("../node_modules/spotlight.js/src/img/zoom-in.svg");
   background-size: 22px;
 }
-.spl-download {
+.spl-download,.spl-banchan-download {
   background-image: url("../node_modules/spotlight.js/src/img/download.svg");
   background-size: 20px;
 }

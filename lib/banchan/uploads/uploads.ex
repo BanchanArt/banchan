@@ -102,12 +102,13 @@ defmodule Banchan.Uploads do
     |> Repo.update!()
   end
 
-  def gen_pending(%User{} = user, type, file_name) do
+  def gen_pending(%User{} = user, %Upload{} = original, type, file_name) do
     bucket = get_bucket() || "default-uploads-bucket"
     key = gen_key()
 
     %Upload{
       uploader_id: user.id,
+      original_id: original.id,
       name: file_name,
       key: key,
       bucket: bucket,
