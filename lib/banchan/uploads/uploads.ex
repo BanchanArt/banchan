@@ -178,6 +178,7 @@ defmodule Banchan.Uploads do
       File.cp!(local, dest)
     else
       ExAws.S3.download_file(upload.bucket, upload.key, dest)
+      |> ExAws.request!()
     end
   end
 
