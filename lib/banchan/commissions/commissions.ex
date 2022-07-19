@@ -1309,6 +1309,57 @@ defmodule Banchan.Commissions do
     end
   end
 
+  def tipped_amount(
+        %User{id: user_id},
+        %Commission{client_id: client_id},
+        current_user_member?
+      )
+      when user_id != client_id and current_user_member? == false do
+    {:error, :unauthorized}
+  end
+
+  def tipped_amount(_, %Commission{} = commission, _) do
+    if Ecto.assoc_loaded?(commission.events) do
+      Enum.reduce(
+        commission.events,
+        %{},
+        fn event, acc ->
+          if event.invoice && event.invoice.status in [:succeeded, :released] do
+            current =
+              Map.get(
+                acc,
+                event.invoice.tip.currency,
+                Money.new(0, event.invoice.tip.currency)
+              )
+
+            Map.put(acc, event.invoice.tip.currency, Money.add(current, event.invoice.tip.amount))
+          else
+            acc
+          end
+        end
+      )
+    else
+      deposits =
+        from(
+          i in Invoice,
+          where:
+            i.commission_id == ^commission.id and
+              i.status == :succeeded,
+          select: i.tip
+        )
+        |> Repo.all()
+
+      Enum.reduce(
+        deposits,
+        %{},
+        fn dep, acc ->
+          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
+          Map.put(acc, dep.currency, Money.add(current, dep))
+        end
+      )
+    end
+  end
+
   def line_item_estimate(line_items) do
     Enum.reduce(
       line_items,

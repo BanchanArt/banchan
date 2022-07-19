@@ -12,12 +12,14 @@ defmodule BanchanWeb.CommissionLive.Receipt do
     ev = Enum.find(comm.events, &(&1.public_id == public_ev_id))
     invoice = ev.invoice |> Repo.preload(:event)
     deposited = Commissions.deposited_amount(socket.assigns.current_user, comm, true)
+    tipped = Commissions.tipped_amount(socket.assigns.current_user, comm, true)
 
     {:ok,
      socket
      |> assign(
        commission: comm,
        deposited: deposited,
+       tipped: tipped,
        invoice: invoice
      )}
   end

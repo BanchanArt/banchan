@@ -13,6 +13,13 @@ defmodule BanchanWeb.PaymentReceiptView do
         assigns.deposited |> Map.values()
       end
 
+    tipped =
+      if is_nil(assigns.tipped) || Enum.empty?(assigns.tipped) do
+        [Money.new(0, assigns.default_currency)]
+      else
+        assigns.tipped |> Map.values()
+      end
+
     remaining =
       if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
         Map.values(estimate)
@@ -68,6 +75,14 @@ defmodule BanchanWeb.PaymentReceiptView do
         <td colspan="2">Balance</td>
         <td>
           {#for val <- remaining}
+            {Money.to_string(val)}
+          {/for}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">Additional Tips</td>
+        <td>
+          {#for val <- tipped}
             {Money.to_string(val)}
           {/for}
         </td>

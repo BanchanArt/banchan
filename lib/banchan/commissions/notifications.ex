@@ -200,7 +200,7 @@ defmodule Banchan.Commissions.Notifications do
   end
 
   defp new_event_notification_body(%Event{type: :payment_processed, amount: amount}) do
-    "A payment for #{Money.to_string(amount)} has been successfully processed. It will be available for payout when the commission is completed and accepted."
+    "A payment for #{Money.to_string(amount)} (including tips) has been successfully processed. It will be available for payout when the commission is completed and accepted."
   end
 
   defp new_event_notification_body(%Event{type: :refund_processed, amount: amount}) do
@@ -354,7 +354,8 @@ defmodule Banchan.Commissions.Notifications do
           Phoenix.View.render_to_string(BanchanWeb.PaymentReceiptView, "receipt.html", %{
             invoice: invoice |> Repo.preload([:event]),
             commission: commission |> Repo.preload([:line_items]),
-            deposited: Commissions.deposited_amount(client, commission, true)
+            deposited: Commissions.deposited_amount(client, commission, true),
+            tipped: Commissions.tipped_amount(client, commission, true)
           })
       )
     end
