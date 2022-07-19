@@ -4,7 +4,7 @@ defmodule BanchanWeb.LayoutView do
   def render(_, assigns) do
     ~F"""
     <!DOCTYPE html>
-    <html lang="en" class="h-full bg-base-100" data-theme="">
+    <html lang="en" data-theme="">
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
@@ -38,7 +38,7 @@ defmodule BanchanWeb.LayoutView do
         <meta name="msapplication-TileColor" content="#da532c">
 
         {!-- Styles and themes --}
-        <meta name="theme-color" content="#ffffff">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}>
 
         <script type="text/javascript">
@@ -55,7 +55,7 @@ defmodule BanchanWeb.LayoutView do
           src={Routes.static_path(@conn, "/assets/app.js")}
         />
       </head>
-      <body class="bg-base-100">
+      <body class="h-full bg-base-100">
         {@inner_content}
       </body>
     </html>
