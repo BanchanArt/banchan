@@ -69,7 +69,7 @@ defmodule BanchanWeb.RegisterLive do
           name={:handle}
           info="Your unique @handle that can be used to refer to you."
           icon="at"
-          opts={required: true, type: :password}
+          opts={required: true}
         />
         <EmailInput
           name={:email}
