@@ -5,6 +5,7 @@ defmodule Banchan.Workers.Thumbnailer do
   use Oban.Worker,
     queue: :media,
     unique: [period: 60],
+    max_attempts: 5,
     tags: ["thumbnailer", "media"]
 
   require Logger
