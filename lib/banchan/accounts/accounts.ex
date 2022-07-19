@@ -265,22 +265,24 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
-  Gets a user by email and password.
+  Gets a user by identifier (email or handle) and password.
 
   ## Examples
 
-      iex> get_user_by_email_and_password("foo@example.com", "correct_password")
+      iex> get_user_by_identifier_and_password("foo@example.com", "correct_password")
       %User{}
 
-      iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
+      iex> get_user_by_identifier_and_password("foo@example.com", "invalid_password")
       nil
 
   """
-  def get_user_by_email_and_password(email, password)
-      when is_binary(email) and is_binary(password) do
+  def get_user_by_identifier_and_password(ident, password)
+      when is_binary(ident) and is_binary(password) do
     user =
       Repo.one(
-        from u in User, where: u.email == ^email, preload: [:pfp_img, :pfp_thumb, :header_img]
+        from u in User,
+          where: u.email == ^ident or u.handle == ^ident,
+          preload: [:pfp_img, :pfp_thumb, :header_img]
       )
 
     if User.valid_password?(user, password), do: user

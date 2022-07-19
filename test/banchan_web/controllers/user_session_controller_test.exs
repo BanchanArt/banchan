@@ -26,11 +26,32 @@ defmodule BanchanWeb.UserSessionControllerTest do
   end
 
   describe "POST /users/log_in" do
-    test "logs the user in", %{conn: conn, user: user} do
+    test "logs the user in using their email", %{conn: conn, user: user} do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
           "user" => %{
-            "email" => user.email,
+            "identifier" => user.email,
+            "password" => valid_user_password(),
+            "mfa_token" => nil
+          }
+        })
+
+      assert get_session(conn, :user_token)
+      assert redirected_to(conn) =~ "/"
+
+      # Now do a logged in request and assert on the menu
+      conn = get(conn, "/")
+      response = html_response(conn, 200)
+      assert response =~ user.handle
+      assert response =~ "Settings"
+      assert response =~ "Log out"
+    end
+
+    test "logs the user in using their handle", %{conn: conn, user: user} do
+      conn =
+        post(conn, Routes.user_session_path(conn, :create), %{
+          "user" => %{
+            "identifier" => user.handle,
             "password" => valid_user_password(),
             "mfa_token" => nil
           }
@@ -51,7 +72,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
           "user" => %{
-            "email" => user.email,
+            "identifier" => user.email,
             "password" => valid_user_password(),
             "mfa_token" => NimbleTOTP.verification_code(user.totp_secret)
           }
@@ -72,7 +93,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
           "user" => %{
-            "email" => user.email,
+            "identifier" => user.email,
             "password" => valid_user_password(),
             "remember_me" => "true",
             "mfa_token" => nil
@@ -89,7 +110,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
         |> init_test_session(user_return_to: "/foo/bar")
         |> post(Routes.user_session_path(conn, :create), %{
           "user" => %{
-            "email" => user.email,
+            "identifier" => user.email,
             "password" => valid_user_password(),
             "mfa_token" => nil
           }
@@ -102,7 +123,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
           "user" => %{
-            "email" => user.email,
+            "identifier" => user.email,
             "password" => "invalid_password",
             "mfa_token" => nil
           }
@@ -114,14 +135,14 @@ defmodule BanchanWeb.UserSessionControllerTest do
       {"location", loc} = Enum.find(conn.resp_headers, fn {k, _} -> k == "location" end)
       {:ok, _, html} = live(conn, loc)
       assert html =~ "Log in</h1>"
-      assert html =~ "Invalid email, password, or MFA token"
+      assert html =~ "Invalid email/handle, password, or MFA token"
     end
 
     test "emits error message with valid credentials no MFA", %{conn: conn, user_mfa: user} do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
           "user" => %{
-            "email" => user.email,
+            "identifier" => user.email,
             "password" => valid_user_password(),
             "mfa_token" => nil
           }
@@ -133,14 +154,14 @@ defmodule BanchanWeb.UserSessionControllerTest do
       {"location", loc} = Enum.find(conn.resp_headers, fn {k, _} -> k == "location" end)
       {:ok, _, html} = live(conn, loc)
       assert html =~ "Log in</h1>"
-      assert html =~ "Invalid email, password, or MFA token"
+      assert html =~ "Invalid email/handle, password, or MFA token"
     end
 
     test "emits error message with valid credentials wrong MFA", %{conn: conn, user_mfa: user} do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
           "user" => %{
-            "email" => user.email,
+            "identifier" => user.email,
             "password" => valid_user_password(),
             "mfa_token" => "000"
           }
@@ -152,7 +173,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
       {"location", loc} = Enum.find(conn.resp_headers, fn {k, _} -> k == "location" end)
       {:ok, _, html} = live(conn, loc)
       assert html =~ "Log in</h1>"
-      assert html =~ "Invalid email, password, or MFA token"
+      assert html =~ "Invalid email/handle, password, or MFA token"
     end
   end
 
