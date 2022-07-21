@@ -796,7 +796,16 @@ defmodule Banchan.Commissions do
 
           {:ok, preview} =
             if Uploads.image?(upload) do
-              Thumbnailer.thumbnail(upload, target_size: "40kb", name: "preview.jpg")
+              Thumbnailer.thumbnail(
+                upload,
+                target_size: "40kb",
+                name: "preview.jpg",
+                callback: [
+                  Notifications,
+                  :commission_event_updated,
+                  [event.commission_id, event.id]
+                ]
+              )
             else
               {:ok, nil}
             end
