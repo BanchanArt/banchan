@@ -266,7 +266,7 @@ defmodule BanchanWeb.OfferingLive.Request do
               />
               <div class="pt-2">
                 <h3 class="py-4 font-bold text-xl">Commission Terms and Conditions</h3>
-                <div class="p-2 border-2 rounded border-neutral max-h-60 overflow-auto">
+                <div class="p-2 max-h-60 overflow-auto">
                   <div class="p-2">
                     <Markdown content={@terms} />
                   </div>
