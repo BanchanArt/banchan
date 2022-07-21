@@ -450,7 +450,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           </li>
         </ul>
         <div class="divider" />
-        <Collapse class="rounded-lg border border-primary" id={@id <> "-terms-collapse"}>
+        <Collapse class="border-b-2 pb-2" id={@id <> "-terms-collapse"}>
           <:header>
             <h3 class="text-2xl">Terms and Template</h3>
           </:header>
@@ -465,8 +465,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
           />
         </Collapse>
-        <div class="divider" />
-        <div class="flex flex-row">
+        <div class="pt-4 flex flex-row">
           <Submit label="Save" />
           {#if @changeset.data.id}
             <Button class="btn-error" click="archive" label="Archive" />
