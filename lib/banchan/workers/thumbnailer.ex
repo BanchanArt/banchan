@@ -91,11 +91,20 @@ defmodule Banchan.Workers.Thumbnailer do
           |> add_global_option(option_y())
           |> add_input_file(tmp_src)
           |> add_output_file(output_src)
+          |> add_file_option(option_f("image2"))
           |> add_file_option(option_filter("scale=128:128"))
           |> add_file_option(option_ss(0))
           |> add_file_option(option_vframes(1))
 
         {:ok, _} = execute(command)
+
+        video_thumb =
+          Uploads.save_file!(
+            %User{id: upload.uploader_id},
+            output_src,
+            "image/jpeg",
+            Path.rootname(upload.name) <> ".jpeg"
+          )
 
         {:ok, ret} =
           Repo.transaction(fn ->
@@ -113,8 +122,8 @@ defmodule Banchan.Workers.Thumbnailer do
                        src: %{
                          id: upload.id,
                          bucket: upload.bucket,
-                         key: upload.key,
-                         name: upload.key <> ".jpeg"
+                         key: video_thumb.key,
+                         name: video_thumb.name
                        },
                        dest: %{
                          id: pending.id,

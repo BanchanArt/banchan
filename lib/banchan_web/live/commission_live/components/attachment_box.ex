@@ -83,9 +83,6 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                     attachment.upload.key
                   )}
                 />
-                {#if Uploads.video?(attachment.upload)}
-                  <i class="fas fa-play text-4xl absolute top-10 left-10" />
-                {/if}
               </Lightbox.Item>
             {/if}
           </div>
@@ -98,7 +95,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
               <i class="float-right fas fa-lock" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
             </div>
           {#else}
-            <div class="relative">
+            <div class="flex">
               <a
                 class="relative"
                 target="_blank"
@@ -109,9 +106,30 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                   attachment.upload.key
                 )}
               >
-                <div title={attachment.upload.name} class="border-2 p-4 m-1">
-                  <i class="float-right fas fa-file-download" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
-                </div>
+                {#if Uploads.video?(attachment.upload)}
+                  <div class="flex justify-center h-[128px] w-[128px]">
+                    <div
+                      class="absolute z-0 h-[128px] w-[128px] rounded-box bg-base-content animate-pulse"
+                      title={attachment.upload.name}
+                    />
+                    <img
+                      alt={attachment.upload.name}
+                      title={attachment.upload.name}
+                      class="rounded-box absolute z-10"
+                      src={Routes.commission_attachment_path(
+                        Endpoint,
+                        :thumbnail,
+                        @commission.public_id,
+                        attachment.upload.key
+                      )}
+                    />
+                    <i class="fas fa-play text-4xl absolute pt-[44px] z-20" />
+                  </div>
+                {#else}
+                  <div title={attachment.upload.name} class="border-2 p-4 m-1">
+                    <i class="float-right fas fa-file-download" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
+                  </div>
+                {/if}
               </a>
               {#if @editing}
                 <a
