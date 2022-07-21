@@ -67,7 +67,8 @@ defmodule Banchan.Offerings.Offering do
       :terms,
       :template,
       :tags,
-      :mature
+      :mature,
+      :card_img_id
     ])
     |> cast_assoc(:options)
     |> validate_format(:type, ~r/^[0-9a-z-]+$/,
@@ -85,6 +86,7 @@ defmodule Banchan.Offerings.Offering do
     |> validate_length(:template, max: 1500)
     |> validate_tags()
     |> validate_length(:tags, max: 5)
+    |> foreign_key_constraint(:card_img_id)
     |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])
   end

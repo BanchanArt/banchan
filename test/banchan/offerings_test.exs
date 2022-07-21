@@ -37,8 +37,8 @@ defmodule Banchan.OfferingsTest do
       Notifications.mark_all_as_read(client)
       Notifications.mark_all_as_read(artist)
 
-      Offerings.update_offering(offering |> Repo.reload(), true, %{open: false}, nil, nil)
-      Offerings.update_offering(offering |> Repo.reload(), true, %{open: true}, nil, nil)
+      Offerings.update_offering(offering |> Repo.reload(), true, %{open: false}, nil)
+      Offerings.update_offering(offering |> Repo.reload(), true, %{open: true}, nil)
 
       Notifications.wait_for_notifications()
 
@@ -237,7 +237,7 @@ defmodule Banchan.OfferingsTest do
 
       # Offering must be manually reopened
       assert {:ok, _} =
-               Offerings.update_offering(offering |> Repo.reload(), true, %{open: true}, nil, nil)
+               Offerings.update_offering(offering |> Repo.reload(), true, %{open: true}, nil)
 
       # Now we can make comms again!
       {:ok, _comm} =
@@ -415,7 +415,7 @@ defmodule Banchan.OfferingsTest do
 
       # Offering must be manually reopened
       assert {:ok, _} =
-               Offerings.update_offering(offering |> Repo.reload(), true, %{open: true}, nil, nil)
+               Offerings.update_offering(offering |> Repo.reload(), true, %{open: true}, nil)
 
       # Now we can start making comms again!
       assert {:ok, _comm} =

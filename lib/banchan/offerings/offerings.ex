@@ -21,11 +21,11 @@ defmodule Banchan.Offerings do
   alias Banchan.Uploads.Upload
   alias Banchan.Workers.Thumbnailer
 
-  def new_offering(_, false, _, _, _) do
+  def new_offering(_, false, _, _) do
     {:error, :unauthorized}
   end
 
-  def new_offering(studio, true, attrs, card_image, gallery_images) do
+  def new_offering(studio, true, attrs, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
         max_idx =
@@ -45,7 +45,6 @@ defmodule Banchan.Offerings do
 
         %Offering{
           studio_id: studio.id,
-          card_img: card_image,
           gallery_imgs: gallery_images,
           index: max_idx + 1
         }
@@ -197,27 +196,19 @@ defmodule Banchan.Offerings do
     Offering.changeset(offering, attrs)
   end
 
-  def update_offering(_, false, _, _, _) do
+  def update_offering(_, false, _, _) do
     {:error, :unauthorized}
   end
 
-  def update_offering(%Offering{} = offering, true, attrs, card_image, gallery_images) do
+  def update_offering(%Offering{} = offering, true, attrs, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
         open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
 
         changeset =
           offering
-          |> Repo.preload(:card_img)
           |> Repo.preload(:gallery_imgs)
           |> change_offering(attrs)
-
-        changeset =
-          if is_nil(card_image) do
-            changeset
-          else
-            changeset |> Ecto.Changeset.put_assoc(:card_img, card_image)
-          end
 
         changeset =
           if is_nil(gallery_images) do

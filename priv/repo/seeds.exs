@@ -82,7 +82,6 @@ user = user |> Banchan.Repo.reload()
         }
       ]
     },
-    nil,
     nil
   )
 
@@ -115,7 +114,6 @@ user = user |> Banchan.Repo.reload()
       ],
       terms: "**No NFTs**. But also no derivative works."
     },
-    nil,
     nil
   )
 
@@ -164,6 +162,5 @@ user = user |> Banchan.Repo.reload()
         }
       ]
     },
-    nil,
     nil
   )

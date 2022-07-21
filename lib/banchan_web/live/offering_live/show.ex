@@ -118,16 +118,16 @@ defmodule BanchanWeb.OfferingLive.Show do
             id="card-lightbox-mobile"
             class="md:hidden w-full h-full bg-base-300 rounded-lg aspect-video mb-4"
           >
-            <Lightbox.Item>
-              <img
-                class="w-full h-full object-contain aspect-video"
-                src={if @offering.card_img && !@offering.card_img.pending do
-                  Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
-                else
-                  Routes.static_path(Endpoint, "/images/640x360.png")
-                end}
-              />
-            </Lightbox.Item>
+            {#if @offering.card_img && !@offering.card_img.pending}
+              <Lightbox.Item>
+                <img
+                  class="w-full h-full object-contain aspect-video"
+                  src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
+                />
+              </Lightbox.Item>
+            {#else}
+              <div class="w-full h-full aspect-video bg-base-300" />
+            {/if}
           </Lightbox>
           <div class="flex flex-row flex-wrap items-center gap-2">
             <div class="md:text-xl grow">
@@ -199,16 +199,16 @@ defmodule BanchanWeb.OfferingLive.Show do
             id="card-lightbox-md"
             class="hidden md:block w-full h-full bg-base-300 rounded-lg aspect-video"
           >
-            <Lightbox.Item>
-              <img
-                class="w-full h-full object-contain aspect-video"
-                src={if @offering.card_img && !@offering.card_img.pending do
-                  Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
-                else
-                  Routes.static_path(Endpoint, "/images/640x360.png")
-                end}
-              />
-            </Lightbox.Item>
+            {#if @offering.card_img && !@offering.card_img.pending}
+              <Lightbox.Item>
+                <img
+                  class="w-full h-full object-contain aspect-video"
+                  src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
+                />
+              </Lightbox.Item>
+            {#else}
+              <div class="w-full h-full aspect-video bg-base-300" />
+            {/if}
           </Lightbox>
           <div class="rounded-lg shadow-lg bg-base-200 p-4">
             <div class="text-2xl">Description</div>
