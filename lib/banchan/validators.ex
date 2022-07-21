@@ -4,6 +4,15 @@ defmodule Banchan.Validators do
   """
   import Ecto.Changeset
 
+  def validate_money(changeset, field) do
+    validate_change(changeset, field, fn
+      _, %Money{amount: amount} when amount >= 0 -> []
+      _, "" -> []
+      _, nil -> []
+      _, _ -> [{field, "Must be a positive money amount."}]
+    end)
+  end
+
   def validate_markdown(changeset, field) do
     validate_change(changeset, field, fn _, data ->
       if data == HtmlSanitizeEx.markdown_html(data) do

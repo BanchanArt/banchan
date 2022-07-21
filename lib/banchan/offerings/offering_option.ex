@@ -5,6 +5,8 @@ defmodule Banchan.Offerings.OfferingOption do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Banchan.Validators
+
   alias Banchan.Offerings.Offering
 
   schema "offering_options" do
@@ -29,13 +31,6 @@ defmodule Banchan.Offerings.OfferingOption do
     |> validate_required([:name, :description, :price])
     |> validate_length(:name, max: 50)
     |> validate_length(:description, max: 140)
-  end
-
-  defp validate_money(changeset, field) do
-    validate_change(changeset, field, fn
-      _, %Money{amount: amount} when amount >= 0 -> []
-      _, _ -> [{field, "can't be negative"}]
-    end)
   end
 
   defp validate_sticky_also_default(%{params: params} = changeset) when is_map(params) do

@@ -71,13 +71,4 @@ defmodule Banchan.Commissions.Event do
     |> validate_markdown(:text)
     |> validate_length(:text, max: 1500)
   end
-
-  defp validate_money(changeset, field) do
-    validate_change(changeset, field, fn
-      _, %Money{amount: amount} when amount >= 0 -> []
-      _, "" -> []
-      _, nil -> []
-      _, _ -> [{field, "must be a non-negative amount"}]
-    end)
-  end
 end

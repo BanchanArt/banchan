@@ -5,6 +5,8 @@ defmodule Banchan.Commissions.Invoice do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Banchan.Validators
+
   schema "commission_invoices" do
     field :stripe_session_id, :string
     field :checkout_url, :string
@@ -105,12 +107,5 @@ defmodule Banchan.Commissions.Invoice do
       :checkout_url,
       :status
     ])
-  end
-
-  defp validate_money(changeset, field) do
-    validate_change(changeset, field, fn
-      _, %Money{amount: amount} when amount >= 0 -> []
-      _, _ -> [{field, "must be a positive amount"}]
-    end)
   end
 end

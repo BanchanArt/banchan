@@ -5,6 +5,8 @@ defmodule Banchan.Commissions.LineItem do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Banchan.Validators
+
   schema "line_items" do
     field :amount, Money.Ecto.Composite.Type
     field :description, :string
@@ -37,12 +39,5 @@ defmodule Banchan.Commissions.LineItem do
     |> validate_required([:amount, :name, :description])
     |> validate_length(:name, max: 50)
     |> validate_length(:description, max: 160)
-  end
-
-  defp validate_money(changeset, field) do
-    validate_change(changeset, field, fn
-      _, %Money{} -> []
-      _, _ -> [{field, "must be an amount"}]
-    end)
   end
 end
