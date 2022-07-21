@@ -343,7 +343,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           label="Mature"
           info="Mark this offering as mature content. Note: if you plan on doing mature/NSFW commissions through this offering, this MUST be checked."
         />
-        <Collapse id={@id <> "-images"} class="border-b-2">
+        <Collapse id={@id <> "-images"} class="pt-4 border-b-2">
           <:header>
             <h3 class="text-xl pb-2">
               Images
@@ -400,6 +400,9 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         </Collapse>
         <h3 class="text-2xl pt-10">Options</h3>
         <div class="divider" />
+        <div class="pb-4">
+        Options include both the "default options", which determine the offering's displayed base price, as well as any "add-ons" than can be added when making a proposal.
+        </div>
         <ul class="flex flex-col gap-4">
           <InputContext :let={form: form}>
             <Inputs form={form} for={:options} :let={index: index}>
