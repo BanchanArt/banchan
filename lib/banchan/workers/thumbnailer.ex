@@ -41,50 +41,52 @@ defmodule Banchan.Workers.Thumbnailer do
   def thumbnail(%Upload{} = upload, opts \\ []) do
     cond do
       Uploads.image?(upload) ->
-         {:ok, ret} =
-        Repo.transaction(fn ->
-          pending =
-            Uploads.gen_pending(
-              %User{id: upload.uploader_id},
-              upload,
-              "image/jpeg",
-              Keyword.get(opts, :name, "thumbnail.jpg")
-            )
+        {:ok, ret} =
+          Repo.transaction(fn ->
+            pending =
+              Uploads.gen_pending(
+                %User{id: upload.uploader_id},
+                upload,
+                "image/jpeg",
+                Keyword.get(opts, :name, "thumbnail.jpg")
+              )
 
-          with {:ok, pending} <- Repo.insert(pending),
-               {:ok, _} <-
-                 Oban.insert(
-                   __MODULE__.new(%{
-                     src: %{
-                       id: upload.id,
-                       bucket: upload.bucket,
-                       key: upload.key,
-                       name: upload.name
-                     },
-                     dest: %{
-                       id: pending.id,
-                       bucket: pending.bucket,
-                       key: pending.key,
-                       name: pending.name
-                     },
-                     opts: %{
-                       target_size: Keyword.get(opts, :target_size),
-                       format: Keyword.get(opts, :format, "jpeg"),
-                       dimensions: Keyword.get(opts, :dimensions),
-                       callback: Keyword.get(opts, :callback)
-                     }
-                   })
-                 ) do
-            {:ok, pending}
-          end
-        end)
+            with {:ok, pending} <- Repo.insert(pending),
+                 {:ok, _} <-
+                   Oban.insert(
+                     __MODULE__.new(%{
+                       src: %{
+                         id: upload.id,
+                         bucket: upload.bucket,
+                         key: upload.key,
+                         name: upload.name
+                       },
+                       dest: %{
+                         id: pending.id,
+                         bucket: pending.bucket,
+                         key: pending.key,
+                         name: pending.name
+                       },
+                       opts: %{
+                         target_size: Keyword.get(opts, :target_size),
+                         format: Keyword.get(opts, :format, "jpeg"),
+                         dimensions: Keyword.get(opts, :dimensions),
+                         callback: Keyword.get(opts, :callback)
+                       }
+                     })
+                   ) do
+              {:ok, pending}
+            end
+          end)
 
-      ret
+        ret
 
       Uploads.video?(upload) ->
         tmp_src = Path.join([System.tmp_dir!(), upload.key <> Path.extname(upload.name)])
         File.mkdir_p!(Path.dirname(tmp_src))
         Uploads.write_data!(upload, tmp_src)
+
+        duration = FFprobe.duration(tmp_src)
 
         output_src = Path.join([System.tmp_dir!(), upload.key <> ".jpeg"])
 
@@ -95,7 +97,7 @@ defmodule Banchan.Workers.Thumbnailer do
           |> add_output_file(output_src)
           |> add_file_option(option_f("image2"))
           |> add_file_option(option_filter("scale=128:128"))
-          |> add_file_option(option_ss(0))
+          |> add_file_option(option_ss(round(duration / 2)))
           |> add_file_option(option_vframes(1))
 
         {:ok, _} = execute(command)
@@ -113,6 +115,7 @@ defmodule Banchan.Workers.Thumbnailer do
             pending =
               Uploads.gen_pending(
                 %User{id: upload.uploader_id},
+                upload,
                 "image/jpeg",
                 Keyword.get(opts, :name, "thumbnail.jpg")
               )
