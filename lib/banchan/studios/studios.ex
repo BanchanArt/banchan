@@ -15,7 +15,16 @@ defmodule Banchan.Studios do
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Invoice
   alias Banchan.Repo
-  alias Banchan.Studios.{Notifications, Payout, PortfolioImage, Studio, StudioFollower}
+
+  alias Banchan.Studios.{
+    Notifications,
+    Payout,
+    PortfolioImage,
+    Studio,
+    StudioDisableHistory,
+    StudioFollower
+  }
+
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
   alias Banchan.Workers.Thumbnailer
@@ -176,6 +185,50 @@ defmodule Banchan.Studios do
     ret
   end
 
+  def disable_studio(%User{} = actor, %Studio{} = studio, attrs) do
+    if :admin in actor.roles || :mod in actor.roles do
+      %StudioDisableHistory{
+        studio_id: studio.id,
+        disabled_by_id: actor.id,
+        disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+      }
+      |> StudioDisableHistory.disable_changeset(attrs)
+      |> Repo.insert()
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  @doc """
+  Re-enable a previously disabled studio.
+  """
+  def enable_studio(actor, %Studio{} = studio, reason) do
+    if is_nil(actor) || :admin in actor.roles || :mod in actor.roles do
+      changeset =
+        StudioDisableHistory.enable_changeset(%StudioDisableHistory{}, %{lifted_reason: reason})
+
+      if changeset.valid? do
+        {_, [history | _]} =
+          Repo.update_all(
+            from(h in StudioDisableHistory,
+              where: h.studio_id == ^studio.id,
+              select: h
+            ),
+            set: [
+              lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+              lifted_by_id: actor && actor.id
+            ]
+          )
+
+        {:ok, history}
+      else
+        {:error, changeset}
+      end
+    else
+      {:error, :unauthorized}
+    end
+  end
+
   @doc """
   Creates a new studio.
 
@@ -242,6 +295,17 @@ defmodule Banchan.Studios do
         join: artist in assoc(s, :artists),
         as: :artist
       )
+
+    q =
+      case Keyword.fetch(opts, :include_disabled) do
+        {:ok, true} ->
+          q
+
+        _ ->
+          q
+          |> join(:left, [studio: s], info in assoc(s, :disable_info), as: :disable_info)
+          |> where([disable_info: info], is_nil(info.id))
+      end
 
     q =
       case Keyword.fetch(opts, :with_member) do

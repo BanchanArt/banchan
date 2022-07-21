@@ -7,7 +7,7 @@ defmodule Banchan.Studios.Studio do
   import Banchan.Validators
 
   alias Banchan.Identities
-  alias Banchan.Studios.{Common, PortfolioImage}
+  alias Banchan.Studios.{Common, PortfolioImage, StudioDisableHistory}
   alias Banchan.Uploads.Upload
 
   schema "studios" do
@@ -23,6 +23,11 @@ defmodule Banchan.Studios.Studio do
     field :featured, :boolean, default: false
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
+
+    # Moderation etc
+    field :moderation_notes, :string
+    has_one :disable_info, StudioDisableHistory, where: [lifted_at: nil]
+    has_many :disable_history, StudioDisableHistory, preload_order: [desc: :disabled_at]
 
     field :stripe_id, :string
     field :stripe_charges_enabled, :boolean
