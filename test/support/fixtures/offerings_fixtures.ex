@@ -24,7 +24,6 @@ defmodule Banchan.OfferingsFixtures do
           },
           attrs
         ),
-        nil,
         nil
       )
 

@@ -5,26 +5,14 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
   """
   use BanchanWeb, :component
 
+  alias Banchan.Commissions
+
   prop default_currency, :atom, required: true
   prop line_items, :list, required: true
   prop deposited, :struct
 
   def render(assigns) do
-    estimate =
-      Enum.reduce(
-        assigns.line_items,
-        %{},
-        fn item, acc ->
-          current =
-            Map.get(
-              acc,
-              item.amount.currency,
-              Money.new(0, item.amount.currency)
-            )
-
-          Map.put(acc, item.amount.currency, Money.add(current, item.amount))
-        end
-      )
+    estimate = Commissions.line_item_estimate(assigns.line_items)
 
     deposited =
       if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do

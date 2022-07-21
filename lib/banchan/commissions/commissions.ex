@@ -294,7 +294,7 @@ defmodule Banchan.Commissions do
     if close do
       # NB(zkat): We pretend we're a studio member here because we're doing
       # this on behalf of the studio. It's safe.
-      {:ok, _} = Offerings.update_offering(offering, true, %{open: false}, nil, nil)
+      {:ok, _} = Offerings.update_offering(offering, true, %{open: false}, nil)
     end
   end
 
@@ -390,7 +390,7 @@ defmodule Banchan.Commissions do
           if close do
             # NB(zkat): We pretend we're a studio member here because we're doing
             # this on behalf of the studio. It's safe.
-            {:ok, _} = Offerings.update_offering(offering, true, %{open: false}, nil, nil)
+            {:ok, _} = Offerings.update_offering(offering, true, %{open: false}, nil)
           end
         end
 
@@ -796,7 +796,16 @@ defmodule Banchan.Commissions do
 
           {:ok, preview} =
             if Uploads.image?(upload) || Uploads.video?(upload) do
-              Thumbnailer.thumbnail(upload, target_size: "40kb", name: "preview.jpg")
+              Thumbnailer.thumbnail(
+                upload,
+                target_size: "40kb",
+                name: "preview.jpg",
+                callback: [
+                  Notifications,
+                  :commission_event_updated,
+                  [event.commission_id, event.id]
+                ]
+              )
             else
               {:ok, nil}
             end
@@ -983,17 +992,21 @@ defmodule Banchan.Commissions do
           )
 
         event = Repo.get!(Event, invoice.event_id)
+        client = Repo.reload!(%User{id: invoice.client_id})
+        commission = Repo.reload!(%Commission{id: event.commission_id})
 
         create_event(
           :payment_processed,
-          Repo.reload!(%User{id: invoice.client_id}),
-          Repo.reload!(%Commission{id: event.commission_id}),
+          client,
+          commission,
           true,
           [],
           %{
             amount: invoice.amount |> Money.add(invoice.tip)
           }
         )
+
+        Notifications.send_receipt(invoice, client, commission)
 
         send_event_update!(invoice.event_id)
       end)
@@ -1298,11 +1311,79 @@ defmodule Banchan.Commissions do
         deposits,
         %{},
         fn dep, acc ->
-          current = Map.get(acc, dep.amount.currency, Money.new(0, dep.amount.currency))
-          Map.put(acc, dep.amount.currency, Money.add(current, dep.amount))
+          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
+          Map.put(acc, dep.currency, Money.add(current, dep))
         end
       )
     end
+  end
+
+  def tipped_amount(
+        %User{id: user_id},
+        %Commission{client_id: client_id},
+        current_user_member?
+      )
+      when user_id != client_id and current_user_member? == false do
+    {:error, :unauthorized}
+  end
+
+  def tipped_amount(_, %Commission{} = commission, _) do
+    if Ecto.assoc_loaded?(commission.events) do
+      Enum.reduce(
+        commission.events,
+        %{},
+        fn event, acc ->
+          if event.invoice && event.invoice.status in [:succeeded, :released] do
+            current =
+              Map.get(
+                acc,
+                event.invoice.tip.currency,
+                Money.new(0, event.invoice.tip.currency)
+              )
+
+            Map.put(acc, event.invoice.tip.currency, Money.add(current, event.invoice.tip.amount))
+          else
+            acc
+          end
+        end
+      )
+    else
+      deposits =
+        from(
+          i in Invoice,
+          where:
+            i.commission_id == ^commission.id and
+              i.status == :succeeded,
+          select: i.tip
+        )
+        |> Repo.all()
+
+      Enum.reduce(
+        deposits,
+        %{},
+        fn dep, acc ->
+          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
+          Map.put(acc, dep.currency, Money.add(current, dep))
+        end
+      )
+    end
+  end
+
+  def line_item_estimate(line_items) do
+    Enum.reduce(
+      line_items,
+      %{},
+      fn item, acc ->
+        current =
+          Map.get(
+            acc,
+            item.amount.currency,
+            Money.new(0, item.amount.currency)
+          )
+
+        Map.put(acc, item.amount.currency, Money.add(current, item.amount))
+      end
+    )
   end
 
   def list_attachments(%Commission{} = commission) do

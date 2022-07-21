@@ -6,6 +6,7 @@ defmodule BanchanWeb.Components.Lightbox.Item do
 
   prop class, :css_class
   prop src, :string
+  prop download, :string
 
   # Type of media. Can be :image or :video
   # TODO: Finish adding video support.
@@ -15,7 +16,12 @@ defmodule BanchanWeb.Components.Lightbox.Item do
 
   def render(assigns) do
     ~F"""
-    <div class={"banchan-lightbox-item cursor-pointer", @class} data-src={@src} data-media={@media}>
+    <div
+      class={"banchan-lightbox-item cursor-pointer", @class}
+      data-src={@src}
+      data-media={@media}
+      data-download={@download}
+    >
       <#slot />
     </div>
     """

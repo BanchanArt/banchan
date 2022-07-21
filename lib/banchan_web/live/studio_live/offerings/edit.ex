@@ -18,7 +18,8 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
       Offerings.get_offering_by_type!(
         socket.assigns.studio,
         offering_type,
-        socket.assigns.current_user_member?
+        socket.assigns.current_user_member?,
+        socket.assigns.current_user
       )
 
     {:ok, assign(socket, offering: offering, gallery_images: nil)}

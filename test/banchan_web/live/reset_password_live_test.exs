@@ -43,7 +43,7 @@ defmodule BanchanWeb.ResetPasswordLiveTest do
     # TODO: Figure out how to check this.
     # refute get_session(conn, :user_token)
     assert html =~ "Password reset successfully"
-    assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+    assert Accounts.get_user_by_identifier_and_password(user.email, "new valid password")
   end
 
   test "does not reset password on invalid data", %{conn: conn, token: token} do

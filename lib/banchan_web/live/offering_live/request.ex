@@ -26,7 +26,8 @@ defmodule BanchanWeb.OfferingLive.Request do
       Offerings.get_offering_by_type!(
         socket.assigns.studio,
         offering_type,
-        socket.assigns.current_user_member?
+        socket.assigns.current_user_member?,
+        socket.assigns.current_user
       )
 
     terms = offering.terms || socket.assigns.studio.default_terms || ""
@@ -266,7 +267,7 @@ defmodule BanchanWeb.OfferingLive.Request do
               />
               <div class="pt-2">
                 <h3 class="py-4 font-bold text-xl">Commission Terms and Conditions</h3>
-                <div class="p-2 border-2 rounded border-neutral max-h-60 overflow-auto">
+                <div class="p-2 max-h-60 overflow-auto">
                   <div class="p-2">
                     <Markdown content={@terms} />
                   </div>

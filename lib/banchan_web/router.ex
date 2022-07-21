@@ -65,6 +65,7 @@ defmodule BanchanWeb.Router do
 
       live("/commissions", CommissionLive, :index)
       live("/commissions/:commission_id", CommissionLive, :show)
+      live("/commissions/:commission_id/receipt/:event_id", CommissionLive.Receipt, :show)
 
       live("/settings", SettingsLive, :edit)
       live("/mfa_setup", SetupMfaLive, :edit)
@@ -122,6 +123,8 @@ defmodule BanchanWeb.Router do
     get("/go/:handle", DispatchController, :dispatch)
 
     get("/images/:id", PublicImageController, :image)
+
+    get("/images/:id/download", PublicImageController, :download)
 
     get("/studios/:handle/connect_to_stripe", StripeAccountController, :account_link)
 

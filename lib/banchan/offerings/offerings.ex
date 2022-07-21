@@ -21,11 +21,11 @@ defmodule Banchan.Offerings do
   alias Banchan.Uploads.Upload
   alias Banchan.Workers.Thumbnailer
 
-  def new_offering(_, false, _, _, _) do
+  def new_offering(_, false, _, _) do
     {:error, :unauthorized}
   end
 
-  def new_offering(studio, true, attrs, card_image, gallery_images) do
+  def new_offering(studio, true, attrs, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
         max_idx =
@@ -45,7 +45,6 @@ defmodule Banchan.Offerings do
 
         %Offering{
           studio_id: studio.id,
-          card_img: card_image,
           gallery_imgs: gallery_images,
           index: max_idx + 1
         }
@@ -153,8 +152,8 @@ defmodule Banchan.Offerings do
     ret
   end
 
-  def get_offering_by_type!(%Studio{} = studio, type, current_user_member?) do
-    Repo.one!(
+  def get_offering_by_type!(%Studio{} = studio, type, current_user_member?, current_user \\ nil) do
+    q =
       from o in Offering,
         as: :offering,
         left_lateral_join:
@@ -189,7 +188,25 @@ defmodule Banchan.Offerings do
                 {:array, Upload}
               )
           })
-    )
+
+    q =
+      if current_user do
+        q
+        |> join(:left, [offering: o], sub in OfferingSubscription,
+          on:
+            sub.user_id == ^current_user.id and sub.offering_id == o.id and
+              sub.silenced != true,
+          as: :subscribed
+        )
+        |> select_merge([o, subscribed: sub], %{
+          user_subscribed?: not is_nil(sub.id)
+        })
+      else
+        q
+      end
+
+    q
+    |> Repo.one!()
     |> Repo.preload([:options, :studio, :card_img])
   end
 
@@ -197,27 +214,19 @@ defmodule Banchan.Offerings do
     Offering.changeset(offering, attrs)
   end
 
-  def update_offering(_, false, _, _, _) do
+  def update_offering(_, false, _, _) do
     {:error, :unauthorized}
   end
 
-  def update_offering(%Offering{} = offering, true, attrs, card_image, gallery_images) do
+  def update_offering(%Offering{} = offering, true, attrs, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
         open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
 
         changeset =
           offering
-          |> Repo.preload(:card_img)
           |> Repo.preload(:gallery_imgs)
           |> change_offering(attrs)
-
-        changeset =
-          if is_nil(card_image) do
-            changeset
-          else
-            changeset |> Ecto.Changeset.put_assoc(:card_img, card_image)
-          end
 
         changeset =
           if is_nil(gallery_images) do
@@ -568,7 +577,6 @@ defmodule Banchan.Offerings do
   end
 
   def make_gallery_image!(%User{} = user, src, true, type, name) do
-    # TODO: Save the original for download, too
     upload = Uploads.save_file!(user, src, type, name)
 
     {:ok, image} =

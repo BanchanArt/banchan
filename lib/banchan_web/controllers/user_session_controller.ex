@@ -7,19 +7,19 @@ defmodule BanchanWeb.UserSessionController do
   alias BanchanWeb.UserAuth
 
   def create(conn, %{"user" => user_params}) do
-    %{"email" => email, "password" => password, "mfa_token" => mfa_token} = user_params
+    %{"identifier" => identifier, "password" => password, "mfa_token" => mfa_token} = user_params
 
-    if user = Accounts.get_user_by_email_and_password(email, password) do
+    if user = Accounts.get_user_by_identifier_and_password(identifier, password) do
       if user.totp_activated == true && !NimbleTOTP.valid?(user.totp_secret, mfa_token) do
         conn
-        |> put_flash(:error, "Invalid email, password, or MFA token")
+        |> put_flash(:error, "Invalid email/handle, password, or MFA token")
         |> redirect(to: Routes.login_path(Endpoint, :new))
       else
         UserAuth.log_in_user(conn, user, user_params)
       end
     else
       conn
-      |> put_flash(:error, "Invalid email, password, or MFA token")
+      |> put_flash(:error, "Invalid email/handle, password, or MFA token")
       |> redirect(to: Routes.login_path(Endpoint, :new))
     end
   end

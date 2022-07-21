@@ -8,7 +8,7 @@ defmodule BanchanWeb.LoginLive do
   alias Surface.Components.{Form, Link, LiveRedirect}
 
   alias BanchanWeb.AuthLive.Components.AuthLayout
-  alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, Submit, TextInput}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -38,7 +38,7 @@ defmodule BanchanWeb.LoginLive do
         trigger_action={@trigger_submit}
       >
         <h1 class="text-2xl">Log in</h1>
-        <EmailInput name={:email} icon="envelope" opts={required: true} />
+        <TextInput name={:identifier} icon="at" label="Email or Handle" opts={required: true} />
         <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
         <TextInput
           label="MFA Token"

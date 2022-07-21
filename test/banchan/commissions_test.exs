@@ -107,7 +107,6 @@ defmodule Banchan.CommissionsTest do
           %{
             slots: 1
           },
-          nil,
           nil
         )
 
@@ -125,7 +124,6 @@ defmodule Banchan.CommissionsTest do
           %{
             slots: 2
           },
-          nil,
           nil
         )
 
@@ -141,7 +139,7 @@ defmodule Banchan.CommissionsTest do
 
       # Manually reopen
       assert {:ok, _} =
-               Offerings.update_offering(offering |> Repo.reload(), true, %{open: true}, nil, nil)
+               Offerings.update_offering(offering |> Repo.reload(), true, %{open: true}, nil)
 
       {:ok, comm3} = new_comm.()
       {:ok, _comm3} = Commissions.update_status(user, comm3, :accepted)

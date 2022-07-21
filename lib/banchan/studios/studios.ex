@@ -109,7 +109,6 @@ defmodule Banchan.Studios do
   end
 
   def make_portfolio_image!(%User{} = user, src, true, type, name) do
-    # TODO: Save the original image so it can be downloaded.
     upload = Uploads.save_file!(user, src, type, name)
 
     {:ok, image} =

@@ -18,6 +18,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
+    HiddenInput,
     MarkdownInput,
     Select,
     Submit,
@@ -35,6 +36,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   data changeset, :struct
   data uploads, :map
+  data remove_card, :boolean, default: false
 
   def mount(socket) do
     {:ok,
@@ -78,6 +80,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
     {:ok,
      socket
+     |> assign(remove_card: false)
      |> assign(
        changeset:
          old_assigns[:changeset] ||
@@ -157,6 +160,10 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     {:noreply, socket}
   end
 
+  def handle_event("remove_card", _, socket) do
+    {:noreply, assign(socket, remove_card: true)}
+  end
+
   @impl true
   def handle_event("cancel_card_upload", %{"ref" => ref}, socket) do
     {:noreply, socket |> cancel_upload(:card_image, ref)}
@@ -171,7 +178,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   def handle_event("submit", %{"offering" => offering}, socket) do
     offering = moneyfy_offering(offering)
 
-    card_images =
+    card_image =
       consume_uploaded_entries(socket, :card_image, fn %{path: path}, entry ->
         {:ok,
          Offerings.make_card_image!(
@@ -182,6 +189,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
            entry.client_name
          )}
       end)
+      |> Enum.at(0)
 
     new_gallery_uploads =
       consume_uploaded_entries(socket, :gallery_images, fn %{path: path}, entry ->
@@ -212,8 +220,9 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
     case submit_offering(
            socket.assigns.offering,
-           offering,
-           Enum.at(card_images, 0),
+           Enum.into(offering, %{
+             "card_img_id" => (card_image && card_image.id) || offering["card_image_id"]
+           }),
            gallery_images,
            socket.assigns.studio,
            socket.assigns.current_user_member?
@@ -235,24 +244,22 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     end
   end
 
-  defp submit_offering(offering, attrs, card_image, gallery_images, studio, current_user_member?)
+  defp submit_offering(offering, attrs, gallery_images, studio, current_user_member?)
        when is_nil(offering) do
     Offerings.new_offering(
       studio,
       current_user_member?,
       attrs,
-      card_image,
       gallery_images
     )
   end
 
-  defp submit_offering(offering, attrs, card_image, gallery_images, _studio, current_user_member?)
+  defp submit_offering(offering, attrs, gallery_images, _studio, current_user_member?)
        when not is_nil(offering) do
     Offerings.update_offering(
       offering,
       current_user_member?,
       attrs,
-      card_image,
       gallery_images
     )
   end
@@ -336,30 +343,46 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           label="Mature"
           info="Mark this offering as mature content. Note: if you plan on doing mature/NSFW commissions through this offering, this MUST be checked."
         />
-        <Collapse id={@id <> "-images"} class="rounded-lg border border-primary">
+        <Collapse id={@id <> "-images"} class="pt-4 border-b-2">
           <:header>
-            <h3 class="text-xl">
+            <h3 class="text-xl pb-2">
               Images
             </h3>
           </:header>
-          <div class="relative pb-video pt-2">
-            {#if Enum.empty?(@uploads.card_image.entries) && !(@offering && @offering.card_img_id)}
-              <img
-                class="absolute h-full w-full object-contain rounded-lg"
-                src={Routes.static_path(Endpoint, "/images/640x360.png")}
-              />
+          <div class="relative aspect-video py-2">
+            {#if Enum.empty?(@uploads.card_image.entries) &&
+                (@remove_card || !(@offering && @offering.card_img_id))}
+              <HiddenInput name={:card_image_id} value={nil} />
+              <div class="aspect-video bg-base-300 w-full" />
             {#elseif !Enum.empty?(@uploads.card_image.entries)}
+              <button
+                type="button"
+                phx-value-ref={(@uploads.card_image.entries |> Enum.at(0)).ref}
+                class="btn btn-xs btn-circle absolute right-2 top-4"
+                :on-click="cancel_card_upload"
+              >✕</button>
               {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
-                class: "absolute h-full w-full object-contain rounded-lg"
+                class: "object-contain aspect-video rounded-xl w-full"
               )}
             {#else}
+              <button
+                type="button"
+                class="btn btn-xs btn-circle absolute right-2 top-4"
+                :on-click="remove_card"
+              >✕</button>
+              <HiddenInput name={:card_image_id} value={@studio.card_img_id} />
               <img
-                class="absolute h-full w-full object-contain rounded-lg"
+                class="object-cover aspect-video rounded-xl w-full"
                 src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
               />
             {/if}
           </div>
-          <UploadInput label="Card Image" upload={@uploads.card_image} cancel="cancel_card_upload" />
+          <UploadInput
+            label="Card Image"
+            upload={@uploads.card_image}
+            cancel="cancel_card_upload"
+            hide_list
+          />
           <MasonryGallery
             id={@id <> "-gallery-preview"}
             class="py-2 rounded-lg"
@@ -377,11 +400,14 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         </Collapse>
         <h3 class="text-2xl pt-10">Options</h3>
         <div class="divider" />
-        <ul class="flex flex-col gap-2">
+        <div class="pb-4">
+          Options include both the "default options", which determine the offering's displayed base price, as well as any "add-ons" than can be added when making a proposal.
+        </div>
+        <ul class="flex flex-col gap-4">
           <InputContext :let={form: form}>
             <Inputs form={form} for={:options} :let={index: index}>
               <li>
-                <Collapse id={@id <> "-option-" <> "#{index}"} class="rounded-lg border border-primary">
+                <Collapse id={@id <> "-option-" <> "#{index}"} class="border-b-2">
                   <:header>
                     <h3 class="text-xl">
                       {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
@@ -427,7 +453,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           </li>
         </ul>
         <div class="divider" />
-        <Collapse class="rounded-lg border border-primary" id={@id <> "-terms-collapse"}>
+        <Collapse class="border-b-2 pb-2" id={@id <> "-terms-collapse"}>
           <:header>
             <h3 class="text-2xl">Terms and Template</h3>
           </:header>
@@ -442,8 +468,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
           />
         </Collapse>
-        <div class="divider" />
-        <div class="flex flex-row">
+        <div class="pt-4 flex flex-row">
           <Submit label="Save" />
           {#if @changeset.data.id}
             <Button class="btn-error" click="archive" label="Archive" />

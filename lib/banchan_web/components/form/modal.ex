@@ -46,7 +46,7 @@ defmodule BanchanWeb.Components.Modal do
       <div
         :if={@modal_open}
         :on-click="nothing"
-        class={"modal-box p-0 pt-3 relative", "sm:w-11/12 sm:max-w-5xl lg:w-8/12": @big}
+        class={"modal-box relative", "sm:w-11/12 sm:max-w-5xl lg:w-8/12": @big}
       >
         <div
           class="btn btn-circle btn-ghost close-modal absolute right-2 top-2 text-xl"

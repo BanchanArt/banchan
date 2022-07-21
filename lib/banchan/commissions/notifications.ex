@@ -6,11 +6,12 @@ defmodule Banchan.Commissions.Notifications do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions
-  alias Banchan.Commissions.{Commission, CommissionSubscription, Common, Event}
+  alias Banchan.Commissions.{Commission, CommissionSubscription, Common, Event, Invoice}
   alias Banchan.Notifications
   alias Banchan.Repo
   alias Banchan.Studios
   alias Banchan.Studios.{Studio, StudioSubscription}
+  alias Banchan.Workers.Mailer
 
   # Unfortunate, but needed for crafting URLs for notifications
   alias BanchanWeb.Endpoint
@@ -199,7 +200,7 @@ defmodule Banchan.Commissions.Notifications do
   end
 
   defp new_event_notification_body(%Event{type: :payment_processed, amount: amount}) do
-    "A payment for #{Money.to_string(amount)} has been successfully processed. It will be available for payout when the commission is completed and accepted."
+    "A payment for #{Money.to_string(amount)} (including tips) has been successfully processed. It will be available for payout when the commission is completed and accepted."
   end
 
   defp new_event_notification_body(%Event{type: :refund_processed, amount: amount}) do
@@ -342,6 +343,22 @@ defmodule Banchan.Commissions.Notifications do
 
   defp refund_updated_body(:requires_action) do
     "A refund requires further action."
+  end
+
+  def send_receipt(%Invoice{} = invoice, %User{} = client, %Commission{} = commission) do
+    if client.email do
+      Mailer.deliver(
+        to: client.email,
+        subject: "Banchan Art Receipt for #{commission.title}",
+        html_body:
+          Phoenix.View.render_to_string(BanchanWeb.PaymentReceiptView, "receipt.html", %{
+            invoice: invoice |> Repo.preload([:event]),
+            commission: commission |> Repo.preload([:line_items]),
+            deposited: Commissions.deposited_amount(client, commission, true),
+            tipped: Commissions.tipped_amount(client, commission, true)
+          })
+      )
+    end
   end
 
   defp replace_fragment(uri, event) do

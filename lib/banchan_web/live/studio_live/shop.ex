@@ -193,11 +193,11 @@ defmodule BanchanWeb.StudioLive.Shop do
               <p>You need to onboard your studio on Stripe before it opens its doors.</p>
               <div class="flex flex-row-reverse">
                 <Link label="Onboard" to={@stripe_onboarding_url} class="btn btn-primary py-1 px-5 m-1" />
-                <Button click="recheck_stripe" label="Recheck" />
+                <Button click="recheck_stripe" label="Recheck" class="btn-link" />
               </div>
             {#elseif @current_user_member? && !@studio.stripe_charges_enabled}
               <p>Details have been submitted to Stripe. Please wait while charges are enabled. This shouldn't take too long.</p>
-              <Button click="recheck_stripe" label="Recheck" />
+              <Button click="recheck_stripe" label="Recheck" class="btn-link" />
             {#else}
               <p>This studio is still working on opening its doors. Check back in soon!</p>
             {/if}

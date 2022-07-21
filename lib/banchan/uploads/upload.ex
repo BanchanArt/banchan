@@ -19,6 +19,8 @@ defmodule Banchan.Uploads.Upload do
     field :pending, :boolean, default: true
 
     belongs_to :uploader, User
+    belongs_to :original, __MODULE__, on_replace: :nilify, type: :binary_id
+
     timestamps()
   end
 
