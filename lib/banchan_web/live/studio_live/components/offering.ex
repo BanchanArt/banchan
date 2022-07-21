@@ -370,7 +370,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                 class="btn btn-xs btn-circle absolute right-2 top-4"
                 :on-click="remove_card"
               >✕</button>
-              <HiddenInput name={:card_image_id} value={@studio.card_img_id} />
+              <HiddenInput name={:card_image_id} value={@offering.card_img_id} />
               <img
                 class="object-cover aspect-video rounded-xl w-full"
                 src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
