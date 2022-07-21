@@ -152,8 +152,8 @@ defmodule Banchan.Offerings do
     ret
   end
 
-  def get_offering_by_type!(%Studio{} = studio, type, current_user_member?) do
-    Repo.one!(
+  def get_offering_by_type!(%Studio{} = studio, type, current_user_member?, current_user \\ nil) do
+    q =
       from o in Offering,
         as: :offering,
         left_lateral_join:
@@ -188,7 +188,25 @@ defmodule Banchan.Offerings do
                 {:array, Upload}
               )
           })
-    )
+
+    q =
+      if current_user do
+        q
+        |> join(:left, [offering: o], sub in OfferingSubscription,
+          on:
+            sub.user_id == ^current_user.id and sub.offering_id == o.id and
+              sub.silenced != true,
+          as: :subscribed
+        )
+        |> select_merge([o, subscribed: sub], %{
+          user_subscribed?: not is_nil(sub.id)
+        })
+      else
+        q
+      end
+
+    q
+    |> Repo.one!()
     |> Repo.preload([:options, :studio, :card_img])
   end
 

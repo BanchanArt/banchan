@@ -32,35 +32,6 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
      |> assign(available_slots: available_slots)}
   end
 
-  @impl true
-  def handle_event("notify_me", _, socket) do
-    if socket.assigns.current_user do
-      Offerings.Notifications.subscribe_user!(
-        socket.assigns.current_user,
-        socket.assigns.offering
-      )
-
-      send_update(__MODULE__, id: socket.assigns.id)
-      {:noreply, socket}
-    else
-      {:noreply,
-       socket
-       |> put_flash(:info, "You must log in to subscribe.")
-       |> redirect(to: Routes.login_path(Endpoint, :new))}
-    end
-  end
-
-  @impl true
-  def handle_event("unnotify_me", _, socket) do
-    Offerings.Notifications.unsubscribe_user!(
-      socket.assigns.current_user,
-      socket.assigns.offering
-    )
-
-    send_update(__MODULE__, id: socket.assigns.id)
-    {:noreply, socket}
-  end
-
   def render(assigns) do
     ~F"""
     <offering-card class="w-full relative cursor-pointer">

@@ -401,7 +401,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <h3 class="text-2xl pt-10">Options</h3>
         <div class="divider" />
         <div class="pb-4">
-        Options include both the "default options", which determine the offering's displayed base price, as well as any "add-ons" than can be added when making a proposal.
+          Options include both the "default options", which determine the offering's displayed base price, as well as any "add-ons" than can be added when making a proposal.
         </div>
         <ul class="flex flex-col gap-4">
           <InputContext :let={form: form}>

@@ -28,7 +28,8 @@ defmodule BanchanWeb.OfferingLive.Show do
       Offerings.get_offering_by_type!(
         socket.assigns.studio,
         offering_type,
-        socket.assigns.current_user_member?
+        socket.assigns.current_user_member?,
+        socket.assigns.current_user
       )
 
     Notifications.subscribe_to_offering_updates(offering)
@@ -94,7 +95,8 @@ defmodule BanchanWeb.OfferingLive.Show do
       Offerings.get_offering_by_type!(
         socket.assigns.studio,
         socket.assigns.offering.type,
-        socket.assigns.current_user_member?
+        socket.assigns.current_user_member?,
+        socket.assigns.current_user
       )
 
     gallery_images =
@@ -102,6 +104,33 @@ defmodule BanchanWeb.OfferingLive.Show do
       |> Enum.map(&{:existing, &1})
 
     {:noreply, socket |> assign(offering: offering, gallery_images: gallery_images)}
+  end
+
+  @impl true
+  def handle_event("notify_me", _, socket) do
+    if socket.assigns.current_user do
+      Offerings.Notifications.subscribe_user!(
+        socket.assigns.current_user,
+        socket.assigns.offering
+      )
+
+      {:noreply, socket |> assign(offering: %{socket.assigns.offering | user_subscribed?: true})}
+    else
+      {:noreply,
+       socket
+       |> put_flash(:info, "You must log in to subscribe.")
+       |> redirect(to: Routes.login_path(Endpoint, :new))}
+    end
+  end
+
+  @impl true
+  def handle_event("unnotify_me", _, socket) do
+    Offerings.Notifications.unsubscribe_user!(
+      socket.assigns.current_user,
+      socket.assigns.offering
+    )
+
+    {:noreply, socket |> assign(offering: %{socket.assigns.offering | user_subscribed?: false})}
   end
 
   @impl true
