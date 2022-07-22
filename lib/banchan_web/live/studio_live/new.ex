@@ -136,12 +136,14 @@ defmodule BanchanWeb.StudioLive.New do
               name={:country}
               info="Country where you are based. This must be the same country where your bank is, and it's the only reason we collect this information."
               options={@countries}
+              selected={:US}
               opts={required: true}
             />
             <Select
               name={:default_currency}
               info="Currency that will appear by default in your currency drop down (if you choose more than one currency)."
               prompt="Pick a currency..."
+              selected={:USD}
               options={@currencies}
               opts={required: true}
             />
