@@ -50,14 +50,17 @@ defmodule BanchanWeb.Router do
     plug(EnsureRolePlug, [:admin, :mod, :artist])
   end
 
-  pipeline :enabled_user do
-    plug(:require_authenticated_user)
+  pipeline :ensure_enabled do
     plug(EnsureEnabledPlug, [])
+  end
+
+  pipeline :require_authed do
+    plug(:require_authenticated_user)
   end
 
   scope "/", BanchanWeb do
     live_session :users_only, on_mount: {BanchanWeb.UserLiveAuth, :users_only} do
-      pipe_through([:browser, :enabled_user])
+      pipe_through([:browser, :require_authed, :ensure_enabled])
 
       live("/denizens/:handle/edit", DenizenLive.Edit, :edit)
 
@@ -95,7 +98,7 @@ defmodule BanchanWeb.Router do
 
   scope "/", BanchanWeb do
     live_session :artists_only, on_mount: {BanchanWeb.UserLiveAuth, :artists_only} do
-      pipe_through([:browser, :enabled_user, :artist])
+      pipe_through([:browser, :require_authed, :ensure_enabled, :artist])
 
       live("/offerings/:handle/:offering_type/edit", StudioLive.Offerings.Edit, :edit)
 
@@ -111,7 +114,7 @@ defmodule BanchanWeb.Router do
 
   scope "/", BanchanWeb do
     live_session :mods_only, on_mount: {BanchanWeb.UserLiveAuth, :mods_only} do
-      pipe_through([:browser, :enabled_user, :mod])
+      pipe_through([:browser, :require_authed, :ensure_enabled, :mod])
 
       live("/denizens/:handle/moderation", DenizenLive.Moderation, :edit)
       live("/studios/:handle/moderation", StudioLive.Moderation, :edit)
@@ -136,8 +139,16 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :open, on_mount: {BanchanWeb.UserLiveAuth, :open} do
+    live_session :default, on_mount: {BanchanWeb.UserLiveAuth, :default} do
       pipe_through(:browser)
+
+      live("/account_disabled", AccountDisabledLive, :show)
+    end
+  end
+
+  scope "/", BanchanWeb do
+    live_session :open, on_mount: {BanchanWeb.UserLiveAuth, :open} do
+      pipe_through([:browser, :ensure_enabled])
 
       live("/", HomeLive, :index)
 
@@ -158,8 +169,6 @@ defmodule BanchanWeb.Router do
 
       live("/reset_password", ForgotPasswordLive, :edit)
       live("/reset_password/:token", ResetPasswordLive, :edit)
-
-      live("/account_disabled", AccountDisabledLive, :show)
     end
   end
 

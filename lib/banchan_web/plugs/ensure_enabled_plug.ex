@@ -8,7 +8,6 @@ defmodule BanchanWeb.EnsureEnabledPlug do
   alias Phoenix.Controller
 
   alias Banchan.Accounts
-  alias Banchan.Repo
 
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
@@ -21,11 +20,10 @@ defmodule BanchanWeb.EnsureEnabledPlug do
   def call(conn, _) do
     user_token = get_session(conn, :user_token)
 
-    user =
-      user_token && Accounts.get_user_by_session_token(user_token) |> Repo.preload(:disable_info)
+    user = user_token && Accounts.get_user_by_session_token(user_token)
 
     if is_nil(user) do
-      maybe_halt(false, conn)
+      maybe_halt(true, conn)
     else
       user
       |> enabled?()

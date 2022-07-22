@@ -81,7 +81,7 @@ defmodule BanchanWeb.DenizenLive.Show do
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <:hero>
         <section>
-          {#if @user.header_img && !@user.header_img.pending}
+          {#if @user.header_img && !@user.header_img.pending && !@user.disable_info}
             <img
               class="object-cover aspect-header-image rounded-b-xl w-full"
               src={Routes.public_image_path(Endpoint, :image, @user.header_img_id)}
@@ -92,12 +92,22 @@ defmodule BanchanWeb.DenizenLive.Show do
           <div class="flex flex-row">
             <div class="relative w-32 h-20">
               <div class="absolute -top-4 left-6">
-                <Avatar thumb={false} class="w-24 h-24" user={@user} />
+                {#if @user.disable_info}
+                  <div class="avatar">
+                    <div class="rounded-full">
+                      <div class="bg-base-300 w-24 h-24" />
+                    </div>
+                  </div>
+                {#else}
+                  <Avatar thumb={false} class="w-24 h-24" user={@user} />
+                {/if}
               </div>
             </div>
             <div class="m-4 flex flex-col">
               <h1 class="text-xl font-bold">
-                {@user.name}
+                {#if !@user.disable_info}
+                  {@user.name}
+                {/if}
               </h1>
               <span>@{@user.handle}</span>
             </div>
@@ -120,14 +130,19 @@ defmodule BanchanWeb.DenizenLive.Show do
             </div>
           </div>
           <div class="mx-6 my-4">
-            {@user.bio}
+            {#if !@user.disable_info}
+              {@user.bio}
+            {/if}
           </div>
-          <div :if={!Enum.empty?(@user.tags)} class="mx-6 my-4 flex flex-row flex-wrap gap-1">
+          <div
+            :if={!@user.disable_info && !Enum.empty?(@user.tags)}
+            class="mx-6 my-4 flex flex-row flex-wrap gap-1"
+          >
             {#for tag <- @user.tags}
               <div class="badge badge-lg gap-2 badge-primary cursor-default">{tag}</div>
             {/for}
           </div>
-          <div class="mx-6 my-4 flex flex-row flex-wrap gap-4">
+          <div :if={!@user.disable_info} class="mx-6 my-4 flex flex-row flex-wrap gap-4">
             <a
               :if={@user.twitter_handle}
               class="flex flex-row flex-nowrap gap-1 items-center"
@@ -232,18 +247,22 @@ defmodule BanchanWeb.DenizenLive.Show do
           </div>
         </section>
       </:hero>
-      {#if @live_action == :show}
-        <div class="text-2xl pb-6">Artist for:</div>
-      {#elseif @live_action == :following}
-        <div class="text-2xl pb-6">Following:</div>
-      {/if}
-      {#if !Enum.empty?(@studios)}
-        <div class="studio-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
-          {#for studio <- @studios}
-            <StudioCard studio={studio} />
-          {/for}
-        </div>
-        <InfiniteScroll id="studios-infinite-scroll" page={@studios.page_number} load_more="load_more" />
+      {#if @user.disable_info}
+        <div class="font-semibold">This account has been disabled.</div>
+      {#else}
+        {#if @live_action == :show}
+          <div class="text-2xl pb-6">Artist for:</div>
+        {#elseif @live_action == :following}
+          <div class="text-2xl pb-6">Following:</div>
+        {/if}
+        {#if !Enum.empty?(@studios)}
+          <div class="studio-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+            {#for studio <- @studios}
+              <StudioCard studio={studio} />
+            {/for}
+          </div>
+          <InfiniteScroll id="studios-infinite-scroll" page={@studios.page_number} load_more="load_more" />
+        {/if}
       {/if}
     </Layout>
     """

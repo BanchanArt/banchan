@@ -203,7 +203,7 @@ defmodule Banchan.Studios do
               studio_id: studio.id,
               disabled_by_id: actor.id,
               disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-              lifting_job_id: job.id
+              lifting_job_id: job && job.id
             }
             |> StudioDisableHistory.disable_changeset(attrs)
             |> Repo.insert()

@@ -224,7 +224,7 @@ defmodule Banchan.Accounts do
       iex> get_user!(456)
       ** (Ecto.NoResultsError)
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload(:disable_info)
 
   @doc """
   Gets a user by email.
@@ -240,7 +240,9 @@ defmodule Banchan.Accounts do
   """
   def get_user_by_email(email) when is_binary(email) do
     Repo.one(
-      from u in User, where: u.email == ^email, preload: [:pfp_img, :pfp_thumb, :header_img]
+      from u in User,
+        where: u.email == ^email,
+        preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
     )
   end
 
@@ -260,7 +262,7 @@ defmodule Banchan.Accounts do
     Repo.one!(
       from u in User,
         where: u.handle == ^handle,
-        preload: [:pfp_img, :pfp_thumb, :header_img]
+        preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
     )
   end
 
@@ -282,7 +284,7 @@ defmodule Banchan.Accounts do
       Repo.one(
         from u in User,
           where: u.email == ^ident or u.handle == ^ident,
-          preload: [:pfp_img, :pfp_thumb, :header_img]
+          preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
       )
 
     if User.valid_password?(user, password), do: user
@@ -430,7 +432,7 @@ defmodule Banchan.Accounts do
               user_id: user.id,
               disabled_by_id: actor.id,
               disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-              lifting_job_id: job.id
+              lifting_job_id: job && job.id
             }
             |> DisableHistory.disable_changeset(attrs)
             |> Repo.insert()
@@ -729,7 +731,7 @@ defmodule Banchan.Accounts do
   """
   def get_user_by_session_token(token) do
     {:ok, query} = UserToken.verify_session_token_query(token)
-    Repo.one(query)
+    Repo.one(query) |> Repo.preload(:disable_info)
   end
 
   @doc """
@@ -820,7 +822,7 @@ defmodule Banchan.Accounts do
   def get_user_by_reset_password_token(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "reset_password"),
          %User{} = user <- Repo.one(query) do
-      user
+      user |> Repo.preload(:disable_info)
     else
       _ -> nil
     end
