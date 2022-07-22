@@ -83,6 +83,10 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                   <TimelineItem uri={@uri} icon="S" actor={Map.get(@users, event.actor_id)} event={event}>
                     changed the status to <strong>{Common.humanize_status(event.status)}</strong>
                   </TimelineItem>
+                {#match :title_changed}
+                  <TimelineItem uri={@uri} icon="T" actor={Map.get(@users, event.actor_id)} event={event}>
+                    changed the title <span class="line-through">{event.text}</span> {@commission.title}
+                  </TimelineItem>
               {/case}
             {/for}
           </div>

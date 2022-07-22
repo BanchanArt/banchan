@@ -27,7 +27,8 @@ defmodule Banchan.Commissions.Common do
     :line_item_removed,
     :payment_processed,
     :refund_processed,
-    :status
+    :status,
+    :title_changed
   ]
 
   def event_types do

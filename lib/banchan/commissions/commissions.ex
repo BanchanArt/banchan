@@ -355,13 +355,19 @@ defmodule Banchan.Commissions do
   def update_title(%User{} = actor, %Commission{} = commission, attrs) do
     {:ok, ret} =
       Repo.transaction(fn ->
+        old_title = Repo.reload(commission).title
+
         commission
         |> Commission.update_title_changeset(attrs)
         |> Repo.update()
         |> case do
           {:ok, commission} ->
             Notifications.commission_title_changed(commission, actor)
-            {:ok, commission}
+
+            with {:ok, _} <-
+                   create_event(:title_changed, actor, commission, true, [], %{text: old_title}) do
+              {:ok, commission}
+            end
 
           {:error, err} ->
             {:error, err}
