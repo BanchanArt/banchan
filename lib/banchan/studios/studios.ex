@@ -27,7 +27,7 @@ defmodule Banchan.Studios do
 
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
-  alias Banchan.Workers.Thumbnailer
+  alias Banchan.Workers.{EnableStudio, Thumbnailer}
 
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
@@ -187,13 +187,30 @@ defmodule Banchan.Studios do
 
   def disable_studio(%User{} = actor, %Studio{} = studio, attrs) do
     if :admin in actor.roles || :mod in actor.roles do
-      %StudioDisableHistory{
-        studio_id: studio.id,
-        disabled_by_id: actor.id,
-        disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-      }
-      |> StudioDisableHistory.disable_changeset(attrs)
-      |> Repo.insert()
+      {:ok, ret} =
+        Repo.transaction(fn ->
+          dummy = %StudioDisableHistory{} |> StudioDisableHistory.disable_changeset(attrs)
+
+          with {:ok, job} <-
+                 (case Ecto.Changeset.fetch_change(dummy, :disabled_until) do
+                    {:ok, until} when not is_nil(until) ->
+                      EnableStudio.schedule_unban(studio, until)
+
+                    _ ->
+                      {:ok, nil}
+                  end) do
+            %StudioDisableHistory{
+              studio_id: studio.id,
+              disabled_by_id: actor.id,
+              disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+              lifting_job_id: job.id
+            }
+            |> StudioDisableHistory.disable_changeset(attrs)
+            |> Repo.insert()
+          end
+        end)
+
+      ret
     else
       {:error, :unauthorized}
     end
@@ -202,26 +219,35 @@ defmodule Banchan.Studios do
   @doc """
   Re-enable a previously disabled studio.
   """
-  def enable_studio(actor, %Studio{} = studio, reason) do
+  def enable_studio(actor, %Studio{} = studio, reason, cancel \\ true) do
     if is_nil(actor) || :admin in actor.roles || :mod in actor.roles do
       changeset =
         StudioDisableHistory.enable_changeset(%StudioDisableHistory{}, %{lifted_reason: reason})
 
       if changeset.valid? do
-        {_, [history | _]} =
-          Repo.update_all(
-            from(h in StudioDisableHistory,
-              where: h.studio_id == ^studio.id and is_nil(h.lifted_at),
-              select: h
-            ),
-            set: [
-              lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-              lifted_by_id: actor && actor.id,
-              lifted_reason: reason
-            ]
-          )
+        {:ok, ret} =
+          Repo.transaction(fn ->
+            {_, [history | _]} =
+              Repo.update_all(
+                from(h in StudioDisableHistory,
+                  where: h.studio_id == ^studio.id and is_nil(h.lifted_at),
+                  select: h
+                ),
+                set: [
+                  lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+                  lifted_by_id: actor && actor.id,
+                  lifted_reason: reason
+                ]
+              )
 
-        {:ok, history}
+            if cancel do
+              EnableStudio.cancel_unban(history)
+            end
+
+            {:ok, history}
+          end)
+
+        ret
       else
         {:error, changeset}
       end

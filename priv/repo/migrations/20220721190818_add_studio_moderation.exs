@@ -12,11 +12,16 @@ defmodule Banchan.Repo.Migrations.AddStudioModeration do
       add :disabled_at, :naive_datetime
       add :disabled_until, :naive_datetime
       add :disabled_reason, :text
+      add :lifting_job_id, :integer
       add :lifted_by_id, references(:users, on_delete: :delete_all)
       add :lifted_reason, :text
       add :lifted_at, :naive_datetime
     end
 
     create index(:studio_disable_history, [:studio_id])
+
+    alter table(:disable_history) do
+      add :lifting_job_id, :integer
+    end
   end
 end

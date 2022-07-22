@@ -10,7 +10,7 @@ defmodule Banchan.Accounts do
   alias Banchan.Accounts.{DisableHistory, User, UserNotifier, UserToken}
   alias Banchan.Repo
   alias Banchan.Uploads
-  alias Banchan.Workers.Thumbnailer
+  alias Banchan.Workers.{EnableUser, Thumbnailer}
 
   alias BanchanWeb.UserAuth
 
@@ -414,13 +414,30 @@ defmodule Banchan.Accounts do
   def disable_user(%User{} = actor, %User{} = user, attrs) do
     if :admin in actor.roles ||
          (:mod in actor.roles && :admin not in user.roles) do
-      %DisableHistory{
-        user_id: user.id,
-        disabled_by_id: actor.id,
-        disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-      }
-      |> DisableHistory.disable_changeset(attrs)
-      |> Repo.insert()
+      {:ok, ret} =
+        Repo.transaction(fn ->
+          dummy = %DisableHistory{} |> DisableHistory.disable_changeset(attrs)
+
+          with {:ok, job} <-
+                 (case Ecto.Changeset.fetch_change(dummy, :disabled_until) do
+                    {:ok, until} when not is_nil(until) ->
+                      EnableUser.schedule_unban(user, until)
+
+                    _ ->
+                      {:ok, nil}
+                  end) do
+            %DisableHistory{
+              user_id: user.id,
+              disabled_by_id: actor.id,
+              disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+              lifting_job_id: job.id
+            }
+            |> DisableHistory.disable_changeset(attrs)
+            |> Repo.insert()
+          end
+        end)
+
+      ret
     else
       {:error, :unauthorized}
     end
@@ -429,27 +446,36 @@ defmodule Banchan.Accounts do
   @doc """
   Re-enable a previously disabled user.
   """
-  def enable_user(actor, %User{} = user, reason) do
+  def enable_user(actor, %User{} = user, reason, cancel \\ true) do
     if is_nil(actor) ||
          :admin in actor.roles ||
          (:mod in actor.roles && :admin not in user.roles) do
       changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifted_reason: reason})
 
       if changeset.valid? do
-        {_, [history | _]} =
-          Repo.update_all(
-            from(h in DisableHistory,
-              where: h.user_id == ^user.id and is_nil(h.lifted_at),
-              select: h
-            ),
-            set: [
-              lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-              lifted_by_id: actor && actor.id,
-              lifted_reason: reason
-            ]
-          )
+        {:ok, ret} =
+          Repo.transaction(fn ->
+            {_, [history | _]} =
+              Repo.update_all(
+                from(h in DisableHistory,
+                  where: h.user_id == ^user.id and is_nil(h.lifted_at),
+                  select: h
+                ),
+                set: [
+                  lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+                  lifted_by_id: actor && actor.id,
+                  lifted_reason: reason
+                ]
+              )
 
-        {:ok, history}
+            if cancel do
+              EnableUser.cancel_unban(history)
+            end
+
+            {:ok, history}
+          end)
+
+        ret
       else
         {:error, changeset}
       end

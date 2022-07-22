@@ -33,17 +33,7 @@ defmodule BanchanWeb.EnsureEnabledPlug do
     end
   end
 
-  defp enabled?(user) when is_nil(user.disable_info), do: true
-  defp enabled?(user) when is_nil(user.disable_info.disabled_until), do: false
-
-  defp enabled?(user) do
-    if NaiveDateTime.compare(NaiveDateTime.utc_now(), user.disable_info.disabled_until) == :gt do
-      {:ok, _} = Accounts.enable_user(nil, user, "Disabled time frame expired.")
-      true
-    else
-      false
-    end
-  end
+  defp enabled?(user), do: is_nil(user.disable_info)
 
   defp maybe_halt(true, conn), do: conn
 

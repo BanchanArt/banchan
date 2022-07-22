@@ -13,6 +13,7 @@ defmodule Banchan.Accounts.DisableHistory do
     field :disabled_at, :naive_datetime
     field :disabled_until, :naive_datetime
     field :disabled_reason, :string
+    field :lifting_job_id, :integer
     field :lifted_reason, :string
     field :lifted_at, :naive_datetime
     belongs_to :lifted_by, User, on_replace: :nilify

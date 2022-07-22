@@ -186,7 +186,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Form as={:studio} for={@changeset} change="change" submit="submit">
             <div class="text-xl">
-              Manage Studio {@studio.name}
+              Manage {@studio.name}
             </div>
             <TextInput
               name={:platform_fee}
