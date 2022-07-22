@@ -6,6 +6,8 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   alias Banchan.Studios
 
+  alias Surface.Components.LiveRedirect
+
   alias BanchanWeb.Components.{Button, Layout}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{FeaturedToggle, TabButton}
@@ -64,7 +66,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
     <Layout uri={@uri} padding={@padding} current_user={@current_user} flashes={@flashes}>
       <:hero>
         <section>
-          {#if @studio.header_img && !@studio.header_img.pending}
+          {#if @studio.header_img && !@studio.header_img.pending && !@studio.disable_info}
             <img
               class="object-cover aspect-header-image rounded-b-xl w-full"
               src={Routes.public_image_path(Endpoint, :image, @studio.header_img_id)}
@@ -77,6 +79,13 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
               <div class="grow">
                 {@studio.name}
               </div>
+              {#if @current_user && (:admin in @current_user.roles || :mod in @current_user.roles)}
+                <LiveRedirect
+                  label="Moderation"
+                  to={Routes.studio_moderation_path(Endpoint, :edit, @studio.handle)}
+                  class="btn btn-sm btn-warning rounded-full px-2 py-0 m-1"
+                />
+              {/if}
               {#if @current_user && :admin in @current_user.roles}
                 <FeaturedToggle id="featured-toggle" current_user={@current_user} studio={@studio} />
               {/if}

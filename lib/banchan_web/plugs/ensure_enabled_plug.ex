@@ -8,7 +8,6 @@ defmodule BanchanWeb.EnsureEnabledPlug do
   alias Phoenix.Controller
 
   alias Banchan.Accounts
-  alias Banchan.Repo
 
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
@@ -21,11 +20,10 @@ defmodule BanchanWeb.EnsureEnabledPlug do
   def call(conn, _) do
     user_token = get_session(conn, :user_token)
 
-    user =
-      user_token && Accounts.get_user_by_session_token(user_token) |> Repo.preload(:disable_info)
+    user = user_token && Accounts.get_user_by_session_token(user_token)
 
     if is_nil(user) do
-      maybe_halt(false, conn)
+      maybe_halt(true, conn)
     else
       user
       |> enabled?()
@@ -33,17 +31,7 @@ defmodule BanchanWeb.EnsureEnabledPlug do
     end
   end
 
-  defp enabled?(user) when is_nil(user.disable_info), do: true
-  defp enabled?(user) when is_nil(user.disable_info.disabled_until), do: false
-
-  defp enabled?(user) do
-    if NaiveDateTime.compare(NaiveDateTime.utc_now(), user.disable_info.disabled_until) == :gt do
-      {:ok, _} = Accounts.enable_user(nil, user, "Disabled time frame expired.")
-      true
-    else
-      false
-    end
-  end
+  defp enabled?(user), do: is_nil(user.disable_info)
 
   defp maybe_halt(true, conn), do: conn
 

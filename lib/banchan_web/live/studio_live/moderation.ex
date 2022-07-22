@@ -1,48 +1,58 @@
-defmodule BanchanWeb.DenizenLive.Moderation do
+defmodule BanchanWeb.StudioLive.Moderation do
   @moduledoc """
-  Admin-level user editing, such as changing roles, disabling, and such.
+  Admin-level studio editing, such as changing platform fees, disabling, etc.
   """
   use BanchanWeb, :surface_view
 
   alias Surface.Components.Form
 
-  alias Banchan.Accounts
-  alias Banchan.Accounts.{DisableHistory, User}
   alias Banchan.Repo
+  alias Banchan.Studios
+  alias Banchan.Studios.{Studio, StudioDisableHistory}
+
+  import BanchanWeb.StudioLive.Helpers
+
+  alias BanchanWeb.Components.{Avatar, Markdown, UserHandle}
 
   alias BanchanWeb.Components.Form.{
     DateTimeLocalInput,
     MarkdownInput,
-    MultipleSelect,
-    Submit
+    Submit,
+    TextInput
   }
 
-  alias BanchanWeb.Components.{Avatar, Layout, Markdown, UserHandle}
   alias BanchanWeb.Endpoint
+  alias BanchanWeb.StudioLive.Components.StudioLayout
 
   @impl true
-  def mount(%{"handle" => handle}, _session, socket) do
-    user =
-      Accounts.get_user_by_handle!(handle)
-      |> Repo.preload([:disable_info, disable_history: [:disabled_by, :lifted_by]])
+  def mount(params, _session, socket) do
+    socket = assign_studio_defaults(params, socket, false, false)
 
-    if :admin in socket.assigns.current_user.roles ||
-         (:mod in socket.assigns.current_user.roles && :admin not in user.roles) do
+    socket =
+      socket
+      |> assign(
+        studio:
+          socket.assigns.studio
+          |> Repo.preload(disable_history: [:disabled_by, :lifted_by])
+      )
+
+    if :admin in socket.assigns.current_user.roles || :mod in socket.assigns.current_user.roles do
       socket =
         socket
-        |> assign(
-          user: user,
-          roles: [Mod: :mod, Admin: :admin, Artist: :artist],
-          changeset: User.admin_changeset(socket.assigns.current_user, user)
-        )
+        |> assign(changeset: Studio.admin_changeset(socket.assigns.studio, %{}))
 
       socket =
-        if user.disable_info do
+        if socket.assigns.studio.disable_info do
           socket
-          |> assign(enable_changeset: DisableHistory.enable_changeset(%DisableHistory{}, %{}))
+          |> assign(
+            enable_changeset: StudioDisableHistory.enable_changeset(%StudioDisableHistory{}, %{})
+          )
         else
           socket
-          |> assign(disable_changeset: DisableHistory.disable_changeset(%DisableHistory{}, %{}))
+          |> assign(
+            disable_changeset:
+              StudioDisableHistory.disable_changeset(%StudioDisableHistory{}, %{})
+          )
         end
 
       {:ok, socket}
@@ -50,8 +60,14 @@ defmodule BanchanWeb.DenizenLive.Moderation do
       {:ok,
        socket
        |> put_flash(:error, "You are not authorized to access this page.")
-       |> push_redirect(to: Routes.denizen_show_path(Endpoint, :show, handle))}
+       |> push_redirect(
+         to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+       )}
     end
+  end
+
+  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
+    {:noreply, socket |> assign(followers: new_count)}
   end
 
   @impl true
@@ -60,55 +76,63 @@ defmodule BanchanWeb.DenizenLive.Moderation do
   end
 
   @impl true
-  def handle_event("change", val, socket) do
+  def handle_event("change", %{"studio" => studio}, socket) do
     changeset =
-      User.admin_changeset(socket.assigns.current_user, socket.assigns.user, val["user"])
+      Studio.admin_changeset(socket.assigns.studio, studio)
       |> Map.put(:action, :update)
 
     {:noreply, socket |> assign(changeset: changeset)}
   end
 
   @impl true
-  def handle_event("submit", val, socket) do
-    case Accounts.update_admin_fields(
+  def handle_event("submit", %{"studio" => studio}, socket) do
+    case Studios.update_admin_fields(
            socket.assigns.current_user,
-           socket.assigns.user,
-           val["user"]
+           socket.assigns.studio,
+           studio
          ) do
+      {:error, :unauthorized} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are not authorized to perform this action.")
+         |> push_redirect(
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, socket |> assign(changeset: changeset)}
 
-      {:ok, user} ->
+      {:ok, studio} ->
         {:noreply,
          socket
-         |> put_flash(:info, "User updated.")
-         |> push_redirect(to: Routes.denizen_show_path(Endpoint, :show, user.handle))}
+         |> put_flash(:info, "Studio updated.")
+         |> push_redirect(to: Routes.studio_shop_path(Endpoint, :show, studio.handle))}
     end
   end
 
   @impl true
-  def handle_event("change_disable", val, socket) do
+  def handle_event("change_disable", %{"disable" => disable}, socket) do
     changeset =
-      %DisableHistory{}
-      |> DisableHistory.disable_changeset(val["disable"])
+      %StudioDisableHistory{}
+      |> StudioDisableHistory.disable_changeset(disable)
       |> Map.put(:action, :update)
 
     {:noreply, socket |> assign(disable_changeset: changeset)}
   end
 
   @impl true
-  def handle_event("submit_disable", val, socket) do
-    case Accounts.disable_user(
+  def handle_event("submit_disable", %{"disable" => disable}, socket) do
+    case Studios.disable_studio(
            socket.assigns.current_user,
-           socket.assigns.user,
-           val["disable"]
+           socket.assigns.studio,
+           disable
          ) do
       {:ok, _} ->
         {:noreply,
          socket
-         |> put_flash(:info, "User disabled.")
+         |> put_flash(:info, "Studio disabled.")
          |> push_redirect(
-           to: Routes.denizen_show_path(Endpoint, :show, socket.assigns.user.handle)
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
       {:error, changeset} ->
@@ -117,28 +141,28 @@ defmodule BanchanWeb.DenizenLive.Moderation do
   end
 
   @impl true
-  def handle_event("change_enable", val, socket) do
+  def handle_event("change_enable", %{"enable" => enable}, socket) do
     changeset =
-      %DisableHistory{}
-      |> DisableHistory.enable_changeset(val["enable"])
+      %StudioDisableHistory{}
+      |> StudioDisableHistory.enable_changeset(enable)
       |> Map.put(:action, :update)
 
     {:noreply, socket |> assign(enable_changeset: changeset)}
   end
 
   @impl true
-  def handle_event("submit_enable", val, socket) do
-    case Accounts.enable_user(
+  def handle_event("submit_enable", %{"enable" => enable}, socket) do
+    case Studios.enable_studio(
            socket.assigns.current_user,
-           socket.assigns.user,
-           val["enable"]["lifted_reason"]
+           socket.assigns.studio,
+           enable["lifted_reason"]
          ) do
       {:ok, _} ->
         {:noreply,
          socket
-         |> put_flash(:info, "User enabled.")
+         |> put_flash(:info, "Studio enabled.")
          |> push_redirect(
-           to: Routes.denizen_show_path(Endpoint, :show, socket.assigns.user.handle)
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
       {:error, changeset} ->
@@ -149,17 +173,24 @@ defmodule BanchanWeb.DenizenLive.Moderation do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} padding={0} current_user={@current_user} flashes={@flash}>
+    <StudioLayout
+      id="studio-layout"
+      current_user={@current_user}
+      flashes={@flash}
+      studio={@studio}
+      followers={@followers}
+      current_user_member?={@current_user_member?}
+      uri={@uri}
+    >
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
-          <Form as={:user} for={@changeset} change="change" submit="submit">
+          <Form as={:studio} for={@changeset} change="change" submit="submit">
             <div class="text-xl">
-              Manage User @{@user.handle}
+              Manage {@studio.name}
             </div>
-            <MultipleSelect
-              info="User roles to apply to this user. Can select multiple items."
-              name={:roles}
-              options={@roles}
+            <TextInput
+              name={:platform_fee}
+              info="Multiplier to use when calculating the platform fee paid by this studio for transactions."
             />
             <MarkdownInput
               id="moderation_notes"
@@ -169,10 +200,10 @@ defmodule BanchanWeb.DenizenLive.Moderation do
             <Submit label="Save" changeset={@changeset} />
           </Form>
           <div class="divider" />
-          {#if @user.disable_info}
+          {#if @studio.disable_info}
             <Form as={:enable} for={@enable_changeset} change="change_enable" submit="submit_enable">
               <div class="text-xl">
-                Re-enable @{@user.handle}
+                Re-enable {@studio.name}
               </div>
               <MarkdownInput id="lifted_reason" name={:lifted_reason} opts={required: true} />
               <Submit label="Enable" changeset={@enable_changeset} />
@@ -180,14 +211,14 @@ defmodule BanchanWeb.DenizenLive.Moderation do
           {#else}
             <Form as={:disable} for={@disable_changeset} change="change_disable" submit="submit_disable">
               <div class="text-xl">
-                Disable @{@user.handle}
+                Disable {@studio.name}
               </div>
               <MarkdownInput id="disabled_reason" name={:disabled_reason} opts={required: true} />
               <DateTimeLocalInput name={:disabled_until} />
               <Submit label="Disable" changeset={@disable_changeset} />
             </Form>
           {/if}
-          <div :if={!Enum.empty?(@user.disable_history)} class="divider" />
+          <div :if={!Enum.empty?(@studio.disable_history)} class="divider" />
           <div class="overflow-x-auto">
             <table class="table table-zebra w-full">
               <thead>
@@ -198,7 +229,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
                   <th>Lifted Reason</th>
                 </tr>
               </thead>
-              {#for item <- @user.disable_history}
+              {#for item <- @studio.disable_history}
                 <tr>
                   <td
                     class="flex flex-col"
@@ -228,7 +259,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
           </div>
         </div>
       </div>
-    </Layout>
+    </StudioLayout>
     """
   end
 end

@@ -10,7 +10,7 @@ defmodule Banchan.Accounts do
   alias Banchan.Accounts.{DisableHistory, User, UserNotifier, UserToken}
   alias Banchan.Repo
   alias Banchan.Uploads
-  alias Banchan.Workers.Thumbnailer
+  alias Banchan.Workers.{EnableUser, Thumbnailer}
 
   alias BanchanWeb.UserAuth
 
@@ -224,7 +224,7 @@ defmodule Banchan.Accounts do
       iex> get_user!(456)
       ** (Ecto.NoResultsError)
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload(:disable_info)
 
   @doc """
   Gets a user by email.
@@ -240,7 +240,9 @@ defmodule Banchan.Accounts do
   """
   def get_user_by_email(email) when is_binary(email) do
     Repo.one(
-      from u in User, where: u.email == ^email, preload: [:pfp_img, :pfp_thumb, :header_img]
+      from u in User,
+        where: u.email == ^email,
+        preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
     )
   end
 
@@ -260,7 +262,7 @@ defmodule Banchan.Accounts do
     Repo.one!(
       from u in User,
         where: u.handle == ^handle,
-        preload: [:pfp_img, :pfp_thumb, :header_img]
+        preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
     )
   end
 
@@ -282,7 +284,7 @@ defmodule Banchan.Accounts do
       Repo.one(
         from u in User,
           where: u.email == ^ident or u.handle == ^ident,
-          preload: [:pfp_img, :pfp_thumb, :header_img]
+          preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
       )
 
     if User.valid_password?(user, password), do: user
@@ -414,13 +416,30 @@ defmodule Banchan.Accounts do
   def disable_user(%User{} = actor, %User{} = user, attrs) do
     if :admin in actor.roles ||
          (:mod in actor.roles && :admin not in user.roles) do
-      %DisableHistory{
-        user_id: user.id,
-        disabled_by_id: actor.id,
-        disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-      }
-      |> DisableHistory.disable_changeset(attrs)
-      |> Repo.insert()
+      {:ok, ret} =
+        Repo.transaction(fn ->
+          dummy = %DisableHistory{} |> DisableHistory.disable_changeset(attrs)
+
+          with {:ok, job} <-
+                 (case Ecto.Changeset.fetch_change(dummy, :disabled_until) do
+                    {:ok, until} when not is_nil(until) ->
+                      EnableUser.schedule_unban(user, until)
+
+                    _ ->
+                      {:ok, nil}
+                  end) do
+            %DisableHistory{
+              user_id: user.id,
+              disabled_by_id: actor.id,
+              disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+              lifting_job_id: job && job.id
+            }
+            |> DisableHistory.disable_changeset(attrs)
+            |> Repo.insert()
+          end
+        end)
+
+      ret
     else
       {:error, :unauthorized}
     end
@@ -429,26 +448,36 @@ defmodule Banchan.Accounts do
   @doc """
   Re-enable a previously disabled user.
   """
-  def enable_user(actor, %User{} = user, reason) do
+  def enable_user(actor, %User{} = user, reason, cancel \\ true) do
     if is_nil(actor) ||
          :admin in actor.roles ||
          (:mod in actor.roles && :admin not in user.roles) do
       changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifted_reason: reason})
 
       if changeset.valid? do
-        {_, [history | _]} =
-          Repo.update_all(
-            from(h in DisableHistory,
-              where: h.user_id == ^user.id,
-              select: h
-            ),
-            set: [
-              lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-              lifted_by_id: actor && actor.id
-            ]
-          )
+        {:ok, ret} =
+          Repo.transaction(fn ->
+            {_, [history | _]} =
+              Repo.update_all(
+                from(h in DisableHistory,
+                  where: h.user_id == ^user.id and is_nil(h.lifted_at),
+                  select: h
+                ),
+                set: [
+                  lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+                  lifted_by_id: actor && actor.id,
+                  lifted_reason: reason
+                ]
+              )
 
-        {:ok, history}
+            if cancel do
+              EnableUser.cancel_unban(history)
+            end
+
+            {:ok, history}
+          end)
+
+        ret
       else
         {:error, changeset}
       end
@@ -702,7 +731,7 @@ defmodule Banchan.Accounts do
   """
   def get_user_by_session_token(token) do
     {:ok, query} = UserToken.verify_session_token_query(token)
-    Repo.one(query)
+    Repo.one(query) |> Repo.preload(:disable_info)
   end
 
   @doc """
@@ -793,7 +822,7 @@ defmodule Banchan.Accounts do
   def get_user_by_reset_password_token(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "reset_password"),
          %User{} = user <- Repo.one(query) do
-      user
+      user |> Repo.preload(:disable_info)
     else
       _ -> nil
     end

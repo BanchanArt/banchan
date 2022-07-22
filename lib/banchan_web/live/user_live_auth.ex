@@ -6,7 +6,6 @@ defmodule BanchanWeb.UserLiveAuth do
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User
-  alias Banchan.Repo
 
   alias BanchanWeb.Router.Helpers, as: Routes
 
@@ -30,7 +29,8 @@ defmodule BanchanWeb.UserLiveAuth do
             true
 
           :open ->
-            true
+            is_nil(socket.assigns.current_user) ||
+              is_nil(socket.assigns.current_user.disable_info)
 
           :redirect_if_authed ->
             true
@@ -77,6 +77,6 @@ defmodule BanchanWeb.UserLiveAuth do
   defp find_current_user(session) do
     with user_token when not is_nil(user_token) <- session["user_token"],
          %User{} = user <- Accounts.get_user_by_session_token(user_token),
-         do: user |> Repo.preload(:disable_info)
+         do: user
   end
 end

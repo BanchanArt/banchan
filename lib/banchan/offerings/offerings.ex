@@ -279,6 +279,7 @@ defmodule Banchan.Offerings do
       from o in Offering,
         as: :offering,
         join: s in assoc(o, :studio),
+        as: :studio,
         left_lateral_join:
           used_slots in subquery(
             from c in Commission,
@@ -288,6 +289,7 @@ defmodule Banchan.Offerings do
               group_by: [c.offering_id],
               select: %{used_slots: count(c.id)}
           ),
+        as: :used_slots,
         left_lateral_join:
           default_prices in subquery(
             from oo in OfferingOption,
@@ -301,6 +303,7 @@ defmodule Banchan.Offerings do
                 sum: fragment("sum((?).amount)", oo.price)
               }
           ),
+        as: :default_prices,
         left_lateral_join:
           gallery_uploads in subquery(
             from i in GalleryImage,
@@ -309,6 +312,7 @@ defmodule Banchan.Offerings do
               group_by: [i.offering_id],
               select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
           ),
+        as: :gallery_uploads,
         select:
           merge(o, %{
             studio: s,
@@ -329,13 +333,24 @@ defmodule Banchan.Offerings do
           })
 
     q =
+      case Keyword.fetch(opts, :include_disabled) do
+        {:ok, true} ->
+          q
+
+        _ ->
+          q
+          |> join(:left, [studio: s], disable_info in assoc(s, :disable_info), as: :disable_info)
+          |> where([disable_info: disable_info], is_nil(disable_info))
+      end
+
+    q =
       case Keyword.fetch(opts, :query) do
         {:ok, nil} ->
           q
 
         {:ok, query} ->
           q
-          |> where([s], fragment("websearch_to_tsquery(?) @@ (?).search_vector", ^query, s))
+          |> where([o], fragment("websearch_to_tsquery(?) @@ (?).search_vector", ^query, o))
 
         :error ->
           q
@@ -373,7 +388,8 @@ defmodule Banchan.Offerings do
           |> join(:left, [o], sub in OfferingSubscription,
             on:
               sub.user_id == ^current_user.id and sub.offering_id == o.id and
-                sub.silenced != true
+                sub.silenced != true,
+            as: :subscription
           )
           |> join(:inner, [], user in User, on: user.id == ^current_user.id, as: :current_user)
           |> where(
@@ -381,7 +397,7 @@ defmodule Banchan.Offerings do
             is_nil(current_user.muted) or
               not fragment("(?).muted_filter_query @@ (?).search_vector", current_user, o)
           )
-          |> select_merge([o, _studio, _used_slots, _default_prices, _gallery_uploads, sub], %{
+          |> select_merge([o, subscription: sub], %{
             user_subscribed?: not is_nil(sub.id)
           })
 
@@ -411,11 +427,11 @@ defmodule Banchan.Offerings do
 
         {:ok, :featured} ->
           q
-          |> order_by([o, s], [{:desc, o.inserted_at}, {:desc, s.inserted_at}])
+          |> order_by([o, studio: s], [{:desc, o.inserted_at}, {:desc, s.inserted_at}])
           |> where([o], not is_nil(o.description) and o.description != "")
           |> where([o], not is_nil(o.card_img_id))
           |> where(
-            [_o, _s, _used_slots, _default_prices, gallery_uploads],
+            [gallery_uploads: gallery_uploads],
             not is_nil(gallery_uploads.uploads) and
               fragment("array_length(?, 1) > 0", gallery_uploads.uploads)
           )
@@ -430,11 +446,11 @@ defmodule Banchan.Offerings do
 
         {:ok, :price_high} ->
           q
-          |> order_by([_o, _s, _used_slots, default_prices], desc: default_prices.sum)
+          |> order_by([default_prices: default_prices], desc: default_prices.sum)
 
         {:ok, :price_low} ->
           q
-          |> order_by([_o, _s, _used_slots, default_prices], asc: default_prices.sum)
+          |> order_by([default_prices: default_prices], asc: default_prices.sum)
 
         :error ->
           q

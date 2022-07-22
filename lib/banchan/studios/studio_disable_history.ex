@@ -1,14 +1,15 @@
-defmodule Banchan.Accounts.DisableHistory do
+defmodule Banchan.Studios.StudioDisableHistory do
   @moduledoc """
-  Historical data for disabled users.
+  Historical data for disabled studios.
   """
   use Ecto.Schema
   import Ecto.Changeset
 
   alias Banchan.Accounts.User
+  alias Banchan.Studios.Studio
 
-  schema "disable_history" do
-    belongs_to :user, User, on_replace: :nilify
+  schema "studio_disable_history" do
+    belongs_to :studio, Studio, on_replace: :nilify
     belongs_to :disabled_by, User, on_replace: :nilify
     field :disabled_at, :naive_datetime
     field :disabled_until, :naive_datetime
