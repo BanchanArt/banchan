@@ -230,6 +230,25 @@ defmodule Banchan.Studios do
   end
 
   @doc """
+  Updates admin-level fields for a user, such as their roles.
+  """
+  def update_admin_fields(%User{} = actor, %Studio{} = studio, attrs \\ %{}) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = Repo.get!(User, actor.id)
+
+        if :admin in actor.roles || :mod in actor.roles do
+          Studio.admin_changeset(studio, attrs)
+          |> Repo.update()
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
+  end
+
+  @doc """
   Creates a new studio.
 
   ## Examples

@@ -114,6 +114,7 @@ defmodule BanchanWeb.Router do
       pipe_through([:browser, :enabled_user, :mod])
 
       live("/denizens/:handle/moderation", DenizenLive.Moderation, :edit)
+      live("/studios/:handle/moderation", StudioLive.Moderation, :edit)
     end
   end
 

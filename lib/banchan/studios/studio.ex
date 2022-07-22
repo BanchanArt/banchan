@@ -119,6 +119,13 @@ defmodule Banchan.Studios.Studio do
     |> cast(attrs, [:featured])
   end
 
+  def admin_changeset(studio, attrs) do
+    studio
+    |> cast(attrs, [:platform_fee, :moderation_notes])
+    |> validate_number(:platform_fee, less_than: 1)
+    |> validate_markdown(:moderation_notes)
+  end
+
   defp validate_default_currency(changeset, default_field, currencies_field)
 
   defp validate_default_currency(changeset, default_field, currencies_field) do
