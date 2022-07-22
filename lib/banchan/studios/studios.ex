@@ -211,12 +211,13 @@ defmodule Banchan.Studios do
         {_, [history | _]} =
           Repo.update_all(
             from(h in StudioDisableHistory,
-              where: h.studio_id == ^studio.id,
+              where: h.studio_id == ^studio.id and is_nil(h.lifted_at),
               select: h
             ),
             set: [
               lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-              lifted_by_id: actor && actor.id
+              lifted_by_id: actor && actor.id,
+              lifted_reason: reason
             ]
           )
 

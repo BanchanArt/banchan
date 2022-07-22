@@ -131,7 +131,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
     case Accounts.enable_user(
            socket.assigns.current_user,
            socket.assigns.user,
-           val["enable"]
+           val["enable"]["lifted_reason"]
          ) do
       {:ok, _} ->
         {:noreply,

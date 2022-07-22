@@ -155,7 +155,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
     case Studios.enable_studio(
            socket.assigns.current_user,
            socket.assigns.studio,
-           enable
+           enable["lifted_reason"]
          ) do
       {:ok, _} ->
         {:noreply,
