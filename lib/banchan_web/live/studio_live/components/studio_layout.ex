@@ -66,7 +66,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
     <Layout uri={@uri} padding={@padding} current_user={@current_user} flashes={@flashes}>
       <:hero>
         <section>
-          {#if @studio.header_img && !@studio.header_img.pending}
+          {#if @studio.header_img && !@studio.header_img.pending && !@studio.disable_info}
             <img
               class="object-cover aspect-header-image rounded-b-xl w-full"
               src={Routes.public_image_path(Endpoint, :image, @studio.header_img_id)}

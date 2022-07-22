@@ -140,7 +140,7 @@ defmodule BanchanWeb.StudioLive.Shop do
       tab={:shop}
       uri={@uri}
     >
-      {#if Studios.charges_enabled?(@studio)}
+      {#if Studios.charges_enabled?(@studio) && is_nil(@studio.disable_info)}
         <div
           id="offering-cards"
           :hook="DragDropCards"

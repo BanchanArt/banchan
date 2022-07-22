@@ -215,9 +215,11 @@ defmodule BanchanWeb.DenizenLive.Moderation do
                   <td><Markdown content={item.disabled_reason} /></td>
                   <td title={item.lifted_at && item.lifted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>
                     {item.lifted_at && item.lifted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
-                    <div class="text-sm">
-                      By <Avatar class="w-4" user={item.lifted_by} /> <UserHandle user={item.lifted_by} />
-                    </div>
+                    {#if item.lifted_by}
+                      <div class="text-sm">
+                        By <Avatar class="w-4" user={item.lifted_by} /> <UserHandle user={item.lifted_by} />
+                      </div>
+                    {/if}
                   </td>
                   <td><Markdown content={item.lifted_reason} /></td>
                 </tr>

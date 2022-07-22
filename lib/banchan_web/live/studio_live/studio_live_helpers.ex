@@ -35,6 +35,15 @@ defmodule BanchanWeb.StudioLive.Helpers do
           :mod not in socket.assigns.current_user.roles ->
         raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
 
+      studio.disable_info && :admin not in socket.assigns.current_user.roles &&
+          :mod not in socket.assigns.current_user.roles ->
+        socket
+        |> put_flash(
+          :error,
+          "Studio is disabled. You can't access this page."
+        )
+        |> redirect(to: Routes.studio_disabled_path(Endpoint, :show, studio.handle))
+
       studio.mature && !socket.assigns.current_user_member.mature_ok ->
         socket
         |> put_flash(

@@ -33,7 +33,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
       |> assign(
         studio:
           socket.assigns.studio
-          |> Repo.preload([:disable_info, disable_history: [:disabled_by, :lifted_by]])
+          |> Repo.preload(disable_history: [:disabled_by, :lifted_by])
       )
 
     if :admin in socket.assigns.current_user.roles || :mod in socket.assigns.current_user.roles do
@@ -246,9 +246,11 @@ defmodule BanchanWeb.StudioLive.Moderation do
                   <td><Markdown content={item.disabled_reason} /></td>
                   <td title={item.lifted_at && item.lifted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>
                     {item.lifted_at && item.lifted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
-                    <div class="text-sm">
-                      By <Avatar class="w-4" user={item.lifted_by} /> <UserHandle user={item.lifted_by} />
-                    </div>
+                    {#if item.lifted_by}
+                      <div class="text-sm">
+                        By <Avatar class="w-4" user={item.lifted_by} /> <UserHandle user={item.lifted_by} />
+                      </div>
+                    {/if}
                   </td>
                   <td><Markdown content={item.lifted_reason} /></td>
                 </tr>

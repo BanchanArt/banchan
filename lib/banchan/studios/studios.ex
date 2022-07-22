@@ -45,7 +45,7 @@ defmodule Banchan.Studios do
 
   """
   def get_studio_by_handle!(handle) when is_binary(handle) do
-    Repo.get_by!(Studio, handle: handle) |> Repo.preload([:header_img, :card_img])
+    Repo.get_by!(Studio, handle: handle) |> Repo.preload([:header_img, :card_img, :disable_info])
   end
 
   @doc """
