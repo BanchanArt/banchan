@@ -165,9 +165,8 @@ defmodule Banchan.Workers.Thumbnailer do
 
     # https://www.smashingmagazine.com/2015/06/efficient-image-resizing-with-imagemagick/
     Mogrify.open(tmp_src)
+    |> Mogrify.custom("flatten")
     |> Mogrify.format(opts["format"])
-    |> Mogrify.custom("filter", "Triangle")
-    |> Mogrify.custom("define", "filter:support=2")
     |> Mogrify.custom("unsharp", "0.25x0.25+8+0.065")
     |> Mogrify.custom("dither", "None")
     |> Mogrify.custom("posterize", "136")
