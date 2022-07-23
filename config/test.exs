@@ -48,9 +48,11 @@ config :banchan, BanchanWeb.Endpoint,
   secret_key_base: "wE/ZQmiSLP77ZAfprMlRRB1D+JP9p2/wMrLhjVXyB8U6/JpoxWfWCsoE4bm3IoY/"
 
 # Print only warnings and errors during test
-# config :logger, level: :warn
-config :logger,
-  backends: [:console],
-  compile_time_purge_matching: [
-    [level_lower_than: :debug]
-  ]
+config :logger, level: :warn
+
+# Print debug logs during test
+# config :logger,
+#   backends: [:console],
+#   compile_time_purge_matching: [
+#     [level_lower_than: :debug]
+#   ]
