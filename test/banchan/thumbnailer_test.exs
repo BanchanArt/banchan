@@ -8,7 +8,7 @@ defmodule Banchan.Workers.ThumbnailerTest do
   alias Banchan.Uploads
   alias Banchan.Workers.Thumbnailer
 
-  @upload_dir Path.expand("../../priv/uploads", __DIR__)
+  @upload_dir Application.compile_env!(:banchan, :upload_dir)
 
   describe "thumbnailer" do
     test "supported image file types" do
