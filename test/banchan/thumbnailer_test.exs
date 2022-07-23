@@ -24,8 +24,7 @@ defmodule Banchan.Workers.ThumbnailerTest do
         %{:name => "test.svg", :type => "image/svg+xml"},
         %{:name => "test.svgz", :type => "image/svg+xml"},
         %{:name => "test.tiff", :type => "image/tiff"},
-        %{:name => "test.webp", :type => "image/webp"},
-        %{:name => "test.xcf", :type => "image/x-xcf"}
+        %{:name => "test.webp", :type => "image/webp"}
       ]
 
       Enum.map(files, fn file ->
