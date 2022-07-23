@@ -106,9 +106,7 @@ jobs:
   unit_tests:
     name: Unit Tests
     needs: deps
-    runs:
-      using: "docker"
-      image: "Dockerfile"
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:13
