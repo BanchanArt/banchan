@@ -17,7 +17,6 @@ defmodule Banchan.Workers.ThumbnailerTest do
       files = [
         %{:name => "test.bmp", :type => "image/bmp"},
         %{:name => "test.gif", :type => "image/gif"},
-        %{:name => "test.heic", :type => "image/heic"},
         %{:name => "test.ico", :type => "image/vnd.microsoft.icon"},
         %{:name => "test.jpg", :type => "image/jpg"},
         %{:name => "test.png", :type => "image/png"},

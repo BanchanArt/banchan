@@ -8,11 +8,12 @@ defmodule Banchan.Uploads do
   alias Banchan.Repo
   alias Banchan.Uploads.Upload
 
+  # image/heic needs additional support for Unbuntu see https://askubuntu.com/questions/1131996/problems-with-compiling-imagemagick-with-heic
   @image_formats ~w(
     image/bmp image/gif image/png image/jpeg image/jpg
     image/jp2 image/psd image/vnd.adobe.photoshop image/x-icon
     image/vnd.microsoft.icon image/tiff image/webp
-    image/heic image/svg+xml image/x-xcf
+    image/svg+xml image/x-xcf
   )
 
   @video_formats ~w(
