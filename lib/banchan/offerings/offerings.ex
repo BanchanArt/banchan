@@ -333,6 +333,16 @@ defmodule Banchan.Offerings do
           })
 
     q =
+      case Keyword.fetch(opts, :show_pending) do
+        {:ok, true} ->
+          q
+
+        _ ->
+          q
+          |> where([studio: s], s.stripe_charges_enabled == true)
+      end
+
+    q =
       case Keyword.fetch(opts, :include_disabled) do
         {:ok, true} ->
           q
@@ -385,6 +395,8 @@ defmodule Banchan.Offerings do
             [o],
             o.mature != true or (o.mature == true and ^current_user.mature_ok == true)
           )
+          |> join(:left, [studio: s], block in assoc(s, :blocklist), as: :blocklist)
+          |> where([blocklist: block], is_nil(block) or block.user_id != ^current_user.id)
           |> join(:left, [o], sub in OfferingSubscription,
             on:
               sub.user_id == ^current_user.id and sub.offering_id == o.id and

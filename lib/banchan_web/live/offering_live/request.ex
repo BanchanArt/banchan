@@ -201,6 +201,15 @@ defmodule BanchanWeb.OfferingLive.Request do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
 
+      {:error, :blocked} ->
+        socket =
+          put_flash(socket, :error, "You are not allowed to create commissions from this studio.")
+
+        {:noreply,
+         push_redirect(socket,
+           to: Routes.home_path(Endpoint, :index)
+         )}
+
       {:error, :no_slots_available} ->
         socket = put_flash(socket, :error, "No more slots are available for this commission.")
 

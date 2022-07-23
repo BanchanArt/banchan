@@ -66,15 +66,23 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
 
   @impl true
   def handle_event("withdraw", _, socket) do
-    {:ok, _} =
-      Commissions.update_status(
-        socket.assigns.current_user,
-        socket.assigns.commission,
-        "withdrawn"
-      )
+    case Commissions.update_status(
+           socket.assigns.current_user,
+           socket.assigns.commission,
+           "withdrawn"
+         ) do
+      {:ok, _} ->
+        Collapse.set_open(socket.assigns.id <> "-withdraw-confirmation", false)
+        {:noreply, socket}
 
-    Collapse.set_open(socket.assigns.id <> "-withdraw-confirmation", false)
-    {:noreply, socket}
+      {:error, :blocked} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are blocked from further interaction with this studio.")
+         |> push_redirect(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
+    end
   end
 
   def handle_event("toggle_subscribed", _, socket) do
@@ -129,6 +137,14 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
 
       {:error, %Ecto.Changeset{} = err} ->
         {:noreply, socket |> assign(title_changeset: err)}
+
+      {:error, :blocked} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are blocked from further interaction with this studio.")
+         |> push_redirect(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
     end
   end
 
@@ -287,6 +303,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             disabled={@commission.status == :withdrawn || @current_user.id != @commission.client_id}
             type="button"
             :on-click="withdraw"
+            phx-target={@myself}
             class="btn btn-sm btn-error my-2 w-full"
           >
             Confirm

@@ -13,9 +13,19 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   prop commission, :struct, required: true
 
   def handle_event("update_status", %{"value" => status}, socket) do
-    Commissions.update_status(socket.assigns.current_user, socket.assigns.commission, status)
-    Modal.hide(socket.assigns.id <> "_approval_modal")
-    {:noreply, socket}
+    case Commissions.update_status(socket.assigns.current_user, socket.assigns.commission, status) do
+      {:ok, _} ->
+        Modal.hide(socket.assigns.id <> "_approval_modal")
+        {:noreply, socket}
+
+      {:error, :blocked} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are blocked from further interaction with this studio.")
+         |> push_redirect(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
+    end
   end
 
   def handle_event("open_approval_modal", _, socket) do

@@ -57,6 +57,11 @@ defmodule BanchanWeb.StudioLive.Helpers do
         |> put_flash(:error, "This studio is not ready to accept commissions yet.")
         |> redirect(to: Routes.studio_shop_path(Endpoint, :show, handle))
 
+      Studios.user_blocked?(studio, socket.assigns.current_user) ->
+        socket
+        |> put_flash(:error, "You have been blocked by studio.")
+        |> redirect(to: Routes.home_path(Endpoint, :index))
+
       true ->
         socket
     end

@@ -25,7 +25,7 @@ defmodule BanchanWeb.StudioLive.Settings do
     UploadInput
   }
 
-  alias BanchanWeb.StudioLive.Components.StudioLayout
+  alias BanchanWeb.StudioLive.Components.{Blocklist, StudioLayout}
 
   @impl true
   def mount(params, _session, socket) do
@@ -310,6 +310,12 @@ defmodule BanchanWeb.StudioLive.Settings do
             />
             <Submit label="Save" />
           </Form>
+
+          <div class="divider" />
+
+          <div class="h-40 overflow-auto">
+            <Blocklist id="studio-blocklist" studio={@studio} />
+          </div>
         </div>
       </div>
     </StudioLayout>

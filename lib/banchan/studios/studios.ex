@@ -21,6 +21,7 @@ defmodule Banchan.Studios do
     Payout,
     PortfolioImage,
     Studio,
+    StudioBlock,
     StudioDisableHistory,
     StudioFollower
   }
@@ -377,6 +378,8 @@ defmodule Banchan.Studios do
             is_nil(current_user.muted) or
               not fragment("(?).muted_filter_query @@ (?).search_vector", current_user, o)
           )
+          |> join(:left, [studio: s], block in assoc(s, :blocklist), as: :blocklist)
+          |> where([blocklist: block], is_nil(block) or block.user_id != ^current_user.id)
 
         _ ->
           q
@@ -501,6 +504,47 @@ defmodule Banchan.Studios do
   def is_user_in_studio?(%User{id: user_id}, %Studio{id: studio_id}) do
     Repo.exists?(
       from us in "users_studios", where: us.user_id == ^user_id and us.studio_id == ^studio_id
+    )
+  end
+
+  def block_user(%Studio{} = studio, %User{} = user, attrs) do
+    %StudioBlock{
+      studio_id: studio.id,
+      user_id: user.id
+    }
+    |> StudioBlock.changeset(attrs)
+    |> Repo.insert(on_conflict: {:replace, [:reason]}, conflict_target: [:studio_id, :user_id])
+  end
+
+  def unblock_user(%Studio{} = studio, %User{} = user) do
+    Repo.delete_all(
+      from sb in StudioBlock,
+        where: sb.studio_id == ^studio.id and sb.user_id == ^user.id
+    )
+  end
+
+  def user_blocked?(%Studio{} = studio, %User{} = user) do
+    Repo.exists?(
+      from sb in StudioBlock,
+        where: sb.studio_id == ^studio.id and sb.user_id == ^user.id
+    )
+  end
+
+  def blockable_studios(%User{} = actor, %User{} = user) do
+    Repo.all(
+      from s in Studio,
+        join: u in assoc(s, :artists),
+        left_join: sb in assoc(s, :blocklist),
+        where: u.id == ^actor.id and (is_nil(sb) or sb.user_id != ^user.id)
+    )
+  end
+
+  def unblockable_studios(%User{} = actor, %User{} = user) do
+    Repo.all(
+      from s in Studio,
+        join: u in assoc(s, :artists),
+        left_join: sb in assoc(s, :blocklist),
+        where: u.id == ^actor.id and sb.user_id == ^user.id
     )
   end
 

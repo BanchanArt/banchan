@@ -6,10 +6,11 @@ defmodule BanchanWeb.DenizenLive.Show do
 
   alias Banchan.Accounts
   alias Banchan.Studios
+  alias Banchan.Studios.Studio
 
   alias Surface.Components.{LivePatch, LiveRedirect}
 
-  alias BanchanWeb.Components.{Avatar, InfiniteScroll, Layout, StudioCard}
+  alias BanchanWeb.Components.{Avatar, InfiniteScroll, Layout, Modal, StudioCard}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -41,6 +42,53 @@ defmodule BanchanWeb.DenizenLive.Show do
     else
       {:noreply, socket}
     end
+  end
+
+  @impl true
+  def handle_event("open_block_modal", _, socket) do
+    socket =
+      socket
+      |> assign(
+        blockable_studios:
+          Studios.blockable_studios(socket.assigns.current_user, socket.assigns.user)
+      )
+
+    Modal.show("block-modal")
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("block_user", %{"from" => studio_id}, socket) do
+    {studio_id, ""} = Integer.parse(studio_id)
+
+    {:ok, _} =
+      Studios.block_user(%Studio{id: studio_id}, socket.assigns.user, %{
+        reason: "manual block from user profile"
+      })
+
+    Modal.hide("block-modal")
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("open_unblock_modal", _, socket) do
+    socket =
+      socket
+      |> assign(
+        unblockable_studios:
+          Studios.unblockable_studios(socket.assigns.current_user, socket.assigns.user)
+      )
+
+    Modal.show("unblock-modal")
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("unblock_user", %{"from" => studio_id}, socket) do
+    {studio_id, ""} = Integer.parse(studio_id)
+    Studios.unblock_user(%Studio{id: studio_id}, socket.assigns.user)
+    Modal.hide("unblock-modal")
+    {:noreply, socket}
   end
 
   defp list_studios(socket, page \\ 1) do
@@ -112,13 +160,30 @@ defmodule BanchanWeb.DenizenLive.Show do
               <span>@{@user.handle}</span>
             </div>
             <div class="flex flex-row gap-2 place-content-end ml-auto m-4">
-              {#if @current_user && (:admin in @current_user.roles || :mod in @current_user.roles)}
-                <LiveRedirect
-                  label="Moderation"
-                  to={Routes.denizen_moderation_path(Endpoint, :edit, @user.handle)}
-                  class="btn btn-sm btn-warning rounded-full m-2 px-2 py-0 grow-0"
-                />
-              {/if}
+              <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
+                  <i class="fas fa-ellipsis-vertical" />
+                </label>
+                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
+                  {#if @current_user && (:admin in @current_user.roles || :mod in @current_user.roles)}
+                    <li>
+                      <LiveRedirect to={Routes.denizen_moderation_path(Endpoint, :edit, @user.handle)}>
+                        <i class="fas fa-gavel" /> Moderation
+                      </LiveRedirect>
+                    </li>
+                  {/if}
+                  <li>
+                    <button type="button" :on-click="open_block_modal">
+                      <i class="fas fa-ban" /> Block
+                    </button>
+                  </li>
+                  <li>
+                    <button type="button" :on-click="open_unblock_modal">
+                      <i class="fa-solid fa-handshake" /> Unblock
+                    </button>
+                  </li>
+                </ul>
+              </div>
               {#if @current_user &&
                   (@current_user.id == @user.id || :admin in @current_user.roles || :mod in @current_user.roles)}
                 <LiveRedirect
@@ -264,6 +329,31 @@ defmodule BanchanWeb.DenizenLive.Show do
           <InfiniteScroll id="studios-infinite-scroll" page={@studios.page_number} load_more="load_more" />
         {/if}
       {/if}
+
+      <Modal id="block-modal">
+        <:title>Block From...</:title>
+        <ul class="overflow-auto menu p-2">
+          {#for studio <- @blockable_studios}
+            <li>
+              <button type="button" :on-click="block_user" phx-value-from={studio.id}>
+                {studio.name}
+              </button>
+            </li>
+          {/for}
+        </ul>
+      </Modal>
+      <Modal id="unblock-modal">
+        <:title>Unblock From...</:title>
+        <ul class="overflow-auto menu p-2">
+          {#for studio <- @unblockable_studios}
+            <li>
+              <button type="button" :on-click="unblock_user" phx-value-from={studio.id}>
+                {studio.name}
+              </button>
+            </li>
+          {/for}
+        </ul>
+      </Modal>
     </Layout>
     """
   end

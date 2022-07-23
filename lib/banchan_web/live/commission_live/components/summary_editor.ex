@@ -79,15 +79,24 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       # someone is trying to send us Shenanigans data.
       {:noreply, socket}
     else
-      {:ok, {_commission, _events}} =
-        Commissions.add_line_item(
-          socket.assigns.current_user,
-          commission,
-          option,
-          socket.assigns.current_user_member?
-        )
+      Commissions.add_line_item(
+        socket.assigns.current_user,
+        commission,
+        option,
+        socket.assigns.current_user_member?
+      )
+      |> case do
+        {:ok, {_comm, _events}} ->
+          {:noreply, socket}
 
-      {:noreply, socket}
+        {:error, :blocked} ->
+          {:noreply,
+           socket
+           |> put_flash(:error, "You are blocked from further interaction with this studio.")
+           |> push_redirect(
+             to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+           )}
+      end
     end
   end
 
@@ -97,13 +106,24 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
     line_item = Enum.at(socket.assigns.commission.line_items, idx)
 
     if socket.assigns.allow_edits && line_item && !line_item.sticky do
-      {:ok, {_commission, _events}} =
-        Commissions.remove_line_item(
-          socket.assigns.current_user,
-          socket.assigns.commission,
-          line_item,
-          socket.assigns.current_user_member?
-        )
+      Commissions.remove_line_item(
+        socket.assigns.current_user,
+        socket.assigns.commission,
+        line_item,
+        socket.assigns.current_user_member?
+      )
+      |> case do
+        {:ok, {_commission, _events}} ->
+          {:noreply, socket}
+
+        {:error, :blocked} ->
+          {:noreply,
+           socket
+           |> put_flash(:error, "You are blocked from further interaction with this studio.")
+           |> push_redirect(
+             to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+           )}
+      end
 
       {:noreply, socket}
     else
@@ -152,24 +172,33 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
     commission = socket.assigns.commission
 
     if socket.assigns.allow_edits do
-      {:ok, {_commission, _events}} =
-        Commissions.add_line_item(
-          socket.assigns.current_user,
-          commission,
-          %{
-            name: name,
-            description: description,
-            amount: Utils.moneyfy(amount, currency)
-          },
-          socket.assigns.current_user_member?
-        )
+      Commissions.add_line_item(
+        socket.assigns.current_user,
+        commission,
+        %{
+          name: name,
+          description: description,
+          amount: Utils.moneyfy(amount, currency)
+        },
+        socket.assigns.current_user_member?
+      )
+      |> case do
+        {:ok, {_commission, _events}} ->
+          Modal.hide(socket.assigns.id <> "_custom_modal")
 
-      Modal.hide(socket.assigns.id <> "_custom_modal")
+          {:noreply,
+           assign(socket,
+             custom_changeset: %LineItem{} |> LineItem.custom_changeset(%{})
+           )}
 
-      {:noreply,
-       assign(socket,
-         custom_changeset: %LineItem{} |> LineItem.custom_changeset(%{})
-       )}
+        {:error, :blocked} ->
+          {:noreply,
+           socket
+           |> put_flash(:error, "You are blocked from further interaction with this studio.")
+           |> push_redirect(
+             to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+           )}
+      end
     else
       # Deny the change. This shouldn't happen unless there's a bug, or
       # someone is trying to send us Shenanigans data.
