@@ -7,7 +7,7 @@
     "deploy": "cd .. && mix assets.deploy && rm -rf _build/esbuild"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.0.0-beta3",
+    "@fortawesome/fontawesome-free": "^6.1.1",
     "@tailwindcss/aspect-ratio": "^0.4.0",
     "@tailwindcss/forms": "^0.4.0",
     "@tailwindcss/typography": "^0.5.0",
