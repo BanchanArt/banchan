@@ -73,19 +73,7 @@ RUN mix release
 # the compiled release and other runtime necessities
 FROM ${RUNNER_IMAGE}
 
-RUN apt-get install build-essential \
-  libde265-dev \
-  autoconf \
-  git-core \
-  libheif-dev \
-  && apt-get build-dep imagemagick \
-  ./configure --with-heic \
-  make -j4 \
-  make install \
-  ldconfig \
-  magick --version
-
-RUN apt-get update -y && apt-get install -y libstdc++6 openssl libncurses5 locales \
+RUN apt-get update -y && apt-get install -y libstdc++6 openssl libncurses5 locales imagemagick \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # Set the locale

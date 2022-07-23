@@ -101,7 +101,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
               <i class="float-right fas fa-lock" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
             </div>
           {#else}
-            <div class="flex">
+            <div class="relative">
               <a
                 class="relative"
                 target="_blank"
@@ -131,8 +131,9 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                     />
                     <i class="fas fa-play text-4xl absolute pt-[44px] z-20" />
                   </div>
+
                 {#else}
-                  <div title={attachment.upload.name} class="border-2 p-4 m-1">
+                  <div title={attachment.upload.name} class="border-2 p-4 m-1 basis-full">
                     <i class="float-right fas fa-file-download" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
                   </div>
                 {/if}
