@@ -8,8 +8,6 @@ defmodule BanchanWeb.StudioLive.Components.FeaturedToggle do
   alias Banchan.Studios
   alias Banchan.Studios.Studio
 
-  alias BanchanWeb.Components.Button
-
   prop current_user, :struct, required: true
   prop studio, :struct, required: true
 
@@ -33,13 +31,13 @@ defmodule BanchanWeb.StudioLive.Components.FeaturedToggle do
 
   def render(assigns) do
     ~F"""
-    <Button click="toggle" class="ml-auto btn-sm btn-outline rounded-full px-2 py-0">
+    <button type="button" :on-click="toggle">
       {#if @studio.featured}
-        Stop Featuring
+        <i class="fa-solid fa-star" /> Unfeature
       {#else}
-        Feature
+        <i class="fa-regular fa-star" /> Feature
       {/if}
-    </Button>
+    </button>
     """
   end
 end
