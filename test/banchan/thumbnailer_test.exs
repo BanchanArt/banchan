@@ -5,8 +5,8 @@ defmodule Banchan.Workers.ThumbnailerTest do
 
   require Logger
 
-  alias Banchan.Workers.Thumbnailer
   alias Banchan.Uploads
+  alias Banchan.Workers.Thumbnailer
 
   @upload_dir Path.expand("../../priv/uploads", __DIR__)
 
