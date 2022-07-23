@@ -9,7 +9,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, Notifications}
 
-  alias BanchanWeb.Components.{Button, Collapse}
+  alias BanchanWeb.Components.{Button, Collapse, ReportModal}
   alias BanchanWeb.Components.Form.{Submit, TextInput}
 
   alias BanchanWeb.CommissionLive.Components.{
@@ -234,6 +234,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               commission={@commission}
               current_user={@current_user}
               current_user_member?={@current_user_member?}
+              report_modal_id="report-modal"
             />
             <div class="divider" />
             <div class="flex flex-col gap-4">
@@ -248,6 +249,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           </div>
         </div>
       </div>
+      <ReportModal id="report-modal" current_user={@current_user} />
     </div>
     """
   end

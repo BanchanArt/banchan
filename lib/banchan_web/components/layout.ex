@@ -79,11 +79,19 @@ defmodule BanchanWeb.Components.Layout do
                 <span>Admin</span>
               </li>
               <li>
-                <a href="/admin/dashboard" target="_blank" rel="noopener noreferrer"><i class="fas fa-tachometer-alt" /> Dashboard</a>
+                <LiveRedirect to={Routes.report_index_path(Endpoint, :index)}>
+                  <span>
+                    <i class="fas fa-flag" />
+                    Reports
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
+                <a href="/admin/dashboard" target="_blank" rel="noopener noreferrer"><i class="fas fa-tachometer-alt" />Dashboard</a>
               </li>
               {#if Application.fetch_env!(:banchan, :env) == :dev}
                 <li>
-                  <a href="/admin/sent_emails" target="_blank" rel="noopener noreferrer"><i class="fas fa-paper-plane" /> Sent Emails</a>
+                  <a href="/admin/sent_emails" target="_blank" rel="noopener noreferrer"><i class="fas fa-paper-plane" />Sent Emails</a>
                 </li>
               {/if}
             {/if}

@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.Components.{Button, Layout}
+  alias BanchanWeb.Components.{Button, Layout, ReportModal}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{FeaturedToggle, TabButton}
 
@@ -61,6 +61,15 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
     {:noreply, socket |> assign(user_following?: !user_following?)}
   end
 
+  def handle_event("report", _, socket) do
+    ReportModal.show(
+      socket.assigns.id <> "-report-modal",
+      Routes.studio_shop_url(Endpoint, :show, socket.assigns.studio.handle)
+    )
+
+    {:noreply, socket}
+  end
+
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} padding={@padding} current_user={@current_user} flashes={@flashes}>
@@ -95,6 +104,13 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                     {#if @current_user && :admin in @current_user.roles}
                       <li>
                         <FeaturedToggle id="featured-toggle" current_user={@current_user} studio={@studio} />
+                      </li>
+                    {/if}
+                    {#if @current_user}
+                      <li>
+                        <button type="button" :on-click="report">
+                          <i class="fas fa-flag" /> Report
+                        </button>
                       </li>
                     {/if}
                   </ul>
@@ -172,6 +188,9 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
         </section>
       </:hero>
       <#slot />
+      {#if @current_user}
+        <ReportModal id={@id <> "-report-modal"} current_user={@current_user} />
+      {/if}
     </Layout>
     """
   end
