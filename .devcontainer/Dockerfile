@@ -46,18 +46,7 @@ RUN apt-get update \
   # Install dependencies
   && apt-get install -y build-essential inotify-tools \
   # imagemagick & ffmpeg
-  && apt-get install build-essential \
-  libde265-dev \
-  autoconf \
-  git-core \
-  libheif-dev \
-  && apt-get build-dep imagemagick \
-  ./configure --with-heic \
-  make -j4 \
-  make install \
-  ldconfig \
-  magick --version \
-
+  && apt-get install -y imagemagick \
   && apt update && apt install -y ffmpeg \
   #
   # stripe cli
@@ -69,7 +58,7 @@ RUN apt-get update \
   # Clean up
   && apt-get autoremove -y \
   && apt-get clean -y \
-  && rm -rf /var/lib/apt/lists/* /tmp/common-setup.sh /tmp/node-setup.sh
+  && rm -rf /var/lib/apt/lists/* /tmp/common-setup.sh /tmp/node-setup.sh 
 
 RUN su ${USERNAME} -c "mix local.hex --force \
   && mix local.rebar --force \
