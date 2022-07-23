@@ -395,8 +395,6 @@ defmodule Banchan.Offerings do
             [o],
             o.mature != true or (o.mature == true and ^current_user.mature_ok == true)
           )
-          |> join(:left, [studio: s], block in assoc(s, :blocklist), as: :blocklist)
-          |> where([blocklist: block], is_nil(block) or block.user_id != ^current_user.id)
           |> join(:left, [o], sub in OfferingSubscription,
             on:
               sub.user_id == ^current_user.id and sub.offering_id == o.id and
@@ -408,6 +406,11 @@ defmodule Banchan.Offerings do
             [o, current_user: current_user],
             is_nil(current_user.muted) or
               not fragment("(?).muted_filter_query @@ (?).search_vector", current_user, o)
+          )
+          |> join(:left, [studio: s], block in assoc(s, :blocklist), as: :blocklist)
+          |> where(
+            [blocklist: block, current_user: u],
+            :admin in u.roles or :mod in u.roles or is_nil(block) or block.user_id != u.id
           )
           |> select_merge([o, subscription: sub], %{
             user_subscribed?: not is_nil(sub.id)

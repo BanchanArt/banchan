@@ -379,7 +379,10 @@ defmodule Banchan.Studios do
               not fragment("(?).muted_filter_query @@ (?).search_vector", current_user, o)
           )
           |> join(:left, [studio: s], block in assoc(s, :blocklist), as: :blocklist)
-          |> where([blocklist: block], is_nil(block) or block.user_id != ^current_user.id)
+          |> where(
+            [blocklist: block, current_user: u],
+            :admin in u.roles or :mod in u.roles or is_nil(block) or block.user_id != u.id
+          )
 
         _ ->
           q
@@ -526,7 +529,10 @@ defmodule Banchan.Studios do
   def user_blocked?(%Studio{} = studio, %User{} = user) do
     Repo.exists?(
       from sb in StudioBlock,
-        where: sb.studio_id == ^studio.id and sb.user_id == ^user.id
+        join: u in assoc(sb, :user),
+        where:
+          sb.studio_id == ^studio.id and sb.user_id == ^user.id and :admin not in u.roles and
+            :mod not in u.roles
     )
   end
 
