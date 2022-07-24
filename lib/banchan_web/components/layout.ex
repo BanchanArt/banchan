@@ -87,6 +87,14 @@ defmodule BanchanWeb.Components.Layout do
                 </LiveRedirect>
               </li>
               <li>
+                <LiveRedirect to={Routes.denizen_index_path(Endpoint, :index)}>
+                  <span>
+                    <i class="fas fa-user-group" />
+                    Users
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
                 <a href="/admin/dashboard" target="_blank" rel="noopener noreferrer"><i class="fas fa-tachometer-alt" />Dashboard</a>
               </li>
               {#if Application.fetch_env!(:banchan, :env) == :dev}

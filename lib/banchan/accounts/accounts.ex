@@ -19,6 +19,34 @@ defmodule Banchan.Accounts do
 
   ## Database getters
 
+  def list_users(%User{} = actor, filter, opts \\ []) do
+    from(u in User,
+      as: :user,
+      join: a in User,
+      as: :actor,
+      on: a.id == ^actor.id,
+      where: :admin in a.roles or :mod in a.roles,
+      order_by: [desc: u.inserted_at]
+    )
+    |> filter_query(filter)
+    |> Repo.paginate(
+      page_size: Keyword.get(opts, :page_size, 24),
+      page: Keyword.get(opts, :page, 1)
+    )
+  end
+
+  defp filter_query(q, filter) do
+    if filter.query && filter.query != "" do
+      q
+      |> where(
+        [user: u],
+        fragment("websearch_to_tsquery(?) @@ (?).search_vector", ^filter.query, u)
+      )
+    else
+      q
+    end
+  end
+
   @doc """
   Either find or create a user based on Ueberauth OAuth credentials.
   """

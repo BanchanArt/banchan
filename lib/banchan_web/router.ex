@@ -118,6 +118,7 @@ defmodule BanchanWeb.Router do
 
       live("/denizens/:handle/moderation", DenizenLive.Moderation, :edit)
       live("/studios/:handle/moderation", StudioLive.Moderation, :edit)
+      live("/admin/denizens", DenizenLive.Index, :index)
       live("/admin/reports", ReportLive.Index, :index)
       live("/admin/reports/:id", ReportLive.Show, :show)
     end
