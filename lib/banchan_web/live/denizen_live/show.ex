@@ -10,7 +10,7 @@ defmodule BanchanWeb.DenizenLive.Show do
 
   alias Surface.Components.{LivePatch, LiveRedirect}
 
-  alias BanchanWeb.Components.{Avatar, InfiniteScroll, Layout, Modal, StudioCard}
+  alias BanchanWeb.Components.{Avatar, InfiniteScroll, Layout, Modal, ReportModal, StudioCard}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -91,6 +91,16 @@ defmodule BanchanWeb.DenizenLive.Show do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("report", _, socket) do
+    ReportModal.show(
+      "report-modal",
+      Routes.denizen_show_url(Endpoint, :show, socket.assigns.user.handle)
+    )
+
+    {:noreply, socket}
+  end
+
   defp list_studios(socket, page \\ 1) do
     case socket.assigns.live_action do
       :show ->
@@ -160,30 +170,37 @@ defmodule BanchanWeb.DenizenLive.Show do
               <span>@{@user.handle}</span>
             </div>
             <div class="flex flex-row gap-2 place-content-end ml-auto m-4">
-              <div class="dropdown dropdown-end">
-                <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
-                  <i class="fas fa-ellipsis-vertical" />
-                </label>
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
-                  {#if @current_user && (:admin in @current_user.roles || :mod in @current_user.roles)}
+              {#if @current_user}
+                <div class="dropdown dropdown-end">
+                  <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
+                    <i class="fas fa-ellipsis-vertical" />
+                  </label>
+                  <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
+                    {#if @current_user && (:admin in @current_user.roles || :mod in @current_user.roles)}
+                      <li>
+                        <LiveRedirect to={Routes.denizen_moderation_path(Endpoint, :edit, @user.handle)}>
+                          <i class="fas fa-gavel" /> Moderation
+                        </LiveRedirect>
+                      </li>
+                    {/if}
                     <li>
-                      <LiveRedirect to={Routes.denizen_moderation_path(Endpoint, :edit, @user.handle)}>
-                        <i class="fas fa-gavel" /> Moderation
-                      </LiveRedirect>
+                      <button type="button" :on-click="open_block_modal">
+                        <i class="fas fa-ban" /> Block
+                      </button>
                     </li>
-                  {/if}
-                  <li>
-                    <button type="button" :on-click="open_block_modal">
-                      <i class="fas fa-ban" /> Block
-                    </button>
-                  </li>
-                  <li>
-                    <button type="button" :on-click="open_unblock_modal">
-                      <i class="fa-solid fa-handshake" /> Unblock
-                    </button>
-                  </li>
-                </ul>
-              </div>
+                    <li>
+                      <button type="button" :on-click="open_unblock_modal">
+                        <i class="fa-solid fa-handshake" /> Unblock
+                      </button>
+                    </li>
+                    <li>
+                      <button type="button" :on-click="report">
+                        <i class="fas fa-flag" /> Report
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              {/if}
               {#if @current_user &&
                   (@current_user.id == @user.id || :admin in @current_user.roles || :mod in @current_user.roles)}
                 <LiveRedirect
@@ -354,6 +371,9 @@ defmodule BanchanWeb.DenizenLive.Show do
           {/for}
         </ul>
       </Modal>
+      {#if @current_user}
+        <ReportModal id="report-modal" current_user={@current_user} />
+      {/if}
     </Layout>
     """
   end

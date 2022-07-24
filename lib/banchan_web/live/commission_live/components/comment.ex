@@ -9,7 +9,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.{Avatar, Button, Markdown, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Button, Markdown, ReportModal, UserHandle}
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
   alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox}
 
@@ -19,6 +19,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
   prop commission, :struct, required: true
   prop event, :struct, required: true
   prop uri, :string, required: true
+  prop report_modal_id, :string, required: true
 
   data changeset, :struct
 
@@ -111,6 +112,16 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
      socket |> assign(event: socket.assigns.event |> Repo.preload(history: [:changed_by]))}
   end
 
+  @impl true
+  def handle_event("report", _, socket) do
+    ReportModal.show(
+      socket.assigns.report_modal_id,
+      replace_fragment(socket.assigns.uri, socket.assigns.event)
+    )
+
+    {:noreply, socket}
+  end
+
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
   end
@@ -163,9 +174,25 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             </div>
           {/if}
         </div>
-        {#if !@changeset && (@current_user_member? || @current_user.id == @actor.id)}
-          <button type="button" :on-click="edit" class="ml-auto hover:underline"><i class="fas fa-edit" /></button>
-        {/if}
+        <div class="dropdown dropdown-end">
+          <label tabindex="0" class="btn btn-circle btn-ghost btn-xs py-0">
+            <i class="fas fa-ellipsis-vertical" />
+          </label>
+          <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
+            {#if !@changeset && (@current_user_member? || @current_user.id == @actor.id)}
+              <li>
+                <button type="button" :on-click="edit">
+                  <i class="fas fa-edit" /> Edit
+                </button>
+              </li>
+            {/if}
+            <li>
+              <button type="button" :on-click="report">
+                <i class="fas fa-flag" /> Report
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
 
       <div class="divider" />

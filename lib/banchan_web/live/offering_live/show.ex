@@ -13,7 +13,7 @@ defmodule BanchanWeb.OfferingLive.Show do
   alias Surface.Components.LiveRedirect
 
   alias BanchanWeb.CommissionLive.Components.Summary
-  alias BanchanWeb.Components.{Button, Layout, Lightbox, Markdown, MasonryGallery}
+  alias BanchanWeb.Components.{Button, Layout, Lightbox, Markdown, MasonryGallery, ReportModal}
   alias BanchanWeb.StudioLive.Components.OfferingCard
 
   @impl true
@@ -134,6 +134,21 @@ defmodule BanchanWeb.OfferingLive.Show do
   end
 
   @impl true
+  def handle_event("report", _, socket) do
+    ReportModal.show(
+      "report-modal",
+      Routes.offering_show_url(
+        Endpoint,
+        :show,
+        socket.assigns.studio.handle,
+        socket.assigns.offering.type
+      )
+    )
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
@@ -193,22 +208,34 @@ defmodule BanchanWeb.OfferingLive.Show do
             <div class="divider" />
           {/if}
           <div class="flex flex-row justify-end gap-2">
-            {#if @current_user_member?}
-              <LiveRedirect
-                to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}
-                class="btn text-center btn-link"
-              >Edit</LiveRedirect>
-            {/if}
+            <div class="dropdown dropdown-end">
+              <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
+                <i class="fas fa-ellipsis-vertical" />
+              </label>
+              <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
+                {#if @current_user &&
+                    (@current_user_member? || :admin in @current_user.roles || :mod in @current_user.roles)}
+                  <li>
+                    <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}><i class="fas fa-edit" /> Edit</LiveRedirect>
+                  </li>
+                {/if}
+                <li>
+                  <button type="button" :on-click="report">
+                    <i class="fas fa-flag" /> Report
+                  </button>
+                </li>
+              </ul>
+            </div>
             {#if @offering.open}
               <LiveRedirect
                 to={Routes.offering_request_path(Endpoint, :new, @offering.studio.handle, @offering.type)}
                 class="btn text-center btn-primary grow"
               >Request</LiveRedirect>
             {#elseif !@offering.user_subscribed?}
-              <Button class="btn-info" click="notify_me">Notify Me</Button>
+              <Button class="btn-info grow" click="notify_me">Notify Me</Button>
             {/if}
             {#if @offering.user_subscribed?}
-              <Button class="btn-info" click="unnotify_me">Unsubscribe</Button>
+              <Button class="btn-info grow" click="unnotify_me">Unsubscribe</Button>
             {/if}
           </div>
           {#if !Enum.empty?(@related)}
@@ -263,6 +290,9 @@ defmodule BanchanWeb.OfferingLive.Show do
           {/if}
         </div>
       </div>
+      {#if @current_user}
+        <ReportModal id="report-modal" current_user={@current_user} />
+      {/if}
     </Layout>
     """
   end

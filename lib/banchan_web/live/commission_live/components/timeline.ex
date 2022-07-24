@@ -13,6 +13,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
   prop current_user_member?, :boolean, required: true
   prop commission, :any, required: true
   prop uri, :string, required: true
+  prop report_modal_id, :string, required: true
 
   def fmt_time(time) do
     Timex.format!(time, "{relative}", :relative)
@@ -44,6 +45,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                   commission={@commission}
                   current_user={@current_user}
                   current_user_member?={@current_user_member?}
+                  report_modal_id={@report_modal_id}
                 />
               </article>
             {/for}
