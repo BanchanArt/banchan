@@ -338,6 +338,13 @@ defmodule BanchanWeb.CommissionLive do
       end
 
     params =
+      if filter.admin_show_all do
+        Keyword.put(params, :admin_show_all, filter.admin_show_all)
+      else
+        params
+      end
+
+    params =
       if filter.statuses && !Enum.empty?(filter.statuses) do
         Keyword.put(params, :statuses, filter.statuses)
       else
@@ -393,6 +400,11 @@ defmodule BanchanWeb.CommissionLive do
               <div class="py-2">
                 <Checkbox label="Show Archived" name={:show_archived} />
               </div>
+              {#if :admin in @current_user.roles || :mod in @current_user.roles}
+                <div class="py-2">
+                  <Checkbox label="Admin: Show All" name={:admin_show_all} />
+                </div>
+              {/if}
               <div class="grid grid-cols-3 gap-2">
                 <Submit label="Apply" class="btn btn-square btn-primary col-span-2 w-full" />
                 <button type="button" :on-click="reset" class="btn-btn-square btn-link w-full">Reset</button>

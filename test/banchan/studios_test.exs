@@ -108,6 +108,7 @@ defmodule Banchan.StudiosTest do
 
       {:error, :unauthorized} =
         Studios.update_studio_profile(
+          user,
           studio,
           false,
           attrs
@@ -132,6 +133,7 @@ defmodule Banchan.StudiosTest do
 
       {:ok, studio} =
         Studios.update_studio_profile(
+          user,
           studio,
           true,
           attrs

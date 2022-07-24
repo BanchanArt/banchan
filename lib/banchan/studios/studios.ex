@@ -52,41 +52,51 @@ defmodule Banchan.Studios do
   @doc """
   Updates the studio profile fields.
   """
-  def update_studio_profile(studio, current_user_member?, attrs)
+  def update_studio_profile(actor, studio, current_user_member?, attrs)
 
-  def update_studio_profile(_, false, _) do
-    {:error, :unauthorized}
+  def update_studio_profile(%User{roles: roles} = actor, studio, false, attrs) do
+    if :admin in roles || :mod in roles do
+      update_studio_profile(actor, studio, true, attrs)
+    else
+      {:error, :unauthorized}
+    end
   end
 
-  def update_studio_profile(%Studio{} = studio, _, attrs) do
+  def update_studio_profile(%User{} = actor, %Studio{} = studio, _, attrs) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        changeset =
-          studio
-          |> Studio.profile_changeset(attrs)
+        actor = Repo.reload(actor)
 
-        if changeset.valid? &&
-             (Ecto.Changeset.fetch_change(changeset, :name) != :error ||
-                Ecto.Changeset.fetch_change(changeset, :handle) != :error) do
-          {:ok, _} =
-            stripe_mod().update_account(studio.stripe_id, %{
-              business_profile: %{
-                name: Ecto.Changeset.get_field(changeset, :name),
-                url:
-                  String.replace(
-                    Routes.studio_shop_url(
-                      Endpoint,
-                      :show,
-                      Ecto.Changeset.get_field(changeset, :handle)
-                    ),
-                    "localhost:4000",
-                    "banchan.art"
-                  )
-              }
-            })
+        if is_user_in_studio?(actor, studio) || :admin in actor.roles || :mod in actor.roles do
+          changeset =
+            studio
+            |> Studio.profile_changeset(attrs)
+
+          if changeset.valid? &&
+               (Ecto.Changeset.fetch_change(changeset, :name) != :error ||
+                  Ecto.Changeset.fetch_change(changeset, :handle) != :error) do
+            {:ok, _} =
+              stripe_mod().update_account(studio.stripe_id, %{
+                business_profile: %{
+                  name: Ecto.Changeset.get_field(changeset, :name),
+                  url:
+                    String.replace(
+                      Routes.studio_shop_url(
+                        Endpoint,
+                        :show,
+                        Ecto.Changeset.get_field(changeset, :handle)
+                      ),
+                      "localhost:4000",
+                      "banchan.art"
+                    )
+                }
+              })
+          end
+
+          changeset |> Repo.update(returning: true)
+        else
+          {:error, :unauthorized}
         end
-
-        changeset |> Repo.update(returning: true)
       end)
 
     ret

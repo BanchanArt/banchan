@@ -16,40 +16,53 @@ defmodule Banchan.Offerings do
   }
 
   alias Banchan.Repo
+  alias Banchan.Studios
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
   alias Banchan.Workers.Thumbnailer
 
-  def new_offering(_, false, _, _) do
-    {:error, :unauthorized}
+  def new_offering(%User{} = actor, %Studio{} = studio, false, attrs, gallery_images) do
+    if :admin in actor.roles || :mod in actor.roles do
+      new_offering(actor, studio, true, attrs, gallery_images)
+    else
+      {:error, :unauthorized}
+    end
   end
 
-  def new_offering(studio, true, attrs, gallery_images) do
+  def new_offering(actor, %Studio{} = studio, true, attrs, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        max_idx =
-          from(o in Offering, where: o.studio_id == ^studio.id, select: max(o.index))
-          |> Repo.one!() ||
-            0
+        actor = actor && Repo.reload(actor)
 
-        gallery_images =
-          (gallery_images || [])
-          |> Enum.with_index()
-          |> Enum.map(fn {%Upload{} = upload, index} ->
-            %GalleryImage{
-              index: index,
-              upload_id: upload.id
-            }
-          end)
+        # nil actor means "system"
+        if is_nil(actor) || Studios.is_user_in_studio?(actor, studio) || :admin in actor.roles ||
+             :mod in actor.roles do
+          max_idx =
+            from(o in Offering, where: o.studio_id == ^studio.id, select: max(o.index))
+            |> Repo.one!() ||
+              0
 
-        %Offering{
-          studio_id: studio.id,
-          gallery_imgs: gallery_images,
-          index: max_idx + 1
-        }
-        |> Offering.changeset(attrs)
-        |> Repo.insert()
+          gallery_images =
+            (gallery_images || [])
+            |> Enum.with_index()
+            |> Enum.map(fn {%Upload{} = upload, index} ->
+              %GalleryImage{
+                index: index,
+                upload_id: upload.id
+              }
+            end)
+
+          %Offering{
+            studio_id: studio.id,
+            gallery_imgs: gallery_images,
+            index: max_idx + 1
+          }
+          |> Offering.changeset(attrs)
+          |> Repo.insert()
+        else
+          {:error, :unauthorized}
+        end
       end)
 
     ret
@@ -214,49 +227,64 @@ defmodule Banchan.Offerings do
     Offering.changeset(offering, attrs)
   end
 
-  def update_offering(_, false, _, _) do
-    {:error, :unauthorized}
+  def update_offering(%User{} = actor, %Offering{} = offering, false, attrs, gallery_images) do
+    if :admin in actor.roles || :mod in actor.roles do
+      update_offering(actor, offering, true, attrs, gallery_images)
+    else
+      {:error, :unauthorized}
+    end
   end
 
-  def update_offering(%Offering{} = offering, true, attrs, gallery_images) do
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def update_offering(actor, %Offering{} = offering, true, attrs, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
+        actor = actor && Repo.reload(actor)
+        offering = Repo.reload(offering) |> Repo.preload(:options)
 
-        changeset =
-          offering
-          |> Repo.preload(:gallery_imgs)
-          |> change_offering(attrs)
+        # nil actors are meant to be used for "system" operations.
+        if is_nil(actor) || Studios.is_user_in_studio?(actor, %Studio{id: offering.studio_id}) ||
+             :admin in actor.roles ||
+             :mod in actor.roles do
+          open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
 
-        changeset =
-          if is_nil(gallery_images) do
-            changeset
-          else
-            gallery_images =
-              (gallery_images || [])
-              |> Enum.with_index()
-              |> Enum.map(fn {%Upload{} = upload, index} ->
-                %GalleryImage{
-                  index: index,
-                  upload_id: upload.id
-                }
-              end)
+          changeset =
+            offering
+            |> Repo.preload(:gallery_imgs)
+            |> change_offering(attrs)
 
-            changeset |> Ecto.Changeset.put_assoc(:gallery_imgs, gallery_images)
-          end
+          changeset =
+            if is_nil(gallery_images) do
+              changeset
+            else
+              gallery_images =
+                (gallery_images || [])
+                |> Enum.with_index()
+                |> Enum.map(fn {%Upload{} = upload, index} ->
+                  %GalleryImage{
+                    index: index,
+                    upload_id: upload.id
+                  }
+                end)
 
-        ret = changeset |> Repo.update(returning: true)
-
-        case ret do
-          {:ok, changed} ->
-            if !open_before? && changed.open do
-              Notifications.offering_opened(changed)
+              changeset |> Ecto.Changeset.put_assoc(:gallery_imgs, gallery_images)
             end
 
-            {:ok, changed}
+          ret = changeset |> Repo.update(returning: true)
 
-          {:error, error} ->
-            {:error, error}
+          case ret do
+            {:ok, changed} ->
+              if !open_before? && changed.open do
+                Notifications.offering_opened(changed)
+              end
+
+              {:ok, changed}
+
+            {:error, error} ->
+              {:error, error}
+          end
+        else
+          {:error, :unauthorized}
         end
       end)
 

@@ -286,7 +286,8 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           Archive
         {/if}
       </button>
-      {#if @current_user.id == @commission.client_id && @commission.status != :withdrawn}
+      {#if (@current_user.id == @commission.client_id || :admin in @current_user.roles ||
+           :mod in @current_user.roles) && @commission.status != :withdrawn}
         <Collapse
           id={@id <> "-withdraw-confirmation" <> if desktop?, do: "-desktop", else: "-mobile"}
           show_arrow={false}
@@ -302,7 +303,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           </p>
           <p class="py-2">Are you sure?</p>
           <button
-            disabled={@commission.status == :withdrawn || @current_user.id != @commission.client_id}
+            disabled={@commission.status == :withdrawn}
             type="button"
             :on-click="withdraw"
             phx-target={@myself}

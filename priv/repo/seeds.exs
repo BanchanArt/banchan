@@ -51,6 +51,7 @@ user = user |> Banchan.Repo.reload()
 
 {:ok, _} =
   Banchan.Offerings.new_offering(
+    user,
     studio,
     true,
     %{
@@ -87,6 +88,7 @@ user = user |> Banchan.Repo.reload()
 
 {:ok, _} =
   Banchan.Offerings.new_offering(
+    user,
     studio,
     true,
     %{
@@ -131,6 +133,7 @@ user = user |> Banchan.Repo.reload()
 
 {:ok, _} =
   Banchan.Offerings.new_offering(
+    user,
     studio,
     true,
     %{

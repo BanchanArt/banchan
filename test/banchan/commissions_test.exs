@@ -102,6 +102,7 @@ defmodule Banchan.CommissionsTest do
 
       {:ok, offering} =
         Offerings.update_offering(
+          user,
           offering,
           true,
           %{
@@ -119,6 +120,7 @@ defmodule Banchan.CommissionsTest do
 
       {:ok, _offering} =
         Offerings.update_offering(
+          user,
           offering,
           true,
           %{
@@ -139,7 +141,13 @@ defmodule Banchan.CommissionsTest do
 
       # Manually reopen
       assert {:ok, _} =
-               Offerings.update_offering(offering |> Repo.reload(), true, %{open: true}, nil)
+               Offerings.update_offering(
+                 user,
+                 offering |> Repo.reload(),
+                 true,
+                 %{open: true},
+                 nil
+               )
 
       {:ok, comm3} = new_comm.()
       {:ok, _comm3} = Commissions.update_status(user, comm3, :accepted)

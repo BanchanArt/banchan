@@ -78,6 +78,7 @@ defmodule BanchanWeb.StudioLive.Settings do
     {:noreply, assign(socket, subscribed?: !socket.assigns.subscribed?)}
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_event("submit", val, socket) do
     card_image =
       consume_uploaded_entries(socket, :card_image, fn %{path: path}, entry ->
@@ -85,7 +86,8 @@ defmodule BanchanWeb.StudioLive.Settings do
          Studios.make_card_image!(
            socket.assigns.current_user,
            path,
-           socket.assigns.current_user_member?,
+           socket.assigns.current_user_member? || :admin in socket.assigns.current_user.roles ||
+             :mod in socket.assigns.current_user.roles,
            entry.client_type,
            entry.client_name
          )}
@@ -98,7 +100,8 @@ defmodule BanchanWeb.StudioLive.Settings do
          Studios.make_header_image!(
            socket.assigns.current_user,
            path,
-           socket.assigns.current_user_member?,
+           socket.assigns.current_user_member? || :admin in socket.assigns.current_user.roles ||
+             :mod in socket.assigns.current_user.roles,
            entry.client_type,
            entry.client_name
          )}
@@ -106,6 +109,7 @@ defmodule BanchanWeb.StudioLive.Settings do
       |> Enum.at(0)
 
     case Studios.update_studio_profile(
+           socket.assigns.current_user,
            socket.assigns.studio,
            socket.assigns.current_user_member?,
            Enum.into(val["studio"], %{
@@ -123,8 +127,16 @@ defmodule BanchanWeb.StudioLive.Settings do
 
         {:noreply, socket}
 
-      other ->
-        other
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, socket |> assign(changeset: changeset)}
+
+      {:error, :unauthorized} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are not authorized to edit this studio")
+         |> push_redirect(
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
     end
   end
 

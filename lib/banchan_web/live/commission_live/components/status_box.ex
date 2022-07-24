@@ -54,7 +54,8 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
           {/if}
         </div>
       </div>
-      {#if @current_user.id == @commission.client_id}
+      {#if @current_user.id == @commission.client_id || :admin in @current_user.roles ||
+          :mod in @current_user.roles}
         <div class="flex flex-col">
           {#case @commission.status}
             {#match :ready_for_review}
@@ -65,7 +66,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
           {/case}
         </div>
       {/if}
-      {#if @current_user_member?}
+      {#if @current_user_member? || :admin in @current_user.roles || :mod in @current_user.roles}
         <div class="flex flex-col">
           {#case @commission.status}
             {#match :submitted}

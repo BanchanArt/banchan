@@ -175,6 +175,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   end
 
   @impl true
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_event("submit", %{"offering" => offering}, socket) do
     offering = moneyfy_offering(offering)
 
@@ -184,7 +185,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
          Offerings.make_card_image!(
            socket.assigns.current_user,
            path,
-           socket.assigns.current_user_member?,
+           socket.assigns.current_user_member? || :admin in socket.assigns.current_user.roles ||
+             :mod in socket.assigns.current_user.roles,
            entry.client_type,
            entry.client_name
          )}
@@ -198,7 +200,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           Offerings.make_gallery_image!(
             socket.assigns.current_user,
             path,
-            socket.assigns.current_user_member?,
+            socket.assigns.current_user_member? || :admin in socket.assigns.current_user.roles ||
+              :mod in socket.assigns.current_user.roles,
             entry.client_type,
             entry.client_name
           )}}
@@ -219,6 +222,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
       end)
 
     case submit_offering(
+           socket.assigns.current_user,
            socket.assigns.offering,
            Enum.into(offering, %{
              "card_img_id" => (card_image && card_image.id) || offering["card_image_id"]
@@ -244,9 +248,10 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     end
   end
 
-  defp submit_offering(offering, attrs, gallery_images, studio, current_user_member?)
+  defp submit_offering(actor, offering, attrs, gallery_images, studio, current_user_member?)
        when is_nil(offering) do
     Offerings.new_offering(
+      actor,
       studio,
       current_user_member?,
       attrs,
@@ -254,9 +259,10 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     )
   end
 
-  defp submit_offering(offering, attrs, gallery_images, _studio, current_user_member?)
+  defp submit_offering(actor, offering, attrs, gallery_images, _studio, current_user_member?)
        when not is_nil(offering) do
     Offerings.update_offering(
+      actor,
       offering,
       current_user_member?,
       attrs,

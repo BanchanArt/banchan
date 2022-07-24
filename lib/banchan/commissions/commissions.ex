@@ -51,14 +51,17 @@ defmodule Banchan.Commissions do
       on: c.studio_id == s.id,
       as: :commission,
       join: artist in assoc(s, :artists),
+      as: :artist,
+      join: u in User,
+      as: :current_user,
+      on: u.id == ^user.id,
       left_join: a in CommissionArchived,
-      on: a.commission_id == c.id and a.user_id == ^user.id,
+      on: a.commission_id == c.id and a.user_id == u.id,
+      as: :archived,
       join: client in assoc(c, :client),
+      as: :client,
       join: e in assoc(c, :events),
       as: :events,
-      where:
-        c.client_id == ^user.id or
-          artist.id == ^user.id,
       group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name, a.archived],
       # order_by: {:desc, max(e.inserted_at)},
       select: %{
@@ -126,6 +129,7 @@ defmodule Banchan.Commissions do
     |> filter_studio(filter)
     |> filter_statuses(filter)
     |> filter_show_archived(filter)
+    |> filter_admin_show_all(filter)
   end
 
   defp filter_search(query, %CommissionFilter{} = filter) do
@@ -134,7 +138,7 @@ defmodule Banchan.Commissions do
     else
       query
       |> where(
-        [s, c, artist, archived, client, e],
+        [commission: c, events: e],
         fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", c.search_vector, ^filter.search) or
           fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", e.search_vector, ^filter.search)
       )
@@ -147,7 +151,7 @@ defmodule Banchan.Commissions do
     else
       query
       |> where(
-        [s, c, artist, archived, client, e],
+        [client: client],
         fragment(
           "? @@ websearch_to_tsquery('banchan_fts', ?)",
           client.search_vector,
@@ -163,7 +167,7 @@ defmodule Banchan.Commissions do
     else
       query
       |> where(
-        [s, c, artist, archived, client, e],
+        [studio: s],
         fragment("? @@ websearch_to_tsquery('banchan_fts', ?)", s.search_vector, ^filter.studio)
       )
     end
@@ -174,7 +178,7 @@ defmodule Banchan.Commissions do
       query
     else
       query
-      |> where([s, c, artist, archived, client, e], c.status in ^filter.statuses)
+      |> where([commission: c], c.status in ^filter.statuses)
     end
   end
 
@@ -183,7 +187,27 @@ defmodule Banchan.Commissions do
       query
     else
       query
-      |> where([s, c, artist, archived, client, e], not coalesce(archived.archived, false))
+      |> where([archived: archived], not coalesce(archived.archived, false))
+    end
+  end
+
+  defp filter_admin_show_all(query, %CommissionFilter{} = filter) do
+    if filter.admin_show_all do
+      query
+      |> where(
+        [
+          commission: c,
+          artist: artist,
+          current_user: u
+        ],
+        :admin in u.roles or :mod in u.roles or c.client_id == u.id or artist.id == u.id
+      )
+    else
+      query
+      |> where(
+        [commission: c, artist: artist, current_user: u],
+        c.client_id == u.id or artist.id == u.id
+      )
     end
   end
 
@@ -197,9 +221,13 @@ defmodule Banchan.Commissions do
       from c in Commission,
         join: s in assoc(c, :studio),
         join: artist in assoc(s, :artists),
+        join: u in User,
+        on: u.id == ^current_user.id,
         where:
           c.public_id == ^public_id and
-            (c.client_id == ^current_user.id or
+            (:admin in u.roles or
+               :mod in u.roles or
+               c.client_id == ^current_user.id or
                ^current_user.id == artist.id),
         preload: [
           :studio,
@@ -298,7 +326,7 @@ defmodule Banchan.Commissions do
     if close do
       # NB(zkat): We pretend we're a studio member here because we're doing
       # this on behalf of the studio. It's safe.
-      {:ok, _} = Offerings.update_offering(offering, true, %{open: false}, nil)
+      {:ok, _} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
     end
   end
 
@@ -407,7 +435,7 @@ defmodule Banchan.Commissions do
             if close do
               # NB(zkat): We pretend we're a studio member here because we're doing
               # this on behalf of the studio. It's safe.
-              {:ok, _} = Offerings.update_offering(offering, true, %{open: false}, nil)
+              {:ok, _} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
             end
           end
 
@@ -486,8 +514,8 @@ defmodule Banchan.Commissions do
 
         true =
           status_transition_allowed?(
-            actor_member?,
-            client_id == actor.id,
+            actor_member? || :admin in actor.roles || :mod in actor.roles,
+            client_id == actor.id || :admin in actor.roles || :mod in actor.roles,
             current_status,
             new_status
           )
@@ -630,17 +658,20 @@ defmodule Banchan.Commissions do
       )
 
   def create_event(
-        _type,
-        %User{id: user_id},
-        %Commission{client_id: client_id},
+        type,
+        %User{id: user_id, roles: roles} = actor,
+        %Commission{client_id: client_id} = comm,
         current_user_member?,
         attachments,
-        _attrs,
-        _notify
+        attrs,
+        notify
       )
       when user_id != client_id and current_user_member? == false do
-    Enum.each(attachments, &File.rm!(&1.path))
-    {:error, :unauthorized}
+    if :admin in roles || :mod in roles do
+      create_event(type, actor, comm, true, attachments, attrs, notify)
+    else
+      {:error, :unauthorized}
+    end
   end
 
   def create_event(
@@ -898,8 +929,12 @@ defmodule Banchan.Commissions do
 
   def invoice_paid?(%Invoice{status: status}), do: status == :succeeded
 
-  def invoice(_actor, _commission, false, _drafts, _event_data) do
-    {:error, :unauthorized}
+  def invoice(%User{roles: roles} = actor, comm, false, drafts, event_data) do
+    if :admin in roles or :client in roles do
+      invoice(actor, comm, true, drafts, event_data)
+    else
+      {:error, :unauthorized}
+    end
   end
 
   def invoice(%User{} = actor, %Commission{} = commission, true, drafts, event_data) do
@@ -1307,12 +1342,16 @@ defmodule Banchan.Commissions do
   end
 
   def deposited_amount(
-        %User{id: user_id},
-        %Commission{client_id: client_id},
+        %User{id: user_id, roles: roles} = actor,
+        %Commission{client_id: client_id} = comm,
         current_user_member?
       )
       when user_id != client_id and current_user_member? == false do
-    {:error, :unauthorized}
+    if :admin in roles || :mod in roles do
+      deposited_amount(actor, comm, true)
+    else
+      {:error, :unauthorized}
+    end
   end
 
   def deposited_amount(_, %Commission{} = commission, _) do
@@ -1358,12 +1397,16 @@ defmodule Banchan.Commissions do
   end
 
   def tipped_amount(
-        %User{id: user_id},
-        %Commission{client_id: client_id},
+        %User{id: user_id, roles: roles} = actor,
+        %Commission{client_id: client_id} = comm,
         current_user_member?
       )
       when user_id != client_id and current_user_member? == false do
-    {:error, :unauthorized}
+    if :admin in roles || :mod in roles do
+      tipped_amount(actor, comm, true)
+    else
+      {:error, :unauthorized}
+    end
   end
 
   def tipped_amount(_, %Commission{} = commission, _) do

@@ -46,7 +46,8 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
      socket
      |> assign(
        changeset:
-         (assigns.current_user_member? || assigns.current_user.id == assigns.actor.id) &&
+         (assigns.current_user_member? || assigns.current_user.id == assigns.actor.id ||
+            :admin in assigns.current_user.roles || :mod in assigns.current_user.roles) &&
            Commissions.change_event_text(assigns.event, %{})
      )}
   end
@@ -179,7 +180,9 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             <i class="fas fa-ellipsis-vertical" />
           </label>
           <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
-            {#if !@changeset && (@current_user_member? || @current_user.id == @actor.id)}
+            {#if !@changeset &&
+                (@current_user_member? || @current_user.id == @actor.id || :admin in @current_user.roles ||
+                   :mod in @current_user.roles)}
               <li>
                 <button type="button" :on-click="edit">
                   <i class="fas fa-edit" /> Edit

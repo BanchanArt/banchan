@@ -2,14 +2,15 @@ defmodule Banchan.Commissions.CommissionFilter do
   @moduledoc """
   Filters applied to the commissions dashboard.
   """
-  defstruct [:search, :client, :studio, :statuses, :show_archived]
+  defstruct [:search, :client, :studio, :statuses, :show_archived, :admin_show_all]
 
   @types %{
     search: :string,
     client: :string,
     studio: :string,
     statuses: {:array, :string},
-    show_archived: :boolean
+    show_archived: :boolean,
+    admin_show_all: :boolean
   }
 
   import Ecto.Changeset
