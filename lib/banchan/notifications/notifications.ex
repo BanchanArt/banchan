@@ -146,11 +146,11 @@ defmodule Banchan.Notifications do
         notification.title
       end
 
-    Mailer.deliver(
+    Mailer.deliver(%{
       to: email,
       subject: title,
       html_body: notification.html_body,
       text_body: notification.text_body
-    )
+    })
   end
 end

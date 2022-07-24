@@ -7,7 +7,7 @@ defmodule Banchan.Accounts do
 
   alias Ueberauth.Auth
 
-  alias Banchan.Accounts.{DisableHistory, User, UserFilter, UserNotifier, UserToken}
+  alias Banchan.Accounts.{DisableHistory, Notifications, User, UserFilter, UserToken}
   alias Banchan.Repo
   alias Banchan.Uploads
   alias Banchan.Workers.{EnableUser, Thumbnailer}
@@ -676,7 +676,7 @@ defmodule Banchan.Accounts do
     {encoded_token, user_token} = UserToken.build_email_token(user, "change:#{current_email}")
 
     Repo.insert!(user_token)
-    UserNotifier.deliver_update_email_instructions(user, update_email_url_fun.(encoded_token))
+    Notifications.update_email_instructions(user, update_email_url_fun.(encoded_token))
   end
 
   @doc """
@@ -899,7 +899,7 @@ defmodule Banchan.Accounts do
     else
       {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
       Repo.insert!(user_token)
-      UserNotifier.deliver_confirmation_instructions(user, confirmation_url_fun.(encoded_token))
+      Notifications.confirmation_instructions(user, confirmation_url_fun.(encoded_token))
     end
   end
 
@@ -940,7 +940,7 @@ defmodule Banchan.Accounts do
       when is_function(reset_password_url_fun, 1) do
     {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
     Repo.insert!(user_token)
-    UserNotifier.deliver_reset_password_instructions(user, reset_password_url_fun.(encoded_token))
+    Notifications.reset_password_instructions(user, reset_password_url_fun.(encoded_token))
   end
 
   @doc """

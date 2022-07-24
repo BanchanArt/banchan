@@ -1080,7 +1080,9 @@ defmodule Banchan.Commissions do
           }
         )
 
-        Notifications.send_receipt(invoice, client, commission)
+        if client.email do
+          Notifications.send_receipt(invoice, client, commission)
+        end
 
         send_event_update!(invoice.event_id)
       end)

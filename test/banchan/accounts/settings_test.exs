@@ -4,10 +4,11 @@ defmodule Banchan.AccountsTest.Settings do
   """
   use Banchan.DataCase, async: true
 
+  use Bamboo.Test
+
   alias Banchan.Accounts
   import Banchan.AccountsFixtures
   alias Banchan.Accounts.{User, UserToken}
-
 
   describe "change_user_handle/2" do
     test "returns a user changeset" do
@@ -109,10 +110,30 @@ defmodule Banchan.AccountsTest.Settings do
     end
 
     test "sends token through notification", %{user: user} do
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_update_email_instructions(user, "current@example.com", url)
-        end)
+      Accounts.deliver_update_email_instructions(
+        user,
+        "current@example.com",
+        &extractable_user_token/1
+      )
+
+      email = user.email
+
+      assert_delivered_email_matches(%_{
+        to: [{_, ^email}],
+        subject: "Update Your Banchan Art Email",
+        text_body: text_body,
+        html_body: html_body
+      })
+
+      token = extract_user_token(text_body)
+
+      {:ok, token} = Base.url_decode64(token, padding: false)
+      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
+      assert user_token.user_id == user.id
+      assert user_token.sent_to == user.email
+      assert user_token.context == "change:current@example.com"
+
+      token = extract_user_token(html_body)
 
       {:ok, token} = Base.url_decode64(token, padding: false)
       assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
@@ -127,10 +148,18 @@ defmodule Banchan.AccountsTest.Settings do
       user = unconfirmed_user_fixture()
       email = unique_user_email()
 
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_update_email_instructions(%{user | email: email}, user.email, url)
-        end)
+      {:ok, %Oban.Job{}} =
+        Accounts.deliver_update_email_instructions(
+          %{user | email: email},
+          user.email,
+          &extractable_user_token/1
+        )
+
+      assert_delivered_email_matches(%{
+        html_body: html_body
+      })
+
+      token = extract_user_token(html_body)
 
       %{user: user, token: token, email: email}
     end
