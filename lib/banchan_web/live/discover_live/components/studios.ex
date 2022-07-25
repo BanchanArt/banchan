@@ -35,7 +35,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
     Studios.list_studios(
       current_user: socket.assigns.current_user,
       order_by: socket.assigns.order_by || :homepage,
-      include_pending: false,
+      include_pending?: false,
       query: socket.assigns.query,
       page_size: socket.assigns.page_size,
       page: page
