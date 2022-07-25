@@ -82,34 +82,6 @@ defmodule Banchan.Workers.Thumbnailer do
         ret
 
       Uploads.video?(upload) ->
-        tmp_src = Path.join([System.tmp_dir!(), upload.key <> Path.extname(upload.name)])
-        File.mkdir_p!(Path.dirname(tmp_src))
-        Uploads.write_data!(upload, tmp_src)
-
-        duration = FFprobe.duration(tmp_src)
-
-        output_src = Path.join([System.tmp_dir!(), upload.key <> ".jpeg"])
-
-        command =
-          FFmpex.new_command()
-          |> add_global_option(option_y())
-          |> add_input_file(tmp_src)
-          |> add_output_file(output_src)
-          |> add_file_option(option_f("image2"))
-          |> add_file_option(option_filter("scale=128:128"))
-          |> add_file_option(option_ss(round(duration / 2)))
-          |> add_file_option(option_vframes(1))
-
-        {:ok, _} = execute(command)
-
-        video_thumb =
-          Uploads.save_file!(
-            %User{id: upload.uploader_id},
-            output_src,
-            "image/jpeg",
-            Path.rootname(upload.name) <> ".jpeg"
-          )
-
         {:ok, ret} =
           Repo.transaction(fn ->
             pending =
@@ -127,8 +99,8 @@ defmodule Banchan.Workers.Thumbnailer do
                        src: %{
                          id: upload.id,
                          bucket: upload.bucket,
-                         key: video_thumb.key,
-                         name: video_thumb.name
+                         key: upload.key,
+                         name: upload.name
                        },
                        dest: %{
                          id: pending.id,
@@ -140,7 +112,8 @@ defmodule Banchan.Workers.Thumbnailer do
                          target_size: Keyword.get(opts, :target_size),
                          format: Keyword.get(opts, :format, "jpeg"),
                          dimensions: Keyword.get(opts, :dimensions),
-                         callback: Keyword.get(opts, :callback)
+                         callback: Keyword.get(opts, :callback),
+                         isVideo: true
                        }
                      })
                    ) do
@@ -159,6 +132,26 @@ defmodule Banchan.Workers.Thumbnailer do
     tmp_src = Path.join([System.tmp_dir!(), src.key <> Path.extname(src.name)])
     File.mkdir_p!(Path.dirname(tmp_src))
     Uploads.write_data!(src, tmp_src)
+
+    if(opts["isVideo"]) do
+      duration = FFprobe.duration(tmp_src)
+
+      output_src = Path.join([System.tmp_dir!(), src.key <> ".jpeg"])
+
+      command =
+        FFmpex.new_command()
+        |> add_global_option(option_y())
+        |> add_input_file(tmp_src)
+        |> add_output_file(output_src)
+        |> add_file_option(option_f("image2"))
+        |> add_file_option(option_filter("scale=128:128"))
+        |> add_file_option(option_ss(round(duration / 2)))
+        |> add_file_option(option_vframes(1))
+
+      {:ok, _} = execute(command)
+
+      File.copy(output_src, tmp_src)
+    end
 
     tmp_dest = Path.join([System.tmp_dir!(), dest.key <> Path.extname(dest.name)])
     File.mkdir_p!(Path.dirname(tmp_dest))
