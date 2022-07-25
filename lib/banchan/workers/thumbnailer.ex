@@ -150,7 +150,7 @@ defmodule Banchan.Workers.Thumbnailer do
 
       {:ok, _} = execute(command)
 
-      File.copy(output_src, tmp_src)
+      File.copy!(output_src, tmp_src)
     end
 
     tmp_dest = Path.join([System.tmp_dir!(), dest.key <> Path.extname(dest.name)])
