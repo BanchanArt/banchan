@@ -1,4 +1,6 @@
 module.exports = {
+  mode: "jit",
+  purge: ["./js/**/*.js", "../lib/*_web/**/*.*ex"],
   content:
     ["./js/**/*.js", "../lib/*_web.ex", "../lib/*_web/**/*.*ex"],
   plugins: [

@@ -9,6 +9,8 @@ defmodule Banchan.Workers.Thumbnailer do
     tags: ["thumbnailer", "media"]
 
   require Logger
+  import FFmpex, warn: false
+  use FFmpex.Options
 
   alias Banchan.Accounts.User
   alias Banchan.Repo
@@ -37,49 +39,92 @@ defmodule Banchan.Workers.Thumbnailer do
   end
 
   def thumbnail(%Upload{} = upload, opts \\ []) do
-    if Uploads.image?(upload) do
-      {:ok, ret} =
-        Repo.transaction(fn ->
-          pending =
-            Uploads.gen_pending(
-              %User{id: upload.uploader_id},
-              upload,
-              "image/jpeg",
-              Keyword.get(opts, :name, "thumbnail.jpg")
-            )
+    cond do
+      Uploads.image?(upload) ->
+        {:ok, ret} =
+          Repo.transaction(fn ->
+            pending =
+              Uploads.gen_pending(
+                %User{id: upload.uploader_id},
+                upload,
+                "image/jpeg",
+                Keyword.get(opts, :name, "thumbnail.jpg")
+              )
 
-          with {:ok, pending} <- Repo.insert(pending),
-               {:ok, _} <-
-                 Oban.insert(
-                   __MODULE__.new(%{
-                     src: %{
-                       id: upload.id,
-                       bucket: upload.bucket,
-                       key: upload.key,
-                       name: upload.name
-                     },
-                     dest: %{
-                       id: pending.id,
-                       bucket: pending.bucket,
-                       key: pending.key,
-                       name: pending.name
-                     },
-                     opts: %{
-                       target_size: Keyword.get(opts, :target_size),
-                       format: Keyword.get(opts, :format, "jpeg"),
-                       dimensions: Keyword.get(opts, :dimensions),
-                       callback: Keyword.get(opts, :callback)
-                     }
-                   })
-                 ) do
-            {:ok, pending}
-          end
-        end)
+            with {:ok, pending} <- Repo.insert(pending),
+                 {:ok, _} <-
+                   Oban.insert(
+                     __MODULE__.new(%{
+                       src: %{
+                         id: upload.id,
+                         bucket: upload.bucket,
+                         key: upload.key,
+                         name: upload.name
+                       },
+                       dest: %{
+                         id: pending.id,
+                         bucket: pending.bucket,
+                         key: pending.key,
+                         name: pending.name
+                       },
+                       opts: %{
+                         target_size: Keyword.get(opts, :target_size),
+                         format: Keyword.get(opts, :format, "jpeg"),
+                         dimensions: Keyword.get(opts, :dimensions),
+                         callback: Keyword.get(opts, :callback)
+                       }
+                     })
+                   ) do
+              {:ok, pending}
+            end
+          end)
 
-      ret
-    else
-      # Only images can be thumbnailed right now.
-      {:error, :unsupported_input}
+        ret
+
+      Uploads.video?(upload) ->
+        {:ok, ret} =
+          Repo.transaction(fn ->
+            pending =
+              Uploads.gen_pending(
+                %User{id: upload.uploader_id},
+                upload,
+                "image/jpeg",
+                Keyword.get(opts, :name, "thumbnail.jpg")
+              )
+
+            with {:ok, pending} <- Repo.insert(pending),
+                 {:ok, _} <-
+                   Oban.insert(
+                     __MODULE__.new(%{
+                       src: %{
+                         id: upload.id,
+                         bucket: upload.bucket,
+                         key: upload.key,
+                         name: upload.name
+                       },
+                       dest: %{
+                         id: pending.id,
+                         bucket: pending.bucket,
+                         key: pending.key,
+                         name: pending.name
+                       },
+                       opts: %{
+                         target_size: Keyword.get(opts, :target_size),
+                         format: Keyword.get(opts, :format, "jpeg"),
+                         dimensions: Keyword.get(opts, :dimensions),
+                         callback: Keyword.get(opts, :callback),
+                         isVideo: true
+                       }
+                     })
+                   ) do
+              {:ok, pending}
+            end
+          end)
+
+        ret
+
+      true ->
+        {:error, :unsupported_input}
     end
   end
 
@@ -88,14 +133,33 @@ defmodule Banchan.Workers.Thumbnailer do
     File.mkdir_p!(Path.dirname(tmp_src))
     Uploads.write_data!(src, tmp_src)
 
+    if opts["isVideo"] do
+      duration = FFprobe.duration(tmp_src)
+
+      output_src = Path.join([System.tmp_dir!(), src.key <> ".jpeg"])
+
+      command =
+        FFmpex.new_command()
+        |> add_global_option(option_y())
+        |> add_input_file(tmp_src)
+        |> add_output_file(output_src)
+        |> add_file_option(option_f("image2"))
+        |> add_file_option(option_filter("scale=128:128"))
+        |> add_file_option(option_ss(round(duration / 2)))
+        |> add_file_option(option_vframes(1))
+
+      {:ok, _} = execute(command)
+
+      File.copy!(output_src, tmp_src)
+    end
+
     tmp_dest = Path.join([System.tmp_dir!(), dest.key <> Path.extname(dest.name)])
     File.mkdir_p!(Path.dirname(tmp_dest))
 
     # https://www.smashingmagazine.com/2015/06/efficient-image-resizing-with-imagemagick/
     Mogrify.open(tmp_src)
+    |> Mogrify.custom("flatten")
     |> Mogrify.format(opts["format"])
-    |> Mogrify.custom("filter", "Triangle")
-    |> Mogrify.custom("define", "filter:support=2")
     |> Mogrify.custom("unsharp", "0.25x0.25+8+0.065")
     |> Mogrify.custom("dither", "None")
     |> Mogrify.custom("posterize", "136")

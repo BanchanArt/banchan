@@ -52,6 +52,7 @@ defmodule Banchan.MixProject do
       {:ecto_sql, "~> 3.8.3"},
       {:ex_aws_s3, "~> 2.3.2"},
       {:ex_aws, "~> 2.3.1"},
+      {:ffmpex, "~> 0.10.0"},
       {:gettext, "~> 0.11"},
       {:hackney, "~> 1.18"},
       {:html_sanitize_ex, "~> 1.4.2"},
