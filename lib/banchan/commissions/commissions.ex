@@ -301,6 +301,9 @@ defmodule Banchan.Commissions do
           maybe_close_offering(offering, available_proposal_count)
 
           cond do
+            !is_nil(offering.archived_at) ->
+              {:error, :offering_archived}
+
             !offering.open ->
               {:error, :offering_closed}
 
