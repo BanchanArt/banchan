@@ -133,7 +133,7 @@ defmodule Banchan.Workers.Thumbnailer do
     File.mkdir_p!(Path.dirname(tmp_src))
     Uploads.write_data!(src, tmp_src)
 
-    if(opts["isVideo"]) do
+    if opts["isVideo"] do
       duration = FFprobe.duration(tmp_src)
 
       output_src = Path.join([System.tmp_dir!(), src.key <> ".jpeg"])
