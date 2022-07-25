@@ -100,7 +100,12 @@ defmodule Banchan.Workers.Thumbnailer do
   end
 
   defp process(src, dest, opts) do
-    tmp_src = Path.join([System.tmp_dir!(), src.key <> Path.extname(src.name)])
+    tmp_src =
+      Path.join([
+        System.tmp_dir!(),
+        src.key <> "#{System.unique_integer()}" <> Path.extname(src.name)
+      ])
+
     File.mkdir_p!(Path.dirname(tmp_src))
     Uploads.write_data!(src, tmp_src)
 
@@ -124,13 +129,20 @@ defmodule Banchan.Workers.Thumbnailer do
       File.copy!(output_src, tmp_src)
     end
 
-    tmp_dest = Path.join([System.tmp_dir!(), dest.key <> Path.extname(dest.name)])
+    tmp_dest =
+      Path.join([
+        System.tmp_dir!(),
+        dest.key <> "#{System.unique_integer()}" <> Path.extname(dest.name)
+      ])
+
     File.mkdir_p!(Path.dirname(tmp_dest))
 
     # https://www.smashingmagazine.com/2015/06/efficient-image-resizing-with-imagemagick/
     Mogrify.open(tmp_src)
     |> Mogrify.custom("flatten")
     |> Mogrify.format(opts["format"])
+    |> Mogrify.custom("filter", "Triangle")
+    |> Mogrify.custom("define", "filter:support=2")
     |> Mogrify.custom("unsharp", "0.25x0.25+8+0.065")
     |> Mogrify.custom("dither", "None")
     |> Mogrify.custom("posterize", "136")

@@ -868,7 +868,7 @@ defmodule Banchan.Commissions do
             if Uploads.image?(upload) || Uploads.video?(upload) do
               Thumbnailer.thumbnail(
                 upload,
-                target_size: "40kb",
+                dimensions: "1200",
                 name: "preview.jpg",
                 callback: [
                   Notifications,
