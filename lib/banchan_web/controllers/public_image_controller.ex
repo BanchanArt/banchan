@@ -6,6 +6,8 @@ defmodule BanchanWeb.PublicImageController do
 
   alias Banchan.Uploads
 
+  # TODO: No this is wrong! Anyone who knows an upload id would be able to
+  # bypass any security checks!!
   def download(conn, %{"id" => upload_id}) do
     upload = Uploads.get_by_id!(upload_id)
 
@@ -30,6 +32,8 @@ defmodule BanchanWeb.PublicImageController do
     )
   end
 
+  # TODO: No this is wrong! Anyone who knows an upload id would be able to
+  # bypass any security checks!!
   def image(conn, %{"id" => upload_id}) do
     upload = Uploads.get_by_id!(upload_id)
 

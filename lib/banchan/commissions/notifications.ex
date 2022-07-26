@@ -19,6 +19,9 @@ defmodule Banchan.Commissions.Notifications do
 
   @pubsub Banchan.PubSub
 
+  @doc """
+  True if the user is directly subscribed to the given Commission.
+  """
   def user_subscribed?(%User{} = user, %Commission{} = commission) do
     from(sub in CommissionSubscription,
       where:
@@ -27,6 +30,9 @@ defmodule Banchan.Commissions.Notifications do
     |> Repo.exists?()
   end
 
+  @doc """
+  Subscribes the user to commission notifications.
+  """
   def subscribe_user!(%User{} = user, %Commission{} = comm) do
     %CommissionSubscription{user_id: user.id, commission_id: comm.id, silenced: false}
     |> Repo.insert(
@@ -35,6 +41,9 @@ defmodule Banchan.Commissions.Notifications do
     )
   end
 
+  @doc """
+  Unsubscribes a user from commission notifications.
+  """
   def unsubscribe_user!(%User{} = user, %Commission{} = comm) do
     %CommissionSubscription{user_id: user.id, commission_id: comm.id, silenced: true}
     |> Repo.insert(
@@ -43,6 +52,12 @@ defmodule Banchan.Commissions.Notifications do
     )
   end
 
+  @doc """
+  Returns a stream of the commission's applicable subscribers. Note that this also takes
+  into account Studio subscriptions, so unless a Studio member has explicitly
+  silenced the commission, they'll receive updates if they're subscribed to
+  Studio notifications.
+  """
   def subscribers(%Commission{} = commission) do
     from(
       u in User,
@@ -66,6 +81,9 @@ defmodule Banchan.Commissions.Notifications do
     |> Repo.stream()
   end
 
+  @doc """
+  Sends out notifications about new commissions.
+  """
   def new_commission(%Commission{} = commission, actor \\ nil) do
     Notifications.with_task(fn ->
       Phoenix.PubSub.broadcast!(
@@ -103,6 +121,11 @@ defmodule Banchan.Commissions.Notifications do
     end)
   end
 
+  @doc """
+  Broadcasts a notification that a specific event in a commission has been
+  updated. This might be things like comments being edited, upload thumbnails
+  completing, etc.
+  """
   def commission_event_updated(comm, ev, _actor \\ nil)
 
   def commission_event_updated(%Commission{} = commission, %Event{} = event, _actor) do
@@ -122,6 +145,7 @@ defmodule Banchan.Commissions.Notifications do
     end)
   end
 
+  # This clause is specifically used when attachment thumbnails complete.
   def commission_event_updated(commission_id, event_id, _actor)
       when is_number(commission_id) and is_number(event_id) do
     commission_event_updated(
@@ -131,6 +155,9 @@ defmodule Banchan.Commissions.Notifications do
     )
   end
 
+  @doc """
+  Broadcasts a list of events that have been added to a commission.
+  """
   def new_commission_events(%Commission{} = commission, events, actor \\ nil) do
     Notifications.with_task(fn ->
       Phoenix.PubSub.broadcast!(
@@ -211,6 +238,9 @@ defmodule Banchan.Commissions.Notifications do
     "The commission status has been changed to #{Common.humanize_status(status)}."
   end
 
+  @doc """
+  Broadcasts commission title changes so commission pages can live-update.
+  """
   def commission_title_changed(%Commission{} = commission, _actor \\ nil) do
     Notifications.with_task(fn ->
       Phoenix.PubSub.broadcast!(
@@ -225,6 +255,9 @@ defmodule Banchan.Commissions.Notifications do
     end)
   end
 
+  @doc """
+  Broadcasts commission status changes so commission pages can live-update.
+  """
   def commission_status_changed(%Commission{} = commission, _actor \\ nil) do
     Notifications.with_task(fn ->
       Phoenix.PubSub.broadcast!(
@@ -242,6 +275,9 @@ defmodule Banchan.Commissions.Notifications do
     end)
   end
 
+  @doc """
+  Broadcasts commission line item changes so commission pages can live-update.
+  """
   def commission_line_items_changed(%Commission{} = commission, _actor \\ nil) do
     Notifications.with_task(fn ->
       Phoenix.PubSub.broadcast!(
@@ -259,6 +295,10 @@ defmodule Banchan.Commissions.Notifications do
     end)
   end
 
+  @doc """
+  Sends out web/email notifications only, when an invoice is released by the
+  client before a commission has been approved.
+  """
   def invoice_released(%Commission{} = commission, %Event{} = event, actor \\ nil) do
     # No need for a broadcast. That's already being handled by commission_event_updated
     Notifications.with_task(fn ->
@@ -291,6 +331,10 @@ defmodule Banchan.Commissions.Notifications do
     end)
   end
 
+  @doc """
+  Sends out web/email notifications only, when a refund in a commission has
+  its status updated (when it succeeds, fails, etc)
+  """
   def invoice_refund_updated(%Commission{} = commission, %Event{} = event, actor \\ nil) do
     # No need for a broadcast. That's already being handled by commission_event_updated
     Notifications.with_task(fn ->

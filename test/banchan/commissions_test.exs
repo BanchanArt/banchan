@@ -161,7 +161,7 @@ defmodule Banchan.CommissionsTest do
       amount = Money.new(420, :USD)
 
       {:ok, invoice} =
-        Commissions.invoice(commission.client, commission, true, [], %{
+        Commissions.invoice(commission.studio.artists |> List.first(), commission, true, [], %{
           "amount" => amount,
           "text" => "Please pay me?"
         })
@@ -175,6 +175,7 @@ defmodule Banchan.CommissionsTest do
 
     test "process payment" do
       commission = commission_fixture()
+      artist = commission.studio.artists |> List.first()
       user = commission.client
       studio = commission.studio
       uri = "https://come.back.here"
@@ -185,7 +186,7 @@ defmodule Banchan.CommissionsTest do
       net = amount |> Money.add(tip) |> Money.subtract(fee)
 
       invoice =
-        invoice_fixture(user, commission, %{
+        invoice_fixture(artist, commission, %{
           "amount" => amount,
           "text" => "Send help."
         })
@@ -237,14 +238,15 @@ defmodule Banchan.CommissionsTest do
 
     test "process payment succeeded" do
       commission = commission_fixture()
-      user = commission.client
+      artist = commission.studio.artists |> List.first()
+      client = commission.client
       uri = "https://come.back.here"
       checkout_uri = "https://checkout.url"
       amount = Money.new(420, :USD)
       tip = Money.new(69, :USD)
 
       invoice =
-        invoice_fixture(user, commission, %{
+        invoice_fixture(artist, commission, %{
           "amount" => amount,
           "text" => "Send help."
         })
@@ -264,7 +266,7 @@ defmodule Banchan.CommissionsTest do
 
       assert checkout_uri ==
                Commissions.process_payment!(
-                 user,
+                client,
                  event,
                  commission,
                  uri,
@@ -326,7 +328,7 @@ defmodule Banchan.CommissionsTest do
 
       assert processed_event
       assert processed_event.commission_id == commission.id
-      assert processed_event.actor_id == user.id
+      assert processed_event.actor_id == client.id
       assert processed_event.amount == Money.add(amount, tip)
 
       eid = processed_event.id
@@ -359,13 +361,13 @@ defmodule Banchan.CommissionsTest do
 
     test "process payment expired" do
       commission = commission_fixture()
-      user = commission.client
+      artist = commission.studio.artists |> List.first()
 
       amount = Money.new(420, :USD)
       tip = Money.new(69, :USD)
 
       invoice =
-        invoice_fixture(user, commission, %{
+        invoice_fixture(artist, commission, %{
           "amount" => amount,
           "text" => "Send help."
         })
@@ -398,13 +400,13 @@ defmodule Banchan.CommissionsTest do
 
     test "manually expire already-started payment" do
       commission = commission_fixture()
-      user = commission.client
+      artist = commission.studio.artists |> List.first()
 
       amount = Money.new(420, :USD)
       tip = Money.new(69, :USD)
 
       invoice =
-        invoice_fixture(user, commission, %{
+        invoice_fixture(artist, commission, %{
           "amount" => amount,
           "text" => "Send help."
         })
@@ -442,12 +444,12 @@ defmodule Banchan.CommissionsTest do
 
     test "manually expire pending payment" do
       commission = commission_fixture()
-      user = commission.client
+      artist = commission.studio.artists |> List.first()
 
       amount = Money.new(420, :USD)
 
       invoice =
-        invoice_fixture(user, commission, %{
+        invoice_fixture(artist, commission, %{
           "amount" => amount,
           "text" => "Send help."
         })
@@ -503,9 +505,8 @@ defmodule Banchan.CommissionsTest do
       iid = invoice.id
       eid = invoice.event.id
 
-      assert_raise MatchError, fn ->
-        Commissions.release_payment!(artist, commission, invoice)
-      end
+      assert {:error, :invalid_invoice_status} =
+               Commissions.release_payment(artist, commission, invoice)
 
       invoice = invoice |> Repo.reload()
 
@@ -523,7 +524,7 @@ defmodule Banchan.CommissionsTest do
       Notifications.mark_all_as_read(client)
       Notifications.mark_all_as_read(artist)
 
-      Commissions.release_payment!(client, commission, invoice)
+      assert {:ok, _} = Commissions.release_payment(client, commission, invoice)
 
       invoice = invoice |> Repo.reload()
 
@@ -543,9 +544,8 @@ defmodule Banchan.CommissionsTest do
                Notifications.unread_notifications(artist).entries
 
       # Can't re-release once it's been released.
-      assert_raise MatchError, fn ->
-        Commissions.release_payment!(artist, commission, invoice)
-      end
+      assert {:error, :invalid_invoice_status} ==
+               Commissions.release_payment(artist, commission, invoice)
     end
 
     test "refund payment before approval - success" do

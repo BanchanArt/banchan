@@ -132,14 +132,47 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           assigns: %{current_user: current_user, commission: commission, event: event}
         } = socket
       ) do
-    Commissions.release_payment!(
+    Commissions.release_payment(
       current_user,
       commission,
       event.invoice
     )
+    |> case do
+      {:ok, _} ->
+        Modal.hide(socket.assigns.id <> "_release_modal")
+        {:noreply, socket}
 
-    Modal.hide(socket.assigns.id <> "_release_modal")
-    {:noreply, socket}
+      {:error, :invalid_invoice_status} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Failed to release invoice, possibly due to a state change")
+         |> push_redirect(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
+
+      {:error, :blocked} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are blocked from further interaction with this studio.")
+         |> push_redirect(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
+
+      {:error, :unauthorized} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are not authorized to access that commission.")
+         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+
+      {:error, :disabled} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "You are not authorized to access that commission because your account has been disabled."
+         )
+         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+    end
   end
 
   def handle_event("open_release_modal", _, socket) do

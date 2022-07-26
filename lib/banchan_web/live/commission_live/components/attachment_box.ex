@@ -59,13 +59,13 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                   Endpoint,
                   :show,
                   @commission.public_id,
-                  attachment.upload.key
+                  attachment.upload_id
                 )}
                 src={Routes.commission_attachment_path(
                   Endpoint,
                   :preview,
                   @commission.public_id,
-                  attachment.upload.key
+                  attachment.upload_id
                 )}
               >
                 {#if @editing}
@@ -86,7 +86,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                     Endpoint,
                     :thumbnail,
                     @commission.public_id,
-                    attachment.upload.key
+                    attachment.upload_id
                   )}
                 />
               </Lightbox.Item>
@@ -109,7 +109,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                   Endpoint,
                   :show,
                   @commission.public_id,
-                  attachment.upload.key
+                  attachment.upload_id
                 )}
               >
                 {#if Uploads.video?(attachment.upload)}
@@ -126,7 +126,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                         Endpoint,
                         :thumbnail,
                         @commission.public_id,
-                        attachment.upload.key
+                        attachment.upload_id
                       )}
                     />
                     <i class="fas fa-play text-4xl absolute pt-[44px] z-20" />
