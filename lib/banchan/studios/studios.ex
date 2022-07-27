@@ -231,6 +231,44 @@ defmodule Banchan.Studios do
   end
 
   @doc """
+  Finds a studio card image's Upload.
+  """
+  def studio_card_img!(upload_id) do
+    from(
+      s in Studio,
+      join: u in assoc(s, :card_img),
+      where: u.id == ^upload_id,
+      select: u
+    )
+    |> Repo.one!()
+  end
+
+  @doc """
+  Finds a studio header image's Upload.
+  """
+  def studio_header_img!(upload_id) do
+    from(
+      s in Studio,
+      join: u in assoc(s, :header_img),
+      where: u.id == ^upload_id,
+      select: u
+    )
+    |> Repo.one!()
+  end
+
+  @doc """
+  Finds a studio portfolio image's Upload.
+  """
+  def studio_portfolio_img!(upload_id) do
+    from(i in PortfolioImage,
+      join: u in assoc(i, :upload),
+      where: u.id == ^upload_id,
+      select: u
+    )
+    |> Repo.one!()
+  end
+
+  @doc """
   List members who are part of a studio
 
   ## Examples

@@ -80,8 +80,8 @@ defmodule BanchanWeb.StudioLive.Helpers do
     )
     |> assign(
       page_image:
-        (studio.card_img_id || studio.header_img_id) &&
-          Routes.public_image_url(Endpoint, :image, studio.card_img_id || studio.header_img_id)
+        studio.card_img_id &&
+          Routes.public_image_url(Endpoint, :image, :studio_card_img, studio.card_img_id)
     )
   end
 end

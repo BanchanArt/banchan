@@ -151,6 +151,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
         send_updates_to={self()}
         images={@portfolio_images}
         editable={@current_user_member?}
+        upload_type={:studio_portfolio_img}
         entries={(@current_user_member? && @uploads.portfolio_images.entries) || []}
       />
     </StudioLayout>

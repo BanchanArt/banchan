@@ -20,7 +20,7 @@ defmodule BanchanWeb.Components.StudioCard do
             {#if @studio.card_img_id || @studio.header_img_id}
               <img
                 class="object-cover aspect-video"
-                src={Routes.public_image_path(Endpoint, :image, @studio.card_img_id || @studio.header_img_id)}
+                src={Routes.public_image_path(Endpoint, :image, :studio_card_img, @studio.card_img_id)}
               />
             {#else}
               <div class="aspect-video bg-base-300" />

@@ -27,7 +27,7 @@ defmodule BanchanWeb.DenizenLive.Show do
        page_description: user.bio,
        page_small_image:
          if user.pfp_img_id do
-           Routes.public_image_url(Endpoint, :image, user.pfp_img_id)
+           Routes.public_image_url(Endpoint, :image, :user_pfp_img, user.pfp_img_id)
          else
            Routes.static_url(Endpoint, "/images/denizen_default_icon.png")
          end
@@ -142,7 +142,7 @@ defmodule BanchanWeb.DenizenLive.Show do
           {#if @user.header_img && !@user.header_img.pending && !@user.disable_info}
             <img
               class="object-cover aspect-header-image rounded-b-xl w-full"
-              src={Routes.public_image_path(Endpoint, :image, @user.header_img_id)}
+              src={Routes.public_image_path(Endpoint, :image, :user_header_img, @user.header_img_id)}
             />
           {#else}
             <div class="rounded-b-xl aspect-header-image bg-base-300 w-full" />

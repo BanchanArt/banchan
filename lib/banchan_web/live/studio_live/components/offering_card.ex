@@ -81,7 +81,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
               class={"object-contain aspect-video", "blur-lg": @offering.mature && !@current_user.uncensored_mature}
               draggable="false"
               src={if @offering.card_img_id do
-                Routes.public_image_path(Endpoint, :image, @offering.card_img_id)
+                Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)
               else
                 Routes.static_path(Endpoint, "/images/640x360.png")
               end}

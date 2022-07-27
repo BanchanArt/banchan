@@ -133,6 +133,45 @@ defmodule Banchan.Accounts do
     if User.valid_password?(user, password), do: user
   end
 
+  @doc """
+  Finds a user pfp image's Upload.
+  """
+  def user_pfp_img!(upload_id) do
+    from(
+      us in User,
+      join: u in assoc(us, :pfp_img),
+      where: u.id == ^upload_id,
+      select: u
+    )
+    |> Repo.one!()
+  end
+
+  @doc """
+  Finds a user pfp image thumb's Upload.
+  """
+  def user_pfp_thumb!(upload_id) do
+    from(
+      us in User,
+      join: u in assoc(us, :pfp_thumb),
+      where: u.id == ^upload_id,
+      select: u
+    )
+    |> Repo.one!()
+  end
+
+  @doc """
+  Finds a user header image's Upload.
+  """
+  def user_header_img!(upload_id) do
+    from(
+      us in User,
+      join: u in assoc(us, :header_img),
+      where: u.id == ^upload_id,
+      select: u
+    )
+    |> Repo.one!()
+  end
+
   ## User registration
 
   @doc """

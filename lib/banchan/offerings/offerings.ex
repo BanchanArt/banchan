@@ -499,6 +499,45 @@ defmodule Banchan.Offerings do
   end
 
   @doc """
+  Finds an offering card image's Upload.
+  """
+  def offering_card_img!(upload_id) do
+    from(
+      o in Offering,
+      join: u in assoc(o, :card_img),
+      where: u.id == ^upload_id,
+      select: u
+    )
+    |> Repo.one!()
+  end
+
+  @doc """
+  Finds an offering header image's Upload.
+  """
+  def offering_header_img!(upload_id) do
+    from(
+      o in Offering,
+      join: u in assoc(o, :header_img),
+      where: u.id == ^upload_id,
+      select: u
+    )
+    |> Repo.one!()
+  end
+
+  @doc """
+  Finds an offering gallery image's Upload.
+  """
+  def offering_gallery_img!(upload_id) do
+    from(
+      i in GalleryImage,
+      join: u in assoc(i, :upload),
+      where: u.id == ^upload_id,
+      select: u
+    )
+    |> Repo.one!()
+  end
+
+  @doc """
   Über query for listing offerings across various use cases on the site.
   Accepts several options that affect its behavior.
 

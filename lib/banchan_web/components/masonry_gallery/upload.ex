@@ -7,6 +7,7 @@ defmodule BanchanWeb.Components.MasonryGallery.Upload do
   alias BanchanWeb.Components.Lightbox
 
   prop upload, :struct, required: true
+  prop type, :atom, required: true
   prop download_original, :boolean, default: false
   prop editable, :boolean
   prop deleted, :event
@@ -35,11 +36,10 @@ defmodule BanchanWeb.Components.MasonryGallery.Upload do
       {#if @upload.pending}
         <div class="w-full h-full bg-base-content animate-pulse" />
       {#else}
-        <Lightbox.Item download={@download_original && @upload.original_id &&
-          Routes.public_image_path(Endpoint, :download, @upload.original_id)}>
+        <Lightbox.Item>
           <img
             class="w-full h-full object-cover"
-            src={Routes.public_image_path(Endpoint, :image, @upload.id)}
+            src={Routes.public_image_path(Endpoint, :image, @type, @upload.id)}
           />
         </Lightbox.Item>
       {/if}

@@ -383,7 +383,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
               <HiddenInput name={:card_image_id} value={@offering.card_img_id} />
               <img
                 class="object-cover aspect-video rounded-xl w-full"
-                src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
+                src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
               />
             {/if}
           </div>
@@ -399,6 +399,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             send_updates_to={self()}
             images={@gallery_images}
             editable
+            upload_type={:offering_gallery_img}
             entries={@uploads.gallery_images.entries}
           />
           <UploadInput

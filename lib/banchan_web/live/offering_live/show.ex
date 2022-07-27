@@ -165,7 +165,7 @@ defmodule BanchanWeb.OfferingLive.Show do
               <Lightbox.Item>
                 <img
                   class="w-full h-full object-contain aspect-video"
-                  src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
+                  src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
                 />
               </Lightbox.Item>
             {#else}
@@ -260,7 +260,7 @@ defmodule BanchanWeb.OfferingLive.Show do
               <Lightbox.Item>
                 <img
                   class="w-full h-full object-contain aspect-video"
-                  src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
+                  src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
                 />
               </Lightbox.Item>
             {#else}
@@ -276,7 +276,11 @@ defmodule BanchanWeb.OfferingLive.Show do
             <div class="rounded-lg shadow-lg bg-base-200 p-4">
               <div class="text-2xl">Gallery</div>
               <div class="divider" />
-              <MasonryGallery id="masonry-gallery" images={@gallery_images} />
+              <MasonryGallery
+                id="masonry-gallery"
+                upload_type={:offering_gallery_img}
+                images={@gallery_images}
+              />
             </div>
           {/if}
           {#if !Enum.empty?(@related)}
