@@ -380,6 +380,159 @@ defmodule Banchan.Commissions do
   """
   def invoice_paid?(%Invoice{status: status}), do: status == :succeeded
 
+  @doc """
+  Calculates the total currently deposited amount for a commission.
+  """
+  def deposited_amount(
+        %User{id: user_id, roles: roles} = actor,
+        %Commission{client_id: client_id} = comm,
+        current_user_member?
+      )
+      when user_id != client_id and current_user_member? == false do
+    if :admin in roles || :mod in roles do
+      deposited_amount(actor, comm, true)
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  def deposited_amount(_, %Commission{} = commission, _) do
+    if Ecto.assoc_loaded?(commission.events) do
+      Enum.reduce(
+        commission.events,
+        %{},
+        fn event, acc ->
+          if event.invoice && event.invoice.status in [:succeeded, :released] do
+            current =
+              Map.get(
+                acc,
+                event.invoice.amount.currency,
+                Money.new(0, event.invoice.amount.currency)
+              )
+
+            Map.put(acc, event.invoice.amount.currency, Money.add(current, event.invoice.amount))
+          else
+            acc
+          end
+        end
+      )
+    else
+      deposits =
+        from(
+          i in Invoice,
+          where:
+            i.commission_id == ^commission.id and
+              i.status == :succeeded,
+          select: i.amount
+        )
+        |> Repo.all()
+
+      Enum.reduce(
+        deposits,
+        %{},
+        fn dep, acc ->
+          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
+          Map.put(acc, dep.currency, Money.add(current, dep))
+        end
+      )
+    end
+  end
+
+  @doc """
+  Calculates total tips so far for a commission.
+  """
+  def tipped_amount(
+        %User{id: user_id, roles: roles} = actor,
+        %Commission{client_id: client_id} = comm,
+        current_user_member?
+      )
+      when user_id != client_id and current_user_member? == false do
+    if :admin in roles || :mod in roles do
+      tipped_amount(actor, comm, true)
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  def tipped_amount(_, %Commission{} = commission, _) do
+    if Ecto.assoc_loaded?(commission.events) do
+      Enum.reduce(
+        commission.events,
+        %{},
+        fn event, acc ->
+          if event.invoice && event.invoice.status in [:succeeded, :released] do
+            current =
+              Map.get(
+                acc,
+                event.invoice.tip.currency,
+                Money.new(0, event.invoice.tip.currency)
+              )
+
+            Map.put(acc, event.invoice.tip.currency, Money.add(current, event.invoice.tip.amount))
+          else
+            acc
+          end
+        end
+      )
+    else
+      deposits =
+        from(
+          i in Invoice,
+          where:
+            i.commission_id == ^commission.id and
+              i.status == :succeeded,
+          select: i.tip
+        )
+        |> Repo.all()
+
+      Enum.reduce(
+        deposits,
+        %{},
+        fn dep, acc ->
+          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
+          Map.put(acc, dep.currency, Money.add(current, dep))
+        end
+      )
+    end
+  end
+
+  @doc """
+  Calculates the total commission cost based on the current line items.
+  """
+  def line_item_estimate(line_items) do
+    Enum.reduce(
+      line_items,
+      %{},
+      fn item, acc ->
+        current =
+          Map.get(
+            acc,
+            item.amount.currency,
+            Money.new(0, item.amount.currency)
+          )
+
+        Map.put(acc, item.amount.currency, Money.add(current, item.amount))
+      end
+    )
+  end
+
+  @doc """
+  Lists a commission's attachments.
+  """
+  def list_attachments(%Commission{} = commission) do
+    from(ea in EventAttachment,
+      join: e in assoc(ea, :event),
+      left_join: i in assoc(e, :invoice),
+      where:
+        e.commission_id == ^commission.id and
+          (is_nil(i.required) or
+             not i.required or (i.required and i.status == :succeeded)),
+      order_by: [desc: e.inserted_at],
+      preload: [:upload, :thumbnail, :preview]
+    )
+    |> Repo.all()
+  end
+
   ## Creation
 
   @doc """
@@ -1273,26 +1426,39 @@ defmodule Banchan.Commissions do
     ret
   end
 
+  @doc """
+  Refunds a payment that hasn't been released yet.
+  """
   def refund_payment(actor, invoice, current_user_member?)
 
-  def refund_payment(_, _, false) do
-    {:error, :unauthorized}
+  def refund_payment(actor, invoice, false) do
+    if :admin in actor.roles || :mod in actor.roles do
+      refund_payment(actor, invoice, true)
+    else
+      {:error, :unauthorized}
+    end
   end
 
   def refund_payment(%User{} = actor, %Invoice{} = invoice, _) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        invoice = invoice |> Repo.reload()
+        actor = actor |> Repo.reload()
+        invoice = invoice |> Repo.reload() |> Repo.preload(:commission)
 
-        if invoice.status != :succeeded do
-          Logger.error(%{
-            message: "Attempted to refund an invoice that wasn't :succeeded.",
-            invoice: invoice
-          })
+        if Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) ||
+             :admin in actor.roles || :mod in actor.roles do
+          if invoice.status != :succeeded do
+            Logger.error(%{
+              message: "Attempted to refund an invoice that wasn't :succeeded.",
+              invoice: invoice
+            })
 
-          {:error, :invoice_not_refundable}
+            {:error, :invoice_not_refundable}
+          else
+            process_refund_payment(actor, invoice)
+          end
         else
-          process_refund_payment(actor, invoice)
+          {:error, :unauthorized}
         end
       end)
 
@@ -1362,6 +1528,9 @@ defmodule Banchan.Commissions do
     end
   end
 
+  @doc """
+  Webhook handler for when a Stripe refund has been updated.
+  """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def process_refund_updated(%Stripe.Refund{} = refund, invoice_id, actor \\ nil) do
     {:ok, ret} =
@@ -1476,156 +1645,21 @@ defmodule Banchan.Commissions do
     end
   end
 
-  def deposited_amount(
-        %User{id: user_id, roles: roles} = actor,
-        %Commission{client_id: client_id} = comm,
-        current_user_member?
-      )
-      when user_id != client_id and current_user_member? == false do
-    if :admin in roles || :mod in roles do
-      deposited_amount(actor, comm, true)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
-  def deposited_amount(_, %Commission{} = commission, _) do
-    if Ecto.assoc_loaded?(commission.events) do
-      Enum.reduce(
-        commission.events,
-        %{},
-        fn event, acc ->
-          if event.invoice && event.invoice.status in [:succeeded, :released] do
-            current =
-              Map.get(
-                acc,
-                event.invoice.amount.currency,
-                Money.new(0, event.invoice.amount.currency)
-              )
-
-            Map.put(acc, event.invoice.amount.currency, Money.add(current, event.invoice.amount))
-          else
-            acc
-          end
-        end
-      )
-    else
-      deposits =
-        from(
-          i in Invoice,
-          where:
-            i.commission_id == ^commission.id and
-              i.status == :succeeded,
-          select: i.amount
-        )
-        |> Repo.all()
-
-      Enum.reduce(
-        deposits,
-        %{},
-        fn dep, acc ->
-          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
-          Map.put(acc, dep.currency, Money.add(current, dep))
-        end
-      )
-    end
-  end
-
-  def tipped_amount(
-        %User{id: user_id, roles: roles} = actor,
-        %Commission{client_id: client_id} = comm,
-        current_user_member?
-      )
-      when user_id != client_id and current_user_member? == false do
-    if :admin in roles || :mod in roles do
-      tipped_amount(actor, comm, true)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
-  def tipped_amount(_, %Commission{} = commission, _) do
-    if Ecto.assoc_loaded?(commission.events) do
-      Enum.reduce(
-        commission.events,
-        %{},
-        fn event, acc ->
-          if event.invoice && event.invoice.status in [:succeeded, :released] do
-            current =
-              Map.get(
-                acc,
-                event.invoice.tip.currency,
-                Money.new(0, event.invoice.tip.currency)
-              )
-
-            Map.put(acc, event.invoice.tip.currency, Money.add(current, event.invoice.tip.amount))
-          else
-            acc
-          end
-        end
-      )
-    else
-      deposits =
-        from(
-          i in Invoice,
-          where:
-            i.commission_id == ^commission.id and
-              i.status == :succeeded,
-          select: i.tip
-        )
-        |> Repo.all()
-
-      Enum.reduce(
-        deposits,
-        %{},
-        fn dep, acc ->
-          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
-          Map.put(acc, dep.currency, Money.add(current, dep))
-        end
-      )
-    end
-  end
-
-  def line_item_estimate(line_items) do
-    Enum.reduce(
-      line_items,
-      %{},
-      fn item, acc ->
-        current =
-          Map.get(
-            acc,
-            item.amount.currency,
-            Money.new(0, item.amount.currency)
-          )
-
-        Map.put(acc, item.amount.currency, Money.add(current, item.amount))
-      end
-    )
-  end
-
-  def list_attachments(%Commission{} = commission) do
-    from(ea in EventAttachment,
-      join: e in assoc(ea, :event),
-      left_join: i in assoc(e, :invoice),
-      where:
-        e.commission_id == ^commission.id and
-          (is_nil(i.required) or
-             not i.required or (i.required and i.status == :succeeded)),
-      order_by: [desc: e.inserted_at],
-      preload: [:upload, :thumbnail, :preview]
-    )
-    |> Repo.all()
-  end
-
   ## Deletion
 
+  @doc """
+  Deletes an attachment from a comment.
+  """
+  # TODO: This is probably the wrong thing. We shouldn't delete this stuff.
+  # Instead, create a history entry of some sort and make the upload
+  # accessible to admins for auditing.
   def delete_attachment!(
         %User{} = actor,
         %Commission{} = commission,
         %Event{} = event,
         %EventAttachment{} = event_attachment
       ) do
-    # NOTE: This also deletes any associated uploads, because of the db ON DELETE
+    # NOTE: This also deletes any associated uploads (not the underlying data), because of the db ON DELETE
     # TODO: Maybe also delete the data from S3/storage?
     Repo.delete!(event_attachment)
     new_attachments = Enum.reject(event.attachments, &(&1.id == event_attachment.id))
