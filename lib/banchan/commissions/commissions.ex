@@ -670,51 +670,51 @@ defmodule Banchan.Commissions do
     {:ok, ret} =
       Repo.transaction(fn ->
         with {:ok, actor} <- check_actor_edit_access(actor, commission) do
-          changeset = Repo.reload!(commission) |> Commission.status_changeset(%{status: status})
+          changeset = Repo.reload(commission) |> Commission.status_changeset(%{status: status})
 
           check_status_transition!(actor, commission, changeset.changes.status)
 
-          {:ok, commission} = changeset |> Repo.update()
+          with {:ok, commission} <- changeset |> Repo.update() do
+            if commission.status == :accepted do
+              offering = Repo.preload(commission, :offering).offering
+              available_slot_count = Offerings.offering_available_slots(offering, true)
 
-          if commission.status == :accepted do
-            offering = Repo.preload(commission, :offering).offering
-            available_slot_count = Offerings.offering_available_slots(offering, true)
+              # Make sure we close the offering if we're out of slots.
+              close = !is_nil(available_slot_count) && available_slot_count <= 0
 
-            # Make sure we close the offering if we're out of slots.
-            close = !is_nil(available_slot_count) && available_slot_count <= 1
-
-            if close do
-              # NB(zkat): We pretend we're a studio member here because we're doing
-              # this on behalf of the studio. It's safe.
-              {:ok, _} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
+              if close do
+                # NB(zkat): We pretend we're a studio member here because we're doing
+                # this on behalf of the studio. It's safe.
+                {:ok, _} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
+              end
             end
-          end
 
-          if commission.status == :approved do
-            # Release any successful deposits.
-            from(i in Invoice,
-              where: i.commission_id == ^commission.id and i.status == :succeeded
-            )
-            |> Repo.update_all(set: [status: :released])
+            if commission.status == :approved do
+              # Release any successful deposits.
+              from(i in Invoice,
+                where: i.commission_id == ^commission.id and i.status == :succeeded
+              )
+              |> Repo.update_all(set: [status: :released])
 
-            from(e in Event,
-              join: i in assoc(e, :invoice),
-              where: i.commission_id == ^commission.id and i.status == :released,
-              select: e,
-              preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
-            )
-            |> Repo.all()
-            |> Enum.each(fn ev ->
-              Notifications.commission_event_updated(commission, ev, actor)
-            end)
-          end
+              from(e in Event,
+                join: i in assoc(e, :invoice),
+                where: i.commission_id == ^commission.id and i.status == :released,
+                select: e,
+                preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
+              )
+              |> Repo.all()
+              |> Enum.each(fn ev ->
+                Notifications.commission_event_updated(commission, ev, actor)
+              end)
+            end
 
-          # current_user_member? is checked as part of check_status_transition!
-          with {:ok, event} <-
-                 create_event(:status, actor, commission, true, [], %{status: status}) do
-            Notifications.commission_status_changed(commission, actor)
+            # current_user_member? is checked as part of check_status_transition!
+            with {:ok, event} <-
+                   create_event(:status, actor, commission, true, [], %{status: status}) do
+              Notifications.commission_status_changed(commission, actor)
 
-            {:ok, {commission, [event]}}
+              {:ok, {commission, [event]}}
+            end
           end
         end
       end)

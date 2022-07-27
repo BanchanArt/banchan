@@ -439,7 +439,7 @@ defmodule Banchan.Offerings do
             on: c.status not in [:withdrawn, :approved, :submitted, :rejected],
             where: o.id == ^offering.id,
             group_by: [o.id, o.slots],
-            select: {o.slots, count(c)}
+            select: {o.slots, count(c.id)}
         )
       else
         {offering.slots, offering.used_slots}
@@ -464,11 +464,11 @@ defmodule Banchan.Offerings do
     {max, count} =
       Repo.one(
         from(o in Offering,
-          left_join: c in Commission,
-          on: c.offering_id == o.id and c.status == :submitted,
+          left_join: c in assoc(o, :commissions),
+          on: c.status == :submitted,
           where: o.id == ^offering.id,
           group_by: [o.id, o.max_proposals],
-          select: {o.max_proposals, count(c)}
+          select: {o.max_proposals, count(c.id)}
         )
       )
 
