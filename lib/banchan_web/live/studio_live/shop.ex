@@ -192,6 +192,7 @@ defmodule BanchanWeb.StudioLive.Shop do
             <div class="divider" />
             {#if @current_user_member? && !@studio.stripe_details_submitted}
               <p>You need to onboard your studio on Stripe before it opens its doors.</p>
+              <p>Note: If you've completed onboarding and still see this, try refreshing the page.</p>
               <div class="flex flex-row-reverse">
                 <Link label="Onboard" to={@stripe_onboarding_url} class="btn btn-primary py-1 px-5 m-1" />
                 <Button click="recheck_stripe" label="Recheck" class="btn-link" />
