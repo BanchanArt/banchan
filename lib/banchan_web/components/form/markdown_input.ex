@@ -78,7 +78,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
               phx-update="ignore"
               class="object-cover editor w-full h-full"
             />
-            <TextArea class="hidden input-textarea" opts={@opts} />
+            <TextArea class="hidden input-textarea" opts={[{:phx_debounce, "200"} | @opts]} />
           </div>
           {#if @upload}
             {#if @dragging}

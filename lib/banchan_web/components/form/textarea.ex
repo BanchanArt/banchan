@@ -51,7 +51,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
                   @class,
                   "textarea-error": !Enum.empty?(Keyword.get_values(form.errors, field))
                 }
-                opts={@opts}
+                opts={[{:phx_debounce, "200"} | @opts]}
               />
             </InputContext>
             <#slot name="right" />
