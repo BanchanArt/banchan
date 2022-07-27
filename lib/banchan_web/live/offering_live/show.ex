@@ -159,7 +159,7 @@ defmodule BanchanWeb.OfferingLive.Show do
         <div class="flex flex-col md:order-2 gap-2">
           <Lightbox
             id="card-lightbox-mobile"
-            class="md:hidden w-full h-full bg-base-300 rounded-lg aspect-video mb-4"
+            class="md:hidden w-full bg-base-300 rounded-lg aspect-video mb-4"
           >
             {#if @offering.card_img && !@offering.card_img.pending}
               <Lightbox.Item>
@@ -254,7 +254,7 @@ defmodule BanchanWeb.OfferingLive.Show do
         <div class="flex flex-col md:col-span-2 md:order-1 gap-4">
           <Lightbox
             id="card-lightbox-md"
-            class="hidden md:block w-full h-full bg-base-300 rounded-lg aspect-video"
+            class="hidden md:block w-full bg-base-300 rounded-lg aspect-video"
           >
             {#if @offering.card_img && !@offering.card_img.pending}
               <Lightbox.Item>
