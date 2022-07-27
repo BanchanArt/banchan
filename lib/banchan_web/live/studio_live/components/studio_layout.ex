@@ -168,7 +168,8 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 current_tab={@tab}
                 to={Routes.studio_portfolio_path(Endpoint, :show, @studio.handle)}
               />
-              {#if @current_user_member? || :admin in @current_user.roles || :mod in @current_user.roles}
+              {#if @current_user_member? ||
+                  (@current_user && (:admin in @current_user.roles || :mod in @current_user.roles))}
                 <TabButton
                   label="Payouts"
                   tab_name={:payouts}

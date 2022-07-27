@@ -31,12 +31,16 @@ defmodule BanchanWeb.StudioLive.Helpers do
     Studios.Notifications.subscribe_to_follower_count(studio)
 
     cond do
-      current_member && !current_user_member? && :admin not in socket.assigns.current_user.roles &&
-          :mod not in socket.assigns.current_user.roles ->
+      current_member && !current_user_member? &&
+          (is_nil(socket.assigns.current_user) ||
+             (:admin not in socket.assigns.current_user.roles &&
+                :mod not in socket.assigns.current_user.roles)) ->
         raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
 
-      studio.disable_info && :admin not in socket.assigns.current_user.roles &&
-          :mod not in socket.assigns.current_user.roles ->
+      studio.disable_info &&
+          (is_nil(socket.assigns.current_user) ||
+             (:admin not in socket.assigns.current_user.roles &&
+                :mod not in socket.assigns.current_user.roles)) ->
         socket
         |> put_flash(
           :error,
@@ -44,7 +48,8 @@ defmodule BanchanWeb.StudioLive.Helpers do
         )
         |> redirect(to: Routes.studio_disabled_path(Endpoint, :show, studio.handle))
 
-      studio.mature && !socket.assigns.current_user_member.mature_ok ->
+      studio.mature &&
+          (is_nil(socket.assigns.current_user) || !socket.assigns.current_user_member.mature_ok) ->
         socket
         |> put_flash(
           :error,
@@ -57,7 +62,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
         |> put_flash(:error, "This studio is not ready to accept commissions yet.")
         |> redirect(to: Routes.studio_shop_path(Endpoint, :show, handle))
 
-      Studios.user_blocked?(studio, socket.assigns.current_user) ->
+      socket.assigns.current_user && Studios.user_blocked?(studio, socket.assigns.current_user) ->
         socket
         |> put_flash(:error, "You have been blocked by studio.")
         |> redirect(to: Routes.home_path(Endpoint, :index))

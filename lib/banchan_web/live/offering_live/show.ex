@@ -207,24 +207,26 @@ defmodule BanchanWeb.OfferingLive.Show do
             <div class="divider" />
           {/if}
           <div class="flex flex-row justify-end gap-2">
-            <div class="dropdown dropdown-end">
-              <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
-                <i class="fas fa-ellipsis-vertical" />
-              </label>
-              <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
-                {#if @current_user &&
-                    (@current_user_member? || :admin in @current_user.roles || :mod in @current_user.roles)}
+            {#if @current_user}
+              <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
+                  <i class="fas fa-ellipsis-vertical" />
+                </label>
+                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
+                  {#if @current_user &&
+                      (@current_user_member? || :admin in @current_user.roles || :mod in @current_user.roles)}
+                    <li>
+                      <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}><i class="fas fa-edit" /> Edit</LiveRedirect>
+                    </li>
+                  {/if}
                   <li>
-                    <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}><i class="fas fa-edit" /> Edit</LiveRedirect>
+                    <button type="button" :on-click="report">
+                      <i class="fas fa-flag" /> Report
+                    </button>
                   </li>
-                {/if}
-                <li>
-                  <button type="button" :on-click="report">
-                    <i class="fas fa-flag" /> Report
-                  </button>
-                </li>
-              </ul>
-            </div>
+                </ul>
+              </div>
+            {/if}
             {#if @offering.open}
               <LiveRedirect
                 to={Routes.offering_request_path(Endpoint, :new, @offering.studio.handle, @offering.type)}
