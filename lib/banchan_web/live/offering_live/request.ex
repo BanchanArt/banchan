@@ -24,10 +24,9 @@ defmodule BanchanWeb.OfferingLive.Request do
 
     offering =
       Offerings.get_offering_by_type!(
+        socket.assigns.current_user,
         socket.assigns.studio,
-        offering_type,
-        socket.assigns.current_user_member?,
-        socket.assigns.current_user
+        offering_type
       )
 
     terms = offering.terms || socket.assigns.studio.default_terms || ""
@@ -167,6 +166,7 @@ defmodule BanchanWeb.OfferingLive.Request do
   end
 
   @impl true
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_event("submit", %{"commission" => commission}, socket) do
     attachments =
       consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
@@ -201,6 +201,14 @@ defmodule BanchanWeb.OfferingLive.Request do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
 
+      {:error, :disabled} ->
+        socket = put_flash(socket, :error, "You can't do that because your account is disabled.")
+
+        {:noreply,
+         push_redirect(socket,
+           to: Routes.home_path(Endpoint, :index)
+         )}
+
       {:error, :blocked} ->
         socket =
           put_flash(socket, :error, "You are not allowed to create commissions from this studio.")
@@ -208,6 +216,51 @@ defmodule BanchanWeb.OfferingLive.Request do
         {:noreply,
          push_redirect(socket,
            to: Routes.home_path(Endpoint, :index)
+         )}
+
+      {:error, :offering_archived} ->
+        socket =
+          put_flash(
+            socket,
+            :error,
+            "This offering has been archived and will no longer accept new proposals."
+          )
+
+        {:noreply,
+         push_redirect(socket,
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+
+      {:error, :offering_closed} ->
+        socket =
+          put_flash(
+            socket,
+            :error,
+            "This offering has been closed and will no longer accept new proposals."
+          )
+
+        {:noreply,
+         push_redirect(socket,
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+
+      {:error, :not_confirmed} ->
+        socket =
+          put_flash(
+            socket,
+            :error,
+            "You must confirm your account before you can request a commission."
+          )
+
+        {:noreply,
+         push_redirect(socket,
+           to:
+             Routes.offering_show_path(
+               Endpoint,
+               :show,
+               socket.assigns.studio.handle,
+               socket.assigns.offering.type
+             )
          )}
 
       {:error, :no_slots_available} ->
@@ -220,7 +273,11 @@ defmodule BanchanWeb.OfferingLive.Request do
 
       {:error, :no_proposals_available} ->
         socket =
-          put_flash(socket, :error, "New commissions of this kind are temporarily unavailable.")
+          put_flash(
+            socket,
+            :error,
+            "New commissions of this kind are temporarily unavailable due to high request volume."
+          )
 
         {:noreply,
          push_redirect(socket,

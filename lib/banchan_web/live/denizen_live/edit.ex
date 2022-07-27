@@ -171,7 +171,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
                 <HiddenInput name={:header_image_id} value={@user.header_img_id} />
                 <img
                   class="object-cover aspect-header-image rounded-b-xl w-full"
-                  src={Routes.public_image_path(Endpoint, :image, @user.header_img_id)}
+                  src={Routes.public_image_path(Endpoint, :image, :user_header_img, @user.header_img_id)}
                 />
               {/if}
               <div class="absolute top-0 left-0 w-full h-full">
@@ -205,7 +205,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
                         <button type="button" class="btn btn-xs btn-circle absolute right-2 top-2" :on-click="remove_pfp">✕</button>
                         <HiddenInput name={:pfp_image_id} value={@user.pfp_img_id} />
                         <HiddenInput name={:pfp_thumb_id} value={@user.pfp_thumb_id} />
-                        <img src={Routes.public_image_path(Endpoint, :image, @user.pfp_img_id)}>
+                        <img src={Routes.public_image_path(Endpoint, :image, :user_pfp_img, @user.pfp_img_id)}>
                       {/if}
                     </div>
                   </div>

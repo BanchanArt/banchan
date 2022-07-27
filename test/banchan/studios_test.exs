@@ -190,7 +190,7 @@ defmodule Banchan.StudiosTest do
       user = user_fixture()
       studio = studio_fixture([user])
 
-      assert studio.id in Enum.map(Studios.list_studios(include_pending: true), & &1.id)
+      assert studio.id in Enum.map(Studios.list_studios(include_pending?: true), & &1.id)
     end
 
     test "list user studios and studio members" do
@@ -215,7 +215,7 @@ defmodule Banchan.StudiosTest do
       assert Studios.is_user_in_studio?(user, studio)
       assert Enum.map(Studios.list_studio_members(studio), & &1.id) == [user.id]
 
-      assert Enum.map(Studios.list_studios(with_member: user, include_pending: true), & &1.id) ==
+      assert Enum.map(Studios.list_studios(with_member: user, include_pending?: true), & &1.id) ==
                [studio.id]
     end
   end
@@ -304,7 +304,7 @@ defmodule Banchan.StudiosTest do
           "text" => "please give me money :("
         })
 
-      Commissions.expire_payment!(invoice, true)
+      assert {:ok, _} = Commissions.expire_payment(artist, invoice, true)
 
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_balance, 4, fn opts ->
@@ -834,7 +834,7 @@ defmodule Banchan.StudiosTest do
       {:ok, [%Payout{amount: ^net, status: :pending} = payout]} =
         Studios.payout_studio(artist, studio)
 
-      assert :ok == Studios.cancel_payout(studio, payout.stripe_payout_id)
+      assert :ok == Studios.cancel_payout(artist, studio, payout.stripe_payout_id)
 
       payout = payout |> Repo.reload()
 
@@ -948,7 +948,7 @@ defmodule Banchan.StudiosTest do
           {:error,
            %Stripe.Error{
              source: :stripe
-           }} = Studios.cancel_payout(studio, payout.stripe_payout_id)
+           }} = Studios.cancel_payout(artist, studio, payout.stripe_payout_id)
         end)
 
       assert log =~ "internal message"

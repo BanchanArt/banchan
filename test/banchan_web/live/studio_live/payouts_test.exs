@@ -92,7 +92,6 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
     test "can navigate to and from listing", %{
       conn: conn,
       artist: artist,
-      client: client,
       studio: studio,
       commission: commission
     } do
@@ -105,7 +104,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       net = Money.new(39_124, :USD)
       mock_balance(studio, [net], [], 3)
-      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
+      payment_fixture(artist, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 
       stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
@@ -209,12 +208,12 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
     test "Shows available balance", %{
       conn: conn,
-      client: client,
+      artist: artist,
       studio: studio,
       commission: commission
     } do
       mock_balance(studio, [Money.new(39_124, :USD)], [])
-      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
+      payment_fixture(artist, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 
       {:ok, page_live, _html} =
@@ -227,13 +226,13 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
     test "Displays multiple balance currencies reasonably", %{
       conn: conn,
-      client: client,
+      artist: artist,
       studio: studio,
       commission: commission
     } do
       mock_balance(studio, [Money.new(39_060, :USD), Money.new(64, :JPY)], [])
-      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(0, :USD))
-      payment_fixture(client, commission, Money.new(69, :JPY), Money.new(0, :JPY))
+      payment_fixture(artist, commission, Money.new(42_000, :USD), Money.new(0, :USD))
+      payment_fixture(artist, commission, Money.new(69, :JPY), Money.new(0, :JPY))
       approve_commission(commission)
 
       {:ok, page_live, _html} =
@@ -258,13 +257,13 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
     test "payout button disabled if no balance", %{
       conn: conn,
-      client: client,
+      artist: artist,
       studio: studio,
       commission: commission
     } do
       net = Money.new(39_124, :USD)
       mock_balance(studio, [net], [], 2)
-      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
+      payment_fixture(artist, commission, Money.new(42_000, :USD), Money.new(69, :USD))
 
       {:ok, page_live, _html} =
         live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
@@ -286,13 +285,13 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
     test "payout button triggers a payout", %{
       conn: conn,
-      client: client,
+      artist: artist,
       studio: studio,
       commission: commission
     } do
       net = Money.new(39_124, :USD)
       mock_balance(studio, [net], [], 2)
-      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
+      payment_fixture(artist, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 
       stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
@@ -355,13 +354,13 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
     test "failed payouts report stripe errors", %{
       conn: conn,
-      client: client,
+      artist: artist,
       studio: studio,
       commission: commission
     } do
       net = Money.new(39_124, :USD)
       mock_balance(studio, [net], [], 2)
-      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
+      payment_fixture(artist, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 
       Banchan.StripeAPI.Mock
@@ -444,13 +443,12 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
     test "cancels payout when it's pending", %{
       conn: conn,
       artist: artist,
-      client: client,
       studio: studio,
       commission: commission
     } do
       net = Money.new(39_124, :USD)
       mock_balance(studio, [net], [], 2)
-      payment_fixture(client, commission, Money.new(42_000, :USD), Money.new(69, :USD))
+      payment_fixture(artist, commission, Money.new(42_000, :USD), Money.new(69, :USD))
       approve_commission(commission)
 
       stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"

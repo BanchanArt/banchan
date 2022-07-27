@@ -82,6 +82,21 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
          |> push_redirect(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
+
+      {:error, :unauthorized} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are not authorized to access that commission.")
+         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+
+      {:error, :disabled} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "You are not authorized to access that commission because your account has been disabled."
+         )
+         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
     end
   end
 
@@ -145,6 +160,21 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
          |> push_redirect(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
+
+      {:error, :unauthorized} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are not authorized to access that commission.")
+         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+
+      {:error, :disabled} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "You are not authorized to access that commission because your account has been disabled."
+         )
+         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
     end
   end
 

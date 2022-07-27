@@ -22,7 +22,7 @@ defmodule BanchanWeb.StudioLive.Components.Blocklist do
   def handle_event("unblock", %{"user" => uid}, socket) do
     {uid, ""} = Integer.parse(uid)
 
-    Studios.unblock_user(socket.assigns.studio, %User{id: uid})
+    Studios.unblock_user(socket.assigns.current_user, socket.assigns.studio, %User{id: uid})
 
     new_blocklist =
       socket.assigns.studio.blocklist

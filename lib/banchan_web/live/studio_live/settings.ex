@@ -261,7 +261,7 @@ defmodule BanchanWeb.StudioLive.Settings do
                 <HiddenInput name={:card_image_id} value={@studio.card_img_id} />
                 <img
                   class="object-cover aspect-video rounded-xl w-full"
-                  src={Routes.public_image_path(Endpoint, :image, @studio.card_img_id)}
+                  src={Routes.public_image_path(Endpoint, :image, :studio_card_img, @studio.card_img_id)}
                 />
               {/if}
             </div>
@@ -295,7 +295,7 @@ defmodule BanchanWeb.StudioLive.Settings do
                 <HiddenInput name={:header_image_id} value={@studio.header_img_id} />
                 <img
                   class="object-cover aspect-header-image rounded-xl w-full"
-                  src={Routes.public_image_path(Endpoint, :image, @studio.header_img_id)}
+                  src={Routes.public_image_path(Endpoint, :image, :studio_header_img, @studio.header_img_id)}
                 />
               {/if}
             </div>

@@ -11,6 +11,11 @@ defmodule Banchan.Studios.Notifications do
 
   @pubsub Banchan.PubSub
 
+  @doc """
+  True if the user is currently subscribed to Studio notifications (as in, new
+  Studio commissions). `user` must be a Studio member for these notifications
+  to work.
+  """
   def user_subscribed?(%User{} = user, %Studio{} = studio) do
     from(sub in StudioSubscription,
       where: sub.user_id == ^user.id and sub.studio_id == ^studio.id and sub.silenced != true
@@ -18,16 +23,27 @@ defmodule Banchan.Studios.Notifications do
     |> Repo.exists?()
   end
 
+  @doc """
+  Subscribes the user to Studio notifications (as in, new Studio commissions and such).
+  """
   def subscribe_user!(%User{} = user, %Studio{} = studio) do
     %StudioSubscription{user_id: user.id, studio_id: studio.id, silenced: false}
     |> Repo.insert(on_conflict: {:replace, [:silenced]}, conflict_target: [:user_id, :studio_id])
   end
 
+  @doc """
+  Unsubscribes the user from the given studio, if they're subscribed.
+  """
   def unsubscribe_user!(%User{} = user, %Studio{} = studio) do
     %StudioSubscription{user_id: user.id, studio_id: studio.id, silenced: true}
     |> Repo.insert(on_conflict: {:replace, [:silenced]}, conflict_target: [:user_id, :studio_id])
   end
 
+  @doc """
+  Whether a user is following a Studio. Followers are more like
+  fans/subscribers to the studio itself and will be notified of things like
+  new offerings, receive broadcasts, etc.
+  """
   def user_following?(%User{} = user, %Studio{} = studio) do
     from(sub in StudioFollower,
       where: sub.user_id == ^user.id and sub.studio_id == ^studio.id
@@ -35,6 +51,9 @@ defmodule Banchan.Studios.Notifications do
     |> Repo.exists?()
   end
 
+  @doc """
+  Adds a user to the given studio's followers.
+  """
   def follow_studio!(%Studio{} = studio, %User{} = user) do
     %StudioFollower{user_id: user.id, studio_id: studio.id}
     |> Repo.insert(on_conflict: :nothing, conflict_target: [:user_id, :studio_id])
@@ -54,6 +73,9 @@ defmodule Banchan.Studios.Notifications do
     :ok
   end
 
+  @doc """
+  Removes a user from the given studio's followers.
+  """
   def unfollow_studio!(%Studio{} = studio, %User{} = user) do
     from(f in StudioFollower,
       where: f.user_id == ^user.id and f.studio_id == ^studio.id
@@ -75,6 +97,9 @@ defmodule Banchan.Studios.Notifications do
     :ok
   end
 
+  @doc """
+  Number of active followers for a Studio.
+  """
   def follower_count(%Studio{} = studio) do
     from(f in StudioFollower,
       where: f.studio_id == ^studio.id,
@@ -83,6 +108,9 @@ defmodule Banchan.Studios.Notifications do
     |> Repo.one()
   end
 
+  @doc """
+  Number of Studios this user is currently following.
+  """
   def following_count(%User{} = user) do
     from(f in StudioFollower,
       where: f.user_id == ^user.id,
@@ -91,14 +119,26 @@ defmodule Banchan.Studios.Notifications do
     |> Repo.one()
   end
 
+  @doc """
+  Subscribes the current process to follower count events. This allows
+  live-updates for the follower count on Studio pages.
+  """
   def subscribe_to_follower_count(%Studio{} = studio) do
     Phoenix.PubSub.subscribe(@pubsub, "follower_count:#{studio.handle}")
   end
 
+  @doc """
+  Unsubscribes the current process from follower count events.
+  """
   def unsubscribe_from_follower_count(%Studio{} = studio) do
     Phoenix.PubSub.unsubscribe(@pubsub, "follower_count:#{studio.handle}")
   end
 
+  @doc """
+  Returns a stream of active subscribers to the Studio. This is the list of
+  Studio members who have opted to receive notifications about the Studio
+  itself (new commissions, etc).
+  """
   def subscribers(%Studio{} = studio) do
     from(
       u in User,
@@ -117,6 +157,9 @@ defmodule Banchan.Studios.Notifications do
     |> Repo.stream()
   end
 
+  @doc """
+  Broadcasts payout state updates.
+  """
   def payout_updated(%Payout{} = payout, _actor \\ nil) do
     Notifications.with_task(fn ->
       Phoenix.PubSub.broadcast!(

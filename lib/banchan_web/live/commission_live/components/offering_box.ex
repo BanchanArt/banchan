@@ -18,7 +18,7 @@ defmodule BanchanWeb.CommissionLive.Components.OfferingBox do
     >
       <img
         :if={!is_nil(@offering.card_img_id)}
-        src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
+        src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
         class="aspect-header-image object-cover rounded-box"
       />
       <div class="px-2 text-lg">

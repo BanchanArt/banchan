@@ -4,7 +4,6 @@ defmodule Banchan.Studios.Common do
   belong in the Studios context.
   """
 
-  # https://stripe.com/docs/currencies?presentment-currency=US#presentment-currencies
   @supported_currencies [
     :USD,
     :AED,
@@ -144,12 +143,17 @@ defmodule Banchan.Studios.Common do
     :ZMW
   ]
 
+  @doc """
+  Returns a list of supported currencies as atoms using their uppercase
+  3-letter currency codes. This is based on Stripe's list of supported
+  currencies.
+
+  See https://stripe.com/docs/currencies?presentment-currency=US#presentment-currencies
+  """
   def supported_currencies do
     @supported_currencies
   end
 
-  # https://stripe.com/docs/connect/cross-border-payouts#supported-countries
-  # But also the US.
   @supported_countries [
     "Antigua and Barbuda": :AG,
     Argentina: :AR,
@@ -236,6 +240,13 @@ defmodule Banchan.Studios.Common do
     Uruguay: :UY
   ]
 
+  @doc """
+  This returns a Keyword list of supported countries, based on Stripe's
+  currently supported list of cross-border payout countries. They key in each
+  entry is the full country name, and the value is the 2-letter country code.
+
+  See https://stripe.com/docs/connect/cross-border-payouts#supported-countries
+  """
   def supported_countries do
     @supported_countries
   end

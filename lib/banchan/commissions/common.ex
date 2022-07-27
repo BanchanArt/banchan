@@ -16,6 +16,9 @@ defmodule Banchan.Commissions.Common do
     :withdrawn
   ]
 
+  @doc """
+  List of possible commission statuses.
+  """
   def status_values do
     @status_values
   end
@@ -31,10 +34,16 @@ defmodule Banchan.Commissions.Common do
     :title_changed
   ]
 
+  @doc """
+  List of possible commission event types.
+  """
   def event_types do
     @event_types
   end
 
+  @doc """
+  Converts a commission status enum value to its human-consumable string.
+  """
   def humanize_status(:submitted), do: "Submitted"
   def humanize_status(:accepted), do: "Accepted"
   def humanize_status(:rejected), do: "Rejected"
@@ -45,6 +54,9 @@ defmodule Banchan.Commissions.Common do
   def humanize_status(:approved), do: "Approved"
   def humanize_status(:withdrawn), do: "Withdrawn"
 
+  @doc """
+  Generates a new public_id for a commission.
+  """
   def gen_public_id do
     random_string(10)
   end

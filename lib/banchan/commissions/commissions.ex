@@ -6,7 +6,7 @@ defmodule Banchan.Commissions do
   import Ecto.Query, warn: false
   require Logger
 
-  alias Banchan.Repo
+  alias Banchan.Accounts.User
 
   alias Banchan.Commissions.{
     CommentHistory,
@@ -21,16 +21,81 @@ defmodule Banchan.Commissions do
     Notifications
   }
 
-  alias Banchan.Accounts.User
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
+  alias Banchan.Repo
   alias Banchan.Studios
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
   alias Banchan.Workers.Thumbnailer
 
+  ## Events
+
   @pubsub Banchan.PubSub
 
+  # TODO: maybe this is too wide a net? We can separate this into user-level
+  # and studio-level subscriptions, though it will mean multiple calls to
+  # these subscription functions.
+  @doc """
+  Subscribes to all new commission broadcasts.
+  """
+  def subscribe_to_new_commissions do
+    Phoenix.PubSub.subscribe(@pubsub, "commission")
+  end
+
+  @doc """
+  Unsubscribes from all new commission broadcasts.
+  """
+  def unsubscribe_from_new_commissions do
+    Phoenix.PubSub.unsubscribe(@pubsub, "commission")
+  end
+
+  @doc """
+  Subscribes to new commission events and event updates.
+  """
+  def subscribe_to_commission_events(%Commission{public_id: public_id}) do
+    Phoenix.PubSub.subscribe(@pubsub, "commission:#{public_id}")
+  end
+
+  @doc """
+  Unsubscribes from new commission events and event updates.
+  """
+  def unsubscribe_from_commission_events(%Commission{public_id: public_id}) do
+    Phoenix.PubSub.unsubscribe(@pubsub, "commission:#{public_id}")
+  end
+
+  ## Getting/Listing
+
+  @doc """
+  Über query for the `My Commissions` page. This is a paginated query that
+  accepts a `CommissionFilter` and a variety of options.
+
+  ## Filters
+
+  The `CommissionFilter` fields have the following effects on this query:
+
+    * `search` - Webquery-style search string that will match various
+      Commission data, including comment text, title, etc.
+    * `client` - Webquery-style search string to filter for specific clients.
+    * `studio` - Webquery-style search string to filter for specific studios.
+    * `statuses` - List of statuses to filter to. [] or nil will match all
+      statuses.
+    * `show_archived` - Whether to show archived commissions
+    * `admin_show_all` - Admins-only: Whether to show all commissions,
+      regardless of whether the current user is a participant.
+
+  ## Options
+
+    * `page` - The page number to return. Defaults to 1.
+    * `page_size` - The number of items to return per page. Defaults to 24.
+    * `order_by` - Sort order, and in some cases, filters. Defaults to
+      `:recently_updated`. Supports the following values:
+      * `:recently_updated` - List by most recently updated commissions (with
+        the newest events first).
+      * `:oldest_updated` - List by least recently updated commissions.
+      * `:status` - Sorts by status order (in the order statuses are listed in
+        the enum).
+  """
   def list_commission_data_for_dashboard(
         %User{} = user,
         %CommissionFilter{} = filter,
@@ -238,6 +303,9 @@ defmodule Banchan.Commissions do
     )
   end
 
+  @doc """
+  Gets just the `public_id` for a commission.
+  """
   def get_public_id!(commission_id) do
     %{public_id: public_id} =
       Repo.one!(
@@ -251,37 +319,226 @@ defmodule Banchan.Commissions do
     public_id
   end
 
-  # TODO: maybe this is too wide a net? We can separate this into user-level
-  # and studio-level subscriptions, though it will mean multiple calls to
-  # these subscription functions.
-  def subscribe_to_new_commissions do
-    Phoenix.PubSub.subscribe(@pubsub, "commission")
-  end
-
-  def unsubscribe_from_new_commissions do
-    Phoenix.PubSub.unsubscribe(@pubsub, "commission")
-  end
-
-  def subscribe_to_commission_events(%Commission{public_id: public_id}) do
-    Phoenix.PubSub.subscribe(@pubsub, "commission:#{public_id}")
-  end
-
-  def unsubscribe_from_commission_events(%Commission{public_id: public_id}) do
-    Phoenix.PubSub.unsubscribe(@pubsub, "commission:#{public_id}")
+  @doc """
+  Has the given user archived this commission?
+  """
+  def archived?(%User{} = user, %Commission{} = commission) do
+    from(archived in CommissionArchived,
+      where:
+        archived.user_id == ^user.id and archived.commission_id == ^commission.id and
+          archived.archived != false
+    )
+    |> Repo.exists?()
   end
 
   @doc """
-  Creates a commission.
+  Is the commission currently open?
 
-  ## Examples
-
-      iex> create_commission(actor, studio, offering, %{field: value})
-      {:ok, %Commission{}}
-
-      iex> create_commission(actor, studio, offering, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
+  NOTE: This expects the commission to be in its latest state.
   """
+  def commission_open?(%Commission{status: :withdrawn}), do: false
+  def commission_open?(%Commission{status: :rejected}), do: false
+  def commission_open?(%Commission{status: :approved}), do: false
+  def commission_open?(%Commission{}), do: true
+
+  @doc """
+  Gets an attachment with preloaded uploads data.
+  """
+  def get_attachment_if_allowed!(commission_id, upload_id, user) do
+    Repo.one!(
+      from ea in EventAttachment,
+        join: ul in assoc(ea, :upload),
+        left_join: thumb in assoc(ea, :thumbnail),
+        left_join: prev in assoc(ea, :preview),
+        join: e in assoc(ea, :event),
+        join: c in assoc(e, :commission),
+        join: s in assoc(c, :studio),
+        join: artist in assoc(s, :artists),
+        left_join: i in assoc(e, :invoice),
+        # Either the user is a studio member
+        # Or the user is the client
+        # And the invoice requires payment to view attachments and has succeeded
+        # Or the invoice doesn't require payment to view attachments
+        where:
+          c.public_id == ^commission_id and
+            ul.id == ^upload_id and
+            (artist.id == ^user.id or
+               (c.client_id == ^user.id and
+                  ((i.required and i.status == :succeeded) or not i.required or is_nil(i.required)))),
+        select: ea,
+        select_merge: %{
+          upload: ul,
+          thumbnail: thumb,
+          preview: prev
+        }
+    )
+  end
+
+  @doc """
+  True if a given invoice has been paid. Expects an already-loaded invoice
+  with the latest data.
+  """
+  def invoice_paid?(%Invoice{status: status}), do: status == :succeeded
+
+  @doc """
+  Calculates the total currently deposited amount for a commission.
+  """
+  def deposited_amount(
+        %User{id: user_id, roles: roles} = actor,
+        %Commission{client_id: client_id} = comm,
+        current_user_member?
+      )
+      when user_id != client_id and current_user_member? == false do
+    if :admin in roles || :mod in roles do
+      deposited_amount(actor, comm, true)
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  def deposited_amount(_, %Commission{} = commission, _) do
+    if Ecto.assoc_loaded?(commission.events) do
+      Enum.reduce(
+        commission.events,
+        %{},
+        fn event, acc ->
+          if event.invoice && event.invoice.status in [:succeeded, :released] do
+            current =
+              Map.get(
+                acc,
+                event.invoice.amount.currency,
+                Money.new(0, event.invoice.amount.currency)
+              )
+
+            Map.put(acc, event.invoice.amount.currency, Money.add(current, event.invoice.amount))
+          else
+            acc
+          end
+        end
+      )
+    else
+      deposits =
+        from(
+          i in Invoice,
+          where:
+            i.commission_id == ^commission.id and
+              i.status == :succeeded,
+          select: i.amount
+        )
+        |> Repo.all()
+
+      Enum.reduce(
+        deposits,
+        %{},
+        fn dep, acc ->
+          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
+          Map.put(acc, dep.currency, Money.add(current, dep))
+        end
+      )
+    end
+  end
+
+  @doc """
+  Calculates total tips so far for a commission.
+  """
+  def tipped_amount(
+        %User{id: user_id, roles: roles} = actor,
+        %Commission{client_id: client_id} = comm,
+        current_user_member?
+      )
+      when user_id != client_id and current_user_member? == false do
+    if :admin in roles || :mod in roles do
+      tipped_amount(actor, comm, true)
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  def tipped_amount(_, %Commission{} = commission, _) do
+    if Ecto.assoc_loaded?(commission.events) do
+      Enum.reduce(
+        commission.events,
+        %{},
+        fn event, acc ->
+          if event.invoice && event.invoice.status in [:succeeded, :released] do
+            current =
+              Map.get(
+                acc,
+                event.invoice.tip.currency,
+                Money.new(0, event.invoice.tip.currency)
+              )
+
+            Map.put(acc, event.invoice.tip.currency, Money.add(current, event.invoice.tip.amount))
+          else
+            acc
+          end
+        end
+      )
+    else
+      deposits =
+        from(
+          i in Invoice,
+          where:
+            i.commission_id == ^commission.id and
+              i.status == :succeeded,
+          select: i.tip
+        )
+        |> Repo.all()
+
+      Enum.reduce(
+        deposits,
+        %{},
+        fn dep, acc ->
+          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
+          Map.put(acc, dep.currency, Money.add(current, dep))
+        end
+      )
+    end
+  end
+
+  @doc """
+  Calculates the total commission cost based on the current line items.
+  """
+  def line_item_estimate(line_items) do
+    Enum.reduce(
+      line_items,
+      %{},
+      fn item, acc ->
+        current =
+          Map.get(
+            acc,
+            item.amount.currency,
+            Money.new(0, item.amount.currency)
+          )
+
+        Map.put(acc, item.amount.currency, Money.add(current, item.amount))
+      end
+    )
+  end
+
+  @doc """
+  Lists a commission's attachments.
+  """
+  def list_attachments(%Commission{} = commission) do
+    from(ea in EventAttachment,
+      join: e in assoc(ea, :event),
+      left_join: i in assoc(e, :invoice),
+      where:
+        e.commission_id == ^commission.id and
+          (is_nil(i.required) or
+             not i.required or (i.required and i.status == :succeeded)),
+      order_by: [desc: e.inserted_at],
+      preload: [:upload, :thumbnail, :preview]
+    )
+    |> Repo.all()
+  end
+
+  ## Creation
+
+  @doc """
+  Creates a new commission.
+  """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def create_commission(
         %User{} = actor,
         %Studio{} = studio,
@@ -292,41 +549,53 @@ defmodule Banchan.Commissions do
       ) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        if Studios.user_blocked?(studio, actor) do
-          {:error, :blocked}
-        else
-          offering = offering |> Repo.reload()
-          available_proposal_count = Offerings.offering_available_proposals(offering)
+        actor = actor |> Repo.preload(:disable_info, force: true)
+        offering = offering |> Repo.reload()
+        available_proposal_count = Offerings.offering_available_proposals(offering)
+        available_slot_count = Offerings.offering_available_slots(offering, true)
 
-          maybe_close_offering(offering, available_proposal_count)
+        cond do
+          Studios.user_blocked?(studio, actor) ->
+            {:error, :blocked}
 
-          cond do
-            !offering.open ->
-              {:error, :offering_closed}
+          !is_nil(actor.disable_info) ->
+            {:error, :disabled}
 
-            is_nil(actor.confirmed_at) ->
-              {:error, :not_confirmed}
+          !is_nil(offering.archived_at) ->
+            {:error, :offering_archived}
 
-            !is_nil(available_proposal_count) && available_proposal_count <= 0 ->
-              {:error, :no_proposals_available}
+          !offering.open ->
+            {:error, :offering_closed}
 
-            true ->
-              insert_commission(actor, studio, offering, line_items, attachments, attrs)
-          end
+          is_nil(actor.confirmed_at) ->
+            {:error, :not_confirmed}
+
+          !is_nil(available_proposal_count) && available_proposal_count <= 0 ->
+            {:error, :no_proposals_available}
+
+          !is_nil(available_slot_count) && available_slot_count <= 0 ->
+            {:error, :no_slots_available}
+
+          true ->
+            offering = maybe_close_offering!(offering, available_proposal_count)
+            insert_commission(actor, studio, offering, line_items, attachments, attrs)
         end
       end)
 
     ret
   end
 
-  defp maybe_close_offering(offering, available_proposal_count) do
+  defp maybe_close_offering!(offering, available_proposal_count) do
     # Make sure we close the offering if we're out of proposals.
     close = !is_nil(available_proposal_count) && available_proposal_count <= 1
 
     if close do
       # NB(zkat): We pretend we're a studio member here because we're doing
       # this on behalf of the studio. It's safe.
-      {:ok, _} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
+      {:ok, offering} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
+      offering
+    else
+      offering
     end
   end
 
@@ -365,283 +634,6 @@ defmodule Banchan.Commissions do
       end)
 
     ret
-  end
-
-  def archived?(%User{} = user, %Commission{} = commission) do
-    from(archived in CommissionArchived,
-      where:
-        archived.user_id == ^user.id and archived.commission_id == ^commission.id and
-          archived.archived != false
-    )
-    |> Repo.exists?()
-  end
-
-  def update_archived(%User{} = actor, %Commission{} = commission, archived?) do
-    %CommissionArchived{user: actor, commission: commission, archived: archived?}
-    |> Repo.insert(
-      on_conflict: {:replace, [:archived]},
-      conflict_target: [:user_id, :commission_id]
-    )
-  end
-
-  def update_title(%User{} = actor, %Commission{} = commission, attrs) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        if Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) do
-          {:error, :blocked}
-        else
-          old_title = Repo.reload(commission).title
-
-          commission
-          |> Commission.update_title_changeset(attrs)
-          |> Repo.update()
-          |> case do
-            {:ok, commission} ->
-              Notifications.commission_title_changed(commission, actor)
-
-              with {:ok, _} <-
-                     create_event(:title_changed, actor, commission, true, [], %{text: old_title}) do
-                {:ok, commission}
-              end
-
-            {:error, err} ->
-              {:error, err}
-          end
-        end
-      end)
-
-    ret
-  end
-
-  def update_status(%User{} = actor, %Commission{} = commission, status) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        if Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) do
-          {:error, :blocked}
-        else
-          changeset = Repo.reload!(commission) |> Commission.status_changeset(%{status: status})
-
-          check_status_transition!(actor, commission, changeset.changes.status)
-
-          {:ok, commission} = changeset |> Repo.update()
-
-          if commission.status == :accepted do
-            offering = Repo.preload(commission, :offering).offering
-            available_slot_count = Offerings.offering_available_slots(offering, true)
-
-            # Make sure we close the offering if we're out of slots.
-            close = !is_nil(available_slot_count) && available_slot_count <= 1
-
-            if close do
-              # NB(zkat): We pretend we're a studio member here because we're doing
-              # this on behalf of the studio. It's safe.
-              {:ok, _} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
-            end
-          end
-
-          if commission.status == :approved do
-            # Release any successful deposits.
-            from(i in Invoice,
-              where: i.commission_id == ^commission.id and i.status == :succeeded
-            )
-            |> Repo.update_all(set: [status: :released])
-
-            from(e in Event,
-              join: i in assoc(e, :invoice),
-              where: i.commission_id == ^commission.id and i.status == :released,
-              select: e,
-              preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
-            )
-            |> Repo.all()
-            |> Enum.each(fn ev ->
-              Notifications.commission_event_updated(commission, ev, actor)
-            end)
-          end
-
-          # current_user_member? is checked as part of check_status_transition!
-          with {:ok, event} <-
-                 create_event(:status, actor, commission, true, [], %{status: status}) do
-            Notifications.commission_status_changed(commission, actor)
-
-            {:ok, {commission, [event]}}
-          end
-        end
-      end)
-
-    ret
-  end
-
-  def release_payment!(%User{} = actor, %Commission{} = commission, %Invoice{} = invoice) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        if Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) do
-          # TODO: Make release_payment be a regular function instead of raising, and return {:error, :blocked} here.
-          raise "user blocked"
-        else
-          {1, _} =
-            from(i in Invoice,
-              join: c in assoc(i, :commission),
-              where: i.id == ^invoice.id and c.client_id == ^actor.id and i.status == :succeeded
-            )
-            |> Repo.update_all(set: [status: :released])
-
-          ev =
-            from(e in Event,
-              where: e.id == ^invoice.event_id,
-              select: e,
-              preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
-            )
-            |> Repo.one!()
-
-          Notifications.invoice_released(commission, ev, actor)
-          Notifications.commission_event_updated(commission, ev, actor)
-
-          :ok
-        end
-      end)
-
-    ret
-  end
-
-  defp check_status_transition!(
-         %User{} = actor,
-         %Commission{client_id: client_id, studio_id: studio_id, status: current_status},
-         new_status
-       ) do
-    {:ok, _} =
-      Repo.transaction(fn ->
-        actor_member? = Studios.is_user_in_studio?(actor, %Studio{id: studio_id})
-
-        true =
-          status_transition_allowed?(
-            actor_member? || :admin in actor.roles || :mod in actor.roles,
-            client_id == actor.id || :admin in actor.roles || :mod in actor.roles,
-            current_status,
-            new_status
-          )
-      end)
-
-    :ok
-  end
-
-  # Transition changes studios can make
-  defp status_transition_allowed?(artist?, client?, from, to)
-
-  defp status_transition_allowed?(true, _, :submitted, :accepted), do: true
-  defp status_transition_allowed?(true, _, :submitted, :rejected), do: true
-  defp status_transition_allowed?(true, _, :accepted, :in_progress), do: true
-  defp status_transition_allowed?(true, _, :accepted, :ready_for_review), do: true
-  defp status_transition_allowed?(true, _, :in_progress, :paused), do: true
-  defp status_transition_allowed?(true, _, :in_progress, :waiting), do: true
-  defp status_transition_allowed?(true, _, :in_progress, :ready_for_review), do: true
-  defp status_transition_allowed?(true, _, :paused, :in_progress), do: true
-  defp status_transition_allowed?(true, _, :waiting, :in_progress), do: true
-  defp status_transition_allowed?(true, _, :ready_for_review, :in_progress), do: true
-  defp status_transition_allowed?(true, _, :approved, :accepted), do: true
-  defp status_transition_allowed?(true, _, :withdrawn, :accepted), do: true
-  defp status_transition_allowed?(true, _, :rejected, :accepted), do: true
-
-  # Transition changes clients can make
-  defp status_transition_allowed?(_, true, :ready_for_review, :approved), do: true
-  defp status_transition_allowed?(_, true, :withdrawn, :submitted), do: true
-
-  # Either party can withdraw a commission (reimbursing the client)
-  defp status_transition_allowed?(_, _, _, :withdrawn), do: true
-
-  # Everything else is a no from me, Bob.
-  defp status_transition_allowed?(_, _, _, _), do: false
-
-  def commission_open?(%Commission{status: :withdrawn}), do: false
-  def commission_open?(%Commission{status: :rejected}), do: false
-  def commission_open?(%Commission{status: :approved}), do: false
-  def commission_open?(%Commission{}), do: true
-
-  def add_line_item(_, _, _, false) do
-    {:error, :not_studio_member}
-  end
-
-  def add_line_item(%User{} = actor, %Commission{} = commission, option, true) do
-    case option do
-      %OfferingOption{} ->
-        %LineItem{
-          commission_id: commission.id,
-          option: option,
-          amount: option.price,
-          name: option.name,
-          description: option.description
-        }
-
-      %{amount: amount, name: name, description: description} ->
-        %LineItem{
-          commission_id: commission.id,
-          amount: amount,
-          name: name,
-          description: description
-        }
-    end
-    |> Repo.insert()
-    |> case do
-      {:error, err} ->
-        {:error, err}
-
-      {:ok, line_item} ->
-        line_item = line_item |> Repo.preload(:option)
-        line_items = commission.line_items ++ [line_item]
-        commission = %{commission | line_items: line_items}
-        {:ok, {line_item, commission}}
-    end
-    |> case do
-      {:error, err} ->
-        {:error, err}
-
-      {:ok, {line_item, commission}} ->
-        case create_event(:line_item_added, actor, commission, true, [], %{
-               amount: line_item.amount,
-               text: line_item.name
-             }) do
-          {:error, err} ->
-            {:error, err}
-
-          {:ok, event} ->
-            Notifications.commission_line_items_changed(commission, actor)
-            {:ok, {commission, [event]}}
-        end
-    end
-  end
-
-  def remove_line_item(_, _, _, false) do
-    {:error, :not_studio_member}
-  end
-
-  def remove_line_item(%User{} = actor, %Commission{} = commission, line_item, true) do
-    line_item
-    |> Repo.delete()
-    |> case do
-      {:error, err} ->
-        {:error, err}
-
-      {:ok, _} ->
-        line_items = Enum.filter(commission.line_items, &(&1.id != line_item.id))
-        commission = %{commission | line_items: line_items}
-        {:ok, {line_item, commission}}
-    end
-    |> case do
-      {:error, err} ->
-        {:error, err}
-
-      {:ok, {line_item, commission}} ->
-        case create_event(:line_item_removed, actor, commission, true, [], %{
-               amount: line_item.amount,
-               text: line_item.name
-             }) do
-          {:error, err} ->
-            {:error, err}
-
-          {:ok, event} ->
-            Notifications.commission_line_items_changed(commission, actor)
-            {:ok, {commission, [event]}}
-        end
-    end
   end
 
   @doc """
@@ -701,7 +693,7 @@ defmodule Banchan.Commissions do
                   :ok
                 end),
              {:ok, event} <- Repo.insert(changeset),
-             :ok <- add_attachments(event, attachments) do
+             :ok <- add_attachments!(event, attachments) do
           event = event |> Repo.preload(attachments: [:upload, :thumbnail, :preview])
 
           if notify do
@@ -716,49 +708,103 @@ defmodule Banchan.Commissions do
   end
 
   @doc """
-  Updates a event.
-
-  ## Examples
-
-      iex> update_event(event, %{field: new_value})
-      {:ok, %Event{}}
-
-      iex> update_event(event, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
+  Creates a new invoice.
   """
-  def update_event(%User{} = actor, %Event{} = event, attrs) do
+  def invoice(actor, commission, current_user_member?, drafts, event_data)
+
+  def invoice(actor, commission, false, drafts, event_data) do
+    if :admin in actor.roles || :mod in actor.roles do
+      invoice(actor, commission, true, drafts, event_data)
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  def invoice(%User{} = actor, %Commission{} = commission, true, drafts, event_data) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        event = Repo.get!(Event, event.id) |> Repo.preload(:commission)
+        actor = Repo.reload(actor)
 
-        if Studios.user_blocked?(%Studio{id: event.commission.studio_id}, actor) do
-          {:error, :blocked}
+        if Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id}) ||
+             :admin in actor.roles ||
+             :mod in actor.roles do
+          with {:ok, event} <-
+                 create_event(:comment, actor, commission, true, drafts, event_data),
+               %Invoice{} = invoice <- %Invoice{
+                 client_id: commission.client_id,
+                 commission: commission,
+                 event: event
+               },
+               %Ecto.Changeset{} = changeset <- Invoice.creation_changeset(invoice, event_data),
+               {:ok, invoice} <- Repo.insert(changeset) do
+            send_event_update!(event.id, actor)
+            {:ok, invoice}
+          end
         else
-          original_text = event.text
-          changeset = Event.changeset(event, attrs)
+          {:error, :unauthorized}
+        end
+      end)
 
-          changeset
-          |> Repo.update()
+    ret
+  end
+
+  ## Edit/Update
+
+  defp check_actor_edit_access(%User{} = actor, %Commission{} = commission) do
+    actor = actor |> Repo.reload() |> Repo.preload(:disable_info, force: true)
+
+    cond do
+      !is_nil(actor.disable_info) ->
+        {:error, :disabled}
+
+      Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) ->
+        {:error, :blocked}
+
+      actor.id != commission.client_id &&
+        !Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id}) &&
+        :admin not in actor.roles && :mod not in actor.roles ->
+        {:error, :unauthorized}
+
+      true ->
+        {:ok, actor}
+    end
+  end
+
+  @doc """
+  Update user's archival state for a commission.
+  """
+  def update_archived(%User{} = actor, %Commission{} = commission, archived?) do
+    %CommissionArchived{user: actor, commission: commission, archived: archived?}
+    |> Repo.insert(
+      on_conflict: {:replace, [:archived]},
+      conflict_target: [:user_id, :commission_id],
+      returning: true
+    )
+  end
+
+  @doc """
+  Updates a commission's title.
+  """
+  def update_title(%User{} = actor, %Commission{} = commission, attrs) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        commission = commission |> Repo.reload()
+
+        with {:ok, actor} <- check_actor_edit_access(actor, commission) do
+          old_title = commission.title
+
+          commission
+          |> Commission.update_title_changeset(attrs)
+          |> Repo.update(returning: true)
           |> case do
-            {:ok, event} ->
-              if Ecto.Changeset.fetch_change(changeset, :text) == :error do
-                {:ok, event}
-              else
-                %CommentHistory{
-                  text: original_text,
-                  written_at: event.updated_at,
-                  event_id: event.id,
-                  changed_by_id: actor.id
-                }
-                |> Repo.insert()
-                |> case do
-                  {:ok, _} ->
-                    {:ok, event}
+            {:ok, commission} ->
+              Notifications.commission_title_changed(commission, actor)
 
-                  {:error, err} ->
-                    {:error, err}
-                end
+              with {:ok, _} <-
+                     create_event(:title_changed, actor, commission, true, [], %{
+                       text: old_title
+                     }) do
+                {:ok, commission}
               end
 
             {:error, err} ->
@@ -771,80 +817,244 @@ defmodule Banchan.Commissions do
   end
 
   @doc """
-  Deletes a event.
-
-  ## Examples
-
-      iex> delete_event(event)
-      {:ok, %Event{}}
-
-      iex> delete_event(event)
-      {:error, %Ecto.Changeset{}}
-
+  Updates a commission's status, taking account legal status changes based on whether a user is a studio member or a client.
   """
-  def delete_event(%Event{} = event) do
-    Repo.delete(event)
+  def update_status(%User{} = actor, %Commission{} = commission, status) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        with {:ok, actor} <- check_actor_edit_access(actor, commission) do
+          changeset = Repo.reload(commission) |> Commission.status_changeset(%{status: status})
+
+          check_status_transition!(actor, commission, changeset.changes.status)
+
+          with {:ok, commission} <- changeset |> Repo.update() do
+            if commission.status == :accepted do
+              offering = Repo.preload(commission, :offering).offering
+              available_slot_count = Offerings.offering_available_slots(offering, true)
+
+              # Make sure we close the offering if we're out of slots.
+              close = !is_nil(available_slot_count) && available_slot_count <= 0
+
+              if close do
+                # NB(zkat): We pretend we're a studio member here because we're doing
+                # this on behalf of the studio. It's safe.
+                {:ok, _} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
+              end
+            end
+
+            if commission.status == :approved do
+              # Release any successful deposits.
+              from(i in Invoice,
+                where: i.commission_id == ^commission.id and i.status == :succeeded
+              )
+              |> Repo.update_all(set: [status: :released])
+
+              from(e in Event,
+                join: i in assoc(e, :invoice),
+                where: i.commission_id == ^commission.id and i.status == :released,
+                select: e,
+                preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
+              )
+              |> Repo.all()
+              |> Enum.each(fn ev ->
+                Notifications.commission_event_updated(commission, ev, actor)
+              end)
+            end
+
+            # current_user_member? is checked as part of check_status_transition!
+            with {:ok, event} <-
+                   create_event(:status, actor, commission, true, [], %{status: status}) do
+              Notifications.commission_status_changed(commission, actor)
+
+              {:ok, {commission, [event]}}
+            end
+          end
+        end
+      end)
+
+    ret
   end
 
   @doc """
-  Returns an `%Ecto.Changeset{}` for tracking event changes.
-
-  ## Examples
-
-      iex> change_event(event)
-      %Ecto.Changeset{data: %Event{}}
-
+  Releases a payment.
   """
-  def change_event(%Event{} = event, attrs \\ %{}) do
-    Event.changeset(event, attrs)
+  def release_payment(%User{} = actor, %Commission{} = commission, %Invoice{} = invoice) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        with {:ok, actor} <- check_actor_edit_access(actor, commission),
+             {1, _} <-
+               from(i in Invoice,
+                 join: c in assoc(i, :commission),
+                 where:
+                   i.id == ^invoice.id and c.client_id == ^actor.id and i.status == :succeeded
+               )
+               |> Repo.update_all(set: [status: :released]),
+             %Event{} = ev <-
+               from(e in Event,
+                 where: e.id == ^invoice.event_id,
+                 select: e,
+                 preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
+               )
+               |> Repo.one() do
+          Notifications.invoice_released(commission, ev, actor)
+          Notifications.commission_event_updated(commission, ev, actor)
+
+          {:ok, ev}
+        end
+        |> case do
+          {0, _} ->
+            # Only succeeded invoices can be released.
+            {:error, :invalid_invoice_status}
+
+          {num, _} when is_integer(num) ->
+            # NB(zkat): This would point to a bug.
+            {:error, :updated_too_many_invoices}
+
+          {:ok, val} ->
+            {:ok, val}
+
+          {:error, err} ->
+            {:error, err}
+        end
+      end)
+
+    ret
   end
 
-  def change_event_text(%Event{} = event, attrs \\ %{}) do
-    Event.text_changeset(event, attrs)
+  defp check_status_transition!(
+         %User{} = actor,
+         %Commission{client_id: client_id, studio_id: studio_id, status: current_status},
+         new_status
+       ) do
+    {:ok, _} =
+      Repo.transaction(fn ->
+        actor_member? = Studios.is_user_in_studio?(actor, %Studio{id: studio_id})
+
+        true =
+          status_transition_allowed?(
+            actor_member? || :admin in actor.roles || :mod in actor.roles,
+            client_id == actor.id || :admin in actor.roles || :mod in actor.roles,
+            current_status,
+            new_status
+          )
+      end)
+
+    :ok
   end
 
-  def send_event_update!(event_id, actor \\ nil) do
-    event =
-      from(e in Event,
-        where: e.id == ^event_id,
-        select: e,
-        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
-      )
-      |> Repo.one!()
+  # Transition changes studios can make
+  defp status_transition_allowed?(artist?, client?, from, to)
 
-    commission =
-      from(c in Commission, where: c.id == ^event.commission_id)
-      |> Repo.one!()
+  defp status_transition_allowed?(true, _, :submitted, :accepted), do: true
+  defp status_transition_allowed?(true, _, :submitted, :rejected), do: true
+  defp status_transition_allowed?(true, _, :accepted, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :accepted, :ready_for_review), do: true
+  defp status_transition_allowed?(true, _, :in_progress, :paused), do: true
+  defp status_transition_allowed?(true, _, :in_progress, :waiting), do: true
+  defp status_transition_allowed?(true, _, :in_progress, :ready_for_review), do: true
+  defp status_transition_allowed?(true, _, :paused, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :waiting, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :ready_for_review, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :approved, :accepted), do: true
+  defp status_transition_allowed?(true, _, :withdrawn, :accepted), do: true
+  defp status_transition_allowed?(true, _, :rejected, :accepted), do: true
 
-    Notifications.commission_event_updated(commission, event, actor)
+  # Transition changes clients can make
+  defp status_transition_allowed?(_, true, :ready_for_review, :approved), do: true
+  defp status_transition_allowed?(_, true, :withdrawn, :submitted), do: true
+
+  # Either party can withdraw a commission
+  defp status_transition_allowed?(_, _, _, :withdrawn), do: true
+
+  # Everything else is a no from me, Bob.
+  defp status_transition_allowed?(_, _, _, _), do: false
+
+  @doc """
+  Adds a new line item to an existing commission. Only studio members and
+  admins/mods can do this.
+  """
+  def add_line_item(actor, commission, option, current_user_member?)
+
+  def add_line_item(actor, commission, option, false) do
+    if :admin in actor.roles || :mod in actor.roles do
+      add_line_item(actor, commission, option, true)
+    else
+      {:error, :unauthorized}
+    end
   end
 
-  # This one expects binaries for everything because it looks everything up in one fell swoop.
-  def get_attachment_if_allowed!(commission, key, user) do
-    Repo.one!(
-      from ea in EventAttachment,
-        join: ul in assoc(ea, :upload),
-        join: e in assoc(ea, :event),
-        join: c in assoc(e, :commission),
-        join: s in assoc(c, :studio),
-        join: artist in assoc(s, :artists),
-        left_join: i in assoc(e, :invoice),
-        select: ea,
-        # Either the user is a studio member
-        # Or the user is the client
-        # And the invoice requires payment to view attachments and has succeeded
-        # Or the invoice doesn't require payment to view attachments
-        where:
-          c.public_id == ^commission and
-            ul.key == ^key and
-            (artist.id == ^user.id or
-               (c.client_id == ^user.id and
-                  ((i.required and i.status == :succeeded) or not i.required or is_nil(i.required)))),
-        preload: [:upload, :thumbnail, :preview]
+  def add_line_item(%User{} = actor, %Commission{} = commission, option, true) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = Repo.reload(actor)
+
+        if Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id}) ||
+             :admin in actor.roles ||
+             :mod in actor.roles do
+          line_item =
+            case option do
+              %OfferingOption{} ->
+                %LineItem{
+                  commission_id: commission.id,
+                  option: option,
+                  amount: option.price,
+                  name: option.name,
+                  description: option.description
+                }
+
+              %{amount: amount, name: name, description: description} ->
+                %LineItem{
+                  commission_id: commission.id,
+                  amount: amount,
+                  name: name,
+                  description: description
+                }
+            end
+
+          with {:ok, line_item} <- Repo.insert(line_item),
+               %LineItem{} = line_item <- line_item |> Repo.preload(:option),
+               line_items <- commission.line_items ++ [line_item],
+               %Commission{} = commission <- %{commission | line_items: line_items},
+               {:ok, event} <-
+                 create_event(:line_item_added, actor, commission, true, [], %{
+                   amount: line_item.amount,
+                   text: line_item.name
+                 }) do
+            Notifications.commission_line_items_changed(commission, actor)
+            {:ok, {commission, [event]}}
+          end
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
+  end
+
+  @doc """
+  Adds a comment to a commission.
+  """
+  def add_comment(
+        %User{} = actor,
+        %Commission{} = commission,
+        current_user_member?,
+        attachments,
+        text
+      ) do
+    create_event(
+      :comment,
+      actor,
+      commission,
+      current_user_member?,
+      attachments,
+      %{"text" => text}
     )
   end
 
-  def add_attachments(%Event{} = event, attachments) do
+  @doc """
+  Adds a the given attachments to the event.
+  """
+  def add_attachments!(%Event{} = event, attachments) do
     {:ok, _} =
       Repo.transaction(fn ->
         Enum.each(attachments, fn upload ->
@@ -893,84 +1103,136 @@ defmodule Banchan.Commissions do
     :ok
   end
 
-  def delete_attachment!(
-        %User{} = actor,
-        %Commission{} = commission,
-        %Event{} = event,
-        %EventAttachment{} = event_attachment
-      ) do
-    # NOTE: This also deletes any associated uploads, because of the db ON DELETE
-    Repo.delete!(event_attachment)
-    new_attachments = Enum.reject(event.attachments, &(&1.id == event_attachment.id))
+  @doc """
+  Removes a new line item from an existing commission. Only studio members and
+  admins/mods can do this.
+  """
+  def remove_line_item(actor, commission, line_item, current_user_member?)
 
-    Notifications.commission_event_updated(
-      commission,
-      %{event | attachments: new_attachments},
-      actor
-    )
-  end
-
-  def add_comment(
-        %User{} = actor,
-        %Commission{} = commission,
-        current_user_member?,
-        attachments,
-        text
-      ) do
-    create_event(
-      :comment,
-      actor,
-      commission,
-      current_user_member?,
-      attachments,
-      %{"text" => text}
-    )
-  end
-
-  def invoice_paid?(%Invoice{status: status}), do: status == :succeeded
-
-  def invoice(%User{roles: roles} = actor, comm, false, drafts, event_data) do
-    if :admin in roles or :client in roles do
-      invoice(actor, comm, true, drafts, event_data)
+  def remove_line_item(actor, commission, line_item, false) do
+    if :admin in actor.roles || :mod in actor.roles do
+      remove_line_item(actor, commission, line_item, true)
     else
       {:error, :unauthorized}
     end
   end
 
-  def invoice(%User{} = actor, %Commission{} = commission, true, drafts, event_data) do
+  def remove_line_item(%User{} = actor, %Commission{} = commission, line_item, true) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        case create_event(:comment, actor, commission, true, drafts, event_data) do
-          {:error, error} ->
-            {:error, error}
+        actor = Repo.reload(actor)
 
-          {:ok, event} ->
-            case %Invoice{
-                   client_id: commission.client_id,
-                   commission: commission,
-                   event: event
-                 }
-                 |> Invoice.creation_changeset(event_data)
-                 |> Repo.insert() do
-              {:error, error} ->
-                {:error, error}
-
-              {:ok, invoice} ->
-                send_event_update!(event.id, actor)
-                {:ok, invoice}
-            end
+        if Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id}) ||
+             :admin in actor.roles ||
+             :mod in actor.roles do
+          with {:ok, _} <- Repo.delete(line_item),
+               line_items <- Enum.filter(commission.line_items, &(&1.id != line_item.id)),
+               %Commission{} = commission <- %{commission | line_items: line_items},
+               {:ok, event} <-
+                 create_event(:line_item_removed, actor, commission, true, [], %{
+                   amount: line_item.amount,
+                   text: line_item.name
+                 }) do
+            Notifications.commission_line_items_changed(commission, actor)
+            {:ok, {commission, [event]}}
+          end
+        else
+          {:error, :unauthorized}
         end
       end)
 
     ret
   end
 
-  def process_payment!(%User{id: user_id}, _, %Commission{client_id: client_id}, _, _)
+  @doc """
+  Updates a event.
+  """
+  def update_event(%User{} = actor, %Event{} = event, attrs) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        commission = Repo.one(Ecto.assoc(event, :commission))
+
+        with {:ok, actor} <- check_actor_edit_access(actor, commission) do
+          event = event |> Repo.reload(force: true) |> Repo.preload(:commission)
+
+          if actor.id == event.actor_id || :admin in actor.roles || :mod in actor.roles do
+            original_text = event.text
+            changeset = Event.changeset(event, attrs)
+
+            with {:ok, event} <- Repo.update(changeset, returning: true),
+                 %Event{} = event <-
+                   Repo.preload(event, [
+                     :actor,
+                     invoice: [],
+                     attachments: [:upload, :thumbnail, :preview]
+                   ]) do
+              if Ecto.Changeset.fetch_change(changeset, :text) == :error do
+                Notifications.commission_event_updated(commission, event, actor)
+                {:ok, event}
+              else
+                # If we're editing the event's text, we want to create a
+                # history entry for it for recordkeeping.
+                history = %CommentHistory{
+                  text: original_text,
+                  written_at: event.updated_at,
+                  event_id: event.id,
+                  changed_by_id: actor.id
+                }
+
+                with {:ok, _} <- Repo.insert(history) do
+                  Notifications.commission_event_updated(commission, event, actor)
+                  {:ok, event}
+                end
+              end
+            end
+          else
+            {:error, :unauthorized}
+          end
+        end
+      end)
+
+    ret
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking event changes.
+  """
+  def change_event(%Event{} = event, attrs \\ %{}) do
+    Event.changeset(event, attrs)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` specifically for tracking event text changes.
+  """
+  def change_event_text(%Event{} = event, attrs \\ %{}) do
+    Event.text_changeset(event, attrs)
+  end
+
+  defp send_event_update!(event_id, actor \\ nil) do
+    event =
+      from(e in Event,
+        where: e.id == ^event_id,
+        select: e,
+        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
+      )
+      |> Repo.one!()
+
+    commission =
+      from(c in Commission, where: c.id == ^event.commission_id)
+      |> Repo.one!()
+
+    Notifications.commission_event_updated(commission, event, actor)
+  end
+
+  @doc """
+  Processes a client payment
+  """
+  def process_payment(%User{id: user_id}, _, %Commission{client_id: client_id}, _, _)
       when user_id != client_id do
     {:error, :unauthorized}
   end
 
-  def process_payment!(
+  def process_payment(
         %User{} = actor,
         %Event{invoice: %Invoice{amount: amount} = invoice} = event,
         %Commission{} = commission,
@@ -992,46 +1254,47 @@ defmodule Banchan.Commissions do
       }
     ]
 
-    {stripe_id, platform_fee} =
-      from(studio in Studio,
-        where: studio.id == ^commission.studio_id,
-        select: {studio.stripe_id, studio.platform_fee}
-      )
-      |> Repo.one!()
+    with {stripe_id, platform_fee} <-
+           from(studio in Studio,
+             where: studio.id == ^commission.studio_id,
+             select: {studio.stripe_id, studio.platform_fee}
+           )
+           |> Repo.one(),
+         platform_fee <- Money.multiply(Money.add(amount, tip), platform_fee),
+         transfer_amt <- amount |> Money.add(tip) |> Money.subtract(platform_fee),
+         {:ok, session} <-
+           stripe_mod().create_session(%{
+             payment_method_types: ["card"],
+             mode: "payment",
+             cancel_url: uri,
+             success_url: uri,
+             line_items: items,
+             payment_intent_data: %{
+               transfer_data: %{
+                 amount: transfer_amt.amount,
+                 destination: stripe_id
+               }
+             }
+           }),
+         {:ok, _} <-
+           invoice
+           |> Invoice.submit_changeset(%{
+             tip: tip,
+             platform_fee: platform_fee,
+             stripe_session_id: session.id,
+             checkout_url: session.url,
+             status: :submitted
+           })
+           |> Repo.update() do
+      send_event_update!(event.id, actor)
 
-    platform_fee = Money.multiply(Money.add(amount, tip), platform_fee)
-    transfer_amt = amount |> Money.add(tip) |> Money.subtract(platform_fee)
-
-    {:ok, session} =
-      stripe_mod().create_session(%{
-        payment_method_types: ["card"],
-        mode: "payment",
-        cancel_url: uri,
-        success_url: uri,
-        line_items: items,
-        payment_intent_data: %{
-          transfer_data: %{
-            amount: transfer_amt.amount,
-            destination: stripe_id
-          }
-        }
-      })
-
-    invoice
-    |> Invoice.submit_changeset(%{
-      tip: tip,
-      platform_fee: platform_fee,
-      stripe_session_id: session.id,
-      checkout_url: session.url,
-      status: :submitted
-    })
-    |> Repo.update!()
-
-    send_event_update!(event.id, actor)
-
-    session.url
+      {:ok, session.url}
+    end
   end
 
+  @doc """
+  Webhook handler for when a payment has been successfully processed by Stripe.
+  """
   def process_payment_succeeded!(session) do
     {:ok, %{charges: %{data: [%{balance_transaction: txn_id, transfer: transfer}]}}} =
       stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, [])
@@ -1080,7 +1343,9 @@ defmodule Banchan.Commissions do
           }
         )
 
-        Notifications.send_receipt(invoice, client, commission)
+        if client.email do
+          Notifications.send_receipt(invoice, client, commission)
+        end
 
         send_event_update!(invoice.event_id)
       end)
@@ -1088,6 +1353,9 @@ defmodule Banchan.Commissions do
     :ok
   end
 
+  @doc """
+  Webhook handler for when a payment has been expired by a Studio member.
+  """
   def process_payment_expired!(session) do
     # NOTE: This will crash (intentionally) if we try to expire an
     # already-succeeded payment. This should never happen, though, because it
@@ -1103,59 +1371,94 @@ defmodule Banchan.Commissions do
     send_event_update!(invoice.event_id)
   end
 
-  def expire_payment!(invoice, current_user_member?)
+  @doc """
+  Expires a payment, preventing the client from being able to complete their
+  session, if it's still active.
+  """
+  def expire_payment(actor, invoice, current_user_member?)
 
-  def expire_payment!(_, false) do
-    {:error, :unauthorized}
-  end
-
-  def expire_payment!(%Invoice{id: id, stripe_session_id: nil, status: :pending}, _) do
-    # NOTE: This will crash (intentionally) if we try to expire an already-succeeded payment.
-    {1, [invoice]} =
-      from(i in Invoice, where: i.id == ^id and i.status != :succeeded, select: i)
-      |> Repo.update_all(set: [status: :expired])
-
-    send_event_update!(invoice.event_id)
-    :ok
-  end
-
-  def expire_payment!(%Invoice{stripe_session_id: session_id, status: :submitted}, _)
-      when session_id != nil do
-    # NOTE: We don't manually expire the invoice in the database here. That's
-    # handled by process_payment_expired!/1 when the webhook fires.
-    case stripe_mod().expire_payment(session_id) do
-      {:ok, _} ->
-        :ok
-
-      {:error, error} ->
-        raise error.message
+  def expire_payment(%User{} = actor, invoice, false) do
+    if :admin in actor.roles || :mod in actor.roles do
+      expire_payment(actor, invoice, true)
+    else
+      {:error, :unauthorized}
     end
   end
 
-  def expire_payment!(%Invoice{}, _) do
-    raise "Tried to expire an invoice in an invalid state. Reload the invoice and try again. Otherwise, this is a bug."
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def expire_payment(
+        %User{} = actor,
+        %Invoice{} = invoice,
+        true
+      ) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+        invoice = invoice |> Repo.reload() |> Repo.preload(:commission)
+
+        if Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) ||
+             :admin in actor.roles || :mod in actor.roles do
+          case invoice do
+            %Invoice{id: id, stripe_session_id: nil, status: :pending} ->
+              # NOTE: This will crash (intentionally) if we try to expire an already-succeeded payment.
+              {1, [invoice]} =
+                from(i in Invoice, where: i.id == ^id and i.status != :succeeded, select: i)
+                |> Repo.update_all(set: [status: :expired])
+
+              send_event_update!(invoice.event_id)
+              {:ok, invoice}
+
+            %Invoice{stripe_session_id: session_id, status: :submitted} when session_id != nil ->
+              # NOTE: We don't manually expire the invoice in the database here. That's
+              # handled by process_payment_expired!/1 when the webhook fires.
+              with {:ok, _} <- stripe_mod().expire_payment(session_id) do
+                {:ok, invoice}
+              end
+
+            _ ->
+              {:error, :invalid_state}
+          end
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
   end
 
+  @doc """
+  Refunds a payment that hasn't been released yet.
+  """
   def refund_payment(actor, invoice, current_user_member?)
 
-  def refund_payment(_, _, false) do
-    {:error, :unauthorized}
+  def refund_payment(actor, invoice, false) do
+    if :admin in actor.roles || :mod in actor.roles do
+      refund_payment(actor, invoice, true)
+    else
+      {:error, :unauthorized}
+    end
   end
 
   def refund_payment(%User{} = actor, %Invoice{} = invoice, _) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        invoice = invoice |> Repo.reload()
+        actor = actor |> Repo.reload()
+        invoice = invoice |> Repo.reload() |> Repo.preload(:commission)
 
-        if invoice.status != :succeeded do
-          Logger.error(%{
-            message: "Attempted to refund an invoice that wasn't :succeeded.",
-            invoice: invoice
-          })
+        if Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) ||
+             :admin in actor.roles || :mod in actor.roles do
+          if invoice.status != :succeeded do
+            Logger.error(%{
+              message: "Attempted to refund an invoice that wasn't :succeeded.",
+              invoice: invoice
+            })
 
-          {:error, :invoice_not_refundable}
+            {:error, :invoice_not_refundable}
+          else
+            process_refund_payment(actor, invoice)
+          end
         else
-          process_refund_payment(actor, invoice)
+          {:error, :unauthorized}
         end
       end)
 
@@ -1225,8 +1528,9 @@ defmodule Banchan.Commissions do
     end
   end
 
-  # Disabling because honestly, refactoring this one is pointless.
-  #
+  @doc """
+  Webhook handler for when a Stripe refund has been updated.
+  """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def process_refund_updated(%Stripe.Refund{} = refund, invoice_id, actor \\ nil) do
     {:ok, ret} =
@@ -1341,146 +1645,33 @@ defmodule Banchan.Commissions do
     end
   end
 
-  def deposited_amount(
-        %User{id: user_id, roles: roles} = actor,
-        %Commission{client_id: client_id} = comm,
-        current_user_member?
-      )
-      when user_id != client_id and current_user_member? == false do
-    if :admin in roles || :mod in roles do
-      deposited_amount(actor, comm, true)
-    else
-      {:error, :unauthorized}
-    end
-  end
+  ## Deletion
 
-  def deposited_amount(_, %Commission{} = commission, _) do
-    if Ecto.assoc_loaded?(commission.events) do
-      Enum.reduce(
-        commission.events,
-        %{},
-        fn event, acc ->
-          if event.invoice && event.invoice.status in [:succeeded, :released] do
-            current =
-              Map.get(
-                acc,
-                event.invoice.amount.currency,
-                Money.new(0, event.invoice.amount.currency)
-              )
+  @doc """
+  Deletes an attachment from a comment.
+  """
+  # TODO: This is probably the wrong thing. We shouldn't delete this stuff.
+  # Instead, create a history entry of some sort and make the upload
+  # accessible to admins for auditing.
+  def delete_attachment!(
+        %User{} = actor,
+        %Commission{} = commission,
+        %Event{} = event,
+        %EventAttachment{} = event_attachment
+      ) do
+    # NOTE: This also deletes any associated uploads (not the underlying data), because of the db ON DELETE
+    # TODO: Maybe also delete the data from S3/storage?
+    Repo.delete!(event_attachment)
+    new_attachments = Enum.reject(event.attachments, &(&1.id == event_attachment.id))
 
-            Map.put(acc, event.invoice.amount.currency, Money.add(current, event.invoice.amount))
-          else
-            acc
-          end
-        end
-      )
-    else
-      deposits =
-        from(
-          i in Invoice,
-          where:
-            i.commission_id == ^commission.id and
-              i.status == :succeeded,
-          select: i.amount
-        )
-        |> Repo.all()
-
-      Enum.reduce(
-        deposits,
-        %{},
-        fn dep, acc ->
-          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
-          Map.put(acc, dep.currency, Money.add(current, dep))
-        end
-      )
-    end
-  end
-
-  def tipped_amount(
-        %User{id: user_id, roles: roles} = actor,
-        %Commission{client_id: client_id} = comm,
-        current_user_member?
-      )
-      when user_id != client_id and current_user_member? == false do
-    if :admin in roles || :mod in roles do
-      tipped_amount(actor, comm, true)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
-  def tipped_amount(_, %Commission{} = commission, _) do
-    if Ecto.assoc_loaded?(commission.events) do
-      Enum.reduce(
-        commission.events,
-        %{},
-        fn event, acc ->
-          if event.invoice && event.invoice.status in [:succeeded, :released] do
-            current =
-              Map.get(
-                acc,
-                event.invoice.tip.currency,
-                Money.new(0, event.invoice.tip.currency)
-              )
-
-            Map.put(acc, event.invoice.tip.currency, Money.add(current, event.invoice.tip.amount))
-          else
-            acc
-          end
-        end
-      )
-    else
-      deposits =
-        from(
-          i in Invoice,
-          where:
-            i.commission_id == ^commission.id and
-              i.status == :succeeded,
-          select: i.tip
-        )
-        |> Repo.all()
-
-      Enum.reduce(
-        deposits,
-        %{},
-        fn dep, acc ->
-          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
-          Map.put(acc, dep.currency, Money.add(current, dep))
-        end
-      )
-    end
-  end
-
-  def line_item_estimate(line_items) do
-    Enum.reduce(
-      line_items,
-      %{},
-      fn item, acc ->
-        current =
-          Map.get(
-            acc,
-            item.amount.currency,
-            Money.new(0, item.amount.currency)
-          )
-
-        Map.put(acc, item.amount.currency, Money.add(current, item.amount))
-      end
+    Notifications.commission_event_updated(
+      commission,
+      %{event | attachments: new_attachments},
+      actor
     )
   end
 
-  def list_attachments(%Commission{} = commission) do
-    from(ea in EventAttachment,
-      join: e in assoc(ea, :event),
-      left_join: i in assoc(e, :invoice),
-      where:
-        e.commission_id == ^commission.id and
-          (is_nil(i.required) or
-             not i.required or (i.required and i.status == :succeeded)),
-      order_by: [desc: e.inserted_at],
-      preload: [:upload, :thumbnail, :preview]
-    )
-    |> Repo.all()
-  end
+  ## Misc utilities
 
   defp stripe_mod do
     Application.get_env(:banchan, :stripe_mod)

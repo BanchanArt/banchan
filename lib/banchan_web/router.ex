@@ -74,19 +74,19 @@ defmodule BanchanWeb.Router do
       live("/mfa_setup", SetupMfaLive, :edit)
 
       get(
-        "/commissions/:commission_id/attachment/:key",
+        "/commissions/:commission_id/attachment/:upload_id",
         CommissionAttachmentController,
         :show
       )
 
       get(
-        "/commissions/:commission_id/attachment/:key/thumbnail",
+        "/commissions/:commission_id/attachment/:upload_id/thumbnail",
         CommissionAttachmentController,
         :thumbnail
       )
 
       get(
-        "/commissions/:commission_id/attachment/:key/preview",
+        "/commissions/:commission_id/attachment/:upload_id/preview",
         CommissionAttachmentController,
         :preview
       )
@@ -129,9 +129,9 @@ defmodule BanchanWeb.Router do
 
     get("/go/:handle", DispatchController, :dispatch)
 
-    get("/images/:id", PublicImageController, :image)
+    get("/images/:type/:id", PublicImageController, :image)
 
-    get("/images/:id/download", PublicImageController, :download)
+    get("/images/:type/:id/download", PublicImageController, :download)
 
     get("/studios/:handle/connect_to_stripe", StripeAccountController, :account_link)
 

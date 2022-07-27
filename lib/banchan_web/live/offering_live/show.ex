@@ -26,10 +26,9 @@ defmodule BanchanWeb.OfferingLive.Show do
 
     offering =
       Offerings.get_offering_by_type!(
+        socket.assigns.current_user,
         socket.assigns.studio,
-        offering_type,
-        socket.assigns.current_user_member?,
-        socket.assigns.current_user
+        offering_type
       )
 
     Notifications.subscribe_to_offering_updates(offering)
@@ -56,6 +55,7 @@ defmodule BanchanWeb.OfferingLive.Show do
     related =
       Offerings.list_offerings(
         related_to: offering,
+        current_user: socket.assigns.current_user,
         order_by: :featured,
         page_size: 6
       )
@@ -93,10 +93,9 @@ defmodule BanchanWeb.OfferingLive.Show do
   def handle_info(%{event: "images_updated"}, socket) do
     offering =
       Offerings.get_offering_by_type!(
+        socket.assigns.current_user,
         socket.assigns.studio,
-        socket.assigns.offering.type,
-        socket.assigns.current_user_member?,
-        socket.assigns.current_user
+        socket.assigns.offering.type
       )
 
     gallery_images =
@@ -166,7 +165,7 @@ defmodule BanchanWeb.OfferingLive.Show do
               <Lightbox.Item>
                 <img
                   class="w-full h-full object-contain aspect-video"
-                  src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
+                  src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
                 />
               </Lightbox.Item>
             {#else}
@@ -208,24 +207,26 @@ defmodule BanchanWeb.OfferingLive.Show do
             <div class="divider" />
           {/if}
           <div class="flex flex-row justify-end gap-2">
-            <div class="dropdown dropdown-end">
-              <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
-                <i class="fas fa-ellipsis-vertical" />
-              </label>
-              <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
-                {#if @current_user &&
-                    (@current_user_member? || :admin in @current_user.roles || :mod in @current_user.roles)}
+            {#if @current_user}
+              <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
+                  <i class="fas fa-ellipsis-vertical" />
+                </label>
+                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
+                  {#if @current_user &&
+                      (@current_user_member? || :admin in @current_user.roles || :mod in @current_user.roles)}
+                    <li>
+                      <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}><i class="fas fa-edit" /> Edit</LiveRedirect>
+                    </li>
+                  {/if}
                   <li>
-                    <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}><i class="fas fa-edit" /> Edit</LiveRedirect>
+                    <button type="button" :on-click="report">
+                      <i class="fas fa-flag" /> Report
+                    </button>
                   </li>
-                {/if}
-                <li>
-                  <button type="button" :on-click="report">
-                    <i class="fas fa-flag" /> Report
-                  </button>
-                </li>
-              </ul>
-            </div>
+                </ul>
+              </div>
+            {/if}
             {#if @offering.open}
               <LiveRedirect
                 to={Routes.offering_request_path(Endpoint, :new, @offering.studio.handle, @offering.type)}
@@ -259,7 +260,7 @@ defmodule BanchanWeb.OfferingLive.Show do
               <Lightbox.Item>
                 <img
                   class="w-full h-full object-contain aspect-video"
-                  src={Routes.public_image_path(Endpoint, :image, @offering.card_img_id)}
+                  src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
                 />
               </Lightbox.Item>
             {#else}
@@ -275,7 +276,11 @@ defmodule BanchanWeb.OfferingLive.Show do
             <div class="rounded-lg shadow-lg bg-base-200 p-4">
               <div class="text-2xl">Gallery</div>
               <div class="divider" />
-              <MasonryGallery id="masonry-gallery" images={@gallery_images} />
+              <MasonryGallery
+                id="masonry-gallery"
+                upload_type={:offering_gallery_img}
+                images={@gallery_images}
+              />
             </div>
           {/if}
           {#if !Enum.empty?(@related)}

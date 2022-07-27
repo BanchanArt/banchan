@@ -78,7 +78,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
           {#if @studio.header_img && !@studio.header_img.pending && !@studio.disable_info}
             <img
               class="object-cover aspect-header-image rounded-b-xl w-full"
-              src={Routes.public_image_path(Endpoint, :image, @studio.header_img_id)}
+              src={Routes.public_image_path(Endpoint, :image, :studio_header_img, @studio.header_img_id)}
             />
           {#else}
             <div class="rounded-b-xl aspect-header-image bg-base-300 w-full" />
@@ -168,7 +168,8 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 current_tab={@tab}
                 to={Routes.studio_portfolio_path(Endpoint, :show, @studio.handle)}
               />
-              {#if @current_user_member? || :admin in @current_user.roles || :mod in @current_user.roles}
+              {#if @current_user_member? ||
+                  (@current_user && (:admin in @current_user.roles || :mod in @current_user.roles))}
                 <TabButton
                   label="Payouts"
                   tab_name={:payouts}

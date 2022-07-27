@@ -7,6 +7,7 @@ defmodule BanchanWeb.Components.MasonryGallery do
   alias BanchanWeb.Components.{Lightbox, MasonryGallery}
 
   prop editable, :boolean, default: false
+  prop upload_type, :atom, required: true
   prop images, :list, required: true
   prop entries, :list
   prop send_updates_to, :any
@@ -108,7 +109,12 @@ defmodule BanchanWeb.Components.MasonryGallery do
           {#for image <- @images}
             {#case image}
               {#match {:existing, upload}}
-                <MasonryGallery.Upload deleted="item_deleted" upload={upload} editable={@editable} />
+                <MasonryGallery.Upload
+                  deleted="item_deleted"
+                  type={@upload_type}
+                  upload={upload}
+                  editable={@editable}
+                />
               {#match {:live, entry}}
                 <MasonryGallery.LiveImgPreview deleted="item_deleted" entry={entry} editable={@editable} />
             {/case}

@@ -84,6 +84,14 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
          |> push_redirect(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
+
+      {:error, :unauthorized} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are not authorized to perform this action.")
+         |> push_redirect(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
     end
   end
 

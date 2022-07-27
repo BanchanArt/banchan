@@ -53,16 +53,28 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       |> Map.put(:action, :insert)
 
     if changeset.valid? do
-      url =
-        Commissions.process_payment!(
-          socket.assigns.current_user,
-          socket.assigns.event,
-          socket.assigns.commission,
-          replace_fragment(socket.assigns.uri, socket.assigns.event),
-          Utils.moneyfy(amount, socket.assigns.event.invoice.amount.currency)
-        )
+      Commissions.process_payment(
+        socket.assigns.current_user,
+        socket.assigns.event,
+        socket.assigns.commission,
+        replace_fragment(socket.assigns.uri, socket.assigns.event),
+        Utils.moneyfy(amount, socket.assigns.event.invoice.amount.currency)
+      )
+      |> case do
+        {:ok, url} ->
+          {:noreply, socket |> redirect(external: url)}
 
-      {:noreply, socket |> redirect(external: url)}
+        {:error, _} ->
+          {:noreply,
+           socket
+           |> put_flash(
+             :error,
+             "Something went wrong while processing your payment, please try again."
+           )
+           |> push_redirect(
+             to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+           )}
+      end
     else
       {:noreply, socket |> assign(:changeset, changeset)}
     end
@@ -81,8 +93,26 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   @impl true
   def handle_event("force_expire", _, socket) do
-    Commissions.expire_payment!(socket.assigns.event.invoice, socket.assigns.current_user_member?)
-    {:noreply, socket}
+    Commissions.expire_payment(
+      socket.assigns.current_user,
+      socket.assigns.event.invoice,
+      socket.assigns.current_user_member?
+    )
+    |> case do
+      {:ok, _} ->
+        {:noreply, socket}
+
+      {:error, _} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "Something went wrong while expiring your payment, please try again."
+         )
+         |> push_redirect(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
+    end
   end
 
   def handle_event(
@@ -132,14 +162,47 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           assigns: %{current_user: current_user, commission: commission, event: event}
         } = socket
       ) do
-    Commissions.release_payment!(
+    Commissions.release_payment(
       current_user,
       commission,
       event.invoice
     )
+    |> case do
+      {:ok, _} ->
+        Modal.hide(socket.assigns.id <> "_release_modal")
+        {:noreply, socket}
 
-    Modal.hide(socket.assigns.id <> "_release_modal")
-    {:noreply, socket}
+      {:error, :invalid_invoice_status} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Failed to release invoice, possibly due to a state change")
+         |> push_redirect(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
+
+      {:error, :blocked} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are blocked from further interaction with this studio.")
+         |> push_redirect(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
+
+      {:error, :unauthorized} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are not authorized to access that commission.")
+         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+
+      {:error, :disabled} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "You are not authorized to access that commission because your account has been disabled."
+         )
+         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+    end
   end
 
   def handle_event("open_release_modal", _, socket) do

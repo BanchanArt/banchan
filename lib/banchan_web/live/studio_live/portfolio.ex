@@ -100,6 +100,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
       end)
 
     case Studios.update_portfolio(
+           socket.assigns.current_user,
            socket.assigns.studio,
            socket.assigns.current_user_member?,
            portfolio_images
@@ -151,6 +152,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
         send_updates_to={self()}
         images={@portfolio_images}
         editable={@current_user_member?}
+        upload_type={:studio_portfolio_img}
         entries={(@current_user_member? && @uploads.portfolio_images.entries) || []}
       />
     </StudioLayout>
