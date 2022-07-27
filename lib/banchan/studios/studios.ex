@@ -772,29 +772,39 @@ defmodule Banchan.Studios do
   @doc """
   Sets the portfolio images for a Studio.
   """
-  def update_portfolio(studio, current_user_member?, portfolio_images)
+  def update_portfolio(actor, studio, current_user_member?, portfolio_images)
 
-  def update_portfolio(_, false, _) do
-    {:error, :unauthorized}
+  def update_portfolio(%User{} = actor, studio, false, images) do
+    if :admin in actor.roles || :mod in actor.roles do
+      update_portfolio(actor, studio, true, images)
+    else
+      {:error, :unauthorized}
+    end
   end
 
-  def update_portfolio(%Studio{} = studio, true, portfolio_images) do
+  def update_portfolio(%User{} = actor, %Studio{} = studio, true, portfolio_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        portfolio_images =
-          (portfolio_images || [])
-          |> Enum.with_index()
-          |> Enum.map(fn {%Upload{} = upload, index} ->
-            %PortfolioImage{
-              index: index,
-              upload_id: upload.id
-            }
-          end)
+        actor = actor |> Repo.reload()
 
-        studio
-        |> Repo.preload(:portfolio_imgs)
-        |> Studio.portfolio_changeset(portfolio_images)
-        |> Repo.update(returning: true)
+        if is_user_in_studio?(actor, studio) || :admin in actor.roles || :mod in actor.roles do
+          portfolio_images =
+            (portfolio_images || [])
+            |> Enum.with_index()
+            |> Enum.map(fn {%Upload{} = upload, index} ->
+              %PortfolioImage{
+                index: index,
+                upload_id: upload.id
+              }
+            end)
+
+          studio
+          |> Repo.preload(:portfolio_imgs)
+          |> Studio.portfolio_changeset(portfolio_images)
+          |> Repo.update(returning: true)
+        else
+          {:error, :unauthorized}
+        end
       end)
 
     ret
@@ -829,9 +839,11 @@ defmodule Banchan.Studios do
   when the time comes.
   """
   def disable_studio(%User{} = actor, %Studio{} = studio, attrs) do
-    if :admin in actor.roles || :mod in actor.roles do
-      {:ok, ret} =
-        Repo.transaction(fn ->
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+
+        if :admin in actor.roles || :mod in actor.roles do
           dummy = %StudioDisableHistory{} |> StudioDisableHistory.disable_changeset(attrs)
 
           with {:ok, job} <-
@@ -851,25 +863,29 @@ defmodule Banchan.Studios do
             |> StudioDisableHistory.disable_changeset(attrs)
             |> Repo.insert()
           end
-        end)
+        else
+          {:error, :unauthorized}
+        end
+      end)
 
-      ret
-    else
-      {:error, :unauthorized}
-    end
+    ret
   end
 
   @doc """
   Re-enable a previously disabled studio.
   """
   def enable_studio(actor, %Studio{} = studio, reason, cancel \\ true) do
-    if is_nil(actor) || :admin in actor.roles || :mod in actor.roles do
-      changeset =
-        StudioDisableHistory.enable_changeset(%StudioDisableHistory{}, %{lifted_reason: reason})
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor && actor |> Repo.reload()
 
-      if changeset.valid? do
-        {:ok, ret} =
-          Repo.transaction(fn ->
+        if is_nil(actor) || :admin in actor.roles || :mod in actor.roles do
+          changeset =
+            StudioDisableHistory.enable_changeset(%StudioDisableHistory{}, %{
+              lifted_reason: reason
+            })
+
+          if changeset.valid? do
             {_, [history | _]} =
               Repo.update_all(
                 from(h in StudioDisableHistory,
@@ -888,15 +904,15 @@ defmodule Banchan.Studios do
             end
 
             {:ok, history}
-          end)
+          else
+            {:error, changeset}
+          end
+        else
+          {:error, :unauthorized}
+        end
+      end)
 
-        ret
-      else
-        {:error, changeset}
-      end
-    else
-      {:error, :unauthorized}
-    end
+    ret
   end
 
   @doc """
@@ -905,7 +921,7 @@ defmodule Banchan.Studios do
   def update_admin_fields(%User{} = actor, %Studio{} = studio, attrs \\ %{}) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor = Repo.get!(User, actor.id)
+        actor = actor |> Repo.reload()
 
         if :admin in actor.roles || :mod in actor.roles do
           Studio.admin_changeset(studio, attrs)
@@ -923,24 +939,45 @@ defmodule Banchan.Studios do
   be unable to further interact with commissions associated with this Studio,
   request new commissions, or even view the Studio profile.
   """
-  def block_user(%Studio{} = studio, %User{} = user, attrs) do
-    %StudioBlock{
-      studio_id: studio.id,
-      user_id: user.id
-    }
-    |> StudioBlock.changeset(attrs)
-    |> Repo.insert(on_conflict: {:replace, [:reason]}, conflict_target: [:studio_id, :user_id])
+  def block_user(%User{} = actor, %Studio{} = studio, %User{} = user, attrs) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        if is_user_in_studio?(actor, studio) do
+          %StudioBlock{
+            studio_id: studio.id,
+            user_id: user.id
+          }
+          |> StudioBlock.changeset(attrs)
+          |> Repo.insert(
+            on_conflict: {:replace, [:reason]},
+            conflict_target: [:studio_id, :user_id]
+          )
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
   end
 
   @doc """
   Unblocks a previously blocked user. This will allow them to interact with
   the Studio normally again.
   """
-  def unblock_user(%Studio{} = studio, %User{} = user) do
-    Repo.delete_all(
-      from sb in StudioBlock,
-        where: sb.studio_id == ^studio.id and sb.user_id == ^user.id
-    )
+  def unblock_user(%User{} = actor, %Studio{} = studio, %User{} = user) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        if is_user_in_studio?(actor, studio) do
+          Repo.delete_all(
+            from sb in StudioBlock,
+              where: sb.studio_id == ^studio.id and sb.user_id == ^user.id
+          )
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -1099,23 +1136,27 @@ defmodule Banchan.Studios do
   @doc """
   Cancels a pending payout.
   """
-  def cancel_payout(%Studio{} = studio, payout_id) do
-    case stripe_mod().cancel_payout(payout_id,
-           headers: %{"Stripe-Account" => studio.stripe_id}
-         ) do
-      {:ok, %Stripe.Payout{id: ^payout_id, status: "canceled"}} ->
-        # NOTE: db is updated on process_payout_updated, so we don't do it
-        # here, particularly because we might not event have a payout entry in
-        # our db at all (this function can get called when insertions fail).
-        :ok
+  def cancel_payout(%User{} = actor, %Studio{} = studio, payout_id) do
+    if is_user_in_studio?(actor, studio) do
+      case stripe_mod().cancel_payout(payout_id,
+             headers: %{"Stripe-Account" => studio.stripe_id}
+           ) do
+        {:ok, %Stripe.Payout{id: ^payout_id, status: "canceled"}} ->
+          # NOTE: db is updated on process_payout_updated, so we don't do it
+          # here, particularly because we might not event have a payout entry in
+          # our db at all (this function can get called when insertions fail).
+          :ok
 
-      {:error, %Stripe.Error{} = err} ->
-        Logger.warn(%{
-          message: "Failed to cancel payout #{payout_id}: #{err.message}",
-          code: err.code
-        })
+        {:error, %Stripe.Error{} = err} ->
+          Logger.warn(%{
+            message: "Failed to cancel payout #{payout_id}: #{err.message}",
+            code: err.code
+          })
 
-        {:error, err}
+          {:error, err}
+      end
+    else
+      {:error, :unauthorized}
     end
   end
 

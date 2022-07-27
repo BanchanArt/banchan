@@ -62,9 +62,14 @@ defmodule BanchanWeb.DenizenLive.Show do
     {studio_id, ""} = Integer.parse(studio_id)
 
     {:ok, _} =
-      Studios.block_user(%Studio{id: studio_id}, socket.assigns.user, %{
-        reason: "manual block from user profile"
-      })
+      Studios.block_user(
+        socket.assigns.current_user,
+        %Studio{id: studio_id},
+        socket.assigns.user,
+        %{
+          reason: "manual block from user profile"
+        }
+      )
 
     Modal.hide("block-modal")
     {:noreply, socket}
@@ -86,7 +91,7 @@ defmodule BanchanWeb.DenizenLive.Show do
   @impl true
   def handle_event("unblock_user", %{"from" => studio_id}, socket) do
     {studio_id, ""} = Integer.parse(studio_id)
-    Studios.unblock_user(%Studio{id: studio_id}, socket.assigns.user)
+    Studios.unblock_user(socket.assigns.current_user, %Studio{id: studio_id}, socket.assigns.user)
     Modal.hide("unblock-modal")
     {:noreply, socket}
   end

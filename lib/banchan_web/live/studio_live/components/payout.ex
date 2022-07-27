@@ -12,6 +12,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
 
   alias BanchanWeb.Components.{Avatar, Button, Modal, UserHandle}
 
+  prop current_user, :struct, required: true
   prop studio, :struct, required: true
   prop payout, :struct, required: true
   prop data_pending, :boolean, default: false
@@ -39,7 +40,11 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   end
 
   def handle_event("cancel_payout", _, socket) do
-    case Studios.cancel_payout(socket.assigns.studio, socket.assigns.payout.stripe_payout_id) do
+    case Studios.cancel_payout(
+           socket.assigns.current_user,
+           socket.assigns.studio,
+           socket.assigns.payout.stripe_payout_id
+         ) do
       :ok ->
         Modal.hide(socket.assigns.id <> "_cancel_modal")
         {:noreply, socket}

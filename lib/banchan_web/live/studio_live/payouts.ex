@@ -243,7 +243,13 @@ defmodule BanchanWeb.StudioLive.Payouts do
           </div>
           {#if @payout_id}
             <div class="px-4 md:container basis-full md:basis-3/4 payout">
-              <Payout id="payout" studio={@studio} payout={@payout} data_pending={@data_pending} />
+              <Payout
+                id="payout"
+                current_user={@current_user}
+                studio={@studio}
+                payout={@payout}
+                data_pending={@data_pending}
+              />
             </div>
           {/if}
         </div>

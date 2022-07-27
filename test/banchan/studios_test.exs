@@ -834,7 +834,7 @@ defmodule Banchan.StudiosTest do
       {:ok, [%Payout{amount: ^net, status: :pending} = payout]} =
         Studios.payout_studio(artist, studio)
 
-      assert :ok == Studios.cancel_payout(studio, payout.stripe_payout_id)
+      assert :ok == Studios.cancel_payout(artist, studio, payout.stripe_payout_id)
 
       payout = payout |> Repo.reload()
 
@@ -948,7 +948,7 @@ defmodule Banchan.StudiosTest do
           {:error,
            %Stripe.Error{
              source: :stripe
-           }} = Studios.cancel_payout(studio, payout.stripe_payout_id)
+           }} = Studios.cancel_payout(artist, studio, payout.stripe_payout_id)
         end)
 
       assert log =~ "internal message"
