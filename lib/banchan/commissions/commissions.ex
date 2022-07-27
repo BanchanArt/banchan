@@ -1071,12 +1071,15 @@ defmodule Banchan.Commissions do
     Notifications.commission_event_updated(commission, event, actor)
   end
 
-  def process_payment!(%User{id: user_id}, _, %Commission{client_id: client_id}, _, _)
+  @doc """
+  Processes a client payment
+  """
+  def process_payment(%User{id: user_id}, _, %Commission{client_id: client_id}, _, _)
       when user_id != client_id do
     {:error, :unauthorized}
   end
 
-  def process_payment!(
+  def process_payment(
         %User{} = actor,
         %Event{invoice: %Invoice{amount: amount} = invoice} = event,
         %Commission{} = commission,
@@ -1098,46 +1101,47 @@ defmodule Banchan.Commissions do
       }
     ]
 
-    {stripe_id, platform_fee} =
-      from(studio in Studio,
-        where: studio.id == ^commission.studio_id,
-        select: {studio.stripe_id, studio.platform_fee}
-      )
-      |> Repo.one!()
+    with {stripe_id, platform_fee} <-
+           from(studio in Studio,
+             where: studio.id == ^commission.studio_id,
+             select: {studio.stripe_id, studio.platform_fee}
+           )
+           |> Repo.one(),
+         platform_fee <- Money.multiply(Money.add(amount, tip), platform_fee),
+         transfer_amt <- amount |> Money.add(tip) |> Money.subtract(platform_fee),
+         {:ok, session} <-
+           stripe_mod().create_session(%{
+             payment_method_types: ["card"],
+             mode: "payment",
+             cancel_url: uri,
+             success_url: uri,
+             line_items: items,
+             payment_intent_data: %{
+               transfer_data: %{
+                 amount: transfer_amt.amount,
+                 destination: stripe_id
+               }
+             }
+           }),
+         {:ok, _} <-
+           invoice
+           |> Invoice.submit_changeset(%{
+             tip: tip,
+             platform_fee: platform_fee,
+             stripe_session_id: session.id,
+             checkout_url: session.url,
+             status: :submitted
+           })
+           |> Repo.update() do
+      send_event_update!(event.id, actor)
 
-    platform_fee = Money.multiply(Money.add(amount, tip), platform_fee)
-    transfer_amt = amount |> Money.add(tip) |> Money.subtract(platform_fee)
-
-    {:ok, session} =
-      stripe_mod().create_session(%{
-        payment_method_types: ["card"],
-        mode: "payment",
-        cancel_url: uri,
-        success_url: uri,
-        line_items: items,
-        payment_intent_data: %{
-          transfer_data: %{
-            amount: transfer_amt.amount,
-            destination: stripe_id
-          }
-        }
-      })
-
-    invoice
-    |> Invoice.submit_changeset(%{
-      tip: tip,
-      platform_fee: platform_fee,
-      stripe_session_id: session.id,
-      checkout_url: session.url,
-      status: :submitted
-    })
-    |> Repo.update!()
-
-    send_event_update!(event.id, actor)
-
-    session.url
+      {:ok, session.url}
+    end
   end
 
+  @doc """
+  Webhook handler for when a payment has been successfully processed by Stripe.
+  """
   def process_payment_succeeded!(session) do
     {:ok, %{charges: %{data: [%{balance_transaction: txn_id, transfer: transfer}]}}} =
       stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, [])
@@ -1196,6 +1200,9 @@ defmodule Banchan.Commissions do
     :ok
   end
 
+  @doc """
+  Webhook handler for when a payment has been expired by a Studio member.
+  """
   def process_payment_expired!(session) do
     # NOTE: This will crash (intentionally) if we try to expire an
     # already-succeeded payment. This should never happen, though, because it
@@ -1211,37 +1218,59 @@ defmodule Banchan.Commissions do
     send_event_update!(invoice.event_id)
   end
 
-  def expire_payment!(invoice, current_user_member?)
+  @doc """
+  Expires a payment, preventing the client from being able to complete their
+  session, if it's still active.
+  """
+  def expire_payment(actor, invoice, current_user_member?)
 
-  def expire_payment!(_, false) do
-    {:error, :unauthorized}
-  end
-
-  def expire_payment!(%Invoice{id: id, stripe_session_id: nil, status: :pending}, _) do
-    # NOTE: This will crash (intentionally) if we try to expire an already-succeeded payment.
-    {1, [invoice]} =
-      from(i in Invoice, where: i.id == ^id and i.status != :succeeded, select: i)
-      |> Repo.update_all(set: [status: :expired])
-
-    send_event_update!(invoice.event_id)
-    :ok
-  end
-
-  def expire_payment!(%Invoice{stripe_session_id: session_id, status: :submitted}, _)
-      when session_id != nil do
-    # NOTE: We don't manually expire the invoice in the database here. That's
-    # handled by process_payment_expired!/1 when the webhook fires.
-    case stripe_mod().expire_payment(session_id) do
-      {:ok, _} ->
-        :ok
-
-      {:error, error} ->
-        raise error.message
+  def expire_payment(%User{} = actor, invoice, false) do
+    if :admin in actor.roles || :mod in actor.roles do
+      expire_payment(actor, invoice, true)
+    else
+      {:error, :unauthorized}
     end
   end
 
-  def expire_payment!(%Invoice{}, _) do
-    raise "Tried to expire an invoice in an invalid state. Reload the invoice and try again. Otherwise, this is a bug."
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def expire_payment(
+        %User{} = actor,
+        %Invoice{} = invoice,
+        true
+      ) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+        invoice = invoice |> Repo.reload() |> Repo.preload(:commission)
+
+        if Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) ||
+             :admin in actor.roles || :mod in actor.roles do
+          case invoice do
+            %Invoice{id: id, stripe_session_id: nil, status: :pending} ->
+              # NOTE: This will crash (intentionally) if we try to expire an already-succeeded payment.
+              {1, [invoice]} =
+                from(i in Invoice, where: i.id == ^id and i.status != :succeeded, select: i)
+                |> Repo.update_all(set: [status: :expired])
+
+              send_event_update!(invoice.event_id)
+              {:ok, invoice}
+
+            %Invoice{stripe_session_id: session_id, status: :submitted} when session_id != nil ->
+              # NOTE: We don't manually expire the invoice in the database here. That's
+              # handled by process_payment_expired!/1 when the webhook fires.
+              with {:ok, _} <- stripe_mod().expire_payment(session_id) do
+                {:ok, invoice}
+              end
+
+            _ ->
+              {:error, :invalid_state}
+          end
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
   end
 
   def refund_payment(actor, invoice, current_user_member?)
@@ -1333,8 +1362,6 @@ defmodule Banchan.Commissions do
     end
   end
 
-  # Disabling because honestly, refactoring this one is pointless.
-  #
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def process_refund_updated(%Stripe.Refund{} = refund, invoice_id, actor \\ nil) do
     {:ok, ret} =

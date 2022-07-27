@@ -64,7 +64,7 @@ defmodule Banchan.CommissionsFixtures do
       {:ok, sess}
     end)
 
-    Commissions.process_payment!(client, event, commission, checkout_uri, tip)
+    {:ok, _} = Commissions.process_payment(client, event, commission, checkout_uri, tip)
 
     sess
   end

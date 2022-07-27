@@ -226,8 +226,8 @@ defmodule Banchan.CommissionsTest do
 
       event = invoice.event |> Repo.reload() |> Repo.preload(:invoice)
 
-      assert checkout_uri ==
-               Commissions.process_payment!(
+      assert {:ok, checkout_uri} ==
+               Commissions.process_payment(
                  user,
                  event,
                  commission,
@@ -264,9 +264,9 @@ defmodule Banchan.CommissionsTest do
 
       event = invoice.event |> Repo.reload() |> Repo.preload(:invoice)
 
-      assert checkout_uri ==
-               Commissions.process_payment!(
-                client,
+      assert {:ok, checkout_uri} ==
+               Commissions.process_payment(
+                 client,
                  event,
                  commission,
                  uri,
@@ -354,9 +354,7 @@ defmodule Banchan.CommissionsTest do
         payload: %Event{type: :comment, id: ^iid, invoice: %Invoice{status: :succeeded}}
       }
 
-      assert_raise RuntimeError, fn ->
-        Commissions.expire_payment!(invoice, true)
-      end
+      assert {:error, :invalid_state} == Commissions.expire_payment(artist, invoice, true)
     end
 
     test "process payment expired" do
@@ -393,9 +391,7 @@ defmodule Banchan.CommissionsTest do
         payload: %Event{type: :comment, id: ^iid, invoice: %Invoice{status: :expired}}
       }
 
-      assert_raise RuntimeError, fn ->
-        Commissions.expire_payment!(invoice, true)
-      end
+      assert {:error, :invalid_state} == Commissions.expire_payment(artist, invoice, true)
     end
 
     test "manually expire already-started payment" do
@@ -416,7 +412,7 @@ defmodule Banchan.CommissionsTest do
 
       Commissions.subscribe_to_commission_events(commission)
 
-      assert {:error, :unauthorized} == Commissions.expire_payment!(invoice, false)
+      assert {:error, :unauthorized} == Commissions.expire_payment(artist, invoice, false)
 
       Banchan.StripeAPI.Mock
       |> expect(:expire_payment, fn sess_id ->
@@ -424,7 +420,7 @@ defmodule Banchan.CommissionsTest do
         {:ok, sess}
       end)
 
-      assert :ok == Commissions.expire_payment!(invoice, true)
+      assert {:ok, _} = Commissions.expire_payment(artist, invoice, true)
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
@@ -444,6 +440,7 @@ defmodule Banchan.CommissionsTest do
 
     test "manually expire pending payment" do
       commission = commission_fixture()
+      client = commission.client
       artist = commission.studio.artists |> List.first()
 
       amount = Money.new(420, :USD)
@@ -458,8 +455,9 @@ defmodule Banchan.CommissionsTest do
 
       Commissions.subscribe_to_commission_events(commission)
 
-      assert {:error, :unauthorized} == Commissions.expire_payment!(invoice, false)
-      assert :ok == Commissions.expire_payment!(invoice, true)
+      assert {:error, :unauthorized} == Commissions.expire_payment(client, invoice, false)
+
+      assert {:ok, _} = Commissions.expire_payment(artist, invoice, true)
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
@@ -476,9 +474,7 @@ defmodule Banchan.CommissionsTest do
         payload: %Event{type: :comment, id: ^iid, invoice: %Invoice{status: :expired}}
       }
 
-      assert_raise RuntimeError, fn ->
-        Commissions.expire_payment!(invoice, true)
-      end
+      assert {:error, :invalid_state} == Commissions.expire_payment(artist, invoice, true)
     end
 
     test "release payment without approving commission" do
