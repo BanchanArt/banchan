@@ -74,19 +74,19 @@ defmodule BanchanWeb.Router do
       live("/mfa_setup", SetupMfaLive, :edit)
 
       get(
-        "/commissions/:commission_id/attachment/:key",
+        "/commissions/:commission_id/attachment/:upload_id",
         CommissionAttachmentController,
         :show
       )
 
       get(
-        "/commissions/:commission_id/attachment/:key/thumbnail",
+        "/commissions/:commission_id/attachment/:upload_id/thumbnail",
         CommissionAttachmentController,
         :thumbnail
       )
 
       get(
-        "/commissions/:commission_id/attachment/:key/preview",
+        "/commissions/:commission_id/attachment/:upload_id/preview",
         CommissionAttachmentController,
         :preview
       )
