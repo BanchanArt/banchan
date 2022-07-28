@@ -29,6 +29,8 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
 
     socket = socket |> assign(assigns)
 
+    # NB(@zkat): This only ever gets picked up by the client until the user
+    # starts interacting with the editor input. See the note in the hook for more details.
     {:ok,
      socket
      |> push_event("markdown-input-updated", %{id: socket.assigns.id <> "-hook", value: val || ""})}
@@ -78,7 +80,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
               phx-update="ignore"
               class="object-cover editor w-full h-full"
             />
-            <TextArea class="hidden input-textarea" opts={[{:phx_debounce, "200"} | @opts]} />
+            <TextArea class="hidden input-textarea" opts={@opts} />
           </div>
           {#if @upload}
             {#if @dragging}
