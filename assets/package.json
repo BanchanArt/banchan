@@ -12,6 +12,7 @@
     "@tailwindcss/forms": "^0.4.0",
     "@tailwindcss/typography": "^0.5.0",
     "@toast-ui/editor": "^3.1.7",
+    "croppr": "^2.3.1",
     "daisyui": "^2.0.6",
     "phoenix": "file:../deps/phoenix",
     "phoenix_html": "file:../deps/phoenix_html",

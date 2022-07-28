@@ -9,7 +9,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
   alias Banchan.Accounts
 
   alias BanchanWeb.Components.Form.{HiddenInput, Submit, TagsInput, TextArea, TextInput}
-  alias BanchanWeb.Components.{Collapse, Layout}
+  alias BanchanWeb.Components.{Button, Collapse, Cropper, Layout, Modal}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -49,6 +49,12 @@ defmodule BanchanWeb.DenizenLive.Edit do
   @impl true
   def handle_params(_params, uri, socket) do
     {:noreply, socket |> assign(uri: uri)}
+  end
+
+  @impl true
+  def handle_event("change", %{ "_method" => "put", "_target" => ["header"]}, socket) do
+    Modal.show("header-cropper-modal")
+    {:noreply, socket}
   end
 
   @impl true
@@ -257,6 +263,19 @@ defmodule BanchanWeb.DenizenLive.Edit do
           </Form>
         </div>
       </div>
+      <Modal id="header-cropper-modal">
+        <:title>Crop Header Image</:title>
+        <Cropper id="header-cropper" class="object-cover aspect-header-image rounded-b-xl w-full" upload_config={@uploads.header} aspect_ratio={ 1 / 3.5 } upload={@uploads.header.entries |> Enum.at(0)} />
+        <:action>
+          <Button>Crop</Button>
+        </:action>
+      </Modal>
+      <Modal id="pfp-cropper-modal">
+        <Cropper id="pfp-cropper" aspect_ratio={1} upload_config={@uploads.pfp} upload={@uploads.pfp.entries |> Enum.at(0)} />
+        <:action>
+          <Button>Crop</Button>
+        </:action>
+      </Modal>
     </Layout>
     """
   end
