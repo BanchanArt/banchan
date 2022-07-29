@@ -48,8 +48,9 @@ defmodule BanchanWeb.StudioLive.Helpers do
         )
         |> redirect(to: Routes.studio_disabled_path(Endpoint, :show, studio.handle))
 
-      studio.mature &&
-          (is_nil(socket.assigns.current_user) || !socket.assigns.current_user_member.mature_ok) ->
+      studio.mature && :admin not in socket.assigns.current_user.roles &&
+        :mod not in socket.assigns.current_user.roles && !socket.assigns.current_user_member? &&
+          (is_nil(socket.assigns.current_user) || !socket.assigns.current_user.mature_ok) ->
         socket
         |> put_flash(
           :error,

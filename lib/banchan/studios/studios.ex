@@ -335,11 +335,11 @@ defmodule Banchan.Studios do
     case Keyword.fetch(opts, :current_user) do
       {:ok, %User{} = current_user} ->
         q
-        |> where(
-          [s],
-          s.mature != true or (s.mature == true and ^current_user.mature_ok == true)
-        )
         |> join(:inner, [], user in User, on: user.id == ^current_user.id, as: :current_user)
+        |> where(
+          [s, current_user: current_user, artist: artist],
+          s.mature != true or (s.mature == true and (current_user.mature_ok == true or :admin in current_user.roles or :mod in current_user.roles or artist.id == current_user.id))
+        )
         |> where(
           [o, current_user: current_user],
           is_nil(current_user.muted) or
