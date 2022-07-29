@@ -34,9 +34,11 @@ defmodule BanchanWeb.Components.StudioCard do
               <div class="badge badge-warning">Pending</div>
             {/if}
           </:header_aside>
-          <div class="content">
-            {@studio.about && raw(HtmlSanitizeEx.strip_tags(Earmark.as_html!(@studio.about)))}
-          </div>
+          <ul class="my-2 flex flex-row flex-wrap gap-1">
+            {#for tag <- @studio.tags}
+              <div class="badge badge-lg badge-primary">{tag}</div>
+            {/for}
+          </ul>
         </Card>
       </LiveRedirect>
     </studio-card>
