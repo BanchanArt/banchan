@@ -8,7 +8,15 @@ defmodule BanchanWeb.DenizenLive.Edit do
 
   alias Banchan.Accounts
 
-  alias BanchanWeb.Components.Form.{CropUploadInput, HiddenInput, Submit, TagsInput, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{
+    CropUploadInput,
+    HiddenInput,
+    Submit,
+    TagsInput,
+    TextArea,
+    TextInput
+  }
+
   alias BanchanWeb.Components.{Collapse, Layout}
   alias BanchanWeb.Endpoint
 
@@ -178,7 +186,13 @@ defmodule BanchanWeb.DenizenLive.Edit do
                   <div class="relative">
                     <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70"><i class="fas fa-camera" /></button>
                     {!-- # TODO: For some reason, this hover:cursor-pointer isn't working on Edge but it works on Firefox. :( --}
-                    <CropUploadInput id="header-cropper" aspect_ratio={1 / 3.5} upload={@uploads.header} class="h-8 w-8 opacity-0 hover:cursor-pointer z-40" />
+                    <CropUploadInput
+                      id="header-cropper"
+                      aspect_ratio={1 / 3.5}
+                      title="Crop Header Image"
+                      upload={@uploads.header}
+                      class="h-8 w-8 opacity-0 hover:cursor-pointer z-40"
+                    />
                   </div>
                 </div>
               </div>
@@ -212,7 +226,13 @@ defmodule BanchanWeb.DenizenLive.Edit do
                     <div class="relative">
                       <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70"><i class="fas fa-camera" /></button>
                       {!-- # TODO: For some reason, this hover:cursor-pointer isn't working on Edge but it works on Firefox. :( --}
-                      <CropUploadInput id="pfp-cropper" aspect_ratio={1} upload={@uploads.pfp} class="h-8 w-8 opacity-0 hover:cursor-pointer z-40" />
+                      <CropUploadInput
+                        id="pfp-cropper"
+                        aspect_ratio={1}
+                        title="Crop Profile Picture"
+                        upload={@uploads.pfp}
+                        class="h-8 w-8 opacity-0 hover:cursor-pointer z-40"
+                      />
                     </div>
                   </div>
                 </div>
