@@ -4,11 +4,19 @@ defmodule BanchanWeb.DenizenLive.Edit do
   """
   use BanchanWeb, :surface_view
 
-  alias Surface.Components.{Form, LiveFileInput}
+  alias Surface.Components.Form
 
   alias Banchan.Accounts
 
-  alias BanchanWeb.Components.Form.{HiddenInput, Submit, TagsInput, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{
+    CropUploadInput,
+    HiddenInput,
+    Submit,
+    TagsInput,
+    TextArea,
+    TextInput
+  }
+
   alias BanchanWeb.Components.{Collapse, Layout}
   alias BanchanWeb.Endpoint
 
@@ -52,10 +60,10 @@ defmodule BanchanWeb.DenizenLive.Edit do
   end
 
   @impl true
-  def handle_event("change", val, socket) do
+  def handle_event("change", %{"user" => user}, socket) do
     changeset =
       socket.assigns.user
-      |> User.profile_changeset(val["user"])
+      |> User.profile_changeset(user)
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)
@@ -65,7 +73,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
 
   @impl true
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def handle_event("submit", val, socket) do
+  def handle_event("submit", %{"user" => user}, socket) do
     {pfp, thumb} =
       case consume_uploaded_entries(socket, :pfp, fn %{path: path}, entry ->
              {:ok,
@@ -101,11 +109,10 @@ defmodule BanchanWeb.DenizenLive.Edit do
     case Accounts.update_user_profile(
            socket.assigns.current_user,
            socket.assigns.user,
-           Enum.into(val["user"], %{
-             "pfp_img_id" => (pfp && pfp.id) || val["user"]["pfp_image_id"],
-             "pfp_thumb_id" => (thumb && thumb.id) || val["user"]["pfp_thumbnail_id"],
-             "header_img_id" =>
-               (header_image && header_image.id) || val["user"]["header_image_id"]
+           Enum.into(user, %{
+             "pfp_img_id" => (pfp && pfp.id) || user["pfp_image_id"],
+             "pfp_thumb_id" => (thumb && thumb.id) || user["pfp_thumbnail_id"],
+             "header_img_id" => (header_image && header_image.id) || user["header_image_id"]
            })
          ) do
       {:ok, user} ->
@@ -179,7 +186,13 @@ defmodule BanchanWeb.DenizenLive.Edit do
                   <div class="relative">
                     <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70"><i class="fas fa-camera" /></button>
                     {!-- # TODO: For some reason, this hover:cursor-pointer isn't working on Edge but it works on Firefox. :( --}
-                    <LiveFileInput upload={@uploads.header} class="h-8 w-8 opacity-0 hover:cursor-pointer z-40" />
+                    <CropUploadInput
+                      id="header-cropper"
+                      aspect_ratio={1 / 3.5}
+                      title="Crop Header Image"
+                      upload={@uploads.header}
+                      class="h-8 w-8 opacity-0 hover:cursor-pointer z-40"
+                    />
                   </div>
                 </div>
               </div>
@@ -213,7 +226,13 @@ defmodule BanchanWeb.DenizenLive.Edit do
                     <div class="relative">
                       <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70"><i class="fas fa-camera" /></button>
                       {!-- # TODO: For some reason, this hover:cursor-pointer isn't working on Edge but it works on Firefox. :( --}
-                      <LiveFileInput upload={@uploads.pfp} class="h-8 w-8 opacity-0 hover:cursor-pointer z-40" />
+                      <CropUploadInput
+                        id="pfp-cropper"
+                        aspect_ratio={1}
+                        title="Crop Profile Picture"
+                        upload={@uploads.pfp}
+                        class="h-8 w-8 opacity-0 hover:cursor-pointer z-40"
+                      />
                     </div>
                   </div>
                 </div>
