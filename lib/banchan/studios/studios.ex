@@ -331,6 +331,7 @@ defmodule Banchan.Studios do
     end
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp filter_current_user(q, opts) do
     case Keyword.fetch(opts, :current_user) do
       {:ok, %User{} = current_user} ->
@@ -338,7 +339,10 @@ defmodule Banchan.Studios do
         |> join(:inner, [], user in User, on: user.id == ^current_user.id, as: :current_user)
         |> where(
           [s, current_user: current_user, artist: artist],
-          s.mature != true or (s.mature == true and (current_user.mature_ok == true or :admin in current_user.roles or :mod in current_user.roles or artist.id == current_user.id))
+          s.mature != true or
+            (s.mature == true and
+               (current_user.mature_ok == true or :admin in current_user.roles or
+                  :mod in current_user.roles or artist.id == current_user.id))
         )
         |> where(
           [o, current_user: current_user],
@@ -664,6 +668,36 @@ defmodule Banchan.Studios do
   end
 
   ## Updating/Editing
+
+  @doc """
+  Updates the studio profile fields.
+  """
+  def update_studio_settings(actor, studio, current_user_member?, attrs)
+
+  def update_studio_settings(%User{roles: roles} = actor, studio, false, attrs) do
+    if :admin in roles || :mod in roles do
+      update_studio_settings(actor, studio, true, attrs)
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  def update_studio_settings(%User{} = actor, %Studio{} = studio, _, attrs) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = Repo.reload(actor)
+
+        if is_user_in_studio?(actor, studio) || :admin in actor.roles || :mod in actor.roles do
+          studio
+          |> Studio.settings_changeset(attrs)
+          |> Repo.update(returning: true)
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
+  end
 
   @doc """
   Updates the studio profile fields.

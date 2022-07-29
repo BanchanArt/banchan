@@ -94,6 +94,43 @@ defmodule Banchan.StudiosTest do
   end
 
   describe "updating" do
+    test "update studio settings" do
+      user = user_fixture()
+      studio = studio_fixture([user])
+
+      attrs = %{
+        default_terms: "new terms",
+        default_template: "new template"
+      }
+
+      {:error, :unauthorized} =
+        Studios.update_studio_settings(
+          user,
+          studio,
+          false,
+          attrs
+        )
+
+      from_db = Repo.get!(Studio, studio.id) |> Repo.preload(:artists)
+      assert from_db.default_terms != attrs.default_terms
+      assert from_db.default_template != attrs.default_template
+
+      {:ok, studio} =
+        Studios.update_studio_settings(
+          user,
+          studio,
+          true,
+          attrs
+        )
+
+      assert studio.default_terms == "new terms"
+      assert studio.default_template == "new template"
+
+      from_db = Repo.get!(Studio, studio.id) |> Repo.preload(:artists)
+      assert studio.default_terms == from_db.default_terms
+      assert studio.default_template == from_db.default_template
+    end
+
     test "update studio profile" do
       user = user_fixture()
       studio = studio_fixture([user])
@@ -101,9 +138,7 @@ defmodule Banchan.StudiosTest do
       attrs = %{
         name: "new name",
         handle: "new-handle",
-        about: "new about",
-        default_terms: "new terms",
-        default_template: "new template"
+        about: "new about"
       }
 
       {:error, :unauthorized} =
@@ -142,15 +177,11 @@ defmodule Banchan.StudiosTest do
       assert studio.name == "new name"
       assert studio.handle == "new-handle"
       assert studio.about == "new about"
-      assert studio.default_terms == "new terms"
-      assert studio.default_template == "new template"
 
       from_db = Repo.get!(Studio, studio.id) |> Repo.preload(:artists)
       assert studio.name == from_db.name
       assert studio.handle == from_db.handle
       assert studio.about == from_db.about
-      assert studio.default_terms == from_db.default_terms
-      assert studio.default_template == from_db.default_template
     end
 
     test "update_stripe_state" do

@@ -1,6 +1,6 @@
 defmodule BanchanWeb.StudioLive.Settings do
   @moduledoc """
-  Banchan studio profile viewing and editing.
+  Banchan studio settings editing.
   """
   use BanchanWeb, :surface_view
 
@@ -15,14 +15,10 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
-    HiddenInput,
     MarkdownInput,
     MultipleSelect,
     Select,
-    Submit,
-    TagsInput,
-    TextInput,
-    UploadInput
+    Submit
   }
 
   alias BanchanWeb.StudioLive.Components.{Blocklist, StudioLayout}
@@ -40,25 +36,10 @@ defmodule BanchanWeb.StudioLive.Settings do
 
     {:ok,
      assign(socket,
-       tags: socket.assigns.studio.tags,
-       changeset: Studio.profile_changeset(socket.assigns.studio, %{}),
+       changeset: Studio.settings_changeset(socket.assigns.studio, %{}),
        currencies: [{:"Currencies...", nil} | currencies],
-       remove_card: false,
-       remove_header: false,
        subscribed?:
          Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.studio)
-     )
-     |> allow_upload(:card_image,
-       # TODO: Be less restrictive here
-       accept: ~w(.jpg .jpeg .png),
-       max_entries: 1,
-       max_file_size: 10_000_000
-     )
-     |> allow_upload(:header_image,
-       # TODO: Be less restrictive here
-       accept: ~w(.jpg .jpeg .png),
-       max_entries: 1,
-       max_file_size: 10_000_000
      )}
   end
 
@@ -80,49 +61,17 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_event("submit", val, socket) do
-    card_image =
-      consume_uploaded_entries(socket, :card_image, fn %{path: path}, entry ->
-        {:ok,
-         Studios.make_card_image!(
-           socket.assigns.current_user,
-           path,
-           socket.assigns.current_user_member? || :admin in socket.assigns.current_user.roles ||
-             :mod in socket.assigns.current_user.roles,
-           entry.client_type,
-           entry.client_name
-         )}
-      end)
-      |> Enum.at(0)
-
-    header_image =
-      consume_uploaded_entries(socket, :header_image, fn %{path: path}, entry ->
-        {:ok,
-         Studios.make_header_image!(
-           socket.assigns.current_user,
-           path,
-           socket.assigns.current_user_member? || :admin in socket.assigns.current_user.roles ||
-             :mod in socket.assigns.current_user.roles,
-           entry.client_type,
-           entry.client_name
-         )}
-      end)
-      |> Enum.at(0)
-
-    case Studios.update_studio_profile(
+    case Studios.update_studio_settings(
            socket.assigns.current_user,
            socket.assigns.studio,
            socket.assigns.current_user_member?,
-           Enum.into(val["studio"], %{
-             "card_img_id" => (card_image && card_image.id) || val["studio"]["card_image_id"],
-             "header_img_id" =>
-               (header_image && header_image.id) || val["studio"]["header_image_id"]
-           })
+           val["studio"]
          ) do
       {:ok, studio} ->
         socket =
           socket
-          |> assign(changeset: Studio.profile_changeset(studio, %{}), studio: studio)
-          |> put_flash(:info, "Profile updated")
+          |> assign(changeset: Studio.settings_changeset(studio, %{}), studio: studio)
+          |> put_flash(:info, "Settings updated")
           |> push_redirect(to: Routes.studio_settings_path(Endpoint, :show, studio.handle))
 
         {:noreply, socket}
@@ -143,29 +92,11 @@ defmodule BanchanWeb.StudioLive.Settings do
   def handle_event("change", val, socket) do
     changeset =
       socket.assigns.studio
-      |> Studio.profile_changeset(val["studio"])
+      |> Studio.settings_changeset(val["studio"])
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)
     {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("cancel_card_upload", %{"ref" => ref}, socket) do
-    {:noreply, socket |> cancel_upload(:card_image, ref)}
-  end
-
-  @impl true
-  def handle_event("cancel_header_upload", %{"ref" => ref}, socket) do
-    {:noreply, socket |> cancel_upload(:header_image, ref)}
-  end
-
-  def handle_event("remove_card", _, socket) do
-    {:noreply, assign(socket, remove_card: true)}
-  end
-
-  def handle_event("remove_header", _, socket) do
-    {:noreply, assign(socket, remove_header: true)}
   end
 
   def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
@@ -212,15 +143,8 @@ defmodule BanchanWeb.StudioLive.Settings do
 
           <div class="divider" />
 
-          <h2 class="text-xl py-6">Edit Studio Profile</h2>
+          <h2 class="text-xl py-6">Edit Studio Settings</h2>
           <Form class="flex flex-col gap-2" for={@changeset} change="change" submit="submit">
-            <TagsInput
-              id="studio_tags"
-              info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
-              name={:tags}
-            />
-            <TextInput name={:name} info="Display name for studio" icon="user" opts={required: true} />
-            <TextInput name={:handle} icon="at" opts={required: true} />
             <Checkbox
               name={:mature}
               label="Mature"
@@ -237,78 +161,6 @@ defmodule BanchanWeb.StudioLive.Settings do
               info="Available currencies for invoicing purposes."
               options={@currencies}
               opts={required: true}
-            />
-            <div class="relative">
-              {#if Enum.empty?(@uploads.card_image.entries) && (@remove_card || !(@studio && @studio.card_img_id))}
-                <HiddenInput name={:card_image_id} value={nil} />
-                <div class="aspect-video bg-base-300 w-full" />
-              {#elseif !Enum.empty?(@uploads.card_image.entries)}
-                <button
-                  type="button"
-                  phx-value-ref={(@uploads.card_image.entries |> Enum.at(0)).ref}
-                  class="btn btn-xs btn-circle absolute right-2 top-2"
-                  :on-click="cancel_card_upload"
-                >✕</button>
-                {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
-                  class: "object-cover aspect-video rounded-xl w-full"
-                )}
-              {#else}
-                <button
-                  type="button"
-                  class="btn btn-xs btn-circle absolute right-2 top-2"
-                  :on-click="remove_card"
-                >✕</button>
-                <HiddenInput name={:card_image_id} value={@studio.card_img_id} />
-                <img
-                  class="object-cover aspect-video rounded-xl w-full"
-                  src={Routes.public_image_path(Endpoint, :image, :studio_card_img, @studio.card_img_id)}
-                />
-              {/if}
-            </div>
-            <UploadInput
-              label="Card Image"
-              hide_list
-              upload={@uploads.card_image}
-              cancel="cancel_card_upload"
-            />
-            <div class="relative">
-              {#if Enum.empty?(@uploads.header_image.entries) &&
-                  (@remove_header || !(@studio && @studio.header_img_id))}
-                <HiddenInput name={:header_image_id} value={nil} />
-                <div class="aspect-header-image bg-base-300 w-full" />
-              {#elseif !Enum.empty?(@uploads.header_image.entries)}
-                <button
-                  type="button"
-                  phx-value-ref={(@uploads.header_image.entries |> Enum.at(0)).ref}
-                  class="btn btn-xs btn-circle absolute right-2 top-2"
-                  :on-click="cancel_header_upload"
-                >✕</button>
-                {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.header_image.entries, 0),
-                  class: "object-cover aspect-header-image rounded-xl w-full"
-                )}
-              {#else}
-                <button
-                  type="button"
-                  class="btn btn-xs btn-circle absolute right-2 top-2"
-                  :on-click="remove_header"
-                >✕</button>
-                <HiddenInput name={:header_image_id} value={@studio.header_img_id} />
-                <img
-                  class="object-cover aspect-header-image rounded-xl w-full"
-                  src={Routes.public_image_path(Endpoint, :image, :studio_header_img, @studio.header_img_id)}
-                />
-              {/if}
-            </div>
-            <UploadInput
-              label="Header Image"
-              hide_list
-              upload={@uploads.header_image}
-              cancel="cancel_header_upload"
-            />
-            <MarkdownInput
-              id="about"
-              info="Displayed in the 'About' page. The first few dozen characters will also be displayed as the description in studio cards."
-              name={:about}
             />
             <MarkdownInput
               id="default-terms"

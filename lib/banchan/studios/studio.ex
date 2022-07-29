@@ -70,6 +70,23 @@ defmodule Banchan.Studios.Studio do
     |> validate_handle_unique(:handle)
   end
 
+  def settings_changeset(studio, attrs) do
+    studio
+    |> cast(attrs, [
+      :mature,
+      :default_currency,
+      :payment_currencies,
+      :default_terms,
+      :default_template
+    ])
+    |> validate_required([:default_currency, :payment_currencies])
+    |> validate_markdown(:default_terms)
+    |> validate_markdown(:default_template)
+    |> validate_length(:default_terms, max: 1500)
+    |> validate_length(:default_template, max: 1500)
+    |> validate_default_currency(:default_currency, :payment_currencies)
+  end
+
   @doc false
   def profile_changeset(studio, attrs) do
     attrs =
@@ -84,26 +101,16 @@ defmodule Banchan.Studios.Studio do
       :name,
       :handle,
       :about,
-      :mature,
       :tags,
-      :default_currency,
-      :payment_currencies,
-      :default_terms,
-      :default_template,
       :card_img_id,
       :header_img_id
     ])
-    |> validate_required([:name, :handle, :default_currency, :payment_currencies])
+    |> validate_required([:name, :handle])
     |> validate_markdown(:about)
-    |> validate_markdown(:default_terms)
-    |> validate_markdown(:default_template)
     |> validate_length(:name, min: 3, max: 32)
     |> validate_length(:handle, min: 3, max: 16)
     |> validate_length(:about, max: 1500)
-    |> validate_length(:default_terms, max: 1500)
-    |> validate_length(:default_template, max: 1500)
     |> validate_tags()
-    |> validate_default_currency(:default_currency, :payment_currencies)
     |> validate_handle_unique(:handle)
     |> foreign_key_constraint(:card_img_id)
     |> foreign_key_constraint(:header_img_id)

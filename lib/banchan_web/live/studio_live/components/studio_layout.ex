@@ -125,6 +125,13 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                   end}
                 </Button>
               {/if}
+              {#if @current_user_member? || :admin in @current_user.roles || :mod in @current_user.roles}
+                <LiveRedirect
+                  label="Edit Profile"
+                  to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}
+                  class="btn btn-sm btn-primary btn-outline rounded-full my-2 px-2 py-0 grow-0"
+                />
+              {/if}
             </div>
             <div :if={!Enum.empty?(@studio.tags)} class="my-2 flex flex-row flex-wrap gap-1">
               {#for tag <- @studio.tags}
