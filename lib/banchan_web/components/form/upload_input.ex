@@ -6,9 +6,13 @@ defmodule BanchanWeb.Components.Form.UploadInput do
 
   alias Surface.Components.LiveFileInput
 
+  alias BanchanWeb.Components.Form.CropUploadInput
+
   prop upload, :struct, required: true
   prop label, :string, default: "Upload attachments"
   prop cancel, :event, required: true
+  prop crop, :boolean, default: false
+  prop aspect_ratio, :number
   prop class, :css_class
   prop hide_list, :boolean
 
@@ -42,7 +46,18 @@ defmodule BanchanWeb.Components.Form.UploadInput do
       <div class="absolute">
         <span class="block font-normal">{@label} <i class="fas fa-file-upload" /></span>
       </div>
-      <LiveFileInput class="h-full w-full opacity-0 hover:cursor-pointer" upload={@upload} />
+      {#if @crop}
+        <CropUploadInput
+          id={"#{System.unique_integer()}-cropper"}
+          aspect_ratio={@aspect_ratio}
+          upload={@upload}
+          target={@cancel.target}
+          title={"Crop " <> @label}
+          class="h-full w-full opacity-0 hover:cursor-pointer"
+        />
+      {#else}
+        <LiveFileInput class="h-full w-full opacity-0 hover:cursor-pointer" upload={@upload} />
+      {/if}
     </div>
     """
   end

@@ -97,7 +97,7 @@ defmodule BanchanWeb.StudioLive.Edit do
           socket
           |> assign(changeset: Studio.profile_changeset(studio, %{}), studio: studio)
           |> put_flash(:info, "Profile updated")
-          |> push_redirect(to: Routes.studio_shop_path(Endpoint, :shop, studio.handle))
+          |> push_redirect(to: Routes.studio_shop_path(Endpoint, :show, studio.handle))
 
         {:noreply, socket}
 
@@ -200,6 +200,8 @@ defmodule BanchanWeb.StudioLive.Edit do
             <UploadInput
               label="Card Image"
               hide_list
+              crop
+              aspect_ratio={9 / 16}
               upload={@uploads.card_image}
               cancel="cancel_card_upload"
             />
@@ -233,6 +235,8 @@ defmodule BanchanWeb.StudioLive.Edit do
             </div>
             <UploadInput
               label="Header Image"
+              crop
+              aspect_ratio={1 / 3.5}
               hide_list
               upload={@uploads.header_image}
               cancel="cancel_header_upload"
