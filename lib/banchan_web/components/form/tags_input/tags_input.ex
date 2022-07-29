@@ -31,7 +31,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
     socket =
       socket
       |> assign(tags: socket.assigns.tags ++ [tag], results: [], menu_selected: nil)
-      |> push_event("change", %{})
+      |> push_event("change", %{id: socket.assigns.id <> "-wrapper"})
 
     {:noreply, socket}
   end
@@ -48,14 +48,14 @@ defmodule BanchanWeb.Components.Form.TagsInput do
     socket =
       socket
       |> assign(tags: socket.assigns.tags ++ [tag], results: [], menu_selected: nil)
-      |> push_event("change", %{})
+      |> push_event("change", %{id: socket.assigns.id <> "-wrapper"})
 
     {:noreply, socket}
   end
 
   def handle_event("handle_input", %{"key" => "Backspace", "value" => ""}, socket) do
     if Enum.empty?(socket.assigns.tags) do
-      {:noreply, socket}
+      {:noreply, socket |> assign(results: [], menu_selected: nil)}
     else
       socket =
         socket
@@ -64,7 +64,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
           results: [],
           menu_selected: nil
         )
-        |> push_event("change", %{})
+        |> push_event("change", %{id: socket.assigns.id <> "-wrapper"})
 
       {:noreply, socket}
     end
@@ -105,9 +105,13 @@ defmodule BanchanWeb.Components.Form.TagsInput do
   end
 
   def handle_event("autocomplete", %{"value" => value}, socket) do
-    {:noreply,
-     socket
-     |> assign(results: Tags.list_tags(value <> "", page_size: 5).entries, menu_selected: nil)}
+    if is_nil(value) do
+      {:noreply, socket |> assign(results: [], menu_selected: nil)}
+    else
+      {:noreply,
+       socket
+       |> assign(results: Tags.list_tags(value <> "", page_size: 5), menu_selected: nil)}
+    end
   end
 
   def handle_event("remove", %{"index" => index}, socket) do
@@ -116,14 +120,14 @@ defmodule BanchanWeb.Components.Form.TagsInput do
     socket =
       socket
       |> assign(tags: List.delete_at(socket.assigns.tags, index))
-      |> push_event("change", %{})
+      |> push_event("change", %{id: socket.assigns.id <> "-wrapper"})
 
     {:noreply, socket}
   end
 
   def render(assigns) do
     ~F"""
-    <div :hook="TagsInput">
+    <div id={@id <> "-wrapper"} :hook="TagsInput">
       <Field class="field" name={@name}>
         {#if @show_label}
           <InputContext assigns={assigns} :let={form: form, field: field}>
