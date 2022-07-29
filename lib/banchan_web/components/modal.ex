@@ -6,6 +6,7 @@ defmodule BanchanWeb.Components.Modal do
 
   prop big, :boolean, default: false
   prop class, :css_class
+  prop always_render_body, :boolean, default: false
 
   data modal_open, :boolean, default: false
 
@@ -44,6 +45,7 @@ defmodule BanchanWeb.Components.Modal do
              built-in one.
           --}
       <div
+        :if={@always_render_body || @modal_open}
         :on-click="nothing"
         class={"modal-box relative", "sm:w-11/12 sm:max-w-5xl lg:w-8/12": @big}
       >

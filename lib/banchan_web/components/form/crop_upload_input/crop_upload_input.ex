@@ -35,7 +35,7 @@ defmodule BanchanWeb.Components.Form.CropUploadInput do
     >
       <input type="file" :on-change="file_chosen" class={"file-input", @class} />
       <LiveFileInput upload={@upload} class="hidden" />
-      <Modal id={@id <> "-modal"}>
+      <Modal id={@id <> "-modal"} always_render_body>
         <:title>{@title}</:title>
         <div phx-update="ignore" class="cropper-preview" />
         <:action>
