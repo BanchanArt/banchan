@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.Components.{Button, Layout, ReportModal}
+  alias BanchanWeb.Components.{Avatar, Button, Layout, ReportModal}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{FeaturedToggle, TabButton}
 
@@ -138,21 +138,30 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 <div class="badge badge-lg gap-2 badge-primary cursor-default">{tag}</div>
               {/for}
             </div>
-            <div>
-              <span class="font-bold">
-                {#if @followers > 9999}
-                  {Number.SI.number_to_si(@followers)}
-                {#else}
-                  {Number.Delimit.number_to_delimited(@followers, precision: 0)}
-                {/if}
-              </span>
-              <span>
-                {#if @followers == 1}
-                  Follower
-                {#else}
-                  Followers
-                {/if}
-              </span>
+            <div class="flex flex-row items-center gap-1">
+              <span>By</span>
+              <div class="avatar-group transition-all -space-x-6 hover:space-x-0">
+                {#for member <- @studio.artists}
+                  <Avatar user={member} class="w-8" />
+                {/for}
+              </div>
+              <div class="p-2">|</div>
+              <div>
+                <span class="font-bold">
+                  {#if @followers > 9999}
+                    {Number.SI.number_to_si(@followers)}
+                  {#else}
+                    {Number.Delimit.number_to_delimited(@followers, precision: 0)}
+                  {/if}
+                </span>
+                <span>
+                  {#if @followers == 1}
+                    Follower
+                  {#else}
+                    Followers
+                  {/if}
+                </span>
+              </div>
             </div>
           </div>
           <div class="overflow-auto min-w-screen">
