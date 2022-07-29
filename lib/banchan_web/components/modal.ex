@@ -44,7 +44,6 @@ defmodule BanchanWeb.Components.Modal do
              built-in one.
           --}
       <div
-        :if={@modal_open}
         :on-click="nothing"
         class={"modal-box relative", "sm:w-11/12 sm:max-w-5xl lg:w-8/12": @big}
       >
