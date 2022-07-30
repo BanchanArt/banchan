@@ -21,19 +21,21 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   data dragging, :boolean, default: false
 
   def update(assigns, socket) do
-    val =
-      Phoenix.HTML.Form.input_value(
-        Map.get(assigns[:__context__], {Surface.Components.Form, :form}),
-        assigns.name
-      )
-
     socket = socket |> assign(assigns)
 
-    # NB(@zkat): This only ever gets picked up by the client until the user
-    # starts interacting with the editor input. See the note in the hook for more details.
-    {:ok,
-     socket
-     |> push_event("markdown-input-updated", %{id: socket.assigns.id <> "-hook", value: val || ""})}
+    # NB(zkat): Disabled for now. See comment in JS hook.
+    #
+    # val =
+    #   Phoenix.HTML.Form.input_value(
+    #     Map.get(assigns[:__context__], {Surface.Components.Form, :form}),
+    #     assigns.name
+    #   )
+    #
+    # {:ok,
+    #  socket
+    #  |> push_event("markdown-input-updated", %{id: socket.assigns.id <> "-hook", value: val || ""})}
+
+    {:ok, socket}
   end
 
   def handle_event("dragstart", _, socket) do
