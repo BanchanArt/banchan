@@ -142,6 +142,7 @@ defmodule BanchanWeb.DenizenLive.Index do
               <tr>
                 <th>User</th>
                 <th>Display Name</th>
+                <th>Roles</th>
                 <th>Signed Up On</th>
               </tr>
             </thead>
@@ -149,6 +150,7 @@ defmodule BanchanWeb.DenizenLive.Index do
               <tr>
                 <td class="flex flex-row items-center gap-2"><Avatar class="w-4" user={user} /> <UserHandle user={user} /></td>
                 <td>{user.name}</td>
+                <td>{user.roles |> Enum.sort() |> Enum.join(", ")}</td>
                 <td>
                   {user.inserted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}
                 </td>
