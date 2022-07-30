@@ -61,6 +61,15 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     socket = socket |> assign(assigns)
 
     socket =
+      socket
+      |> assign(remove_card: false)
+      |> assign(
+        changeset:
+          old_assigns[:changeset] ||
+            Offering.changeset(socket.assigns.offering || %Offering{}, %{})
+      )
+
+    socket =
       if is_nil(assigns[:gallery_images]) &&
            old_assigns[:gallery_images] == assigns[:gallery_images] do
         socket
@@ -76,16 +85,14 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         |> Enum.reduce(socket, fn {:live, entry}, socket ->
           socket |> cancel_upload(:gallery_images, entry.ref)
         end)
+        |> assign(
+          changeset:
+            socket.assigns.changeset |> Ecto.Changeset.put_change(:gallery_imgs_changed, true)
+        )
       end
 
     {:ok,
      socket
-     |> assign(remove_card: false)
-     |> assign(
-       changeset:
-         old_assigns[:changeset] ||
-           Offering.changeset(socket.assigns.offering || %Offering{}, %{})
-     )
      |> assign(
        gallery_images:
          if socket.assigns.offering && is_nil(assigns[:gallery_images]) do
@@ -146,6 +153,13 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     offering =
       if target == ["offering", "name"] do
         %{offering | "type" => slugify(offering["name"])}
+      else
+        offering
+      end
+
+    offering =
+      if target == ["offering", "gallery_images"] do
+        %{offering | "gallery_imgs_changed" => true}
       else
         offering
       end
@@ -480,7 +494,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           />
         </Collapse>
         <div class="pt-4 flex flex-row">
-          <Submit label="Save" />
+          <Submit changeset={@changeset} label="Save" />
           {#if @changeset.data.id}
             <Button class="btn-error" click="archive" label="Archive" />
           {/if}

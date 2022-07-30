@@ -35,6 +35,8 @@ defmodule Banchan.Offerings.Offering do
     belongs_to :studio, Studio
     belongs_to :card_img, Upload, on_replace: :nilify, type: :binary_id
 
+    field :gallery_imgs_changed, :boolean, virtual: true, default: false
+
     has_many :gallery_imgs, GalleryImage,
       on_replace: :delete_if_exists,
       preload_order: [asc: :index]
@@ -68,7 +70,8 @@ defmodule Banchan.Offerings.Offering do
       :template,
       :tags,
       :mature,
-      :card_img_id
+      :card_img_id,
+      :gallery_imgs_changed
     ])
     |> cast_assoc(:options)
     |> validate_format(:type, ~r/^[0-9a-z-]+$/,
