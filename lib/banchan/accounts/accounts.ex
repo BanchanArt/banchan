@@ -22,6 +22,12 @@ defmodule Banchan.Accounts do
   @doc """
   General paginated User-listing query.
 
+  ## Filter
+
+  The second item is a `%UserFilter{}` struct whose values affect the query in the following ways:
+
+    * `:query` - Websearch-style full text search query for finding the user based on its search_vector.
+
   ## Options
 
     * `:page_size` - The number of users to return per page.
