@@ -88,19 +88,19 @@ defmodule BanchanWeb.HomeLive do
             class="rounded-b-xl aspect-header-image h-full w-full"
           >
             {#for studio <- @featured_studios.entries}
-              <Carousel.Slide class="carousel-item w-full aspect-header-image relative">
+              <Carousel.Slide class="carousel-item w-full aspect-header-image">
                 <LiveRedirect
-                  class="w-full h-full aspect-header-image"
+                  class="w-full h-full aspect-header-image relative"
                   to={Routes.studio_shop_path(Endpoint, :show, studio.handle)}
                 >
                   <img
                     class="object-cover aspect-header-image w-full"
                     src={Routes.public_image_path(Endpoint, :image, :studio_header_img, studio.header_img_id)}
                   />
+                  <div class="absolute top-2 left-2 md:top-6 md:left-6 text-3xl sm:text-3xl md:text-6xl font-bold text-white text-shadow-lg shadow-black">
+                    {studio.name}
+                  </div>
                 </LiveRedirect>
-                <div class="absolute top-2 left-2 md:top-6 md:left-6 text-3xl sm:text-3xl md:text-6xl font-bold text-white">
-                  {studio.name}
-                </div>
               </Carousel.Slide>
             {/for}
           </Carousel>
