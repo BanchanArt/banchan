@@ -11,7 +11,7 @@ defmodule BanchanWeb.HomeLive do
   alias Surface.Components.Form.{Field, Submit}
   alias Surface.Components.Form.TextInput
 
-  alias BanchanWeb.Components.{Carousel, Layout, StudioCard}
+  alias BanchanWeb.Components.{Carousel, Layout, StudioCard, Tag}
   alias BanchanWeb.StudioLive.Components.OfferingCard
 
   @impl true
@@ -35,8 +35,24 @@ defmodule BanchanWeb.HomeLive do
         order_by: :homepage
       )
 
+    categories = [
+      "fanart",
+      "book art",
+      "OC art",
+      "vtuber model",
+      "twitch emote",
+      "illustration",
+      "YCH",
+      "adopt"
+    ]
+
     {:ok,
-     assign(socket, offerings: offerings, studios: studios, featured_studios: featured_studios)}
+     assign(socket,
+       offerings: offerings,
+       studios: studios,
+       featured_studios: featured_studios,
+       categories: categories
+     )}
   end
 
   @impl true
@@ -90,7 +106,7 @@ defmodule BanchanWeb.HomeLive do
           </Carousel>
         </div>
       </:hero>
-      <div class="flex flex-col">
+      <div class="flex flex-col gap-2">
         <Form for={:search} submit="search" class="w-full">
           <div class="flex flex-row flex-nowrap w-full md:w-content max-w-xl mx-auto">
             <Field name={:query} class="w-full">
@@ -105,6 +121,11 @@ defmodule BanchanWeb.HomeLive do
             </Submit>
           </div>
         </Form>
+        <div class="flex flex-row flex-wrap gap-2 mx-auto justify-center">
+          {#for cat <- @categories}
+            <Tag tag={cat} />
+          {/for}
+        </div>
         <div class="homepage-offerings">
           <div class="pt-6 px-2 flex flex-row items-end">
             <div class="text-xl grow">

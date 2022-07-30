@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.Components.{Avatar, Button, Layout, ReportModal}
+  alias BanchanWeb.Components.{Avatar, Button, Layout, ReportModal, Tag}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{FeaturedToggle, TabButton}
 
@@ -135,7 +135,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
             </div>
             <div :if={!Enum.empty?(@studio.tags)} class="my-2 flex flex-row flex-wrap gap-1">
               {#for tag <- @studio.tags}
-                <div class="badge badge-lg gap-2 badge-primary cursor-default">{tag}</div>
+                <Tag tag={tag} />
               {/for}
             </div>
             <div class="flex flex-row items-center gap-1">

@@ -10,7 +10,16 @@ defmodule BanchanWeb.DenizenLive.Show do
 
   alias Surface.Components.{LivePatch, LiveRedirect}
 
-  alias BanchanWeb.Components.{Avatar, InfiniteScroll, Layout, Modal, ReportModal, StudioCard}
+  alias BanchanWeb.Components.{
+    Avatar,
+    InfiniteScroll,
+    Layout,
+    Modal,
+    ReportModal,
+    StudioCard,
+    Tag
+  }
+
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -226,7 +235,7 @@ defmodule BanchanWeb.DenizenLive.Show do
             class="mx-6 my-4 flex flex-row flex-wrap gap-1"
           >
             {#for tag <- @user.tags}
-              <div class="badge badge-lg gap-2 badge-primary cursor-default">{tag}</div>
+              <Tag tag={tag} />
             {/for}
           </div>
           <div :if={!@user.disable_info} class="mx-6 my-4 flex flex-row flex-wrap gap-4">

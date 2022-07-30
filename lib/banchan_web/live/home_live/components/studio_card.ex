@@ -6,7 +6,7 @@ defmodule BanchanWeb.Components.StudioCard do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.Components.Card
+  alias BanchanWeb.Components.{Card, Tag}
   alias BanchanWeb.Endpoint
 
   prop studio, :struct, required: true
@@ -36,7 +36,7 @@ defmodule BanchanWeb.Components.StudioCard do
           </:header_aside>
           <ul class="my-2 flex flex-row flex-wrap gap-1">
             {#for tag <- @studio.tags}
-              <div class="badge badge-lg badge-primary">{tag}</div>
+              <Tag tag={tag} />
             {/for}
           </ul>
         </Card>
