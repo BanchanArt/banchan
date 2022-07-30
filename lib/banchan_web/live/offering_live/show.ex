@@ -13,7 +13,17 @@ defmodule BanchanWeb.OfferingLive.Show do
   alias Surface.Components.LiveRedirect
 
   alias BanchanWeb.CommissionLive.Components.Summary
-  alias BanchanWeb.Components.{Button, Layout, Lightbox, Markdown, MasonryGallery, ReportModal, Tag}
+
+  alias BanchanWeb.Components.{
+    Button,
+    Layout,
+    Lightbox,
+    Markdown,
+    MasonryGallery,
+    ReportModal,
+    Tag
+  }
+
   alias BanchanWeb.StudioLive.Components.OfferingCard
 
   @impl true

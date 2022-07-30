@@ -108,11 +108,13 @@ defmodule BanchanWeb.DiscoverLive.Index do
 
   @impl true
   def render(assigns) do
-    params = if assigns.query && assigns.query != "" do
-      %{q: assigns.query}
-    else
-      %{}
-    end
+    params =
+      if assigns.query && assigns.query != "" do
+        %{q: assigns.query}
+      else
+        %{}
+      end
+
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <h1 class="text-3xl">Discover</h1>

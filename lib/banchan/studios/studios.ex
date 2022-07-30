@@ -288,6 +288,17 @@ defmodule Banchan.Studios do
   ## Options
 
     * `:include_disabled?` - Whether to include disabled studios in the results.
+    * `:with_member` - Filter studios to ones with this user as a member/artist.
+    * `:current_user` - When given, applies various user-specific filters, like muted words, blocks, and mature content filtering.
+    * `:include_pending?` - When true, includes studios that are pending.
+    * `:query` - Webquery-style full text search applied to the Studio's search_vector.
+    * `:order_by` - Applies some ordering/filtering to the results. Accepts the following values:
+      * `:oldest` - Order by the oldest studios first.
+      * `:newest` - Order by the newest studios first.
+      * `:followers` - Order by the most followers first.
+      * `:homepage` - Filter/order by homepage relevance.
+      * `:featured` - Filter/order by whether a studio is marked as featured.
+    * `:with_follower` - Filter studios to ones with this user as a follower.
   """
   def list_studios(opts \\ []) do
     from(
