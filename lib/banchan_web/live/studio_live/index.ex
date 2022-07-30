@@ -15,6 +15,8 @@ defmodule BanchanWeb.StudioLive.Index do
     if :artist in socket.assigns.current_user.roles do
       studios =
         Studios.list_studios(
+          with_member: socket.assigns.current_user,
+          current_user: socket.assigns.current_user,
           page_size: 24,
           order_by: :newest
         )
