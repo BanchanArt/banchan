@@ -31,7 +31,7 @@ defmodule BanchanWeb.Components.Nav do
         </label>
       </div>
 
-      <div class="flex-1">
+      <div class="flex-1 font-semibold">
         <LiveRedirect to={Routes.home_path(Endpoint, :index)}>
           <img
             src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
