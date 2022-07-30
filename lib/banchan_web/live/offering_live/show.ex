@@ -13,7 +13,7 @@ defmodule BanchanWeb.OfferingLive.Show do
   alias Surface.Components.LiveRedirect
 
   alias BanchanWeb.CommissionLive.Components.Summary
-  alias BanchanWeb.Components.{Button, Layout, Lightbox, Markdown, MasonryGallery, ReportModal}
+  alias BanchanWeb.Components.{Button, Layout, Lightbox, Markdown, MasonryGallery, ReportModal, Tag}
   alias BanchanWeb.StudioLive.Components.OfferingCard
 
   @impl true
@@ -199,11 +199,11 @@ defmodule BanchanWeb.OfferingLive.Show do
           <Summary line_items={@line_items} offering={@offering} studio={@studio} />
           {#if !Enum.empty?(@offering.tags)}
             <h3 class="pt-2 text-lg">Tags</h3>
-            <ul class="flex flex-row flex-wrap gap-1">
+            <div class="flex flex-row flex-wrap gap-1">
               {#for tag <- @offering.tags}
-                <li class="badge badge-sm badge-primary p-2 cursor-default overflow-hidden">{tag}</li>
+                <Tag tag={tag} />
               {/for}
-            </ul>
+            </div>
             <div class="divider" />
           {/if}
           <div class="flex flex-row justify-end gap-2">
