@@ -66,7 +66,20 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
       |> assign(
         changeset:
           old_assigns[:changeset] ||
-            Offering.changeset(socket.assigns.offering || %Offering{}, %{})
+            Offering.changeset(
+              socket.assigns.offering ||
+                %Offering{
+                  options: [
+                    %OfferingOption{
+                      name: "Base Price",
+                      price: Money.new(0, socket.assigns.studio.default_currency),
+                      default: true,
+                      sticky: true
+                    }
+                  ]
+                },
+              %{}
+            )
       )
 
     socket =
