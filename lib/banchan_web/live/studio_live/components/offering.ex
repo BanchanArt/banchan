@@ -460,14 +460,32 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                   </:header>
                   <TextInput name={:name} info="Name of the option." opts={required: true} />
                   <TextArea name={:description} info="Description for the option." opts={required: true} />
-                  <Select
-                    name={:currency}
-                    info="Currency for the price."
-                    options={@studio.payment_currencies}
-                    selected={@studio.default_currency}
-                    opts={required: true}
-                  />
-                  <TextInput name={:price} info="Quoted price for adding this option." opts={required: true} />
+                  <div class="flex flex-row gap-2 items-center py-2">
+                    {#case @studio.payment_currencies}
+                      {#match [_]}
+                        <div class="flex flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
+                        <HiddenInput name={:currency} value={@studio.default_currency} />
+                      {#match _}
+                        <div class="flex-basis-1/4">
+                          <Select
+                            name={:currency}
+                            show_label={false}
+                            options={@studio.payment_currencies
+                            |> Enum.map(&{"#{to_string(&1)}#{Money.Currency.symbol(&1)}", &1})}
+                            selected={@studio.default_currency}
+                            opts={required: true}
+                          />
+                        </div>
+                    {/case}
+                    <div class="grow">
+                      <TextInput
+                        name={:price}
+                        info="Quoted price for adding this option."
+                        show_label={false}
+                        opts={required: true, placeholder: "12.34"}
+                      />
+                    </div>
+                  </div>
                   <Checkbox
                     name={:multiple}
                     info="Allow multiple instances of this option at the same time."
