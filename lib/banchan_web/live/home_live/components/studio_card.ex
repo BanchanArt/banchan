@@ -36,7 +36,7 @@ defmodule BanchanWeb.Components.StudioCard do
           </:header_aside>
           <ul class="my-2 flex flex-row flex-wrap gap-1">
             {#for tag <- @studio.tags}
-              <Tag tag={tag} />
+              <Tag link={false} tag={tag} />
             {/for}
           </ul>
         </Card>
