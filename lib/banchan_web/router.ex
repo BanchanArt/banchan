@@ -102,6 +102,7 @@ defmodule BanchanWeb.Router do
 
       live("/offerings/:handle/:offering_type/edit", StudioLive.Offerings.Edit, :edit)
 
+      live("/studios", StudioLive.Index, :index)
       live("/studios/new", StudioLive.New, :new)
       live("/studios/:handle/edit", StudioLive.Edit, :edit)
       live("/studios/:handle/settings", StudioLive.Settings, :show)

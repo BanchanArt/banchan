@@ -151,10 +151,10 @@ defmodule BanchanWeb.Components.Layout do
                 </LiveRedirect>
               </li>
               <li :if={:artist in @current_user.roles}>
-                <LiveRedirect to={Routes.studio_new_path(Endpoint, :new)}>
+                <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
                   <span>
                     <i class="fas fa-palette" />
-                    Create a Studio
+                    Your Studios
                   </span>
                 </LiveRedirect>
               </li>
