@@ -41,6 +41,7 @@ defmodule Banchan.Accounts do
       as: :actor,
       on: a.id == ^actor.id,
       where: :admin in a.roles or :mod in a.roles,
+      where: is_nil(u.deactivated_at),
       order_by: [desc: u.inserted_at]
     )
     |> filter_query(filter)
@@ -73,7 +74,9 @@ defmodule Banchan.Accounts do
       iex> get_user!(456)
       ** (Ecto.NoResultsError)
   """
-  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload(:disable_info)
+  def get_user!(id) do
+    Repo.get!(User, id) |> Repo.preload(:disable_info)
+  end
 
   @doc """
   Gets a user by email.
@@ -146,7 +149,7 @@ defmodule Banchan.Accounts do
     from(
       us in User,
       join: u in assoc(us, :pfp_img),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(us.deactivated_at),
       select: u
     )
     |> Repo.one!()
@@ -159,7 +162,7 @@ defmodule Banchan.Accounts do
     from(
       us in User,
       join: u in assoc(us, :pfp_thumb),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(us.deactivated_at),
       select: u
     )
     |> Repo.one!()
@@ -172,10 +175,20 @@ defmodule Banchan.Accounts do
     from(
       us in User,
       join: u in assoc(us, :header_img),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(us.deactivated_at),
       select: u
     )
     |> Repo.one!()
+  end
+
+  @doc """
+  Utility for determining whether an actor can modify a target user. Used for
+  allowing admins to modify user-only stuff.
+  """
+  def can_modify_user?(%User{} = actor, %User{} = target) do
+    actor.id == target.id ||
+      :admin in actor.roles ||
+      (:mod in actor.roles && :admin not in target.roles)
   end
 
   ## User registration
@@ -446,15 +459,18 @@ defmodule Banchan.Accounts do
 
                     _ ->
                       {:ok, nil}
-                  end) do
-            %DisableHistory{
-              user_id: user.id,
-              disabled_by_id: actor.id,
-              disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-              lifting_job_id: job && job.id
-            }
-            |> DisableHistory.disable_changeset(attrs)
-            |> Repo.insert()
+                  end),
+               {:ok, disable_history} <-
+                 %DisableHistory{
+                   user_id: user.id,
+                   disabled_by_id: actor.id,
+                   disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+                   lifting_job_id: job && job.id
+                 }
+                 |> DisableHistory.disable_changeset(attrs)
+                 |> Repo.insert(),
+               {:ok, _} <- logout_user(user) do
+            {:ok, disable_history}
           end
         end)
 
@@ -503,16 +519,6 @@ defmodule Banchan.Accounts do
     else
       {:error, :unauthorized}
     end
-  end
-
-  @doc """
-  Utility for determining whether an actor can modify a target user. Used for
-  allowing admins to modify user-only stuff.
-  """
-  def can_modify_user?(%User{} = actor, %User{} = target) do
-    actor.id == target.id ||
-      :admin in actor.roles ||
-      (:mod in actor.roles && :admin not in target.roles)
   end
 
   ## Settings and Profile
@@ -899,21 +905,30 @@ defmodule Banchan.Accounts do
   """
   def logout_user(%User{} = user) do
     # Delete all user tokens
-    Repo.delete_all(UserToken.user_and_contexts_query(user, :all))
+    case Repo.delete_all(UserToken.user_and_contexts_query(user, :all)) do
+      {1, _} ->
+        # Broadcast to all LiveViews to immediately disconnect the user
+        Phoenix.PubSub.broadcast_from(
+          @pubsub,
+          self(),
+          UserAuth.pubsub_topic(),
+          %Phoenix.Socket.Broadcast{
+            topic: UserAuth.pubsub_topic(),
+            event: "logout_user",
+            payload: %{
+              user: user
+            }
+          }
+        )
 
-    # Broadcast to all LiveViews to immediately disconnect the user
-    Phoenix.PubSub.broadcast_from(
-      @pubsub,
-      self(),
-      UserAuth.pubsub_topic(),
-      %Phoenix.Socket.Broadcast{
-        topic: UserAuth.pubsub_topic(),
-        event: "logout_user",
-        payload: %{
-          user: user
-        }
-      }
-    )
+        {:ok, user}
+
+      {0, _} ->
+        {:ok, user}
+
+      {_, _} ->
+        {:error, :too_many_logouts}
+    end
   end
 
   @doc """
@@ -1030,5 +1045,39 @@ defmodule Banchan.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  ## Deletion
+
+  @doc """
+  Deactivates a user, scheduling them for deletion, but retaining user data.
+  """
+  def deactivate_user(%User{} = actor, %User{} = user) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+
+        if actor.id == user.id || :admin in actor.roles do
+          with {:ok, user} <- user |> User.deactivate_changeset() |> Repo.update(returning: true),
+               {:ok, _} <- logout_user(user) do
+            {:ok, user}
+          end
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
+  end
+
+  @doc """
+  Deletes a user and all of its data. This is a very destructive operation and
+  should only be done as part of deactivation cleanup by a cron job!
+
+  All existing references to this user will be nilified and the user will
+  appear as a "ghost" wherever it previously interacted.
+  """
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
   end
 end

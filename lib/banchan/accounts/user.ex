@@ -20,6 +20,7 @@ defmodule Banchan.Accounts.User do
     field :password, :string, virtual: true
     field :hashed_password, :string
     field :confirmed_at, :naive_datetime
+    field :deactivated_at, :naive_datetime
     field :name, :string
     field :bio, :string
     field :totp_secret, :binary
@@ -476,6 +477,21 @@ defmodule Banchan.Accounts.User do
   def confirm_changeset(user) do
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
     change(user, confirmed_at: now)
+  end
+
+  @doc """
+  Changeset for deactivating a user account.
+  """
+  def deactivate_changeset(user) do
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    change(user, deactivated_at: now)
+  end
+
+  @doc """
+  Changeset for reactivating a user.
+  """
+  def reactivate_changeset(user) do
+    change(user, deactivated_at: nil)
   end
 
   @doc """

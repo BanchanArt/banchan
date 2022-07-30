@@ -23,6 +23,7 @@ defmodule Banchan.Studios.Studio do
     field :featured, :boolean, default: false
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
+    field :deleted_at, :naive_datetime
 
     # Moderation etc
     field :moderation_notes, :string

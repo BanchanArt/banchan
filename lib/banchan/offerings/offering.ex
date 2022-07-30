@@ -26,6 +26,7 @@ defmodule Banchan.Offerings.Offering do
     field :archived_at, :naive_datetime
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
+    field :deleted_at, :naive_datetime
 
     field :option_prices, {:array, Money.Ecto.Composite.Type}, virtual: true
     field :used_slots, :integer, virtual: true
