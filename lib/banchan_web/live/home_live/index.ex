@@ -161,7 +161,7 @@ defmodule BanchanWeb.HomeLive do
           </div>
           <div class="divider" />
           <div class="sm:px-2 flex flex-col gap-4">
-            <div class="grid grid-cols-2 sm:gap-2 md:grid-cols-4 auto-rows-fr">
+            <div class="grid grid-cols-2 sm:gap-2 md:grid-cols-3 auto-rows-fr">
               {#for studio <- @studios.entries}
                 <StudioCard studio={studio} />
               {/for}
