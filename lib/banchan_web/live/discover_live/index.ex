@@ -108,19 +108,24 @@ defmodule BanchanWeb.DiscoverLive.Index do
 
   @impl true
   def render(assigns) do
+    params = if assigns.query && assigns.query != "" do
+      %{q: assigns.query}
+    else
+      %{}
+    end
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <h1 class="text-3xl">Discover</h1>
       <div class="divider" />
       <div class="tabs tabs-boxed flex flex-nowrap max-w-xl mx-auto">
         <div class={"tab tab-lg flex-1", "tab-active": @type not in ["studios", "offerings"]}>
-          <LivePatch to={Routes.discover_index_path(Endpoint, :index)}>Explore</LivePatch>
+          <LivePatch to={Routes.discover_index_path(Endpoint, :index, params)}>Explore</LivePatch>
         </div>
         <div class={"tab tab-lg flex-1", "tab-active": @type == "offerings"}>
-          <LivePatch to={Routes.discover_index_path(Endpoint, :index, "offerings")}>Offerings</LivePatch>
+          <LivePatch to={Routes.discover_index_path(Endpoint, :index, "offerings", params)}>Offerings</LivePatch>
         </div>
         <div class={"tab tab-lg flex-1", "tab-active": @type == "studios"}>
-          <LivePatch to={Routes.discover_index_path(Endpoint, :index, "studios")}>Studios</LivePatch>
+          <LivePatch to={Routes.discover_index_path(Endpoint, :index, "studios", params)}>Studios</LivePatch>
         </div>
       </div>
       <div class="form-control mx-auto max-w-3xl py-4 w-full md:w-content">
