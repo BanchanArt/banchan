@@ -45,7 +45,10 @@ defmodule Banchan.Studios.Studio do
       on_replace: :delete_if_exists,
       preload_order: [asc: :index]
 
-    many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
+    many_to_many :artists, Banchan.Accounts.User,
+      join_through: "users_studios",
+      where: [deactivated_at: nil]
+
     many_to_many :followers, Banchan.Accounts.User, join_through: "studio_followers"
 
     has_many :offerings, Banchan.Offerings.Offering, preload_order: [:asc, :index]

@@ -1250,6 +1250,27 @@ defmodule Banchan.Studios do
     end
   end
 
+  ## Deletion
+
+  @doc """
+  Prunes all studios that were soft-deleted more than 30 days ago.
+
+  Database constraints will take care of nilifying foreign keys or cascading
+  deletions.
+  """
+  def prune_studios() do
+    now = NaiveDateTime.utc_now()
+
+    from(
+      s in Studio,
+      where: not is_nil(s.deleted_at),
+      where: s.deleted_at < datetime_add(^now, -30, "day")
+    )
+    |> Repo.delete_all()
+  end
+
+  ## Misc utilities
+
   defp stripe_mod do
     Application.get_env(:banchan, :stripe_mod)
   end

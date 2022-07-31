@@ -83,6 +83,8 @@ defmodule Banchan.Accounts do
 
   Returns nil if the User does not exist.
   """
+  def get_user(nil), do: nil
+
   def get_user(id) do
     Repo.get(from(u in User, where: is_nil(u.deactivated_at)), id) |> Repo.preload(:disable_info)
   end
@@ -1143,13 +1145,19 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
-  Deletes a user and all of its data. This is a very destructive operation and
-  should only be done as part of deactivation cleanup by a cron job!
+  Prunes all users that were deactivated more than 30 days ago.
 
   Database constraints will take care of nilifying foreign keys or cascading
   deletions.
   """
-  def delete_user(%User{} = user) do
-    Repo.delete(user)
+  def prune_users() do
+    now = NaiveDateTime.utc_now()
+
+    from(
+      u in User,
+      where: not is_nil(u.deactivated_at),
+      where: u.deactivated_at < datetime_add(^now, -30, "day")
+    )
+    |> Repo.delete_all()
   end
 end

@@ -1657,6 +1657,23 @@ defmodule Banchan.Commissions do
     )
   end
 
+  @doc """
+  Prunes all offerings that were soft-deleted more than 30 days ago.
+
+  Database constraints will take care of nilifying foreign keys or cascading
+  deletions.
+  """
+  def prune_offerings() do
+    now = NaiveDateTime.utc_now()
+
+    from(
+      o in Offering,
+      where: not is_nil(o.deleted_at),
+      where: o.deleted_at < datetime_add(^now, -30, "day")
+    )
+    |> Repo.delete_all()
+  end
+
   ## Misc utilities
 
   defp stripe_mod do
