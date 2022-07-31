@@ -9,7 +9,10 @@ defmodule BanchanWeb.UserSessionController do
   def create(conn, %{"user" => user_params}) do
     %{"identifier" => identifier, "password" => password, "mfa_token" => mfa_token} = user_params
 
-    if user = Accounts.get_user_by_identifier_and_password(identifier, password) do
+    if user =
+         Accounts.get_user_by_identifier_and_password(identifier, password,
+           include_deactivated?: true
+         ) do
       if user.totp_activated == true && !NimbleTOTP.valid?(user.totp_secret, mfa_token) do
         conn
         |> put_flash(:error, "Invalid email/handle, password, or MFA token")

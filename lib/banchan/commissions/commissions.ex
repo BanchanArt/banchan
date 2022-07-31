@@ -123,31 +123,17 @@ defmodule Banchan.Commissions do
       left_join: a in CommissionArchived,
       on: a.commission_id == c.id and a.user_id == u.id,
       as: :archived,
-      join: client in assoc(c, :client),
+      left_join: client in assoc(c, :client),
+      on: is_nil(client.deactivated_at),
       as: :client,
       join: e in assoc(c, :events),
       as: :events,
       group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name, a.archived],
       # order_by: {:desc, max(e.inserted_at)},
       select: %{
-        commission: %Commission{
-          id: c.id,
-          title: c.title,
-          status: c.status,
-          public_id: c.public_id,
-          inserted_at: c.inserted_at
-        },
-        client: %User{
-          id: client.id,
-          name: client.name,
-          handle: client.handle,
-          pfp_thumb_id: client.pfp_thumb_id
-        },
-        studio: %Studio{
-          id: s.id,
-          handle: s.handle,
-          name: s.name
-        },
+        commission: c,
+        client: client,
+        studio: s,
         archived: coalesce(a.archived, false),
         updated_at: max(e.inserted_at)
       }

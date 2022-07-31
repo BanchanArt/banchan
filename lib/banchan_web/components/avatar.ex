@@ -15,8 +15,12 @@ defmodule BanchanWeb.Components.Avatar do
 
   def render(assigns) do
     ~F"""
-    <div class={"avatar", placeholder: !@user.pfp_thumb_id}>
-      <div class={"rounded-full", @class, "bg-neutral-focus text-neutral-content": !@user.pfp_thumb_id}>
+    <div class={"avatar", placeholder: is_nil(@user) || !@user.pfp_thumb_id}>
+      <div class={
+        "rounded-full",
+        @class,
+        "bg-neutral-focus text-neutral-content": is_nil(@user) || !@user.pfp_thumb_id
+      }>
         {#if !Accounts.active_user?(@user)}
           <div class="w-full h-full bg-neutral-focus" />
         {#elseif @link}

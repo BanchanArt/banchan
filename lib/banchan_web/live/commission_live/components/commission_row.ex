@@ -8,7 +8,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
 
   alias Surface.Components.LivePatch
 
-  alias BanchanWeb.Components.Avatar
+  alias BanchanWeb.Components.{Avatar, UserHandle}
 
   prop result, :struct, required: true
   prop highlight, :boolean, default: false
@@ -43,7 +43,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
                 <Avatar link={false} user={@result.client} class="w-2.5" />
               </div>
               <div class="inline">
-                <strong title={@result.client.handle} class="font-bold">{@result.client.handle}</strong>.
+                <UserHandle link={false} user={@result.client} />
               </div>
               <div>
                 Updated {Timex.format!(@result.updated_at, "{relative}", :relative)}.

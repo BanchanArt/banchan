@@ -75,7 +75,16 @@ defmodule Banchan.Accounts do
       ** (Ecto.NoResultsError)
   """
   def get_user!(id) do
-    Repo.get!(User, id) |> Repo.preload(:disable_info)
+    Repo.get!(from(u in User, where: is_nil(u.deactivated_at)), id) |> Repo.preload(:disable_info)
+  end
+
+  @doc """
+  Gets a single user.
+
+  Returns nil if the User does not exist.
+  """
+  def get_user(id) do
+    Repo.get(from(u in User, where: is_nil(u.deactivated_at)), id) |> Repo.preload(:disable_info)
   end
 
   @doc """
@@ -94,6 +103,7 @@ defmodule Banchan.Accounts do
     Repo.one(
       from u in User,
         where: u.email == ^email,
+        where: is_nil(u.deactivated_at),
         preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
     )
   end
@@ -130,14 +140,22 @@ defmodule Banchan.Accounts do
       nil
 
   """
-  def get_user_by_identifier_and_password(ident, password)
+  def get_user_by_identifier_and_password(ident, password, opts \\ [])
       when is_binary(ident) and is_binary(password) do
-    user =
-      Repo.one(
-        from u in User,
-          where: u.email == ^ident or u.handle == ^ident,
-          preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
+    q =
+      from(u in User,
+        where: u.email == ^ident or u.handle == ^ident,
+        preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
       )
+
+    q =
+      if Keyword.get(opts, :include_deactivated?) do
+        q
+      else
+        q |> where([u], is_nil(u.deactivated_at))
+      end
+
+    user = Repo.one(q)
 
     if User.valid_password?(user, password), do: user
   end
