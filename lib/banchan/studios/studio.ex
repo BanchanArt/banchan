@@ -138,6 +138,13 @@ defmodule Banchan.Studios.Studio do
     |> validate_markdown(:moderation_notes)
   end
 
+  @doc """
+  Changeset for soft-deleting a Studio.
+  """
+  def deletion_changeset(studio) do
+    change(studio, deleted_at: NaiveDateTime.utc_now())
+  end
+
   defp validate_default_currency(changeset, default_field, currencies_field)
 
   defp validate_default_currency(changeset, default_field, currencies_field) do

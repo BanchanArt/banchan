@@ -94,4 +94,11 @@ defmodule Banchan.Offerings.Offering do
     |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])
   end
+
+  @doc """
+  Changeset for soft-deleting an offering.
+  """
+  def deletion_changeset(offering) do
+    change(offering, deleted_at: NaiveDateTime.utc_now())
+  end
 end

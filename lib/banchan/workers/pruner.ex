@@ -8,14 +8,14 @@ defmodule Banchan.Workers.Pruner do
     unique: [period: 60],
     tags: ["deletion", "pruning"]
 
-  alias Banchan.{Accounts, Commissions, Repo, Studios}
+  alias Banchan.{Accounts, Offerings, Repo, Studios}
 
   def perform(_) do
     {:ok, ret} =
       Repo.transaction(fn ->
         Accounts.prune_users()
         Studios.prune_studios()
-        Commissions.prune_offerings()
+        Offerings.prune_offerings()
         :ok
       end)
 

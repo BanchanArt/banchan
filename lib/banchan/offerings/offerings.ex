@@ -340,6 +340,7 @@ defmodule Banchan.Offerings do
     q =
       from o in Offering,
         as: :offering,
+        where: is_nil(o.deleted_at),
         join: s in assoc(o, :studio),
         as: :studio,
         left_lateral_join:
@@ -437,7 +438,7 @@ defmodule Banchan.Offerings do
           from o in Offering,
             left_join: c in assoc(o, :commissions),
             on: c.status not in [:withdrawn, :approved, :submitted, :rejected],
-            where: o.id == ^offering.id,
+            where: o.id == ^offering.id and is_nil(o.deleted_at),
             group_by: [o.id, o.slots],
             select: {o.slots, count(c.id)}
         )
@@ -466,7 +467,7 @@ defmodule Banchan.Offerings do
         from(o in Offering,
           left_join: c in assoc(o, :commissions),
           on: c.status == :submitted,
-          where: o.id == ^offering.id,
+          where: o.id == ^offering.id and is_nil(o.deleted_at),
           group_by: [o.id, o.max_proposals],
           select: {o.max_proposals, count(c.id)}
         )
@@ -505,7 +506,7 @@ defmodule Banchan.Offerings do
     from(
       o in Offering,
       join: u in assoc(o, :card_img),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(o.deleted_at),
       select: u
     )
     |> Repo.one!()
@@ -518,7 +519,7 @@ defmodule Banchan.Offerings do
     from(
       o in Offering,
       join: u in assoc(o, :header_img),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(o.deleted_at),
       select: u
     )
     |> Repo.one!()
@@ -530,8 +531,9 @@ defmodule Banchan.Offerings do
   def offering_gallery_img!(upload_id) do
     from(
       i in GalleryImage,
+      join: o in assoc(i, :offering),
       join: u in assoc(i, :upload),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(o.deleted_at),
       select: u
     )
     |> Repo.one!()
@@ -581,6 +583,7 @@ defmodule Banchan.Offerings do
       as: :offering,
       join: s in assoc(o, :studio),
       as: :studio,
+      where: is_nil(o.deleted_at) and is_nil(s.deleted_at),
       left_lateral_join:
         used_slots in subquery(
           from c in Commission,
@@ -831,5 +834,34 @@ defmodule Banchan.Offerings do
       :error ->
         q
     end
+  end
+
+  ## Deletion
+
+  @doc """
+  Soft-deletes an offering by marking it for deletion. It will be pruned in 30
+  days.
+  """
+  def delete_offering(offering) do
+    offering
+    |> Offering.deletion_changeset()
+    |> Repo.update(returning: true)
+  end
+
+  @doc """
+  Prunes all offerings that were soft-deleted more than 30 days ago.
+
+  Database constraints will take care of nilifying foreign keys or cascading
+  deletions.
+  """
+  def prune_offerings do
+    now = NaiveDateTime.utc_now()
+
+    from(
+      o in Offering,
+      where: not is_nil(o.deleted_at),
+      where: o.deleted_at < datetime_add(^now, -30, "day")
+    )
+    |> Repo.delete_all()
   end
 end

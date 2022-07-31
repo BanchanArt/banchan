@@ -1150,7 +1150,7 @@ defmodule Banchan.Accounts do
   Database constraints will take care of nilifying foreign keys or cascading
   deletions.
   """
-  def prune_users() do
+  def prune_users do
     now = NaiveDateTime.utc_now()
 
     from(

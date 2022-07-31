@@ -200,6 +200,7 @@ defmodule Banchan.Studios do
   end
 
   ## Getting/Listing
+
   @doc """
   Gets a studio by its handle.
 
@@ -213,7 +214,10 @@ defmodule Banchan.Studios do
 
   """
   def get_studio_by_handle!(handle) when is_binary(handle) do
-    Repo.get_by!(Studio, handle: handle)
+    from(s in Studio,
+      where: s.handle == ^handle and is_nil(s.deleted_at)
+    )
+    |> Repo.one!()
     |> Repo.preload([:header_img, :card_img, :disable_info, :artists])
   end
 
@@ -224,7 +228,8 @@ defmodule Banchan.Studios do
   def studio_portfolio_uploads(%Studio{} = studio) do
     from(i in PortfolioImage,
       join: u in assoc(i, :upload),
-      where: i.studio_id == ^studio.id,
+      join: s in assoc(i, :studio),
+      where: s.id == ^studio.id and is_nil(s.deleted_at),
       order_by: [asc: i.index],
       select: u
     )
@@ -238,7 +243,7 @@ defmodule Banchan.Studios do
     from(
       s in Studio,
       join: u in assoc(s, :card_img),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(s.deleted_at),
       select: u
     )
     |> Repo.one!()
@@ -251,7 +256,7 @@ defmodule Banchan.Studios do
     from(
       s in Studio,
       join: u in assoc(s, :header_img),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(s.deleted_at),
       select: u
     )
     |> Repo.one!()
@@ -263,7 +268,8 @@ defmodule Banchan.Studios do
   def studio_portfolio_img!(upload_id) do
     from(i in PortfolioImage,
       join: u in assoc(i, :upload),
-      where: u.id == ^upload_id,
+      join: s in assoc(i, :studio),
+      where: u.id == ^upload_id and is_nil(s.deleted_at),
       select: u
     )
     |> Repo.one!()
@@ -305,7 +311,8 @@ defmodule Banchan.Studios do
       s in Studio,
       as: :studio,
       join: artist in assoc(s, :artists),
-      as: :artist
+      as: :artist,
+      where: is_nil(s.deleted_at)
     )
     |> filter_include_disabled?(opts)
     |> filter_with_member(opts)
@@ -500,7 +507,8 @@ defmodule Banchan.Studios do
       from s in Studio,
         join: u in assoc(s, :artists),
         left_join: sb in assoc(s, :blocklist),
-        where: u.id == ^actor.id and (is_nil(sb) or sb.user_id != ^user.id)
+        where:
+          u.id == ^actor.id and (is_nil(sb) or sb.user_id != ^user.id) and is_nil(s.deleted_at)
     )
   end
 
@@ -512,7 +520,7 @@ defmodule Banchan.Studios do
       from s in Studio,
         join: u in assoc(s, :artists),
         left_join: sb in assoc(s, :blocklist),
-        where: u.id == ^actor.id and sb.user_id == ^user.id
+        where: u.id == ^actor.id and sb.user_id == ^user.id and is_nil(s.deleted_at)
     )
   end
 
@@ -877,7 +885,7 @@ defmodule Banchan.Studios do
   end
 
   @doc """
-  Disabled a studio. This prevents the Studio and its Offerings from showing
+  Disables a studio. This prevents the Studio and its Offerings from showing
   up in searches or being generally accessible. This Studio will no longer be
   able to accept commissions until the ban is lifted.
 
@@ -1253,12 +1261,22 @@ defmodule Banchan.Studios do
   ## Deletion
 
   @doc """
+  Soft-delete a Studio by marking it for deletion. It will be pruned in 30
+  days.
+  """
+  def delete_studio(studio) do
+    studio
+    |> Studio.deletion_changeset()
+    |> Repo.update(returning: true)
+  end
+
+  @doc """
   Prunes all studios that were soft-deleted more than 30 days ago.
 
   Database constraints will take care of nilifying foreign keys or cascading
   deletions.
   """
-  def prune_studios() do
+  def prune_studios do
     now = NaiveDateTime.utc_now()
 
     from(
