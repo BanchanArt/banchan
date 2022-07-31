@@ -72,6 +72,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                   options: [
                     %OfferingOption{
                       name: "Base Price",
+                      description: "Base price, without add-ons",
                       price: Money.new(0, socket.assigns.studio.default_currency),
                       default: true,
                       sticky: true
@@ -203,6 +204,36 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   @impl true
   def handle_event("cancel_gallery_upload", %{"ref" => ref}, socket) do
     {:noreply, socket |> cancel_upload(:gallery_images, ref)}
+  end
+
+  @impl true
+  def handle_event("delete_offering", _, socket) do
+    case Offerings.delete_offering(socket.assigns.current_user, socket.assigns.offering) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Offering successfully deleted.")
+         |> push_redirect(
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+
+      {:error, _} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "An error occurred while trying to delete this offering. Wait a bit and try again."
+         )
+         |> push_redirect(
+           to:
+             Routes.studio_offerings_edit_path(
+               Endpoint,
+               :edit,
+               socket.assigns.studio.handle,
+               socket.assigns.offering.type
+             )
+         )}
+    end
   end
 
   @impl true
@@ -530,6 +561,21 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             <Button class="btn-error" click="archive" label="Archive" />
           {/if}
         </div>
+        {#if @changeset.data.id}
+          <Collapse id="delete-offering-collapse" class="w-full pt-4">
+            <:header>
+              <div class="font-semibold text-error">Delete</div>
+            </:header>
+            <div class="prose">
+              <p>This operation <strong>can't be reversed</strong>.</p>
+              <p>Deleting an offering will prevent you from being able to edit add-ons in existing commissions, and commissions made with this offering will not be able to link back to it.</p>
+              <p>You will also not be able to create an offering with the same name for <strong>30 days</strong>. If you want to reuse this name, change the offering's type <i>before</i> deletion.</p>
+              <p>If you simply want to prevent new commissions from being created for this offering, please consider archiving it instead.</p>
+              <p>Are you sure you want to delete this offering?</p>
+            </div>
+            <Button click="delete_offering" class="w-full btn-error" label="Confirm" />
+          </Collapse>
+        {/if}
       </div>
     </Form>
     """

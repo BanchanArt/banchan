@@ -1350,7 +1350,7 @@ defmodule Banchan.Studios do
     Application.get_env(:banchan, :stripe_mod)
   end
 
-  defp check_studio_member(%Studio{} = studio, %User{} = actor, roles \\ [:admin, :mod]) do
+  def check_studio_member(%Studio{} = studio, %User{} = actor, roles \\ [:admin, :mod]) do
     actor = actor |> Repo.reload()
 
     if is_user_in_studio?(actor, studio) || Enum.any?(roles, &(&1 in actor.roles)) do

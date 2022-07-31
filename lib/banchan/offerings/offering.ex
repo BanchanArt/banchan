@@ -9,6 +9,7 @@ defmodule Banchan.Offerings.Offering do
 
   alias Banchan.Commissions.Commission
   alias Banchan.Offerings.{GalleryImage, OfferingOption}
+  alias Banchan.Repo
   alias Banchan.Studios.Studio
   alias Banchan.Uploads.Upload
 
@@ -72,6 +73,7 @@ defmodule Banchan.Offerings.Offering do
       :tags,
       :mature,
       :card_img_id,
+      :studio_id,
       :gallery_imgs_changed
     ])
     |> cast_assoc(:options)
@@ -89,6 +91,7 @@ defmodule Banchan.Offerings.Offering do
     |> validate_length(:terms, max: 1500)
     |> validate_length(:template, max: 1500)
     |> validate_tags()
+    |> unsafe_validate_unique([:type, :studio_id], Repo)
     |> validate_length(:tags, max: 5)
     |> foreign_key_constraint(:card_img_id)
     |> validate_required([:type, :name, :description])

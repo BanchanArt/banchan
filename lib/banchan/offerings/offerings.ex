@@ -44,7 +44,10 @@ defmodule Banchan.Offerings do
         if is_nil(actor) || Studios.is_user_in_studio?(actor, studio) || :admin in actor.roles ||
              :mod in actor.roles do
           max_idx =
-            from(o in Offering, where: o.studio_id == ^studio.id, select: max(o.index))
+            from(o in Offering,
+              where: o.studio_id == ^studio.id and is_nil(o.deleted_at),
+              select: max(o.index)
+            )
             |> Repo.one!() ||
               0
 
@@ -842,10 +845,21 @@ defmodule Banchan.Offerings do
   Soft-deletes an offering by marking it for deletion. It will be pruned in 30
   days.
   """
-  def delete_offering(offering) do
-    offering
-    |> Offering.deletion_changeset()
-    |> Repo.update(returning: true)
+  def delete_offering(%User{} = actor, %Offering{} = offering) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        with {:ok, _} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor),
+             # NB(@zkat): We archive the offering first because this takes
+             # care of updating offering order indices. It's a hack but hey it
+             # does the job.
+             {:ok, offering} <- archive_offering(actor, offering, true) do
+          offering
+          |> Offering.deletion_changeset()
+          |> Repo.update(returning: true)
+        end
+      end)
+
+    ret
   end
 
   @doc """
