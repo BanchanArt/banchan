@@ -53,7 +53,6 @@ user = user |> Banchan.Repo.reload()
   Banchan.Offerings.new_offering(
     user,
     studio,
-    true,
     %{
       type: "illustration",
       index: 0,
@@ -90,7 +89,6 @@ user = user |> Banchan.Repo.reload()
   Banchan.Offerings.new_offering(
     user,
     studio,
-    true,
     %{
       type: "chibi",
       index: 1,
@@ -135,7 +133,6 @@ user = user |> Banchan.Repo.reload()
   Banchan.Offerings.new_offering(
     user,
     studio,
-    true,
     %{
       type: "illustration",
       index: 0,

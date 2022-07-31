@@ -536,6 +536,7 @@ defmodule Banchan.Commissions do
     {:ok, ret} =
       Repo.transaction(fn ->
         actor = actor |> Repo.preload(:disable_info, force: true)
+        studio = studio |> Repo.reload()
         offering = offering |> Repo.reload()
         available_proposal_count = Offerings.offering_available_proposals(offering)
         available_slot_count = Offerings.offering_available_slots(offering, true)
@@ -544,10 +545,13 @@ defmodule Banchan.Commissions do
           Studios.user_blocked?(studio, actor) ->
             {:error, :blocked}
 
-          !is_nil(actor.disable_info) ->
+          actor.disable_info ->
             {:error, :disabled}
 
-          !is_nil(offering.archived_at) ->
+          studio.archived_at ->
+            {:error, :studio_archived}
+
+          offering.archived_at ->
             {:error, :offering_archived}
 
           !offering.open ->
@@ -556,10 +560,10 @@ defmodule Banchan.Commissions do
           is_nil(actor.confirmed_at) ->
             {:error, :not_confirmed}
 
-          !is_nil(available_proposal_count) && available_proposal_count <= 0 ->
+          available_proposal_count && available_proposal_count <= 0 ->
             {:error, :no_proposals_available}
 
-          !is_nil(available_slot_count) && available_slot_count <= 0 ->
+          available_slot_count && available_slot_count <= 0 ->
             {:error, :no_slots_available}
 
           true ->
@@ -578,7 +582,7 @@ defmodule Banchan.Commissions do
     if close do
       # NB(zkat): We pretend we're a studio member here because we're doing
       # this on behalf of the studio. It's safe.
-      {:ok, offering} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
+      {:ok, offering} = Offerings.update_offering(nil, offering, %{open: false}, nil)
       offering
     else
       offering
@@ -827,7 +831,7 @@ defmodule Banchan.Commissions do
               if close do
                 # NB(zkat): We pretend we're a studio member here because we're doing
                 # this on behalf of the studio. It's safe.
-                {:ok, _} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
+                {:ok, _} = Offerings.update_offering(nil, offering, %{open: false}, nil)
               end
             end
 

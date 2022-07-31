@@ -125,7 +125,8 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                   end}
                 </Button>
               {/if}
-              {#if @current_user_member? || :admin in @current_user.roles || :mod in @current_user.roles}
+              {#if @current_user_member? ||
+                  (@current_user && (:admin in @current_user.roles || :mod in @current_user.roles))}
                 <LiveRedirect
                   label="Edit Profile"
                   to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}

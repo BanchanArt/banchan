@@ -38,7 +38,7 @@ defmodule Banchan.CommissionsFixtures do
         })
       )
 
-    commission
+    commission |> Repo.preload(studio: [:artists])
   end
 
   def invoice_fixture(%User{} = actor, %Commission{} = commission, data) do

@@ -124,8 +124,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
       {:ok, _} =
         Offerings.archive_offering(
           socket.assigns.current_user,
-          %Offering{id: data.id},
-          socket.assigns.current_user_member?
+          %Offering{id: data.id}
         )
 
       {:noreply,
@@ -246,9 +245,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         {:ok,
          Offerings.make_card_image!(
            socket.assigns.current_user,
+           socket.assigns.studio,
            path,
-           socket.assigns.current_user_member? || :admin in socket.assigns.current_user.roles ||
-             :mod in socket.assigns.current_user.roles,
            entry.client_type,
            entry.client_name
          )}
@@ -261,9 +259,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
          {entry.ref,
           Offerings.make_gallery_image!(
             socket.assigns.current_user,
+            socket.assigns.studio,
             path,
-            socket.assigns.current_user_member? || :admin in socket.assigns.current_user.roles ||
-              :mod in socket.assigns.current_user.roles,
             entry.client_type,
             entry.client_name
           )}}
@@ -290,8 +287,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
              "card_img_id" => (card_image && card_image.id) || offering["card_image_id"]
            }),
            gallery_images,
-           socket.assigns.studio,
-           socket.assigns.current_user_member?
+           socket.assigns.studio
          ) do
       {:ok, offering} ->
         {:noreply,
@@ -310,23 +306,21 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     end
   end
 
-  defp submit_offering(actor, offering, attrs, gallery_images, studio, current_user_member?)
+  defp submit_offering(actor, offering, attrs, gallery_images, studio)
        when is_nil(offering) do
     Offerings.new_offering(
       actor,
       studio,
-      current_user_member?,
       attrs,
       gallery_images
     )
   end
 
-  defp submit_offering(actor, offering, attrs, gallery_images, _studio, current_user_member?)
+  defp submit_offering(actor, offering, attrs, gallery_images, _studio)
        when not is_nil(offering) do
     Offerings.update_offering(
       actor,
       offering,
-      current_user_member?,
       attrs,
       gallery_images
     )

@@ -365,9 +365,16 @@ defmodule Banchan.Studios do
                   :mod in current_user.roles or artist.id == current_user.id))
         )
         |> where(
-          [o, current_user: current_user],
+          [studio: s, current_user: current_user, artist: artist],
+          is_nil(s.archived_at) or
+            :admin in current_user.roles or
+            :mod in current_user.roles or
+            artist.id == current_user.id
+        )
+        |> where(
+          [studio: s, current_user: current_user],
           is_nil(current_user.muted) or
-            not fragment("(?).muted_filter_query @@ (?).search_vector", current_user, o)
+            not fragment("(?).muted_filter_query @@ (?).search_vector", current_user, s)
         )
         |> join(:left, [studio: s], block in assoc(s, :blocklist), as: :blocklist)
         |> where(
@@ -377,7 +384,7 @@ defmodule Banchan.Studios do
 
       _ ->
         q
-        |> where([s], s.mature != true)
+        |> where([s], s.mature != true and is_nil(s.archived_at))
     end
   end
 
@@ -1253,6 +1260,39 @@ defmodule Banchan.Studios do
   ## Deletion
 
   @doc """
+  Archives a studio, removing it and its offerings from listings and
+  preventing new commissions.
+  """
+  def archive_studio(%User{} = actor, %Studio{} = studio) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        with {:ok, _actor} <- check_studio_member(studio, actor) do
+          studio
+          |> Studio.archive_changeset()
+          |> Repo.update(returning: true)
+        end
+      end)
+
+    ret
+  end
+
+  @doc """
+  Unarchives a studio.
+  """
+  def unarchive_studio(%User{} = actor, %Studio{} = studio) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        with {:ok, _actor} <- check_studio_member(studio, actor) do
+          studio
+          |> Studio.unarchive_changeset()
+          |> Repo.update(returning: true)
+        end
+      end)
+
+    ret
+  end
+
+  @doc """
   Soft-delete a Studio by marking it for deletion. It will be pruned in 30
   days.
   """
@@ -1350,10 +1390,11 @@ defmodule Banchan.Studios do
     Application.get_env(:banchan, :stripe_mod)
   end
 
-  def check_studio_member(%Studio{} = studio, %User{} = actor, roles \\ [:admin, :mod]) do
-    actor = actor |> Repo.reload()
+  def check_studio_member(%Studio{} = studio, actor, roles \\ [:admin, :mod]) do
+    actor = actor && actor |> Repo.reload()
 
-    if is_user_in_studio?(actor, studio) || Enum.any?(roles, &(&1 in actor.roles)) do
+    if is_nil(actor) || is_user_in_studio?(actor, studio) ||
+         Enum.any?(roles, &(&1 in actor.roles)) do
       {:ok, actor}
     else
       {:error, :unauthorized}

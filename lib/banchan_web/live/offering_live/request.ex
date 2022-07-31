@@ -218,6 +218,19 @@ defmodule BanchanWeb.OfferingLive.Request do
            to: Routes.home_path(Endpoint, :index)
          )}
 
+      {:error, :studio_archived} ->
+        socket =
+          put_flash(
+            socket,
+            :error,
+            "This offering's studio has been archived and will no longer accept new proposals."
+          )
+
+        {:noreply,
+         push_redirect(socket,
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+
       {:error, :offering_archived} ->
         socket =
           put_flash(

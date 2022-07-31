@@ -9,6 +9,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
     end
 
     alter table(:studios) do
+      add :archived_at, :naive_datetime
       add :deleted_at, :naive_datetime
     end
 

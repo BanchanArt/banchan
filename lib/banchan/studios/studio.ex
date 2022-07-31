@@ -23,6 +23,7 @@ defmodule Banchan.Studios.Studio do
     field :featured, :boolean, default: false
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
+    field :archived_at, :naive_datetime
     field :deleted_at, :naive_datetime
 
     # Moderation etc
@@ -136,6 +137,14 @@ defmodule Banchan.Studios.Studio do
     |> cast(attrs, [:platform_fee, :moderation_notes])
     |> validate_number(:platform_fee, less_than: 1)
     |> validate_markdown(:moderation_notes)
+  end
+
+  def archive_changeset(studio) do
+    change(studio, archived_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+  end
+
+  def unarchive_changeset(studio) do
+    change(studio, archived_at: nil)
   end
 
   @doc """
