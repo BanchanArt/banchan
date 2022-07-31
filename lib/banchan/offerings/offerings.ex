@@ -27,24 +27,15 @@ defmodule Banchan.Offerings do
   @doc """
   Creates a new offering.
   """
-  def new_offering(actor, %Studio{} = studio, false, attrs, gallery_images) do
-    if is_nil(actor) || :admin in actor.roles || :mod in actor.roles do
-      new_offering(actor, studio, true, attrs, gallery_images)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
-  def new_offering(actor, %Studio{} = studio, true, attrs, gallery_images) do
+  def new_offering(actor, %Studio{} = studio, attrs, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor = actor && Repo.reload(actor)
-
-        # nil actor means "system"
-        if is_nil(actor) || Studios.is_user_in_studio?(actor, studio) || :admin in actor.roles ||
-             :mod in actor.roles do
+        with {:ok, _actor} <- Studios.check_studio_member(studio, actor) do
           max_idx =
-            from(o in Offering, where: o.studio_id == ^studio.id, select: max(o.index))
+            from(o in Offering,
+              where: o.studio_id == ^studio.id and is_nil(o.deleted_at),
+              select: max(o.index)
+            )
             |> Repo.one!() ||
               0
 
@@ -65,8 +56,6 @@ defmodule Banchan.Offerings do
           }
           |> Offering.changeset(attrs)
           |> Repo.insert()
-        else
-          {:error, :unauthorized}
         end
       end)
 
@@ -85,25 +74,13 @@ defmodule Banchan.Offerings do
   @doc """
   Updates offering details.
   """
-  def update_offering(%User{} = actor, %Offering{} = offering, false, attrs, gallery_images) do
-    if :admin in actor.roles || :mod in actor.roles do
-      update_offering(actor, offering, true, attrs, gallery_images)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def update_offering(actor, %Offering{} = offering, true, attrs, gallery_images) do
+  def update_offering(actor, %Offering{} = offering, attrs, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor = actor && Repo.reload(actor)
-        offering = Repo.reload(offering) |> Repo.preload(:options)
+        with {:ok, _actor} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor) do
+          offering = Repo.reload(offering) |> Repo.preload(:options)
 
-        # nil actors are meant to be used for "system" operations.
-        if is_nil(actor) || Studios.is_user_in_studio?(actor, %Studio{id: offering.studio_id}) ||
-             :admin in actor.roles ||
-             :mod in actor.roles do
           open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
 
           changeset =
@@ -128,21 +105,13 @@ defmodule Banchan.Offerings do
               changeset |> Ecto.Changeset.put_assoc(:gallery_imgs, gallery_images)
             end
 
-          ret = changeset |> Repo.update(returning: true)
+          with {:ok, changed} <- changeset |> Repo.update(returning: true) do
+            if !open_before? && changed.open do
+              Notifications.offering_opened(changed)
+            end
 
-          case ret do
-            {:ok, changed} ->
-              if !open_before? && changed.open do
-                Notifications.offering_opened(changed)
-              end
-
-              {:ok, changed}
-
-            {:error, error} ->
-              {:error, error}
+            {:ok, changed}
           end
-        else
-          {:error, :unauthorized}
         end
       end)
 
@@ -153,23 +122,10 @@ defmodule Banchan.Offerings do
   Archives an offering. This removes it from the visible list of offerings for
   its studio and prevents new requests.
   """
-  def archive_offering(%User{} = actor, %Offering{} = offering, false) do
-    if :admin in actor.roles || :mod in actor.roles do
-      archive_offering(actor, offering, true)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
-  def archive_offering(actor, %Offering{} = offering, true) do
+  def archive_offering(actor, %Offering{} = offering) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor = actor && Repo.reload(actor)
-
-        # nil actor means "system"
-        if is_nil(actor) || Studios.is_user_in_studio?(actor, %Studio{id: offering.studio_id}) ||
-             :admin in actor.roles ||
-             :mod in actor.roles do
+        with {:ok, _actor} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor) do
           {1, [new]} =
             from(o in Offering,
               where: o.id == ^offering.id,
@@ -190,8 +146,6 @@ defmodule Banchan.Offerings do
           end
 
           {:ok, new}
-        else
-          {:error, :unauthorized}
         end
       end)
 
@@ -201,23 +155,10 @@ defmodule Banchan.Offerings do
   @doc """
   Unarchives an offering, making it available for new requests (if it's open).
   """
-  def unarchive_offering(actor, %Offering{} = offering, false) do
-    if is_nil(actor) || :admin in actor.roles || :mod in actor.roles do
-      unarchive_offering(actor, offering, true)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
-  def unarchive_offering(actor, %Offering{} = offering, true) do
+  def unarchive_offering(actor, %Offering{} = offering) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor = actor && Repo.reload(actor)
-
-        # nil actor means "system"
-        if is_nil(actor) || Studios.is_user_in_studio?(actor, %Studio{id: offering.studio_id}) ||
-             :admin in actor.roles ||
-             :mod in actor.roles do
+        with {:ok, _actor} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor) do
           max_idx =
             from(o in Offering, where: o.studio_id == ^offering.studio_id, select: max(o.index))
             |> Repo.one!() ||
@@ -231,8 +172,6 @@ defmodule Banchan.Offerings do
             |> Repo.update_all(set: [index: max_idx + 1, archived_at: nil])
 
           {:ok, new}
-        else
-          {:error, :unauthorized}
         end
       end)
 
@@ -242,25 +181,11 @@ defmodule Banchan.Offerings do
   @doc """
   Changes the offering order in the Studio shop page. Does not affect ordering anywhere else.
   """
-  def move_offering(actor, %Offering{} = offering, new_index, false) do
-    if is_nil(actor) || :admin in actor.roles || :mod in actor.roles do
-      move_offering(actor, offering, new_index, true)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def move_offering(actor, %Offering{} = offering, new_index, true) when new_index >= 0 do
+  def move_offering(actor, %Offering{} = offering, new_index) when new_index >= 0 do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor = actor && Repo.reload(actor)
-
-        # nil actor means "system"
-        if is_nil(actor) || Studios.is_user_in_studio?(actor, %Studio{id: offering.studio_id}) ||
-             :admin in actor.roles ||
-             :mod in actor.roles do
-          # "Remove" the existing offering
+        with {:ok, _actor} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor) do
           {_, _} =
             from(o in Offering,
               where:
@@ -289,17 +214,17 @@ defmodule Banchan.Offerings do
             |> Repo.update_all([])
 
           {:ok, o}
-        else
-          {:error, :unauthorized}
         end
       end)
 
     ret
   end
 
-  def make_card_image!(%User{} = user, src, true, type, name) do
+  def make_card_image!(%User{} = user, %Studio{} = studio, src, type, name) do
     # TODO: need two versions here, the smaller card image and "preview"
     # version for the offering page.
+    {:ok, user} = Studios.check_studio_member(studio, user)
+
     upload = Uploads.save_file!(user, src, type, name)
 
     {:ok, card} =
@@ -313,7 +238,9 @@ defmodule Banchan.Offerings do
     card
   end
 
-  def make_gallery_image!(%User{} = user, src, true, type, name) do
+  def make_gallery_image!(%User{} = user, %Studio{} = studio, src, type, name) do
+    {:ok, user} = Studios.check_studio_member(studio, user)
+
     upload = Uploads.save_file!(user, src, type, name)
 
     {:ok, image} =
@@ -340,8 +267,10 @@ defmodule Banchan.Offerings do
     q =
       from o in Offering,
         as: :offering,
+        where: is_nil(o.deleted_at),
         join: s in assoc(o, :studio),
         as: :studio,
+        where: is_nil(s.deleted_at) and is_nil(s.archived_at),
         left_lateral_join:
           gallery_uploads in subquery(
             from i in GalleryImage,
@@ -437,10 +366,12 @@ defmodule Banchan.Offerings do
           from o in Offering,
             left_join: c in assoc(o, :commissions),
             on: c.status not in [:withdrawn, :approved, :submitted, :rejected],
-            where: o.id == ^offering.id,
+            join: s in assoc(o, :studio),
+            where: o.id == ^offering.id and is_nil(o.deleted_at),
+            where: is_nil(s.deleted_at) and is_nil(s.archived_at),
             group_by: [o.id, o.slots],
             select: {o.slots, count(c.id)}
-        )
+        ) || {nil, 0}
       else
         {offering.slots, offering.used_slots}
       end
@@ -466,11 +397,13 @@ defmodule Banchan.Offerings do
         from(o in Offering,
           left_join: c in assoc(o, :commissions),
           on: c.status == :submitted,
-          where: o.id == ^offering.id,
+          join: s in assoc(o, :studio),
+          where: o.id == ^offering.id and is_nil(o.deleted_at),
+          where: is_nil(s.deleted_at) and is_nil(s.archived_at),
           group_by: [o.id, o.max_proposals],
           select: {o.max_proposals, count(c.id)}
         )
-      )
+      ) || {nil, 0}
 
     cond do
       is_nil(max) ->
@@ -505,7 +438,7 @@ defmodule Banchan.Offerings do
     from(
       o in Offering,
       join: u in assoc(o, :card_img),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(o.deleted_at),
       select: u
     )
     |> Repo.one!()
@@ -518,7 +451,7 @@ defmodule Banchan.Offerings do
     from(
       o in Offering,
       join: u in assoc(o, :header_img),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(o.deleted_at),
       select: u
     )
     |> Repo.one!()
@@ -530,8 +463,9 @@ defmodule Banchan.Offerings do
   def offering_gallery_img!(upload_id) do
     from(
       i in GalleryImage,
+      join: o in assoc(i, :offering),
       join: u in assoc(i, :upload),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(o.deleted_at),
       select: u
     )
     |> Repo.one!()
@@ -581,6 +515,7 @@ defmodule Banchan.Offerings do
       as: :offering,
       join: s in assoc(o, :studio),
       as: :studio,
+      where: is_nil(o.deleted_at) and is_nil(s.deleted_at) and is_nil(s.archived_at),
       left_lateral_join:
         used_slots in subquery(
           from c in Commission,
@@ -831,5 +766,45 @@ defmodule Banchan.Offerings do
       :error ->
         q
     end
+  end
+
+  ## Deletion
+
+  @doc """
+  Soft-deletes an offering by marking it for deletion. It will be pruned in 30
+  days.
+  """
+  def delete_offering(%User{} = actor, %Offering{} = offering) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        with {:ok, _} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor),
+             # NB(@zkat): We archive the offering first because this takes
+             # care of updating offering order indices. It's a hack but hey it
+             # does the job.
+             {:ok, offering} <- archive_offering(actor, offering) do
+          offering
+          |> Offering.deletion_changeset()
+          |> Repo.update(returning: true)
+        end
+      end)
+
+    ret
+  end
+
+  @doc """
+  Prunes all offerings that were soft-deleted more than 30 days ago.
+
+  Database constraints will take care of nilifying foreign keys or cascading
+  deletions.
+  """
+  def prune_offerings do
+    now = NaiveDateTime.utc_now()
+
+    from(
+      o in Offering,
+      where: not is_nil(o.deleted_at),
+      where: o.deleted_at < datetime_add(^now, -30, "day")
+    )
+    |> Repo.delete_all()
   end
 end

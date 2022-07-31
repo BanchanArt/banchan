@@ -82,9 +82,9 @@ defmodule BanchanWeb.StudioLive.Payouts do
     results =
       Task.async(fn -> Studios.list_payouts(socket.assigns.studio, socket.assigns.page) end)
 
-    balance = Task.async(fn -> Studios.get_banchan_balance!(socket.assigns.studio) end)
+    balance = Task.async(fn -> Studios.get_banchan_balance(socket.assigns.studio) end)
 
-    [payout, results, balance] = Task.await_many([payout, results, balance])
+    [payout, results, {:ok, balance}] = Task.await_many([payout, results, balance])
 
     {:noreply,
      socket
@@ -152,9 +152,9 @@ defmodule BanchanWeb.StudioLive.Payouts do
         Task.async(fn -> Studios.list_payouts(socket.assigns.studio, socket.assigns.page) end)
       end
 
-    new_balance = Task.async(fn -> Studios.get_banchan_balance!(socket.assigns.studio) end)
+    new_balance = Task.async(fn -> Studios.get_banchan_balance(socket.assigns.studio) end)
 
-    [new_results, new_balance] = Task.await_many([new_results, new_balance])
+    [new_results, {:ok, new_balance}] = Task.await_many([new_results, new_balance])
 
     {:noreply,
      socket

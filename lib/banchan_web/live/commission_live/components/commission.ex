@@ -8,6 +8,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, Notifications}
+  alias Banchan.Studios
 
   alias BanchanWeb.Components.{Button, Collapse, ReportModal}
   alias BanchanWeb.Components.Form.{Submit, TextInput}
@@ -224,7 +225,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             <div class="divider" />
             <div class="text-lg font-medium">Summary</div>
             <BalanceBox
-              default_currency={@commission.studio.default_currency}
+              default_currency={Studios.default_currency(@commission.studio)}
               deposited={@deposited}
               line_items={@commission.line_items}
             />

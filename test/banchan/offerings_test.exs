@@ -37,8 +37,8 @@ defmodule Banchan.OfferingsTest do
       Notifications.mark_all_as_read(client)
       Notifications.mark_all_as_read(artist)
 
-      Offerings.update_offering(artist, offering |> Repo.reload(), true, %{open: false}, nil)
-      Offerings.update_offering(artist, offering |> Repo.reload(), true, %{open: true}, nil)
+      Offerings.update_offering(artist, offering |> Repo.reload(), %{open: false}, nil)
+      Offerings.update_offering(artist, offering |> Repo.reload(), %{open: true}, nil)
 
       Notifications.wait_for_notifications()
 
@@ -245,7 +245,6 @@ defmodule Banchan.OfferingsTest do
                Offerings.update_offering(
                  artist,
                  offering |> Repo.reload(),
-                 true,
                  %{open: true},
                  nil
                )
@@ -429,7 +428,6 @@ defmodule Banchan.OfferingsTest do
                Offerings.update_offering(
                  artist,
                  offering |> Repo.reload(),
-                 true,
                  %{open: true},
                  nil
                )

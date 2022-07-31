@@ -76,12 +76,11 @@ defmodule BanchanWeb.StudioLive.Shop do
   end
 
   @impl true
-  def handle_event("unarchive", %{"type" => type}, socket) do
+  def handle_event("unarchive_offering", %{"type" => type}, socket) do
     {:ok, _} =
       Offerings.unarchive_offering(
         socket.assigns.current_user,
-        Enum.find(socket.assigns.offerings, &(&1.type == type)),
-        socket.assigns.current_user_member?
+        Enum.find(socket.assigns.offerings, &(&1.type == type))
       )
 
     offerings = list_offerings(socket)
@@ -90,13 +89,58 @@ defmodule BanchanWeb.StudioLive.Shop do
   end
 
   @impl true
+  def handle_event("archive_studio", _, socket) do
+    case Studios.archive_studio(socket.assigns.current_user, socket.assigns.studio) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Studio archived.")
+         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+
+      {:error, _} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "Studio could not be unarchived due to an internal error. Try again later or report this to support@banchan.art"
+         )
+         |> push_redirect(
+           to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+    end
+  end
+
+  @impl true
+  def handle_event("unarchive_studio", _, socket) do
+    case Studios.unarchive_studio(socket.assigns.current_user, socket.assigns.studio) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Studio unarchived.")
+         |> push_redirect(
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+
+      {:error, _} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "Studio could not be unarchived due to an internal error. Try again later or report this to support@banchan.art"
+         )
+         |> push_redirect(
+           to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+    end
+  end
+
+  @impl true
   def handle_event("drop_card", %{"type" => type, "new_index" => new_index}, socket) do
     {:ok, _} =
       Offerings.move_offering(
         socket.assigns.current_user,
         Enum.find(socket.assigns.offerings, &(&1.type == type)),
-        new_index,
-        socket.assigns.current_user_member?
+        new_index
       )
 
     offerings = list_offerings(socket)
@@ -141,7 +185,8 @@ defmodule BanchanWeb.StudioLive.Shop do
       tab={:shop}
       uri={@uri}
     >
-      {#if Studios.charges_enabled?(@studio) && is_nil(@studio.disable_info)}
+      {#if Studios.charges_enabled?(@studio) && is_nil(@studio.disable_info) && is_nil(@studio.deleted_at) &&
+          is_nil(@studio.archived_at)}
         <div
           id="offering-cards"
           :hook="DragDropCards"
@@ -166,7 +211,7 @@ defmodule BanchanWeb.StudioLive.Shop do
                 current_user={@current_user}
                 current_user_member?={@current_user_member?}
                 offering={offering}
-                unarchive="unarchive"
+                unarchive="unarchive_offering"
               />
             </div>
           {#else}
@@ -182,6 +227,20 @@ defmodule BanchanWeb.StudioLive.Shop do
             </LiveRedirect>
           {/if}
           <InfiniteScroll id="shop-infinite-scroll" page={@offerings.page_number} load_more="load_more" />
+        </div>
+      {#elseif @studio.archived_at}
+        <div class="w-full mx-auto md:bg-base-300">
+          <div class="max-w-prose w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+            <h1 class="text-2xl">
+              Studio Archived
+            </h1>
+            <div class="divider" />
+            <p>This studio has been archived and will not be listed anywhere.</p>
+            {#if @current_user_member?}
+              <p>Do you want to unarchive it?</p>
+              <Button click="unarchive_studio" label="Unarchive" />
+            {/if}
+          </div>
         </div>
       {#else}
         <div class="w-full mx-auto md:bg-base-300">

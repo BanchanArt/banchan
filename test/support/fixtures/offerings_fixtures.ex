@@ -14,7 +14,6 @@ defmodule Banchan.OfferingsFixtures do
       Offerings.new_offering(
         nil,
         studio,
-        true,
         Enum.into(
           %{
             type: type,

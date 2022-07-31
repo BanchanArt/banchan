@@ -37,6 +37,13 @@ defmodule BanchanWeb.StudioLive.Helpers do
                 :mod not in socket.assigns.current_user.roles)) ->
         raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
 
+      (studio.deleted_at || studio.archived_at) &&
+          (is_nil(socket.assigns.current_user) ||
+             !current_user_member? ||
+             (:admin not in socket.assigns.current_user.roles &&
+                :mod not in socket.assigns.current_user.roles)) ->
+        raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
+
       studio.disable_info &&
           (is_nil(socket.assigns.current_user) ||
              (:admin not in socket.assigns.current_user.roles &&

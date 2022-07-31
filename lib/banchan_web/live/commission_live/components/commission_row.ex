@@ -8,7 +8,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
 
   alias Surface.Components.LivePatch
 
-  alias BanchanWeb.Components.Avatar
+  alias BanchanWeb.Components.{Avatar, UserHandle}
 
   prop result, :struct, required: true
   prop highlight, :boolean, default: false
@@ -36,14 +36,20 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
             <div class="inline">
               <div class="self-center inline">
                 Submitted to
-                <div class="inline font-bold">{@result.studio.name}</div>
+                <div class="inline font-bold">
+                  {#if @result.studio && is_nil(@result.studio.deleted_at)}
+                    {@result.studio.name}
+                  {#else}
+                    (Deleted Studio)
+                  {/if}
+                </div>
                 by
               </div>
               <div class="self-center inline">
                 <Avatar link={false} user={@result.client} class="w-2.5" />
               </div>
               <div class="inline">
-                <strong title={@result.client.handle} class="font-bold">{@result.client.handle}</strong>.
+                <UserHandle link={false} user={@result.client} />
               </div>
               <div>
                 Updated {Timex.format!(@result.updated_at, "{relative}", :relative)}.

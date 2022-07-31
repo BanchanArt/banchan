@@ -13,7 +13,7 @@ defmodule BanchanWeb.Email.AccountsView do
     <p>{@url}</p>
     <p>If you have any questions, feel free to email us at <a href="mailto:support@banchan.art">support@banchan.art</a>.</p>
     <p>If you didn't create an account with us please ignore this.</p>
-    <p>- The Banchan Team</p>
+    <p>- The Banchan Art Team</p>
     """
   end
 
@@ -31,7 +31,7 @@ defmodule BanchanWeb.Email.AccountsView do
 
     If you didn't create an account with us, please ignore this.
 
-    - The Banchan Team
+    - The Banchan Art Team
 
     ==============================
     """

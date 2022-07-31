@@ -41,6 +41,7 @@ defmodule Banchan.Accounts do
       as: :actor,
       on: a.id == ^actor.id,
       where: :admin in a.roles or :mod in a.roles,
+      where: is_nil(u.deactivated_at),
       order_by: [desc: u.inserted_at]
     )
     |> filter_query(filter)
@@ -73,7 +74,20 @@ defmodule Banchan.Accounts do
       iex> get_user!(456)
       ** (Ecto.NoResultsError)
   """
-  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload(:disable_info)
+  def get_user!(id) do
+    Repo.get!(from(u in User, where: is_nil(u.deactivated_at)), id) |> Repo.preload(:disable_info)
+  end
+
+  @doc """
+  Gets a single user.
+
+  Returns nil if the User does not exist.
+  """
+  def get_user(nil), do: nil
+
+  def get_user(id) do
+    Repo.get(from(u in User, where: is_nil(u.deactivated_at)), id) |> Repo.preload(:disable_info)
+  end
 
   @doc """
   Gets a user by email.
@@ -91,6 +105,7 @@ defmodule Banchan.Accounts do
     Repo.one(
       from u in User,
         where: u.email == ^email,
+        where: is_nil(u.deactivated_at),
         preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
     )
   end
@@ -110,7 +125,7 @@ defmodule Banchan.Accounts do
   def get_user_by_handle!(handle) when is_binary(handle) do
     Repo.one!(
       from u in User,
-        where: u.handle == ^handle,
+        where: u.handle == ^handle and is_nil(u.deactivated_at),
         preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
     )
   end
@@ -127,14 +142,22 @@ defmodule Banchan.Accounts do
       nil
 
   """
-  def get_user_by_identifier_and_password(ident, password)
+  def get_user_by_identifier_and_password(ident, password, opts \\ [])
       when is_binary(ident) and is_binary(password) do
-    user =
-      Repo.one(
-        from u in User,
-          where: u.email == ^ident or u.handle == ^ident,
-          preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
+    q =
+      from(u in User,
+        where: u.email == ^ident or u.handle == ^ident,
+        preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
       )
+
+    q =
+      if Keyword.get(opts, :include_deactivated?) do
+        q
+      else
+        q |> where([u], is_nil(u.deactivated_at))
+      end
+
+    user = Repo.one(q)
 
     if User.valid_password?(user, password), do: user
   end
@@ -146,7 +169,7 @@ defmodule Banchan.Accounts do
     from(
       us in User,
       join: u in assoc(us, :pfp_img),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(us.deactivated_at),
       select: u
     )
     |> Repo.one!()
@@ -159,7 +182,7 @@ defmodule Banchan.Accounts do
     from(
       us in User,
       join: u in assoc(us, :pfp_thumb),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(us.deactivated_at),
       select: u
     )
     |> Repo.one!()
@@ -172,11 +195,45 @@ defmodule Banchan.Accounts do
     from(
       us in User,
       join: u in assoc(us, :header_img),
-      where: u.id == ^upload_id,
+      where: u.id == ^upload_id and is_nil(us.deactivated_at),
       select: u
     )
     |> Repo.one!()
   end
+
+  @doc """
+  Utility for determining whether an actor can modify a target user. Used for
+  allowing admins to modify user-only stuff.
+  """
+  def can_modify_user?(%User{} = actor, %User{} = target) do
+    actor.id == target.id ||
+      :admin in actor.roles ||
+      (:mod in actor.roles && :admin not in target.roles)
+  end
+
+  @doc """
+  Number of days until full deletion of a deactivated user. It's an error to
+  call this on a non-deactivated user.
+  """
+  def days_until_deletion(%User{deactivated_at: deactivated_at})
+      when not is_nil(deactivated_at) do
+    case NaiveDateTime.diff(
+           NaiveDateTime.add(deactivated_at, 60 * 60 * 24 * 30, :second),
+           NaiveDateTime.utc_now()
+         ) do
+      secs when secs <= 0 ->
+        0
+
+      secs ->
+        floor(secs / (60 * 60 * 24))
+    end
+  end
+
+  @doc """
+  True if the user is active.
+  """
+  def active_user?(nil), do: false
+  def active_user?(%User{deactivated_at: deactivated_at}), do: is_nil(deactivated_at)
 
   ## User registration
 
@@ -446,15 +503,18 @@ defmodule Banchan.Accounts do
 
                     _ ->
                       {:ok, nil}
-                  end) do
-            %DisableHistory{
-              user_id: user.id,
-              disabled_by_id: actor.id,
-              disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-              lifting_job_id: job && job.id
-            }
-            |> DisableHistory.disable_changeset(attrs)
-            |> Repo.insert()
+                  end),
+               {:ok, disable_history} <-
+                 %DisableHistory{
+                   user_id: user.id,
+                   disabled_by_id: actor.id,
+                   disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+                   lifting_job_id: job && job.id
+                 }
+                 |> DisableHistory.disable_changeset(attrs)
+                 |> Repo.insert(),
+               {:ok, _} <- logout_user(user) do
+            {:ok, disable_history}
           end
         end)
 
@@ -503,16 +563,6 @@ defmodule Banchan.Accounts do
     else
       {:error, :unauthorized}
     end
-  end
-
-  @doc """
-  Utility for determining whether an actor can modify a target user. Used for
-  allowing admins to modify user-only stuff.
-  """
-  def can_modify_user?(%User{} = actor, %User{} = target) do
-    actor.id == target.id ||
-      :admin in actor.roles ||
-      (:mod in actor.roles && :admin not in target.roles)
   end
 
   ## Settings and Profile
@@ -899,21 +949,30 @@ defmodule Banchan.Accounts do
   """
   def logout_user(%User{} = user) do
     # Delete all user tokens
-    Repo.delete_all(UserToken.user_and_contexts_query(user, :all))
+    case Repo.delete_all(UserToken.user_and_contexts_query(user, :all)) do
+      {1, _} ->
+        # Broadcast to all LiveViews to immediately disconnect the user
+        Phoenix.PubSub.broadcast_from(
+          @pubsub,
+          self(),
+          UserAuth.pubsub_topic(),
+          %Phoenix.Socket.Broadcast{
+            topic: UserAuth.pubsub_topic(),
+            event: "logout_user",
+            payload: %{
+              user: user
+            }
+          }
+        )
 
-    # Broadcast to all LiveViews to immediately disconnect the user
-    Phoenix.PubSub.broadcast_from(
-      @pubsub,
-      self(),
-      UserAuth.pubsub_topic(),
-      %Phoenix.Socket.Broadcast{
-        topic: UserAuth.pubsub_topic(),
-        event: "logout_user",
-        payload: %{
-          user: user
-        }
-      }
-    )
+        {:ok, user}
+
+      {0, _} ->
+        {:ok, user}
+
+      {_, _} ->
+        {:error, :too_many_logouts}
+    end
   end
 
   @doc """
@@ -1030,5 +1089,75 @@ defmodule Banchan.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  ## Deletion/Deactivation
+
+  @doc """
+  Reactivates a previously-deactivated user, preventing them from getting deleted.
+  """
+  def reactivate_user(%User{} = actor, %User{} = user) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+
+        if actor.id == user.id || :admin in actor.roles do
+          user |> User.reactivate_changeset() |> Repo.update(returning: true)
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
+  end
+
+  @doc """
+  Deactivates a user, scheduling them for deletion, but retaining user data.
+  """
+  def deactivate_user(%User{} = actor, %User{} = user, password) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+
+        if actor.id == user.id || :admin in actor.roles do
+          with {:ok, user} <-
+                 user
+                 |> User.deactivate_changeset()
+                 |> then(fn changeset ->
+                   # NB(@zkat): Users without emails are OAuth users. They also
+                   # do not have passwords. So we just skip the password check.
+                   if user.email do
+                     User.validate_current_password(changeset, password)
+                   else
+                     changeset
+                   end
+                 end)
+                 |> Repo.update(returning: true),
+               {:ok, _} <- logout_user(user) do
+            {:ok, user}
+          end
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
+  end
+
+  @doc """
+  Prunes all users that were deactivated more than 30 days ago.
+
+  Database constraints will take care of nilifying foreign keys or cascading
+  deletions.
+  """
+  def prune_users do
+    now = NaiveDateTime.utc_now()
+
+    from(
+      u in User,
+      where: not is_nil(u.deactivated_at),
+      where: u.deactivated_at < datetime_add(^now, -30, "day")
+    )
+    |> Repo.delete_all()
   end
 end

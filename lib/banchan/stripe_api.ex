@@ -83,4 +83,9 @@ defmodule Banchan.StripeAPI do
   def create_login_link(id, params) do
     Stripe.LoginLink.create(id, params)
   end
+
+  @impl Banchan.StripeAPI.Base
+  def delete_account(id) do
+    Stripe.Account.delete(id)
+  end
 end

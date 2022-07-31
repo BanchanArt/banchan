@@ -72,6 +72,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                   options: [
                     %OfferingOption{
                       name: "Base Price",
+                      description: "Base price, without add-ons",
                       price: Money.new(0, socket.assigns.studio.default_currency),
                       default: true,
                       sticky: true
@@ -123,8 +124,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
       {:ok, _} =
         Offerings.archive_offering(
           socket.assigns.current_user,
-          %Offering{id: data.id},
-          socket.assigns.current_user_member?
+          %Offering{id: data.id}
         )
 
       {:noreply,
@@ -206,6 +206,36 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   end
 
   @impl true
+  def handle_event("delete_offering", _, socket) do
+    case Offerings.delete_offering(socket.assigns.current_user, socket.assigns.offering) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Offering successfully deleted.")
+         |> push_redirect(
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+
+      {:error, _} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "An error occurred while trying to delete this offering. Wait a bit and try again."
+         )
+         |> push_redirect(
+           to:
+             Routes.studio_offerings_edit_path(
+               Endpoint,
+               :edit,
+               socket.assigns.studio.handle,
+               socket.assigns.offering.type
+             )
+         )}
+    end
+  end
+
+  @impl true
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_event("submit", %{"offering" => offering}, socket) do
     offering = moneyfy_offering(offering)
@@ -215,9 +245,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         {:ok,
          Offerings.make_card_image!(
            socket.assigns.current_user,
+           socket.assigns.studio,
            path,
-           socket.assigns.current_user_member? || :admin in socket.assigns.current_user.roles ||
-             :mod in socket.assigns.current_user.roles,
            entry.client_type,
            entry.client_name
          )}
@@ -230,9 +259,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
          {entry.ref,
           Offerings.make_gallery_image!(
             socket.assigns.current_user,
+            socket.assigns.studio,
             path,
-            socket.assigns.current_user_member? || :admin in socket.assigns.current_user.roles ||
-              :mod in socket.assigns.current_user.roles,
             entry.client_type,
             entry.client_name
           )}}
@@ -259,8 +287,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
              "card_img_id" => (card_image && card_image.id) || offering["card_image_id"]
            }),
            gallery_images,
-           socket.assigns.studio,
-           socket.assigns.current_user_member?
+           socket.assigns.studio
          ) do
       {:ok, offering} ->
         {:noreply,
@@ -279,23 +306,21 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     end
   end
 
-  defp submit_offering(actor, offering, attrs, gallery_images, studio, current_user_member?)
+  defp submit_offering(actor, offering, attrs, gallery_images, studio)
        when is_nil(offering) do
     Offerings.new_offering(
       actor,
       studio,
-      current_user_member?,
       attrs,
       gallery_images
     )
   end
 
-  defp submit_offering(actor, offering, attrs, gallery_images, _studio, current_user_member?)
+  defp submit_offering(actor, offering, attrs, gallery_images, _studio)
        when not is_nil(offering) do
     Offerings.update_offering(
       actor,
       offering,
-      current_user_member?,
       attrs,
       gallery_images
     )
@@ -530,6 +555,21 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             <Button class="btn-error" click="archive" label="Archive" />
           {/if}
         </div>
+        {#if @changeset.data.id}
+          <Collapse id="delete-offering-collapse" class="w-full pt-4">
+            <:header>
+              <div class="font-semibold text-error">Delete</div>
+            </:header>
+            <div class="prose">
+              <p>This operation <strong>can't be reversed</strong>.</p>
+              <p>Deleting an offering will prevent you from being able to edit add-ons in existing commissions, and commissions made with this offering will not be able to link back to it.</p>
+              <p>You will also not be able to create an offering with the same name for <strong>30 days</strong>. If you want to reuse this name, change the offering's type <i>before</i> deletion.</p>
+              <p>If you simply want to prevent new commissions from being created for this offering, please consider archiving it instead.</p>
+              <p>Are you sure you want to delete this offering?</p>
+            </div>
+            <Button click="delete_offering" class="w-full btn-error" label="Confirm" />
+          </Collapse>
+        {/if}
       </div>
     </Form>
     """

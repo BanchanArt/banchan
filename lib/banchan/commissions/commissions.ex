@@ -111,11 +111,11 @@ defmodule Banchan.Commissions do
   end
 
   defp main_dashboard_query(%User{} = user) do
-    from s in Studio,
-      join: c in Commission,
-      on: c.studio_id == s.id,
+    from c in Commission,
       as: :commission,
-      join: artist in assoc(s, :artists),
+      left_join: s in assoc(c, :studio),
+      as: :studio,
+      left_join: artist in assoc(s, :artists),
       as: :artist,
       join: u in User,
       as: :current_user,
@@ -123,31 +123,17 @@ defmodule Banchan.Commissions do
       left_join: a in CommissionArchived,
       on: a.commission_id == c.id and a.user_id == u.id,
       as: :archived,
-      join: client in assoc(c, :client),
+      left_join: client in assoc(c, :client),
+      on: is_nil(client.deactivated_at),
       as: :client,
       join: e in assoc(c, :events),
       as: :events,
       group_by: [c.id, s.id, client.id, client.handle, s.handle, s.name, a.archived],
       # order_by: {:desc, max(e.inserted_at)},
       select: %{
-        commission: %Commission{
-          id: c.id,
-          title: c.title,
-          status: c.status,
-          public_id: c.public_id,
-          inserted_at: c.inserted_at
-        },
-        client: %User{
-          id: client.id,
-          name: client.name,
-          handle: client.handle,
-          pfp_thumb_id: client.pfp_thumb_id
-        },
-        studio: %Studio{
-          id: s.id,
-          handle: s.handle,
-          name: s.name
-        },
+        commission: c,
+        client: client,
+        studio: s,
         archived: coalesce(a.archived, false),
         updated_at: max(e.inserted_at)
       }
@@ -284,8 +270,8 @@ defmodule Banchan.Commissions do
   def get_commission!(public_id, current_user) do
     Repo.one!(
       from c in Commission,
-        join: s in assoc(c, :studio),
-        join: artist in assoc(s, :artists),
+        left_join: s in assoc(c, :studio),
+        left_join: artist in assoc(s, :artists),
         join: u in User,
         on: u.id == ^current_user.id,
         where:
@@ -550,6 +536,7 @@ defmodule Banchan.Commissions do
     {:ok, ret} =
       Repo.transaction(fn ->
         actor = actor |> Repo.preload(:disable_info, force: true)
+        studio = studio |> Repo.reload()
         offering = offering |> Repo.reload()
         available_proposal_count = Offerings.offering_available_proposals(offering)
         available_slot_count = Offerings.offering_available_slots(offering, true)
@@ -558,10 +545,13 @@ defmodule Banchan.Commissions do
           Studios.user_blocked?(studio, actor) ->
             {:error, :blocked}
 
-          !is_nil(actor.disable_info) ->
+          actor.disable_info ->
             {:error, :disabled}
 
-          !is_nil(offering.archived_at) ->
+          studio.archived_at ->
+            {:error, :studio_archived}
+
+          offering.archived_at ->
             {:error, :offering_archived}
 
           !offering.open ->
@@ -570,10 +560,10 @@ defmodule Banchan.Commissions do
           is_nil(actor.confirmed_at) ->
             {:error, :not_confirmed}
 
-          !is_nil(available_proposal_count) && available_proposal_count <= 0 ->
+          available_proposal_count && available_proposal_count <= 0 ->
             {:error, :no_proposals_available}
 
-          !is_nil(available_slot_count) && available_slot_count <= 0 ->
+          available_slot_count && available_slot_count <= 0 ->
             {:error, :no_slots_available}
 
           true ->
@@ -592,7 +582,7 @@ defmodule Banchan.Commissions do
     if close do
       # NB(zkat): We pretend we're a studio member here because we're doing
       # this on behalf of the studio. It's safe.
-      {:ok, offering} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
+      {:ok, offering} = Offerings.update_offering(nil, offering, %{open: false}, nil)
       offering
     else
       offering
@@ -687,7 +677,8 @@ defmodule Banchan.Commissions do
           |> Event.changeset(attrs)
 
         with :ok <-
-               (if Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) do
+               (if commission.studio_id &&
+                     Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) do
                   {:error, :blocked}
                 else
                   :ok
@@ -750,6 +741,7 @@ defmodule Banchan.Commissions do
 
   ## Edit/Update
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp check_actor_edit_access(%User{} = actor, %Commission{} = commission) do
     actor = actor |> Repo.reload() |> Repo.preload(:disable_info, force: true)
 
@@ -757,11 +749,12 @@ defmodule Banchan.Commissions do
       !is_nil(actor.disable_info) ->
         {:error, :disabled}
 
-      Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) ->
+      commission.studio_id && Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) ->
         {:error, :blocked}
 
       actor.id != commission.client_id &&
-        !Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id}) &&
+        !(commission.studio_id &&
+              Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id})) &&
         :admin not in actor.roles && :mod not in actor.roles ->
         {:error, :unauthorized}
 
@@ -838,7 +831,7 @@ defmodule Banchan.Commissions do
               if close do
                 # NB(zkat): We pretend we're a studio member here because we're doing
                 # this on behalf of the studio. It's safe.
-                {:ok, _} = Offerings.update_offering(nil, offering, true, %{open: false}, nil)
+                {:ok, _} = Offerings.update_offering(nil, offering, %{open: false}, nil)
               end
             end
 
@@ -928,7 +921,8 @@ defmodule Banchan.Commissions do
        ) do
     {:ok, _} =
       Repo.transaction(fn ->
-        actor_member? = Studios.is_user_in_studio?(actor, %Studio{id: studio_id})
+        actor_member? =
+          !is_nil(studio_id) && Studios.is_user_in_studio?(actor, %Studio{id: studio_id})
 
         true =
           status_transition_allowed?(

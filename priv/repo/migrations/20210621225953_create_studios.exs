@@ -90,6 +90,9 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
     create table(:users_studios, primary_key: false) do
       add :user_id, references(:users), null: false
       add :studio_id, references(:studios), null: false
+
+      # TODO: add these in.
+      # timestamps()
     end
 
     create unique_index(:users_studios, [:user_id, :studio_id])

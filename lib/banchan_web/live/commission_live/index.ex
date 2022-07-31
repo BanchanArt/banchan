@@ -24,6 +24,7 @@ defmodule BanchanWeb.CommissionLive do
   ]
 
   @impl true
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_params(params, uri, socket) do
     socket =
       socket
@@ -77,7 +78,7 @@ defmodule BanchanWeb.CommissionLive do
               if Map.has_key?(acc, ev.actor_id) do
                 acc
               else
-                Map.put(acc, ev.actor_id, Accounts.get_user!(ev.actor_id))
+                Map.put(acc, ev.actor_id, Accounts.get_user(ev.actor_id))
               end
             end)
 
@@ -85,9 +86,10 @@ defmodule BanchanWeb.CommissionLive do
             commission: comm,
             users: users,
             current_user_member?:
-              Studios.is_user_in_studio?(socket.assigns.current_user, %Studios.Studio{
-                id: comm.studio_id
-              })
+              !is_nil(comm.studio_id) &&
+                Studios.is_user_in_studio?(socket.assigns.current_user, %Studios.Studio{
+                  id: comm.studio_id
+                })
           )
 
         _ ->

@@ -23,6 +23,8 @@ defmodule Banchan.Studios.Studio do
     field :featured, :boolean, default: false
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
+    field :archived_at, :naive_datetime
+    field :deleted_at, :naive_datetime
 
     # Moderation etc
     field :moderation_notes, :string
@@ -44,7 +46,10 @@ defmodule Banchan.Studios.Studio do
       on_replace: :delete_if_exists,
       preload_order: [asc: :index]
 
-    many_to_many :artists, Banchan.Accounts.User, join_through: "users_studios"
+    many_to_many :artists, Banchan.Accounts.User,
+      join_through: "users_studios",
+      where: [deactivated_at: nil]
+
     many_to_many :followers, Banchan.Accounts.User, join_through: "studio_followers"
 
     has_many :offerings, Banchan.Offerings.Offering, preload_order: [:asc, :index]
@@ -132,6 +137,21 @@ defmodule Banchan.Studios.Studio do
     |> cast(attrs, [:platform_fee, :moderation_notes])
     |> validate_number(:platform_fee, less_than: 1)
     |> validate_markdown(:moderation_notes)
+  end
+
+  def archive_changeset(studio) do
+    change(studio, archived_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+  end
+
+  def unarchive_changeset(studio) do
+    change(studio, archived_at: nil)
+  end
+
+  @doc """
+  Changeset for soft-deleting a Studio.
+  """
+  def deletion_changeset(studio) do
+    change(studio, deleted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
   end
 
   defp validate_default_currency(changeset, default_field, currencies_field)

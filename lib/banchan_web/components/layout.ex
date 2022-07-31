@@ -6,6 +6,8 @@ defmodule BanchanWeb.Components.Layout do
   """
   use BanchanWeb, :component
 
+  alias Banchan.Accounts
+
   alias Surface.Components.{Link, LiveRedirect}
 
   alias BanchanWeb.Components.{Flash, Nav}
@@ -74,7 +76,7 @@ defmodule BanchanWeb.Components.Layout do
                 </span>
               </LiveRedirect>
             </li>
-            {#if @current_user && :admin in @current_user.roles}
+            {#if Accounts.active_user?(@current_user) && :admin in @current_user.roles}
               <li class="menu-title">
                 <span>Admin</span>
               </li>
@@ -106,7 +108,7 @@ defmodule BanchanWeb.Components.Layout do
             <li class="menu-title">
               <span>Art</span>
             </li>
-            <li :if={@current_user}>
+            <li :if={Accounts.active_user?(@current_user)}>
               <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
                 <span>
                   <i class="fas fa-palette" />
@@ -141,7 +143,7 @@ defmodule BanchanWeb.Components.Layout do
             <li class="menu-title">
               <span>Account</span>
             </li>
-            {#if @current_user}
+            {#if Accounts.active_user?(@current_user)}
               <li>
                 <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
                   <span>

@@ -4,6 +4,8 @@ defmodule BanchanWeb.Components.Avatar do
   """
   use BanchanWeb, :component
 
+  alias Banchan.Accounts
+
   alias Surface.Components.LiveRedirect
 
   prop user, :struct, required: true
@@ -13,9 +15,15 @@ defmodule BanchanWeb.Components.Avatar do
 
   def render(assigns) do
     ~F"""
-    <div class={"avatar", placeholder: !@user.pfp_thumb_id}>
-      <div class={"rounded-full", @class, "bg-neutral-focus text-neutral-content": !@user.pfp_thumb_id}>
-        {#if @link}
+    <div class={"avatar", placeholder: is_nil(@user) || !@user.pfp_thumb_id}>
+      <div class={
+        "rounded-full",
+        @class,
+        "bg-neutral-focus text-neutral-content": is_nil(@user) || !@user.pfp_thumb_id
+      }>
+        {#if !Accounts.active_user?(@user)}
+          <div class="w-full h-full bg-neutral-focus" />
+        {#elseif @link}
           <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @user.handle)}>
             {#if @thumb && @user.pfp_thumb_id}
               <img src={Routes.public_image_path(Endpoint, :image, :user_pfp_thumb, @user.pfp_thumb_id)}>

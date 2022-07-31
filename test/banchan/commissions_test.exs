@@ -104,7 +104,6 @@ defmodule Banchan.CommissionsTest do
         Offerings.update_offering(
           user,
           offering,
-          true,
           %{
             slots: 1
           },
@@ -122,7 +121,6 @@ defmodule Banchan.CommissionsTest do
         Offerings.update_offering(
           user,
           offering,
-          true,
           %{
             slots: 2
           },
@@ -144,7 +142,6 @@ defmodule Banchan.CommissionsTest do
                Offerings.update_offering(
                  user,
                  offering |> Repo.reload(),
-                 true,
                  %{open: true},
                  nil
                )
