@@ -1282,6 +1282,7 @@ defmodule Banchan.Studios do
                end),
              # Check balances again to clear up any races.
              {:ok, _balance} <- check_balance_empty(studio),
+             {:ok, _} <- delete_stripe_account(studio),
              # Mark the studio for deletion.
              {:ok, studio} <-
                studio
@@ -1320,6 +1321,10 @@ defmodule Banchan.Studios do
     else
       {:error, :invalid_password}
     end
+  end
+
+  defp delete_stripe_account(%Studio{} = studio) do
+    stripe_mod().delete_account(studio.stripe_id)
   end
 
   @doc """
