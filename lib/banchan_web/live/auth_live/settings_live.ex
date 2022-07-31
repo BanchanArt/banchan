@@ -11,6 +11,7 @@ defmodule BanchanWeb.SettingsLive do
   alias Banchan.Notifications.UserNotificationSettings
 
   alias BanchanWeb.AuthLive.Components.AuthLayout
+  alias BanchanWeb.Components.Collapse
   alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
 
@@ -314,6 +315,28 @@ defmodule BanchanWeb.SettingsLive do
     end
   end
 
+  def handle_event("submit_deactivate", val, socket) do
+    case Accounts.deactivate_user(
+           socket.assigns.current_user,
+           socket.assigns.current_user,
+           val["deactivate"] && val["deactivate"]["password"]
+         ) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :info,
+           "Your account has been deactivated."
+         )
+         |> redirect(to: Routes.home_path(Endpoint, :index))}
+
+      {:error, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Something went wrong. Please try again later.")}
+    end
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -479,6 +502,29 @@ defmodule BanchanWeb.SettingsLive do
         />
         <Submit class="w-full" changeset={@maturity_changeset} label="Save" />
       </Form>
+      <div class="divider" />
+      <h3 class="text-lg">⚠️Deactivate Account⚠️</h3>
+      <div class="prose">
+        <p>You can deactivate your account. Existing commissions (and their comments), uploads, studios, etc. will be retained, but with your account anonymized, and your user profile will be disabled.</p>
+        <p>If you want your studios to be deleted as well, <strong>you must do that before  deactivating</strong>.  Otherwise, they'll just stick around forever.</p>
+        <p>You can reverse this decision and reactivate your account at any time in the next 30 days. After 30 days, your account will be permanently deleted and you will no longer be able to access it or recover it.</p>
+      </div>
+      <Collapse id="deactivate-account-collapse" class="w-full pt-4">
+        <:header>
+          <div class="font-semibold text-error">Deactivate</div>
+        </:header>
+        <Form class="flex flex-col gap-4" for={:deactivate} as={:deactivate} submit="submit_deactivate">
+          <p>
+            You will have 30 days to change your mind.
+          </p>
+          <p class="py-2 font-semibold">Are you sure?</p>
+
+          {#if @current_user.email}
+            <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+          {/if}
+          <Submit class="w-full btn-error" label="Confirm" />
+        </Form>
+      </Collapse>
     </AuthLayout>
     """
   end

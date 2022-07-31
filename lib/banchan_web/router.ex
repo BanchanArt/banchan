@@ -189,6 +189,14 @@ defmodule BanchanWeb.Router do
     end
   end
 
+  scope "/", BanchanWeb do
+    live_session :deactivated, on_mount: {BanchanWeb.UserLiveAuth, :deactivated} do
+      pipe_through([:browser, :require_authed])
+
+      live("/reactivate", ReactivateLive, :show)
+    end
+  end
+
   scope "/auth", BanchanWeb do
     pipe_through :browser
 

@@ -89,7 +89,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
           ALTER TABLE studio_payouts
             DROP CONSTRAINT studio_payouts_studio_id_fkey,
             ADD CONSTRAINT studio_payouts_studio_id_fkey
-            FOREIGN KEY (studio_id) REFERENCES users(id) ON DELETE CASCADE;
+            FOREIGN KEY (studio_id) REFERENCES studios(id) ON DELETE CASCADE;
           """,
           [],
           log: :info
@@ -262,7 +262,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
           ALTER TABLE studio_payouts
             DROP CONSTRAINT studio_payouts_studio_id_fkey,
             ADD CONSTRAINT studio_payouts_studio_id_fkey
-            FOREIGN KEY (studio_id) REFERENCES users(id);
+            FOREIGN KEY (studio_id) REFERENCES studios(id);
           """,
           [],
           log: :info

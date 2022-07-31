@@ -113,7 +113,7 @@ defmodule Banchan.Accounts do
   def get_user_by_handle!(handle) when is_binary(handle) do
     Repo.one!(
       from u in User,
-        where: u.handle == ^handle,
+        where: u.handle == ^handle and is_nil(u.deactivated_at),
         preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
     )
   end
@@ -190,6 +190,30 @@ defmodule Banchan.Accounts do
       :admin in actor.roles ||
       (:mod in actor.roles && :admin not in target.roles)
   end
+
+  @doc """
+  Number of days until full deletion of a deactivated user. It's an error to
+  call this on a non-deactivated user.
+  """
+  def days_until_deletion(%User{deactivated_at: deactivated_at})
+      when not is_nil(deactivated_at) do
+    case NaiveDateTime.diff(
+           NaiveDateTime.add(deactivated_at, 60 * 60 * 24 * 30, :seconds),
+           NaiveDateTime.utc_now()
+         ) do
+      secs when secs <= 0 ->
+        0
+
+      secs ->
+        floor(secs / (60 * 60 * 24))
+    end
+  end
+
+  @doc """
+  True if the user is active.
+  """
+  def active_user?(nil), do: false
+  def active_user?(%User{deactivated_at: deactivated_at}), do: is_nil(deactivated_at)
 
   ## User registration
 
@@ -1047,18 +1071,48 @@ defmodule Banchan.Accounts do
     end
   end
 
-  ## Deletion
+  ## Deletion/Deactivation
 
   @doc """
-  Deactivates a user, scheduling them for deletion, but retaining user data.
+  Reactivates a previously-deactivated user, preventing them from getting deleted.
   """
-  def deactivate_user(%User{} = actor, %User{} = user) do
+  def reactivate_user(%User{} = actor, %User{} = user) do
     {:ok, ret} =
       Repo.transaction(fn ->
         actor = actor |> Repo.reload()
 
         if actor.id == user.id || :admin in actor.roles do
-          with {:ok, user} <- user |> User.deactivate_changeset() |> Repo.update(returning: true),
+          user |> User.reactivate_changeset() |> Repo.update(returning: true)
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
+  end
+
+  @doc """
+  Deactivates a user, scheduling them for deletion, but retaining user data.
+  """
+  def deactivate_user(%User{} = actor, %User{} = user, password) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+
+        if actor.id == user.id || :admin in actor.roles do
+          with {:ok, user} <-
+                 user
+                 |> User.deactivate_changeset()
+                 |> then(fn changeset ->
+                   # NB(@zkat): Users without emails are OAuth users. They also
+                   # do not have passwords. So we just skip the password check.
+                   if user.email do
+                     User.validate_current_password(changeset, password)
+                   else
+                     changeset
+                   end
+                 end)
+                 |> Repo.update(returning: true),
                {:ok, _} <- logout_user(user) do
             {:ok, user}
           end
@@ -1074,8 +1128,8 @@ defmodule Banchan.Accounts do
   Deletes a user and all of its data. This is a very destructive operation and
   should only be done as part of deactivation cleanup by a cron job!
 
-  All existing references to this user will be nilified and the user will
-  appear as a "ghost" wherever it previously interacted.
+  Database constraints will take care of nilifying foreign keys or cascading
+  deletions.
   """
   def delete_user(%User{} = user) do
     Repo.delete(user)
