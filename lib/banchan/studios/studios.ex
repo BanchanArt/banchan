@@ -13,6 +13,7 @@ defmodule Banchan.Studios do
   require Logger
 
   alias Banchan.Accounts.User
+  alias Banchan.Commissions
   alias Banchan.Commissions.Invoice
   alias Banchan.Repo
 
@@ -482,6 +483,8 @@ defmodule Banchan.Studios do
       iex> is_user_in_studio?(user, studio)
       true
   """
+  def is_user_in_studio?(user, studio) when is_nil(user) or is_nil(studio), do: false
+
   def is_user_in_studio?(%User{id: user_id}, %Studio{id: studio_id}) do
     Repo.exists?(
       from us in "users_studios", where: us.user_id == ^user_id and us.studio_id == ^studio_id
@@ -528,71 +531,72 @@ defmodule Banchan.Studios do
   Gets account balance stats for a studio, including how much is available on
   Stripe, how much has been released and available for payout, etc.
   """
-  def get_banchan_balance!(%Studio{} = studio) do
-    {:ok, stripe_balance} =
-      stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id})
+  def get_banchan_balance(%Studio{} = studio) do
+    with {:ok, stripe_balance} <-
+           stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id}) do
+      stripe_available =
+        stripe_balance.available
+        |> Enum.map(&Money.new(&1.amount, String.to_atom(String.upcase(&1.currency))))
+        |> Enum.sort()
 
-    stripe_available =
-      stripe_balance.available
-      |> Enum.map(&Money.new(&1.amount, String.to_atom(String.upcase(&1.currency))))
-      |> Enum.sort()
+      stripe_pending =
+        stripe_balance.pending
+        |> Enum.map(&Money.new(&1.amount, String.to_atom(String.upcase(&1.currency))))
+        |> Enum.sort()
 
-    stripe_pending =
-      stripe_balance.pending
-      |> Enum.map(&Money.new(&1.amount, String.to_atom(String.upcase(&1.currency))))
-      |> Enum.sort()
-
-    results =
-      from(i in Invoice,
-        join: c in assoc(i, :commission),
-        left_join: p in assoc(i, :payouts),
-        where:
-          c.studio_id == ^studio.id and
-            (i.status == :succeeded or i.status == :released),
-        group_by: [
-          fragment("CASE WHEN ? = 'pending' OR ? = 'in_transit' THEN 'on_the_way'
+      results =
+        from(i in Invoice,
+          join: c in assoc(i, :commission),
+          left_join: p in assoc(i, :payouts),
+          where:
+            c.studio_id == ^studio.id and
+              (i.status == :succeeded or i.status == :released),
+          group_by: [
+            fragment("CASE WHEN ? = 'pending' OR ? = 'in_transit' THEN 'on_the_way'
                   WHEN ? = 'paid' THEN 'paid'
                   WHEN ? = 'released' THEN 'released'
                   ELSE 'held_back'
                 END", p.status, p.status, p.status, i.status),
-          fragment("(?).currency", i.total_transferred)
-        ],
-        select: %{
-          status:
-            type(
-              fragment("CASE WHEN ? = 'pending' OR ? = 'in_transit' THEN 'on_the_way'
+            fragment("(?).currency", i.total_transferred)
+          ],
+          select: %{
+            status:
+              type(
+                fragment("CASE WHEN ? = 'pending' OR ? = 'in_transit' THEN 'on_the_way'
                   WHEN ? = 'paid' THEN 'paid'
                   WHEN ? = 'released' THEN 'released'
                   ELSE 'held_back'
                 END", p.status, p.status, p.status, i.status),
-              :string
-            ),
-          final:
-            type(
-              fragment(
-                "(sum((?).amount), (?).currency)",
-                i.total_transferred,
-                i.total_transferred
+                :string
               ),
-              Money.Ecto.Composite.Type
-            )
-        }
-      )
-      |> Repo.all()
+            final:
+              type(
+                fragment(
+                  "(sum((?).amount), (?).currency)",
+                  i.total_transferred,
+                  i.total_transferred
+                ),
+                Money.Ecto.Composite.Type
+              )
+          }
+        )
+        |> Repo.all()
 
-    {released, held_back, on_the_way, paid} = get_net_values(results)
+      {released, held_back, on_the_way, paid} = get_net_values(results)
 
-    available = get_released_available(stripe_available, released)
+      available = get_released_available(stripe_available, released)
 
-    %{
-      stripe_available: stripe_available,
-      stripe_pending: stripe_pending,
-      held_back: held_back,
-      released: released,
-      on_the_way: on_the_way,
-      paid: paid,
-      available: available
-    }
+      {:ok,
+       %{
+         stripe_available: stripe_available,
+         stripe_pending: stripe_pending,
+         held_back: held_back,
+         released: released,
+         on_the_way: on_the_way,
+         paid: paid,
+         available: available
+       }}
+    end
   end
 
   defp get_net_values(results) do
@@ -687,6 +691,12 @@ defmodule Banchan.Studios do
     )
   end
 
+  @doc """
+  Returns the default currency for a studio. Takes into account global default.
+  """
+  def default_currency(nil), do: :USD
+  def default_currency(%Studio{default_currency: default_currency}), do: default_currency
+
   ## Updating/Editing
 
   @doc """
@@ -705,14 +715,10 @@ defmodule Banchan.Studios do
   def update_studio_settings(%User{} = actor, %Studio{} = studio, _, attrs) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor = Repo.reload(actor)
-
-        if is_user_in_studio?(actor, studio) || :admin in actor.roles || :mod in actor.roles do
+        with {:ok, _actor} <- check_studio_member(studio, actor) do
           studio
           |> Studio.settings_changeset(attrs)
           |> Repo.update(returning: true)
-        else
-          {:error, :unauthorized}
         end
       end)
 
@@ -735,9 +741,7 @@ defmodule Banchan.Studios do
   def update_studio_profile(%User{} = actor, %Studio{} = studio, _, attrs) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor = Repo.reload(actor)
-
-        if is_user_in_studio?(actor, studio) || :admin in actor.roles || :mod in actor.roles do
+        with {:ok, _actor} <- check_studio_member(studio, actor) do
           changeset =
             studio
             |> Studio.profile_changeset(attrs)
@@ -764,8 +768,6 @@ defmodule Banchan.Studios do
           end
 
           changeset |> Repo.update(returning: true)
-        else
-          {:error, :unauthorized}
         end
       end)
 
@@ -839,9 +841,7 @@ defmodule Banchan.Studios do
   def update_portfolio(%User{} = actor, %Studio{} = studio, true, portfolio_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor = actor |> Repo.reload()
-
-        if is_user_in_studio?(actor, studio) || :admin in actor.roles || :mod in actor.roles do
+        with {:ok, _actor} <- check_studio_member(studio, actor) do
           portfolio_images =
             (portfolio_images || [])
             |> Enum.with_index()
@@ -856,8 +856,6 @@ defmodule Banchan.Studios do
           |> Repo.preload(:portfolio_imgs)
           |> Studio.portfolio_changeset(portfolio_images)
           |> Repo.update(returning: true)
-        else
-          {:error, :unauthorized}
         end
       end)
 
@@ -996,7 +994,7 @@ defmodule Banchan.Studios do
   def block_user(%User{} = actor, %Studio{} = studio, %User{} = user, attrs) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        if is_user_in_studio?(actor, studio) do
+        with {:ok, _actor} <- check_studio_member(studio, actor, []) do
           %StudioBlock{
             studio_id: studio.id,
             user_id: user.id
@@ -1006,8 +1004,6 @@ defmodule Banchan.Studios do
             on_conflict: {:replace, [:reason]},
             conflict_target: [:studio_id, :user_id]
           )
-        else
-          {:error, :unauthorized}
         end
       end)
 
@@ -1021,13 +1017,11 @@ defmodule Banchan.Studios do
   def unblock_user(%User{} = actor, %Studio{} = studio, %User{} = user) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        if is_user_in_studio?(actor, studio) do
+        with {:ok, _actor} <- check_studio_member(studio, actor) do
           Repo.delete_all(
             from sb in StudioBlock,
               where: sb.studio_id == ^studio.id and sb.user_id == ^user.id
           )
-        else
-          {:error, :unauthorized}
         end
       end)
 
@@ -1191,7 +1185,7 @@ defmodule Banchan.Studios do
   Cancels a pending payout.
   """
   def cancel_payout(%User{} = actor, %Studio{} = studio, payout_id) do
-    if is_user_in_studio?(actor, studio) do
+    with {:ok, _} <- check_studio_member(studio, actor) do
       case stripe_mod().cancel_payout(payout_id,
              headers: %{"Stripe-Account" => studio.stripe_id}
            ) do
@@ -1209,8 +1203,6 @@ defmodule Banchan.Studios do
 
           {:error, err}
       end
-    else
-      {:error, :unauthorized}
     end
   end
 
@@ -1264,10 +1256,70 @@ defmodule Banchan.Studios do
   Soft-delete a Studio by marking it for deletion. It will be pruned in 30
   days.
   """
-  def delete_studio(studio) do
-    studio
-    |> Studio.deletion_changeset()
-    |> Repo.update(returning: true)
+  def delete_studio(%User{} = actor, %Studio{} = studio, password) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        with {:ok, actor} <- check_studio_member(studio, actor, [:admin]),
+             {:ok, _} <- check_password(actor, password),
+             # Precheck that all our balances are indeed empty.
+             {:ok, _balance} <- check_balance_empty(studio),
+             # Cancel all open invoices.
+             :ok <-
+               from(i in Invoice,
+                 join: c in assoc(i, :commission),
+                 where: c.studio_id == ^studio.id,
+                 where: i.status in [:pending, :submitted]
+               )
+               |> Repo.stream()
+               |> Enum.reduce_while(:ok, fn invoice, :ok ->
+                 case Commissions.expire_payment(actor, invoice, true) do
+                   {:ok, _} ->
+                     {:cont, :ok}
+
+                   {:error, err} ->
+                     {:halt, {:error, err}}
+                 end
+               end),
+             # Check balances again to clear up any races.
+             {:ok, _balance} <- check_balance_empty(studio),
+             # Mark the studio for deletion.
+             {:ok, studio} <-
+               studio
+               |> Studio.deletion_changeset()
+               |> Repo.update(returning: true) do
+          Notifications.studio_deleted(actor, studio)
+          {:ok, studio}
+        end
+      end)
+
+    ret
+  end
+
+  defp check_balance_empty(%Studio{} = studio) do
+    with {:ok, balance} <- get_banchan_balance(studio) do
+      if has_balance?(balance.stripe_available) ||
+           has_balance?(balance.stripe_pending) ||
+           has_balance?(balance.held_back) ||
+           has_balance?(balance.released) ||
+           has_balance?(balance.on_the_way) ||
+           has_balance?(balance.available) do
+        {:error, :pending_funds}
+      else
+        {:ok, balance}
+      end
+    end
+  end
+
+  defp has_balance?(balance) do
+    Enum.any?(balance, &(&1.amount > 0))
+  end
+
+  defp check_password(%User{} = user, password) do
+    if (user.email && User.valid_password?(user, password)) || is_nil(user.email) do
+      {:ok, user}
+    else
+      {:error, :invalid_password}
+    end
   end
 
   @doc """
@@ -1291,5 +1343,15 @@ defmodule Banchan.Studios do
 
   defp stripe_mod do
     Application.get_env(:banchan, :stripe_mod)
+  end
+
+  defp check_studio_member(%Studio{} = studio, %User{} = actor, roles \\ [:admin, :mod]) do
+    actor = actor |> Repo.reload()
+
+    if is_user_in_studio?(actor, studio) || Enum.any?(roles, &(&1 in actor.roles)) do
+      {:ok, actor}
+    else
+      {:error, :unauthorized}
+    end
   end
 end

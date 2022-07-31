@@ -36,7 +36,13 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
             <div class="inline">
               <div class="self-center inline">
                 Submitted to
-                <div class="inline font-bold">{@result.studio.name}</div>
+                <div class="inline font-bold">
+                  {#if @result.studio && is_nil(@result.studio.deleted_at)}
+                    {@result.studio.name}
+                  {#else}
+                    (Deleted Studio)
+                  {/if}
+                </div>
                 by
               </div>
               <div class="self-center inline">

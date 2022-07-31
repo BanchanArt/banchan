@@ -218,7 +218,7 @@ defmodule Banchan.Accounts do
   def days_until_deletion(%User{deactivated_at: deactivated_at})
       when not is_nil(deactivated_at) do
     case NaiveDateTime.diff(
-           NaiveDateTime.add(deactivated_at, 60 * 60 * 24 * 30, :seconds),
+           NaiveDateTime.add(deactivated_at, 60 * 60 * 24 * 30, :second),
            NaiveDateTime.utc_now()
          ) do
       secs when secs <= 0 ->

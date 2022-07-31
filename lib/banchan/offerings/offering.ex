@@ -99,6 +99,6 @@ defmodule Banchan.Offerings.Offering do
   Changeset for soft-deleting an offering.
   """
   def deletion_changeset(offering) do
-    change(offering, deleted_at: NaiveDateTime.utc_now())
+    change(offering, deleted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
   end
 end

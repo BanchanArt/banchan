@@ -7,7 +7,9 @@ defmodule Banchan.Studios.Notifications do
   alias Banchan.Accounts.User
   alias Banchan.Notifications
   alias Banchan.Repo
+  alias Banchan.Studios
   alias Banchan.Studios.{Payout, Studio, StudioFollower, StudioSubscription}
+  alias Banchan.Workers.Mailer
 
   @pubsub Banchan.PubSub
 
@@ -171,6 +173,27 @@ defmodule Banchan.Studios.Notifications do
           payload: payout
         }
       )
+    end)
+  end
+
+  @doc """
+  Notifies studio members that a studio has been deleted successfully.
+  """
+  def studio_deleted(%User{} = actor, %Studio{} = studio) do
+    Studios.list_studio_members(studio)
+    |> Enum.each(fn member ->
+      if member.email do
+        Mailer.new_email(
+          member.email,
+          "Your Studio has been successfully deleted",
+          BanchanWeb.Email.StudiosView,
+          :studio_deleted,
+          actor: actor,
+          member: member,
+          studio: studio
+        )
+        |> Mailer.deliver()
+      end
     end)
   end
 end

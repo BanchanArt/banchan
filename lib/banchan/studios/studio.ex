@@ -142,7 +142,7 @@ defmodule Banchan.Studios.Studio do
   Changeset for soft-deleting a Studio.
   """
   def deletion_changeset(studio) do
-    change(studio, deleted_at: NaiveDateTime.utc_now())
+    change(studio, deleted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
   end
 
   defp validate_default_currency(changeset, default_field, currencies_field)

@@ -358,7 +358,7 @@ defmodule Banchan.StudiosTest do
          }}
       end)
 
-      balance = Studios.get_banchan_balance!(studio)
+      {:ok, balance} = Studios.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -424,7 +424,7 @@ defmodule Banchan.StudiosTest do
 
       # Payout funds are marked as on_the_way until we get notified by stripe
       # that the payment has been completed.
-      balance = Studios.get_banchan_balance!(studio)
+      {:ok, balance} = Studios.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -465,7 +465,7 @@ defmodule Banchan.StudiosTest do
         failure_message: nil
       })
 
-      balance = Studios.get_banchan_balance!(studio)
+      {:ok, balance} = Studios.get_banchan_balance(studio)
 
       assert [Money.new(0, :USD)] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -526,7 +526,7 @@ defmodule Banchan.StudiosTest do
          }}
       end)
 
-      balance = Studios.get_banchan_balance!(studio)
+      {:ok, balance} = Studios.get_banchan_balance(studio)
 
       assert [Money.new(0, :USD)] == balance.stripe_available
       assert [net] == balance.stripe_pending
@@ -545,7 +545,7 @@ defmodule Banchan.StudiosTest do
       # No money available on Stripe yet, so no payout happens.
       assert {:ok, []} == Studios.payout_studio(artist, studio)
 
-      balance = Studios.get_banchan_balance!(studio)
+      {:ok, balance} = Studios.get_banchan_balance(studio)
 
       assert [Money.new(0, :USD)] == balance.stripe_available
       assert [net] == balance.stripe_pending
@@ -583,7 +583,7 @@ defmodule Banchan.StudiosTest do
 
       # Payout funds are marked as on_the_way until we get notified by stripe
       # that the payment has been completed.
-      balance = Studios.get_banchan_balance!(studio)
+      {:ok, balance} = Studios.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -669,7 +669,7 @@ defmodule Banchan.StudiosTest do
 
       # We don't mark them as failed when the failure was immediate. They just
       # stay "released".
-      balance = Studios.get_banchan_balance!(studio)
+      {:ok, balance} = Studios.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -760,7 +760,7 @@ defmodule Banchan.StudiosTest do
         method: "standard"
       })
 
-      balance = Studios.get_banchan_balance!(studio)
+      {:ok, balance} = Studios.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -882,7 +882,7 @@ defmodule Banchan.StudiosTest do
         failure_message: nil
       })
 
-      balance = Studios.get_banchan_balance!(studio)
+      {:ok, balance} = Studios.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending

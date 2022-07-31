@@ -12,19 +12,25 @@ defmodule BanchanWeb.CommissionLive.Components.OfferingBox do
 
   def render(assigns) do
     ~F"""
-    <LiveRedirect
-      class={@class}
-      to={Routes.offering_show_path(Endpoint, :show, @offering.studio.handle, @offering.type)}
-    >
-      <img
-        :if={!is_nil(@offering.card_img_id)}
-        src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
-        class="aspect-header-image object-cover rounded-box"
-      />
-      <div class="px-2 text-lg">
-        <span class="font-medium">{@offering.name}</span> by {@offering.studio.name}
+    {#if is_nil(@offering) || @offering.deleted_at || @offering.studio.deleted_at}
+      <div class="px-2 text-lg font-medium">
+        (Deleted Offering)
       </div>
-    </LiveRedirect>
+    {#else}
+      <LiveRedirect
+        class={@class}
+        to={Routes.offering_show_path(Endpoint, :show, @offering.studio.handle, @offering.type)}
+      >
+        <img
+          :if={!is_nil(@offering.card_img_id)}
+          src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
+          class="aspect-header-image object-cover rounded-box"
+        />
+        <div class="px-2 text-lg">
+          <span class="font-medium">{@offering.name}</span> by {@offering.studio.name}
+        </div>
+      </LiveRedirect>
+    {/if}
     """
   end
 end

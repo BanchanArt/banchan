@@ -11,14 +11,15 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.Components.Button
+  alias BanchanWeb.Components.{Button, Collapse}
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
     MarkdownInput,
     MultipleSelect,
     Select,
-    Submit
+    Submit,
+    TextInput
   }
 
   alias BanchanWeb.StudioLive.Components.{Blocklist, StudioLayout}
@@ -97,6 +98,50 @@ defmodule BanchanWeb.StudioLive.Settings do
 
     socket = assign(socket, changeset: changeset)
     {:noreply, socket}
+  end
+
+  def handle_event("delete_studio", val, socket) do
+    case Studios.delete_studio(
+           socket.assigns.current_user,
+           socket.assigns.studio,
+           val["delete"] && val["delete"]["password"]
+         ) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Studio has been successfully deleted.")
+         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+
+      {:error, :pending_funds} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "Can't delete a studio when funds are still pending either in invoices or in payouts."
+         )
+         |> push_redirect(
+           to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+
+      {:error, :invalid_password} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Invalid password when trying to delete studio. Please try again.")
+         |> push_redirect(
+           to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+
+      {:error, _} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "Something went wrong while marking the studio for deletion. Please try again later."
+         )
+         |> push_redirect(
+           to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+    end
   end
 
   def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
@@ -178,8 +223,29 @@ defmodule BanchanWeb.StudioLive.Settings do
           <div class="divider" />
 
           <div class="h-40 overflow-auto">
+            <div class="text-xl py-4">Blocklist</div>
             <Blocklist id="studio-blocklist" studio={@studio} />
           </div>
+
+          <div class="divider" />
+
+          <Collapse id="delete-studio-collapse" class="w-full">
+            <:header>
+              <div class="font-semibold text-error">Delete</div>
+            </:header>
+            <Form class="flex flex-col gap-4" for={:delete} as={:delete} submit="delete_studio">
+              <div class="prose">
+                <p>This operation <strong>can't be reversed</strong>. The studio's handle will also not be available for the next 30 days.</p>
+                <p>You will no longer have access to payout records, and all current open invoices will be canceled.</p>
+                <p>Additionally, this operation will not succeed if you still have money in your account, or there are payments pending processing.</p>
+                <p>Are you sure you want to delete this studio?</p>
+              </div>
+              {#if @current_user.email}
+                <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+              {/if}
+              <Submit class="w-full btn-error" label="Confirm" />
+            </Form>
+          </Collapse>
         </div>
       </div>
     </StudioLayout>

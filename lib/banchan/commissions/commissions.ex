@@ -111,11 +111,11 @@ defmodule Banchan.Commissions do
   end
 
   defp main_dashboard_query(%User{} = user) do
-    from s in Studio,
-      join: c in Commission,
-      on: c.studio_id == s.id,
+    from c in Commission,
       as: :commission,
-      join: artist in assoc(s, :artists),
+      left_join: s in assoc(c, :studio),
+      as: :studio,
+      left_join: artist in assoc(s, :artists),
       as: :artist,
       join: u in User,
       as: :current_user,
@@ -270,8 +270,8 @@ defmodule Banchan.Commissions do
   def get_commission!(public_id, current_user) do
     Repo.one!(
       from c in Commission,
-        join: s in assoc(c, :studio),
-        join: artist in assoc(s, :artists),
+        left_join: s in assoc(c, :studio),
+        left_join: artist in assoc(s, :artists),
         join: u in User,
         on: u.id == ^current_user.id,
         where:
@@ -673,7 +673,8 @@ defmodule Banchan.Commissions do
           |> Event.changeset(attrs)
 
         with :ok <-
-               (if Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) do
+               (if commission.studio_id &&
+                     Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) do
                   {:error, :blocked}
                 else
                   :ok
@@ -736,6 +737,7 @@ defmodule Banchan.Commissions do
 
   ## Edit/Update
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp check_actor_edit_access(%User{} = actor, %Commission{} = commission) do
     actor = actor |> Repo.reload() |> Repo.preload(:disable_info, force: true)
 
@@ -743,11 +745,12 @@ defmodule Banchan.Commissions do
       !is_nil(actor.disable_info) ->
         {:error, :disabled}
 
-      Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) ->
+      commission.studio_id && Studios.user_blocked?(%Studio{id: commission.studio_id}, actor) ->
         {:error, :blocked}
 
       actor.id != commission.client_id &&
-        !Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id}) &&
+        !(commission.studio_id &&
+              Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id})) &&
         :admin not in actor.roles && :mod not in actor.roles ->
         {:error, :unauthorized}
 
@@ -914,7 +917,8 @@ defmodule Banchan.Commissions do
        ) do
     {:ok, _} =
       Repo.transaction(fn ->
-        actor_member? = Studios.is_user_in_studio?(actor, %Studio{id: studio_id})
+        actor_member? =
+          !is_nil(studio_id) && Studios.is_user_in_studio?(actor, %Studio{id: studio_id})
 
         true =
           status_transition_allowed?(
