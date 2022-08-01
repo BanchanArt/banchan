@@ -113,7 +113,7 @@ defmodule BanchanWeb.CommissionLive do
         if Map.has_key?(acc, ev.actor_id) do
           acc
         else
-          Map.put(acc, ev.actor_id, Accounts.get_user!(ev.actor_id))
+          Map.put(acc, ev.actor_id, Accounts.get_user(ev.actor_id))
         end
       end)
 

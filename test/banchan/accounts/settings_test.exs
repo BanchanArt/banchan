@@ -100,7 +100,7 @@ defmodule Banchan.AccountsTest.Settings do
       email = unique_user_email()
       {:ok, user} = Accounts.apply_user_email(user, valid_user_password(), %{email: email})
       assert user.email == email
-      assert Accounts.get_user!(user.id).email != email
+      assert Accounts.get_user(user.id).email != email
     end
   end
 

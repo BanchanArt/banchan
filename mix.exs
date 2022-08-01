@@ -129,7 +129,12 @@ defmodule Banchan.MixProject do
         "ecto.reset"
       ],
       fmt: ["format"],
-      test: ["ecto.reset --quiet", "test"],
+      test: [
+        "ecto.drop --quiet",
+        "ecto.create --quiet",
+        "ecto.migrate --quiet",
+        "test"
+      ],
       quality: [
         "compile --all-warnings --warnings-as-errors",
         "test",

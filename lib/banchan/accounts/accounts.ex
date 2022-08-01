@@ -64,22 +64,7 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
-  Gets a single user.
-
-  Raises `Ecto.NoResultsError` if the User does not exist.
-
-  ## Examples
-      iex> get_user!(123)
-      %User{}
-      iex> get_user!(456)
-      ** (Ecto.NoResultsError)
-  """
-  def get_user!(id) do
-    Repo.get!(from(u in User, where: is_nil(u.deactivated_at)), id) |> Repo.preload(:disable_info)
-  end
-
-  @doc """
-  Gets a single user.
+  Gets a single user by ID.
 
   Returns nil if the User does not exist.
   """
@@ -111,15 +96,15 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
-  Gets a user by handle.
+  Gets a user by handle. Throws if the user is not found or is deactivated.
 
   ## Examples
 
-      iex> get_user_by_email("foo")
+      iex> get_user_by_handle!("foo")
       %User{}
 
-      iex> get_user_by_email("unknown")
-      nil
+      iex> get_user_by_handle!("unknown")
+      Ecto error
 
   """
   def get_user_by_handle!(handle) when is_binary(handle) do
@@ -163,6 +148,40 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  Utility for determining whether an actor can modify a target user. Used for
+  allowing admins to modify user-only stuff.
+  """
+  def can_modify_user?(%User{} = actor, %User{} = target) do
+    actor.id == target.id ||
+      :admin in actor.roles ||
+      (:mod in actor.roles && :admin not in target.roles)
+  end
+
+  @doc """
+  Number of days until full deletion of a deactivated user. It's an error to
+  call this on a non-deactivated user.
+  """
+  def days_until_deletion(%User{deactivated_at: deactivated_at})
+      when not is_nil(deactivated_at) do
+    case NaiveDateTime.diff(
+           NaiveDateTime.add(deactivated_at, 60 * 60 * 24 * 30, :second),
+           NaiveDateTime.utc_now()
+         ) do
+      secs when secs <= 0 ->
+        0
+
+      secs ->
+        floor(secs / (60 * 60 * 24))
+    end
+  end
+
+  @doc """
+  True if the user is active.
+  """
+  def active_user?(nil), do: false
+  def active_user?(%User{deactivated_at: deactivated_at}), do: is_nil(deactivated_at)
+
+  @doc """
   Finds a user pfp image's Upload.
   """
   def user_pfp_img!(upload_id) do
@@ -200,40 +219,6 @@ defmodule Banchan.Accounts do
     )
     |> Repo.one!()
   end
-
-  @doc """
-  Utility for determining whether an actor can modify a target user. Used for
-  allowing admins to modify user-only stuff.
-  """
-  def can_modify_user?(%User{} = actor, %User{} = target) do
-    actor.id == target.id ||
-      :admin in actor.roles ||
-      (:mod in actor.roles && :admin not in target.roles)
-  end
-
-  @doc """
-  Number of days until full deletion of a deactivated user. It's an error to
-  call this on a non-deactivated user.
-  """
-  def days_until_deletion(%User{deactivated_at: deactivated_at})
-      when not is_nil(deactivated_at) do
-    case NaiveDateTime.diff(
-           NaiveDateTime.add(deactivated_at, 60 * 60 * 24 * 30, :second),
-           NaiveDateTime.utc_now()
-         ) do
-      secs when secs <= 0 ->
-        0
-
-      secs ->
-        floor(secs / (60 * 60 * 24))
-    end
-  end
-
-  @doc """
-  True if the user is active.
-  """
-  def active_user?(nil), do: false
-  def active_user?(%User{deactivated_at: deactivated_at}), do: is_nil(deactivated_at)
 
   ## User registration
 
