@@ -346,7 +346,7 @@ defmodule Banchan.AccountsTest.Registration do
       %User{id: admin_id} = admin = user_fixture(%{roles: [:admin]})
 
       assert [%User{id: ^user_id}, %User{id: ^admin_id}] =
-               Accounts.list_users(admin, %UserFilter{}).entries
+               Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
     end
 
     @tag skip: "TODO"
