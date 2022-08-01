@@ -507,53 +507,84 @@ defmodule Banchan.Accounts do
   @doc """
   Disables a user.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def disable_user(%User{} = actor, %User{} = user, attrs) do
-    if :admin in actor.roles ||
-         (:mod in actor.roles && :admin not in user.roles) do
-      {:ok, ret} =
-        Repo.transaction(fn ->
-          dummy = %DisableHistory{} |> DisableHistory.disable_changeset(attrs)
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+        user = user |> Repo.reload()
+        dummy = %DisableHistory{} |> DisableHistory.disable_changeset(attrs)
 
-          with {:ok, job} <-
-                 (case Ecto.Changeset.fetch_change(dummy, :disabled_until) do
-                    {:ok, until} when not is_nil(until) ->
-                      EnableUser.schedule_unban(user, until)
+        cond do
+          :admin not in actor.roles &&
+              (:mod not in actor.roles || :admin in user.roles) ->
+            {:error, :unauthorized}
 
-                    _ ->
-                      {:ok, nil}
-                  end),
-               {:ok, disable_history} <-
-                 %DisableHistory{
-                   user_id: user.id,
-                   disabled_by_id: actor.id,
-                   disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-                   lifting_job_id: job && job.id
-                 }
-                 |> DisableHistory.disable_changeset(attrs)
-                 |> Repo.insert(),
-               {:ok, _} <- logout_user(user) do
-            {:ok, disable_history}
-          end
-        end)
+          (user |> Repo.preload(:disable_info)).disable_info ->
+            {:error, :already_disabled}
 
-      ret
-    else
-      {:error, :unauthorized}
-    end
+          !dummy.valid? ->
+            {:error, dummy}
+
+          true ->
+            with {:ok, disable_history} <-
+                   %DisableHistory{
+                     user_id: user.id,
+                     disabled_by_id: actor.id,
+                     disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+                   }
+                   |> DisableHistory.disable_changeset(attrs)
+                   |> Repo.insert(),
+                 {:ok, job} <-
+                   (case Ecto.Changeset.fetch_change(dummy, :disabled_until) do
+                      {:ok, until} when not is_nil(until) ->
+                        EnableUser.schedule_unban(user, until)
+
+                      _ ->
+                        {:ok, nil}
+                    end),
+                 {:ok, disable_history} <-
+                   (if job do
+                      disable_history
+                      |> DisableHistory.update_job_changeset(job)
+                      |> Repo.update(returning: true)
+                    else
+                      {:ok, disable_history}
+                    end),
+                 {:ok, _} <- logout_user(user) do
+              {:ok, disable_history}
+            end
+        end
+      end)
+
+    ret
   end
 
   @doc """
   Re-enable a previously disabled user.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def enable_user(actor, %User{} = user, reason, cancel \\ true) do
-    if is_nil(actor) ||
-         :admin in actor.roles ||
-         (:mod in actor.roles && :admin not in user.roles) do
-      changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifted_reason: reason})
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor =
+          if actor == :system do
+            nil
+          else
+            actor |> Repo.reload()
+          end
 
-      if changeset.valid? do
-        {:ok, ret} =
-          Repo.transaction(fn ->
+        user = user |> Repo.reload()
+
+        if is_nil(actor) ||
+             :admin in actor.roles ||
+             (:mod in actor.roles && :admin not in user.roles) do
+          changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifted_reason: reason})
+
+          if changeset.valid? do
+            # We're a little heavy-handed here in case of the very unlikely
+            # scenario where we get multiple concurrent bans in place.
+            # Better to just clean those up while we're at it.
             {_, [history | _]} =
               Repo.update_all(
                 from(h in DisableHistory,
@@ -567,20 +598,23 @@ defmodule Banchan.Accounts do
                 ]
               )
 
+            # NB(@zkat): This option is used only in
+            # Banchan.Workers.EnableUser, since it's the one running the
+            # actual unban job already.
             if cancel do
               EnableUser.cancel_unban(history)
             end
 
             {:ok, history}
-          end)
+          else
+            {:error, changeset}
+          end
+        else
+          {:error, :unauthorized}
+        end
+      end)
 
-        ret
-      else
-        {:error, changeset}
-      end
-    else
-      {:error, :unauthorized}
-    end
+    ret
   end
 
   ## Settings and Profile

@@ -63,7 +63,7 @@ defmodule Banchan.MixProject do
       {:money, "~> 1.9"},
       {:nimble_totp, "~> 0.1.0"},
       {:number, "~> 1.0.3"},
-      {:oban, "~> 2.12"},
+      {:oban, "~> 2.13"},
       {:pbkdf2_elixir, "~> 1.0"},
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 3.2.0"},

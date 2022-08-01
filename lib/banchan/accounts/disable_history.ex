@@ -43,6 +43,10 @@ defmodule Banchan.Accounts.DisableHistory do
     end)
   end
 
+  def update_job_changeset(history, %Oban.Job{id: job_id}) do
+    change(history, lifting_job_id: job_id)
+  end
+
   def enable_changeset(history, attrs) do
     history
     |> cast(attrs, [:lifted_reason])
