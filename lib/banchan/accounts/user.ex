@@ -95,9 +95,8 @@ defmodule Banchan.Accounts.User do
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:handle, :email, :password])
-    |> validate_handle_unique(:handle)
-    |> unique_constraint(:handle)
-    |> validate_required([:handle, :email])
+    |> validate_required([:email])
+    |> validate_handle()
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
@@ -138,12 +137,17 @@ defmodule Banchan.Accounts.User do
       :password,
       :confirmed_at,
       :twitter_uid,
+      :twitter_handle,
       :google_uid,
-      :discord_uid
+      :discord_uid,
+      :discord_handle
     ])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
+    |> validate_handle()
     |> validate_email()
+    |> validate_bio()
+    |> validate_name()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
   end
@@ -165,7 +169,7 @@ defmodule Banchan.Accounts.User do
     changeset
     |> validate_required([:handle])
     |> validate_format(:handle, ~r/^[a-zA-Z0-9_]+$/,
-      message: "only letters, numbers, and underscores allowed"
+      message: "only letters, numbers, and underscores are allowed"
     )
     |> validate_length(:handle, min: 3, max: 16)
     |> validate_handle_unique(:handle)

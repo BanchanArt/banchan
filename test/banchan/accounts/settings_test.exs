@@ -47,7 +47,7 @@ defmodule Banchan.AccountsTest.Settings do
         })
 
       assert %{
-               handle: ["only letters, numbers, and underscores allowed"]
+               handle: ["only letters, numbers, and underscores are allowed"]
              } = errors_on(changeset)
     end
   end

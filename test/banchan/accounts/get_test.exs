@@ -154,7 +154,7 @@ defmodule Banchan.AccountsTest.Get do
       # NB(@zkat): This is every so slightly racy, but it's probably ok
       # 99.999% of the time. Come up with something better if this ends up
       # causing headaches.
-      assert 29 == Accounts.days_until_deletion(user)
+      assert 30 == Accounts.days_until_deletion(user)
     end
 
     test "errors if the user is not deactivated" do

@@ -3,14 +3,13 @@ defmodule Banchan.AccountsFixtures do
   This module defines test helpers for creating
   entities via the `Banchan.Accounts` context.
   """
-
-  def unique_user_email, do: "user#{System.unique_integer()}@example.com"
-  def unique_user_handle, do: "user#{:rand.uniform(100_000)}"
+  def unique_user_email, do: "user#{gen_random_string()}@example.com"
+  def unique_user_handle, do: "user#{gen_random_string()}"
   def valid_user_password, do: "hello world!"
 
   def valid_user_attributes(attrs \\ %{}) do
-    name = "user#{System.unique_integer()}"
-    handle = name <> "-handle"
+    name = "user#{gen_random_string()}"
+    handle = name <> "_hdl"
     email = name <> "@example.com"
     pw = valid_user_password()
 
@@ -51,5 +50,9 @@ defmodule Banchan.AccountsFixtures do
   def extract_user_token(text) do
     [_, token, _ | _] = String.split(text, "[TOKEN]")
     token
+  end
+
+  def gen_random_string(length \\ 5) do
+    for _ <- 1..length, into: "", do: <<Enum.random('0123456789abcdef')>>
   end
 end

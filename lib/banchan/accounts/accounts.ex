@@ -276,7 +276,7 @@ defmodule Banchan.Accounts do
   @doc """
   Either find or create a user based on Ueberauth OAuth credentials.
   """
-  def find_or_create_user(%Auth{provider: :twitter} = auth) do
+  def handle_oauth(%Auth{provider: :twitter} = auth) do
     {:ok, ret} =
       Repo.transaction(fn ->
         case Repo.one(from u in User, where: u.twitter_uid == ^auth.uid) do
@@ -292,7 +292,7 @@ defmodule Banchan.Accounts do
     ret
   end
 
-  def find_or_create_user(%Auth{provider: :discord} = auth) do
+  def handle_oauth(%Auth{provider: :discord} = auth) do
     {:ok, ret} =
       Repo.transaction(fn ->
         case Repo.one(from u in User, where: u.discord_uid == ^auth.uid) do
@@ -308,7 +308,7 @@ defmodule Banchan.Accounts do
     ret
   end
 
-  def find_or_create_user(%Auth{provider: :google} = auth) do
+  def handle_oauth(%Auth{provider: :google} = auth) do
     {:ok, ret} =
       Repo.transaction(fn ->
         case Repo.one(from u in User, where: u.google_uid == ^auth.uid) do
@@ -324,7 +324,7 @@ defmodule Banchan.Accounts do
     ret
   end
 
-  def find_or_create_user(%Auth{}) do
+  def handle_oauth(%Auth{}) do
     {:error, :unsupported}
   end
 
@@ -351,16 +351,35 @@ defmodule Banchan.Accounts do
         {:ok, user}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        if Enum.any?(changeset.errors, fn {field, _} -> field == :handle end) do
-          %User{}
-          |> User.registration_oauth_changeset(%{
-            attrs
-            | handle: "user#{:rand.uniform(100_000_000)}"
-          })
-          |> Repo.insert()
-        else
-          {:error, changeset}
-        end
+        changeset.errors
+        |> Enum.reduce(attrs, fn {field, _}, acc ->
+          case field do
+            :handle ->
+              Map.put(acc, :handle, "user#{:rand.uniform(100_000_000)}")
+
+            :bio ->
+              Map.put(
+                acc,
+                :bio,
+                Ecto.Changeset.get_change(changeset, :bio) |> binary_part(0, 160)
+              )
+
+            :name ->
+              Map.put(
+                acc,
+                :name,
+                Ecto.Changeset.get_change(changeset, :name) |> binary_part(0, 32)
+              )
+
+            :email ->
+              Map.put(acc, :email, nil)
+
+            _ ->
+              acc
+          end
+        end)
+        |> then(&User.registration_oauth_changeset(%User{}, &1))
+        |> Repo.insert()
     end
   end
 
@@ -389,16 +408,28 @@ defmodule Banchan.Accounts do
         {:ok, user}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        if Enum.any?(changeset.errors, fn {field, _} -> field == :handle end) do
-          %User{}
-          |> User.registration_oauth_changeset(%{
-            attrs
-            | handle: "user#{:rand.uniform(100_000_000)}"
-          })
-          |> Repo.insert()
-        else
-          {:error, changeset}
-        end
+        changeset.errors
+        |> Enum.reduce(attrs, fn {field, _}, acc ->
+          case field do
+            :handle ->
+              Map.put(acc, :handle, "user#{:rand.uniform(100_000_000)}")
+
+            :name ->
+              Map.put(
+                acc,
+                :name,
+                Ecto.Changeset.get_change(changeset, :name) |> binary_part(0, 32)
+              )
+
+            :email ->
+              Map.put(acc, :email, nil)
+
+            _ ->
+              acc
+          end
+        end)
+        |> then(&User.registration_oauth_changeset(%User{}, &1))
+        |> Repo.insert()
     end
   end
 
@@ -422,21 +453,19 @@ defmodule Banchan.Accounts do
         {:ok, user}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        if Enum.any?(changeset.errors, fn {field, _} -> field == :email end) do
-          %User{}
-          |> User.registration_oauth_changeset(%{
-            attrs
-            | email: nil
-          })
-          |> Repo.insert()
-        else
-          {:error, changeset}
-        end
-    end
-  end
+        changeset.errors
+        |> Enum.reduce(attrs, fn {field, _}, acc ->
+          case field do
+            :email ->
+              Map.put(acc, :email, nil)
 
-  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: nil}}) do
-    {:ok, user}
+            _ ->
+              acc
+          end
+        end)
+        |> then(&User.registration_oauth_changeset(%User{}, &1))
+        |> Repo.insert()
+    end
   end
 
   defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: url}}) when is_binary(url) do
@@ -459,6 +488,10 @@ defmodule Banchan.Accounts do
       "pfp_img_id" => pfp.id,
       "pfp_thumb_id" => thumb.id
     })
+  end
+
+  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{}) do
+    {:ok, user}
   end
 
   defp add_oauth_pfp({:error, error}, _) do
