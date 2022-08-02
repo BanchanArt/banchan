@@ -169,14 +169,6 @@ defmodule BanchanWeb.Components.Layout do
                 </LiveRedirect>
               </li>
               <li>
-                <LiveRedirect to={Routes.setup_mfa_path(Endpoint, :edit)}>
-                  <span>
-                    <i class="fas fa-shield" />
-                    MFA Setup
-                  </span>
-                </LiveRedirect>
-              </li>
-              <li>
                 <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
                   <span>
                     <i class="fa fa-sign-out-alt" />

@@ -394,6 +394,10 @@ defmodule BanchanWeb.SettingsLive do
           <Submit class="w-full" changeset={@new_email_changeset} label="Save" />
         </Form>
       {#else}
+        <h3 class="text-lg">Two-factor Authentication</h3>
+        <p class="py-2">2FA helps secure your account by requiring an additional device to log in. Banchan supports any standard OTP application, such as Google Authenticator, Authy, or 1Password.</p>
+        <LiveRedirect class="btn btn-primary w-full" to={Routes.setup_mfa_path(Endpoint, :edit)}>Manage 2FA</LiveRedirect>
+        <div class="divider" />
         <Form
           class="flex flex-col gap-4"
           as={:change_handle}

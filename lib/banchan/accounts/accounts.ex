@@ -636,8 +636,20 @@ defmodule Banchan.Accounts do
   Updates admin-level fields for a user, such as their roles.
   """
   def update_admin_fields(%User{} = actor, %User{} = user, attrs \\ %{}) do
-    User.admin_changeset(actor, user, attrs)
-    |> Repo.update()
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+        user = user |> Repo.reload()
+
+        if :admin in actor.roles || :mod in actor.roles do
+          User.admin_changeset(actor, user, attrs)
+          |> Repo.update()
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -758,9 +770,20 @@ defmodule Banchan.Accounts do
       {:ok, %User{}}
   """
   def apply_new_user_email(user, attrs) do
-    user
-    |> User.email_changeset(attrs)
-    |> Ecto.Changeset.apply_action(:update)
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        user = user |> Repo.reload()
+
+        if is_nil(user.email) do
+          user
+          |> User.email_changeset(attrs)
+          |> Ecto.Changeset.apply_action(:update)
+        else
+          {:error, :has_email}
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -880,19 +903,22 @@ defmodule Banchan.Accounts do
 
   """
   def generate_totp_secret(user) do
-    secret = NimbleTOTP.secret()
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        user = user |> Repo.reload()
 
-    changeset =
-      user
-      |> User.totp_secret_changeset(%{totp_secret: secret})
+        if user.totp_activated do
+          {:error, :totp_activated}
+        else
+          secret = NimbleTOTP.secret()
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
-    end
+          user
+          |> User.totp_secret_changeset(%{totp_secret: secret, totp_activated: false})
+          |> Repo.update(returning: true)
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -900,25 +926,29 @@ defmodule Banchan.Accounts do
 
   ## Examples
 
-      iex> deactivate_totp(user)
+      iex> deactivate_totp(user, password)
       {:ok, %User{}}
 
-      iex> deactivate_totp(user)
-      {:error, %Ecto.Changeset{}}
+      iex> deactivate_totp(user, badpassword)
+      {:error, :invalid_password}
 
   """
-  def deactivate_totp(user) do
-    changeset =
-      user
-      |> User.totp_secret_changeset(%{totp_secret: nil, totp_activated: false})
+  def deactivate_totp(user, password) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        user = user |> Repo.reload()
+        valid_password = User.valid_password?(user, password)
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
-    end
+        if valid_password do
+          user
+          |> User.totp_secret_changeset(%{totp_secret: nil, totp_activated: false})
+          |> Repo.update(returning: true)
+        else
+          {:error, :invalid_password}
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -929,26 +959,25 @@ defmodule Banchan.Accounts do
       iex> activate_totp(user, token)
       {:ok, %User{}}
 
-      iex> activate_totp(user, token)
-      {:invalid_token, %Ecto.Changeset{}}
+      iex> activate_totp(user, badtoken)
+      {:error, :invalid_token}
 
   """
   def activate_totp(user, token) do
-    changeset =
-      user
-      |> User.totp_secret_changeset(%{totp_activated: true})
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        user = user |> Repo.reload()
 
-    if NimbleTOTP.valid?(user.totp_secret, token) do
-      Ecto.Multi.new()
-      |> Ecto.Multi.update(:user, changeset)
-      |> Repo.transaction()
-      |> case do
-        {:ok, %{user: user}} -> {:ok, user}
-        {:error, :user, changeset, _} -> {:error, changeset}
-      end
-    else
-      {:invalid_token, changeset}
-    end
+        if NimbleTOTP.valid?(user.totp_secret, token) do
+          user
+          |> User.totp_secret_changeset(%{totp_activated: true})
+          |> Repo.update(returning: true)
+        else
+          {:error, :invalid_token}
+        end
+      end)
+
+    ret
   end
 
   @doc """
