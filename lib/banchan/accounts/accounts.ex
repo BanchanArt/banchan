@@ -1194,15 +1194,16 @@ defmodule Banchan.Accounts do
     {:ok, ret} =
       Repo.transaction(fn ->
         actor = actor |> Repo.reload()
+        user = user |> Repo.reload()
 
-        if actor.id == user.id || :admin in actor.roles do
+        if actor.id == user.id || (:admin in actor.roles && :admin not in user.roles) do
           with {:ok, user} <-
                  user
                  |> User.deactivate_changeset()
                  |> then(fn changeset ->
                    # NB(@zkat): Users without emails are OAuth users. They also
                    # do not have passwords. So we just skip the password check.
-                   if user.email do
+                   if user.email && :admin not in actor.roles do
                      User.validate_current_password(changeset, password)
                    else
                      changeset
