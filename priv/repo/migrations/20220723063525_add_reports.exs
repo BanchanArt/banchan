@@ -29,7 +29,7 @@ defmodule Banchan.Repo.Migrations.AddReports do
             ) STORED;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -37,7 +37,7 @@ defmodule Banchan.Repo.Migrations.AddReports do
           CREATE INDEX reports_search_idx ON reports USING GIN (search_vector);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -45,7 +45,7 @@ defmodule Banchan.Repo.Migrations.AddReports do
           CREATE INDEX reports_tags ON reports USING GIN (tags);
           """,
           [],
-          log: :info
+          log: false
         )
       end,
       fn ->
@@ -54,7 +54,7 @@ defmodule Banchan.Repo.Migrations.AddReports do
           DROP INDEX studios_search_idx;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -62,7 +62,7 @@ defmodule Banchan.Repo.Migrations.AddReports do
           DROP INDEX studios_tags;
           """,
           [],
-          log: :info
+          log: false
         )
       end
     )

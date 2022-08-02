@@ -12,17 +12,17 @@ defmodule Banchan.Repo.Migrations.Tags do
     execute(
       # Up
       fn ->
-        repo().query(
+        repo().query!(
           """
           CREATE OR REPLACE FUNCTION public.immutable_array_to_string(text[], text)
               RETURNS text as $$ SELECT array_to_string($1, $2); $$
           LANGUAGE sql IMMUTABLE;
           """,
           [],
-          log: :info
+          log: false
         )
 
-        repo().query(
+        repo().query!(
           """
           CREATE OR REPLACE FUNCTION public.trigger_update_tags_count()
             RETURNS trigger
@@ -60,26 +60,26 @@ defmodule Banchan.Repo.Migrations.Tags do
           $function$;
           """,
           [],
-          log: :info
+          log: false
         )
       end,
 
       # Down
       fn ->
-        repo().query(
+        repo().query!(
           """
           DROP FUNCTION IF EXISTS public.immutable_array_to_string();
           """,
           [],
-          log: :info
+          log: false
         )
 
-        repo().query(
+        repo().query!(
           """
           DROP FUNCTION IF EXISTS public.trigger_update_tags_count();
           """,
           [],
-          log: :info
+          log: false
         )
       end
     )

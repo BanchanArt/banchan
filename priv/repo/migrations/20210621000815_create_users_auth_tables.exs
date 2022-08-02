@@ -80,7 +80,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
             ) STORED;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -91,7 +91,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
             ) STORED;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -99,7 +99,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
           CREATE INDEX users_search_idx ON users USING GIN (search_vector);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -107,7 +107,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
           CREATE INDEX users_tags ON users USING GIN (tags);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -118,7 +118,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
           EXECUTE PROCEDURE public.trigger_update_tags_count();
           """,
           [],
-          log: :info
+          log: false
         )
       end,
       fn ->
@@ -127,7 +127,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
           DROP INDEX users_search_idx;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -135,7 +135,7 @@ defmodule Banchan.Repo.Migrations.CreateUsersAuthTables do
           DROP INDEX users_tags;
           """,
           [],
-          log: :info
+          log: false
         )
       end
     )
