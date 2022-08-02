@@ -5,6 +5,15 @@
 import Config
 
 if config_env() == :prod do
+  case System.get_env("BASIC_AUTH_USERNAME") do
+    nil ->
+      nil
+
+    username ->
+      config :banchan,
+        basic_auth: [username: username, password: System.get_env("BASIC_AUTH_PASSWORD")]
+  end
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

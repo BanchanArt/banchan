@@ -4,7 +4,7 @@ defmodule BanchanWeb.Router do
   import BanchanWeb.UserAuth
   import Phoenix.LiveDashboard.Router
 
-  alias BanchanWeb.{EnsureEnabledPlug, EnsureRolePlug}
+  alias BanchanWeb.{BasicAuthPlug, EnsureEnabledPlug, EnsureRolePlug}
 
   @host Application.compile_env!(:banchan, [BanchanWeb.Endpoint, :url, :host])
 
@@ -22,6 +22,7 @@ defmodule BanchanWeb.Router do
 
   pipeline :browser do
     plug(:accepts, ["html"])
+    plug(BasicAuthPlug, Application.get_env(:banchan, :basic_auth))
     plug(:fetch_session)
     plug(:fetch_live_flash)
     plug(:put_root_layout, {BanchanWeb.LayoutView, :root})
