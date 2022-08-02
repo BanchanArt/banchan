@@ -4,9 +4,12 @@ defmodule Banchan.AccountsTest.Session do
   """
   use Banchan.DataCase, async: true
 
-  alias Banchan.Accounts
   import Banchan.AccountsFixtures
-  alias Banchan.Accounts.UserToken
+
+  alias Banchan.Accounts
+  alias Banchan.Accounts.{User, UserToken}
+
+  alias BanchanWeb.UserAuth
 
   describe "generate_user_session_token/1" do
     setup do
@@ -57,6 +60,59 @@ defmodule Banchan.AccountsTest.Session do
       token = Accounts.generate_user_session_token(user)
       assert Accounts.delete_session_token(token) == :ok
       refute Accounts.get_user_by_session_token(token)
+    end
+  end
+
+  describe "logout_user/1" do
+    test "clears all sessions for a user" do
+      %User{id: user_id} = user = unconfirmed_user_fixture()
+
+      token1 = Accounts.generate_user_session_token(user)
+      token2 = Accounts.generate_user_session_token(user)
+
+      assert {:ok, %User{id: ^user_id}} = Accounts.logout_user(user)
+
+      refute Accounts.get_user_by_session_token(token1)
+      refute Accounts.get_user_by_session_token(token2)
+    end
+  end
+
+  describe "subscribe_to_auth_events/0" do
+    test "subscribes to logout events" do
+      %User{id: user_id} = user = unconfirmed_user_fixture()
+      topic = UserAuth.pubsub_topic()
+
+      Accounts.generate_user_session_token(user)
+      {:ok, _} = Accounts.logout_user(user)
+      refute_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "logout_user"
+      }
+
+      assert :ok = Accounts.subscribe_to_auth_events()
+
+      # Process that does the logout doesn't get the broadcast.
+      Accounts.generate_user_session_token(user)
+
+      {:ok, _} = Accounts.logout_user(user)
+
+      refute_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "logout_user"
+      }
+
+      # But other processes do.
+      Accounts.generate_user_session_token(user)
+
+      {:ok, %User{}} = Task.await(Task.async(fn -> Accounts.logout_user(user) end))
+
+      assert_receive %Phoenix.Socket.Broadcast{
+        topic: ^topic,
+        event: "logout_user",
+        payload: %{
+          user: %User{id: ^user_id}
+        }
+      }
     end
   end
 end

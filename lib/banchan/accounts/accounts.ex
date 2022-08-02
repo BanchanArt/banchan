@@ -1030,30 +1030,25 @@ defmodule Banchan.Accounts do
   """
   def logout_user(%User{} = user) do
     # Delete all user tokens
-    case Repo.delete_all(UserToken.user_and_contexts_query(user, :all)) do
-      {1, _} ->
-        # Broadcast to all LiveViews to immediately disconnect the user
-        Phoenix.PubSub.broadcast_from(
-          @pubsub,
-          self(),
-          UserAuth.pubsub_topic(),
-          %Phoenix.Socket.Broadcast{
-            topic: UserAuth.pubsub_topic(),
-            event: "logout_user",
-            payload: %{
-              user: user
-            }
+    {n, _} = Repo.delete_all(UserToken.user_and_contexts_query(user, :all))
+
+    if n > 0 do
+      # Broadcast to all LiveViews to immediately disconnect the user
+      Phoenix.PubSub.broadcast_from(
+        @pubsub,
+        self(),
+        UserAuth.pubsub_topic(),
+        %Phoenix.Socket.Broadcast{
+          topic: UserAuth.pubsub_topic(),
+          event: "logout_user",
+          payload: %{
+            user: user
           }
-        )
-
-        {:ok, user}
-
-      {0, _} ->
-        {:ok, user}
-
-      {_, _} ->
-        {:error, :too_many_logouts}
+        }
+      )
     end
+
+    {:ok, user}
   end
 
   @doc """
