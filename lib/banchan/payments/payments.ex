@@ -144,9 +144,6 @@ defmodule Banchan.Payments do
 
         from_stripe.amount < rel.amount ->
           from_stripe
-
-        true ->
-          Money.new(0, rel.currency)
       end
     end)
   end
