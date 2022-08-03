@@ -116,6 +116,21 @@ defmodule Banchan.AccountsTest.Registration do
   end
 
   describe "handle_oauth/1" do
+    test "fails with other oauth providers" do
+      auth = %Auth{
+        provider: :facebook,
+        uid: gen_random_string(),
+        info: %{
+          email: unique_user_email(),
+          nickname: unique_user_handle(),
+          name: gen_random_string(),
+          description: gen_random_string()
+        }
+      }
+
+      {:error, :unsupported} = Accounts.handle_oauth(auth)
+    end
+
     test "Twitter: registers a new user when logging in" do
       auth = %Auth{
         provider: :twitter,
@@ -124,7 +139,8 @@ defmodule Banchan.AccountsTest.Registration do
           email: unique_user_email(),
           nickname: unique_user_handle(),
           name: gen_random_string(),
-          description: gen_random_string()
+          description: gen_random_string(),
+          other: gen_random_string()
         }
       }
 
