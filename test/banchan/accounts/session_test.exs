@@ -84,6 +84,7 @@ defmodule Banchan.AccountsTest.Session do
 
       Accounts.generate_user_session_token(user)
       {:ok, _} = Accounts.logout_user(user)
+
       refute_receive %Phoenix.Socket.Broadcast{
         topic: ^topic,
         event: "logout_user"

@@ -1230,11 +1230,14 @@ defmodule Banchan.Accounts do
   def prune_users do
     now = NaiveDateTime.utc_now()
 
-    from(
-      u in User,
-      where: not is_nil(u.deactivated_at),
-      where: u.deactivated_at < datetime_add(^now, -30, "day")
-    )
-    |> Repo.delete_all()
+    {n, _} =
+      from(
+        u in User,
+        where: not is_nil(u.deactivated_at),
+        where: u.deactivated_at < datetime_add(^now, -30, "day")
+      )
+      |> Repo.delete_all()
+
+    {:ok, n}
   end
 end

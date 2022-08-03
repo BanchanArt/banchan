@@ -23,6 +23,20 @@ defmodule Banchan.AccountsTest.Get do
                total_pages: 1
              } = Accounts.list_users(admin, %UserFilter{})
     end
+
+    test "does not list deactivated users" do
+      user = unconfirmed_user_fixture()
+
+      {:ok, _} = Accounts.deactivate_user(user, user, valid_user_password())
+
+      assert %_{
+               page_number: 1,
+               page_size: 24,
+               entries: [],
+               total_entries: 0,
+               total_pages: 1
+             } = Accounts.list_users(user, %UserFilter{})
+    end
   end
 
   describe "get_user/1" do
