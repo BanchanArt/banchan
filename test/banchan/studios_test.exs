@@ -13,10 +13,11 @@ defmodule Banchan.StudiosTest do
   import Banchan.StudiosFixtures
 
   alias Banchan.Commissions
-  alias Banchan.Commissions.Invoice
+  alias Banchan.Payments
+  alias Banchan.Payments.{Invoice, Payout}
   alias Banchan.Repo
   alias Banchan.Studios
-  alias Banchan.Studios.{Payout, Studio}
+  alias Banchan.Studios.Studio
 
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
@@ -335,7 +336,7 @@ defmodule Banchan.StudiosTest do
           "text" => "please give me money :("
         })
 
-      assert {:ok, _} = Commissions.expire_payment(artist, invoice, true)
+      assert {:ok, _} = Payments.expire_payment(artist, invoice, true)
 
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_balance, 4, fn opts ->
@@ -358,7 +359,7 @@ defmodule Banchan.StudiosTest do
          }}
       end)
 
-      {:ok, balance} = Studios.get_banchan_balance(studio)
+      {:ok, balance} = Payments.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -368,7 +369,7 @@ defmodule Banchan.StudiosTest do
       assert [] == balance.paid
       assert [] == balance.available
 
-      assert {:ok, []} == Studios.payout_studio(artist, studio)
+      assert {:ok, []} == Payments.payout_studio(artist, studio)
 
       {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
       {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
@@ -396,7 +397,7 @@ defmodule Banchan.StudiosTest do
          }}
       end)
 
-      {:ok, [%Payout{amount: ^net, status: :pending}]} = Studios.payout_studio(artist, studio)
+      {:ok, [%Payout{amount: ^net, status: :pending}]} = Payments.payout_studio(artist, studio)
 
       payout =
         from(p in Payout, where: p.studio_id == ^studio.id)
@@ -424,7 +425,7 @@ defmodule Banchan.StudiosTest do
 
       # Payout funds are marked as on_the_way until we get notified by stripe
       # that the payment has been completed.
-      {:ok, balance} = Studios.get_banchan_balance(studio)
+      {:ok, balance} = Payments.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -455,7 +456,7 @@ defmodule Banchan.StudiosTest do
          }}
       end)
 
-      Studios.process_payout_updated!(%Stripe.Payout{
+      Payments.process_payout_updated!(%Stripe.Payout{
         id: payout.stripe_payout_id,
         arrival_date: DateTime.utc_now() |> DateTime.to_unix(),
         status: "paid",
@@ -465,7 +466,7 @@ defmodule Banchan.StudiosTest do
         failure_message: nil
       })
 
-      {:ok, balance} = Studios.get_banchan_balance(studio)
+      {:ok, balance} = Payments.get_banchan_balance(studio)
 
       assert [Money.new(0, :USD)] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -526,7 +527,7 @@ defmodule Banchan.StudiosTest do
          }}
       end)
 
-      {:ok, balance} = Studios.get_banchan_balance(studio)
+      {:ok, balance} = Payments.get_banchan_balance(studio)
 
       assert [Money.new(0, :USD)] == balance.stripe_available
       assert [net] == balance.stripe_pending
@@ -536,16 +537,16 @@ defmodule Banchan.StudiosTest do
       assert [] == balance.paid
       assert [] == balance.available
 
-      assert {:ok, []} == Studios.payout_studio(artist, studio)
+      assert {:ok, []} == Payments.payout_studio(artist, studio)
 
       {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
       {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
       {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :approved)
 
       # No money available on Stripe yet, so no payout happens.
-      assert {:ok, []} == Studios.payout_studio(artist, studio)
+      assert {:ok, []} == Payments.payout_studio(artist, studio)
 
-      {:ok, balance} = Studios.get_banchan_balance(studio)
+      {:ok, balance} = Payments.get_banchan_balance(studio)
 
       assert [Money.new(0, :USD)] == balance.stripe_available
       assert [net] == balance.stripe_pending
@@ -583,7 +584,7 @@ defmodule Banchan.StudiosTest do
 
       # Payout funds are marked as on_the_way until we get notified by stripe
       # that the payment has been completed.
-      {:ok, balance} = Studios.get_banchan_balance(studio)
+      {:ok, balance} = Payments.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -660,7 +661,7 @@ defmodule Banchan.StudiosTest do
         {:error, stripe_err}
       end)
 
-      {result, log} = with_log(fn -> Studios.payout_studio(artist, studio) end)
+      {result, log} = with_log(fn -> Payments.payout_studio(artist, studio) end)
       assert {:error, stripe_err} == result
       assert log =~ "[error] Stripe error during payout: Log me?\n"
 
@@ -669,7 +670,7 @@ defmodule Banchan.StudiosTest do
 
       # We don't mark them as failed when the failure was immediate. They just
       # stay "released".
-      {:ok, balance} = Studios.get_banchan_balance(studio)
+      {:ok, balance} = Payments.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -745,12 +746,12 @@ defmodule Banchan.StudiosTest do
 
       # Initial requests succeeded. Payout is now "pending"
       {:ok, [%Payout{amount: ^net, status: :pending} = payout]} =
-        Studios.payout_studio(artist, studio)
+        Payments.payout_studio(artist, studio)
 
       # TODO: Does your stripe available balance get drained in between
       # initial request and eventual failure?
 
-      Studios.process_payout_updated!(%Stripe.Payout{
+      Payments.process_payout_updated!(%Stripe.Payout{
         id: payout.stripe_payout_id,
         arrival_date: DateTime.utc_now() |> DateTime.to_unix(),
         status: "failed",
@@ -760,7 +761,7 @@ defmodule Banchan.StudiosTest do
         method: "standard"
       })
 
-      {:ok, balance} = Studios.get_banchan_balance(studio)
+      {:ok, balance} = Payments.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -779,7 +780,7 @@ defmodule Banchan.StudiosTest do
 
     test "payout does not exist in our db yet (but might've been created already on Stripe" do
       assert_raise Ecto.NoResultsError, fn ->
-        Studios.process_payout_updated!(%Stripe.Payout{
+        Payments.process_payout_updated!(%Stripe.Payout{
           id: "random-stripe-payout-id#{System.unique_integer()}",
           arrival_date: DateTime.utc_now() |> DateTime.to_unix(),
           status: "canceled",
@@ -863,16 +864,16 @@ defmodule Banchan.StudiosTest do
 
       # Initial requests succeeded. Payout is now "pending"
       {:ok, [%Payout{amount: ^net, status: :pending} = payout]} =
-        Studios.payout_studio(artist, studio)
+        Payments.payout_studio(artist, studio)
 
-      assert :ok == Studios.cancel_payout(artist, studio, payout.stripe_payout_id)
+      assert :ok == Payments.cancel_payout(artist, studio, payout.stripe_payout_id)
 
       payout = payout |> Repo.reload()
 
       # We don't update the status until Stripe tells us to.
       assert :pending == payout.status
 
-      Studios.process_payout_updated!(%Stripe.Payout{
+      Payments.process_payout_updated!(%Stripe.Payout{
         id: payout.stripe_payout_id,
         status: "canceled",
         arrival_date: DateTime.utc_now() |> DateTime.to_unix(),
@@ -882,7 +883,7 @@ defmodule Banchan.StudiosTest do
         failure_message: nil
       })
 
-      {:ok, balance} = Studios.get_banchan_balance(studio)
+      {:ok, balance} = Payments.get_banchan_balance(studio)
 
       assert [net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
@@ -972,14 +973,14 @@ defmodule Banchan.StudiosTest do
       end)
 
       {:ok, [%Payout{amount: ^net, status: :pending} = payout]} =
-        Studios.payout_studio(artist, studio)
+        Payments.payout_studio(artist, studio)
 
       log =
         capture_log([level: :debug], fn ->
           {:error,
            %Stripe.Error{
              source: :stripe
-           }} = Studios.cancel_payout(artist, studio, payout.stripe_payout_id)
+           }} = Payments.cancel_payout(artist, studio, payout.stripe_payout_id)
         end)
 
       assert log =~ "internal message"

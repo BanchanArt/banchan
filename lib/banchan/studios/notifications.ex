@@ -8,7 +8,7 @@ defmodule Banchan.Studios.Notifications do
   alias Banchan.Notifications
   alias Banchan.Repo
   alias Banchan.Studios
-  alias Banchan.Studios.{Payout, Studio, StudioFollower, StudioSubscription}
+  alias Banchan.Studios.{Studio, StudioFollower, StudioSubscription}
   alias Banchan.Workers.Mailer
 
   @pubsub Banchan.PubSub
@@ -157,23 +157,6 @@ defmodule Banchan.Studios.Notifications do
       }
     )
     |> Repo.stream()
-  end
-
-  @doc """
-  Broadcasts payout state updates.
-  """
-  def payout_updated(%Payout{} = payout, _actor \\ nil) do
-    Notifications.with_task(fn ->
-      Phoenix.PubSub.broadcast!(
-        @pubsub,
-        "payout:#{payout.studio.handle}",
-        %Phoenix.Socket.Broadcast{
-          topic: "payout:#{payout.studio.handle}",
-          event: "payout_updated",
-          payload: payout
-        }
-      )
-    end)
   end
 
   @doc """

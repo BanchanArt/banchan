@@ -6,7 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.PayoutRow do
 
   alias Surface.Components.LivePatch
 
-  alias Banchan.Studios.Payout
+  alias Banchan.Payments.Payout
 
   prop studio, :struct, required: true
   prop payout, :struct, required: true

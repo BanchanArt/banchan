@@ -11,6 +11,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
   import Banchan.CommissionsFixtures
 
   alias Banchan.Notifications
+  alias Banchan.Payments
   alias Banchan.Studios
 
   defp mock_balance(studio, available, pending, n \\ 1) do
@@ -138,7 +139,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
          }}
       end)
 
-      {:ok, [payout]} = Studios.payout_studio(artist, studio)
+      {:ok, [payout]} = Payments.payout_studio(artist, studio)
 
       {:ok, page_live, _html} =
         live(conn, Routes.studio_payouts_path(conn, :show, studio.handle, payout.public_id))
@@ -488,7 +489,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
         {:ok, %Stripe.Payout{id: stripe_payout_id, status: "canceled"}}
       end)
 
-      {:ok, [payout]} = Studios.payout_studio(artist, studio)
+      {:ok, [payout]} = Payments.payout_studio(artist, studio)
 
       {:ok, page_live, _html} =
         live(conn, Routes.studio_payouts_path(conn, :show, studio.handle, payout.public_id))
@@ -506,7 +507,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
              # No change to status yet.
              |> render() =~ "Pending"
 
-      Studios.process_payout_updated!(%Stripe.Payout{
+      Payments.process_payout_updated!(%Stripe.Payout{
         id: payout.stripe_payout_id,
         status: "canceled",
         arrival_date: DateTime.utc_now() |> DateTime.to_unix(),

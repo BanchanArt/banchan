@@ -1,4 +1,4 @@
-defmodule Banchan.Commissions.Invoice do
+defmodule Banchan.Payments.Invoice do
   @moduledoc """
   Schema for individual Invoices within Commissions.
   """
@@ -57,7 +57,7 @@ defmodule Banchan.Commissions.Invoice do
     belongs_to :client, Banchan.Accounts.User
     belongs_to :event, Banchan.Commissions.Event
 
-    many_to_many :payouts, Banchan.Studios.Payout, join_through: "invoices_payouts"
+    many_to_many :payouts, Banchan.Payments.Payout, join_through: "invoices_payouts"
 
     timestamps()
   end

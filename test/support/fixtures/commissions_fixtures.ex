@@ -15,7 +15,9 @@ defmodule Banchan.CommissionsFixtures do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions
-  alias Banchan.Commissions.{Commission, Invoice}
+  alias Banchan.Commissions.Commission
+  alias Banchan.Payments
+  alias Banchan.Payments.Invoice
   alias Banchan.Repo
 
   def commission_fixture(attrs \\ %{}) do
@@ -42,7 +44,7 @@ defmodule Banchan.CommissionsFixtures do
   end
 
   def invoice_fixture(%User{} = actor, %Commission{} = commission, data) do
-    {:ok, invoice} = Commissions.invoice(actor, commission, true, [], data)
+    {:ok, invoice} = Payments.invoice(actor, commission, true, [], data)
     invoice
   end
 
@@ -64,7 +66,7 @@ defmodule Banchan.CommissionsFixtures do
       {:ok, sess}
     end)
 
-    {:ok, _} = Commissions.process_payment(client, event, commission, checkout_uri, tip)
+    {:ok, _} = Payments.process_payment(client, event, commission, checkout_uri, tip)
 
     sess
   end
@@ -108,11 +110,11 @@ defmodule Banchan.CommissionsFixtures do
        }}
     end)
 
-    Commissions.process_payment_succeeded!(session)
+    Payments.process_payment_succeeded!(session)
   end
 
   def expire_mock_payment(%Stripe.Session{} = session) do
-    Commissions.process_payment_expired!(session)
+    Payments.process_payment_expired!(session)
   end
 
   def payment_fixture(

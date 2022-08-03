@@ -6,7 +6,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias Banchan.Studios
+  alias Banchan.Payments
 
   alias BanchanWeb.Components.{Button, InfiniteScroll}
   alias BanchanWeb.StudioLive.Components.{Payout, PayoutRow, StudioLayout}
@@ -20,7 +20,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
     if socket.redirected do
       {:noreply, socket}
     else
-      Studios.subscribe_to_payout_events(socket.assigns.studio)
+      Payments.subscribe_to_payout_events(socket.assigns.studio)
 
       payout_id =
         case params do
@@ -74,15 +74,15 @@ defmodule BanchanWeb.StudioLive.Payouts do
   def handle_info(:load_data, socket) do
     payout =
       if socket.assigns.payout_id do
-        Task.async(fn -> Studios.get_payout!(socket.assigns.payout_id) end)
+        Task.async(fn -> Payments.get_payout!(socket.assigns.payout_id) end)
       else
         Task.async(fn -> nil end)
       end
 
     results =
-      Task.async(fn -> Studios.list_payouts(socket.assigns.studio, socket.assigns.page) end)
+      Task.async(fn -> Payments.list_payouts(socket.assigns.studio, socket.assigns.page) end)
 
-    balance = Task.async(fn -> Studios.get_banchan_balance(socket.assigns.studio) end)
+    balance = Task.async(fn -> Payments.get_banchan_balance(socket.assigns.studio) end)
 
     [payout, results, {:ok, balance}] = Task.await_many([payout, results, balance])
 
@@ -95,7 +95,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
   end
 
   def handle_info(:process_fypm, socket) do
-    case Studios.payout_studio(socket.assigns.current_user, socket.assigns.studio) do
+    case Payments.payout_studio(socket.assigns.current_user, socket.assigns.studio) do
       {:ok, [payout, _ | _]} ->
         {:noreply,
          socket
@@ -149,10 +149,10 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
         Task.async(fn -> %{socket.assigns.results | entries: new_entries} end)
       else
-        Task.async(fn -> Studios.list_payouts(socket.assigns.studio, socket.assigns.page) end)
+        Task.async(fn -> Payments.list_payouts(socket.assigns.studio, socket.assigns.page) end)
       end
 
-    new_balance = Task.async(fn -> Studios.get_banchan_balance(socket.assigns.studio) end)
+    new_balance = Task.async(fn -> Payments.get_banchan_balance(socket.assigns.studio) end)
 
     [new_results, {:ok, new_balance}] = Task.await_many([new_results, new_balance])
 
@@ -183,7 +183,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
         results
         | entries:
             results.entries ++
-              Studios.list_payouts(socket.assigns.studio, page).entries
+              Payments.list_payouts(socket.assigns.studio, page).entries
       }
     )
   end

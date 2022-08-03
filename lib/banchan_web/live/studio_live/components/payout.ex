@@ -7,8 +7,8 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
 
   alias Surface.Components.{LivePatch, LiveRedirect}
 
-  alias Banchan.Studios
-  alias Banchan.Studios.Payout
+  alias Banchan.Payments
+  alias Banchan.Payments.Payout
 
   alias BanchanWeb.Components.{Avatar, Button, Modal, UserHandle}
 
@@ -40,7 +40,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   end
 
   def handle_event("cancel_payout", _, socket) do
-    case Studios.cancel_payout(
+    case Payments.cancel_payout(
            socket.assigns.current_user,
            socket.assigns.studio,
            socket.assigns.payout.stripe_payout_id
