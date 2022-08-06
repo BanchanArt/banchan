@@ -731,19 +731,28 @@ defmodule Banchan.Accounts do
 
   """
   def update_user_handle(user, password, attrs) do
-    changeset =
-      user
-      |> User.handle_changeset(attrs)
-      |> User.validate_current_password(password)
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        user = user |> Repo.reload()
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
-    end
+        changeset = user |> User.handle_changeset(attrs)
+
+        changeset =
+          if user.email do
+            changeset |> User.validate_current_password(password)
+          else
+            changeset
+          end
+
+        with {:ok, user} <- Repo.update(changeset) do
+          UserToken.user_and_contexts_query(user, :all)
+          |> Repo.delete_all()
+
+          {:ok, user}
+        end
+      end)
+
+    ret
   end
 
   @doc """

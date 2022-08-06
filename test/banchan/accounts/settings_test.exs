@@ -364,7 +364,36 @@ defmodule Banchan.AccountsTest.Settings do
              } = errors_on(changeset)
     end
 
-    test "updates handle with a password", %{user: user} do
+    test "updates handle with a valid password", %{user: user} do
+      {:ok, %User{} = user} =
+        Accounts.update_user_handle(
+          user,
+          valid_user_password(),
+          %{
+            handle: "newhandle"
+          }
+        )
+
+      {:error, changeset} =
+        Accounts.update_user_handle(user, "badpass", %{
+          handle: "newhandle2"
+        })
+
+      assert %{
+               current_password: ["is not valid"]
+             } = errors_on(changeset)
+
+      assert %User{
+               handle: "newhandle"
+             } = Accounts.get_user_by_handle!(user.handle)
+    end
+
+    test "does not require password to update if there's no user email", %{user: user} do
+      Ecto.Query.from(u in User, where: u.id == ^user.id)
+      |> Repo.update_all(set: [email: nil])
+
+      user = Accounts.get_user(user.id)
+
       {:ok, %User{} = user} =
         Accounts.update_user_handle(
           user,
