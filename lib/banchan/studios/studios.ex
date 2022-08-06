@@ -7,19 +7,16 @@ defmodule Banchan.Studios do
     :no_return
   ]
 
-  @pubsub Banchan.PubSub
-
   import Ecto.Query, warn: false
   require Logger
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions
-  alias Banchan.Commissions.Invoice
+  alias Banchan.Payments
+  alias Banchan.Payments.Invoice
   alias Banchan.Repo
 
   alias Banchan.Studios.{
     Notifications,
-    Payout,
     PortfolioImage,
     Studio,
     StudioBlock,
@@ -36,6 +33,8 @@ defmodule Banchan.Studios do
 
   ## Events
 
+  @pubsub Banchan.PubSub
+
   @doc """
   Subscribes the current process to stripe state changes. This is used to
   live-update studio pages as the studio gets onboarded.
@@ -49,20 +48,6 @@ defmodule Banchan.Studios do
   """
   def unsubscribe_from_stripe_state(%Studio{stripe_id: stripe_id}) do
     Phoenix.PubSub.unsubscribe(@pubsub, "studio_stripe_state:#{stripe_id}")
-  end
-
-  @doc """
-  Subscribes the current process to payout-related events for this Studio.
-  """
-  def subscribe_to_payout_events(%Studio{} = studio) do
-    Phoenix.PubSub.subscribe(@pubsub, "payout:#{studio.handle}")
-  end
-
-  @doc """
-  Unsubscribes the current process from payout-related events for this Studio.
-  """
-  def unsubscribe_from_payout_events(%Studio{} = studio) do
-    Phoenix.PubSub.unsubscribe(@pubsub, "payout:#{studio.handle}")
   end
 
   ## Creation
@@ -535,138 +520,6 @@ defmodule Banchan.Studios do
   end
 
   @doc """
-  Gets account balance stats for a studio, including how much is available on
-  Stripe, how much has been released and available for payout, etc.
-  """
-  def get_banchan_balance(%Studio{} = studio) do
-    with {:ok, stripe_balance} <-
-           stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id}) do
-      stripe_available =
-        stripe_balance.available
-        |> Enum.map(&Money.new(&1.amount, String.to_atom(String.upcase(&1.currency))))
-        |> Enum.sort()
-
-      stripe_pending =
-        stripe_balance.pending
-        |> Enum.map(&Money.new(&1.amount, String.to_atom(String.upcase(&1.currency))))
-        |> Enum.sort()
-
-      results =
-        from(i in Invoice,
-          join: c in assoc(i, :commission),
-          left_join: p in assoc(i, :payouts),
-          where:
-            c.studio_id == ^studio.id and
-              (i.status == :succeeded or i.status == :released),
-          group_by: [
-            fragment("CASE WHEN ? = 'pending' OR ? = 'in_transit' THEN 'on_the_way'
-                  WHEN ? = 'paid' THEN 'paid'
-                  WHEN ? = 'released' THEN 'released'
-                  ELSE 'held_back'
-                END", p.status, p.status, p.status, i.status),
-            fragment("(?).currency", i.total_transferred)
-          ],
-          select: %{
-            status:
-              type(
-                fragment("CASE WHEN ? = 'pending' OR ? = 'in_transit' THEN 'on_the_way'
-                  WHEN ? = 'paid' THEN 'paid'
-                  WHEN ? = 'released' THEN 'released'
-                  ELSE 'held_back'
-                END", p.status, p.status, p.status, i.status),
-                :string
-              ),
-            final:
-              type(
-                fragment(
-                  "(sum((?).amount), (?).currency)",
-                  i.total_transferred,
-                  i.total_transferred
-                ),
-                Money.Ecto.Composite.Type
-              )
-          }
-        )
-        |> Repo.all()
-
-      {released, held_back, on_the_way, paid} = get_net_values(results)
-
-      available = get_released_available(stripe_available, released)
-
-      {:ok,
-       %{
-         stripe_available: stripe_available,
-         stripe_pending: stripe_pending,
-         held_back: held_back,
-         released: released,
-         on_the_way: on_the_way,
-         paid: paid,
-         available: available
-       }}
-    end
-  end
-
-  defp get_net_values(results) do
-    Enum.reduce(results, {[], [], [], []}, fn %{status: status} = res,
-                                              {released, held_back, on_the_way, paid} ->
-      case status do
-        "released" ->
-          {[res.final | released], held_back, on_the_way, paid}
-
-        "held_back" ->
-          {released, [res.final | held_back], on_the_way, paid}
-
-        "on_the_way" ->
-          {released, held_back, [res.final | on_the_way], paid}
-
-        "paid" ->
-          {released, held_back, on_the_way, [res.final | paid]}
-      end
-    end)
-  end
-
-  defp get_released_available(stripe_available, released) do
-    Enum.map(released, fn rel ->
-      from_stripe =
-        Enum.find(stripe_available, Money.new(0, rel.currency), &(&1.currency == rel.currency))
-
-      cond do
-        from_stripe.amount >= rel.amount ->
-          rel
-
-        from_stripe.amount < rel.amount ->
-          from_stripe
-
-        true ->
-          Money.new(0, rel.currency)
-      end
-    end)
-  end
-
-  @doc """
-  Gets a specific payout with its actor and invoices preloaded.
-  """
-  def get_payout!(public_id) when is_binary(public_id) do
-    from(p in Payout,
-      where: p.public_id == ^public_id,
-      preload: [:actor, [invoices: [:commission, :event]]]
-    )
-    |> Repo.one!()
-  end
-
-  @doc """
-  Paginated view of payouts for a studio.
-  """
-  def list_payouts(%Studio{} = studio, page \\ 1) do
-    from(
-      p in Payout,
-      where: p.studio_id == ^studio.id,
-      order_by: {:desc, p.inserted_at}
-    )
-    |> Repo.paginate(page: page, page_size: 10)
-  end
-
-  @doc """
   Charges aren't enabled on a Studio until their Stripe account has gone
   through onboarding and been approved by Stripe. This will return true when
   that process has been completed.
@@ -1035,228 +888,6 @@ defmodule Banchan.Studios do
     ret
   end
 
-  @doc """
-  Pays out a Studio for the full available and released amount.
-  """
-  def payout_studio(%User{} = actor, %Studio{} = studio) do
-    {:ok, balance} =
-      stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id})
-
-    try do
-      # TODO: notifications!
-      {:ok,
-       Enum.reduce(balance.available, [], fn avail, acc ->
-         case payout_available!(actor, studio, avail) do
-           {:ok, nil} ->
-             acc
-
-           {:ok, %Payout{} = payout} ->
-             [payout | acc]
-         end
-       end)}
-    catch
-      %Stripe.Error{} = e ->
-        Logger.error("Stripe error during payout: #{e.message}")
-        {:error, e}
-
-      {:error, err} ->
-        Logger.error(%{message: "Internal error during payout", error: err})
-        {:error, err}
-    end
-  end
-
-  defp payout_available!(%User{} = actor, %Studio{} = studio, avail) do
-    avail = Money.new(avail.amount, String.to_atom(String.upcase(avail.currency)))
-
-    if avail.amount > 0 do
-      {invoice_ids, invoice_count, total} = invoice_details(studio, avail)
-
-      if total.amount > 0 do
-        create_payout!(actor, studio, invoice_ids, invoice_count, total)
-      else
-        {:ok, nil}
-      end
-    else
-      {:ok, nil}
-    end
-  end
-
-  defp invoice_details(%Studio{} = studio, avail) do
-    currency_str = Atom.to_string(avail.currency)
-    now = NaiveDateTime.utc_now()
-
-    from(i in Invoice,
-      join: c in assoc(i, :commission),
-      left_join: p in assoc(i, :payouts),
-      where:
-        c.studio_id == ^studio.id and i.status == :released and
-          (is_nil(p.id) or p.status not in [:pending, :in_transit, :paid]) and
-          fragment("(?).currency = ?::char(3)", i.total_transferred, ^currency_str) and
-          i.payout_available_on < ^now,
-      order_by: {:asc, i.updated_at}
-    )
-    |> Repo.all()
-    |> Enum.reduce_while({[], 0, Money.new(0, avail.currency)}, fn invoice,
-                                                                   {invoice_ids, invoice_count,
-                                                                    total} = acc ->
-      invoice_total = invoice.total_transferred
-
-      if invoice_total.amount + total.amount > avail.amount do
-        {:halt, acc}
-      else
-        {:cont, {[invoice.id | invoice_ids], invoice_count + 1, Money.add(total, invoice_total)}}
-      end
-    end)
-  end
-
-  defp create_payout!(
-         %User{} = actor,
-         %Studio{} = studio,
-         invoice_ids,
-         invoice_count,
-         %Money{} = total
-       ) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        case %Payout{
-               amount: total,
-               studio_id: studio.id,
-               actor_id: actor.id,
-               invoices: from(i in Invoice, where: i.id in ^invoice_ids) |> Repo.all()
-             }
-             |> Repo.insert(returning: [:id]) do
-          {:ok, payout} ->
-            payout = payout |> Repo.preload(:invoices)
-            actual_count = Enum.count(payout.invoices)
-
-            if actual_count == invoice_count do
-              {:ok, payout}
-            else
-              Logger.error(%{
-                message:
-                  "Wrong number of invoices associated with new Payout (expected: #{invoice_count}, actual: ${actual_count}"
-              })
-
-              throw({:error, "Payout failed due to an internal error."})
-            end
-
-          {:error, err} ->
-            Logger.error(%{message: "Failed to insert payout row into database", error: err})
-            throw({:error, "Payout failed due to an internal error."})
-        end
-      end)
-
-    case ret do
-      {:ok, payout} ->
-        case create_stripe_payout(studio, total) do
-          {:ok, stripe_payout} ->
-            process_payout_updated!(stripe_payout, payout.id)
-
-          {:error, err} ->
-            Logger.error(%{message: "Failed to create Stripe payout", error: err})
-
-            process_payout_updated!(
-              %Stripe.Payout{
-                status: :failed,
-                arrival_date: DateTime.utc_now() |> DateTime.to_unix()
-              },
-              payout.id
-            )
-
-            throw(err)
-        end
-
-      {:error, err} ->
-        {:error, err}
-    end
-  end
-
-  defp create_stripe_payout(%Studio{} = studio, %Money{} = total) do
-    case stripe_mod().create_payout(
-           %{
-             amount: total.amount,
-             currency: String.downcase(Atom.to_string(total.currency)),
-             statement_descriptor: "banchan.art payout"
-           },
-           headers: %{"Stripe-Account" => studio.stripe_id}
-         ) do
-      {:ok, stripe_payout} ->
-        {:ok, stripe_payout}
-
-      {:error, %Stripe.Error{} = error} ->
-        {:error, error}
-    end
-  end
-
-  @doc """
-  Cancels a pending payout.
-  """
-  def cancel_payout(%User{} = actor, %Studio{} = studio, payout_id) do
-    with {:ok, _} <- check_studio_member(studio, actor) do
-      case stripe_mod().cancel_payout(payout_id,
-             headers: %{"Stripe-Account" => studio.stripe_id}
-           ) do
-        {:ok, %Stripe.Payout{id: ^payout_id, status: "canceled"}} ->
-          # NOTE: db is updated on process_payout_updated, so we don't do it
-          # here, particularly because we might not event have a payout entry in
-          # our db at all (this function can get called when insertions fail).
-          :ok
-
-        {:error, %Stripe.Error{} = err} ->
-          Logger.warn(%{
-            message: "Failed to cancel payout #{payout_id}: #{err.message}",
-            code: err.code
-          })
-
-          {:error, err}
-      end
-    end
-  end
-
-  @doc """
-  Webhook handler for Stripe Payout state updates.
-  """
-  def process_payout_updated!(%Stripe.Payout{} = payout, id \\ nil) do
-    query =
-      cond do
-        !is_nil(id) ->
-          from(p in Payout, where: p.id == ^id, select: p)
-
-        !is_nil(payout.id) ->
-          from(p in Payout,
-            where: p.stripe_payout_id == ^payout.id,
-            select: p
-          )
-
-        true ->
-          throw({:error, "Invalid process_payout_updated! call"})
-      end
-
-    case query
-         |> Repo.update_all(
-           set: [
-             stripe_payout_id: payout.id,
-             status: payout.status,
-             failure_code: payout.failure_code,
-             failure_message: payout.failure_message,
-             arrival_date: payout.arrival_date |> DateTime.from_unix!() |> DateTime.to_naive(),
-             method: payout.method,
-             type: payout.type
-           ]
-         ) do
-      {1, [payout]} ->
-        Notifications.payout_updated(
-          payout
-          |> Repo.preload([:studio, :actor, [invoices: [:commission, :event]]])
-        )
-
-        {:ok, payout}
-
-      {0, _} ->
-        raise Ecto.NoResultsError, queryable: query
-    end
-  end
-
   ## Deletion
 
   @doc """
@@ -1312,7 +943,7 @@ defmodule Banchan.Studios do
                )
                |> Repo.stream()
                |> Enum.reduce_while(:ok, fn invoice, :ok ->
-                 case Commissions.expire_payment(actor, invoice, true) do
+                 case Payments.expire_payment(actor, invoice, true) do
                    {:ok, _} ->
                      {:cont, :ok}
 
@@ -1337,7 +968,7 @@ defmodule Banchan.Studios do
   end
 
   defp check_balance_empty(%Studio{} = studio) do
-    with {:ok, balance} <- get_banchan_balance(studio) do
+    with {:ok, balance} <- Payments.get_banchan_balance(studio) do
       if has_balance?(balance.stripe_available) ||
            has_balance?(balance.stripe_pending) ||
            has_balance?(balance.held_back) ||

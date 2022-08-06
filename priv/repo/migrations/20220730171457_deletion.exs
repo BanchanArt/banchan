@@ -29,7 +29,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (disabled_by_id) REFERENCES users(id) ON DELETE SET NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -40,7 +40,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (lifted_by_id) REFERENCES users(id) ON DELETE SET NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -51,7 +51,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -62,7 +62,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (studio_id) REFERENCES studios(id) ON DELETE CASCADE;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -71,7 +71,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             ALTER COLUMN actor_id DROP NOT NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -82,7 +82,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -93,7 +93,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (studio_id) REFERENCES studios(id) ON DELETE CASCADE;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -102,7 +102,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             ALTER COLUMN actor_id DROP NOT NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -113,7 +113,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -124,7 +124,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (refunded_by_id) REFERENCES users(id) ON DELETE SET NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -135,7 +135,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE SET NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -144,7 +144,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             ALTER COLUMN changed_by_id DROP NOT NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -155,7 +155,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (changed_by_id) REFERENCES users(id) ON DELETE SET NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -166,7 +166,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (disabled_by_id) REFERENCES users(id) ON DELETE SET NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -177,7 +177,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (lifted_by_id) REFERENCES users(id) ON DELETE SET NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -188,7 +188,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (studio_id) REFERENCES studios(id) ON DELETE CASCADE;
           """,
           [],
-          log: :info
+          log: false
         )
       end,
 
@@ -202,7 +202,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (disabled_by_id) REFERENCES users(id) ON DELETE CASCADE;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -213,7 +213,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (lifted_by_id) REFERENCES users(id) ON DELETE CASCADE;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -224,7 +224,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (user_id) REFERENCES users(id);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -235,7 +235,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (studio_id) REFERENCES studios(id);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -244,7 +244,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             ALTER COLUMN actor_id SET NOT NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -255,7 +255,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (actor_id) REFERENCES users(id);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -266,7 +266,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (studio_id) REFERENCES studios(id);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -275,7 +275,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             ALTER COLUMN actor_id SET NOT NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -286,7 +286,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (actor_id) REFERENCES users(id);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -297,7 +297,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (refunded_by_id) REFERENCES users(id);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -308,7 +308,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (client_id) REFERENCES users(id);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -317,7 +317,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             ALTER COLUMN changed_by_id SET NOT NULL;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -328,7 +328,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (changed_by_id) REFERENCES users(id);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -339,7 +339,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (disabled_by_id) REFERENCES users(id) ON DELETE CASCADE;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -350,7 +350,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (lifted_by_id) REFERENCES users(id) ON DELETE CASCADE;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query(
@@ -361,7 +361,7 @@ defmodule Banchan.Repo.Migrations.Deletion do
             FOREIGN KEY (studio_id) REFERENCES studios(id);
           """,
           [],
-          log: :info
+          log: false
         )
       end
     )

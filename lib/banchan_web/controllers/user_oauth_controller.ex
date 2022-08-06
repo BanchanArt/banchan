@@ -10,7 +10,7 @@ defmodule BanchanWeb.UserOAuthController do
   alias BanchanWeb.UserAuth
 
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
-    case Accounts.find_or_create_user(auth) do
+    case Accounts.handle_oauth(auth) do
       {:ok, user} ->
         UserAuth.log_in_user(conn, user)
 

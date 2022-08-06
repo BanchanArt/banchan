@@ -113,7 +113,7 @@ defmodule BanchanWeb.CommissionLive do
         if Map.has_key?(acc, ev.actor_id) do
           acc
         else
-          Map.put(acc, ev.actor_id, Accounts.get_user!(ev.actor_id))
+          Map.put(acc, ev.actor_id, Accounts.get_user(ev.actor_id))
         end
       end)
 
@@ -282,7 +282,7 @@ defmodule BanchanWeb.CommissionLive do
   end
 
   defp list_comms(socket, page \\ 1) do
-    Commissions.list_commission_data_for_dashboard(
+    Commissions.list_commissions(
       socket.assigns.current_user,
       Ecto.Changeset.apply_changes(socket.assigns.filter),
       page: page,

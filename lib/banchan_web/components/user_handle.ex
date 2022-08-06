@@ -17,10 +17,10 @@ defmodule BanchanWeb.Components.UserHandle do
       <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @user.handle)}>
         <strong title={@user.name} class="font-bold hover:underline">{@user.handle}</strong>
       </LiveRedirect>
-    {#elseif !Accounts.active_user?(@user)}
-      <strong class="font-bold">(deactivated)</strong>
+    {#elseif Accounts.active_user?(@user) && !@link}
+      <strong title={@user.name} class="font-bold hover:underline">{@user.handle}</strong>
     {#else}
-      <strong title="(deactivated)" class="font-bold hover:underline">(deactivated)</strong>
+      <strong title="User deactivated their account" class="font-bold">(deactivated)</strong>
     {/if}
     """
   end

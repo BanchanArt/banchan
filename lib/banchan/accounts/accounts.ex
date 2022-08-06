@@ -64,22 +64,7 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
-  Gets a single user.
-
-  Raises `Ecto.NoResultsError` if the User does not exist.
-
-  ## Examples
-      iex> get_user!(123)
-      %User{}
-      iex> get_user!(456)
-      ** (Ecto.NoResultsError)
-  """
-  def get_user!(id) do
-    Repo.get!(from(u in User, where: is_nil(u.deactivated_at)), id) |> Repo.preload(:disable_info)
-  end
-
-  @doc """
-  Gets a single user.
+  Gets a single user by ID.
 
   Returns nil if the User does not exist.
   """
@@ -111,15 +96,15 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
-  Gets a user by handle.
+  Gets a user by handle. Throws if the user is not found or is deactivated.
 
   ## Examples
 
-      iex> get_user_by_email("foo")
+      iex> get_user_by_handle!("foo")
       %User{}
 
-      iex> get_user_by_email("unknown")
-      nil
+      iex> get_user_by_handle!("unknown")
+      Ecto error
 
   """
   def get_user_by_handle!(handle) when is_binary(handle) do
@@ -163,6 +148,40 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  Utility for determining whether an actor can modify a target user. Used for
+  allowing admins to modify user-only stuff.
+  """
+  def can_modify_user?(%User{} = actor, %User{} = target) do
+    actor.id == target.id ||
+      :admin in actor.roles ||
+      (:mod in actor.roles && :admin not in target.roles)
+  end
+
+  @doc """
+  Number of days until full deletion of a deactivated user. It's an error to
+  call this on a non-deactivated user.
+  """
+  def days_until_deletion(%User{deactivated_at: deactivated_at})
+      when not is_nil(deactivated_at) do
+    case NaiveDateTime.diff(
+           NaiveDateTime.add(deactivated_at, 60 * 60 * 24 * 30, :second),
+           NaiveDateTime.utc_now()
+         ) do
+      secs when secs <= 0 ->
+        0
+
+      secs ->
+        floor(secs / (60 * 60 * 24))
+    end
+  end
+
+  @doc """
+  True if the user is active.
+  """
+  def active_user?(nil), do: false
+  def active_user?(%User{deactivated_at: deactivated_at}), do: is_nil(deactivated_at)
+
+  @doc """
   Finds a user pfp image's Upload.
   """
   def user_pfp_img!(upload_id) do
@@ -200,40 +219,6 @@ defmodule Banchan.Accounts do
     )
     |> Repo.one!()
   end
-
-  @doc """
-  Utility for determining whether an actor can modify a target user. Used for
-  allowing admins to modify user-only stuff.
-  """
-  def can_modify_user?(%User{} = actor, %User{} = target) do
-    actor.id == target.id ||
-      :admin in actor.roles ||
-      (:mod in actor.roles && :admin not in target.roles)
-  end
-
-  @doc """
-  Number of days until full deletion of a deactivated user. It's an error to
-  call this on a non-deactivated user.
-  """
-  def days_until_deletion(%User{deactivated_at: deactivated_at})
-      when not is_nil(deactivated_at) do
-    case NaiveDateTime.diff(
-           NaiveDateTime.add(deactivated_at, 60 * 60 * 24 * 30, :second),
-           NaiveDateTime.utc_now()
-         ) do
-      secs when secs <= 0 ->
-        0
-
-      secs ->
-        floor(secs / (60 * 60 * 24))
-    end
-  end
-
-  @doc """
-  True if the user is active.
-  """
-  def active_user?(nil), do: false
-  def active_user?(%User{deactivated_at: deactivated_at}), do: is_nil(deactivated_at)
 
   ## User registration
 
@@ -291,7 +276,7 @@ defmodule Banchan.Accounts do
   @doc """
   Either find or create a user based on Ueberauth OAuth credentials.
   """
-  def find_or_create_user(%Auth{provider: :twitter} = auth) do
+  def handle_oauth(%Auth{provider: :twitter} = auth) do
     {:ok, ret} =
       Repo.transaction(fn ->
         case Repo.one(from u in User, where: u.twitter_uid == ^auth.uid) do
@@ -307,7 +292,7 @@ defmodule Banchan.Accounts do
     ret
   end
 
-  def find_or_create_user(%Auth{provider: :discord} = auth) do
+  def handle_oauth(%Auth{provider: :discord} = auth) do
     {:ok, ret} =
       Repo.transaction(fn ->
         case Repo.one(from u in User, where: u.discord_uid == ^auth.uid) do
@@ -323,7 +308,7 @@ defmodule Banchan.Accounts do
     ret
   end
 
-  def find_or_create_user(%Auth{provider: :google} = auth) do
+  def handle_oauth(%Auth{provider: :google} = auth) do
     {:ok, ret} =
       Repo.transaction(fn ->
         case Repo.one(from u in User, where: u.google_uid == ^auth.uid) do
@@ -339,7 +324,7 @@ defmodule Banchan.Accounts do
     ret
   end
 
-  def find_or_create_user(%Auth{}) do
+  def handle_oauth(%Auth{}) do
     {:error, :unsupported}
   end
 
@@ -366,16 +351,35 @@ defmodule Banchan.Accounts do
         {:ok, user}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        if Enum.any?(changeset.errors, fn {field, _} -> field == :handle end) do
-          %User{}
-          |> User.registration_oauth_changeset(%{
-            attrs
-            | handle: "user#{:rand.uniform(100_000_000)}"
-          })
-          |> Repo.insert()
-        else
-          {:error, changeset}
-        end
+        changeset.errors
+        |> Enum.reduce(attrs, fn {field, _}, acc ->
+          case field do
+            :handle ->
+              Map.put(acc, :handle, "user#{:rand.uniform(100_000_000)}")
+
+            :bio ->
+              Map.put(
+                acc,
+                :bio,
+                Ecto.Changeset.get_change(changeset, :bio) |> binary_part(0, 160)
+              )
+
+            :name ->
+              Map.put(
+                acc,
+                :name,
+                Ecto.Changeset.get_change(changeset, :name) |> binary_part(0, 32)
+              )
+
+            :email ->
+              Map.put(acc, :email, nil)
+
+            _ ->
+              acc
+          end
+        end)
+        |> then(&User.registration_oauth_changeset(%User{}, &1))
+        |> Repo.insert()
     end
   end
 
@@ -404,16 +408,28 @@ defmodule Banchan.Accounts do
         {:ok, user}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        if Enum.any?(changeset.errors, fn {field, _} -> field == :handle end) do
-          %User{}
-          |> User.registration_oauth_changeset(%{
-            attrs
-            | handle: "user#{:rand.uniform(100_000_000)}"
-          })
-          |> Repo.insert()
-        else
-          {:error, changeset}
-        end
+        changeset.errors
+        |> Enum.reduce(attrs, fn {field, _}, acc ->
+          case field do
+            :handle ->
+              Map.put(acc, :handle, "user#{:rand.uniform(100_000_000)}")
+
+            :name ->
+              Map.put(
+                acc,
+                :name,
+                Ecto.Changeset.get_change(changeset, :name) |> binary_part(0, 32)
+              )
+
+            :email ->
+              Map.put(acc, :email, nil)
+
+            _ ->
+              acc
+          end
+        end)
+        |> then(&User.registration_oauth_changeset(%User{}, &1))
+        |> Repo.insert()
     end
   end
 
@@ -437,21 +453,19 @@ defmodule Banchan.Accounts do
         {:ok, user}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        if Enum.any?(changeset.errors, fn {field, _} -> field == :email end) do
-          %User{}
-          |> User.registration_oauth_changeset(%{
-            attrs
-            | email: nil
-          })
-          |> Repo.insert()
-        else
-          {:error, changeset}
-        end
-    end
-  end
+        changeset.errors
+        |> Enum.reduce(attrs, fn {field, _}, acc ->
+          case field do
+            :email ->
+              Map.put(acc, :email, nil)
 
-  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: nil}}) do
-    {:ok, user}
+            _ ->
+              acc
+          end
+        end)
+        |> then(&User.registration_oauth_changeset(%User{}, &1))
+        |> Repo.insert()
+    end
   end
 
   defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: url}}) when is_binary(url) do
@@ -476,6 +490,10 @@ defmodule Banchan.Accounts do
     })
   end
 
+  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{}) do
+    {:ok, user}
+  end
+
   defp add_oauth_pfp({:error, error}, _) do
     {:error, error}
   end
@@ -489,53 +507,84 @@ defmodule Banchan.Accounts do
   @doc """
   Disables a user.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def disable_user(%User{} = actor, %User{} = user, attrs) do
-    if :admin in actor.roles ||
-         (:mod in actor.roles && :admin not in user.roles) do
-      {:ok, ret} =
-        Repo.transaction(fn ->
-          dummy = %DisableHistory{} |> DisableHistory.disable_changeset(attrs)
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+        user = user |> Repo.reload()
+        dummy = %DisableHistory{} |> DisableHistory.disable_changeset(attrs)
 
-          with {:ok, job} <-
-                 (case Ecto.Changeset.fetch_change(dummy, :disabled_until) do
-                    {:ok, until} when not is_nil(until) ->
-                      EnableUser.schedule_unban(user, until)
+        cond do
+          :admin not in actor.roles &&
+              (:mod not in actor.roles || :admin in user.roles) ->
+            {:error, :unauthorized}
 
-                    _ ->
-                      {:ok, nil}
-                  end),
-               {:ok, disable_history} <-
-                 %DisableHistory{
-                   user_id: user.id,
-                   disabled_by_id: actor.id,
-                   disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-                   lifting_job_id: job && job.id
-                 }
-                 |> DisableHistory.disable_changeset(attrs)
-                 |> Repo.insert(),
-               {:ok, _} <- logout_user(user) do
-            {:ok, disable_history}
-          end
-        end)
+          (user |> Repo.preload(:disable_info)).disable_info ->
+            {:error, :already_disabled}
 
-      ret
-    else
-      {:error, :unauthorized}
-    end
+          !dummy.valid? ->
+            {:error, dummy}
+
+          true ->
+            with {:ok, disable_history} <-
+                   %DisableHistory{
+                     user_id: user.id,
+                     disabled_by_id: actor.id,
+                     disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+                   }
+                   |> DisableHistory.disable_changeset(attrs)
+                   |> Repo.insert(),
+                 {:ok, job} <-
+                   (case Ecto.Changeset.fetch_change(dummy, :disabled_until) do
+                      {:ok, until} when not is_nil(until) ->
+                        EnableUser.schedule_unban(user, until)
+
+                      _ ->
+                        {:ok, nil}
+                    end),
+                 {:ok, disable_history} <-
+                   (if job do
+                      disable_history
+                      |> DisableHistory.update_job_changeset(job)
+                      |> Repo.update(returning: true)
+                    else
+                      {:ok, disable_history}
+                    end),
+                 {:ok, _} <- logout_user(user) do
+              {:ok, disable_history}
+            end
+        end
+      end)
+
+    ret
   end
 
   @doc """
   Re-enable a previously disabled user.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def enable_user(actor, %User{} = user, reason, cancel \\ true) do
-    if is_nil(actor) ||
-         :admin in actor.roles ||
-         (:mod in actor.roles && :admin not in user.roles) do
-      changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifted_reason: reason})
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor =
+          if actor == :system do
+            nil
+          else
+            actor |> Repo.reload()
+          end
 
-      if changeset.valid? do
-        {:ok, ret} =
-          Repo.transaction(fn ->
+        user = user |> Repo.reload()
+
+        if is_nil(actor) ||
+             :admin in actor.roles ||
+             (:mod in actor.roles && :admin not in user.roles) do
+          changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifted_reason: reason})
+
+          if changeset.valid? do
+            # We're a little heavy-handed here in case of the very unlikely
+            # scenario where we get multiple concurrent bans in place.
+            # Better to just clean those up while we're at it.
             {_, [history | _]} =
               Repo.update_all(
                 from(h in DisableHistory,
@@ -549,20 +598,23 @@ defmodule Banchan.Accounts do
                 ]
               )
 
+            # NB(@zkat): This option is used only in
+            # Banchan.Workers.EnableUser, since it's the one running the
+            # actual unban job already.
             if cancel do
               EnableUser.cancel_unban(history)
             end
 
             {:ok, history}
-          end)
+          else
+            {:error, changeset}
+          end
+        else
+          {:error, :unauthorized}
+        end
+      end)
 
-        ret
-      else
-        {:error, changeset}
-      end
-    else
-      {:error, :unauthorized}
-    end
+    ret
   end
 
   ## Settings and Profile
@@ -584,8 +636,20 @@ defmodule Banchan.Accounts do
   Updates admin-level fields for a user, such as their roles.
   """
   def update_admin_fields(%User{} = actor, %User{} = user, attrs \\ %{}) do
-    User.admin_changeset(actor, user, attrs)
-    |> Repo.update()
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = actor |> Repo.reload()
+        user = user |> Repo.reload()
+
+        if :admin in actor.roles || :mod in actor.roles do
+          User.admin_changeset(actor, user, attrs)
+          |> Repo.update()
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -667,19 +731,28 @@ defmodule Banchan.Accounts do
 
   """
   def update_user_handle(user, password, attrs) do
-    changeset =
-      user
-      |> User.handle_changeset(attrs)
-      |> User.validate_current_password(password)
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        user = user |> Repo.reload()
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
-    end
+        changeset = user |> User.handle_changeset(attrs)
+
+        changeset =
+          if user.email do
+            changeset |> User.validate_current_password(password)
+          else
+            changeset
+          end
+
+        with {:ok, user} <- Repo.update(changeset) do
+          UserToken.user_and_contexts_query(user, :all)
+          |> Repo.delete_all()
+
+          {:ok, user}
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -706,9 +779,20 @@ defmodule Banchan.Accounts do
       {:ok, %User{}}
   """
   def apply_new_user_email(user, attrs) do
-    user
-    |> User.email_changeset(attrs)
-    |> Ecto.Changeset.apply_action(:update)
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        user = user |> Repo.reload()
+
+        if is_nil(user.email) do
+          user
+          |> User.email_changeset(attrs)
+          |> Ecto.Changeset.apply_action(:update)
+        else
+          {:error, :has_email}
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -828,19 +912,22 @@ defmodule Banchan.Accounts do
 
   """
   def generate_totp_secret(user) do
-    secret = NimbleTOTP.secret()
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        user = user |> Repo.reload()
 
-    changeset =
-      user
-      |> User.totp_secret_changeset(%{totp_secret: secret})
+        if user.totp_activated do
+          {:error, :totp_activated}
+        else
+          secret = NimbleTOTP.secret()
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
-    end
+          user
+          |> User.totp_secret_changeset(%{totp_secret: secret, totp_activated: false})
+          |> Repo.update(returning: true)
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -848,25 +935,29 @@ defmodule Banchan.Accounts do
 
   ## Examples
 
-      iex> deactivate_totp(user)
+      iex> deactivate_totp(user, password)
       {:ok, %User{}}
 
-      iex> deactivate_totp(user)
-      {:error, %Ecto.Changeset{}}
+      iex> deactivate_totp(user, badpassword)
+      {:error, :invalid_password}
 
   """
-  def deactivate_totp(user) do
-    changeset =
-      user
-      |> User.totp_secret_changeset(%{totp_secret: nil, totp_activated: false})
+  def deactivate_totp(user, password) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        user = user |> Repo.reload()
+        valid_password = User.valid_password?(user, password)
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
-    end
+        if valid_password do
+          user
+          |> User.totp_secret_changeset(%{totp_secret: nil, totp_activated: false})
+          |> Repo.update(returning: true)
+        else
+          {:error, :invalid_password}
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -877,26 +968,25 @@ defmodule Banchan.Accounts do
       iex> activate_totp(user, token)
       {:ok, %User{}}
 
-      iex> activate_totp(user, token)
-      {:invalid_token, %Ecto.Changeset{}}
+      iex> activate_totp(user, badtoken)
+      {:error, :invalid_token}
 
   """
   def activate_totp(user, token) do
-    changeset =
-      user
-      |> User.totp_secret_changeset(%{totp_activated: true})
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        user = user |> Repo.reload()
 
-    if NimbleTOTP.valid?(user.totp_secret, token) do
-      Ecto.Multi.new()
-      |> Ecto.Multi.update(:user, changeset)
-      |> Repo.transaction()
-      |> case do
-        {:ok, %{user: user}} -> {:ok, user}
-        {:error, :user, changeset, _} -> {:error, changeset}
-      end
-    else
-      {:invalid_token, changeset}
-    end
+        if NimbleTOTP.valid?(user.totp_secret, token) do
+          user
+          |> User.totp_secret_changeset(%{totp_activated: true})
+          |> Repo.update(returning: true)
+        else
+          {:error, :invalid_token}
+        end
+      end)
+
+    ret
   end
 
   @doc """
@@ -949,30 +1039,25 @@ defmodule Banchan.Accounts do
   """
   def logout_user(%User{} = user) do
     # Delete all user tokens
-    case Repo.delete_all(UserToken.user_and_contexts_query(user, :all)) do
-      {1, _} ->
-        # Broadcast to all LiveViews to immediately disconnect the user
-        Phoenix.PubSub.broadcast_from(
-          @pubsub,
-          self(),
-          UserAuth.pubsub_topic(),
-          %Phoenix.Socket.Broadcast{
-            topic: UserAuth.pubsub_topic(),
-            event: "logout_user",
-            payload: %{
-              user: user
-            }
+    {n, _} = Repo.delete_all(UserToken.user_and_contexts_query(user, :all))
+
+    if n > 0 do
+      # Broadcast to all LiveViews to immediately disconnect the user
+      Phoenix.PubSub.broadcast_from(
+        @pubsub,
+        self(),
+        UserAuth.pubsub_topic(),
+        %Phoenix.Socket.Broadcast{
+          topic: UserAuth.pubsub_topic(),
+          event: "logout_user",
+          payload: %{
+            user: user
           }
-        )
-
-        {:ok, user}
-
-      {0, _} ->
-        {:ok, user}
-
-      {_, _} ->
-        {:error, :too_many_logouts}
+        }
+      )
     end
+
+    {:ok, user}
   end
 
   @doc """
@@ -1118,15 +1203,16 @@ defmodule Banchan.Accounts do
     {:ok, ret} =
       Repo.transaction(fn ->
         actor = actor |> Repo.reload()
+        user = user |> Repo.reload()
 
-        if actor.id == user.id || :admin in actor.roles do
+        if actor.id == user.id || (:admin in actor.roles && :admin not in user.roles) do
           with {:ok, user} <-
                  user
                  |> User.deactivate_changeset()
                  |> then(fn changeset ->
                    # NB(@zkat): Users without emails are OAuth users. They also
                    # do not have passwords. So we just skip the password check.
-                   if user.email do
+                   if user.email && :admin not in actor.roles do
                      User.validate_current_password(changeset, password)
                    else
                      changeset
@@ -1153,11 +1239,14 @@ defmodule Banchan.Accounts do
   def prune_users do
     now = NaiveDateTime.utc_now()
 
-    from(
-      u in User,
-      where: not is_nil(u.deactivated_at),
-      where: u.deactivated_at < datetime_add(^now, -30, "day")
-    )
-    |> Repo.delete_all()
+    {n, _} =
+      from(
+        u in User,
+        where: not is_nil(u.deactivated_at),
+        where: u.deactivated_at < datetime_add(^now, -30, "day")
+      )
+      |> Repo.delete_all()
+
+    {:ok, n}
   end
 end

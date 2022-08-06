@@ -48,7 +48,7 @@ config :banchan, BanchanWeb.Endpoint,
   secret_key_base: "wE/ZQmiSLP77ZAfprMlRRB1D+JP9p2/wMrLhjVXyB8U6/JpoxWfWCsoE4bm3IoY/"
 
 # Print only warnings and errors during test
-config :logger, level: :warn
+config :logger, level: :warning
 
 # Print debug logs during test
 # config :logger,

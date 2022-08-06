@@ -13,9 +13,11 @@ defmodule Banchan.CommissionsTest do
   import Banchan.StudiosFixtures
 
   alias Banchan.Commissions
-  alias Banchan.Commissions.{Event, Invoice}
+  alias Banchan.Commissions.Event
   alias Banchan.Notifications
   alias Banchan.Offerings
+  alias Banchan.Payments
+  alias Banchan.Payments.Invoice
 
   setup :verify_on_exit!
 
@@ -158,7 +160,7 @@ defmodule Banchan.CommissionsTest do
       amount = Money.new(420, :USD)
 
       {:ok, invoice} =
-        Commissions.invoice(commission.studio.artists |> List.first(), commission, true, [], %{
+        Payments.invoice(commission.studio.artists |> List.first(), commission, true, [], %{
           "amount" => amount,
           "text" => "Please pay me?"
         })
@@ -224,7 +226,7 @@ defmodule Banchan.CommissionsTest do
       event = invoice.event |> Repo.reload() |> Repo.preload(:invoice)
 
       assert {:ok, checkout_uri} ==
-               Commissions.process_payment(
+               Payments.process_payment(
                  user,
                  event,
                  commission,
@@ -262,7 +264,7 @@ defmodule Banchan.CommissionsTest do
       event = invoice.event |> Repo.reload() |> Repo.preload(:invoice)
 
       assert {:ok, checkout_uri} ==
-               Commissions.process_payment(
+               Payments.process_payment(
                  client,
                  event,
                  commission,
@@ -309,7 +311,7 @@ defmodule Banchan.CommissionsTest do
       Commissions.subscribe_to_commission_events(commission)
 
       assert :ok ==
-               Commissions.process_payment_succeeded!(%Stripe.Session{
+               Payments.process_payment_succeeded!(%Stripe.Session{
                  id: sess_id,
                  payment_intent: payment_intent_id
                })
@@ -351,7 +353,7 @@ defmodule Banchan.CommissionsTest do
         payload: %Event{type: :comment, id: ^iid, invoice: %Invoice{status: :succeeded}}
       }
 
-      assert {:error, :invalid_state} == Commissions.expire_payment(artist, invoice, true)
+      assert {:error, :invalid_state} == Payments.expire_payment(artist, invoice, true)
     end
 
     test "process payment expired" do
@@ -371,7 +373,7 @@ defmodule Banchan.CommissionsTest do
 
       Commissions.subscribe_to_commission_events(commission)
 
-      Commissions.process_payment_expired!(sess)
+      Payments.process_payment_expired!(sess)
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
@@ -388,7 +390,7 @@ defmodule Banchan.CommissionsTest do
         payload: %Event{type: :comment, id: ^iid, invoice: %Invoice{status: :expired}}
       }
 
-      assert {:error, :invalid_state} == Commissions.expire_payment(artist, invoice, true)
+      assert {:error, :invalid_state} == Payments.expire_payment(artist, invoice, true)
     end
 
     test "manually expire already-started payment" do
@@ -409,7 +411,7 @@ defmodule Banchan.CommissionsTest do
 
       Commissions.subscribe_to_commission_events(commission)
 
-      assert {:error, :unauthorized} == Commissions.expire_payment(artist, invoice, false)
+      assert {:error, :unauthorized} == Payments.expire_payment(artist, invoice, false)
 
       Banchan.StripeAPI.Mock
       |> expect(:expire_payment, fn sess_id ->
@@ -417,7 +419,7 @@ defmodule Banchan.CommissionsTest do
         {:ok, sess}
       end)
 
-      assert {:ok, _} = Commissions.expire_payment(artist, invoice, true)
+      assert {:ok, _} = Payments.expire_payment(artist, invoice, true)
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
@@ -452,9 +454,9 @@ defmodule Banchan.CommissionsTest do
 
       Commissions.subscribe_to_commission_events(commission)
 
-      assert {:error, :unauthorized} == Commissions.expire_payment(client, invoice, false)
+      assert {:error, :unauthorized} == Payments.expire_payment(client, invoice, false)
 
-      assert {:ok, _} = Commissions.expire_payment(artist, invoice, true)
+      assert {:ok, _} = Payments.expire_payment(artist, invoice, true)
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
@@ -471,7 +473,7 @@ defmodule Banchan.CommissionsTest do
         payload: %Event{type: :comment, id: ^iid, invoice: %Invoice{status: :expired}}
       }
 
-      assert {:error, :invalid_state} == Commissions.expire_payment(artist, invoice, true)
+      assert {:error, :invalid_state} == Payments.expire_payment(artist, invoice, true)
     end
 
     test "release payment without approving commission" do
@@ -499,7 +501,7 @@ defmodule Banchan.CommissionsTest do
       eid = invoice.event.id
 
       assert {:error, :invalid_invoice_status} =
-               Commissions.release_payment(artist, commission, invoice)
+               Payments.release_payment(artist, commission, invoice)
 
       invoice = invoice |> Repo.reload()
 
@@ -517,7 +519,7 @@ defmodule Banchan.CommissionsTest do
       Notifications.mark_all_as_read(client)
       Notifications.mark_all_as_read(artist)
 
-      assert {:ok, _} = Commissions.release_payment(client, commission, invoice)
+      assert {:ok, _} = Payments.release_payment(client, commission, invoice)
 
       invoice = invoice |> Repo.reload()
 
@@ -538,7 +540,7 @@ defmodule Banchan.CommissionsTest do
 
       # Can't re-release once it's been released.
       assert {:error, :invalid_invoice_status} ==
-               Commissions.release_payment(artist, commission, invoice)
+               Payments.release_payment(artist, commission, invoice)
     end
 
     test "refund payment before approval - success" do
@@ -564,7 +566,7 @@ defmodule Banchan.CommissionsTest do
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
-      assert {:error, :unauthorized} == Commissions.refund_payment(artist, invoice, false)
+      assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
@@ -614,7 +616,7 @@ defmodule Banchan.CommissionsTest do
                 status: :refunded,
                 refund_status: :succeeded,
                 refunded_by_id: ^artist_id
-              }} = Commissions.refund_payment(artist, invoice, true)
+              }} = Payments.refund_payment(artist, invoice, true)
 
       eid = invoice.event.id
 
@@ -662,7 +664,7 @@ defmodule Banchan.CommissionsTest do
       Notifications.mark_all_as_read(client)
       Notifications.mark_all_as_read(artist)
 
-      assert {:error, :unauthorized} == Commissions.refund_payment(artist, invoice, false)
+      assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
 
@@ -696,7 +698,7 @@ defmodule Banchan.CommissionsTest do
 
       log =
         capture_log([level: :error], fn ->
-          assert {:error, ^err} = Commissions.refund_payment(artist, invoice, true)
+          assert {:error, ^err} = Payments.refund_payment(artist, invoice, true)
         end)
 
       assert log =~ "bad request"
@@ -728,7 +730,7 @@ defmodule Banchan.CommissionsTest do
       Notifications.mark_all_as_read(client)
       Notifications.mark_all_as_read(artist)
 
-      assert {:error, :unauthorized} == Commissions.refund_payment(artist, invoice, false)
+      assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
       charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
@@ -776,7 +778,7 @@ defmodule Banchan.CommissionsTest do
                     refund_status: :failed,
                     refund_failure_reason: :unknown,
                     status: :succeeded
-                  }} = Commissions.refund_payment(artist, invoice, true)
+                  }} = Payments.refund_payment(artist, invoice, true)
         end)
 
       assert log =~ "unknown"
@@ -828,7 +830,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Commissions.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -871,7 +873,7 @@ defmodule Banchan.CommissionsTest do
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
-      assert {:error, :unauthorized} == Commissions.refund_payment(artist, invoice, false)
+      assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
       charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
@@ -916,7 +918,7 @@ defmodule Banchan.CommissionsTest do
                 stripe_refund_id: ^refund_id,
                 refund_status: :pending,
                 status: :succeeded
-              }} = Commissions.refund_payment(artist, invoice, true)
+              }} = Payments.refund_payment(artist, invoice, true)
 
       Notifications.wait_for_notifications()
 
@@ -948,7 +950,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Commissions.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -983,7 +985,7 @@ defmodule Banchan.CommissionsTest do
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
-      assert {:error, :unauthorized} == Commissions.refund_payment(artist, invoice, false)
+      assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       Notifications.mark_all_as_read(client)
       Notifications.mark_all_as_read(artist)
@@ -1031,7 +1033,7 @@ defmodule Banchan.CommissionsTest do
                 stripe_refund_id: ^refund_id,
                 refund_status: :requires_action,
                 status: :succeeded
-              }} = Commissions.refund_payment(artist, invoice, true)
+              }} = Payments.refund_payment(artist, invoice, true)
 
       Notifications.wait_for_notifications()
 
@@ -1071,7 +1073,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Commissions.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -1118,7 +1120,7 @@ defmodule Banchan.CommissionsTest do
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
-      assert {:error, :unauthorized} == Commissions.refund_payment(artist, invoice, false)
+      assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
       charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
@@ -1159,7 +1161,7 @@ defmodule Banchan.CommissionsTest do
                     stripe_refund_id: ^refund_id,
                     refund_status: :canceled,
                     status: :succeeded
-                  }} = Commissions.refund_payment(artist, invoice, true)
+                  }} = Payments.refund_payment(artist, invoice, true)
         end)
 
       assert log =~ "canceled"
@@ -1202,7 +1204,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Commissions.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(refund, nil)
 
       Notifications.wait_for_notifications()
 

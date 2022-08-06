@@ -37,7 +37,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
             ) STORED;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -45,7 +45,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           CREATE INDEX offerings_search_idx ON offerings USING GIN (search_vector);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -53,7 +53,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           CREATE INDEX offerings_tags ON offerings USING GIN (tags);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -64,7 +64,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           EXECUTE PROCEDURE public.trigger_update_tags_count();
           """,
           [],
-          log: :info
+          log: false
         )
       end,
       fn ->
@@ -73,7 +73,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           DROP INDEX offerings_search_idx;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -81,7 +81,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           DROP INDEX offerings_tags;
           """,
           [],
-          log: :info
+          log: false
         )
       end
     )
@@ -133,7 +133,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
             ) STORED;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -141,7 +141,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           CREATE INDEX commissions_search_idx ON commissions USING GIN (search_vector);
           """,
           [],
-          log: :info
+          log: false
         )
       end,
       fn ->
@@ -150,7 +150,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           DROP INDEX commissions_search_idx;
           """,
           [],
-          log: :info
+          log: false
         )
       end
     )
@@ -191,7 +191,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
             GENERATED ALWAYS AS (to_tsvector('banchan_fts', coalesce(text, ''))) STORED;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -199,7 +199,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           CREATE INDEX commission_events_search_idx ON commission_events USING GIN (search_vector);
           """,
           [],
-          log: :info
+          log: false
         )
       end,
       fn ->
@@ -208,7 +208,7 @@ defmodule Banchan.Repo.Migrations.CreateCommissionOffering do
           DROP INDEX commission_events_search_idx;
           """,
           [],
-          log: :info
+          log: false
         )
       end
     )

@@ -10,8 +10,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
 
   import Banchan.CommissionsFixtures
 
-  alias Banchan.Commissions
   alias Banchan.Notifications
+  alias Banchan.Payments
 
   setup :verify_on_exit!
 
@@ -272,7 +272,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
          }}
       end)
 
-      Commissions.process_payment_succeeded!(%Stripe.Session{
+      Payments.process_payment_succeeded!(%Stripe.Session{
         id: stripe_sess_id,
         payment_intent: intent_id
       })
@@ -585,7 +585,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       assert invoice_box =~ "$69.00"
       assert invoice_box =~ "A refund is pending"
 
-      Commissions.process_refund_updated(
+      Payments.process_refund_updated(
         %Stripe.Refund{
           id: refund_id,
           status: "succeeded",
@@ -661,7 +661,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .modal .refund-btn")
       |> render_click()
 
-      Commissions.process_refund_updated(%Stripe.Refund{id: refund_id, status: "canceled"}, nil)
+      Payments.process_refund_updated(%Stripe.Refund{id: refund_id, status: "canceled"}, nil)
 
       Notifications.wait_for_notifications()
 
@@ -729,7 +729,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .modal .refund-btn")
       |> render_click()
 
-      Commissions.process_refund_updated(
+      Payments.process_refund_updated(
         %Stripe.Refund{id: refund_id, status: "requires_action"},
         nil
       )
@@ -802,7 +802,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .modal .refund-btn")
       |> render_click()
 
-      Commissions.process_refund_updated(
+      Payments.process_refund_updated(
         %Stripe.Refund{
           id: refund_id,
           status: "failed",

@@ -8,7 +8,8 @@ defmodule Banchan.Commissions.Event do
   import Banchan.Validators
 
   alias Banchan.Accounts.User
-  alias Banchan.Commissions.{CommentHistory, Commission, Common, EventAttachment, Invoice}
+  alias Banchan.Commissions.{CommentHistory, Commission, Common, EventAttachment}
+  alias Banchan.Payments.Invoice
 
   schema "commission_events" do
     field :public_id, :string, autogenerate: {Common, :gen_public_id, []}

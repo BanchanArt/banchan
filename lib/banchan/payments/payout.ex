@@ -1,4 +1,4 @@
-defmodule Banchan.Studios.Payout do
+defmodule Banchan.Payments.Payout do
   @moduledoc """
   Payouts to Studios.
   """
@@ -48,7 +48,7 @@ defmodule Banchan.Studios.Payout do
     belongs_to :actor, Banchan.Accounts.User
     belongs_to :studio, Banchan.Studios.Studio
 
-    many_to_many :invoices, Banchan.Commissions.Invoice, join_through: "invoices_payouts"
+    many_to_many :invoices, Banchan.Payments.Invoice, join_through: "invoices_payouts"
 
     timestamps()
   end

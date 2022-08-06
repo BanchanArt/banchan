@@ -27,6 +27,7 @@ defmodule BanchanWeb.SettingsLive do
          assign(socket,
            theme: nil,
            new_email_changeset: User.email_changeset(socket.assigns.current_user, %{}),
+           handle_changeset: User.handle_changeset(socket.assigns.current_user, %{}),
            notification_settings: settings,
            notification_settings_changeset: UserNotificationSettings.changeset(settings, %{}),
            maturity_changeset: User.maturity_changeset(socket.assigns.current_user, %{}),
@@ -377,6 +378,27 @@ defmodule BanchanWeb.SettingsLive do
         <Submit class="w-full" changeset={@notification_settings_changeset} label="Save" />
       </Form>
       <div class="divider" />
+      <Form
+        class="flex flex-col gap-4"
+        as={:change_handle}
+        for={@handle_changeset}
+        change="change_handle"
+        submit="submit_handle"
+        opts={autocomplete: "off"}
+      >
+        <h3 class="text-lg font-medium">
+          Update Handle
+        </h3>
+        <TextInput name={:handle} icon="at" opts={required: true} />
+        {#if @current_user.email}
+          <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+          <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
+            Forgot your password?
+          </LiveRedirect>
+        {/if}
+        <Submit class="w-full" changeset={@handle_changeset} label="Save" />
+      </Form>
+      <div class="divider" />
       {#if is_nil(@current_user.email)}
         <Form
           class="flex flex-col gap-4"
@@ -394,24 +416,9 @@ defmodule BanchanWeb.SettingsLive do
           <Submit class="w-full" changeset={@new_email_changeset} label="Save" />
         </Form>
       {#else}
-        <Form
-          class="flex flex-col gap-4"
-          as={:change_handle}
-          for={@handle_changeset}
-          change="change_handle"
-          submit="submit_handle"
-          opts={autocomplete: "off"}
-        >
-          <h3 class="text-lg font-medium">
-            Update Handle
-          </h3>
-          <TextInput name={:handle} icon="at" opts={required: true} />
-          <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
-          <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
-            Forgot your password?
-          </LiveRedirect>
-          <Submit class="w-full" changeset={@handle_changeset} label="Save" />
-        </Form>
+        <h3 class="text-lg">Two-factor Authentication</h3>
+        <p class="py-2">2FA helps secure your account by requiring an additional device to log in. Banchan supports any standard OTP application, such as Google Authenticator, Authy, or 1Password.</p>
+        <LiveRedirect class="btn btn-primary w-full" to={Routes.setup_mfa_path(Endpoint, :edit)}>Manage 2FA</LiveRedirect>
         <div class="divider" />
         <Form
           class="flex flex-col gap-4"

@@ -35,7 +35,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
             ) STORED;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -43,7 +43,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           CREATE INDEX studios_search_idx ON studios USING GIN (search_vector);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -51,7 +51,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           CREATE INDEX studios_tags ON studios USING GIN (tags);
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -62,7 +62,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           EXECUTE PROCEDURE public.trigger_update_tags_count();
           """,
           [],
-          log: :info
+          log: false
         )
       end,
       fn ->
@@ -71,7 +71,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           DROP INDEX studios_search_idx;
           """,
           [],
-          log: :info
+          log: false
         )
 
         repo().query!(
@@ -79,7 +79,7 @@ defmodule Banchan.Repo.Migrations.CreateStudios do
           DROP INDEX studios_tags;
           """,
           [],
-          log: :info
+          log: false
         )
       end
     )

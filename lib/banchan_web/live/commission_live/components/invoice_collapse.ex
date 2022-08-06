@@ -8,8 +8,8 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
   alias Surface.Components.Form.{Field, Label}
   alias Surface.Components.Form.Input.InputContext
 
-  alias Banchan.Commissions
   alias Banchan.Commissions.Event
+  alias Banchan.Payments
   alias Banchan.Repo
   alias Banchan.Uploads
   alias Banchan.Utils
@@ -86,7 +86,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
       when amount != "" do
     attachments = process_uploads(socket)
 
-    case Commissions.invoice(
+    case Payments.invoice(
            socket.assigns.current_user,
            socket.assigns.commission,
            socket.assigns.current_user_member?,

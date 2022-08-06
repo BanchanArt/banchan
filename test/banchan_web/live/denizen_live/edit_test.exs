@@ -80,7 +80,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
       assert rendered =~ "new name"
       refute rendered =~ "new@email"
 
-      db_user = Accounts.get_user!(user.id)
+      db_user = Accounts.get_user(user.id)
 
       assert user.name == db_user.name
       assert user.bio == db_user.bio
@@ -125,7 +125,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
       assert_redirected(page_live, Routes.denizen_show_path(conn, :show, user.handle))
 
-      db_user = Accounts.get_user!(user.id)
+      db_user = Accounts.get_user(user.id)
 
       assert db_user.name == "new name"
       assert db_user.bio == "new bio"
@@ -149,7 +149,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
       assert_redirected(page_live, Routes.denizen_show_path(conn, :show, user.handle))
 
-      db_user = Accounts.get_user!(user.id)
+      db_user = Accounts.get_user(user.id)
 
       assert db_user.name == "new name"
       assert db_user.bio == "new bio"
@@ -173,7 +173,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
       assert_redirected(page_live, Routes.denizen_show_path(conn, :show, user.handle))
 
-      db_user = Accounts.get_user!(user.id)
+      db_user = Accounts.get_user(user.id)
 
       assert db_user.name == "new name"
       assert db_user.bio == "new bio"

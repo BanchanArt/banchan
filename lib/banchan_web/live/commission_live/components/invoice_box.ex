@@ -4,8 +4,8 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   """
   use BanchanWeb, :live_component
 
-  alias Banchan.Commissions
   alias Banchan.Commissions.Event
+  alias Banchan.Payments
   alias Banchan.Utils
 
   alias Surface.Components.{Form, LiveRedirect}
@@ -53,7 +53,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       |> Map.put(:action, :insert)
 
     if changeset.valid? do
-      Commissions.process_payment(
+      Payments.process_payment(
         socket.assigns.current_user,
         socket.assigns.event,
         socket.assigns.commission,
@@ -93,7 +93,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   @impl true
   def handle_event("force_expire", _, socket) do
-    Commissions.expire_payment(
+    Payments.expire_payment(
       socket.assigns.current_user,
       socket.assigns.event.invoice,
       socket.assigns.current_user_member?
@@ -126,7 +126,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           }
         } = socket
       ) do
-    case Commissions.refund_payment(
+    case Payments.refund_payment(
            current_user,
            event.invoice,
            current_user_member?
@@ -162,7 +162,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           assigns: %{current_user: current_user, commission: commission, event: event}
         } = socket
       ) do
-    Commissions.release_payment(
+    Payments.release_payment(
       current_user,
       commission,
       event.invoice

@@ -84,6 +84,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
                 value="ready_for_review"
                 label="Request Final Approval"
               />
+              <Button class="btn-sm w-full" click="update_status" value="paused" label="Pause Work" />
             {#match :rejected}
               <Button class="btn-sm w-full" click="update_status" value="accepted" label="Reopen" />
             {#match :in_progress}
@@ -96,9 +97,17 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
               <Button class="btn-sm w-full" click="update_status" value="paused" label="Pause Work" />
               <Button class="btn-sm w-full" click="update_status" value="waiting" label="Wait for Client" />
             {#match :paused}
+              <Button class="btn-sm w-full" click="update_status" value="waiting" label="Wait for Client" />
               <Button class="btn-sm w-full" click="update_status" value="in_progress" label="Resume" />
             {#match :waiting}
               <Button class="btn-sm w-full" click="update_status" value="in_progress" label="Resume" />
+              <Button class="btn-sm w-full" click="update_status" value="paused" label="Pause Work" />
+              <Button
+                class="btn-sm w-full"
+                click="update_status"
+                value="ready_for_review"
+                label="Request Final Approval"
+              />
             {#match :ready_for_review}
               <Button
                 class="btn-sm w-full"

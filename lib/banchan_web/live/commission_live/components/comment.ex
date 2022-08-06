@@ -5,6 +5,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
   use BanchanWeb, :live_component
 
   alias Banchan.Commissions
+  alias Banchan.Payments
   alias Banchan.Repo
 
   alias Surface.Components.Form
@@ -256,7 +257,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             attachments={@event.attachments}
             open_preview="open_preview"
             remove_attachment="remove_attachment"
-            pending_payment={@event.invoice && @event.invoice.required && !Commissions.invoice_paid?(@event.invoice)}
+            pending_payment={@event.invoice && @event.invoice.required && !Payments.invoice_paid?(@event.invoice)}
             current_user_member?={@current_user_member?}
           />
         </div>

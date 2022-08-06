@@ -95,9 +95,8 @@ defmodule Banchan.Accounts.User do
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:handle, :email, :password])
-    |> validate_handle_unique(:handle)
-    |> unique_constraint(:handle)
-    |> validate_required([:handle, :email])
+    |> validate_required([:email])
+    |> validate_handle()
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
@@ -121,7 +120,6 @@ defmodule Banchan.Accounts.User do
     ])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
-    |> validate_roles(nil)
     |> validate_required([:email])
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
@@ -138,12 +136,17 @@ defmodule Banchan.Accounts.User do
       :password,
       :confirmed_at,
       :twitter_uid,
+      :twitter_handle,
       :google_uid,
-      :discord_uid
+      :discord_uid,
+      :discord_handle
     ])
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
+    |> validate_handle()
     |> validate_email()
+    |> validate_bio()
+    |> validate_name()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
   end
@@ -165,7 +168,7 @@ defmodule Banchan.Accounts.User do
     changeset
     |> validate_required([:handle])
     |> validate_format(:handle, ~r/^[a-zA-Z0-9_]+$/,
-      message: "only letters, numbers, and underscores allowed"
+      message: "only letters, numbers, and underscores are allowed"
     )
     |> validate_length(:handle, min: 3, max: 16)
     |> validate_handle_unique(:handle)
@@ -226,7 +229,7 @@ defmodule Banchan.Accounts.User do
       :roles,
       :moderation_notes
     ])
-    |> validate_roles(actor)
+    |> validate_roles(actor, user)
     |> validate_length(:moderation_notes, max: 500)
     |> validate_markdown(:moderation_notes)
   end
@@ -359,10 +362,10 @@ defmodule Banchan.Accounts.User do
       end
     end)
     |> validate_change(:pixiv_url, fn field, url ->
-      if String.match?(url, ~r/^https:\/\/www\.pixiv\.net\/en\/users\/\d+$/) do
+      if String.match?(url, ~r/^https:\/\/(www\.)?pixiv\.net\/[a-zA-Z]{2}\/users\/\d+$/) do
         []
       else
-        [{field, "must be a valid Pixiv URL."}]
+        [{field, "must be a valid Pixiv URL, like `https://pixiv.net/en/users/12345`."}]
       end
     end)
     |> validate_change(:pixiv_url, fn field, _ ->
@@ -442,14 +445,8 @@ defmodule Banchan.Accounts.User do
 
   @doc """
   User changeset for setting a TOTP token.
-
-  Will fail if current TOTP is activated.
   """
   def totp_secret_changeset(user, attrs) do
-    if user.totp_activated == true do
-      {:error, :totp_activated}
-    end
-
     user
     |> cast(attrs, [:totp_secret, :totp_activated])
   end
@@ -545,13 +542,11 @@ defmodule Banchan.Accounts.User do
     end)
   end
 
-  defp validate_roles(changeset, actor) do
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  defp validate_roles(changeset, actor, user) do
     changeset
     |> validate_change(:roles, fn field, roles ->
       cond do
-        is_nil(actor) ->
-          []
-
         :admin in actor.roles ->
           []
 
@@ -559,7 +554,21 @@ defmodule Banchan.Accounts.User do
           []
 
         true ->
-          [{field, "Can't give user a role higher than your own."}]
+          [{field, "can't give user a role higher than your own"}]
+      end
+    end)
+    |> validate_change(:roles, fn field, _ ->
+      cond do
+        actor.id == user.id ->
+          []
+
+        (:mod in actor.roles && :mod in user.roles) ||
+          (:mod in actor.roles && :admin in user.roles) ||
+            (:admin in actor.roles && :admin in user.roles) ->
+          [{field, "can't edit roles for user with equal or higher privileges than you"}]
+
+        true ->
+          []
       end
     end)
   end

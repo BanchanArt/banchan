@@ -20,12 +20,15 @@ defmodule Banchan.DataCase do
 
   using do
     quote do
-      alias Banchan.Repo
+      use Oban.Testing, repo: Banchan.Repo
 
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
+
       import Banchan.DataCase
+
+      alias Banchan.Repo
     end
   end
 
