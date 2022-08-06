@@ -23,19 +23,24 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
 
-    # NB(zkat): Disabled for now. See comment in JS hook.
-    #
-    # val =
-    #   Phoenix.HTML.Form.input_value(
-    #     Map.get(assigns[:__context__], {Surface.Components.Form, :form}),
-    #     assigns.name
-    #   )
-    #
-    # {:ok,
-    #  socket
-    #  |> push_event("markdown-input-updated", %{id: socket.assigns.id <> "-hook", value: val || ""})}
+    val =
+      Phoenix.HTML.Form.input_value(
+        Map.get(assigns[:__context__], {Surface.Components.Form, :form}),
+        assigns.name
+      )
 
-    {:ok, socket}
+    if !val || val == "" do
+      {:ok,
+       socket
+       |> push_event("clear-markdown-input", %{id: socket.assigns.id <> "-hook"})}
+    else
+      # NB(@zkat): See comment in hook for why we can't do this.
+      # {:ok,
+      #  socket
+      #  |> push_event("markdown-input-updated", %{id: socket.assigns.id <> "-hook", value: val || ""})}
+
+      {:ok, socket}
+    end
   end
 
   def handle_event("dragstart", _, socket) do
