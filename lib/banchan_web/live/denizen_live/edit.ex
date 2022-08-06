@@ -188,7 +188,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
                     {!-- # TODO: For some reason, this hover:cursor-pointer isn't working on Edge but it works on Firefox. :( --}
                     <CropUploadInput
                       id="header-cropper"
-                      aspect_ratio={1 / 3.5}
+                      aspect_ratio={3.5 / 1}
                       title="Crop Header Image"
                       upload={@uploads.header}
                       class="h-8 w-8 opacity-0 hover:cursor-pointer z-40"

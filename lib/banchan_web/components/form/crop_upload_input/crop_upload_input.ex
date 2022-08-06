@@ -38,6 +38,19 @@ defmodule BanchanWeb.Components.Form.CropUploadInput do
       <Modal id={@id <> "-modal"} always_render_body>
         <:title>{@title}</:title>
         <div id={@id <> "-image-container"} phx-update="ignore" class="cropper-preview" />
+        <div id={@id <> "-image-rotation"} phx-update="ignore" class="flex flex-col">
+          <label class="label">
+            Rotate
+          </label>
+          <input
+            type="range"
+            min="0"
+            max="360"
+            step="1"
+            value="0"
+            class="rotate-range range range-primary"
+          />
+        </div>
         <:action>
           <Button click="submit">Done</Button>
         </:action>

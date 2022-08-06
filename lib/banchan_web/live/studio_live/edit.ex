@@ -201,7 +201,7 @@ defmodule BanchanWeb.StudioLive.Edit do
               label="Card Image"
               hide_list
               crop
-              aspect_ratio={9 / 16}
+              aspect_ratio={16 / 9}
               upload={@uploads.card_image}
               cancel="cancel_card_upload"
             />
@@ -236,7 +236,7 @@ defmodule BanchanWeb.StudioLive.Edit do
             <UploadInput
               label="Header Image"
               crop
-              aspect_ratio={1 / 3.5}
+              aspect_ratio={3.5 / 1}
               hide_list
               upload={@uploads.header_image}
               cancel="cancel_header_upload"
