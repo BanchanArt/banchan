@@ -97,7 +97,7 @@ defmodule Banchan.Commissions do
       * `:status` - Sorts by status order (in the order statuses are listed in
         the enum).
   """
-  def list_commission_data_for_dashboard(
+  def list_commissions(
         %User{} = user,
         %CommissionFilter{} = filter,
         opts \\ []

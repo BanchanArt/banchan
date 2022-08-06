@@ -282,7 +282,7 @@ defmodule BanchanWeb.CommissionLive do
   end
 
   defp list_comms(socket, page \\ 1) do
-    Commissions.list_commission_data_for_dashboard(
+    Commissions.list_commissions(
       socket.assigns.current_user,
       Ecto.Changeset.apply_changes(socket.assigns.filter),
       page: page,
