@@ -847,12 +847,16 @@ defmodule Banchan.Commissions do
   defp status_transition_allowed?(true, _, :submitted, :accepted), do: true
   defp status_transition_allowed?(true, _, :submitted, :rejected), do: true
   defp status_transition_allowed?(true, _, :accepted, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :accepted, :paused), do: true
   defp status_transition_allowed?(true, _, :accepted, :ready_for_review), do: true
   defp status_transition_allowed?(true, _, :in_progress, :paused), do: true
   defp status_transition_allowed?(true, _, :in_progress, :waiting), do: true
   defp status_transition_allowed?(true, _, :in_progress, :ready_for_review), do: true
   defp status_transition_allowed?(true, _, :paused, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :paused, :waiting), do: true
   defp status_transition_allowed?(true, _, :waiting, :in_progress), do: true
+  defp status_transition_allowed?(true, _, :waiting, :paused), do: true
+  defp status_transition_allowed?(true, _, :waiting, :ready_for_review), do: true
   defp status_transition_allowed?(true, _, :ready_for_review, :in_progress), do: true
   defp status_transition_allowed?(true, _, :approved, :accepted), do: true
   defp status_transition_allowed?(true, _, :withdrawn, :accepted), do: true
