@@ -49,7 +49,7 @@ defmodule Banchan.CommissionsTest.Get do
     test "returns the public ID of a commission, given its id" do
       commission = commission_fixture()
 
-      assert  commission.public_id == Commissions.get_public_id!(commission.id)
+      assert commission.public_id == Commissions.get_public_id!(commission.id)
     end
 
     test "fails if the commission does not exist" do
