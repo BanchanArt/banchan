@@ -806,11 +806,11 @@ defmodule Banchan.Commissions do
             end
 
             # current_user_member? is checked as part of check_status_transition!
-            with {:ok, event} <-
+            with {:ok, _event} <-
                    create_event(:status, actor, commission, true, [], %{status: status}) do
               Notifications.commission_status_changed(commission, actor)
 
-              {:ok, {commission, [event]}}
+              {:ok, commission}
             end
           end
         end
