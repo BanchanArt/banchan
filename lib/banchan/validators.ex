@@ -15,7 +15,9 @@ defmodule Banchan.Validators do
 
   def validate_markdown(changeset, field) do
     validate_change(changeset, field, fn _, data ->
-      if data == HtmlSanitizeEx.markdown_html(data) do
+      # NB(@zkat): We don't care about whitespace changes.
+      if String.replace(data, ~r/\s+/, "") ==
+           String.replace(HtmlSanitizeEx.markdown_html(data), ~r/\s+/, "") do
         []
       else
         [{field, "Disallowed HTML detected. Some tags, like <script>, are not allowed."}]
