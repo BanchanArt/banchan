@@ -294,16 +294,13 @@ defmodule Banchan.Commissions do
   Gets just the `public_id` for a commission.
   """
   def get_public_id!(commission_id) do
-    %{public_id: public_id} =
-      Repo.one!(
-        from c in Commission,
-          where: c.id == ^commission_id,
-          select: %{
-            public_id: c.public_id
-          }
-      )
-
-    public_id
+    Repo.one!(
+      from c in Commission,
+        where: c.id == ^commission_id,
+        select: %{
+          public_id: c.public_id
+        }
+    ).public_id
   end
 
   @doc """
