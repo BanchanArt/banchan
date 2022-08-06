@@ -7,11 +7,13 @@ defmodule BanchanWeb.BasicAuthPlug do
   def init(opts), do: opts
 
   @doc false
-  def call(conn, nil) do
-    conn
-  end
+  def call(conn, _) do
+    case Application.get_env(:banchan, :basic_auth) do
+      nil ->
+        conn
 
-  def call(conn, opts) do
-    Plug.BasicAuth.basic_auth(conn, opts)
+      opts ->
+        Plug.BasicAuth.basic_auth(conn, opts)
+    end
   end
 end
