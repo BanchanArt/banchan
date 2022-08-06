@@ -17,7 +17,7 @@ defmodule BanchanWeb.Components.StudioCard do
       <LiveRedirect to={Routes.studio_shop_path(Endpoint, :show, @studio.handle)}>
         <Card class="h-full sm:hover:scale-105 sm:hover:z-10 transition-all">
           <:image>
-            {#if @studio.card_img_id || @studio.header_img_id}
+            {#if @studio.card_img_id}
               <img
                 class="object-cover aspect-video"
                 src={Routes.public_image_path(Endpoint, :image, :studio_card_img, @studio.card_img_id)}
