@@ -41,7 +41,7 @@ defmodule BanchanWeb.OfferingLive.Request do
             "You must verify your email address before requesting a commission."
           )
 
-        {:ok,
+        {:noreply,
          push_redirect(socket,
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
