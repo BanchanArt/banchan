@@ -9,7 +9,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
   alias BanchanWeb.Components.InfiniteScroll
   alias BanchanWeb.StudioLive.Components.OfferingCard
 
-  prop current_user, :struct
+  prop current_user, :struct, required: true
   prop query, :string
   prop order_by, :atom, default: :featured
   prop page_size, :integer, default: 24

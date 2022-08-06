@@ -197,7 +197,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
           </div>
         </div>
         <div class="divider" />
-        <Offerings id="offerings" page_size={4} infinite={false} />
+        <Offerings id="offerings" current_user={@current_user} page_size={4} infinite={false} />
         <div class="pt-10 px-2 flex flex-row items-end">
           <div class="text-xl grow">
             Selected Studios
@@ -210,7 +210,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
           </div>
         </div>
         <div class="divider" />
-        <Studios id="studios" page_size={3} infinite={false} />
+        <Studios id="studios" current_user={@current_user} page_size={3} infinite={false} />
       {/if}
     </Layout>
     """

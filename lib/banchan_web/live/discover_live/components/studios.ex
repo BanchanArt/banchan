@@ -8,7 +8,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
 
   alias BanchanWeb.Components.{InfiniteScroll, StudioCard}
 
-  prop current_user, :struct
+  prop current_user, :struct, required: true
   prop query, :string
   prop order_by, :atom, default: :homepage
   prop page_size, :integer, default: 24

@@ -346,12 +346,12 @@ defmodule BanchanWeb.DenizenLive.Show do
       {#if @user.disable_info}
         <div class="font-semibold">This account has been disabled.</div>
       {#else}
-        {#if @live_action == :show}
-          <div class="text-2xl pb-6">Artist for:</div>
-        {#elseif @live_action == :following}
-          <div class="text-2xl pb-6">Following:</div>
-        {/if}
         {#if !Enum.empty?(@studios)}
+          {#if @live_action == :show}
+            <div class="text-2xl pb-6">Artist for:</div>
+          {#elseif @live_action == :following}
+            <div class="text-2xl pb-6">Following:</div>
+          {/if}
           <div class="studio-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
             {#for studio <- @studios}
               <StudioCard studio={studio} />
