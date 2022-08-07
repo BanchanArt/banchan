@@ -298,8 +298,8 @@ defmodule Banchan.AccountsTest.Settings do
             twitter_handle: "foo1_",
             instagram_handle: "foo1_",
             facebook_url: "https://facebook.com/hello",
-            furaffinity_handle: "foo1_",
-            discord_handle: "foo1_#1234",
+            furaffinity_handle: "foo1_-",
+            discord_handle: "foo1_-#1234",
             artstation_handle: "foo1_",
             deviantart_handle: "foo1_",
             tumblr_handle: "foo1_",
@@ -309,15 +309,15 @@ defmodule Banchan.AccountsTest.Settings do
             pixiv_url: "https://pixiv.net/en/users/12345",
             pixiv_handle: "bar",
             tiktok_handle: "foo1_",
-            artfight_handle: "foo1_"
+            artfight_handle: "foo1_-"
           }
         )
 
       assert user.twitter_handle == "foo1_"
       assert user.instagram_handle == "foo1_"
       assert user.facebook_url == "https://facebook.com/hello"
-      assert user.furaffinity_handle == "foo1_"
-      assert user.discord_handle == "foo1_#1234"
+      assert user.furaffinity_handle == "foo1_-"
+      assert user.discord_handle == "foo1_-#1234"
       assert user.artstation_handle == "foo1_"
       assert user.deviantart_handle == "foo1_"
       assert user.tumblr_handle == "foo1_"
@@ -327,7 +327,7 @@ defmodule Banchan.AccountsTest.Settings do
       assert user.pixiv_url == "https://pixiv.net/en/users/12345"
       assert user.pixiv_handle == "bar"
       assert user.tiktok_handle == "foo1_"
-      assert user.artfight_handle == "foo1_"
+      assert user.artfight_handle == "foo1_-"
     end
   end
 

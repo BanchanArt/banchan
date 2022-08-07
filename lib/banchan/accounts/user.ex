@@ -293,10 +293,10 @@ defmodule Banchan.Accounts.User do
     |> validate_format(:facebook_url, ~r/^https:\/\/(www\.)?facebook\.com\/.+$/,
       message: "must be a valid Facebook URL."
     )
-    |> validate_format(:furaffinity_handle, ~r/^[a-zA-Z0-9_]+$/,
+    |> validate_format(:furaffinity_handle, ~r/^[a-zA-Z0-9_-]+$/,
       message: "must be a valid Furaffinity handle."
     )
-    |> validate_format(:discord_handle, ~r/^[a-zA-Z0-9_]+#\d{4}$/,
+    |> validate_format(:discord_handle, ~r/^[a-zA-Z0-9_-]+#\d{4}$/,
       message: "must be a valid Discord handle, including the number (myname#1234)."
     )
     |> validate_format(:artstation_handle, ~r/^[a-zA-Z0-9_]+$/,
@@ -308,7 +308,7 @@ defmodule Banchan.Accounts.User do
     |> validate_format(:tumblr_handle, ~r/^[a-zA-Z0-9_]+$/,
       message: "must be a valid Tumblr handle."
     )
-    |> validate_format(:mastodon_handle, ~r/^[a-zA-Z0-9_]+@.+$/,
+    |> validate_format(:mastodon_handle, ~r/^[a-zA-Z0-9_-]+@.+$/,
       message:
         "must be a valid Mastodon handle, without the preceding @. For example: `foo@mastodon.social`."
     )
@@ -341,7 +341,7 @@ defmodule Banchan.Accounts.User do
     |> validate_format(:tiktok_handle, ~r/^[a-zA-Z0-9_]+$/,
       message: "must be a valid TikTok handle, without the @ sign."
     )
-    |> validate_format(:artfight_handle, ~r/^[a-zA-Z0-9_]+$/,
+    |> validate_format(:artfight_handle, ~r/^[a-zA-Z0-9_-]+$/,
       message: "must be a valid Artfight handle, without the ~ sign."
     )
   end
