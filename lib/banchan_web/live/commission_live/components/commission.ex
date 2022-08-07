@@ -217,7 +217,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             />
             <div class="divider" />
             <StatusBox
-              id="status-box"
+              id={@id <> "-status-box"}
               commission={@commission}
               current_user={@current_user}
               current_user_member?={@current_user_member?}
@@ -233,7 +233,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             <Collapse id="summary-details" class="px-2">
               <:header><div class="font-medium">Details:</div></:header>
               <SummaryEditor
-                id="summary-editor"
+                id={@id <> "-summary-editor"}
                 current_user={@current_user}
                 current_user_member?={@current_user_member?}
                 commission={@commission}
@@ -266,12 +266,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               commission={@commission}
               current_user={@current_user}
               current_user_member?={@current_user_member?}
-              report_modal_id="report-modal"
+              report_modal_id={@id <> "-report-modal"}
             />
             <div class="divider" />
             <div class="flex flex-col gap-4">
               <CommentBox
-                id="comment-box"
+                id={@id <> "-comment-box"}
                 commission={@commission}
                 current_user={@current_user}
                 current_user_member?={@current_user_member?}
@@ -281,7 +281,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           </div>
         </div>
       </div>
-      <ReportModal id="report-modal" current_user={@current_user} />
+      <ReportModal id={@id <> "-report-modal"} current_user={@current_user} />
     </div>
     """
   end
