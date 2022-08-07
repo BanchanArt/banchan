@@ -162,28 +162,30 @@ defmodule Banchan.Workers.Thumbnailer do
         File.rm!(tmp_src)
         File.rm!(tmp_dest)
 
-        case opts["callback"] do
-          [module, name, args] ->
-            apply(
-              String.to_existing_atom(module),
-              String.to_existing_atom(name),
-              args
-            )
-
-          [module, name] ->
-            apply(
-              String.to_existing_atom(module),
-              String.to_existing_atom(name),
-              [dest]
-            )
-
-          _ ->
-            nil
-        end
-
-        :ok
+        {:ok, dest}
       end)
 
-    ret
+    with {:ok, dest} <- ret do
+      case opts["callback"] do
+        [module, name, args] ->
+          apply(
+            String.to_existing_atom(module),
+            String.to_existing_atom(name),
+            args
+          )
+
+        [module, name] ->
+          apply(
+            String.to_existing_atom(module),
+            String.to_existing_atom(name),
+            [dest]
+          )
+
+        _ ->
+          nil
+      end
+
+      :ok
+    end
   end
 end

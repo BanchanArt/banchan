@@ -198,7 +198,7 @@ defmodule Banchan.Uploads do
   def update_upload!(%Upload{} = upload, attrs) do
     upload
     |> Upload.update_changeset(attrs)
-    |> Repo.update!()
+    |> Repo.update!(return: true)
   end
 
   ## Misc internal utilities
