@@ -17,7 +17,8 @@ defmodule BanchanWeb.DenizenLive.Show do
     Modal,
     ReportModal,
     StudioCard,
-    Tag
+    Tag,
+    UserHandle
   }
 
   alias BanchanWeb.Endpoint
@@ -161,7 +162,7 @@ defmodule BanchanWeb.DenizenLive.Show do
           {#else}
             <div class="rounded-b-xl aspect-header-image bg-base-300 w-full" />
           {/if}
-          <div class="flex flex-row">
+          <div class="flex flex-row flex-wrap">
             <div class="relative w-32 h-20">
               <div class="absolute -top-4 left-6">
                 {#if @user.disable_info}
@@ -175,13 +176,13 @@ defmodule BanchanWeb.DenizenLive.Show do
                 {/if}
               </div>
             </div>
-            <div class="m-4 flex flex-col">
+            <div class="m-4 hidden md:flex md:flex-col">
               <h1 class="text-xl font-bold">
                 {#if !@user.disable_info}
                   {@user.name}
                 {/if}
               </h1>
-              <span>@{@user.handle}</span>
+              <UserHandle link={false} user={@user} />
             </div>
             <div class="flex flex-row gap-2 place-content-end ml-auto m-4">
               {#if @current_user}
@@ -224,6 +225,14 @@ defmodule BanchanWeb.DenizenLive.Show do
                 />
               {/if}
             </div>
+          </div>
+          <div class="m-4 mx-8 flex flex-col md:hidden">
+            <h1 class="text-xl font-bold">
+              {#if !@user.disable_info}
+                {@user.name}
+              {/if}
+            </h1>
+            <UserHandle link={false} user={@user} />
           </div>
           <div class="mx-6 my-4">
             {#if !@user.disable_info}
