@@ -195,7 +195,7 @@ defmodule BanchanWeb.StudioLive.Shop do
           <div class="hidden md:flex">
             <Card>
               <:header>
-                <h3 class="text-lg font-semibold text-gray-800">
+                <h3 class="text-lg font-semibold">
                   About
                 </h3>
               </:header>
