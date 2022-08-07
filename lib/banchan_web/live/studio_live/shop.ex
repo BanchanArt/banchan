@@ -11,7 +11,7 @@ defmodule BanchanWeb.StudioLive.Shop do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.Components.{Button, Card, InfiniteScroll}
+  alias BanchanWeb.Components.{Button, Card, InfiniteScroll, Markdown}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{OfferingCard, StudioLayout}
 
@@ -190,8 +190,24 @@ defmodule BanchanWeb.StudioLive.Shop do
         <div
           id="offering-cards"
           :hook="DragDropCards"
-          class="sm:px-2 grid grid-cols-2 sm:gap-2 sm:grid-cols-3 md:grid-cols-4 auto-rows-fr pt-4"
+          class="sm:px-2 grid grid-cols-2 sm:gap-2 sm:grid-cols-3 auto-rows-fr pt-4"
         >
+          <div class="hidden md:flex">
+            <Card>
+              <:header>
+                <h3 class="text-lg font-semibold text-gray-800">
+                  About
+                </h3>
+              </:header>
+              <Markdown class="truncate grow max-h-52" content={@studio.about} />
+              <LiveRedirect
+                class="btn btn-link btn-primary"
+                to={Routes.studio_about_path(Endpoint, :show, @studio.handle)}
+              >
+                Read More
+              </LiveRedirect>
+            </Card>
+          </div>
           {#for offering <- @offerings.entries}
             <div
               class={
