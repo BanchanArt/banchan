@@ -3,7 +3,7 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
   Displays a running balance based on the current line items + what's been
   deposited.
   """
-  use BanchanWeb, :component
+  use BanchanWeb, :live_component
 
   alias Banchan.Commissions
 
@@ -11,7 +11,11 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
   prop line_items, :list, required: true
   prop deposited, :struct
 
-  def render(assigns) do
+  data estimate_amt, :list
+  data deposited_amt, :list
+  data remaining_amt, :list
+
+  def update(assigns, socket) do
     estimate = Commissions.line_item_estimate(assigns.line_items)
 
     deposited =
@@ -33,6 +37,17 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
 
     estimate = Map.values(estimate)
 
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(
+       estimate_amt: estimate,
+       deposited_amt: deposited,
+       remaining_amt: remaining
+     )}
+  end
+
+  def render(assigns) do
     ~F"""
     <div>
       {#if @deposited}
@@ -40,7 +55,7 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
           <div class="flex flex-row items-center">
             <div class="font-medium grow">Quote:</div>
             <div class="flex flex-col">
-              {#for val <- estimate}
+              {#for val <- @estimate_amt}
                 <div class="text-sm font-medium">
                   {Money.to_string(val)}
                 </div>
@@ -50,7 +65,7 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
           <div class="flex flex-row items-center">
             <div class="font-medium grow">Deposited:</div>
             <div class="flex flex-col">
-              {#for val <- deposited}
+              {#for val <- @deposited_amt}
                 <div class="text-sm font-medium">
                   {Money.to_string(val)}
                 </div>
@@ -60,7 +75,7 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
           <div class="flex flex-row items-center">
             <div class="font-medium grow">Balance:</div>
             <div class="flex flex-col">
-              {#for val <- remaining}
+              {#for val <- @remaining_amt}
                 <div class="text-sm font-medium">
                   {Money.to_string(val)}
                 </div>
@@ -69,15 +84,19 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
           </div>
         </div>
       {#else}
-        <div class="px-2 flex">
+        <div class="px-2 flex flex-row">
           <div class="font-medium grow">Quote:</div>
-          <div class="flex flex-col">
-            {#for val <- estimate}
-              <div class="text-sm font-medium">
-                {Money.to_string(val)}
-              </div>
-            {/for}
-          </div>
+          {#if Enum.empty?(@estimate_amt)}
+            <span class="font-medium">TBD</span>
+          {#else}
+            <div class="flex flex-col">
+              {#for val <- @estimate_amt}
+                <div class="text-sm font-medium">
+                  {Money.to_string(val)}
+                </div>
+              {/for}
+            </div>
+          {/if}
         </div>
       {/if}
     </div>

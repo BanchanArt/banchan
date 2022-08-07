@@ -225,6 +225,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             <div class="divider" />
             <div class="text-lg font-medium">Summary</div>
             <BalanceBox
+              id={@id <> "-balance-box"}
               default_currency={Studios.default_currency(@commission.studio)}
               deposited={@deposited}
               line_items={@commission.line_items}

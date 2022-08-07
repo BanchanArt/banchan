@@ -13,7 +13,7 @@ defmodule BanchanWeb.OfferingLive.Request do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.CommissionLive.Components.{OfferingBox, Summary}
+  alias BanchanWeb.CommissionLive.Components.{BalanceBox, OfferingBox, Summary}
   alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
   alias BanchanWeb.Components.{Layout, Markdown}
   alias BanchanWeb.Endpoint
@@ -323,6 +323,13 @@ defmodule BanchanWeb.OfferingLive.Request do
                 offering={@offering}
                 studio={@studio}
               />
+              <div class="pt-6">
+                <BalanceBox
+                  id="balance-box"
+                  default_currency={@studio.default_currency}
+                  line_items={@line_items}
+                />
+              </div>
             </div>
             <div class="divider md:hidden" />
             <div class="flex flex-col md:col-span-2 md:order-1 gap-4">
