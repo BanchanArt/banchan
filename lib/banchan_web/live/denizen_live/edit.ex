@@ -252,10 +252,11 @@ defmodule BanchanWeb.DenizenLive.Edit do
               info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
               name={:tags}
             />
-            <Collapse id="socials" class="rounded-lg border border-primary my-2">
+            <Collapse id="socials" class="my-4 border-b-2">
               <:header>
-                Social Media Links
+                Links
               </:header>
+              <TextInput name={:website_url} />
               <TextInput name={:twitter_handle} />
               <TextInput name={:instagram_handle} />
               <TextInput name={:facebook_url} />

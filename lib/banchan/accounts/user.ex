@@ -42,6 +42,7 @@ defmodule Banchan.Accounts.User do
     field :discord_uid, :string
 
     # Social handles
+    field :website_url, :string
     field :twitter_handle, :string
     field :instagram_handle, :string
     field :facebook_url, :string
@@ -253,6 +254,7 @@ defmodule Banchan.Accounts.User do
       :pfp_img_id,
       :pfp_thumb_id,
       :header_img_id,
+      :website_url,
       :twitter_handle,
       :instagram_handle,
       :facebook_url,
@@ -281,93 +283,44 @@ defmodule Banchan.Accounts.User do
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def validate_socials(changeset) do
     changeset
-    |> validate_change(:twitter_handle, fn field, handle ->
-      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
-        []
-      else
-        [{field, "must be a valid Twitter handle, without the @ sign."}]
-      end
-    end)
-    |> validate_change(:instagram_handle, fn field, handle ->
-      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
-        []
-      else
-        [{field, "must be a valid Instagram handle, without the @ sign."}]
-      end
-    end)
-    |> validate_change(:facebook_url, fn field, url ->
-      if String.match?(url, ~r/^https:\/\/(www\.)?facebook\.com\/.+$/) do
-        []
-      else
-        [{field, "must be a valid Facebook URL."}]
-      end
-    end)
-    |> validate_change(:furaffinity_handle, fn field, handle ->
-      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
-        []
-      else
-        [{field, "must be a valid Furaffinity handle."}]
-      end
-    end)
-    |> validate_change(:discord_handle, fn field, handle ->
-      if String.match?(handle, ~r/^[a-zA-Z0-9_]+#\d{4}$/) do
-        []
-      else
-        [{field, "must be a valid Discord handle, including the number (myname#1234)."}]
-      end
-    end)
-    |> validate_change(:artstation_handle, fn field, handle ->
-      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
-        []
-      else
-        [{field, "must be a valid Artstation handle."}]
-      end
-    end)
-    |> validate_change(:deviantart_handle, fn field, handle ->
-      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
-        []
-      else
-        [{field, "must be a valid Deviantart handle."}]
-      end
-    end)
-    |> validate_change(:tumblr_handle, fn field, handle ->
-      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
-        []
-      else
-        [{field, "must be a valid Tumblr handle."}]
-      end
-    end)
-    |> validate_change(:mastodon_handle, fn field, handle ->
-      if String.match?(handle, ~r/^[a-zA-Z0-9_]+@.+$/) do
-        []
-      else
-        [
-          {field,
-           "must be a valid Mastodon handle, without the preceding @. For example: `foo@mastodon.social`."}
-        ]
-      end
-    end)
-    |> validate_change(:twitch_channel, fn field, channel ->
-      if String.match?(channel, ~r/^[a-zA-Z0-9_]+$/) do
-        []
-      else
-        [{field, "must be a valid Twitch channel name."}]
-      end
-    end)
-    |> validate_change(:picarto_channel, fn field, channel ->
-      if String.match?(channel, ~r/^[a-zA-Z0-9_]+$/) do
-        []
-      else
-        [{field, "must be a valid Picarto channel name."}]
-      end
-    end)
-    |> validate_change(:pixiv_url, fn field, url ->
-      if String.match?(url, ~r/^https:\/\/(www\.)?pixiv\.net\/[a-zA-Z]{2}\/users\/\d+$/) do
-        []
-      else
-        [{field, "must be a valid Pixiv URL, like `https://pixiv.net/en/users/12345`."}]
-      end
-    end)
+    |> validate_format(:website_url, ~r/^https?:\/\/[^\s]+$/, message: "must be a valid URL")
+    |> validate_format(:twitter_handle, ~r/^[a-zA-Z0-9_]+$/,
+      message: "must be a valid Twitter handle, without the @ sign."
+    )
+    |> validate_format(:instagram_handle, ~r/^[a-zA-Z0-9_]+$/,
+      message: "must be a valid Instagram handle, without the @ sign."
+    )
+    |> validate_format(:facebook_url, ~r/^https:\/\/(www\.)?facebook\.com\/.+$/,
+      message: "must be a valid Facebook URL."
+    )
+    |> validate_format(:furaffinity_handle, ~r/^[a-zA-Z0-9_]+$/,
+      message: "must be a valid Furaffinity handle."
+    )
+    |> validate_format(:discord_handle, ~r/^[a-zA-Z0-9_]+#\d{4}$/,
+      message: "must be a valid Discord handle, including the number (myname#1234)."
+    )
+    |> validate_format(:artstation_handle, ~r/^[a-zA-Z0-9_]+$/,
+      message: "must be a valid Artstation handle."
+    )
+    |> validate_format(:deviantart_handle, ~r/^[a-zA-Z0-9_]+$/,
+      message: "must be a valid Deviantart handle."
+    )
+    |> validate_format(:tumblr_handle, ~r/^[a-zA-Z0-9_]+$/,
+      message: "must be a valid Tumblr handle."
+    )
+    |> validate_format(:mastodon_handle, ~r/^[a-zA-Z0-9_]+@.+$/,
+      message:
+        "must be a valid Mastodon handle, without the preceding @. For example: `foo@mastodon.social`."
+    )
+    |> validate_format(:twitch_channel, ~r/^[a-zA-Z0-9_]+$/,
+      message: "must be a valid Twitch channel name."
+    )
+    |> validate_format(:picarto_channel, ~r/^[a-zA-Z0-9_]+$/,
+      message: "must be a valid Picarto channel name."
+    )
+    |> validate_format(:pixiv_url, ~r/^https:\/\/(www\.)?pixiv\.net\/[a-zA-Z]{2}\/users\/\d+$/,
+      message: "must be a valid Pixiv URL, like `https://pixiv.net/en/users/12345`."
+    )
     |> validate_change(:pixiv_url, fn field, _ ->
       if Ecto.Changeset.fetch_field(changeset, :pixiv_handle) == :error do
         [{field, "Must provide both a pixiv handle and a pixiv url, or neither."}]
@@ -382,27 +335,15 @@ defmodule Banchan.Accounts.User do
         []
       end
     end)
-    |> validate_change(:pixiv_handle, fn field, handle ->
-      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
-        []
-      else
-        [{field, "must be a valid Pixiv handle."}]
-      end
-    end)
-    |> validate_change(:tiktok_handle, fn field, handle ->
-      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
-        []
-      else
-        [{field, "must be a valid TikTok handle, without the @ sign."}]
-      end
-    end)
-    |> validate_change(:artfight_handle, fn field, handle ->
-      if String.match?(handle, ~r/^[a-zA-Z0-9_]+$/) do
-        []
-      else
-        [{field, "must be a valid Artfight handle, without the ~ sign."}]
-      end
-    end)
+    |> validate_format(:pixiv_handle, ~r/^[a-zA-Z0-9_]+$/,
+      message: "must be a valid Pixiv handle."
+    )
+    |> validate_format(:tiktok_handle, ~r/^[a-zA-Z0-9_]+$/,
+      message: "must be a valid TikTok handle, without the @ sign."
+    )
+    |> validate_format(:artfight_handle, ~r/^[a-zA-Z0-9_]+$/,
+      message: "must be a valid Artfight handle, without the ~ sign."
+    )
   end
 
   @doc """

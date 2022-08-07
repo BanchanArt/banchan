@@ -249,18 +249,25 @@ defmodule BanchanWeb.DenizenLive.Show do
           </div>
           <div :if={!@user.disable_info} class="mx-6 my-4 flex flex-row flex-wrap gap-4">
             <a
+              :if={@user.website_url}
+              class="flex flex-row flex-nowrap gap-1 items-center"
+              href={@user.website_url}
+            >
+              <i class="fas fa-link" /><div class="font-medium text-sm hover:link">{@user.website_url}</div>
+            </a>
+            <a
               :if={@user.twitter_handle}
               class="flex flex-row flex-nowrap gap-1 items-center"
               href={"https://twitter.com/#{@user.twitter_handle}"}
             >
-              <i class="fa-brands fa-twitter" /><div class="font-medium text-sm">@{@user.twitter_handle}</div>
+              <i class="fa-brands fa-twitter" /><div class="font-medium text-sm hover:link">@{@user.twitter_handle}</div>
             </a>
             <a
               :if={@user.instagram_handle}
               class="flex flex-row flex-nowrap gap-1 items-center"
               href={"https://instagram.com/#{@user.instagram_handle}"}
             >
-              <i class="fa-brands fa-instagram" /><div class="font-medium text-sm">@{@user.instagram_handle}</div>
+              <i class="fa-brands fa-instagram" /><div class="font-medium text-sm hover:link">@{@user.instagram_handle}</div>
             </a>
             <a
               :if={@user.facebook_url}
@@ -274,66 +281,66 @@ defmodule BanchanWeb.DenizenLive.Show do
               class="flex flex-row flex-nowrap gap-1 items-center"
               href={"https://www.furaffinity.com/user/#{@user.furaffinity_handle}"}
             >
-              <img width="16" src={Routes.static_path(Endpoint, "/images/fa-favicon.svg")}><div class="font-medium text-sm">{@user.furaffinity_handle}</div>
+              <img width="16" src={Routes.static_path(Endpoint, "/images/fa-favicon.svg")}><div class="font-medium text-sm hover:link">{@user.furaffinity_handle}</div>
             </a>
             <div :if={@user.discord_handle} class="flex flex-row flex-nowrap gap-1 items-center">
-              <i class="fa-brands fa-discord" /><div class="font-medium text-sm">{@user.discord_handle}</div>
+              <i class="fa-brands fa-discord" /><div class="font-medium text-sm hover:link">{@user.discord_handle}</div>
             </div>
             <a
               :if={@user.artstation_handle}
               class="flex flex-row flex-nowrap gap-1 items-center"
               href={"https://artstation.com/#{@user.artstation_handle}"}
             >
-              <i class="fa-brands fa-artstation" /><div class="font-medium text-sm">{@user.artstation_handle}</div>
+              <i class="fa-brands fa-artstation" /><div class="font-medium text-sm hover:link">{@user.artstation_handle}</div>
             </a>
             <a
               :if={@user.deviantart_handle}
               class="flex flex-row flex-nowrap gap-1 items-center"
               href={"https://www.deviantart.com/#{@user.deviantart_handle}"}
             >
-              <i class="fa-brands fa-deviantart" /><div class="font-medium text-sm">{@user.deviantart_handle}</div>
+              <i class="fa-brands fa-deviantart" /><div class="font-medium text-sm hover:link">{@user.deviantart_handle}</div>
             </a>
             <a
               :if={@user.tumblr_handle}
               class="flex flex-row flex-nowrap gap-1 items-center"
               href={"https://www.tumblr.com/blog/#{@user.tumblr_handle}"}
             >
-              <i class="fa-brands fa-tumblr" /><div class="font-medium text-sm">{@user.tumblr_handle}</div>
+              <i class="fa-brands fa-tumblr" /><div class="font-medium text-sm hover:link">{@user.tumblr_handle}</div>
             </a>
             <a
               :if={@user.twitch_channel}
               class="flex flex-row flex-nowrap gap-1 items-center"
               href={"https://www.twitch.tv/#{@user.twitch_channel}"}
             >
-              <i class="fa-brands fa-twitch" /><div class="font-medium text-sm">{@user.twitch_channel}</div>
+              <i class="fa-brands fa-twitch" /><div class="font-medium text-sm hover:link">{@user.twitch_channel}</div>
             </a>
             <a
               :if={@user.pixiv_handle && @user.pixiv_url}
               class="flex flex-row flex-nowrap gap-1 items-center"
               href={@user.pixiv_url}
             >
-              <img width="16" src={Routes.static_path(Endpoint, "/images/pixiv-favicon.svg")}><div class="font-medium text-sm">{@user.pixiv_handle}</div>
+              <img width="16" src={Routes.static_path(Endpoint, "/images/pixiv-favicon.svg")}><div class="font-medium text-sm hover:link">{@user.pixiv_handle}</div>
             </a>
             <a
               :if={@user.picarto_channel}
               class="flex flex-row flex-nowrap gap-1 items-center"
               href={"https://picarto.tv/#{@user.picarto_channel}"}
             >
-              <img width="16" src={Routes.static_path(Endpoint, "/images/picarto-favicon.svg")}><div class="font-medium text-sm">{@user.pixiv_handle}</div>
+              <img width="16" src={Routes.static_path(Endpoint, "/images/picarto-favicon.svg")}><div class="font-medium text-sm hover:link">{@user.pixiv_handle}</div>
             </a>
             <a
               :if={@user.tiktok_handle}
               class="flex flex-row flex-nowrap gap-1 items-center"
               href={"https://www.tiktok.com/@#{@user.tiktok_handle}"}
             >
-              <i class="fa-brands fa-tiktok" /><div class="font-medium text-sm">@{@user.tiktok_handle}</div>
+              <i class="fa-brands fa-tiktok" /><div class="font-medium text-sm hover:link">@{@user.tiktok_handle}</div>
             </a>
             <a
               :if={@user.artfight_handle}
               class="flex flex-row flex-nowrap gap-1 items-center"
               href={"https://artfight.net/~#{@user.artfight_handle}"}
             >
-              <img width="16" src={Routes.static_path(Endpoint, "/images/artfight-favicon.svg")}><div class="font-medium text-sm">~{@user.artfight_handle}</div>
+              <img width="16" src={Routes.static_path(Endpoint, "/images/artfight-favicon.svg")}><div class="font-medium text-sm hover:link">~{@user.artfight_handle}</div>
             </a>
           </div>
           <div class="mx-6 flex flex-row my-4 gap-4">
