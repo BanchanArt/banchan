@@ -199,7 +199,7 @@ defmodule BanchanWeb.StudioLive.Shop do
                   About
                 </h3>
               </:header>
-              <Markdown class="truncate grow max-h-52" content={@studio.about} />
+              <Markdown class="truncate grow max-h-52 whitespace-normal" content={@studio.about} />
               <LiveRedirect
                 class="btn btn-link btn-primary"
                 to={Routes.studio_about_path(Endpoint, :show, @studio.handle)}
