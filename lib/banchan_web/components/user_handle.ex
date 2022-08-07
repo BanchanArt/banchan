@@ -20,7 +20,7 @@ defmodule BanchanWeb.Components.UserHandle do
           {#if :admin in @user.roles}
             <span class="font-medium text-error">
               (admin)</span>
-          {#else if(:mod in @user.roles)}
+          {#elseif :mod in @user.roles}
             <span class="font-medium text-error">
               (mod)</span>
           {/if}
@@ -32,7 +32,7 @@ defmodule BanchanWeb.Components.UserHandle do
         {#if :admin in @user.roles}
           <span class="font-medium text-error">
             (admin)</span>
-        {#else if(:mod in @user.roles)}
+        {#elseif :mod in @user.roles}
           <span class="font-medium text-error">
             (mod)</span>
         {/if}
