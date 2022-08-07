@@ -130,12 +130,12 @@ defmodule Banchan.Offerings.Notifications do
   def notify_images_updated(%Upload{} = upload) do
     from(
       o in Offering,
-      join: gi in assoc(o, :gallery_imgs),
+      left_join: gi in assoc(o, :gallery_imgs),
       where: gi.upload_id == ^upload.id or o.card_img_id == ^upload.id,
       limit: 1,
       select: o
     )
-    |> Repo.one()
+    |> Repo.one!()
     |> Repo.preload(:studio)
     |> notify_images_updated()
   end
