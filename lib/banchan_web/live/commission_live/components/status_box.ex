@@ -5,17 +5,34 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   use BanchanWeb, :live_component
 
   alias Banchan.Commissions
+  alias Banchan.Payments
 
-  alias BanchanWeb.Components.{Button, Modal}
+  alias BanchanWeb.Components.{Button, Collapse}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
   prop commission, :struct, required: true
 
+  data invoices_paid?, :boolean
+
+  def update(assigns, socket) do
+    socket = assign(socket, assigns)
+
+    invoices = Payments.list_invoices(commission: socket.assigns.commission)
+
+    invoices_paid? =
+      !Enum.empty?(invoices) &&
+        Enum.all?(invoices, &Payments.invoice_finished?(&1)) &&
+        Enum.any?(invoices, &Payments.invoice_paid?(&1))
+
+    {:ok, socket |> assign(invoices_paid?: invoices_paid?)}
+  end
+
   def handle_event("update_status", %{"value" => status}, socket) do
     case Commissions.update_status(socket.assigns.current_user, socket.assigns.commission, status) do
       {:ok, _} ->
-        Modal.hide(socket.assigns.id <> "_approval_modal")
+        Collapse.set_open(socket.assigns.id <> "-approval-collapse", false)
+        Collapse.set_open(socket.assigns.id <> "-review-confirm-collapse", false)
         {:noreply, socket}
 
       {:error, :blocked} ->
@@ -26,11 +43,6 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
     end
-  end
-
-  def handle_event("open_approval_modal", _, socket) do
-    Modal.show(socket.assigns.id <> "_approval_modal")
-    {:noreply, socket}
   end
 
   def render(assigns) do
@@ -59,7 +71,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
         <div class="flex flex-col">
           {#case @commission.status}
             {#match :ready_for_review}
-              <Button class="btn-sm w-full" click="open_approval_modal" label="Approve" />
+              {approve(assigns)}
             {#match :withdrawn}
               <Button class="btn-sm w-full" click="update_status" value="submitted" label="Submit Again" />
             {#match _}
@@ -78,36 +90,21 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
                 value="in_progress"
                 label="Mark as In Progress"
               />
-              <Button
-                class="btn-sm w-full"
-                click="update_status"
-                value="ready_for_review"
-                label="Request Final Approval"
-              />
               <Button class="btn-sm w-full" click="update_status" value="paused" label="Pause Work" />
+              {ready_for_review(assigns)}
             {#match :rejected}
               <Button class="btn-sm w-full" click="update_status" value="accepted" label="Reopen" />
             {#match :in_progress}
-              <Button
-                class="btn-sm w-full"
-                click="update_status"
-                value="ready_for_review"
-                label="Request Final Approval"
-              />
               <Button class="btn-sm w-full" click="update_status" value="paused" label="Pause Work" />
               <Button class="btn-sm w-full" click="update_status" value="waiting" label="Wait for Client" />
+              {ready_for_review(assigns)}
             {#match :paused}
               <Button class="btn-sm w-full" click="update_status" value="waiting" label="Wait for Client" />
               <Button class="btn-sm w-full" click="update_status" value="in_progress" label="Resume" />
             {#match :waiting}
               <Button class="btn-sm w-full" click="update_status" value="in_progress" label="Resume" />
               <Button class="btn-sm w-full" click="update_status" value="paused" label="Pause Work" />
-              <Button
-                class="btn-sm w-full"
-                click="update_status"
-                value="ready_for_review"
-                label="Request Final Approval"
-              />
+              {ready_for_review(assigns)}
             {#match :ready_for_review}
               <Button
                 class="btn-sm w-full"
@@ -122,17 +119,58 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
           {/case}
         </div>
       {/if}
-
-      <Modal id={@id <> "_approval_modal"}>
-        <:title>
-          Confirm Final Approal
-        </:title>
-        All deposited funds will be made available immediately to the studio and the commission will be closed. <p class="font-bold text-warning">WARNING: You will not be able to request a refund once approved.</p>
-        <:action>
-          <Button click="update_status" value="approved" label="Confirm" />
-        </:action>
-      </Modal>
     </div>
+    """
+  end
+
+  defp approve(assigns) do
+    ~F"""
+    <Collapse id={@id <> "-approval-collapse"} show_arrow={false}>
+      <:header>
+        <Button class="btn-sm w-full" label="Approve" />
+      </:header>
+      <p>
+        All deposited funds will be made available immediately to the studio and the commission will be closed.
+      </p>
+      <p class="font-bold text-warning">WARNING: You will not be able to request a refund once approved.</p>
+      <Button
+        class="btn-sm w-full"
+        click="update_status"
+        value="approved"
+        label="Confirm"
+        opts={phx_target: @myself}
+      />
+    </Collapse>
+    """
+  end
+
+  defp ready_for_review(assigns) do
+    ~F"""
+    {#if @invoices_paid?}
+      <Button
+        class="btn-sm w-full"
+        click="update_status"
+        value="ready_for_review"
+        label="Request Final Approval"
+        opts={phx_target: @myself}
+      />
+    {#else}
+      <Collapse id={@id <> "-review-confirm-collapse"} show_arrow={false}>
+        <:header>
+          <Button class="btn-sm w-full" label="Request Final Approval" />
+        </:header>
+        <p>You're requesting final approval for a commission before any/all invoices have been completed.</p>
+        <p>It's recommended you invoice your client before they are able to approve a commission.</p>
+        <p>Are you sure you want to proceed?</p>
+        <Button
+          class="btn-sm w-full"
+          click="update_status"
+          value="ready_for_review"
+          label="Confirm"
+          opts={phx_target: @myself}
+        />
+      </Collapse>
+    {/if}
     """
   end
 

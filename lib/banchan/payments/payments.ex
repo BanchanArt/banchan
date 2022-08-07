@@ -37,10 +37,51 @@ defmodule Banchan.Payments do
   ## Getting/Listing
 
   @doc """
+  Lists invoices.
+
+  ## Options
+
+    * `:commission` - The commission invoices should belong to.
+    * `:with_statuses` - List of statuses to filter by.
+  """
+  def list_invoices(opts \\ []) do
+    from(i in Invoice, as: :invoice)
+    |> filter_commission(opts)
+    |> filter_statuses(opts)
+    |> Repo.all()
+  end
+
+  defp filter_commission(q, opts) do
+    case Keyword.fetch(opts, :commission) do
+      {:ok, %Commission{id: id}} ->
+        q |> where([invoice: i], i.commission_id == ^id)
+
+      :error ->
+        q
+    end
+  end
+
+  defp filter_statuses(q, opts) do
+    case Keyword.fetch(opts, :with_statuses) do
+      {:ok, statuses} ->
+        q |> where([invoice: i], i.status in ^statuses)
+
+      :error ->
+        q
+    end
+  end
+
+  @doc """
   True if a given invoice has been paid. Expects an already-loaded invoice
   with the latest data.
   """
-  def invoice_paid?(%Invoice{status: status}), do: status == :succeeded
+  def invoice_paid?(%Invoice{status: status}), do: status in [:succeeded, :released]
+
+  @doc """
+  True if a given invoice is in a "finished" state.
+  """
+  def invoice_finished?(%Invoice{status: status}),
+    do: status in [:succeeded, :released, :refunded, :expired]
 
   @doc """
   Gets account balance stats for a studio, including how much is available on
