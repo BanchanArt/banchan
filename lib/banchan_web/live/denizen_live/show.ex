@@ -279,7 +279,7 @@ defmodule BanchanWeb.DenizenLive.Show do
             <a
               :if={@user.furaffinity_handle}
               class="flex flex-row flex-nowrap gap-1 items-center"
-              href={"https://www.furaffinity.com/user/#{@user.furaffinity_handle}"}
+              href={"https://www.furaffinity.net/user/#{@user.furaffinity_handle}"}
             >
               <img width="16" src={Routes.static_path(Endpoint, "/images/fa-favicon.svg")}><div class="font-medium text-sm hover:link">{@user.furaffinity_handle}</div>
             </a>
