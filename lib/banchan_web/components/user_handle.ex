@@ -15,12 +15,30 @@ defmodule BanchanWeb.Components.UserHandle do
     ~F"""
     {#if Accounts.active_user?(@user) && @link}
       <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @user.handle)}>
-        <strong title={@user.name} class="font-bold hover:underline">{@user.handle}</strong>
+        <span>
+          <strong title={@user.name} class="font-semibold hover:underline">@{@user.handle}</strong>
+          {#if :admin in @user.roles}
+            <span class="font-medium text-error">
+              (admin)</span>
+          {#else if(:mod in @user.roles)}
+            <span class="font-medium text-error">
+              (mod)</span>
+          {/if}
+        </span>
       </LiveRedirect>
     {#elseif Accounts.active_user?(@user) && !@link}
-      <strong title={@user.name} class="font-bold hover:underline">{@user.handle}</strong>
+      <span class="cursor-default">
+        <strong title={@user.name} class="font-semibold">@{@user.handle}</strong>
+        {#if :admin in @user.roles}
+          <span class="font-medium text-error">
+            (admin)</span>
+        {#else if(:mod in @user.roles)}
+          <span class="font-medium text-error">
+            (mod)</span>
+        {/if}
+      </span>
     {#else}
-      <strong title="User deactivated their account" class="font-bold">(deactivated)</strong>
+      <strong title="User deactivated their account" class="font-semibold">(deactivated)</strong>
     {/if}
     """
   end
