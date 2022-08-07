@@ -280,6 +280,7 @@ defmodule Banchan.Studios do
   ## Options
 
     * `:include_disabled?` - Whether to include disabled studios in the results.
+    * `:include_own_archived?` - Whether to include archived studios if `:current_user` is a member.
     * `:with_member` - Filter studios to ones with this user as a member/artist.
     * `:current_user` - When given, applies various user-specific filters, like muted words, blocks, and mature content filtering.
     * `:include_pending?` - When true, includes studios that are pending.
@@ -298,7 +299,8 @@ defmodule Banchan.Studios do
       as: :studio,
       join: artist in assoc(s, :artists),
       as: :artist,
-      where: is_nil(s.deleted_at)
+      where: is_nil(s.deleted_at),
+      order_by: [desc: fragment("CASE WHEN (?).archived_at IS NULL THEN 1 ELSE 0 END", s)]
     )
     |> filter_include_disabled?(opts)
     |> filter_with_member(opts)
@@ -338,6 +340,8 @@ defmodule Banchan.Studios do
 
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp filter_current_user(q, opts) do
+    include_own_archived? = Keyword.get(opts, :include_own_archived?) == true
+
     case Keyword.fetch(opts, :current_user) do
       {:ok, %User{} = current_user} ->
         q
@@ -354,7 +358,7 @@ defmodule Banchan.Studios do
           is_nil(s.archived_at) or
             :admin in current_user.roles or
             :mod in current_user.roles or
-            artist.id == current_user.id
+            (^include_own_archived? and artist.id == current_user.id)
         )
         |> where(
           [studio: s, current_user: current_user],

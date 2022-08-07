@@ -123,6 +123,29 @@ defmodule BanchanWeb.StudioLive.Settings do
     end
   end
 
+  def handle_event("unarchive_studio", _, socket) do
+    case Studios.unarchive_studio(
+           socket.assigns.current_user,
+           socket.assigns.studio
+         ) do
+      {:ok, _studio} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Studio unarchived")
+         |> push_redirect(
+           to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+
+      {:error, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "An unexpected error occurred. Please try again later.")
+         |> push_redirect(
+           to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
+         )}
+    end
+  end
+
   def handle_event("delete_studio", val, socket) do
     case Studios.delete_studio(
            socket.assigns.current_user,
@@ -252,16 +275,30 @@ defmodule BanchanWeb.StudioLive.Settings do
 
           <div class="divider" />
 
-          <Collapse id="archive-studio-collapse" class="w-full">
-            <:header>
-              <div class="font-semibold text-error">Archive</div>
-            </:header>
-            <div class="prose">
-              <p>Archiving is a reversible operation that unlists the studio and prevents new commissions, but allows you to retain access to historical information from commissions and payouts. It's also doable while there's still money pending.</p>
-              <p>Are you sure you want to archive this studio?</p>
-            </div>
-            <Button click="archive_studio" class="w-full btn-error" label="Confirm" />
-          </Collapse>
+          {#if @studio.archived_at}
+            <Collapse id="archive-studio-collapse" class="w-full">
+              <:header>
+                <div class="font-semibold text-error">Archive</div>
+              </:header>
+              <div class="prose">
+                <p>This studio is currently archived. This is a reversible operation that hides it and prevents it from being accessed by non-members.</p>
+                <p>Do you want to bring it back?</p>
+              </div>
+              <Button click="unarchive_studio" class="w-full btn-primary" label="Confirm" />
+            </Collapse>
+          {#else}
+            <Collapse id="archive-studio-collapse" class="w-full">
+              <:header>
+                <div class="font-semibold text-error">Archive</div>
+              </:header>
+              <div class="prose">
+                <p>Archiving is a reversible operation that unlists the studio and prevents new commissions, but allows you to retain access to historical information from commissions and payouts. It's also doable while there's still money pending.</p>
+                <p>Are you sure you want to archive this studio?</p>
+              </div>
+              <Button click="archive_studio" class="w-full btn-error" label="Confirm" />
+            </Collapse>
+          {/if}
+
           <div class="divider" />
 
           <Collapse id="delete-studio-collapse" class="w-full">
