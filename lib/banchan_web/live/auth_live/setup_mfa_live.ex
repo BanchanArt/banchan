@@ -117,7 +117,7 @@ defmodule BanchanWeb.SetupMfaLive do
 
         {:noreply, socket}
 
-      {:invalid_token, _} ->
+      {:error, :invalid_token} ->
         socket =
           socket
           |> put_flash(:error, "Invalid MFA token")
