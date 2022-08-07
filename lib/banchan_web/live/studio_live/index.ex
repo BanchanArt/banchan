@@ -17,6 +17,7 @@ defmodule BanchanWeb.StudioLive.Index do
         Studios.list_studios(
           with_member: socket.assigns.current_user,
           current_user: socket.assigns.current_user,
+          include_own_archived?: true,
           page_size: 24,
           order_by: :newest
         )
