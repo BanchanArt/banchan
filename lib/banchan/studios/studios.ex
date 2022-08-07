@@ -299,7 +299,8 @@ defmodule Banchan.Studios do
       as: :studio,
       join: artist in assoc(s, :artists),
       as: :artist,
-      where: is_nil(s.deleted_at)
+      where: is_nil(s.deleted_at),
+      order_by: [desc: fragment("CASE WHEN (?).archived_at IS NULL THEN 1 ELSE 0 END", s)]
     )
     |> filter_include_disabled?(opts)
     |> filter_with_member(opts)

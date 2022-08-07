@@ -15,7 +15,7 @@ defmodule BanchanWeb.Components.StudioCard do
     ~F"""
     <studio-card>
       <LiveRedirect to={Routes.studio_shop_path(Endpoint, :show, @studio.handle)}>
-        <Card class="h-full sm:hover:scale-105 sm:hover:z-10 transition-all">
+        <Card class={"h-full sm:hover:scale-105 sm:hover:z-10 transition-all", "opacity-50": @studio.archived_at}>
           <:image>
             {#if @studio.card_img_id}
               <img
@@ -32,6 +32,9 @@ defmodule BanchanWeb.Components.StudioCard do
           <:header_aside>
             {#if !@studio.stripe_charges_enabled}
               <div class="badge badge-warning">Pending</div>
+            {/if}
+            {#if @studio.archived_at}
+              <div class="badge badge-warning">Archived</div>
             {/if}
           </:header_aside>
           <ul class="my-2 flex flex-row flex-wrap gap-1">
