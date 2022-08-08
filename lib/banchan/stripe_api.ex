@@ -88,4 +88,9 @@ defmodule Banchan.StripeAPI do
   def delete_account(id) do
     Stripe.Account.delete(id)
   end
+
+  @impl Banchan.StripeAPI.Base
+  def create_price(params) do
+    Stripe.Price.create(params)
+  end
 end

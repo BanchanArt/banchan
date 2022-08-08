@@ -154,16 +154,22 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
 
       line_items = [
         %{
-          name: "Commission Invoice Payment",
           quantity: 1,
-          amount: amount.amount,
-          currency: String.downcase(to_string(amount.currency))
+          price_data: %{
+            currency: "usd",
+            product_data: %{name: "Commission Invoice Payment"},
+            tax_behavior: "exclusive",
+            unit_amount: amount.amount
+          }
         },
         %{
-          name: "Extra Tip",
           quantity: 1,
-          amount: tip.amount,
-          currency: String.downcase(to_string(tip.currency))
+          price_data: %{
+            currency: "usd",
+            product_data: %{name: "Extra Tip"},
+            tax_behavior: "exclusive",
+            unit_amount: tip.amount
+          }
         }
       ]
 

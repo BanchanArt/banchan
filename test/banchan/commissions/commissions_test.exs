@@ -203,16 +203,22 @@ defmodule Banchan.CommissionsTest do
 
         assert [
                  %{
-                   name: "Commission Invoice Payment",
                    quantity: 1,
-                   amount: amount.amount,
-                   currency: "usd"
+                   price_data: %{
+                     currency: "usd",
+                     product_data: %{name: "Commission Invoice Payment"},
+                     tax_behavior: "exclusive",
+                     unit_amount: amount.amount
+                   }
                  },
                  %{
-                   name: "Extra Tip",
                    quantity: 1,
-                   amount: tip.amount,
-                   currency: "usd"
+                   price_data: %{
+                     currency: "usd",
+                     product_data: %{name: "Extra Tip"},
+                     tax_behavior: "exclusive",
+                     unit_amount: tip.amount
+                   }
                  }
                ] == sess.line_items
 

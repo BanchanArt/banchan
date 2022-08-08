@@ -64,7 +64,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         {:ok, url} ->
           {:noreply, socket |> redirect(external: url)}
 
-        {:error, _} ->
+        {:error, :payment_failed} ->
           {:noreply,
            socket
            |> put_flash(

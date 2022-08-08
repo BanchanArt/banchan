@@ -489,16 +489,26 @@ defmodule Banchan.Payments do
       ) do
     items = [
       %{
-        name: "Commission Invoice Payment",
-        quantity: 1,
-        amount: amount.amount,
-        currency: String.downcase(to_string(amount.currency))
+        price_data: %{
+          product_data: %{
+            name: "Commission Invoice Payment"
+          },
+          unit_amount: amount.amount,
+          currency: String.downcase(to_string(amount.currency)),
+          tax_behavior: "exclusive"
+        },
+        quantity: 1
       },
       %{
-        name: "Extra Tip",
-        quantity: 1,
-        amount: tip.amount,
-        currency: String.downcase(to_string(tip.currency))
+        price_data: %{
+          product_data: %{
+            name: "Extra Tip"
+          },
+          unit_amount: tip.amount,
+          currency: String.downcase(to_string(tip.currency)),
+          tax_behavior: "exclusive"
+        },
+        quantity: 1
       }
     ]
 
@@ -517,6 +527,9 @@ defmodule Banchan.Payments do
              cancel_url: uri,
              success_url: uri,
              line_items: items,
+             automatic_tax: %{
+               enabled: true
+             },
              payment_intent_data: %{
                transfer_data: %{
                  amount: transfer_amt.amount,
@@ -537,6 +550,10 @@ defmodule Banchan.Payments do
       send_event_update!(event.id, actor)
 
       {:ok, session.url}
+    else
+      {:error, err} ->
+        Logger.error(%{message: "Failed to process payment", error: err})
+        {:error, :payment_failed}
     end
   end
 
