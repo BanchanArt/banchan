@@ -54,6 +54,24 @@ defmodule Banchan.Studios.Notifications do
   end
 
   @doc """
+  Paginated view of followers for a given studio.
+  """
+  def list_followers(%Studio{} = studio, opts \\ []) do
+    from(u in User,
+      as: :user,
+      join: f in StudioFollower,
+      on: f.user_id == u.id and f.studio_id == ^studio.id,
+      where: is_nil(u.deactivated_at),
+      order_by: [desc: f.inserted_at],
+      preload: [:header_img, :pfp_thumb]
+    )
+    |> Repo.paginate(
+      page_size: Keyword.get(opts, :page_size, 24),
+      page: Keyword.get(opts, :page, 1)
+    )
+  end
+
+  @doc """
   Adds a user to the given studio's followers.
   """
   def follow_studio!(%Studio{} = studio, %User{} = user) do

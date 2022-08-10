@@ -16,7 +16,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   prop current_user_member?, :boolean, required: true
   prop flashes, :string, required: true
   prop studio, :struct, required: true
-  prop followers, :integer, required: true
+  prop followers, :struct, required: true
   prop tab, :atom
   prop uri, :string, required: true
   prop padding, :integer
@@ -147,22 +147,25 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 {/for}
               </div>
               <div class="p-2">|</div>
-              <div>
+              <LiveRedirect
+                class="hover:link"
+                to={Routes.studio_followers_path(Endpoint, :index, @studio.handle)}
+              >
                 <span class="font-bold">
-                  {#if @followers > 9999}
-                    {Number.SI.number_to_si(@followers)}
+                  {#if @followers.total_entries > 9999}
+                    {Number.SI.number_to_si(@followers.total_entries)}
                   {#else}
-                    {Number.Delimit.number_to_delimited(@followers, precision: 0)}
+                    {Number.Delimit.number_to_delimited(@followers.total_entries, precision: 0)}
                   {/if}
                 </span>
                 <span>
-                  {#if @followers == 1}
+                  {#if @followers.total_entries == 1}
                     Follower
                   {#else}
                     Followers
                   {/if}
                 </span>
-              </div>
+              </LiveRedirect>
             </div>
           </div>
           <div class="overflow-auto min-w-screen">

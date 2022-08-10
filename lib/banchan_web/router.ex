@@ -167,6 +167,7 @@ defmodule BanchanWeb.Router do
       live("/offerings/:handle/:offering_type", OfferingLive.Show, :show)
 
       live("/studios/:handle", StudioLive.Shop, :show)
+      live("/studios/:handle/followers", StudioLive.Followers, :index)
       live("/studios/:handle/about", StudioLive.About, :show)
       live("/studios/:handle/portfolio", StudioLive.Portfolio, :show)
       live("/studios/:handle/disabled", StudioLive.Disabled, :show)

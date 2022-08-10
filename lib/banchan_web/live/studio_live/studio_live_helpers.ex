@@ -26,7 +26,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
       |> assign_card_props(studio)
       |> assign(studio: studio)
       |> assign(current_user_member?: current_user_member?)
-      |> assign(followers: Studios.Notifications.follower_count(studio))
+      |> assign(followers: Studios.Notifications.list_followers(studio))
 
     Studios.Notifications.subscribe_to_follower_count(studio)
 

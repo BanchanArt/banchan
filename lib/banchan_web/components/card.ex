@@ -7,6 +7,9 @@ defmodule BanchanWeb.Components.Card do
   @doc "Additional class text"
   prop class, :css_class
 
+  @doc "Class to apply to image"
+  prop image_class, :css_class, default: "aspect-video"
+
   @doc "The header"
   slot header
 
@@ -26,7 +29,7 @@ defmodule BanchanWeb.Components.Card do
     ~F"""
     <div class={"shadow-xl bg-base-200 card card-compact flex flex-col flex-grow", @class}>
       {#if slot_assigned?(:image)}
-        <figure class="aspect-video">
+        <figure class={@image_class}>
           <#slot name="image" />
         </figure>
       {/if}
