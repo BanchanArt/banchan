@@ -64,7 +64,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
               end}
             />
           </:image>
-          <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-2 grow justify-end">
             <div class="flex flex-row flex-wrap gap-2">
               {#if @offering.open && !is_nil(@offering.slots)}
                 <div class="whitespace-nowrap badge badge-outline badge-primary">{@available_slots}/{@offering.slots} Slots</div>
@@ -82,7 +82,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
                 <div class="badge badge-error badge-outline">Hidden</div>
               {/if}
             </div>
-            <div class="flex flex-col grow z-20">
+            <div class="flex flex-col z-20">
               <p class="flex flex-row items-end">
                 <span class="font-bold grow">Base Price:</span>
                 {#if @base_price && !Enum.empty?(@base_price)}
