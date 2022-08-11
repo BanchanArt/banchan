@@ -52,7 +52,7 @@ defmodule BanchanWeb.Components.Layout do
             {!-- # TODO: Fill these out --}
             <span class="footer-title">Legal</span>
             <a href="#" class="link link-hover">Terms of use</a>
-            <a href="#" class="link link-hover">Privacy policy</a>
+            <LiveRedirect to={Routes.static_privacy_policy_path(Endpoint, :show)} class="link link-hover">Privacy policy</LiveRedirect>
             <a href="#" class="link link-hover">Cookie policy</a>
           </div>
           <div>
