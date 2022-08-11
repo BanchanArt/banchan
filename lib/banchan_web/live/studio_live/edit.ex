@@ -11,6 +11,8 @@ defmodule BanchanWeb.StudioLive.Edit do
 
   import BanchanWeb.StudioLive.Helpers
 
+  alias BanchanWeb.Components.Collapse
+
   alias BanchanWeb.Components.Form.{
     HiddenInput,
     MarkdownInput,
@@ -246,6 +248,27 @@ defmodule BanchanWeb.StudioLive.Edit do
               info="Displayed in the 'About' page. The first few dozen characters will also be displayed as the description in studio cards."
               name={:about}
             />
+            <Collapse id="socials" class="my-4 border-b-2">
+              <:header>
+                Links
+              </:header>
+              <TextInput name={:website_url} />
+              <TextInput name={:twitter_handle} />
+              <TextInput name={:instagram_handle} />
+              <TextInput name={:facebook_url} />
+              <TextInput name={:furaffinity_handle} />
+              <TextInput name={:discord_handle} />
+              <TextInput name={:artstation_handle} />
+              <TextInput name={:deviantart_handle} />
+              <TextInput name={:tumblr_handle} />
+              <TextInput name={:mastodon_handle} />
+              <TextInput name={:twitch_channel} />
+              <TextInput name={:picarto_channel} />
+              <TextInput name={:pixiv_url} />
+              <TextInput name={:pixiv_handle} />
+              <TextInput name={:tiktok_handle} />
+              <TextInput name={:artfight_handle} />
+            </Collapse>
             <Submit label="Save" />
           </Form>
         </div>

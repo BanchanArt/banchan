@@ -54,6 +54,23 @@ defmodule Banchan.Studios.Studio do
 
     has_many :offerings, Banchan.Offerings.Offering, preload_order: [:asc, :index]
 
+    field :website_url, :string
+    field :twitter_handle, :string
+    field :instagram_handle, :string
+    field :facebook_url, :string
+    field :furaffinity_handle, :string
+    field :discord_handle, :string
+    field :artstation_handle, :string
+    field :deviantart_handle, :string
+    field :tumblr_handle, :string
+    field :mastodon_handle, :string
+    field :twitch_channel, :string
+    field :picarto_channel, :string
+    field :pixiv_url, :string
+    field :pixiv_handle, :string
+    field :tiktok_handle, :string
+    field :artfight_handle, :string
+
     timestamps()
   end
 
@@ -110,6 +127,8 @@ defmodule Banchan.Studios.Studio do
       :card_img_id,
       :header_img_id
     ])
+    |> cast_socials(attrs)
+    |> validate_socials()
     |> validate_required([:name, :handle])
     |> validate_markdown(:about)
     |> validate_length(:name, min: 3, max: 32)

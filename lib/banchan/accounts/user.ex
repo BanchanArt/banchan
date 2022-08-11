@@ -253,97 +253,16 @@ defmodule Banchan.Accounts.User do
       :tags,
       :pfp_img_id,
       :pfp_thumb_id,
-      :header_img_id,
-      :website_url,
-      :twitter_handle,
-      :instagram_handle,
-      :facebook_url,
-      :furaffinity_handle,
-      :discord_handle,
-      :artstation_handle,
-      :deviantart_handle,
-      :tumblr_handle,
-      :mastodon_handle,
-      :twitch_channel,
-      :picarto_channel,
-      :pixiv_url,
-      :pixiv_handle,
-      :tiktok_handle,
-      :artfight_handle
+      :header_img_id
     ])
+    |> cast_socials(attrs)
+    |> validate_socials()
     |> validate_name()
     |> validate_bio()
     |> validate_tags()
-    |> validate_socials()
     |> foreign_key_constraint(:pfp_img_id)
     |> foreign_key_constraint(:pfp_thumb_id)
     |> foreign_key_constraint(:header_img_id)
-  end
-
-  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def validate_socials(changeset) do
-    changeset
-    |> validate_format(:website_url, ~r/^https?:\/\/[^\s]+$/, message: "must be a valid URL")
-    |> validate_format(:twitter_handle, ~r/^[a-zA-Z0-9_]+$/,
-      message: "must be a valid Twitter handle, without the @ sign."
-    )
-    |> validate_format(:instagram_handle, ~r/^[a-zA-Z0-9_]+$/,
-      message: "must be a valid Instagram handle, without the @ sign."
-    )
-    |> validate_format(:facebook_url, ~r/^https:\/\/(www\.)?facebook\.com\/.+$/,
-      message: "must be a valid Facebook URL."
-    )
-    |> validate_format(:furaffinity_handle, ~r/^[a-zA-Z0-9_-]+$/,
-      message: "must be a valid Furaffinity handle."
-    )
-    |> validate_format(:discord_handle, ~r/^[a-zA-Z0-9_-]+#\d{4}$/,
-      message: "must be a valid Discord handle, including the number (myname#1234)."
-    )
-    |> validate_format(:artstation_handle, ~r/^[a-zA-Z0-9_]+$/,
-      message: "must be a valid Artstation handle."
-    )
-    |> validate_format(:deviantart_handle, ~r/^[a-zA-Z0-9_]+$/,
-      message: "must be a valid Deviantart handle."
-    )
-    |> validate_format(:tumblr_handle, ~r/^[a-zA-Z0-9_]+$/,
-      message: "must be a valid Tumblr handle."
-    )
-    |> validate_format(:mastodon_handle, ~r/^[a-zA-Z0-9_-]+@.+$/,
-      message:
-        "must be a valid Mastodon handle, without the preceding @. For example: `foo@mastodon.social`."
-    )
-    |> validate_format(:twitch_channel, ~r/^[a-zA-Z0-9_]+$/,
-      message: "must be a valid Twitch channel name."
-    )
-    |> validate_format(:picarto_channel, ~r/^[a-zA-Z0-9_]+$/,
-      message: "must be a valid Picarto channel name."
-    )
-    |> validate_format(:pixiv_url, ~r/^https:\/\/(www\.)?pixiv\.net\/[a-zA-Z]{2}\/users\/\d+$/,
-      message: "must be a valid Pixiv URL, like `https://pixiv.net/en/users/12345`."
-    )
-    |> validate_change(:pixiv_url, fn field, _ ->
-      if Ecto.Changeset.fetch_field(changeset, :pixiv_handle) == :error do
-        [{field, "Must provide both a pixiv handle and a pixiv url, or neither."}]
-      else
-        []
-      end
-    end)
-    |> validate_change(:pixiv_handle, fn field, _ ->
-      if Ecto.Changeset.fetch_field(changeset, :pixiv_url) == :error do
-        [{field, "Must provide both a pixiv handle and a pixiv url, or neither."}]
-      else
-        []
-      end
-    end)
-    |> validate_format(:pixiv_handle, ~r/^[a-zA-Z0-9_]+$/,
-      message: "must be a valid Pixiv handle."
-    )
-    |> validate_format(:tiktok_handle, ~r/^[a-zA-Z0-9_]+$/,
-      message: "must be a valid TikTok handle, without the @ sign."
-    )
-    |> validate_format(:artfight_handle, ~r/^[a-zA-Z0-9_-]+$/,
-      message: "must be a valid Artfight handle, without the ~ sign."
-    )
   end
 
   @doc """

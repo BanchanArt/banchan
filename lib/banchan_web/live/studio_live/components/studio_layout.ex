@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.Components.{Avatar, Button, Layout, ReportModal, Tag}
+  alias BanchanWeb.Components.{Avatar, Button, Layout, ReportModal, Socials, Tag}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{FeaturedToggle, TabButton}
 
@@ -139,6 +139,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 <Tag tag={tag} />
               {/for}
             </div>
+            <Socials entity={@studio} class="my-4" />
             <div class="flex flex-row items-center gap-1">
               <span>By</span>
               <div class="avatar-group transition-all -space-x-6 hover:space-x-0">
