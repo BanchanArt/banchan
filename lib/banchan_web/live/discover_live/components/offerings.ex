@@ -4,6 +4,8 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
   """
   use BanchanWeb, :live_component
 
+  alias Surface.Components.LivePatch
+
   alias Banchan.Offerings
 
   alias BanchanWeb.Components.InfiniteScroll
@@ -14,6 +16,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
   prop order_by, :atom, default: :featured
   prop page_size, :integer, default: 24
   prop infinite, :boolean, default: true
+  prop suggest_studios, :boolean, default: false
 
   data offerings, :list
 
@@ -56,10 +59,20 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
 
   @impl true
   def render(assigns) do
+    params =
+      if assigns.query && assigns.query != "" do
+        %{q: assigns.query}
+      else
+        %{}
+      end
+
     ~F"""
     <discover-offerings>
       {#if Enum.empty?(@offerings)}
         <div class="text-2xl">No Results</div>
+        {#if @suggest_studios}
+          <LivePatch class="link" to={Routes.discover_index_path(Endpoint, :index, "studios", params)}>Search Studios instead.</LivePatch>
+        {/if}
       {#else}
         <div class="offering-list grid grid-cols-2 sm:gap-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 auto-rows-fr">
           {#for {offering, idx} <- Enum.with_index(@offerings)}

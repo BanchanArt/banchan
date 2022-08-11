@@ -4,6 +4,8 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
   """
   use BanchanWeb, :live_component
 
+  alias Surface.Components.LivePatch
+
   alias Banchan.Studios
 
   alias BanchanWeb.Components.{InfiniteScroll, StudioCard}
@@ -13,6 +15,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
   prop order_by, :atom, default: :homepage
   prop page_size, :integer, default: 24
   prop infinite, :boolean, default: true
+  prop suggest_offerings, :boolean, default: false
 
   data studios, :list
 
@@ -56,10 +59,20 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
 
   @impl true
   def render(assigns) do
+    params =
+      if assigns.query && assigns.query != "" do
+        %{q: assigns.query}
+      else
+        %{}
+      end
+
     ~F"""
     <discover-studios>
       {#if Enum.empty?(@studios)}
         <div class="text-2xl">No Results</div>
+        {#if @suggest_offerings}
+          <LivePatch class="link" to={Routes.discover_index_path(Endpoint, :index, "offerings", params)}>Search Offerings instead.</LivePatch>
+        {/if}
       {#else}
         <div class="studio-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
           {#for studio <- @studios}
