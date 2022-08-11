@@ -31,7 +31,7 @@ defmodule BanchanWeb.HomeLive do
 
     studios =
       Studios.list_studios(
-        page_size: 4,
+        page_size: 6,
         order_by: :homepage
       )
 
