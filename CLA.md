@@ -88,3 +88,4 @@ The undersigned have all agreed to this CLA:
 * Troy Coll (@tacohole)
 * Ava Collins (@simplesthing)
 * Emil Socks (@EmiSocks)
+* Monique Murphy (@moniquemurphy)
