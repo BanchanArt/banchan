@@ -117,6 +117,53 @@ defmodule Banchan.CommissionsFixtures do
     Payments.process_payment_expired!(session)
   end
 
+  def mock_refund_stripe_calls(%Invoice{} = invoice) do
+    checkout_uri = "https://stripe-mock-checkout-uri"
+    sess_id = invoice.stripe_session_id
+    intent_id = "stripe-mock-payment-intent-id#{System.unique_integer()}"
+    charge_id = "stripe-mock-payment-charge-id#{System.unique_integer()}"
+    refund_id = "stripe-mock-payment-refund-id#{System.unique_integer()}"
+
+    sess = %Stripe.Session{
+      id: sess_id,
+      url: checkout_uri,
+      payment_intent: intent_id
+    }
+
+    intent = %Stripe.PaymentIntent{
+      id: intent_id,
+      charges: %{
+        data: [%{id: charge_id}]
+      }
+    }
+
+    refund = %Stripe.Refund{
+      id: refund_id,
+      status: "succeeded"
+    }
+
+    Banchan.StripeAPI.Mock
+    |> expect(:retrieve_session, fn _sess_id, _ ->
+      {:ok, sess}
+    end)
+    |> expect(:retrieve_payment_intent, fn _intent_id, _, _ ->
+      {:ok, intent}
+    end)
+    |> expect(:create_refund, fn %{
+                                   charge: _incoming_charge_id,
+                                   reverse_transfer: true,
+                                   refund_application_fee: true
+                                 },
+                                 _ ->
+      {:ok, refund}
+    end)
+  end
+
+  def refund_mock_payment(actor, %Invoice{} = invoice) do
+    mock_refund_stripe_calls(invoice)
+    Payments.refund_payment(actor, invoice, true)
+  end
+
   def payment_fixture(
         %User{} = actor,
         %Commission{} = commission,

@@ -274,22 +274,26 @@ defmodule Banchan.Payments do
   @doc """
   Pays out a Studio for the full available and released amount.
   """
-  def payout_studio(%User{} = actor, %Studio{} = studio) do
+  def payout_studio(actor, %Studio{} = studio, invoice \\ nil) do
     {:ok, balance} =
       stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id})
 
+    # TODO: notifications!
     try do
-      # TODO: notifications!
-      {:ok,
-       Enum.reduce(balance.available, [], fn avail, acc ->
-         case payout_available!(actor, studio, avail) do
-           {:ok, nil} ->
-             acc
+      if invoice do
+        payout_single_invoice(actor, studio, balance.available, invoice)
+      else
+        {:ok,
+         Enum.reduce(balance.available, [], fn avail, acc ->
+           case payout_available!(actor, studio, avail) do
+             {:ok, nil} ->
+               acc
 
-           {:ok, %Payout{} = payout} ->
-             [payout | acc]
-         end
-       end)}
+             {:ok, %Payout{} = payout} ->
+               [payout | acc]
+           end
+         end)}
+      end
     catch
       %Stripe.Error{} = e ->
         Logger.error("Stripe error during payout: #{e.message}")
@@ -298,6 +302,16 @@ defmodule Banchan.Payments do
       {:error, err} ->
         Logger.error(%{message: "Internal error during payout", error: err})
         {:error, err}
+    end
+  end
+
+  defp payout_single_invoice(actor, %Studio{} = studio, avail, %Invoice{} = invoice) do
+    avail = Money.new(avail.amount, String.to_atom(String.upcase(avail.currency)))
+
+    if avail.amount > 0 do
+      create_payout!(actor, studio, [invoice.id], 1, invoice.total_transferred)
+    else
+      {:error, :insufficient_funds}
     end
   end
 
@@ -346,7 +360,7 @@ defmodule Banchan.Payments do
   end
 
   defp create_payout!(
-         %User{} = actor,
+         actor,
          %Studio{} = studio,
          invoice_ids,
          invoice_count,
@@ -357,7 +371,7 @@ defmodule Banchan.Payments do
         case %Payout{
                amount: total,
                studio_id: studio.id,
-               actor_id: actor.id,
+               actor_id: actor && actor.id,
                invoices: from(i in Invoice, where: i.id in ^invoice_ids) |> Repo.all()
              }
              |> Repo.insert(returning: [:id]) do
@@ -697,20 +711,21 @@ defmodule Banchan.Payments do
   def refund_payment(actor, invoice, current_user_member?)
 
   def refund_payment(actor, invoice, false) do
-    if :admin in actor.roles || :mod in actor.roles do
+    if is_nil(actor) || :admin in actor.roles || :mod in actor.roles do
       refund_payment(actor, invoice, true)
     else
       {:error, :unauthorized}
     end
   end
 
-  def refund_payment(%User{} = actor, %Invoice{} = invoice, _) do
+  def refund_payment(actor, %Invoice{} = invoice, _) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor = actor |> Repo.reload()
+        actor = actor && actor |> Repo.reload()
         invoice = invoice |> Repo.reload() |> Repo.preload(:commission)
 
-        if Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) ||
+        if is_nil(actor) ||
+             Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) ||
              :admin in actor.roles || :mod in actor.roles do
           if invoice.status != :succeeded do
             Logger.error(%{
@@ -730,7 +745,7 @@ defmodule Banchan.Payments do
     ret
   end
 
-  defp process_refund_payment(%User{} = actor, %Invoice{} = invoice) do
+  defp process_refund_payment(actor, %Invoice{} = invoice) do
     case refund_payment_on_stripe(invoice) do
       {:ok, %Stripe.Refund{status: "failed"} = refund} ->
         Logger.error(%{message: "Refund failed", refund: refund})
@@ -908,6 +923,52 @@ defmodule Banchan.Payments do
         Logger.error(%{message: "Failed to update invoice status to refunded", error: err})
         {:error, :internal_error}
     end
+  end
+
+  @doc """
+  Refunds or pays out invoices that have been held for longer than they should have.
+  """
+  def purge_expired_invoice(%Invoice{} = invoice) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        invoice = invoice |> Repo.reload() |> Repo.preload(:commission)
+
+        case invoice.status do
+          :succeeded ->
+            with {:ok, _} <- refund_payment(nil, invoice, true) do
+              {:ok, invoice}
+            end
+
+          :released ->
+            paid_out? =
+              from(i in Invoice,
+                where: i.id == ^invoice.id,
+                join: p in assoc(i, :payouts)
+              )
+              |> Repo.exists?()
+
+            if paid_out? do
+              {:ok, invoice}
+            else
+              with {:ok, _payout} <-
+                     payout_studio(nil, %Studio{id: invoice.commission.studio_id}, invoice) do
+                {:ok, invoice}
+              end
+            end
+
+          _ ->
+            {:ok, invoice}
+        end
+      end)
+
+    ret
+  end
+
+  @doc """
+  Warns clients and/or studio members that an invoice is overdue for
+  processing and will either be refunded or paid out.
+  """
+  def warn_about_invoice_purge(%Invoice{} = _invoice) do
   end
 
   @doc """
