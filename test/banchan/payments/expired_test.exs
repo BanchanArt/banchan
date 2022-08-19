@@ -64,7 +64,8 @@ defmodule Banchan.PaymentsTest.Expired do
       amount: amount,
       tip: tip
     } do
-      %Invoice{id: invoice_id} = invoice =
+      %Invoice{id: invoice_id} =
+        invoice =
         invoice_fixture(artist, commission, %{
           "amount" => amount,
           "text" => "Please pay me :x"

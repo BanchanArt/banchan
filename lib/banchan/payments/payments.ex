@@ -360,7 +360,7 @@ defmodule Banchan.Payments do
   end
 
   defp create_payout!(
-         actor,
+         %User{} = actor,
          %Studio{} = studio,
          invoice_ids,
          invoice_count,
@@ -575,7 +575,8 @@ defmodule Banchan.Payments do
   Webhook handler for when a payment has been successfully processed by Stripe.
   """
   def process_payment_succeeded!(session) do
-    {:ok, %{charges: %{data: [%{balance_transaction: txn_id, transfer: transfer}]}}} =
+    {:ok,
+     %{charges: %{data: [%{id: charge_id, balance_transaction: txn_id, transfer: transfer}]}}} =
       stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, [])
 
     {:ok, %{available_on: available_on, amount: amt, currency: curr}} =
@@ -603,7 +604,8 @@ defmodule Banchan.Payments do
               status: :succeeded,
               payout_available_on: available_on,
               total_charged: total_charged,
-              total_transferred: total_transferred
+              total_transferred: total_transferred,
+              stripe_charge_id: charge_id
             ]
           )
 
@@ -771,39 +773,21 @@ defmodule Banchan.Payments do
     end
   end
 
-  defp refund_payment_on_stripe(%Invoice{} = invoice) do
-    case stripe_mod().retrieve_session(invoice.stripe_session_id, []) do
-      {:ok, session} ->
-        case stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, []) do
-          {:ok, %Stripe.PaymentIntent{charges: %{data: [%{id: charge_id}]}}} ->
-            # https://stripe.com/docs/connect/destination-charges#issuing-refunds
-            case stripe_mod().create_refund(
-                   %{
-                     charge: charge_id,
-                     reverse_transfer: true,
-                     refund_application_fee: true
-                   },
-                   []
-                 ) do
-              {:ok, refund} ->
-                {:ok, refund}
-
-              {:error, err} ->
-                Logger.error(%{message: "Refund failed.", error: err})
-                {:error, err}
-            end
-
-          {:error, err} ->
-            Logger.error(%{
-              message: "Failed to retrieve payment intent while refunding.",
-              error: err
-            })
-
-            {:error, err}
-        end
+  defp refund_payment_on_stripe(%Invoice{stripe_charge_id: charge_id}) do
+    # https://stripe.com/docs/connect/destination-charges#issuing-refunds
+    case stripe_mod().create_refund(
+           %{
+             charge: charge_id,
+             reverse_transfer: true,
+             refund_application_fee: true
+           },
+           []
+         ) do
+      {:ok, refund} ->
+        {:ok, refund}
 
       {:error, err} ->
-        Logger.error(%{message: "Failed to retrieve session while refunding.", error: err})
+        Logger.error(%{message: "Refund failed.", error: err})
         {:error, err}
     end
   end

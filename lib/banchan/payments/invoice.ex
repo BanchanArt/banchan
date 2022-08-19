@@ -11,6 +11,7 @@ defmodule Banchan.Payments.Invoice do
     field :stripe_session_id, :string
     field :checkout_url, :string
     field :stripe_refund_id, :string
+    field :stripe_charge_id, :string
     field :amount, Money.Ecto.Composite.Type
     field :tip, Money.Ecto.Composite.Type
     field :platform_fee, Money.Ecto.Composite.Type
