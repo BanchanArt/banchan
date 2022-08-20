@@ -44,4 +44,6 @@ defmodule Banchan.StripeAPI.Base do
   @callback delete_account(id :: Stripe.id()) ::
               {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
   @callback create_price(params :: %{}) :: {:ok, Stripe.Price.t()} | {:error, Stripe.Error.t()}
+  @callback retrieve_charge(id :: Stripe.id()) ::
+              {:ok, Stripe.Charge.t()} | {:error, Stripe.Error.t()}
 end

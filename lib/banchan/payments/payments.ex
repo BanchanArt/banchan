@@ -282,7 +282,7 @@ defmodule Banchan.Payments do
     # TODO: notifications!
     try do
       if invoice do
-        payout_single_invoice(actor, studio, balance.available, invoice)
+        payout_single_invoice(actor, studio, balance.available |> Enum.at(0), invoice)
       else
         {:ok,
          Enum.reduce(balance.available, [], fn avail, acc ->
@@ -320,18 +320,19 @@ defmodule Banchan.Payments do
     avail = Money.new(avail.amount, String.to_atom(String.upcase(avail.currency)))
 
     if avail.amount > 0 do
-      {invoice_ids, invoice_count, total} = invoice_details(studio, avail)
-
-      if total.amount > 0 do
-        create_payout!(actor, studio, invoice_ids, invoice_count, total)
-      else
-        {:ok, nil}
+      with {:ok, {invoice_ids, invoice_count, total}} <- invoice_details(studio, avail) do
+        if total.amount > 0 do
+          create_payout!(actor, studio, invoice_ids, invoice_count, total)
+        else
+          {:ok, nil}
+        end
       end
     else
       {:ok, nil}
     end
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp invoice_details(%Studio{} = studio, avail) do
     currency_str = Atom.to_string(avail.currency)
     now = NaiveDateTime.utc_now()
@@ -343,19 +344,36 @@ defmodule Banchan.Payments do
         c.studio_id == ^studio.id and i.status == :released and
           (is_nil(p.id) or p.status not in [:pending, :in_transit, :paid]) and
           fragment("(?).currency = ?::char(3)", i.total_transferred, ^currency_str) and
-          i.payout_available_on < ^now,
+          i.payout_available_on <= ^now,
       order_by: {:asc, i.updated_at}
     )
     |> Repo.all()
-    |> Enum.reduce_while({[], 0, Money.new(0, avail.currency)}, fn invoice,
-                                                                   {invoice_ids, invoice_count,
-                                                                    total} = acc ->
+    |> Enum.reduce_while({:ok, {[], 0, Money.new(0, avail.currency)}}, fn invoice,
+                                                                          {:ok,
+                                                                           {invoice_ids,
+                                                                            invoice_count,
+                                                                            total}} = acc ->
       invoice_total = invoice.total_transferred
 
-      if invoice_total.amount + total.amount > avail.amount do
-        {:halt, acc}
-      else
-        {:cont, {[invoice.id | invoice_ids], invoice_count + 1, Money.add(total, invoice_total)}}
+      case stripe_mod().retrieve_charge(invoice.stripe_charge_id) do
+        {:ok, charge} ->
+          cond do
+            charge.balance_transaction.status != "available" ->
+              {:cont, acc}
+
+            invoice_total.amount + total.amount > avail.amount ->
+              # NB(@zkat): This should _generally_ not happen, but may as well
+              # check for it.
+              {:halt, acc}
+
+            true ->
+              {:cont,
+               {:ok,
+                {[invoice.id | invoice_ids], invoice_count + 1, Money.add(total, invoice_total)}}}
+          end
+
+        {:error, stripe_err} ->
+          {:halt, {:error, stripe_err}}
       end
     end)
   end
@@ -427,7 +445,7 @@ defmodule Banchan.Payments do
            %{
              amount: total.amount,
              currency: String.downcase(Atom.to_string(total.currency)),
-             statement_descriptor: "banchan.art payout"
+             statement_descriptor: "Banchan Art Payout"
            },
            headers: %{"Stripe-Account" => studio.stripe_id}
          ) do
@@ -869,13 +887,14 @@ defmodule Banchan.Payments do
     case ret do
       {:ok, event} ->
         if event.invoice.refund_status == :succeeded do
-          actor = if event.invoice.refunded_by_id do
-            %User{id: event.invoice.refunded_by_id} |> Repo.reload!()
-          else
-            msg = "Bad State: invoice refund succeeded but refunded_by_id is nil!"
-            Logger.error(%{message: msg})
-            raise msg
-          end
+          actor =
+            if event.invoice.refunded_by_id do
+              %User{id: event.invoice.refunded_by_id} |> Repo.reload!()
+            else
+              msg = "Bad State: invoice refund succeeded but refunded_by_id is nil!"
+              Logger.error(%{message: msg})
+              raise msg
+            end
 
           Commissions.create_event(
             :refund_processed,

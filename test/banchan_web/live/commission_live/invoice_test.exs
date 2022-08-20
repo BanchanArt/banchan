@@ -672,7 +672,11 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .modal .refund-btn")
       |> render_click()
 
-      Payments.process_refund_updated(system, %Stripe.Refund{id: refund_id, status: "canceled"}, nil)
+      Payments.process_refund_updated(
+        system,
+        %Stripe.Refund{id: refund_id, status: "canceled"},
+        nil
+      )
 
       Notifications.wait_for_notifications()
 
