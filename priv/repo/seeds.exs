@@ -15,7 +15,7 @@
     handle: "tteokbokki",
     name: "Tokki",
     bio:
-      "Teokbokki (nickname Tokki) is the manifestation of the Banchan system itself, taking care of various internal and automated tasks."
+      "Teokbokki (aka Tokki) is the manifestation of the Banchan system itself, taking care of various internal and automated tasks. They're also Banchan's mascot!"
   })
 
 if Application.fetch_env!(:banchan, :env) == :dev do

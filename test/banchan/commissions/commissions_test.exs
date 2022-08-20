@@ -282,6 +282,7 @@ defmodule Banchan.CommissionsTest do
       # Let's just make it so it's available immediately.
       available_on = DateTime.add(DateTime.utc_now(), -2)
 
+      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
       txn_id = "stripe-mock-txn-id#{System.unique_integer()}"
       trans_id = "stripe-mock-transfer-id#{System.unique_integer()}"
       payment_intent_id = "stripe-mock-payment-intent-id#{System.unique_integer()}"
@@ -289,7 +290,9 @@ defmodule Banchan.CommissionsTest do
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_payment_intent, fn id, _, _ ->
         assert payment_intent_id == id
-        {:ok, %{charges: %{data: [%{balance_transaction: txn_id, transfer: trans_id}]}}}
+
+        {:ok,
+         %{charges: %{data: [%{id: charge_id, balance_transaction: txn_id, transfer: trans_id}]}}}
       end)
       |> expect(:retrieve_transfer, fn id ->
         assert trans_id == id
@@ -673,8 +676,6 @@ defmodule Banchan.CommissionsTest do
 
       assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
-
       err = %Stripe.Error{
         source: "test",
         code: "badness",
@@ -682,23 +683,6 @@ defmodule Banchan.CommissionsTest do
       }
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:error, err}
       end)
@@ -885,26 +869,8 @@ defmodule Banchan.CommissionsTest do
       assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:ok,
          %Stripe.Refund{

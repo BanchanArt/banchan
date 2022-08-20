@@ -3,7 +3,7 @@ defmodule Banchan.Repo.Migrations.AddBalanceTransactionId do
 
   def change do
     alter table(:commission_invoices) do
-      add_column(:stripe_charge_id, :string)
+      add :stripe_charge_id, :string
     end
   end
 end

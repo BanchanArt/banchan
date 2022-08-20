@@ -930,9 +930,7 @@ defmodule Banchan.Payments do
 
         case invoice.status do
           :succeeded ->
-            with {:ok, _} <- refund_payment(system, invoice, true) do
-              {:ok, invoice}
-            end
+            refund_payment(system, invoice, true)
 
           :released ->
             paid_out? =

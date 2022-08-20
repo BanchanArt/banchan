@@ -11,6 +11,7 @@ defmodule Banchan.AccountsTest.Get do
 
   describe "list_users/3" do
     test "lists existing users, in insertion order" do
+      %User{id: system_id} = Accounts.system_user()
       %User{id: admin_id} = admin = user_fixture(%{roles: [:admin]})
       %User{id: user1_id} = user_fixture()
       %User{id: user2_id} = unconfirmed_user_fixture()
@@ -18,10 +19,17 @@ defmodule Banchan.AccountsTest.Get do
       assert %_{
                page_number: 1,
                page_size: 24,
-               entries: [%User{id: ^admin_id}, %User{id: ^user1_id}, %User{id: ^user2_id}],
-               total_entries: 3,
+               entries: entries,
+               total_entries: 4,
                total_pages: 1
              } = Accounts.list_users(admin, %UserFilter{})
+
+      assert [
+               %User{id: ^system_id},
+               %User{id: ^admin_id},
+               %User{id: ^user1_id},
+               %User{id: ^user2_id}
+             ] = entries |> Enum.sort_by(& &1.id)
     end
 
     test "does not list deactivated users" do

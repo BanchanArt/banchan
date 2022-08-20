@@ -128,6 +128,14 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
            ]
          }}
       end)
+      |> expect(:retrieve_charge, fn _ ->
+        {:ok,
+         %Stripe.Charge{
+           balance_transaction: %Stripe.BalanceTransaction{
+             status: "available"
+           }
+         }}
+      end)
       |> expect(:create_payout, fn _, _ ->
         {:ok,
          %Stripe.Payout{
@@ -470,6 +478,14 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
                amount: 0
              }
            ]
+         }}
+      end)
+      |> expect(:retrieve_charge, fn _ ->
+        {:ok,
+         %Stripe.Charge{
+           balance_transaction: %Stripe.BalanceTransaction{
+             status: "available"
+           }
          }}
       end)
       |> expect(:create_payout, fn _, _ ->

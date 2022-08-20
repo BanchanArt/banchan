@@ -154,8 +154,9 @@ defmodule Banchan.AccountsTest.Registration do
       assert user.bio == auth.info.description
 
       admin = user_fixture(%{roles: [:admin]})
+      %User{id: system_id} = Accounts.system_user()
 
-      assert [%User{id: ^user_id} | _] =
+      assert [%User{id: ^system_id}, %User{id: ^user_id} | _] =
                Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
     end
 
@@ -179,8 +180,9 @@ defmodule Banchan.AccountsTest.Registration do
       assert user.bio == binary_part(auth.info.description, 0, 160)
 
       admin = user_fixture(%{roles: [:admin]})
+      %User{id: system_id} = Accounts.system_user()
 
-      assert [%User{id: ^user_id} | _] =
+      assert [%User{id: ^system_id}, %User{id: ^user_id} | _] =
                Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
     end
 
@@ -200,8 +202,9 @@ defmodule Banchan.AccountsTest.Registration do
       assert {:ok, %User{id: ^user_id}} = Accounts.handle_oauth(auth)
 
       %User{id: admin_id} = admin = user_fixture(%{roles: [:admin]})
+      %User{id: system_id} = Accounts.system_user()
 
-      assert [%User{id: ^user_id}, %User{id: ^admin_id}] =
+      assert [%User{id: ^system_id}, %User{id: ^user_id}, %User{id: ^admin_id}] =
                Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
     end
 
@@ -248,7 +251,9 @@ defmodule Banchan.AccountsTest.Registration do
 
       admin = user_fixture(%{roles: [:admin]})
 
-      assert [%User{id: ^user_id} | _] =
+      %User{id: system_id} = Accounts.system_user()
+
+      assert [%User{id: ^system_id}, %User{id: ^user_id} | _] =
                Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
     end
 
@@ -281,8 +286,9 @@ defmodule Banchan.AccountsTest.Registration do
       assert user.handle =~ ~r/^user\d+$/
 
       admin = user_fixture(%{roles: [:admin]})
+      %User{id: system_id} = Accounts.system_user()
 
-      assert [%User{id: ^user_id} | _] =
+      assert [%User{id: ^system_id}, %User{id: ^user_id} | _] =
                Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
     end
 
@@ -308,7 +314,9 @@ defmodule Banchan.AccountsTest.Registration do
 
       %User{id: admin_id} = admin = user_fixture(%{roles: [:admin]})
 
-      assert [%User{id: ^user_id}, %User{id: ^admin_id}] =
+      %User{id: system_id} = Accounts.system_user()
+
+      assert [%User{id: ^system_id}, %User{id: ^user_id}, %User{id: ^admin_id}] =
                Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
     end
 
@@ -334,8 +342,9 @@ defmodule Banchan.AccountsTest.Registration do
       assert user.bio == nil
 
       admin = user_fixture(%{roles: [:admin]})
+      %User{id: system_id} = Accounts.system_user()
 
-      assert [%User{id: ^user_id} | _] =
+      assert [%User{id: ^system_id}, %User{id: ^user_id} | _] =
                Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
     end
 
@@ -354,8 +363,9 @@ defmodule Banchan.AccountsTest.Registration do
       assert user.email == nil
 
       admin = user_fixture(%{roles: [:admin]})
+      %User{id: system_id} = Accounts.system_user()
 
-      assert [%User{id: ^user_id} | _] =
+      assert [%User{id: ^system_id}, %User{id: ^user_id} | _] =
                Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
     end
 
@@ -372,8 +382,9 @@ defmodule Banchan.AccountsTest.Registration do
       assert {:ok, %User{id: ^user_id}} = Accounts.handle_oauth(auth)
 
       %User{id: admin_id} = admin = user_fixture(%{roles: [:admin]})
+      %User{id: system_id} = Accounts.system_user()
 
-      assert [%User{id: ^user_id}, %User{id: ^admin_id}] =
+      assert [%User{id: ^system_id}, %User{id: ^user_id}, %User{id: ^admin_id}] =
                Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
     end
 

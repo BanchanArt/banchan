@@ -254,7 +254,7 @@ defmodule Banchan.Accounts do
   """
   def system_user do
     from(u in User,
-      where: u.handle == "system" and :system in u.roles
+      where: u.handle == "tteokbokki" and :system in u.roles
     )
     |> Repo.one!()
   end
@@ -303,8 +303,15 @@ defmodule Banchan.Accounts do
   Registers a new special "system" user.
   """
   def register_system(attrs) do
+    pw = random_password()
+
     %User{}
-    |> User.system_registration_changeset(attrs)
+    |> User.system_registration_changeset(
+      Enum.into(attrs, %{
+        password: pw,
+        password_confirmation: pw
+      })
+    )
     |> Repo.insert()
   end
 

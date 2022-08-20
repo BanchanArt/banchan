@@ -6,6 +6,7 @@ defmodule Banchan.Commissions do
   import Ecto.Query, warn: false
   require Logger
 
+  alias Banchan.Accounts
   alias Banchan.Accounts.User
 
   alias Banchan.Commissions.{
@@ -572,9 +573,9 @@ defmodule Banchan.Commissions do
     close = !is_nil(available_proposal_count) && available_proposal_count <= 1
 
     if close do
-      # NB(zkat): We pretend we're a studio member here because we're doing
-      # this on behalf of the studio. It's safe.
-      {:ok, offering} = Offerings.update_offering(nil, offering, %{open: false}, nil)
+      {:ok, offering} =
+        Offerings.update_offering(Accounts.system_user(), offering, %{open: false}, nil)
+
       offering
     else
       offering
@@ -780,9 +781,8 @@ defmodule Banchan.Commissions do
               close = !is_nil(available_slot_count) && available_slot_count <= 0
 
               if close do
-                # NB(zkat): We pretend we're a studio member here because we're doing
-                # this on behalf of the studio. It's safe.
-                {:ok, _} = Offerings.update_offering(nil, offering, %{open: false}, nil)
+                {:ok, _} =
+                  Offerings.update_offering(Accounts.system_user(), offering, %{open: false}, nil)
               end
             end
 

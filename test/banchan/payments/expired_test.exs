@@ -77,10 +77,10 @@ defmodule Banchan.PaymentsTest.Expired do
 
       mock_refund_stripe_calls(invoice)
 
-      assert {:ok, %Invoice{id: ^invoice_id, status: :refunded}} =
+      assert {:ok, %Invoice{id: ^invoice_id, status: :refunded, refund_status: :succeeded}} =
                Payments.purge_expired_invoice(invoice)
 
-      assert %Invoice{status: :refunded} = Repo.reload(invoice)
+      assert %Invoice{status: :refunded, refund_status: :succeeded} = Repo.reload(invoice)
     end
 
     @tag skip: "TODO"

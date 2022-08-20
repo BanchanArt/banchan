@@ -3,6 +3,8 @@ defmodule Banchan.OfferingsFixtures do
   This module defines test helpers for creating
   entities via the `Banchan.Offerings` context.
   """
+
+  alias Banchan.Accounts
   alias Banchan.Offerings
 
   def offering_fixture(studio, attrs \\ %{}) do

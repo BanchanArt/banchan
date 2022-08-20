@@ -394,10 +394,12 @@ defmodule Banchan.Accounts.User do
 
   def system_registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:handle, :name, :bio])
+    |> cast(attrs, [:handle, :name, :bio, :password])
     |> validate_handle()
     |> validate_name()
     |> validate_bio()
+    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_password([])
     |> put_change(:roles, [:system])
   end
 
