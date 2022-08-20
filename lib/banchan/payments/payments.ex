@@ -7,6 +7,7 @@ defmodule Banchan.Payments do
   import Ecto.Query, warn: false
   require Logger
 
+  alias Banchan.Accounts
   alias Banchan.Accounts.User
   alias Banchan.Commissions
   # TODO: Move payments-related notifications to Banchan.Payments.Notifications instead.
@@ -872,7 +873,7 @@ defmodule Banchan.Payments do
             %User{id: event.invoice.refunded_by_id} |> Repo.reload!()
           else
             msg = "Bad State: invoice refund succeeded but refunded_by_id is nil!"
-            Logger.error(%{message: msg, error: err})
+            Logger.error(%{message: msg})
             raise msg
           end
 

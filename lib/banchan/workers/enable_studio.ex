@@ -8,6 +8,7 @@ defmodule Banchan.Workers.EnableStudio do
     max_attempts: 5,
     tags: ["unban", "unban-studio"]
 
+  alias Banchan.Accounts
   alias Banchan.Studios
 
   @impl Oban.Worker

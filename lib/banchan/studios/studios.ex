@@ -10,6 +10,7 @@ defmodule Banchan.Studios do
   import Ecto.Query, warn: false
   require Logger
 
+  alias Banchan.Accounts
   alias Banchan.Accounts.User
   alias Banchan.Payments
   alias Banchan.Payments.Invoice
@@ -790,7 +791,7 @@ defmodule Banchan.Studios do
   @doc """
   Re-enable a previously disabled studio.
   """
-  def enable_studio(User{} = actor, %Studio{} = studio, reason, cancel \\ true) do
+  def enable_studio(%User{} = actor, %Studio{} = studio, reason, cancel \\ true) do
     {:ok, ret} =
       Repo.transaction(fn ->
         actor = actor && actor |> Repo.reload()
