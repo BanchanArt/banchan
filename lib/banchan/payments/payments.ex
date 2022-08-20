@@ -769,22 +769,22 @@ defmodule Banchan.Payments do
     case refund_payment_on_stripe(invoice) do
       {:ok, %Stripe.Refund{status: "failed"} = refund} ->
         Logger.error(%{message: "Refund failed", refund: refund})
-        process_refund_updated(actor, refund, invoice.id)
+        process_refund_updated(actor, refund, invoice.id, actor.id)
 
       {:ok, %Stripe.Refund{status: "canceled"} = refund} ->
         Logger.error(%{message: "Refund canceled", refund: refund})
-        process_refund_updated(actor, refund, invoice.id)
+        process_refund_updated(actor, refund, invoice.id, actor.id)
 
       {:ok, %Stripe.Refund{status: "requires_action"} = refund} ->
         Logger.info(%{message: "Refund requires action", refund: refund})
         # This should eventually succeed asynchronously.
-        process_refund_updated(actor, refund, invoice.id)
+        process_refund_updated(actor, refund, invoice.id, actor.id)
 
       {:ok, %Stripe.Refund{status: "succeeded"} = refund} ->
-        process_refund_updated(actor, refund, invoice.id)
+        process_refund_updated(actor, refund, invoice.id, actor.id)
 
       {:ok, %Stripe.Refund{status: "pending"} = refund} ->
-        process_refund_updated(actor, refund, invoice.id)
+        process_refund_updated(actor, refund, invoice.id, actor.id)
 
       {:error, %Stripe.Error{} = err} ->
         {:error, err}
@@ -814,7 +814,12 @@ defmodule Banchan.Payments do
   Webhook handler for when a Stripe refund has been updated.
   """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def process_refund_updated(%User{} = actor, %Stripe.Refund{} = refund, invoice_id) do
+  def process_refund_updated(
+        %User{} = actor,
+        %Stripe.Refund{} = refund,
+        invoice_id,
+        refunded_by_id \\ nil
+      ) do
     {:ok, ret} =
       Repo.transaction(fn ->
         assignments =
@@ -848,7 +853,12 @@ defmodule Banchan.Payments do
               ]
           end
 
-        assignments = assignments ++ [refunded_by_id: actor.id]
+        assignments =
+          if refunded_by_id do
+            assignments ++ [refunded_by_id: refunded_by_id]
+          else
+            assignments
+          end
 
         update_res =
           if is_nil(invoice_id) do

@@ -578,29 +578,11 @@ defmodule Banchan.CommissionsTest do
 
       assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn params, _opts ->
-        assert charge_id == params.charge
+        assert invoice.stripe_charge_id == params.charge
         assert true == params.reverse_transfer
         assert true == params.refund_application_fee
 
@@ -725,26 +707,8 @@ defmodule Banchan.CommissionsTest do
       assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:ok,
          %Stripe.Refund{
@@ -967,26 +931,8 @@ defmodule Banchan.CommissionsTest do
       Notifications.mark_all_as_read(artist)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:ok,
          %Stripe.Refund{
@@ -1100,26 +1046,8 @@ defmodule Banchan.CommissionsTest do
       assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:ok, %Stripe.Refund{id: refund_id, status: "canceled"}}
       end)
