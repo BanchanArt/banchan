@@ -134,6 +134,7 @@ defmodule Banchan.MixProject do
         "ecto.drop --quiet",
         "ecto.create --quiet",
         "ecto.migrate --quiet",
+        "run priv/repo/seeds.exs",
         "test"
       ],
       quality: [

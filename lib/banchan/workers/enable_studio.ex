@@ -12,7 +12,7 @@ defmodule Banchan.Workers.EnableStudio do
 
   @impl Oban.Worker
   def perform(%_{args: %{"studio_id" => studio_id}}) do
-    Studios.enable_studio(nil, %Studios.Studio{id: studio_id}, "ban expired", false)
+    Studios.enable_studio(Accounts.system_user(), %Studios.Studio{id: studio_id}, "ban expired", false)
   end
 
   def schedule_unban(%Studios.Studio{} = studio, disabled_until) do

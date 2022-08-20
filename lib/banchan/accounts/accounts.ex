@@ -153,6 +153,7 @@ defmodule Banchan.Accounts do
   """
   def can_modify_user?(%User{} = actor, %User{} = target) do
     actor.id == target.id ||
+      :system in actor.roles ||
       :admin in actor.roles ||
       (:mod in actor.roles && :admin not in target.roles)
   end
@@ -220,6 +221,44 @@ defmodule Banchan.Accounts do
     |> Repo.one!()
   end
 
+  @doc """
+  Returns true if the user's roles overlap with the given list of roles.
+  """
+  def has_roles?(%User{roles: user_roles}, roles) do
+    Enum.any?(user_roles, &(&1 in roles))
+  end
+
+  @doc """
+  Returns true if user has mod or admin privs.
+  """
+  def mod?(%User{roles: user_roles}) do
+    has_roles?(user_roles, [:mod, :admin])
+  end
+
+  @doc """
+  Returns true if user is an admin.
+  """
+  def admin?(%User{roles: user_roles}) do
+    has_roles?(user_roles, [:admin])
+  end
+
+  @doc """
+  Returns true if user is a system user.
+  """
+  def system?(%User{roles: user_roles}) do
+    has_roles?(user_roles, [:system])
+  end
+
+  @doc """
+  Fetches the system user.
+  """
+  def system_user do
+    from(u in User,
+      where: u.handle == "system" and :system in u.roles
+    )
+    |> Repo.one!()
+  end
+
   ## User registration
 
   @doc """
@@ -257,6 +296,15 @@ defmodule Banchan.Accounts do
   def register_admin(attrs) do
     %User{}
     |> User.admin_registration_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Registers a new special "system" user.
+  """
+  def register_system(attrs) do
+    %User{}
+    |> User.system_registration_changeset(attrs)
     |> Repo.insert()
   end
 
@@ -516,8 +564,7 @@ defmodule Banchan.Accounts do
         dummy = %DisableHistory{} |> DisableHistory.disable_changeset(attrs)
 
         cond do
-          :admin not in actor.roles &&
-              (:mod not in actor.roles || :admin in user.roles) ->
+          !can_modify_user?(actor, user) ->
             {:error, :unauthorized}
 
           (user |> Repo.preload(:disable_info)).disable_info ->
@@ -564,21 +611,14 @@ defmodule Banchan.Accounts do
   Re-enable a previously disabled user.
   """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def enable_user(actor, %User{} = user, reason, cancel \\ true) do
+  def enable_user(%User{} = actor, %User{} = user, reason, cancel \\ true) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor =
-          if actor == :system do
-            nil
-          else
-            actor |> Repo.reload()
-          end
+        actor = actor |> Repo.reload()
 
         user = user |> Repo.reload()
 
-        if is_nil(actor) ||
-             :admin in actor.roles ||
-             (:mod in actor.roles && :admin not in user.roles) do
+        if can_modify_user?(actor, user) do
           changeset = DisableHistory.enable_changeset(%DisableHistory{}, %{lifted_reason: reason})
 
           if changeset.valid? do

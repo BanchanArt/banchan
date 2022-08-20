@@ -27,7 +27,7 @@ defmodule Banchan.Offerings do
   @doc """
   Creates a new offering.
   """
-  def new_offering(actor, %Studio{} = studio, attrs, gallery_images) do
+  def new_offering(%User{} = actor, %Studio{} = studio, attrs, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
         with {:ok, _actor} <- Studios.check_studio_member(studio, actor) do

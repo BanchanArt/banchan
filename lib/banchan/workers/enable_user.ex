@@ -12,7 +12,7 @@ defmodule Banchan.Workers.EnableUser do
 
   @impl Oban.Worker
   def perform(%_{args: %{"user_id" => user_id}}) do
-    Accounts.enable_user(:system, %Accounts.User{id: user_id}, "ban expired", false)
+    Accounts.enable_user(Accounts.system_user(), %Accounts.User{id: user_id}, "ban expired", false)
   end
 
   def schedule_unban(%Accounts.User{} = user, disabled_until) do

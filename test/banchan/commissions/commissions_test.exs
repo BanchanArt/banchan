@@ -12,6 +12,7 @@ defmodule Banchan.CommissionsTest do
   import Banchan.OfferingsFixtures
   import Banchan.StudiosFixtures
 
+  alias Banchan.Accounts
   alias Banchan.Commissions
   alias Banchan.Commissions.Event
   alias Banchan.Notifications
@@ -714,6 +715,7 @@ defmodule Banchan.CommissionsTest do
     end
 
     test "refund payment before approval - refund failed" do
+      system = Accounts.system_user()
       commission = commission_fixture()
       client = commission.client
       studio = commission.studio
@@ -836,7 +838,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Payments.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(system, refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -861,6 +863,7 @@ defmodule Banchan.CommissionsTest do
     end
 
     test "refund payment before approval - refund pending" do
+      system = Accounts.system_user()
       commission = commission_fixture()
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
@@ -956,7 +959,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Payments.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(system, refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -972,6 +975,7 @@ defmodule Banchan.CommissionsTest do
     end
 
     test "refund payment before approval - refund requires action" do
+      system = Accounts.system_user()
       commission = commission_fixture()
       client = commission.client
       studio = commission.studio
@@ -1079,7 +1083,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Payments.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(system, refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -1104,6 +1108,7 @@ defmodule Banchan.CommissionsTest do
     end
 
     test "refund payment before approval - refund canceled" do
+      system = Accounts.system_user()
       commission = commission_fixture()
       client = commission.client
       studio = commission.studio
@@ -1210,7 +1215,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Payments.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(system, refund, nil)
 
       Notifications.wait_for_notifications()
 

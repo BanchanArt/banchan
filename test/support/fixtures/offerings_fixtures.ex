@@ -12,7 +12,7 @@ defmodule Banchan.OfferingsFixtures do
 
     {:ok, offering} =
       Offerings.new_offering(
-        nil,
+        Accounts.system_user(),
         studio,
         Enum.into(
           %{

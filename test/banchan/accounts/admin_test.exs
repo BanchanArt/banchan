@@ -250,8 +250,9 @@ defmodule Banchan.AccountsTest.Admin do
       assert {:error, :unauthorized} = Accounts.enable_user(mod, admin, "ok now")
     end
 
-    test "supports passing a `:system` actor to act of behalf of the system." do
+    test "supports passing a 'system' actor to act of behalf of the system." do
       admin = user_fixture(%{roles: [:admin]})
+      system = Accounts.system_user()
       user = user_fixture()
 
       {:ok, %DisableHistory{id: history_id}} =
@@ -260,7 +261,7 @@ defmodule Banchan.AccountsTest.Admin do
         })
 
       assert {:ok, %DisableHistory{id: ^history_id, lifted_by_id: nil, lifted_reason: "ok actor"}} =
-               Accounts.enable_user(:system, user, "ok actor")
+               Accounts.enable_user(system, user, "ok actor")
     end
 
     test "validates lifted reason" do

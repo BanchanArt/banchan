@@ -6,6 +6,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
 
   require Logger
 
+  alias Banchan.Accounts
   alias Banchan.Payments
   alias Banchan.Studios
 
@@ -58,7 +59,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
   end
 
   defp handle_event(%Stripe.Event{type: "charge.refund.updated"} = event, conn) do
-    {:ok, _} = Payments.process_refund_updated(event.data.object, nil)
+    {:ok, _} = Payments.process_refund_updated(Accounts.system_user(), event.data.object, nil)
 
     conn
     |> resp(200, "OK")

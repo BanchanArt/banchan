@@ -274,7 +274,7 @@ defmodule Banchan.Payments do
   @doc """
   Pays out a Studio for the full available and released amount.
   """
-  def payout_studio(actor, %Studio{} = studio, invoice \\ nil) do
+  def payout_studio(%User{} = actor, %Studio{} = studio, invoice \\ nil) do
     {:ok, balance} =
       stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id})
 
@@ -305,7 +305,7 @@ defmodule Banchan.Payments do
     end
   end
 
-  defp payout_single_invoice(actor, %Studio{} = studio, avail, %Invoice{} = invoice) do
+  defp payout_single_invoice(%User{} = actor, %Studio{} = studio, avail, %Invoice{} = invoice) do
     avail = Money.new(avail.amount, String.to_atom(String.upcase(avail.currency)))
 
     if avail.amount > 0 do
@@ -712,23 +712,22 @@ defmodule Banchan.Payments do
   """
   def refund_payment(actor, invoice, current_user_member?)
 
-  def refund_payment(actor, invoice, false) do
-    if is_nil(actor) || :admin in actor.roles || :mod in actor.roles do
+  def refund_payment(%User{} = actor, invoice, false) do
+    if Accounts.has_roles?(actor, [:system, :admin, :mod]) do
       refund_payment(actor, invoice, true)
     else
       {:error, :unauthorized}
     end
   end
 
-  def refund_payment(actor, %Invoice{} = invoice, _) do
+  def refund_payment(%User{} = actor, %Invoice{} = invoice, _) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        actor = actor && actor |> Repo.reload()
+        actor = actor |> Repo.reload()
         invoice = invoice |> Repo.reload() |> Repo.preload(:commission)
 
-        if is_nil(actor) ||
-             Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) ||
-             :admin in actor.roles || :mod in actor.roles do
+        if Accounts.has_roles?(actor, [:system, :admin, :mod]) ||
+             Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) do
           if invoice.status != :succeeded do
             Logger.error(%{
               message: "Attempted to refund an invoice that wasn't :succeeded.",
@@ -747,26 +746,26 @@ defmodule Banchan.Payments do
     ret
   end
 
-  defp process_refund_payment(actor, %Invoice{} = invoice) do
+  defp process_refund_payment(%User{} = actor, %Invoice{} = invoice) do
     case refund_payment_on_stripe(invoice) do
       {:ok, %Stripe.Refund{status: "failed"} = refund} ->
         Logger.error(%{message: "Refund failed", refund: refund})
-        process_refund_updated(refund, invoice.id, actor)
+        process_refund_updated(actor, refund, invoice.id)
 
       {:ok, %Stripe.Refund{status: "canceled"} = refund} ->
         Logger.error(%{message: "Refund canceled", refund: refund})
-        process_refund_updated(refund, invoice.id, actor)
+        process_refund_updated(actor, refund, invoice.id)
 
       {:ok, %Stripe.Refund{status: "requires_action"} = refund} ->
         Logger.info(%{message: "Refund requires action", refund: refund})
         # This should eventually succeed asynchronously.
-        process_refund_updated(refund, invoice.id, actor)
+        process_refund_updated(actor, refund, invoice.id)
 
       {:ok, %Stripe.Refund{status: "succeeded"} = refund} ->
-        process_refund_updated(refund, invoice.id, actor)
+        process_refund_updated(actor, refund, invoice.id)
 
       {:ok, %Stripe.Refund{status: "pending"} = refund} ->
-        process_refund_updated(refund, invoice.id, actor)
+        process_refund_updated(actor, refund, invoice.id)
 
       {:error, %Stripe.Error{} = err} ->
         {:error, err}
@@ -796,7 +795,7 @@ defmodule Banchan.Payments do
   Webhook handler for when a Stripe refund has been updated.
   """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def process_refund_updated(%Stripe.Refund{} = refund, invoice_id, actor \\ nil) do
+  def process_refund_updated(%User{} = actor, %Stripe.Refund{} = refund, invoice_id) do
     {:ok, ret} =
       Repo.transaction(fn ->
         assignments =
@@ -830,12 +829,7 @@ defmodule Banchan.Payments do
               ]
           end
 
-        assignments =
-          if is_nil(actor) do
-            assignments
-          else
-            assignments ++ [refunded_by_id: actor.id]
-          end
+        assignments = assignments ++ [refunded_by_id: actor.id]
 
         update_res =
           if is_nil(invoice_id) do
@@ -874,17 +868,13 @@ defmodule Banchan.Payments do
     case ret do
       {:ok, event} ->
         if event.invoice.refund_status == :succeeded do
-          actor =
-            cond do
-              is_nil(actor) && event.invoice.refunded_by_id ->
-                %User{id: event.invoice.refunded_by_id} |> Repo.reload!()
-
-              !is_nil(actor) ->
-                actor
-
-              true ->
-                raise "Bad state: an invoice was succeeded that didn't already have a refunded_by_id."
-            end
+          actor = if event.invoice.refunded_by_id do
+            %User{id: event.invoice.refunded_by_id} |> Repo.reload!()
+          else
+            msg = "Bad State: invoice refund succeeded but refunded_by_id is nil!"
+            Logger.error(%{message: msg, error: err})
+            raise msg
+          end
 
           Commissions.create_event(
             :refund_processed,
@@ -916,10 +906,11 @@ defmodule Banchan.Payments do
     {:ok, ret} =
       Repo.transaction(fn ->
         invoice = invoice |> Repo.reload() |> Repo.preload(:commission)
+        system = Accounts.system_user()
 
         case invoice.status do
           :succeeded ->
-            with {:ok, _} <- refund_payment(nil, invoice, true) do
+            with {:ok, _} <- refund_payment(system, invoice, true) do
               {:ok, invoice}
             end
 
@@ -935,7 +926,7 @@ defmodule Banchan.Payments do
               {:ok, invoice}
             else
               with {:ok, _payout} <-
-                     payout_studio(nil, %Studio{id: invoice.commission.studio_id}, invoice) do
+                     payout_studio(system, %Studio{id: invoice.commission.studio_id}, invoice) do
                 {:ok, invoice}
               end
             end

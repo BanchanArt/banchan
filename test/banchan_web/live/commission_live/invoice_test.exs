@@ -10,6 +10,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
 
   import Banchan.CommissionsFixtures
 
+  alias Banchan.Accounts
   alias Banchan.Notifications
   alias Banchan.Payments
 
@@ -24,7 +25,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       commission: commission,
       client: commission.client,
       studio: commission.studio,
-      artist: Enum.at(commission.studio.artists, 0)
+      artist: Enum.at(commission.studio.artists, 0),
+      system: Accounts.system_user()
     }
   end
 
@@ -526,7 +528,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
-      commission: commission
+      commission: commission,
+      system: system
     } do
       amount = Money.new(42_000, :USD)
       tip = Money.new(6900, :USD)
@@ -592,6 +595,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       assert invoice_box =~ "A refund is pending"
 
       Payments.process_refund_updated(
+        system,
         %Stripe.Refund{
           id: refund_id,
           status: "succeeded",
@@ -626,7 +630,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
-      commission: commission
+      commission: commission,
+      system: system
     } do
       amount = Money.new(42_000, :USD)
       tip = Money.new(6900, :USD)
@@ -667,7 +672,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .modal .refund-btn")
       |> render_click()
 
-      Payments.process_refund_updated(%Stripe.Refund{id: refund_id, status: "canceled"}, nil)
+      Payments.process_refund_updated(system, %Stripe.Refund{id: refund_id, status: "canceled"}, nil)
 
       Notifications.wait_for_notifications()
 
@@ -694,7 +699,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
-      commission: commission
+      commission: commission,
+      system: system
     } do
       amount = Money.new(42_000, :USD)
       tip = Money.new(6900, :USD)
@@ -736,6 +742,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> render_click()
 
       Payments.process_refund_updated(
+        system,
         %Stripe.Refund{id: refund_id, status: "requires_action"},
         nil
       )
@@ -767,7 +774,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
-      commission: commission
+      commission: commission,
+      system: system
     } do
       amount = Money.new(42_000, :USD)
       tip = Money.new(6900, :USD)
@@ -809,6 +817,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> render_click()
 
       Payments.process_refund_updated(
+        system,
         %Stripe.Refund{
           id: refund_id,
           status: "failed",
