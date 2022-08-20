@@ -18,6 +18,7 @@ defmodule Banchan.Payments.Invoice do
     field :total_charged, Money.Ecto.Composite.Type
     field :total_transferred, Money.Ecto.Composite.Type
     field :payout_available_on, :utc_datetime
+    field :paid_on, :utc_datetime
     field :required, :boolean
 
     field :refund_status, Ecto.Enum,

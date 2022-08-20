@@ -71,9 +71,15 @@ defmodule Banchan.PaymentsTest.Expired do
           "text" => "Please pay me :x"
         })
 
-      invoice
-      |> checkout_session_fixture(tip)
-      |> succeed_mock_payment!()
+      two_years_ago =
+        DateTime.utc_now()
+        |> DateTime.add(-1 * 60 * 60 * 24 * 365 * 2 - 1)
+
+      Oban.Testing.with_testing_mode(:manual, fn ->
+        invoice
+        |> checkout_session_fixture(tip)
+        |> succeed_mock_payment!(paid_on: two_years_ago)
+      end)
 
       mock_refund_stripe_calls(invoice)
 

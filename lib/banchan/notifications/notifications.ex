@@ -149,6 +149,8 @@ defmodule Banchan.Notifications do
         send_email(user, notification, opts)
       end
     end)
+
+    :ok
   end
 
   defp send_web(%User{} = user, %UserNotification{} = notification) do

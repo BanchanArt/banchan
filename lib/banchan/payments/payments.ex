@@ -16,6 +16,7 @@ defmodule Banchan.Payments do
   alias Banchan.Repo
   alias Banchan.Studios
   alias Banchan.Studios.Studio
+  alias Banchan.Workers.{ExpiredInvoicePurger, ExpiredInvoiceWarner}
 
   ## Events
 
@@ -598,7 +599,7 @@ defmodule Banchan.Payments do
      %{charges: %{data: [%{id: charge_id, balance_transaction: txn_id, transfer: transfer}]}}} =
       stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, [])
 
-    {:ok, %{available_on: available_on, amount: amt, currency: curr}} =
+    {:ok, %{created: paid_on, available_on: available_on, amount: amt, currency: curr}} =
       stripe_mod().retrieve_balance_transaction(txn_id, [])
 
     {:ok, transfer} = stripe_mod().retrieve_transfer(transfer)
@@ -612,21 +613,35 @@ defmodule Banchan.Payments do
         String.to_atom(String.upcase(final_transfer_txn.currency))
       )
 
+    {:ok, paid_on} = DateTime.from_unix(paid_on)
     {:ok, available_on} = DateTime.from_unix(available_on)
 
     {:ok, _} =
       Repo.transaction(fn ->
-        {1, [invoice]} =
-          from(i in Invoice, where: i.stripe_session_id == ^session.id, select: i)
+        {1, [{invoice, country}]} =
+          from(i in Invoice,
+            join: c in assoc(i, :commission),
+            join: s in assoc(c, :studio),
+            where: i.stripe_session_id == ^session.id,
+            select: {i, s.country}
+          )
           |> Repo.update_all(
             set: [
               status: :succeeded,
               payout_available_on: available_on,
+              paid_on: paid_on,
               total_charged: total_charged,
               total_transferred: total_transferred,
               stripe_charge_id: charge_id
             ]
           )
+
+        # Start the Doomsday Clock.
+        purge_on = DateTime.utc_now() |> DateTime.add(max_payment_age(country))
+        {:ok, _job} = ExpiredInvoicePurger.schedule_purge(invoice, purge_on)
+
+        warn_on = purge_on |> DateTime.add(-1 * 60 * 60 * 72)
+        {:ok, _job} = ExpiredInvoiceWarner.schedule_warning(invoice, warn_on)
 
         event = Repo.get!(Event, invoice.event_id)
         client = Repo.reload!(%User{id: invoice.client_id})
@@ -935,37 +950,83 @@ defmodule Banchan.Payments do
   def purge_expired_invoice(%Invoice{} = invoice) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        invoice = invoice |> Repo.reload() |> Repo.preload(:commission)
+        invoice = invoice |> Repo.reload() |> Repo.preload(commission: [:studio])
         system = Accounts.system_user()
 
-        case invoice.status do
-          :succeeded ->
+        invoice_expired? =
+          if is_nil(invoice.paid_on) do
+            false
+          else
+            age = DateTime.utc_now() |> DateTime.diff(invoice.paid_on)
+
+            age >= max_payment_age(invoice.commission.studio.country)
+          end
+
+        case {invoice_expired?, invoice.status} do
+          {false, _} ->
+            {:ok, invoice}
+
+          {true, :succeeded} ->
+            # If funds haven't been released, refund the client.
             refund_payment(system, invoice, true)
 
-          :released ->
-            paid_out? =
+          {true, :released} ->
+            # If they _have_ been released, pay out the studio if appropriate.
+            payout =
               from(i in Invoice,
                 where: i.id == ^invoice.id,
                 join: p in assoc(i, :payouts)
               )
-              |> Repo.exists?()
+              |> Repo.one()
 
-            if paid_out? do
-              {:ok, invoice}
-            else
-              with {:ok, _payout} <-
-                     payout_studio(system, %Studio{id: invoice.commission.studio_id}, invoice) do
+            case payout do
+              %Payout{status: :paid} ->
                 {:ok, invoice}
-              end
+
+              %Payout{status: status, arrival_date: arrival_date}
+              when status in [:pending, :in_transit] ->
+                # There's a payout in flight, but we want to make sure that if
+                # anything happens to it, we still correctly purge. So we
+                # don't do anything, but we requeue purge_expired_invoice/1
+                # for the day after the arrival_date
+                # 1 day
+                next = arrival_date |> NaiveDateTime.add(60 * 60 * 24)
+
+                with {:ok, _job} <- ExpiredInvoicePurger.schedule_purge(invoice, next) do
+                  {:ok, invoice}
+                end
+
+              _ ->
+                # If there's no payout for this invoice or the payout is in a
+                # failed state, initiate a new payout just for this invoice.
+                with {:ok, _payout} <-
+                       payout_studio(system, %Studio{id: invoice.commission.studio_id}, invoice) do
+                  {:ok, invoice}
+                end
             end
 
           _ ->
+            # Unpaid and refunded invoices don't really have a deadline.
             {:ok, invoice}
         end
       end)
 
     ret
   end
+
+  @doc """
+  Maximum age, in seconds, that a payment can be before it needs to be either
+  refunded or paid out, based on the studio country.
+
+  See https://stripe.com/docs/connect/manual-payouts for more details.
+  """
+  def max_payment_age(country)
+  # US studios can hold payments for 2 years.
+  def max_payment_age(:US), do: 60 * 60 * 24 * 365 * 2
+  # Thai studios can hold payments for only 10 days.
+  def max_payment_age(:TH), do: 60 * 60 * 24 * 10
+  # All others can hold them for 90 days.
+  def max_payment_age(_), do: 60 * 60 * 24 * 90
 
   @doc """
   Warns clients and/or studio members that an invoice is overdue for

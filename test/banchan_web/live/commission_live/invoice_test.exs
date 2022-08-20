@@ -275,16 +275,19 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         {:ok,
          %Stripe.BalanceTransaction{
            id: id,
+           created: 1,
            available_on: 1,
            amount: (amount |> Money.add(tip) |> Money.subtract(platform_fee)).amount,
            currency: "usd"
          }}
       end)
 
-      Payments.process_payment_succeeded!(%Stripe.Session{
-        id: stripe_sess_id,
-        payment_intent: intent_id
-      })
+      Oban.Testing.with_testing_mode(:manual, fn ->
+        Payments.process_payment_succeeded!(%Stripe.Session{
+          id: stripe_sess_id,
+          payment_intent: intent_id
+        })
+      end)
 
       Notifications.wait_for_notifications()
 

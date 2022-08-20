@@ -73,13 +73,15 @@ defmodule Banchan.CommissionsFixtures do
 
   def succeed_mock_payment!(
         %Stripe.Session{} = session,
-        available_on \\ DateTime.add(DateTime.utc_now(), -2)
+        opts \\ []
       ) do
     charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
     txn_id = "stripe-mock-transaction-id#{System.unique_integer()}"
     trans_id = "stripe-mock-transfer-id#{System.unique_integer()}"
 
     invoice = from(i in Invoice, where: i.stripe_session_id == ^session.id) |> Repo.one!()
+
+    now_ish = DateTime.utc_now() |> DateTime.add(-2)
 
     Banchan.StripeAPI.Mock
     |> expect(:retrieve_payment_intent, fn _, _, _ ->
@@ -89,7 +91,8 @@ defmodule Banchan.CommissionsFixtures do
     |> expect(:retrieve_balance_transaction, fn _, _ ->
       {:ok,
        %{
-         available_on: DateTime.to_unix(available_on),
+         available_on: Keyword.get(opts, :available_on, now_ish) |> DateTime.to_unix(),
+         created: Keyword.get(opts, :paid_on, now_ish) |> DateTime.to_unix(),
          amount:
            (invoice.amount
             |> Money.add(invoice.tip)

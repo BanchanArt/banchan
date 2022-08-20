@@ -312,6 +312,7 @@ defmodule Banchan.CommissionsTest do
 
         {:ok,
          %{
+           created: DateTime.utc_now() |> DateTime.to_unix(),
            available_on: DateTime.to_unix(available_on),
            amount: Money.add(amount, tip).amount,
            currency: "usd"
