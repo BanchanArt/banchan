@@ -118,6 +118,8 @@ defmodule Banchan.Workers.Thumbnailer do
         Mogrify.open(tmp_src)
         |> Mogrify.custom("flatten")
         |> Mogrify.format(opts["format"])
+        |> Mogrify.limit("area", "128MB")
+        |> Mogrify.limit("disk", "1GB")
         |> Mogrify.custom("filter", "Triangle")
         |> Mogrify.custom("define", "filter:support=2")
         |> Mogrify.custom("unsharp", "0.25x0.25+8+0.065")

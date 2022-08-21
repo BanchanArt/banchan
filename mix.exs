@@ -59,7 +59,10 @@ defmodule Banchan.MixProject do
       {:html_sanitize_ex, "~> 1.4.2"},
       {:httpoison, "~> 1.8.1"},
       {:jason, "~> 1.0"},
-      {:mogrify, "~> 0.9.1"},
+      # TODO: move back to mainline after
+      # https://github.com/elixir-mogrify/mogrify/pull/112 is merged and
+      # released.
+      {:mogrify, github: "BanchanArt/mogrify"},
       {:money, "~> 1.9"},
       {:nimble_totp, "~> 0.1.0"},
       {:number, "~> 1.0.3"},
