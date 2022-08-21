@@ -43,17 +43,15 @@ defmodule BanchanWeb.Components.Layout do
         <footer class="footer p-10 shadow-sm">
           <div>
             <span class="footer-title">Co-op</span>
-            {!-- # TODO: Fill these out --}
-            <a href="#" class="link link-hover">About us</a>
-            <a href="#" class="link link-hover">Contact</a>
-            <a href="#" class="link link-hover">Membership</a>
+            <LiveRedirect to={Routes.static_about_us_path(Endpoint, :show)} class="link link-hover">About Us</LiveRedirect>
+            <LiveRedirect to={Routes.static_contact_path(Endpoint, :show)} class="link link-hover">Contact</LiveRedirect>
+            <LiveRedirect to={Routes.static_membership_path(Endpoint, :show)} class="link link-hover">Membership</LiveRedirect>
           </div>
           <div>
-            {!-- # TODO: Fill these out --}
             <span class="footer-title">Legal</span>
-            <a href="#" class="link link-hover">Terms of use</a>
+            <LiveRedirect to={Routes.static_terms_of_service_path(Endpoint, :show)} class="link link-hover">Terms of Service</LiveRedirect>
             <LiveRedirect to={Routes.static_privacy_policy_path(Endpoint, :show)} class="link link-hover">Privacy policy</LiveRedirect>
-            <a href="#" class="link link-hover">Cookie policy</a>
+            <LiveRedirect to={Routes.static_refunds_and_disputes_path(Endpoint, :show)} class="link link-hover">Refunds and Disputes</LiveRedirect>
           </div>
           <div>
             <span class="footer-title">Social</span>

@@ -177,7 +177,13 @@ defmodule BanchanWeb.Router do
       live("/reset_password", ForgotPasswordLive, :edit)
       live("/reset_password/:token", ResetPasswordLive, :edit)
 
+      live("/about-us", StaticLive.AboutUs, :show)
+      live("/contact", StaticLive.Contact, :show)
+      live("/membership", StaticLive.Membership, :show)
+
       live("/privacy-policy", StaticLive.PrivacyPolicy, :show)
+      live("/terms-of-service", StaticLive.TermsOfService, :show)
+      live("/refunds-and-disputes", StaticLive.RefundsAndDisputes, :show)
     end
   end
 
