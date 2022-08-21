@@ -84,6 +84,7 @@ defmodule Banchan.PaymentsTest.Expired do
     end
 
     test "initiates refunds for expired :succeeded invoices", %{
+      client: client,
       artist: artist,
       commission: commission,
       amount: amount,
@@ -108,10 +109,22 @@ defmodule Banchan.PaymentsTest.Expired do
 
       mock_refund_stripe_calls(invoice)
 
+      Notifications.wait_for_notifications()
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
+
       assert {:ok, %Invoice{id: ^invoice_id, status: :refunded, refund_status: :succeeded}} =
                Payments.purge_expired_invoice(invoice)
 
       assert %Invoice{status: :refunded, refund_status: :succeeded} = Repo.reload(invoice)
+
+      Notifications.wait_for_notifications()
+
+      assert [%_{type: "expired_invoice_refunded"}, _] =
+               Notifications.unread_notifications(client).entries |> Enum.sort_by(& &1.id)
+
+      assert [%_{type: "expired_invoice_refunded"}, _] =
+               Notifications.unread_notifications(artist).entries |> Enum.sort_by(& &1.id)
     end
 
     test "Initiates a single-invoice payout for non-paid-out, expired :released invoices", %{
@@ -173,6 +186,10 @@ defmodule Banchan.PaymentsTest.Expired do
          }}
       end)
 
+      Notifications.wait_for_notifications()
+      Notifications.mark_all_as_read(client)
+      Notifications.mark_all_as_read(artist)
+
       assert {:ok,
               %Invoice{
                 id: ^invoice_id,
@@ -192,6 +209,13 @@ defmodule Banchan.PaymentsTest.Expired do
 
       refute is_nil(payout_available_on)
       assert [%Payout{status: :pending, amount: ^total_transferred}] = payouts
+
+      Notifications.wait_for_notifications()
+
+      assert [] = Notifications.unread_notifications(client).entries |> Enum.sort_by(& &1.id)
+
+      assert [%_{type: "expired_invoice_paid_out"}] =
+               Notifications.unread_notifications(artist).entries |> Enum.sort_by(& &1.id)
     end
 
     test "ignores :released invoices that are part of successful payouts", %{

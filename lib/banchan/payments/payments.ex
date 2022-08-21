@@ -968,7 +968,10 @@ defmodule Banchan.Payments do
 
           {true, :succeeded} ->
             # If funds haven't been released, refund the client.
-            refund_payment(system, invoice, true)
+            with {:ok, invoice} <- refund_payment(system, invoice, true),
+                 :ok <- Notifications.expired_invoice_refunded(invoice) do
+              {:ok, invoice}
+            end
 
           {true, :released} ->
             # If they _have_ been released, pay out the studio if appropriate.
@@ -1002,7 +1005,8 @@ defmodule Banchan.Payments do
                 # If there's no payout for this invoice or the payout is in a
                 # failed state, initiate a new payout just for this invoice.
                 with {:ok, _payout} <-
-                       payout_studio(system, %Studio{id: invoice.commission.studio_id}, invoice) do
+                       payout_studio(system, %Studio{id: invoice.commission.studio_id}, invoice),
+                     :ok <- Notifications.expired_invoice_paid_out(invoice) do
                   {:ok, invoice}
                 end
             end
