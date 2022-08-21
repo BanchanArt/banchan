@@ -27,7 +27,7 @@ defmodule Banchan.Offerings do
   @doc """
   Creates a new offering.
   """
-  def new_offering(actor, %Studio{} = studio, attrs, gallery_images) do
+  def new_offering(%User{} = actor, %Studio{} = studio, attrs, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
         with {:ok, _actor} <- Studios.check_studio_member(studio, actor) do
@@ -75,7 +75,7 @@ defmodule Banchan.Offerings do
   Updates offering details.
   """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def update_offering(actor, %Offering{} = offering, attrs, gallery_images) do
+  def update_offering(%User{} = actor, %Offering{} = offering, attrs, gallery_images) do
     {:ok, ret} =
       Repo.transaction(fn ->
         with {:ok, _actor} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor) do

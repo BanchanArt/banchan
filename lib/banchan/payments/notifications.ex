@@ -3,6 +3,7 @@ defmodule Banchan.Payments.Notifications do
   Send notifications related to payments.
   """
 
+  alias Banchan.Accounts
   alias Banchan.Accounts.User
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, Event}
@@ -32,6 +33,141 @@ defmodule Banchan.Payments.Notifications do
         }
       )
     end)
+  end
+
+  @doc """
+  Sends a warning that an invoice is about to expire and must either be paid
+  out or reimbursed, or the system will do it automatically.
+  """
+  def invoice_expiry_warning(%Invoice{} = invoice) do
+    # We don't shove this in a separate task because this one is meant to be
+    # handled by an actual Oban Worker.
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = Accounts.system_user()
+
+        invoice =
+          invoice
+          |> Repo.reload()
+          |> Repo.preload([:event, commission: [studio: [artists: [:notification_settings]]]])
+
+        body =
+          "An invoice payment for #{invoice.total_transferred} is expiring in 72 hours. Unreleased expired payments will be reimbursed to the client automatically."
+
+        url =
+          Routes.commission_url(Endpoint, :show, invoice.commission.public_id)
+          |> replace_fragment(invoice.event)
+
+        {:safe, safe_url} = Phoenix.HTML.html_escape(url)
+
+        Notifications.notify_subscribers!(
+          actor,
+          invoice.commission.studio.artists,
+          %Notifications.UserNotification{
+            type: "invoice_expiring_soon",
+            title: "Invoice payment expiring soon",
+            short_body: body,
+            text_body: "#{body}\n\n#{url}",
+            html_body: "<p>#{body}</p><p><a href=\"#{safe_url}\">View it</a></p>",
+            url: url,
+            read: false
+          }
+        )
+      end)
+
+    ret
+  end
+
+  @doc """
+  Lets both the client and the studio members know that a paid invoice has
+  been refunded due to expiring.
+  """
+  def expired_invoice_refunded(%Invoice{} = invoice) do
+    # We don't shove this in a separate task because this one is meant to be
+    # handled by an actual Oban Worker.
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = Accounts.system_user()
+
+        invoice =
+          invoice
+          |> Repo.reload()
+          |> Repo.preload([
+            :event,
+            commission: [
+              client: [:notification_settings],
+              studio: [artists: [:notification_settings]]
+            ]
+          ])
+
+        body =
+          "An invoice payment for #{invoice.total_transferred} has expired and has been refunded. Please initiate a new payment."
+
+        url =
+          Routes.commission_url(Endpoint, :show, invoice.commission.public_id)
+          |> replace_fragment(invoice.event)
+
+        {:safe, safe_url} = Phoenix.HTML.html_escape(url)
+
+        Notifications.notify_subscribers!(
+          actor,
+          [invoice.commission.client | invoice.commission.studio.artists],
+          %Notifications.UserNotification{
+            type: "expired_invoice_refunded",
+            title: "Expired invoice refunded",
+            short_body: body,
+            text_body: "#{body}\n\n#{url}",
+            html_body: "<p>#{body}</p><p><a href=\"#{safe_url}\">View it</a></p>",
+            url: url,
+            read: false
+          }
+        )
+      end)
+
+    ret
+  end
+
+  @doc """
+  Lets studio members know that a payout for an expired invoice has been
+  automatically created for them.
+  """
+  def expired_invoice_paid_out(%Invoice{} = invoice) do
+    # We don't shove this in a separate task because this one is meant to be
+    # handled by an actual Oban Worker.
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = Accounts.system_user()
+
+        invoice =
+          invoice
+          |> Repo.reload()
+          |> Repo.preload([:event, commission: [studio: [artists: [:notification_settings]]]])
+
+        body =
+          "An invoice payment for #{invoice.total_transferred} has expired and a payout has been automatically initiated for it."
+
+        url =
+          Routes.commission_url(Endpoint, :show, invoice.commission.public_id)
+          |> replace_fragment(invoice.event)
+
+        {:safe, safe_url} = Phoenix.HTML.html_escape(url)
+
+        Notifications.notify_subscribers!(
+          actor,
+          invoice.commission.studio.artists,
+          %Notifications.UserNotification{
+            type: "expired_invoice_paid_out",
+            title: "Expired invoice paid out",
+            short_body: body,
+            text_body: "#{body}\n\n#{url}",
+            html_body: "<p>#{body}</p><p><a href=\"#{safe_url}\">View it</a></p>",
+            url: url,
+            read: false
+          }
+        )
+      end)
+
+    ret
   end
 
   @doc """

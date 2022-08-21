@@ -73,21 +73,26 @@ defmodule Banchan.CommissionsFixtures do
 
   def succeed_mock_payment!(
         %Stripe.Session{} = session,
-        available_on \\ DateTime.add(DateTime.utc_now(), -2)
+        opts \\ []
       ) do
+    charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
     txn_id = "stripe-mock-transaction-id#{System.unique_integer()}"
     trans_id = "stripe-mock-transfer-id#{System.unique_integer()}"
 
     invoice = from(i in Invoice, where: i.stripe_session_id == ^session.id) |> Repo.one!()
 
+    now_ish = DateTime.utc_now() |> DateTime.add(-2)
+
     Banchan.StripeAPI.Mock
     |> expect(:retrieve_payment_intent, fn _, _, _ ->
-      {:ok, %{charges: %{data: [%{balance_transaction: txn_id, transfer: trans_id}]}}}
+      {:ok,
+       %{charges: %{data: [%{id: charge_id, balance_transaction: txn_id, transfer: trans_id}]}}}
     end)
     |> expect(:retrieve_balance_transaction, fn _, _ ->
       {:ok,
        %{
-         available_on: DateTime.to_unix(available_on),
+         available_on: Keyword.get(opts, :available_on, now_ish) |> DateTime.to_unix(),
+         created: Keyword.get(opts, :paid_on, now_ish) |> DateTime.to_unix(),
          amount:
            (invoice.amount
             |> Money.add(invoice.tip)
@@ -115,6 +120,32 @@ defmodule Banchan.CommissionsFixtures do
 
   def expire_mock_payment(%Stripe.Session{} = session) do
     Payments.process_payment_expired!(session)
+  end
+
+  def mock_refund_stripe_calls(%Invoice{} = invoice) do
+    refund_id = "stripe-mock-payment-refund-id#{System.unique_integer()}"
+
+    refund = %Stripe.Refund{
+      id: refund_id,
+      status: "succeeded",
+      amount: invoice.amount.amount,
+      currency: invoice.amount.currency |> to_string() |> String.downcase()
+    }
+
+    Banchan.StripeAPI.Mock
+    |> expect(:create_refund, fn %{
+                                   charge: _incoming_charge_id,
+                                   reverse_transfer: true,
+                                   refund_application_fee: true
+                                 },
+                                 _ ->
+      {:ok, refund}
+    end)
+  end
+
+  def refund_mock_payment(actor, %Invoice{} = invoice) do
+    mock_refund_stripe_calls(invoice)
+    Payments.refund_payment(actor, invoice, true)
   end
 
   def payment_fixture(

@@ -10,6 +10,7 @@ defmodule Banchan.Studios do
   import Ecto.Query, warn: false
   require Logger
 
+  alias Banchan.Accounts
   alias Banchan.Accounts.User
   alias Banchan.Payments
   alias Banchan.Payments.Invoice
@@ -790,12 +791,12 @@ defmodule Banchan.Studios do
   @doc """
   Re-enable a previously disabled studio.
   """
-  def enable_studio(actor, %Studio{} = studio, reason, cancel \\ true) do
+  def enable_studio(%User{} = actor, %Studio{} = studio, reason, cancel \\ true) do
     {:ok, ret} =
       Repo.transaction(fn ->
         actor = actor && actor |> Repo.reload()
 
-        if is_nil(actor) || :admin in actor.roles || :mod in actor.roles do
+        if Accounts.system?(actor) || Accounts.admin?(actor) do
           changeset =
             StudioDisableHistory.enable_changeset(%StudioDisableHistory{}, %{
               lifted_reason: reason
@@ -934,7 +935,7 @@ defmodule Banchan.Studios do
   def delete_studio(%User{} = actor, %Studio{} = studio, password) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        with {:ok, actor} <- check_studio_member(studio, actor, [:admin]),
+        with {:ok, actor} <- check_studio_member(studio, actor, [:system, :admin]),
              {:ok, _} <- check_password(actor, password),
              # Precheck that all our balances are indeed empty.
              {:ok, _balance} <- check_balance_empty(studio),
@@ -1025,10 +1026,10 @@ defmodule Banchan.Studios do
     Application.get_env(:banchan, :stripe_mod)
   end
 
-  def check_studio_member(%Studio{} = studio, actor, roles \\ [:admin, :mod]) do
-    actor = actor && actor |> Repo.reload()
+  def check_studio_member(%Studio{} = studio, %User{} = actor, roles \\ [:system, :admin, :mod]) do
+    actor = actor |> Repo.reload()
 
-    if is_nil(actor) || is_user_in_studio?(actor, studio) ||
+    if is_user_in_studio?(actor, studio) ||
          Enum.any?(roles, &(&1 in actor.roles)) do
       {:ok, actor}
     else

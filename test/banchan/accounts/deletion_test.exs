@@ -140,7 +140,10 @@ defmodule Banchan.AccountsTest.Deletion do
 
       assert {:ok, 1} = Accounts.prune_users()
 
-      assert [%User{id: ^user2_id}] = Repo.all(User)
+      %User{id: system_id} = Accounts.system_user()
+
+      assert [%User{id: ^system_id}, %User{id: ^user2_id}] =
+               Repo.all(User) |> Enum.sort_by(& &1.id)
     end
 
     test "does not delete active users" do

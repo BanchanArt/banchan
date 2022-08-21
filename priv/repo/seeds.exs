@@ -10,6 +10,14 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
+{:ok, _root} =
+  Banchan.Accounts.register_system(%{
+    handle: "tteokbokki",
+    name: "Tokki",
+    bio:
+      "Teokbokki (aka Tokki) is the manifestation of the Banchan system itself, taking care of various internal and automated tasks. They're also Banchan's mascot!"
+  })
+
 if Application.fetch_env!(:banchan, :env) == :dev do
   {:ok, user} =
     Banchan.Accounts.register_admin(%{

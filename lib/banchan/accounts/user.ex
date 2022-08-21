@@ -31,7 +31,7 @@ defmodule Banchan.Accounts.User do
     field :muted, :string
 
     # Roles and moderation
-    field :roles, {:array, Ecto.Enum}, values: [:admin, :mod, :artist], default: []
+    field :roles, {:array, Ecto.Enum}, values: [:system, :admin, :mod, :artist], default: []
     field :moderation_notes, :string
     has_one :disable_info, DisableHistory, where: [lifted_at: nil]
     has_many :disable_history, DisableHistory, preload_order: [desc: :disabled_at]
@@ -390,6 +390,17 @@ defmodule Banchan.Accounts.User do
   defp set_admin_role(changeset) do
     changeset
     |> put_change(:roles, [:admin])
+  end
+
+  def system_registration_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:handle, :name, :bio, :password])
+    |> validate_handle()
+    |> validate_name()
+    |> validate_bio()
+    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_password([])
+    |> put_change(:roles, [:system])
   end
 
   defp validate_handle_unique(changeset, field) when is_atom(field) do

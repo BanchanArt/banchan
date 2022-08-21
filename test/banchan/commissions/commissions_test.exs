@@ -12,12 +12,14 @@ defmodule Banchan.CommissionsTest do
   import Banchan.OfferingsFixtures
   import Banchan.StudiosFixtures
 
+  alias Banchan.Accounts
   alias Banchan.Commissions
   alias Banchan.Commissions.Event
   alias Banchan.Notifications
   alias Banchan.Offerings
   alias Banchan.Payments
   alias Banchan.Payments.Invoice
+  alias Banchan.Workers.{ExpiredInvoicePurger, ExpiredInvoiceWarner}
 
   setup :verify_on_exit!
 
@@ -281,6 +283,7 @@ defmodule Banchan.CommissionsTest do
       # Let's just make it so it's available immediately.
       available_on = DateTime.add(DateTime.utc_now(), -2)
 
+      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
       txn_id = "stripe-mock-txn-id#{System.unique_integer()}"
       trans_id = "stripe-mock-transfer-id#{System.unique_integer()}"
       payment_intent_id = "stripe-mock-payment-intent-id#{System.unique_integer()}"
@@ -288,7 +291,9 @@ defmodule Banchan.CommissionsTest do
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_payment_intent, fn id, _, _ ->
         assert payment_intent_id == id
-        {:ok, %{charges: %{data: [%{balance_transaction: txn_id, transfer: trans_id}]}}}
+
+        {:ok,
+         %{charges: %{data: [%{id: charge_id, balance_transaction: txn_id, transfer: trans_id}]}}}
       end)
       |> expect(:retrieve_transfer, fn id ->
         assert trans_id == id
@@ -308,6 +313,7 @@ defmodule Banchan.CommissionsTest do
 
         {:ok,
          %{
+           created: DateTime.utc_now() |> DateTime.to_unix(),
            available_on: DateTime.to_unix(available_on),
            amount: Money.add(amount, tip).amount,
            currency: "usd"
@@ -316,11 +322,16 @@ defmodule Banchan.CommissionsTest do
 
       Commissions.subscribe_to_commission_events(commission)
 
-      assert :ok ==
-               Payments.process_payment_succeeded!(%Stripe.Session{
-                 id: sess_id,
-                 payment_intent: payment_intent_id
-               })
+      Oban.Testing.with_testing_mode(:manual, fn ->
+        assert :ok ==
+                 Payments.process_payment_succeeded!(%Stripe.Session{
+                   id: sess_id,
+                   payment_intent: payment_intent_id
+                 })
+
+        assert_enqueued(worker: ExpiredInvoicePurger, args: %{invoice_id: invoice.id})
+        assert_enqueued(worker: ExpiredInvoiceWarner, args: %{invoice_id: invoice.id})
+      end)
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 
@@ -574,29 +585,11 @@ defmodule Banchan.CommissionsTest do
 
       assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn params, _opts ->
-        assert charge_id == params.charge
+        assert invoice.stripe_charge_id == params.charge
         assert true == params.reverse_transfer
         assert true == params.refund_application_fee
 
@@ -672,8 +665,6 @@ defmodule Banchan.CommissionsTest do
 
       assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
-
       err = %Stripe.Error{
         source: "test",
         code: "badness",
@@ -681,23 +672,6 @@ defmodule Banchan.CommissionsTest do
       }
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:error, err}
       end)
@@ -714,6 +688,7 @@ defmodule Banchan.CommissionsTest do
     end
 
     test "refund payment before approval - refund failed" do
+      system = Accounts.system_user()
       commission = commission_fixture()
       client = commission.client
       studio = commission.studio
@@ -739,26 +714,8 @@ defmodule Banchan.CommissionsTest do
       assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:ok,
          %Stripe.Refund{
@@ -836,7 +793,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Payments.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(system, refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -861,6 +818,7 @@ defmodule Banchan.CommissionsTest do
     end
 
     test "refund payment before approval - refund pending" do
+      system = Accounts.system_user()
       commission = commission_fixture()
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
@@ -882,26 +840,8 @@ defmodule Banchan.CommissionsTest do
       assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:ok,
          %Stripe.Refund{
@@ -956,7 +896,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Payments.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(system, refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -972,6 +912,7 @@ defmodule Banchan.CommissionsTest do
     end
 
     test "refund payment before approval - refund requires action" do
+      system = Accounts.system_user()
       commission = commission_fixture()
       client = commission.client
       studio = commission.studio
@@ -997,26 +938,8 @@ defmodule Banchan.CommissionsTest do
       Notifications.mark_all_as_read(artist)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:ok,
          %Stripe.Refund{
@@ -1079,7 +1002,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Payments.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(system, refund, nil)
 
       Notifications.wait_for_notifications()
 
@@ -1104,6 +1027,7 @@ defmodule Banchan.CommissionsTest do
     end
 
     test "refund payment before approval - refund canceled" do
+      system = Accounts.system_user()
       commission = commission_fixture()
       client = commission.client
       studio = commission.studio
@@ -1129,26 +1053,8 @@ defmodule Banchan.CommissionsTest do
       assert {:error, :unauthorized} == Payments.refund_payment(artist, invoice, false)
 
       refund_id = "stripe-mock-refund-id#{System.unique_integer()}"
-      charge_id = "stripe-mock-charge-id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn sid, _opts ->
-        assert sess.id == sid
-        {:ok, sess}
-      end)
-      |> expect(:retrieve_payment_intent, fn intent_id, _params, _opts ->
-        assert sess.payment_intent == intent_id
-
-        {:ok,
-         %Stripe.PaymentIntent{
-           id: intent_id,
-           charges: %{
-             data: [
-               %{id: charge_id}
-             ]
-           }
-         }}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:ok, %Stripe.Refund{id: refund_id, status: "canceled"}}
       end)
@@ -1210,7 +1116,7 @@ defmodule Banchan.CommissionsTest do
                 refund_status: :succeeded,
                 refund_failure_reason: nil,
                 status: :refunded
-              }} = Payments.process_refund_updated(refund, nil)
+              }} = Payments.process_refund_updated(system, refund, nil)
 
       Notifications.wait_for_notifications()
 

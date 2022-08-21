@@ -378,13 +378,21 @@ defmodule Banchan.StudiosTest do
       stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
+      |> expect(:retrieve_charge, 2, fn _ ->
+        {:ok,
+         %Stripe.Charge{
+           balance_transaction: %Stripe.BalanceTransaction{
+             status: "available"
+           }
+         }}
+      end)
       |> expect(:create_payout, fn params, opts ->
         assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
 
         assert %{
                  amount: net.amount,
                  currency: "usd",
-                 statement_descriptor: "banchan.art payout"
+                 statement_descriptor: "Banchan Art Payout"
                } == params
 
         {:ok,
@@ -642,6 +650,14 @@ defmodule Banchan.StudiosTest do
            ]
          }}
       end)
+      |> expect(:retrieve_charge, fn _ ->
+        {:ok,
+         %Stripe.Charge{
+           balance_transaction: %Stripe.BalanceTransaction{
+             status: "available"
+           }
+         }}
+      end)
 
       {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
       {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
@@ -731,6 +747,14 @@ defmodule Banchan.StudiosTest do
                amount: 0
              }
            ]
+         }}
+      end)
+      |> expect(:retrieve_charge, fn _ ->
+        {:ok,
+         %Stripe.Charge{
+           balance_transaction: %Stripe.BalanceTransaction{
+             status: "available"
+           }
          }}
       end)
       |> expect(:create_payout, fn _, _ ->
@@ -846,6 +870,14 @@ defmodule Banchan.StudiosTest do
            ]
          }}
       end)
+      |> expect(:retrieve_charge, fn _ ->
+        {:ok,
+         %Stripe.Charge{
+           balance_transaction: %Stripe.BalanceTransaction{
+             status: "available"
+           }
+         }}
+      end)
       |> expect(:create_payout, fn _, _ ->
         {:ok,
          %Stripe.Payout{
@@ -945,6 +977,14 @@ defmodule Banchan.StudiosTest do
                amount: 0
              }
            ]
+         }}
+      end)
+      |> expect(:retrieve_charge, fn _ ->
+        {:ok,
+         %Stripe.Charge{
+           balance_transaction: %Stripe.BalanceTransaction{
+             status: "available"
+           }
          }}
       end)
       |> expect(:create_payout, fn _, _ ->

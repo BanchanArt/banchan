@@ -10,6 +10,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
 
   import Banchan.CommissionsFixtures
 
+  alias Banchan.Accounts
   alias Banchan.Notifications
   alias Banchan.Payments
 
@@ -24,7 +25,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       commission: commission,
       client: commission.client,
       studio: commission.studio,
-      artist: Enum.at(commission.studio.artists, 0)
+      artist: Enum.at(commission.studio.artists, 0),
+      system: Accounts.system_user()
     }
   end
 
@@ -237,6 +239,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
 
       assert_redirected(client_page_live, "https://some.stripe.url")
 
+      charge_id = "stripe_charge_mock_id#{System.unique_integer()}"
       intent_id = "stripe_intent_mock_id#{System.unique_integer()}"
       txn_id = "stripe_txn_mock_id#{System.unique_integer()}"
       trans_id = "stripe_transfer_mock_id#{System.unique_integer()}"
@@ -249,7 +252,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         {:ok,
          %Stripe.PaymentIntent{
            id: id,
-           charges: %{data: [%{balance_transaction: txn_id, transfer: trans_id}]}
+           charges: %{data: [%{id: charge_id, balance_transaction: txn_id, transfer: trans_id}]}
          }}
       end)
       |> expect(:retrieve_transfer, fn id ->
@@ -272,16 +275,19 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         {:ok,
          %Stripe.BalanceTransaction{
            id: id,
+           created: 1,
            available_on: 1,
            amount: (amount |> Money.add(tip) |> Money.subtract(platform_fee)).amount,
            currency: "usd"
          }}
       end)
 
-      Payments.process_payment_succeeded!(%Stripe.Session{
-        id: stripe_sess_id,
-        payment_intent: intent_id
-      })
+      Oban.Testing.with_testing_mode(:manual, fn ->
+        Payments.process_payment_succeeded!(%Stripe.Session{
+          id: stripe_sess_id,
+          payment_intent: intent_id
+        })
+      end)
 
       Notifications.wait_for_notifications()
 
@@ -323,7 +329,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       tip = Money.new(6900, :USD)
       total = Money.add(amount, tip)
 
-      session = payment_fixture(artist, commission, amount, tip)
+      payment_fixture(artist, commission, amount, tip)
 
       client_conn = log_in_user(conn, client)
       artist_conn = log_in_user(conn, artist)
@@ -370,21 +376,10 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       assert artist_page_live
              |> has_element?(".invoice-box .modal.modal-open")
 
-      intent_id = "stripe_intent_mock_id#{System.unique_integer()}"
-      charge_id = "stripe_charge_mock_id#{System.unique_integer()}"
       refund_id = "stripe_refund_mock_id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn id, _opts ->
-        assert session.id == id
-        {:ok, %Stripe.Session{id: id, payment_intent: intent_id}}
-      end)
-      |> expect(:retrieve_payment_intent, fn id, _params, _opts ->
-        assert intent_id == id
-        {:ok, %Stripe.PaymentIntent{id: id, charges: %{data: [%{id: charge_id}]}}}
-      end)
       |> expect(:create_refund, fn params, _opts ->
-        assert charge_id == params.charge
         assert true == params.reverse_transfer
         assert true == params.refund_application_fee
 
@@ -463,7 +458,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       internal_error = "Something went poorly internally"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn _id, _opts ->
+      |> expect(:create_refund, fn _id, _opts ->
         {:error,
          %Stripe.Error{
            code: :request_failed,
@@ -526,13 +521,14 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
-      commission: commission
+      commission: commission,
+      system: system
     } do
       amount = Money.new(42_000, :USD)
       tip = Money.new(6900, :USD)
       total = Money.add(amount, tip)
 
-      session = payment_fixture(artist, commission, amount, tip)
+      payment_fixture(artist, commission, amount, tip)
 
       client_conn = log_in_user(conn, client)
       artist_conn = log_in_user(conn, artist)
@@ -547,21 +543,10 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .open-refund-modal")
       |> render_click()
 
-      intent_id = "stripe_intent_mock_id#{System.unique_integer()}"
-      charge_id = "stripe_charge_mock_id#{System.unique_integer()}"
       refund_id = "stripe_refund_mock_id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn id, _opts ->
-        assert session.id == id
-        {:ok, %Stripe.Session{id: id, payment_intent: intent_id}}
-      end)
-      |> expect(:retrieve_payment_intent, fn id, _params, _opts ->
-        assert intent_id == id
-        {:ok, %Stripe.PaymentIntent{id: id, charges: %{data: [%{id: charge_id}]}}}
-      end)
       |> expect(:create_refund, fn params, _opts ->
-        assert charge_id == params.charge
         assert true == params.reverse_transfer
         assert true == params.refund_application_fee
         {:ok, %Stripe.Refund{id: refund_id, status: "pending"}}
@@ -592,6 +577,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       assert invoice_box =~ "A refund is pending"
 
       Payments.process_refund_updated(
+        system,
         %Stripe.Refund{
           id: refund_id,
           status: "succeeded",
@@ -626,12 +612,13 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
-      commission: commission
+      commission: commission,
+      system: system
     } do
       amount = Money.new(42_000, :USD)
       tip = Money.new(6900, :USD)
 
-      session = payment_fixture(artist, commission, amount, tip)
+      payment_fixture(artist, commission, amount, tip)
 
       client_conn = log_in_user(conn, client)
       artist_conn = log_in_user(conn, artist)
@@ -646,19 +633,9 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .open-refund-modal")
       |> render_click()
 
-      intent_id = "stripe_intent_mock_id#{System.unique_integer()}"
-      charge_id = "stripe_charge_mock_id#{System.unique_integer()}"
       refund_id = "stripe_refund_mock_id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn id, _opts ->
-        assert session.id == id
-        {:ok, %Stripe.Session{id: id, payment_intent: intent_id}}
-      end)
-      |> expect(:retrieve_payment_intent, fn id, _params, _opts ->
-        assert intent_id == id
-        {:ok, %Stripe.PaymentIntent{id: id, charges: %{data: [%{id: charge_id}]}}}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:ok, %Stripe.Refund{id: refund_id, status: "pending"}}
       end)
@@ -667,7 +644,11 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .modal .refund-btn")
       |> render_click()
 
-      Payments.process_refund_updated(%Stripe.Refund{id: refund_id, status: "canceled"}, nil)
+      Payments.process_refund_updated(
+        system,
+        %Stripe.Refund{id: refund_id, status: "canceled"},
+        nil
+      )
 
       Notifications.wait_for_notifications()
 
@@ -694,12 +675,13 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
-      commission: commission
+      commission: commission,
+      system: system
     } do
       amount = Money.new(42_000, :USD)
       tip = Money.new(6900, :USD)
 
-      session = payment_fixture(artist, commission, amount, tip)
+      payment_fixture(artist, commission, amount, tip)
 
       client_conn = log_in_user(conn, client)
       artist_conn = log_in_user(conn, artist)
@@ -714,19 +696,9 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .open-refund-modal")
       |> render_click()
 
-      intent_id = "stripe_intent_mock_id#{System.unique_integer()}"
-      charge_id = "stripe_charge_mock_id#{System.unique_integer()}"
       refund_id = "stripe_refund_mock_id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn id, _opts ->
-        assert session.id == id
-        {:ok, %Stripe.Session{id: id, payment_intent: intent_id}}
-      end)
-      |> expect(:retrieve_payment_intent, fn id, _params, _opts ->
-        assert intent_id == id
-        {:ok, %Stripe.PaymentIntent{id: id, charges: %{data: [%{id: charge_id}]}}}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:ok, %Stripe.Refund{id: refund_id, status: "pending"}}
       end)
@@ -736,6 +708,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> render_click()
 
       Payments.process_refund_updated(
+        system,
         %Stripe.Refund{id: refund_id, status: "requires_action"},
         nil
       )
@@ -767,12 +740,13 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
-      commission: commission
+      commission: commission,
+      system: system
     } do
       amount = Money.new(42_000, :USD)
       tip = Money.new(6900, :USD)
 
-      session = payment_fixture(artist, commission, amount, tip)
+      payment_fixture(artist, commission, amount, tip)
 
       client_conn = log_in_user(conn, client)
       artist_conn = log_in_user(conn, artist)
@@ -787,19 +761,9 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> element(".invoice-box .open-refund-modal")
       |> render_click()
 
-      intent_id = "stripe_intent_mock_id#{System.unique_integer()}"
-      charge_id = "stripe_charge_mock_id#{System.unique_integer()}"
       refund_id = "stripe_refund_mock_id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_session, fn id, _opts ->
-        assert session.id == id
-        {:ok, %Stripe.Session{id: id, payment_intent: intent_id}}
-      end)
-      |> expect(:retrieve_payment_intent, fn id, _params, _opts ->
-        assert intent_id == id
-        {:ok, %Stripe.PaymentIntent{id: id, charges: %{data: [%{id: charge_id}]}}}
-      end)
       |> expect(:create_refund, fn _params, _opts ->
         {:ok, %Stripe.Refund{id: refund_id, status: "pending"}}
       end)
@@ -809,6 +773,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       |> render_click()
 
       Payments.process_refund_updated(
+        system,
         %Stripe.Refund{
           id: refund_id,
           status: "failed",

@@ -93,4 +93,9 @@ defmodule Banchan.StripeAPI do
   def create_price(params) do
     Stripe.Price.create(params)
   end
+
+  @impl Banchan.StripeAPI.Base
+  def retrieve_charge(id) do
+    Stripe.Charge.retrieve(id, expand: ["balance_transaction"])
+  end
 end

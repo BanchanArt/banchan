@@ -21,6 +21,8 @@ defmodule BanchanWeb.ConnCase do
 
   using do
     quote do
+      use Oban.Testing, repo: Banchan.Repo
+
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest

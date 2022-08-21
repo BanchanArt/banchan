@@ -61,7 +61,7 @@ config :banchan, Oban,
        {"@daily", Banchan.Workers.Pruner}
      ]}
   ],
-  queues: [mailers: 10, media: 1, unban: 10, pruning: 1]
+  queues: [mailers: 10, media: 1, unban: 10, pruning: 1, invoice_purge: 10]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
