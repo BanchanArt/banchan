@@ -991,7 +991,7 @@ defmodule Banchan.Payments do
                 # don't do anything, but we requeue purge_expired_invoice/1
                 # for the day after the arrival_date
                 # 1 day
-                next = arrival_date |> NaiveDateTime.add(60 * 60 * 24)
+                next = arrival_date |> DateTime.from_naive!("Etc/UTC") |> DateTime.add(60 * 60 * 24)
 
                 with {:ok, _job} <- ExpiredInvoicePurger.schedule_purge(invoice, next) do
                   {:ok, invoice}

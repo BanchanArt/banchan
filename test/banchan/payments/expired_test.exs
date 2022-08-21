@@ -303,8 +303,101 @@ defmodule Banchan.PaymentsTest.Expired do
       assert [%Payout{id: ^payout_id, status: :paid, amount: ^total_transferred}] = payouts
     end
 
-    @tag skip: "TODO"
-    test "defers action on :released invoices that are in a pending payout" do
+    test "defers action on :released invoices that are in a pending payout", %{
+      artist: artist,
+      client: client,
+      commission: commission,
+      studio: studio,
+      amount: amount,
+      tip: tip
+    } do
+      %Invoice{id: invoice_id} =
+        invoice =
+        invoice_fixture(artist, commission, %{
+          "amount" => amount,
+          "text" => "Please pay me :x"
+        })
+
+      two_years_ago =
+        DateTime.utc_now()
+        |> DateTime.add(-1 * 60 * 60 * 24 * 365 * 2 - 1)
+
+      Oban.Testing.with_testing_mode(:manual, fn ->
+        invoice
+        |> checkout_session_fixture(tip)
+        |> succeed_mock_payment!(paid_on: two_years_ago)
+
+        # The notificatifier will fail, but that's fine. We just want to clear the queue.
+        assert %{success: 1, failure: 1} =
+                 Oban.drain_queue(
+                   queue: :invoice_purge,
+                   with_scheduled: true
+                 )
+      end)
+
+      {:ok, _} = Payments.release_payment(client, commission, invoice)
+
+      total_transferred = Repo.reload(invoice).total_transferred
+
+      stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
+
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, fn _ ->
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: total_transferred.amount
+             }
+           ],
+           pending: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ]
+         }}
+      end)
+      |> expect(:retrieve_charge, fn _ ->
+        {:ok,
+         %Stripe.Charge{
+           balance_transaction: %Stripe.BalanceTransaction{
+             status: "available"
+           }
+         }}
+      end)
+      |> expect(:create_payout, fn _, _ ->
+        {:ok,
+         %Stripe.Payout{
+           id: stripe_payout_id,
+           status: "pending",
+           arrival_date: DateTime.utc_now() |> DateTime.to_unix(),
+           type: "card",
+           method: "standard"
+         }}
+      end)
+
+      {:ok, _} = Payments.payout_studio(artist, studio)
+
+      Oban.Testing.with_testing_mode(:manual, fn ->
+        refute_enqueued(worker: ExpiredInvoicePurger, args: %{invoice_id: invoice_id})
+
+        assert {:ok,
+                %Invoice{
+                  id: ^invoice_id,
+                  status: :released,
+                  refund_status: nil
+                }} = Payments.purge_expired_invoice(invoice)
+
+        assert %{success: 1, failure: 0} =
+                 Oban.drain_queue(
+                   queue: :invoice_purge,
+                   with_scheduled: true
+                 )
+      end)
+
+
     end
   end
 end
