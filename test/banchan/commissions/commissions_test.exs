@@ -19,6 +19,7 @@ defmodule Banchan.CommissionsTest do
   alias Banchan.Offerings
   alias Banchan.Payments
   alias Banchan.Payments.Invoice
+  alias Banchan.Workers.{ExpiredInvoicePurger, ExpiredInvoiceWarner}
 
   setup :verify_on_exit!
 
@@ -321,11 +322,16 @@ defmodule Banchan.CommissionsTest do
 
       Commissions.subscribe_to_commission_events(commission)
 
-      assert :ok ==
-               Payments.process_payment_succeeded!(%Stripe.Session{
-                 id: sess_id,
-                 payment_intent: payment_intent_id
-               })
+      Oban.Testing.with_testing_mode(:manual, fn ->
+        assert :ok ==
+                 Payments.process_payment_succeeded!(%Stripe.Session{
+                   id: sess_id,
+                   payment_intent: payment_intent_id
+                 })
+
+        assert_enqueued(worker: ExpiredInvoicePurger, args: %{invoice_id: invoice.id})
+        assert_enqueued(worker: ExpiredInvoiceWarner, args: %{invoice_id: invoice.id})
+      end)
 
       invoice = invoice |> Repo.reload() |> Repo.preload(:event)
 

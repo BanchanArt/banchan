@@ -973,9 +973,10 @@ defmodule Banchan.Payments do
           {true, :released} ->
             # If they _have_ been released, pay out the studio if appropriate.
             payout =
-              from(i in Invoice,
+              from(p in Payout,
+                join: i in assoc(p, :invoices),
                 where: i.id == ^invoice.id,
-                join: p in assoc(i, :payouts)
+                order_by: [desc: p.updated_at]
               )
               |> Repo.one()
 
