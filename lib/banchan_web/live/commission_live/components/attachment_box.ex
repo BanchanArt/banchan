@@ -69,14 +69,14 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                 )}
               >
                 {#if @editing}
-                  <a
-                    href="#"
+                  <button
+                    type="button"
                     :on-click={@remove_attachment}
                     phx-value-attachment-idx={get_attachment_index(@attachments, attachment)}
                     class="-top-2 -right-2 absolute"
                   >
                     <i class="fas fa-times-circle text-2xl" />
-                  </a>
+                  </button>
                 {/if}
                 <img
                   alt={attachment.upload.name}
@@ -138,14 +138,14 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                 {/if}
               </a>
               {#if @editing}
-                <a
-                  href="#"
+                <button
+                  type="button"
                   :on-click={@remove_attachment}
                   phx-value-attachment-idx={get_attachment_index(@attachments, attachment)}
                   class="-top-2 -right-2 absolute"
                 >
                   <i class="fas fa-times-circle text-2xl" />
-                </a>
+                </button>
               {/if}
             </div>
           {/if}
