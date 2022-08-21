@@ -396,8 +396,6 @@ defmodule Banchan.PaymentsTest.Expired do
                    with_scheduled: true
                  )
       end)
-
-
     end
   end
 end
