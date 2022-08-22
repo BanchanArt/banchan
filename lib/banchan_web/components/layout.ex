@@ -149,7 +149,7 @@ defmodule BanchanWeb.Components.Layout do
                 <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
                   <span>
                     <i class="fas fa-user-circle" />
-                    Your Profile
+                    My Profile
                   </span>
                 </LiveRedirect>
               </li>
@@ -157,7 +157,7 @@ defmodule BanchanWeb.Components.Layout do
                 <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
                   <span>
                     <i class="fas fa-palette" />
-                    Your Studios
+                    My Studios
                   </span>
                 </LiveRedirect>
               </li>

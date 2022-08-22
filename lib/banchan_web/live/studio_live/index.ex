@@ -43,7 +43,7 @@ defmodule BanchanWeb.StudioLive.Index do
   def render(assigns) do
     ~F"""
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
-      <h1 class="text-3xl">Your Studios</h1>
+      <h1 class="text-3xl">My Studios</h1>
       <div class="divider" />
       <div class="studio-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
         {#for studio <- @studios}
