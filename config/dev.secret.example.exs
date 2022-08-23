@@ -11,6 +11,12 @@ config :banchan, Banchan.Repo,
   hostname: "localhost",
   pool_size: 10
 
+# Sentry configuration
+config :sentry,
+  # Find the Sentry DSN at https://sentry.io/settings/{orginization}/projects/elixir/keys/
+  # https://<big hex number>@o<number>.ingest.sentry.io/<account number>
+  dsn: ""
+
 # Stripe configuration
 config :stripity_stripe,
   # You can find your Stripe Secret Key at https://dashboard.stripe.com/test/apikeys

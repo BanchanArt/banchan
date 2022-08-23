@@ -58,6 +58,23 @@ if config_env() == :prod do
     api_key: stripe_secret,
     endpoint_secret: endpoint_secret
 
+  dsn =
+    System.get_env("SENTRY_DSN") ||
+      raise """
+      environment variable SENTRY_DSN is missing.
+      Find the Sentry DSN at https://sentry.io/settings/{organization}/projects/elixir/keys/
+      """
+
+  config :sentry,
+    dsn: dsn,
+    included_environments: [:prod],
+    enable_source_code_context: true,
+    root_source_code_path: File.cwd!(),
+    tags: %{
+      env: config_env()
+    },
+    environment_name: config_env()
+
   aws_region =
     System.get_env("AWS_REGION") ||
       raise """
