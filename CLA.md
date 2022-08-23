@@ -89,3 +89,4 @@ The undersigned have all agreed to this CLA:
 * Ava Collins (@simplesthing)
 * Emil Socks (@EmiSocks)
 * Monique Murphy (@moniquemurphy)
+* Bryan Ginger (@bcgoss)
