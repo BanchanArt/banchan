@@ -2,7 +2,6 @@ defmodule Banchan.Accounts do
   @moduledoc """
   The Accounts context.
   """
-
   import Ecto.Query, warn: false
 
   alias Ueberauth.Auth
@@ -1271,6 +1270,20 @@ defmodule Banchan.Accounts do
     )
   end
 
+  def add_artist_invites(%User{} = user, n) when is_integer(n) do
+    {1, [%User{} = user]} =
+      from(u in User,
+        where: u.id == ^user.id,
+        select: u,
+        update: [
+          set: [available_invites: fragment("COALESCE(?, 1) + ?", u.available_invites, ^n)]
+        ]
+      )
+      |> Repo.update_all([])
+
+    {:ok, user}
+  end
+
   @doc """
   Generates a token and sends an invite email for a given `InviteRequest`.
   """
@@ -1362,6 +1375,14 @@ defmodule Banchan.Accounts do
       {:error, _, err, _} ->
         {:error, err}
     end
+  end
+
+  @doc """
+  Fetches an ArtistToken by its base64 token string.
+  """
+  def get_artist_token(token) do
+    from(t in ArtistToken, where: t.token == ^token)
+    |> Repo.one()
   end
 
   @doc """

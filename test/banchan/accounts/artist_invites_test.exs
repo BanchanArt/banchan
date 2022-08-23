@@ -3,11 +3,12 @@ defmodule Banchan.AccountsTest.ArtistInvites do
   Test for functionality related to artist invite tokens.
   """
   use Banchan.DataCase, async: true
+  use Bamboo.Test
 
   import Banchan.AccountsFixtures
 
   alias Banchan.Accounts
-  alias Banchan.Accounts.InviteRequest
+  alias Banchan.Accounts.{ArtistToken, InviteRequest}
 
   describe "list_invite_requests/1" do
   end
@@ -57,6 +58,65 @@ defmodule Banchan.AccountsTest.ArtistInvites do
   end
 
   describe "send_invite/3" do
+    test "System user can send an invite email" do
+      email = "foo@example.com"
+      system = Accounts.system_user()
+
+      {:ok, %InviteRequest{id: request_id} = request} = Accounts.add_invite_request(email)
+
+      assert {:ok, %InviteRequest{id: ^request_id, token_id: token_id}} =
+               Accounts.send_invite(system, request, &extractable_user_token/1)
+
+      assert_delivered_email_matches(%{
+        to: [{_, ^email}],
+        subject: "You're invited to be an artist on Banchan Art!",
+        text_body: text_body,
+        html_body: html_body
+      })
+
+      assert %ArtistToken{id: ^token_id} =
+               Accounts.get_artist_token(extract_user_token(text_body))
+
+      assert %ArtistToken{id: ^token_id} =
+               Accounts.get_artist_token(extract_user_token(html_body))
+    end
+
+    test "regular users with enough invites can send an invite email" do
+      email = "foo@example.com"
+      user = user_fixture()
+
+      {:ok, %InviteRequest{id: request_id} = request} = Accounts.add_invite_request(email)
+
+      assert {:error, :no_invites} =
+               Accounts.send_invite(user, request, &extractable_user_token/1)
+
+      {:ok, user} = Accounts.add_artist_invites(user, 1)
+
+      assert {:ok, %InviteRequest{id: ^request_id, token_id: token_id}} =
+               Accounts.send_invite(user, request, &extractable_user_token/1)
+
+      assert_delivered_email_matches(%{
+        to: [{_, ^email}],
+        subject: "You're invited to be an artist on Banchan Art!",
+        text_body: text_body,
+        html_body: html_body
+      })
+
+      assert %ArtistToken{id: ^token_id} =
+               Accounts.get_artist_token(extract_user_token(text_body))
+
+      assert %ArtistToken{id: ^token_id} =
+               Accounts.get_artist_token(extract_user_token(html_body))
+
+      # We're out of invites now
+      {:ok, %InviteRequest{} = request} = Accounts.add_invite_request(email)
+
+      assert {:error, :no_invites} =
+               Accounts.send_invite(user, request, &extractable_user_token/1)
+    end
+  end
+
+  describe "get_artist_token/1" do
   end
 
   describe "generate_artist_token/1" do
