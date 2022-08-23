@@ -8,9 +8,39 @@ defmodule Banchan.AccountsTest.ArtistInvites do
   import Banchan.AccountsFixtures
 
   alias Banchan.Accounts
-  alias Banchan.Accounts.{ArtistToken, InviteRequest}
+  alias Banchan.Accounts.{ArtistToken, InviteRequest, User}
 
   describe "list_invite_requests/1" do
+    test "lists all invite requests, in creation order" do
+      {:ok, %InviteRequest{id: req1_id}} =
+        Accounts.add_invite_request(
+          "foo@example.com",
+          NaiveDateTime.utc_now() |> NaiveDateTime.add(-1000) |> NaiveDateTime.truncate(:second)
+        )
+
+      {:ok, %InviteRequest{id: req2_id}} =
+        {:ok, req2} = Accounts.add_invite_request("foo2@example.com")
+
+      {:ok, _} = Accounts.send_invite(Accounts.system_user(), req2, &extractable_user_token/1)
+
+      assert [%InviteRequest{id: ^req1_id}, %InviteRequest{id: ^req2_id}] =
+               Accounts.list_invite_requests().entries
+    end
+
+    test "supports an :unsent_only option to filter down to only requests that haven't been processed." do
+      {:ok, %InviteRequest{id: req1_id}} =
+        Accounts.add_invite_request(
+          "foo@example.com",
+          NaiveDateTime.utc_now() |> NaiveDateTime.add(-1000) |> NaiveDateTime.truncate(:second)
+        )
+
+      {:ok, req2} = Accounts.add_invite_request("foo2@example.com")
+
+      {:ok, _} = Accounts.send_invite(Accounts.system_user(), req2, &extractable_user_token/1)
+
+      assert [%InviteRequest{id: ^req1_id}] =
+               Accounts.list_invite_requests(unsent_only: true).entries
+    end
   end
 
   describe "add_invite_request" do
@@ -113,6 +143,8 @@ defmodule Banchan.AccountsTest.ArtistInvites do
 
       assert {:error, :no_invites} =
                Accounts.send_invite(user, request, &extractable_user_token/1)
+
+      assert %User{available_invites: 0} = Accounts.get_user(user.id)
     end
   end
 
