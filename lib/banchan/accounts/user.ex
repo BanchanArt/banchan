@@ -29,6 +29,7 @@ defmodule Banchan.Accounts.User do
     field :mature_ok, :boolean, default: false
     field :uncensored_mature, :boolean, default: false
     field :muted, :string
+    field :available_invites, :integer, default: 0
 
     # Roles and moderation
     field :roles, {:array, Ecto.Enum}, values: [:system, :admin, :mod, :artist], default: []
@@ -98,7 +99,7 @@ defmodule Banchan.Accounts.User do
     |> cast(attrs, [:handle, :email, :password])
     |> validate_required([:email])
     |> validate_handle()
-    |> validate_email()
+    |> validate_unique_email(:email)
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
   end
@@ -122,7 +123,7 @@ defmodule Banchan.Accounts.User do
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
     |> validate_required([:email])
-    |> validate_email()
+    |> validate_unique_email(:email)
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
   end
@@ -145,7 +146,7 @@ defmodule Banchan.Accounts.User do
     |> validate_handle_unique(:handle)
     |> unique_constraint(:handle)
     |> validate_handle()
-    |> validate_email()
+    |> validate_unique_email(:email)
     |> validate_bio()
     |> validate_name()
     |> validate_confirmation(:password, message: "does not match password")
@@ -190,14 +191,6 @@ defmodule Banchan.Accounts.User do
     |> validate_length(:bio, max: 160)
   end
 
-  defp validate_email(changeset) do
-    changeset
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
-    |> validate_length(:email, max: 160)
-    |> unsafe_validate_unique(:email, Banchan.Repo)
-    |> unique_constraint(:email)
-  end
-
   defp validate_password(changeset, opts) do
     changeset
     |> validate_required([:password])
@@ -219,6 +212,12 @@ defmodule Banchan.Accounts.User do
     else
       changeset
     end
+  end
+
+  def roles_changeset(%__MODULE__{} = actor, %__MODULE__{} = user, attrs) do
+    user
+    |> cast(attrs, [:roles])
+    |> validate_roles(actor, user)
   end
 
   @doc """
@@ -272,7 +271,7 @@ defmodule Banchan.Accounts.User do
     user
     |> cast(attrs, [:email])
     |> validate_required([:email])
-    |> validate_email()
+    |> validate_unique_email(:email)
   end
 
   @doc """
@@ -352,6 +351,15 @@ defmodule Banchan.Accounts.User do
   end
 
   @doc """
+  Updates a user's artist invite count.
+  """
+  def update_invite_count_changeset(user, count) do
+    user
+    |> cast(%{available_invites: count}, [:available_invites])
+    |> validate_number(:available_invites, greater_than_or_equal_to: 0)
+  end
+
+  @doc """
   Verifies the password.
 
   If there is no user or the user doesn't have a password, we call
@@ -418,6 +426,9 @@ defmodule Banchan.Accounts.User do
     changeset
     |> validate_change(:roles, fn field, roles ->
       cond do
+        :system in actor.roles ->
+          []
+
         :admin in actor.roles ->
           []
 

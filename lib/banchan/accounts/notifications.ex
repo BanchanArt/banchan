@@ -50,4 +50,18 @@ defmodule Banchan.Accounts.Notifications do
     )
     |> Mailer.deliver()
   end
+
+  @doc """
+  Deliver an artist invite email.
+  """
+  def artist_invite(email, url) do
+    Mailer.new_email(
+      email,
+      "You're invited to be an artist on Banchan Art!",
+      BanchanWeb.Email.AccountsView,
+      :artist_invite,
+      url: url
+    )
+    |> Mailer.deliver()
+  end
 end

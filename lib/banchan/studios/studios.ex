@@ -293,6 +293,8 @@ defmodule Banchan.Studios do
       * `:homepage` - Filter/order by homepage relevance.
       * `:featured` - Filter/order by whether a studio is marked as featured.
     * `:with_follower` - Filter studios to ones with this user as a follower.
+    * `:page` - The page of results to return.
+    * `:page_size` - How many results to return per page.
   """
   def list_studios(opts \\ []) do
     from(

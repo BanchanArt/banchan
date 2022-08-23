@@ -90,4 +90,35 @@ defmodule BanchanWeb.Email.AccountsView do
     ==============================
     """
   end
+
+  def render("artist_invite.html", assigns) do
+    ~F"""
+    <p>Congratulations! You've been invited to become an artist on <a href="https://banchan.art">Banchan Art</a>!</p>
+    <p>Accepting this invite will allow you to create studios and start accepting commissions right away, as well as getting your studios and offerings listed across the site.</p>
+    <p>To accept the invite, <a href={@url}>click here</a> or visit the following URL:</p>
+    <p>{@url}</p>
+    <p>If you didn't sign up for this, or aren't expecting someone else to invite you, please ignore this.</p>
+    <p>- The Banchan Art Team</p>
+    """
+  end
+
+  def render("artist_invite.text", assigns) do
+    """
+    ==============================
+
+    Congratulations! You've been invited to become an artist on Banchan Art!
+
+    Accepting this invite will allow you to create studios and start accepting commissions right away, as well as getting your studios and offerings listed across the site.
+
+    To accept the invite, visit the following URL:
+
+    #{assigns.url}
+
+    If you didn't sign up for this, or aren't expecting someone else to invite you, please ignore this.
+
+    - The Banchan Art Team
+
+    ==============================
+    """
+  end
 end
