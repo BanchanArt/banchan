@@ -149,11 +149,81 @@ defmodule Banchan.AccountsTest.ArtistInvites do
   end
 
   describe "get_artist_token/1" do
+    test "fetches an existing artist token based on its token string" do
+      {:ok, %ArtistToken{id: token_id, token: token_string}} =
+        Accounts.generate_artist_token(Accounts.system_user())
+
+      assert %ArtistToken{id: ^token_id} = Accounts.get_artist_token(token_string)
+    end
+
+    test "returns nil if the token doesn't exist" do
+      refute Accounts.get_artist_token("not-a-token")
+    end
   end
 
   describe "generate_artist_token/1" do
+    test "system user can generate a new artist token regardless of invites" do
+      system = Accounts.system_user()
+
+      assert {:ok, %ArtistToken{id: token_id, token: token_string}} =
+               Accounts.generate_artist_token(system)
+
+      assert is_binary(token_string)
+
+      assert %ArtistToken{id: ^token_id, token: ^token_string} =
+               Accounts.get_artist_token(token_string)
+    end
+
+    test "regular users can generate tokens if they have enough invite slots" do
+      user = user_fixture()
+
+      assert {:error, :no_invites} = Accounts.generate_artist_token(user)
+
+      {:ok, user} = Accounts.add_artist_invites(user, 1)
+
+      assert {:ok, %ArtistToken{id: token_id, token: token_string}} =
+               Accounts.generate_artist_token(user)
+
+      assert %ArtistToken{id: ^token_id, token: ^token_string} =
+               Accounts.get_artist_token(token_string)
+    end
   end
 
   describe "apply_artist_token/2" do
+    test "adds the :artist role to a user" do
+      %User{id: user_id} = user = user_fixture(%{roles: [:mod]})
+
+      {:ok, %ArtistToken{id: token_id, token: token_string}} =
+        Accounts.generate_artist_token(Accounts.system_user())
+
+      assert {:ok, %ArtistToken{id: ^token_id, used_by_id: ^user_id}} =
+               Accounts.apply_artist_token(user, token_string)
+
+      assert %User{roles: [:artist, :mod]} = Accounts.get_user(user.id)
+    end
+
+    test "fails if the user is already an artist" do
+      user = user_fixture(%{roles: [:artist]})
+
+      assert {:error, :already_artist} = Accounts.apply_artist_token(user, "whatever")
+    end
+
+    test "fails if the the token does not exist" do
+      user = user_fixture()
+
+      assert {:error, :invalid_token} = Accounts.apply_artist_token(user, "whatever")
+    end
+
+    test "fails if the the token has already been used" do
+      user1 = user_fixture()
+      user2 = user_fixture()
+
+      {:ok, %ArtistToken{token: token_string}} =
+        Accounts.generate_artist_token(Accounts.system_user())
+
+      {:ok, %ArtistToken{}} = Accounts.apply_artist_token(user1, token_string)
+
+      assert {:error, :token_used} = Accounts.apply_artist_token(user2, token_string)
+    end
   end
 end
