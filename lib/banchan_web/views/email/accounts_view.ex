@@ -90,4 +90,63 @@ defmodule BanchanWeb.Email.AccountsView do
     ==============================
     """
   end
+
+  def render("artist_invite.html", assigns) do
+    ~F"""
+    <p>Congratulations! You've been invited to become an artist on <a href="https://banchan.art">Banchan Art</a>!</p>
+    <p>Accepting this invite will allow you to create studios and start accepting commissions right away, as well as getting your studios and offerings listed across the site.</p>
+    <p>To accept the invite, <a href={@url}>click here</a> or visit the following URL:</p>
+    <p>{@url}</p>
+    <p>If you didn't sign up for this, or aren't expecting someone else to invite you, please ignore this.</p>
+    <p>- The Banchan Art Team</p>
+    """
+  end
+
+  def render("artist_invite.text", assigns) do
+    """
+    ==============================
+
+    Congratulations! You've been invited to become an artist on Banchan Art!
+
+    Accepting this invite will allow you to create studios and start accepting commissions right away, as well as getting your studios and offerings listed across the site.
+
+    To accept the invite, visit the following URL:
+
+    #{assigns.url}
+
+    If you didn't sign up for this, or aren't expecting someone else to invite you, please ignore this.
+
+    - The Banchan Art Team
+
+    ==============================
+    """
+  end
+
+  def render("invite_request_confirmation.html", assigns) do
+    ~F"""
+    <p>You've successfully signed up for the Banchan Art beta waiting list.</p>
+    <p>When it's your turn, we'll send you an email with a link you can use to flag your Banchan account as an artist, which will let you make your own studios and start accepting commissions.</p>
+    <p>In the meantime, you can <a href="https://discord.gg/FUkTHjGKJF">Join us on Discord</a> or <a href="https://twitter.com/BanchanArt">Follow us on Twitter</a> to stay up to date on the latest news.</p>
+    <p>If you didn't sign up for this, or aren't expecting someone else to invite you, please ignore this.</p>
+    <p>- The Banchan Art Team</p>
+    """
+  end
+
+  def render("invite_request_confirmation.text", _assigns) do
+    """
+    ==============================
+
+    You've successfully signed up for the Banchan Art beta waiting list.
+
+    When it's your turn, we'll send you an email with a link you can use to flag your Banchan account as an artist, which will let you make your own studios and start accepting commissions.
+
+    In the meantime, you can Join us on Discord (https://discord.gg/FUkTHjGKJF) or Follow us on Twitter (https://twitter.com/BanchanArt) to stay up to date on the latest news.
+
+    If you didn't sign up for this, or aren't expecting someone else to invite you, please ignore this.
+
+    - The Banchan Art Team
+
+    ==============================
+    """
+  end
 end

@@ -94,6 +94,8 @@ defmodule BanchanWeb.Router do
 
       get("/settings/confirm_email/:token", UserSettingsController, :confirm_email)
       get("/settings/refresh_session/:return_to", UserSessionController, :refresh_session)
+
+      get("/apply_artist_token/:token", ArtistTokenController, :confirm_artist)
     end
   end
 
@@ -176,6 +178,9 @@ defmodule BanchanWeb.Router do
 
       live("/reset_password", ForgotPasswordLive, :edit)
       live("/reset_password/:token", ResetPasswordLive, :edit)
+
+      live("/beta", BetaLive.Signup, :new)
+      live("/beta/confirmation", BetaLive.Confirmation, :show)
 
       live("/about-us", StaticLive.AboutUs, :show)
       live("/contact", StaticLive.Contact, :show)

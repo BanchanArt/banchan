@@ -2,12 +2,20 @@ defmodule Banchan.Accounts do
   @moduledoc """
   The Accounts context.
   """
-
   import Ecto.Query, warn: false
 
   alias Ueberauth.Auth
 
-  alias Banchan.Accounts.{DisableHistory, Notifications, User, UserFilter, UserToken}
+  alias Banchan.Accounts.{
+    ArtistToken,
+    DisableHistory,
+    InviteRequest,
+    Notifications,
+    User,
+    UserFilter,
+    UserToken
+  }
+
   alias Banchan.Repo
   alias Banchan.Uploads
   alias Banchan.Workers.{EnableUser, Thumbnailer}
@@ -231,32 +239,36 @@ defmodule Banchan.Accounts do
   @doc """
   Returns true if user has mod or admin privs.
   """
-  def mod?(%User{roles: user_roles}) do
-    has_roles?(user_roles, [:mod, :admin])
+  def mod?(%User{} = user) do
+    has_roles?(user, [:mod, :admin])
   end
 
   @doc """
   Returns true if user is an admin.
   """
-  def admin?(%User{roles: user_roles}) do
-    has_roles?(user_roles, [:admin])
+  def admin?(%User{} = user) do
+    has_roles?(user, [:admin])
   end
 
   @doc """
   Returns true if user is a system user.
   """
-  def system?(%User{roles: user_roles}) do
-    has_roles?(user_roles, [:system])
+  def system?(%User{} = user) do
+    has_roles?(user, [:system])
   end
 
   @doc """
   Fetches the system user.
   """
   def system_user do
+    system_user_query()
+    |> Repo.one!()
+  end
+
+  defp system_user_query do
     from(u in User,
       where: u.handle == "tteokbokki" and :system in u.roles
     )
-    |> Repo.one!()
   end
 
   ## User registration
@@ -1220,6 +1232,235 @@ defmodule Banchan.Accounts do
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  ## Artist Invites
+
+  @doc """
+  Lists invite requests.
+
+  ## Options
+
+    * `:unsent_only` - Only list invites that havent' had tokens generated for them.
+    * `:page` - The page of results to return.
+    * `:page_size` - How many results to return per page.
+  """
+  def list_invite_requests(opts \\ []) do
+    q =
+      from(
+        r in InviteRequest,
+        as: :request,
+        order_by: [asc: r.inserted_at]
+      )
+
+    q =
+      case Keyword.fetch(opts, :unsent_only) do
+        {:ok, true} ->
+          q |> where([request: r], is_nil(r.token_id))
+
+        _ ->
+          q
+      end
+
+    q
+    |> Repo.paginate(
+      page_size: Keyword.get(opts, :page_size, 24),
+      page: Keyword.get(opts, :page, 1)
+    )
+  end
+
+  def add_artist_invites(%User{} = user, n) when is_integer(n) do
+    {1, [%User{} = user]} =
+      from(u in User,
+        where: u.id == ^user.id,
+        select: u,
+        update: [
+          set: [available_invites: fragment("COALESCE(?, 1) + ?", u.available_invites, ^n)]
+        ]
+      )
+      |> Repo.update_all([])
+
+    {:ok, user}
+  end
+
+  @doc """
+  Generates a token and sends an invite email for a given `InviteRequest`.
+  """
+  def send_invite(%User{} = actor, email, invite_url_fun) when is_binary(email) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:request, fn _repo, _changes ->
+      add_invite_request(email)
+    end)
+    |> Ecto.Multi.run(:updated_request, fn _repo, %{request: request} ->
+      send_invite(actor, request, invite_url_fun)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_request: request}} -> {:ok, request}
+      {:error, _, error, _} -> {:error, error}
+    end
+  end
+
+  def send_invite(%User{} = actor, %InviteRequest{} = request, invite_url_fun) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.one(:actor, from(u in User, where: u.id == ^actor.id))
+    |> Ecto.Multi.one(
+      :request,
+      from(r in InviteRequest, where: r.id == ^request.id, lock: "FOR UPDATE")
+    )
+    |> Ecto.Multi.run(:check_args, fn _repo, %{actor: actor, request: request} ->
+      cond do
+        is_nil(request) ->
+          {:error, :request_not_found}
+
+        is_nil(actor) ->
+          {:error, :actor_not_found}
+
+        true ->
+          {:ok, true}
+      end
+    end)
+    |> Ecto.Multi.run(:token, fn _repo, %{actor: actor} ->
+      generate_artist_token(actor)
+    end)
+    |> Ecto.Multi.update(:updated_request, fn %{request: request, token: token} ->
+      request |> InviteRequest.update_token_changeset(token)
+    end)
+    |> Ecto.Multi.run(:email_job, fn _repo, %{updated_request: request, token: token} ->
+      Notifications.artist_invite(request.email, invite_url_fun.(token.token))
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_request: request}} ->
+        {:ok, request}
+
+      {:error, _, err, _} ->
+        {:error, err}
+    end
+  end
+
+  @doc """
+  Adds an email to the artist signup queue.
+  """
+  def add_invite_request(email, requested_at \\ nil) do
+    %InviteRequest{
+      inserted_at: requested_at
+    }
+    |> InviteRequest.changeset(%{
+      email: email
+    })
+    |> Repo.insert()
+  end
+
+  @doc """
+  Delivers a confirmation email letting someone know that they've been signed up for the beta.
+  """
+  def deliver_artist_invite_confirmation(%InviteRequest{} = request) do
+    Notifications.invite_request_confirmation(request.email)
+  end
+
+  @doc """
+  Generates an artist invite token.
+  """
+  def generate_artist_token(%User{} = actor) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.one(:user, from(u in User, where: u.id == ^actor.id, lock: "FOR UPDATE"))
+    |> Ecto.Multi.run(:new_invite_count, fn _repo, %{user: %User{} = user} ->
+      case user.available_invites do
+        n when n > 0 ->
+          {:ok, n - 1}
+
+        _ ->
+          if admin?(user) || system?(user) do
+            {:ok, 0}
+          else
+            {:error, :no_invites}
+          end
+      end
+    end)
+    |> Ecto.Multi.update(:updated_user, fn %{user: %User{} = user, new_invite_count: n} ->
+      user
+      |> User.update_invite_count_changeset(n)
+    end)
+    |> Ecto.Multi.insert(:artist_token, fn %{user: %User{} = user} ->
+      %ArtistToken{
+        generated_by_id: user.id,
+        token: ArtistToken.build_token()
+      }
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{artist_token: artist_token}} ->
+        {:ok, artist_token}
+
+      {:error, _, err, _} ->
+        {:error, err}
+    end
+  end
+
+  @doc """
+  Fetches an ArtistToken by its base64 token string.
+  """
+  def get_artist_token(token) do
+    from(t in ArtistToken, where: t.token == ^token)
+    |> Repo.one()
+  end
+
+  @doc """
+  Applies an invite token to a user, adding the :artist role.
+  """
+  def apply_artist_token(%User{} = user, token) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.one(:user, from(u in User, where: u.id == ^user.id, lock: "FOR UPDATE"))
+    |> Ecto.Multi.run(:new_roles, fn _repo, %{user: %User{} = user} ->
+      if :artist in user.roles do
+        {:error, :already_artist}
+      else
+        new_roles =
+          if is_nil(user.roles) do
+            []
+          else
+            [:artist | user.roles]
+          end
+
+        {:ok, new_roles}
+      end
+    end)
+    |> Ecto.Multi.one(:system, system_user_query())
+    |> Ecto.Multi.one(
+      :token,
+      from(t in ArtistToken, where: t.token == ^token, lock: "FOR UPDATE")
+    )
+    |> Ecto.Multi.run(:check_token_unused, fn _repo, %{token: token} ->
+      cond do
+        is_nil(token) ->
+          {:error, :invalid_token}
+
+        !is_nil(token.used_by_id) ->
+          {:error, :token_used}
+
+        true ->
+          {:ok, token}
+      end
+    end)
+    |> Ecto.Multi.update(:update_roles, fn %{
+                                             new_roles: new_roles,
+                                             user: %User{} = user,
+                                             system: %User{} = system
+                                           } ->
+      User.roles_changeset(system, user, %{roles: new_roles})
+    end)
+    |> Ecto.Multi.update(:updated_token, fn %{token: token, user: %User{} = user} ->
+      token |> ArtistToken.used_by_changeset(%{used_by_id: user.id})
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_token: %ArtistToken{} = token}} ->
+        {:ok, token}
+
+      {:error, _, value, _} ->
+        {:error, value}
     end
   end
 
