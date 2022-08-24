@@ -153,6 +153,14 @@ defmodule BanchanWeb.Components.Layout do
                   </span>
                 </LiveRedirect>
               </li>
+              <li :if={:artist not in @current_user.roles}>
+                <LiveRedirect to={Routes.beta_signup_path(Endpoint, :new)}>
+                  <span>
+                    <i class="fas fa-flask-vial" />
+                    Artist Signup
+                  </span>
+                </LiveRedirect>
+              </li>
               <li :if={:artist in @current_user.roles}>
                 <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
                   <span>

@@ -6,10 +6,10 @@ import { LiveSocket } from "phoenix_live_view"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket('/live', Socket, {
-    params: {
-        _csrf_token: csrfToken
-    },
-    hooks: Hooks
+  params: {
+    _csrf_token: csrfToken
+  },
+  hooks: Hooks
 })
 
 // liveSocket.socket.onError((_error, transport, establishedConnections) => {
@@ -23,11 +23,11 @@ const liveSocket = new LiveSocket('/live', Socket, {
 // things feel faster.
 //
 // See: https://fly.io/phoenix-files/make-your-liveview-feel-faster/#solution
-topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
+topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
 
 let topBarScheduled = undefined;
 window.addEventListener("phx:page-loading-start", () => {
-  if(!topBarScheduled) {
+  if (!topBarScheduled) {
     topBarScheduled = setTimeout(() => topbar.show(), 120);
   };
 });

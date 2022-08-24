@@ -1354,6 +1354,13 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  Delivers a confirmation email letting someone know that they've been signed up for the beta.
+  """
+  def deliver_artist_invite_confirmation(%InviteRequest{} = request) do
+    Notifications.invite_request_confirmation(request.email)
+  end
+
+  @doc """
   Generates an artist invite token.
   """
   def generate_artist_token(%User{} = actor) do

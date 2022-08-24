@@ -53,11 +53,12 @@ defmodule BanchanWeb.LayoutView do
         {!-- Styles and themes --}
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}>
-
-        <script type="text/javascript">
-          let theme = localStorage.getItem("theme")
+        <script>
+          let theme = localStorage.getItem("theme");
           if (!theme) {
-            theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+            theme = window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
           }
           document.documentElement.setAttribute("data-theme", theme);
         </script>
@@ -67,6 +68,20 @@ defmodule BanchanWeb.LayoutView do
           type="text/javascript"
           src={Routes.static_path(@conn, "/assets/app.js")}
         />
+        {#if Application.fetch_env!(:banchan, :env) == :prod}
+          <script
+            defer
+            data-domain="banchan.art"
+            src="https://plausible.io/js/plausible.outbound-links.js"
+          />
+          <script>
+            window.plausible =
+              window.plausible ||
+              function () {
+                (window.plausible.q = window.plausible.q || []).push(arguments);
+              };
+          </script>
+        {/if}
       </head>
       <body class="h-full bg-base-100">
         {@inner_content}
