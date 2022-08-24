@@ -4,9 +4,12 @@ defmodule BanchanWeb.SettingsLive do
   """
   use BanchanWeb, :surface_view
 
+  require Logger
+
   alias Surface.Components.{Form, LiveRedirect}
 
   alias Banchan.Accounts
+  alias Banchan.Accounts.InviteRequest
   alias Banchan.Notifications
   alias Banchan.Notifications.UserNotificationSettings
 
@@ -31,7 +34,8 @@ defmodule BanchanWeb.SettingsLive do
            notification_settings: settings,
            notification_settings_changeset: UserNotificationSettings.changeset(settings, %{}),
            maturity_changeset: User.maturity_changeset(socket.assigns.current_user, %{}),
-           muted_changeset: User.muted_changeset(socket.assigns.current_user, %{})
+           muted_changeset: User.muted_changeset(socket.assigns.current_user, %{}),
+           invite_request_changeset: InviteRequest.changeset(%InviteRequest{}, %{})
          )}
       else
         {:ok,
@@ -43,7 +47,8 @@ defmodule BanchanWeb.SettingsLive do
            notification_settings: settings,
            notification_settings_changeset: UserNotificationSettings.changeset(settings, %{}),
            maturity_changeset: User.maturity_changeset(socket.assigns.current_user, %{}),
-           muted_changeset: User.muted_changeset(socket.assigns.current_user, %{})
+           muted_changeset: User.muted_changeset(socket.assigns.current_user, %{}),
+           invite_request_changeset: InviteRequest.changeset(%InviteRequest{}, %{})
          )}
       end
     else
@@ -338,6 +343,58 @@ defmodule BanchanWeb.SettingsLive do
     end
   end
 
+  def handle_event("change_invite_request", val, socket) do
+    changeset =
+      %InviteRequest{}
+      |> InviteRequest.changeset(val["change_invite_request"])
+      |> Map.put(:action, :update)
+
+    socket = assign(socket, invite_request_changeset: changeset)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "submit_invite_request",
+        %{"change_invite_request" => %{"email" => email}},
+        socket
+      ) do
+    case Accounts.send_invite(
+           socket.assigns.current_user,
+           email,
+           &Routes.artist_token_url(Endpoint, :confirm_artist, &1)
+         ) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :info,
+           "An invite has been sent to #{email}."
+         )
+         |> redirect(to: Routes.settings_path(Endpoint, :edit))}
+
+      {:error, :no_invites} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "You have no invites left."
+         )
+         |> redirect(to: Routes.settings_path(Endpoint, :edit))}
+
+      {:error, err} ->
+        Logger.error("Unexpected error sending artist invite", %{error: err})
+
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "An internal error occurred while trying to send your invite. Please try again later."
+         )
+         |> redirect(to: Routes.settings_path(Endpoint, :edit))}
+    end
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -472,6 +529,21 @@ defmodule BanchanWeb.SettingsLive do
             Forgot your password?
           </LiveRedirect>
           <Submit class="w-full" changeset={@password_changeset} label="Save" />
+        </Form>
+      {/if}
+      {#if Accounts.admin?(@current_user) || @current_user.available_invites > 0}
+        <div class="divider" />
+        <Form
+          class="flex flex-col gap-4"
+          for={@invite_request_changeset}
+          as={:change_invite_request}
+          change="change_invite_request"
+          submit="submit_invite_request"
+        >
+          <h3 class="text-lg">Send an Artist Invite</h3>
+          <p :if={!Accounts.admin?(@current_user)}>You have {@current_user.available_invites} invite(s) available.</p>
+          <EmailInput name={:email} icon="envelope" opts={required: true} />
+          <Submit class="w-full" changeset={@invite_request_changeset} label="Send" />
         </Form>
       {/if}
       <div class="divider" />

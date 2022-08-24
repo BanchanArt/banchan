@@ -1287,6 +1287,21 @@ defmodule Banchan.Accounts do
   @doc """
   Generates a token and sends an invite email for a given `InviteRequest`.
   """
+  def send_invite(%User{} = actor, email, invite_url_fun) when is_binary(email) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:request, fn _repo, _changes ->
+      add_invite_request(email)
+    end)
+    |> Ecto.Multi.run(:updated_request, fn _repo, %{request: request} ->
+      send_invite(actor, request, invite_url_fun)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_request: request}} -> {:ok, request}
+      {:error, _, error, _} -> {:error, error}
+    end
+  end
+
   def send_invite(%User{} = actor, %InviteRequest{} = request, invite_url_fun) do
     Ecto.Multi.new()
     |> Ecto.Multi.one(:actor, from(u in User, where: u.id == ^actor.id))

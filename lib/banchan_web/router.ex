@@ -94,6 +94,8 @@ defmodule BanchanWeb.Router do
 
       get("/settings/confirm_email/:token", UserSettingsController, :confirm_email)
       get("/settings/refresh_session/:return_to", UserSessionController, :refresh_session)
+
+      get("/apply_artist_token/:token", ArtistTokenController, :confirm_artist)
     end
   end
 
