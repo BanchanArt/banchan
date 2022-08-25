@@ -66,14 +66,7 @@ if config_env() == :prod do
       """
 
   config :sentry,
-    dsn: dsn,
-    included_environments: [:prod],
-    enable_source_code_context: true,
-    root_source_code_path: File.cwd!(),
-    tags: %{
-      env: config_env()
-    },
-    environment_name: config_env()
+    dsn: dsn
 
   aws_region =
     System.get_env("AWS_REGION") ||

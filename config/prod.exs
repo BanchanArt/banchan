@@ -31,7 +31,9 @@ config :banchan, BanchanWeb.Endpoint,
 # ]
 
 # Do not print debug messages in production
-config :logger, level: :info
+config :logger,
+  level: :info,
+  backends: [:console, Sentry.LoggerBackend]
 
 config :banchan, Banchan.Repo,
   adapter: Ecto.Adapters.Postgres,

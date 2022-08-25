@@ -63,6 +63,15 @@ config :banchan, Oban,
   ],
   queues: [mailers: 10, media: 2, unban: 10, pruning: 1, invoice_purge: 10]
 
+config :sentry,
+  included_environments: [:prod],
+  enable_source_code_context: true,
+  root_source_code_path: File.cwd!(),
+  tags: %{
+    env: config_env()
+  },
+  environment_name: config_env()
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

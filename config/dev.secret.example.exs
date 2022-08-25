@@ -12,10 +12,12 @@ config :banchan, Banchan.Repo,
   pool_size: 10
 
 # Sentry configuration
-config :sentry,
-  # Find the Sentry DSN at https://sentry.io/settings/{orginization}/projects/elixir/keys/
-  # https://<big hex number>@o<number>.ingest.sentry.io/<account number>
-  dsn: ""
+# config :logger,
+#   backends: [:console, Sentry.LoggerBackend]
+# config :sentry,
+#   # Find the Sentry DSN at https://sentry.io/settings/{organization}/projects/elixir/keys/
+#   # https://<big hex number>@o<number>.ingest.sentry.io/<account number>
+#   dsn: ""
 
 # Stripe configuration
 config :stripity_stripe,
