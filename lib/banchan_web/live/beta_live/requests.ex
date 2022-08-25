@@ -53,7 +53,7 @@ defmodule BanchanWeb.BetaLive.Requests do
   end
 
   @impl true
-  def handle_event("send_invite", req_id, socket) do
+  def handle_event("send_invite", %{"value" => req_id}, socket) do
     {req_id, ""} = Integer.parse(req_id)
     %InviteRequest{} = req = Accounts.get_invite_request(req_id)
 
@@ -66,13 +66,13 @@ defmodule BanchanWeb.BetaLive.Requests do
         {:noreply,
          socket
          |> put_flash(:info, "Invite sent to #{req.email}")
-         |> redirect(to: Routes.beta_requests_path(Endpoint, :index))}
+         |> push_redirect(to: Routes.beta_requests_path(Endpoint, :index))}
 
       {:error, err} ->
         {:noreply,
          socket
          |> put_flash(:error, "Unexpected error while inviting #{req.email}: #{err}")
-         |> redirect(to: Routes.beta_requests_path(Endpoint, :index))}
+         |> push_redirect(to: Routes.beta_requests_path(Endpoint, :index))}
     end
 
     {:noreply, socket}
@@ -147,7 +147,13 @@ defmodule BanchanWeb.BetaLive.Requests do
           {#for req <- @results}
             <tr>
               <td>
-                <Button class="btn-sm" click="send_invite" value={req.id}>Send Invite</Button>
+                <Button class="btn-sm" click="send_invite" value={req.id}>
+                  {#if is_nil(req.token_id)}
+                    Send Invite
+                  {#else}
+                    Resend Invite
+                  {/if}
+                </Button>
               </td>
               <td>{req.email}</td>
               <td>
