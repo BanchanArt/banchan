@@ -43,47 +43,15 @@ defmodule Banchan.AccountsTest.ArtistInvites do
     end
   end
 
-  describe "add_invite_request" do
-    test "inserts a new invite request" do
-      email = "foo@example.com"
-
-      assert {:ok, %InviteRequest{id: request_id, email: ^email, token_id: nil}} =
-               Accounts.add_invite_request(email)
-
-      assert [%InviteRequest{id: ^request_id}] = Accounts.list_invite_requests().entries
+  describe "add_artist_invites/2" do
+    @tag skip: "TODO"
+    test "adds more invite slots to a user" do
     end
+  end
 
-    test "validates the email" do
-      assert {:error, changeset} = Accounts.add_invite_request("badmail")
-
-      assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
-    end
-
-    test "allows duplicates" do
-      email = "foo@example.com"
-
-      assert {:ok, %InviteRequest{id: request_id_1, email: ^email, token_id: nil}} =
-               Accounts.add_invite_request(email)
-
-      assert [%InviteRequest{id: ^request_id_1}] = Accounts.list_invite_requests().entries
-
-      assert {:ok, %InviteRequest{id: request_id_2, email: ^email, token_id: nil}} =
-               Accounts.add_invite_request(email)
-
-      assert [%InviteRequest{id: ^request_id_1}, %InviteRequest{id: ^request_id_2}] =
-               Accounts.list_invite_requests().entries
-    end
-
-    test "accepts an optional argument to specify a custom inserted_at timestamp" do
-      timestamp =
-        NaiveDateTime.utc_now()
-        |> NaiveDateTime.add(-1 * 60 * 60 * 24)
-        |> NaiveDateTime.truncate(:second)
-
-      assert {:ok, %InviteRequest{inserted_at: ^timestamp}} =
-               Accounts.add_invite_request("foo@example.com", timestamp)
-
-      assert [%InviteRequest{inserted_at: ^timestamp}] = Accounts.list_invite_requests().entries
+  describe "send_invite_batch/3" do
+    @tag skip: "TODO"
+    test "sends a batch of invite emails to the n oldest invite requests" do
     end
   end
 
@@ -148,16 +116,59 @@ defmodule Banchan.AccountsTest.ArtistInvites do
     end
   end
 
-  describe "get_artist_token/1" do
-    test "fetches an existing artist token based on its token string" do
-      {:ok, %ArtistToken{id: token_id, token: token_string}} =
-        Accounts.generate_artist_token(Accounts.system_user())
+  describe "add_invite_request" do
+    test "inserts a new invite request" do
+      email = "foo@example.com"
 
-      assert %ArtistToken{id: ^token_id} = Accounts.get_artist_token(token_string)
+      assert {:ok, %InviteRequest{id: request_id, email: ^email, token_id: nil}} =
+               Accounts.add_invite_request(email)
+
+      assert [%InviteRequest{id: ^request_id}] = Accounts.list_invite_requests().entries
     end
 
-    test "returns nil if the token doesn't exist" do
-      refute Accounts.get_artist_token("not-a-token")
+    test "validates the email" do
+      assert {:error, changeset} = Accounts.add_invite_request("badmail")
+
+      assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
+    end
+
+    test "allows duplicates" do
+      email = "foo@example.com"
+
+      assert {:ok, %InviteRequest{id: request_id_1, email: ^email, token_id: nil}} =
+               Accounts.add_invite_request(email)
+
+      assert [%InviteRequest{id: ^request_id_1}] = Accounts.list_invite_requests().entries
+
+      assert {:ok, %InviteRequest{id: request_id_2, email: ^email, token_id: nil}} =
+               Accounts.add_invite_request(email)
+
+      assert [%InviteRequest{id: ^request_id_1}, %InviteRequest{id: ^request_id_2}] =
+               Accounts.list_invite_requests().entries
+    end
+
+    test "accepts an optional argument to specify a custom inserted_at timestamp" do
+      timestamp =
+        NaiveDateTime.utc_now()
+        |> NaiveDateTime.add(-1 * 60 * 60 * 24)
+        |> NaiveDateTime.truncate(:second)
+
+      assert {:ok, %InviteRequest{inserted_at: ^timestamp}} =
+               Accounts.add_invite_request("foo@example.com", timestamp)
+
+      assert [%InviteRequest{inserted_at: ^timestamp}] = Accounts.list_invite_requests().entries
+    end
+  end
+
+  describe "get_invite_request/1" do
+    @tag skip: "TODO"
+    test "gets an invite request by id" do
+    end
+  end
+
+  describe "deliver_artist_invite_confirmation/1" do
+    @tag skip: "TODO"
+    test "sends an email confirming that someone's signed up for the beta" do
     end
   end
 
@@ -186,6 +197,19 @@ defmodule Banchan.AccountsTest.ArtistInvites do
 
       assert %ArtistToken{id: ^token_id, token: ^token_string} =
                Accounts.get_artist_token(token_string)
+    end
+  end
+
+  describe "get_artist_token/1" do
+    test "fetches an existing artist token based on its token string" do
+      {:ok, %ArtistToken{id: token_id, token: token_string}} =
+        Accounts.generate_artist_token(Accounts.system_user())
+
+      assert %ArtistToken{id: ^token_id} = Accounts.get_artist_token(token_string)
+    end
+
+    test "returns nil if the token doesn't exist" do
+      refute Accounts.get_artist_token("not-a-token")
     end
   end
 
