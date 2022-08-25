@@ -25,6 +25,9 @@ defmodule Banchan.Application do
 
     :ok = Oban.Telemetry.attach_default_logger()
 
+    # Captures exceptions and sends them to Sentry.io
+    Logger.add_backend(Sentry.LoggerBackend)
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Banchan.Supervisor]

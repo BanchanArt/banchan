@@ -1,4 +1,6 @@
 defmodule BanchanWeb.Endpoint do
+  # Captures errors in the Plug stack and send them to Sentry.io
+  use Sentry.PlugCapture
   use Phoenix.Endpoint, otp_app: :banchan
 
   alias BanchanWeb.CacheBodyReader
@@ -46,6 +48,9 @@ defmodule BanchanWeb.Endpoint do
     pass: ["*/*"],
     body_reader: {CacheBodyReader, :read_body, []},
     json_decoder: Phoenix.json_library()
+
+  # Adds contextual information to errors captured by Sentry, should be under Plug.Parsers
+  plug Sentry.PlugContext
 
   plug Plug.MethodOverride
   plug Plug.Head

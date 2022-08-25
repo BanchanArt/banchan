@@ -77,6 +77,7 @@ defmodule Banchan.MixProject do
       {:postgrex, "~> 0.16.3"},
       {:qr_code, "~> 2.2.1"},
       {:scrivener_ecto, "~> 2.7.0"},
+      {:sentry, "~> 8.0"},
       {:slugify, "~> 1.3.1"},
       {:stripity_stripe, "~> 2.15.0"},
       {:surface, "~> 0.7.4"},
