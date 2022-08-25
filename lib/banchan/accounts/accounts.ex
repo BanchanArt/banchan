@@ -1251,7 +1251,8 @@ defmodule Banchan.Accounts do
       from(
         r in InviteRequest,
         as: :request,
-        order_by: [asc: r.inserted_at]
+        order_by: [asc: r.inserted_at],
+        preload: [token: [:used_by, :generated_by]]
       )
 
     q =
@@ -1354,6 +1355,13 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  Gets an invite request by its id.
+  """
+  def get_invite_request(id) do
+    Repo.get(InviteRequest, id)
+  end
+
+  @doc """
   Delivers a confirmation email letting someone know that they've been signed up for the beta.
   """
   def deliver_artist_invite_confirmation(%InviteRequest{} = request) do
@@ -1372,7 +1380,7 @@ defmodule Banchan.Accounts do
           {:ok, n - 1}
 
         _ ->
-          if admin?(user) || system?(user) do
+          if mod?(user) || system?(user) do
             {:ok, 0}
           else
             {:error, :no_invites}

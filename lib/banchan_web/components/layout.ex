@@ -98,6 +98,14 @@ defmodule BanchanWeb.Components.Layout do
                 </LiveRedirect>
               </li>
               <li>
+                <LiveRedirect to={Routes.beta_manage_path(Endpoint, :index)}>
+                  <span>
+                    <i class="fas fa-inbox" />
+                    Beta Requests
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
                 <a href="/admin/dashboard" target="_blank" rel="noopener noreferrer"><i class="fas fa-tachometer-alt" />Dashboard</a>
               </li>
               {#if Application.fetch_env!(:banchan, :env) == :dev}

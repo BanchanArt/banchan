@@ -12,6 +12,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   prop wrapper_class, :css_class
   prop class, :css_class
   prop label, :string
+  prop value, :any
   prop info, :string
 
   slot default
@@ -30,6 +31,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
         </div>
         <InputContext :let={form: form, field: field}>
           <Checkbox
+            value={@value}
             class={
               @class,
               "checkbox",

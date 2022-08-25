@@ -531,7 +531,7 @@ defmodule BanchanWeb.SettingsLive do
           <Submit class="w-full" changeset={@password_changeset} label="Save" />
         </Form>
       {/if}
-      {#if Accounts.admin?(@current_user) || @current_user.available_invites > 0}
+      {#if Accounts.mod?(@current_user) || @current_user.available_invites > 0}
         <div class="divider" />
         <Form
           class="flex flex-col gap-4"
@@ -541,7 +541,7 @@ defmodule BanchanWeb.SettingsLive do
           submit="submit_invite_request"
         >
           <h3 class="text-lg">Send an Artist Invite</h3>
-          <p :if={!Accounts.admin?(@current_user)}>You have {@current_user.available_invites} invite(s) available.</p>
+          <p :if={!Accounts.mod?(@current_user)}>You have {@current_user.available_invites} invite(s) available.</p>
           <EmailInput name={:email} icon="envelope" opts={required: true} />
           <Submit class="w-full" changeset={@invite_request_changeset} label="Send" />
         </Form>
