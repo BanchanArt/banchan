@@ -1,4 +1,4 @@
-defmodule BanchanWeb.BetaLive.Manage do
+defmodule BanchanWeb.BetaLive.Requests do
   @moduledoc """
   LiveView for managing beta invites.
   """
@@ -44,13 +44,13 @@ defmodule BanchanWeb.BetaLive.Manage do
         {:noreply,
          socket
          |> put_flash(:info, "Invite sent to #{req.email}")
-         |> redirect(to: Routes.beta_manage_path(Endpoint, :index))}
+         |> redirect(to: Routes.beta_requests_path(Endpoint, :index))}
 
       {:error, err} ->
         {:noreply,
          socket
          |> put_flash(:error, "Unexpected error while inviting #{req.email}: #{err}")
-         |> redirect(to: Routes.beta_manage_path(Endpoint, :index))}
+         |> redirect(to: Routes.beta_requests_path(Endpoint, :index))}
     end
 
     {:noreply, socket}

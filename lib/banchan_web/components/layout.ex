@@ -98,7 +98,7 @@ defmodule BanchanWeb.Components.Layout do
                 </LiveRedirect>
               </li>
               <li>
-                <LiveRedirect to={Routes.beta_manage_path(Endpoint, :index)}>
+                <LiveRedirect to={Routes.beta_requests_path(Endpoint, :index)}>
                   <span>
                     <i class="fas fa-inbox" />
                     Beta Requests
