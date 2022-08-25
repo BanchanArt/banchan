@@ -1243,6 +1243,7 @@ defmodule Banchan.Accounts do
   ## Options
 
     * `:unsent_only` - Only list invites that havent' had tokens generated for them.
+    * `:email_filter` - Prefix filter to apply to search for emails.
     * `:page` - The page of results to return.
     * `:page_size` - How many results to return per page.
   """
@@ -1264,6 +1265,16 @@ defmodule Banchan.Accounts do
           q
       end
 
+    q =
+      case Keyword.fetch(opts, :email_filter) do
+        {:ok, filter} when is_binary(filter) ->
+          filter = filter <> "%"
+          q |> where([request: r], ilike(r.email, ^filter))
+
+        _ ->
+          q
+      end
+
     q
     |> Repo.paginate(
       page_size: Keyword.get(opts, :page_size, 24),
@@ -1271,18 +1282,54 @@ defmodule Banchan.Accounts do
     )
   end
 
+  @doc """
+  Adds artist invites to a user so they can send them out.
+  """
   def add_artist_invites(%User{} = user, n) when is_integer(n) do
     {1, [%User{} = user]} =
       from(u in User,
         where: u.id == ^user.id,
         select: u,
         update: [
-          set: [available_invites: fragment("COALESCE(?, 1) + ?", u.available_invites, ^n)]
+          set: [available_invites: fragment("COALESCE(?, 0) + ?", u.available_invites, ^n)]
         ]
       )
       |> Repo.update_all([])
 
     {:ok, user}
+  end
+
+  @doc """
+  Sends a batch of invites to the `n` oldest emails.
+  """
+  def send_invite_batch(%User{} = actor, n, invite_url_fun) when is_integer(n) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.all(
+      :requests,
+      from(r in InviteRequest,
+        order_by: [asc: r.inserted_at],
+        limit: ^n,
+        where: is_nil(r.token_id),
+        lock: "FOR UPDATE"
+      )
+    )
+    |> Ecto.Multi.run(:sent_invites, fn _repo, %{requests: requests} ->
+      requests
+      |> Enum.reduce_while({:ok, []}, fn request, {:ok, requests} ->
+        case send_invite(actor, request, invite_url_fun) do
+          {:ok, request} ->
+            {:cont, {:ok, [request | requests]}}
+
+          {:error, error} ->
+            {:halt, {:error, error}}
+        end
+      end)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{sent_invites: requests}} -> {:ok, requests}
+      {:error, _, error, _} -> {:error, error}
+    end
   end
 
   @doc """

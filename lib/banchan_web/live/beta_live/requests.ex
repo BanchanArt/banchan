@@ -8,25 +8,47 @@ defmodule BanchanWeb.BetaLive.Requests do
   alias Banchan.Accounts.InviteRequest
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{NumberInput, Submit}
+  alias Surface.Components.Form.{NumberInput, Submit, TextInput}
 
   alias BanchanWeb.Components.{Avatar, Button, InfiniteScroll, Layout, UserHandle}
   alias BanchanWeb.Components.Form.Checkbox
 
   @impl true
   def handle_params(_params, uri, socket) do
-    socket = socket |> assign(uri: uri, show_sent: false, page: 1)
+    socket = socket |> assign(uri: uri, show_sent: false, email_filter: "", page: 1)
     {:noreply, socket |> assign(results: list_requests(socket))}
   end
 
   @impl true
-  def handle_event("submit_invites", val, socket) do
-    IO.inspect(val)
-    {:noreply, socket}
+  def handle_event("submit_invites", %{"count" => count}, socket) do
+    {count, ""} = Integer.parse(count)
+
+    case Accounts.send_invite_batch(
+           socket.assigns.current_user,
+           count,
+           &Routes.artist_token_url(Endpoint, :confirm_artist, &1)
+         ) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Invites sent!")
+         |> redirect(to: Routes.beta_requests_path(Endpoint, :show))}
+
+      {:error, reason} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Unexpected error while inviting batch: #{reason}")
+         |> redirect(to: Routes.beta_requests_path(Endpoint, :show))}
+    end
+  end
+
+  def handle_event("change_email_filter", %{"filter" => filter}, socket) do
+    socket = socket |> assign(email_filter: filter, page: 1)
+    {:noreply, socket |> assign(results: list_requests(socket))}
   end
 
   def handle_event("change_show_sent", %{"show_sent" => %{"show_sent" => show_sent}}, socket) do
-    socket = socket |> assign(show_sent: show_sent == "true")
+    socket = socket |> assign(show_sent: show_sent == "true", page: 1)
     {:noreply, socket |> assign(results: list_requests(socket))}
   end
 
@@ -81,6 +103,7 @@ defmodule BanchanWeb.BetaLive.Requests do
   defp list_requests(socket, page \\ 1) do
     Accounts.list_invite_requests(
       unsent_only: !socket.assigns.show_sent,
+      email_filter: socket.assigns.email_filter,
       page: page,
       page_size: 24
     )
@@ -92,14 +115,20 @@ defmodule BanchanWeb.BetaLive.Requests do
     <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
       <h1 class="text-3xl">Manage Invite Requests</h1>
       <div class="divider" />
-      <div class="flex flex-col md:flex-row md:flex-wrap">
-        <Form class="grow" for={:send_invites} submit="submit_invites">
+      <div class="flex flex-col md:flex-row md:flex-wrap gap-2">
+        <Form for={:send_invites} submit="submit_invites">
           <div class="input-group">
             <NumberInput class="input input-bordered" name={:count} opts={placeholder: "Invites to send"} />
             <Submit class="btn btn-primary rounded-lg">Send Invites</Submit>
           </div>
         </Form>
-        <Form for={:show_sent} change="change_show_sent">
+        <Form class="grow" for={:email_filter} change="change_email_filter" submit="change_email_filter">
+          <div class="input-group">
+            <TextInput class="input input-bordered" name={:filter} opts={placeholder: "Filter email"} />
+            <Submit class="btn btn-primary rounded-lg">Filter</Submit>
+          </div>
+        </Form>
+        <Form for={:show_sent} change="change_show_sent" submit="change_show_sent">
           <Checkbox name={:show_sent} label="Show sent invites" value={@show_sent} />
         </Form>
       </div>
