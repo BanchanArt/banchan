@@ -151,22 +151,6 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
 
       - name: Run test
-        run: mix coveralls.lcov --trace --slowest 10
-
-      - name: Coveralls Parallel
-        uses: coverallsapp/github-action@master
-        with:
-          path-to-lcov: "./cover/lcov.info"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: run-${{ matrix.otp }}-${{ matrix.elixir }}
-          parallel: true
-
-  finish:
-    needs: unit_tests
-    runs-on: ubuntu-latest
-    steps:
-    - name: Coveralls Finished
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        parallel-finished: true
+        run: mix coveralls.github --trace --slowest 10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
