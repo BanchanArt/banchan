@@ -98,7 +98,6 @@ defmodule Banchan.MixProject do
       {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
       {:excoveralls, "~> 0.13", only: :test},
       {:floki, "~> 0.33.0", only: :test},
-      {:html5ever, "~> 0.13.0", only: :test},
       {:mox, "~> 1.0.1", only: :test},
       {:phoenix_live_reload, "~> 1.3.3", only: :dev},
       {:sobelow, "~> 0.8", only: [:dev, :test], runtime: false},
