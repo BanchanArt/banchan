@@ -1,4 +1,4 @@
-# Banchan.Art 🎨
+# Banchan.Art 🎨 [![CI](https://github.com/BanchanArt/banchan/actions/workflows/webapp.yaml/badge.svg)](https://github.com/BanchanArt/banchan/actions/workflows/webapp.yaml) [![Coverage Status](https://coveralls.io/repos/github/BanchanArt/banchan/badge.svg?branch=main)](https://coveralls.io/github/BanchanArt/banchan?branch=main)
 
 [Repo Wiki](https://github.com/digitalworkersguild/banchan/wiki) | [Staging Server](https://dev.banchan.art/)
 
