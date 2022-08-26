@@ -155,6 +155,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Coveralls Parallel
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: run-${{ matrix.otp }}-${{ matrix.elixir }}
+          parallel: true
+
   finish:
     needs: unit_tests
     runs-on: ubuntu-latest
