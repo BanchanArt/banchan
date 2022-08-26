@@ -1748,4 +1748,8 @@ defmodule Banchan.Accounts do
         {:error, :internal_error}
     end
   end
+
+  def new_fn do
+    1
+  end
 end
