@@ -32,13 +32,13 @@ defmodule BanchanWeb.BetaLive.Requests do
         {:noreply,
          socket
          |> put_flash(:info, "Invites sent!")
-         |> redirect(to: Routes.beta_requests_path(Endpoint, :show))}
+         |> push_redirect(to: Routes.beta_requests_path(Endpoint, :index))}
 
       {:error, reason} ->
         {:noreply,
          socket
          |> put_flash(:error, "Unexpected error while inviting batch: #{reason}")
-         |> redirect(to: Routes.beta_requests_path(Endpoint, :show))}
+         |> push_redirect(to: Routes.beta_requests_path(Endpoint, :index))}
     end
   end
 
@@ -74,8 +74,6 @@ defmodule BanchanWeb.BetaLive.Requests do
          |> put_flash(:error, "Unexpected error while inviting #{req.email}: #{err}")
          |> push_redirect(to: Routes.beta_requests_path(Endpoint, :index))}
     end
-
-    {:noreply, socket}
   end
 
   def handle_event("load_more", _, socket) do
@@ -116,13 +114,18 @@ defmodule BanchanWeb.BetaLive.Requests do
       <h1 class="text-3xl">Manage Invite Requests</h1>
       <div class="divider" />
       <div class="flex flex-col md:flex-row md:flex-wrap gap-2">
-        <Form for={:send_invites} submit="submit_invites">
+        <Form class="send-invites" for={:send_invites} submit="submit_invites">
           <div class="input-group">
             <NumberInput class="input input-bordered" name={:count} opts={placeholder: "Invites to send"} />
             <Submit class="btn btn-primary rounded-lg">Send Invites</Submit>
           </div>
         </Form>
-        <Form class="grow" for={:email_filter} change="change_email_filter" submit="change_email_filter">
+        <Form
+          class="grow email-filter"
+          for={:email_filter}
+          change="change_email_filter"
+          submit="change_email_filter"
+        >
           <div class="input-group">
             <TextInput class="input input-bordered" name={:filter} opts={placeholder: "Filter email"} />
             <Submit class="btn btn-primary rounded-lg">Filter</Submit>

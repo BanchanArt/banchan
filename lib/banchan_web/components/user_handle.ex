@@ -23,6 +23,9 @@ defmodule BanchanWeb.Components.UserHandle do
           {#elseif :mod in @user.roles}
             <span class="font-medium text-error">
               (mod)</span>
+          {#elseif :system in @user.roles}
+            <span class="font-medium text-error">
+              (system)</span>
           {/if}
         </span>
       </LiveRedirect>
@@ -35,6 +38,9 @@ defmodule BanchanWeb.Components.UserHandle do
         {#elseif :mod in @user.roles}
           <span class="font-medium text-error">
             (mod)</span>
+        {#elseif :system in @user.roles}
+          <span class="font-medium text-error">
+            (system)</span>
         {/if}
       </span>
     {#else}
