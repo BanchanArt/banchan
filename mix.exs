@@ -20,7 +20,7 @@ defmodule Banchan.MixProject do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test,
-        "coveralls.github": :test
+        "coveralls.lcov": :test
       ],
       dialyzer: [
         plt_ignore_apps: [:mnesia],
