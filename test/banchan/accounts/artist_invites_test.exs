@@ -44,14 +44,59 @@ defmodule Banchan.AccountsTest.ArtistInvites do
   end
 
   describe "add_artist_invites/2" do
-    @tag skip: "TODO"
     test "adds more invite slots to a user" do
+      user = user_fixture()
+      assert user.available_invites == 0
+
+      {:ok, %User{available_invites: 5}} = Accounts.add_artist_invites(user, 5)
+
+      assert %User{available_invites: 5} = Accounts.get_user(user.id)
+    end
+
+    test "handles nil available_invites" do
+      user = user_fixture()
+
+      Ecto.Query.from(u in User, where: u.id == ^user.id)
+      |> Repo.update_all(set: [available_invites: nil])
+
+      {:ok, %User{available_invites: 5}} = Accounts.add_artist_invites(user, 5)
     end
   end
 
   describe "send_invite_batch/3" do
-    @tag skip: "TODO"
     test "sends a batch of invite emails to the n oldest invite requests" do
+      email = "foo@example.com"
+      system = Accounts.system_user()
+
+      {:ok, %InviteRequest{id: req1_id}} = Accounts.add_invite_request(email)
+      {:ok, %InviteRequest{id: req2_id}} = Accounts.add_invite_request(email)
+      {:ok, %InviteRequest{id: req3_id}} = Accounts.add_invite_request(email)
+      {:ok, %InviteRequest{id: req4_id}} = Accounts.add_invite_request(email)
+
+      assert {:ok,
+              [%InviteRequest{id: ^req1_id, token_id: token_id_1}, %InviteRequest{id: ^req2_id}]} =
+               Accounts.send_invite_batch(system, 2, &extractable_user_token/1)
+
+      assert_delivered_email_matches(%{
+        to: [{_, ^email}],
+        subject: "You're invited to be an artist on Banchan Art!",
+        text_body: text_body,
+        html_body: html_body
+      })
+
+      assert %ArtistToken{id: ^token_id_1} =
+               Accounts.get_artist_token(extract_user_token(text_body))
+
+      assert %ArtistToken{id: ^token_id_1} =
+               Accounts.get_artist_token(extract_user_token(html_body))
+
+      assert_delivered_email_matches(%{
+        to: [{_, ^email}],
+        subject: "You're invited to be an artist on Banchan Art!"
+      })
+
+      assert [%InviteRequest{id: ^req3_id}, %InviteRequest{id: ^req4_id}] =
+               Accounts.list_invite_requests(unsent_only: true).entries
     end
   end
 
@@ -161,14 +206,32 @@ defmodule Banchan.AccountsTest.ArtistInvites do
   end
 
   describe "get_invite_request/1" do
-    @tag skip: "TODO"
     test "gets an invite request by id" do
+      {:ok, %InviteRequest{id: request_id}} = Accounts.add_invite_request("foo@example.com")
+
+      assert %InviteRequest{id: ^request_id} = Accounts.get_invite_request(request_id)
+    end
+
+    test "returns nil if the invite request does not exist" do
+      assert is_nil(Accounts.get_invite_request(123))
     end
   end
 
   describe "deliver_artist_invite_confirmation/1" do
-    @tag skip: "TODO"
     test "sends an email confirming that someone's signed up for the beta" do
+      email = "foo@example.com"
+
+      {:ok, %InviteRequest{} = request} = Accounts.add_invite_request("foo@example.com")
+
+      assert {:ok, %Oban.Job{}} = Accounts.deliver_artist_invite_confirmation(request)
+
+      assert_delivered_email_matches(%{
+        to: [{_, ^email}],
+        subject: "You're signed up for the Banchan Art artist beta!",
+        text_body: text_body
+      })
+
+      assert text_body =~ "You've successfully signed up for the Banchan Art beta waiting list."
     end
   end
 

@@ -1291,7 +1291,7 @@ defmodule Banchan.Accounts do
         where: u.id == ^user.id,
         select: u,
         update: [
-          set: [available_invites: fragment("COALESCE(?, 0) + ?", u.available_invites, ^n)]
+          set: [available_invites: coalesce(u.available_invites, 0) + ^n]
         ]
       )
       |> Repo.update_all([])
@@ -1327,7 +1327,7 @@ defmodule Banchan.Accounts do
     end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{sent_invites: requests}} -> {:ok, requests}
+      {:ok, %{sent_invites: requests}} -> {:ok, requests |> Enum.reverse()}
       {:error, _, error, _} -> {:error, error}
     end
   end
