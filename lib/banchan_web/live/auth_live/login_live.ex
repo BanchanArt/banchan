@@ -66,10 +66,13 @@ defmodule BanchanWeb.LoginLive do
             class="btn bg-discord flex-1 text-xl"
             to={Routes.user_o_auth_path(Endpoint, :request, "discord")}
           ><i class="px-2 fa-brands fa-discord" /></Link>
+          {!--
+          # TODO: Re-enable when Google has approved our app (post-launch)
           <Link
             class="btn bg-google flex-1 text-xl"
             to={Routes.user_o_auth_path(Endpoint, :request, "google")}
           ><i class="px-2 fa-brands fa-google" /></Link>
+          --}
         </div>
       </div>
       <div class="divider">OR</div>
