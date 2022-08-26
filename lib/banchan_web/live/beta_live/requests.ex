@@ -128,7 +128,7 @@ defmodule BanchanWeb.BetaLive.Requests do
             <Submit class="btn btn-primary rounded-lg">Filter</Submit>
           </div>
         </Form>
-        <Form for={:show_sent} change="change_show_sent" submit="change_show_sent">
+        <Form class="show-sent" for={:show_sent} change="change_show_sent" submit="change_show_sent">
           <Checkbox name={:show_sent} label="Show sent invites" value={@show_sent} />
         </Form>
       </div>
@@ -144,43 +144,45 @@ defmodule BanchanWeb.BetaLive.Requests do
               <th>Used By</th>
             </tr>
           </thead>
-          {#for req <- @results}
-            <tr>
-              <td>
-                <Button class="btn-sm" click="send_invite" value={req.id}>
-                  {#if is_nil(req.token_id)}
-                    Send Invite
+          <tbody>
+            {#for req <- @results}
+              <tr>
+                <td class="action">
+                  <Button class="btn-sm" click="send_invite" value={req.id}>
+                    {#if is_nil(req.token_id)}
+                      Send Invite
+                    {#else}
+                      Resend Invite
+                    {/if}
+                  </Button>
+                </td>
+                <td class="email">{req.email}</td>
+                <td class="requested-on">
+                  <div title={req.inserted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>
+                    {req.inserted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
+                  </div>
+                </td>
+                <td class="generated-by">
+                  {#if req.token && req.token.generated_by}
+                    <div class="flex flex-row items-center gap-2">
+                      <Avatar class="w-4" user={req.token.generated_by} /> <UserHandle user={req.token.generated_by} />
+                    </div>
                   {#else}
-                    Resend Invite
+                    <span>-</span>
                   {/if}
-                </Button>
-              </td>
-              <td>{req.email}</td>
-              <td>
-                <div title={req.inserted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>
-                  {req.inserted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
-                </div>
-              </td>
-              <td>
-                {#if req.token && req.token.generated_by}
-                  <div class="flex flex-row items-center gap-2">
-                    <Avatar class="w-4" user={req.token.generated_by} /> <UserHandle user={req.token.generated_by} />
-                  </div>
-                {#else}
-                  <span>-</span>
-                {/if}
-              </td>
-              <td>
-                {#if req.token && req.token.used_by}
-                  <div class="flex flex-row items-center gap-2">
-                    <Avatar class="w-4" user={req.token.used_by} /> <UserHandle user={req.token.used_by} />
-                  </div>
-                {#else}
-                  <span>-</span>
-                {/if}
-              </td>
-            </tr>
-          {/for}
+                </td>
+                <td class="used-by">
+                  {#if req.token && req.token.used_by}
+                    <div class="flex flex-row items-center gap-2">
+                      <Avatar class="w-4" user={req.token.used_by} /> <UserHandle user={req.token.used_by} />
+                    </div>
+                  {#else}
+                    <span>-</span>
+                  {/if}
+                </td>
+              </tr>
+            {/for}
+          </tbody>
         </table>
         <InfiniteScroll id="requests-infinite-scroll" page={@page} load_more="load_more" />
       </div>
