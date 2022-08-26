@@ -15,10 +15,12 @@ defmodule Banchan.MixProject do
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
         quality: :test,
+        "quality.ci": :test,
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
-        "coveralls.html": :test
+        "coveralls.html": :test,
+        "coveralls.github": :test
       ],
       dialyzer: [
         plt_ignore_apps: [:mnesia],
@@ -148,14 +150,6 @@ defmodule Banchan.MixProject do
         "credo --strict",
         "sobelow --verbose",
         "dialyzer --ignore-exit-status"
-      ],
-      "quality.ci": [
-        "compile --all-warnings --warnings-as-errors",
-        "test --slowest 10",
-        "format --check-formatted",
-        "credo --strict",
-        "sobelow --exit"
-        # "dialyzer"
       ]
     ]
   end

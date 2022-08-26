@@ -151,4 +151,6 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
 
       - name: Run test
-        run: mix test --trace --slowest 10
+        run: mix coveralls.github --trace --slowest 10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
