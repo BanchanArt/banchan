@@ -154,3 +154,13 @@ jobs:
         run: mix coveralls.github --trace --slowest 10
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  finish:
+    needs: unit_tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
