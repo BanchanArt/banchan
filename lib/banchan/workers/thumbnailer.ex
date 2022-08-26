@@ -28,46 +28,46 @@ defmodule Banchan.Workers.Thumbnailer do
     process(%Upload{id: src_id}, %Upload{id: dest_id}, opts)
   end
 
-  def thumbnail(upload)
+  def thumbnail(upload, opts \\ [])
 
-  def thumbnail(%Upload{pending: true}) do
+  def thumbnail(%Upload{pending: true}, _) do
     # Only processed uploads can be thumbnailed.
     {:error, :pending}
   end
 
-  def thumbnail(%Upload{} = upload, opts \\ []) do
+  def thumbnail(%Upload{} = upload, opts) do
     if !Uploads.image?(upload) && !Uploads.video?(upload) do
       {:error, :unsupported_input}
     else
-      {:ok, ret} =
-        Repo.transaction(fn ->
-          pending =
-            Uploads.gen_pending(
-              %User{id: upload.uploader_id},
-              upload,
-              "image/jpeg",
-              Keyword.get(opts, :name, "thumbnail.jpg")
-            )
-
-          with {:ok, pending} <- Repo.insert(pending),
-               {:ok, _} <-
-                 Oban.insert(
-                   __MODULE__.new(%{
-                     src: upload.id,
-                     dest: pending.id,
-                     opts: %{
-                       target_size: Keyword.get(opts, :target_size),
-                       format: Keyword.get(opts, :format, "jpeg"),
-                       dimensions: Keyword.get(opts, :dimensions),
-                       callback: Keyword.get(opts, :callback)
-                     }
-                   })
-                 ) do
-            {:ok, pending}
-          end
-        end)
-
-      ret
+      Ecto.Multi.new()
+      |> Ecto.Multi.insert(
+        :pending,
+        Uploads.gen_pending(
+          %User{id: upload.uploader_id},
+          upload,
+          "image/jpeg",
+          Keyword.get(opts, :name, "thumbnail.jpg")
+        )
+      )
+      |> Ecto.Multi.run(:job, fn _repo, %{pending: pending} ->
+        Oban.insert(
+          __MODULE__.new(%{
+            src: upload.id,
+            dest: pending.id,
+            opts: %{
+              target_size: Keyword.get(opts, :target_size),
+              format: Keyword.get(opts, :format, "jpeg"),
+              dimensions: Keyword.get(opts, :dimensions),
+              callback: Keyword.get(opts, :callback)
+            }
+          })
+        )
+      end)
+      |> Repo.transaction()
+      |> case do
+        {:ok, %{pending: pending}} -> {:ok, pending}
+        {:error, _, error, _} -> {:error, error}
+      end
     end
   end
 
