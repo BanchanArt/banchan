@@ -487,46 +487,49 @@ defmodule Banchan.Payments do
   Releases a payment.
   """
   def release_payment(%User{} = actor, %Commission{} = commission, %Invoice{} = invoice) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        with {:ok, actor} <- Commissions.check_actor_edit_access(actor, commission),
-             {1, _} <-
-               from(i in Invoice,
-                 join: c in assoc(i, :commission),
-                 where:
-                   i.id == ^invoice.id and c.client_id == ^actor.id and i.status == :succeeded
-               )
-               |> Repo.update_all(set: [status: :released]),
-             %Event{} = ev <-
-               from(e in Event,
-                 where: e.id == ^invoice.event_id,
-                 select: e,
-                 preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
-               )
-               |> Repo.one() do
-          Commissions.Notifications.invoice_released(commission, ev, actor)
-          Commissions.Notifications.commission_event_updated(commission, ev, actor)
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:actor, fn _, _ ->
+      Commissions.check_actor_edit_access(actor, commission)
+    end)
+    |> Ecto.Multi.update_all(
+      :invoices,
+      fn %{actor: actor} ->
+        from(i in Invoice,
+          join: c in assoc(i, :commission),
+          where: i.id == ^invoice.id and c.client_id == ^actor.id and i.status == :succeeded
+        )
+      end,
+      set: [status: :released]
+    )
+    |> Ecto.Multi.run(:check_updated_count, fn _, %{invoices: {n, _}} ->
+      case n do
+        0 ->
+          {:error, :invalid_invoice_status}
 
-          {:ok, ev}
-        end
-        |> case do
-          {0, _} ->
-            # Only succeeded invoices can be released.
-            {:error, :invalid_invoice_status}
+        1 ->
+          {:ok, true}
 
-          {num, _} when is_integer(num) ->
-            # NB(zkat): This would point to a bug.
-            {:error, :updated_too_many_invoices}
+        n when is_integer(n) ->
+          {:error, :updated_too_many_invoices}
+      end
+    end)
+    |> Ecto.Multi.one(:event, fn _ ->
+      from(e in Event,
+        where: e.id == ^invoice.event_id,
+        select: e,
+        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
+      )
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{event: event, actor: actor}} ->
+        Commissions.Notifications.invoice_released(commission, event, actor)
+        Commissions.Notifications.commission_event_updated(commission, event, actor)
+        {:ok, event}
 
-          {:ok, val} ->
-            {:ok, val}
-
-          {:error, err} ->
-            {:error, err}
-        end
-      end)
-
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
@@ -569,47 +572,65 @@ defmodule Banchan.Payments do
       }
     ]
 
-    with {stripe_id, platform_fee} <-
-           from(studio in Studio,
-             where: studio.id == ^commission.studio_id,
-             select: {studio.stripe_id, studio.platform_fee}
-           )
-           |> Repo.one(),
-         platform_fee <- Money.multiply(Money.add(amount, tip), platform_fee),
-         transfer_amt <- amount |> Money.add(tip) |> Money.subtract(platform_fee),
-         {:ok, session} <-
-           stripe_mod().create_session(%{
-             payment_method_types: ["card"],
-             mode: "payment",
-             cancel_url: uri,
-             success_url: uri,
-             line_items: items,
-             automatic_tax: %{
-               enabled: true
-             },
-             payment_intent_data: %{
-               transfer_data: %{
-                 amount: transfer_amt.amount,
-                 destination: stripe_id
-               }
-             }
-           }),
-         {:ok, _} <-
-           invoice
-           |> Invoice.submit_changeset(%{
-             tip: tip,
-             platform_fee: platform_fee,
-             stripe_session_id: session.id,
-             checkout_url: session.url,
-             status: :submitted
-           })
-           |> Repo.update() do
+    Ecto.Multi.new()
+    |> Ecto.Multi.one(
+      :studio_info,
+      from(s in Studio,
+        where: s.id == ^commission.studio_id,
+        select: {s.stripe_id, s.platform_fee}
+      )
+    )
+    |> Ecto.Multi.run(:platform_fee_amount, fn _, %{studio_info: {_, platform_fee}} ->
+      {:ok, Money.multiply(Money.add(amount, tip), platform_fee)}
+    end)
+    |> Ecto.Multi.run(:session, fn _,
+                                   %{
+                                     studio_info: {stripe_id, _},
+                                     platform_fee_amount: platform_fee
+                                   } ->
+      with transfer_amt <- amount |> Money.add(tip) |> Money.subtract(platform_fee) do
+        stripe_mod().create_session(%{
+          payment_method_types: ["card"],
+          mode: "payment",
+          cancel_url: uri,
+          success_url: uri,
+          line_items: items,
+          automatic_tax: %{
+            enabled: true
+          },
+          payment_intent_data: %{
+            transfer_data: %{
+              amount: transfer_amt.amount,
+              destination: stripe_id
+            }
+          }
+        })
+      end
+    end)
+    |> Ecto.Multi.update(:updated_invoice, fn %{
+                                                session: session,
+                                                platform_fee_amount: platform_fee
+                                              } ->
+      invoice
+      |> Invoice.submit_changeset(%{
+        tip: tip,
+        platform_fee: platform_fee,
+        stripe_session_id: session.id,
+        checkout_url: session.url,
+        status: :submitted
+      })
+    end)
+    |> Ecto.Multi.run(:finalize, fn _, _ ->
       send_event_update!(event.id, actor)
+      {:ok, true}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{session: session}} ->
+        {:ok, session.url}
 
-      {:ok, session.url}
-    else
-      {:error, err} ->
-        Logger.error(%{message: "Failed to process payment", error: err})
+      {:error, _, error, _} ->
+        Logger.error(%{message: "Failed to process payment", error: error})
         {:error, :payment_failed}
     end
   end
