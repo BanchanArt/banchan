@@ -95,8 +95,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   def handle_event("force_expire", _, socket) do
     Payments.expire_payment(
       socket.assigns.current_user,
-      socket.assigns.event.invoice,
-      socket.assigns.current_user_member?
+      socket.assigns.event.invoice
     )
     |> case do
       {:ok, _} ->
@@ -121,15 +120,13 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         %{
           assigns: %{
             current_user: current_user,
-            event: event,
-            current_user_member?: current_user_member?
+            event: event
           }
         } = socket
       ) do
     case Payments.refund_payment(
            current_user,
-           event.invoice,
-           current_user_member?
+           event.invoice
          ) do
       {:ok, _} ->
         Modal.hide(socket.assigns.id <> "_refund_modal")

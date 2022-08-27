@@ -1023,7 +1023,7 @@ defmodule Banchan.Studios do
       )
       |> Repo.stream()
       |> Enum.reduce_while({:ok, []}, fn invoice, {:ok, acc} ->
-        case Payments.expire_payment(actor, invoice, true) do
+        case Payments.expire_payment(actor, invoice) do
           {:ok, val} ->
             {:cont, {:ok, acc ++ [val]}}
 

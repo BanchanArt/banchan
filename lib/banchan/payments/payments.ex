@@ -734,94 +734,95 @@ defmodule Banchan.Payments do
   Expires a payment, preventing the client from being able to complete their
   session, if it's still active.
   """
-  def expire_payment(actor, invoice, current_user_member?)
-
-  def expire_payment(%User{} = actor, invoice, false) do
-    if :admin in actor.roles || :mod in actor.roles do
-      expire_payment(actor, invoice, true)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def expire_payment(
         %User{} = actor,
-        %Invoice{} = invoice,
-        true
+        %Invoice{} = invoice
       ) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        actor = actor |> Repo.reload()
-        invoice = invoice |> Repo.reload() |> Repo.preload(:commission)
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:invoice, fn _, _ ->
+      {:ok, invoice |> Repo.reload() |> Repo.preload(:commission)}
+    end)
+    |> Ecto.Multi.run(:actor, fn _, %{invoice: invoice} ->
+      actor = actor |> Repo.reload()
 
-        if Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) ||
-             :admin in actor.roles || :mod in actor.roles do
-          case invoice do
-            %Invoice{id: id, stripe_session_id: nil, status: :pending} ->
-              # NOTE: This will crash (intentionally) if we try to expire an already-succeeded payment.
-              {1, [invoice]} =
-                from(i in Invoice, where: i.id == ^id and i.status != :succeeded, select: i)
-                |> Repo.update_all(set: [status: :expired])
+      if Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) ||
+           Accounts.mod?(actor) do
+        {:ok, actor}
+      else
+        {:error, :unauthorized}
+      end
+    end)
+    |> Ecto.Multi.run(:updated_invoice, fn _, %{invoice: invoice} ->
+      case invoice do
+        %Invoice{id: id, stripe_session_id: nil, status: :pending} ->
+          # NOTE: This will crash (intentionally) if we try to expire an already-succeeded payment.
+          {1, [invoice]} =
+            from(i in Invoice, where: i.id == ^id and i.status != :succeeded, select: i)
+            |> Repo.update_all(set: [status: :expired])
 
-              send_event_update!(invoice.event_id)
-              {:ok, invoice}
+          send_event_update!(invoice.event_id)
+          {:ok, invoice}
 
-            %Invoice{stripe_session_id: session_id, status: :submitted} when session_id != nil ->
-              # NOTE: We don't manually expire the invoice in the database here. That's
-              # handled by process_payment_expired!/1 when the webhook fires.
-              with {:ok, _} <- stripe_mod().expire_payment(session_id) do
-                {:ok, invoice}
-              end
-
-            _ ->
-              {:error, :invalid_state}
+        %Invoice{stripe_session_id: session_id, status: :submitted} when session_id != nil ->
+          # NOTE: We don't manually expire the invoice in the database here. That's
+          # handled by process_payment_expired!/1 when the webhook fires.
+          with {:ok, _} <- stripe_mod().expire_payment(session_id) do
+            {:ok, invoice}
           end
-        else
-          {:error, :unauthorized}
-        end
-      end)
 
-    ret
+        _ ->
+          {:error, :invalid_state}
+      end
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_invoice: invoice}} ->
+        {:ok, invoice}
+
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
   Refunds a payment that hasn't been released yet.
   """
-  def refund_payment(actor, invoice, current_user_member?)
+  def refund_payment(%User{} = actor, %Invoice{} = invoice) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:invoice, fn _, _ ->
+      {:ok, invoice |> Repo.reload() |> Repo.preload(:commission)}
+    end)
+    |> Ecto.Multi.run(:actor, fn _, %{invoice: invoice} ->
+      actor = actor |> Repo.reload()
 
-  def refund_payment(%User{} = actor, invoice, false) do
-    if Accounts.has_roles?(actor, [:system, :admin, :mod]) do
-      refund_payment(actor, invoice, true)
-    else
-      {:error, :unauthorized}
+      if Accounts.has_roles?(actor, [:system, :admin, :mod]) ||
+           Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) do
+        {:ok, actor}
+      else
+        {:error, :unauthorized}
+      end
+    end)
+    |> Ecto.Multi.run(:refund, fn _, %{actor: actor, invoice: invoice} ->
+      if invoice.status != :succeeded do
+        Logger.error(%{
+          message: "Attempted to refund an invoice that wasn't :succeeded.",
+          invoice: invoice
+        })
+
+        {:error, :invoice_not_refundable}
+      else
+        process_refund_payment(actor, invoice)
+      end
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{refund: refund}} ->
+        {:ok, refund}
+
+      {:error, _, error, _} ->
+        {:error, error}
     end
-  end
-
-  def refund_payment(%User{} = actor, %Invoice{} = invoice, _) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        actor = actor |> Repo.reload()
-        invoice = invoice |> Repo.reload() |> Repo.preload(:commission)
-
-        if Accounts.has_roles?(actor, [:system, :admin, :mod]) ||
-             Studios.is_user_in_studio?(actor, %Studio{id: invoice.commission.studio_id}) do
-          if invoice.status != :succeeded do
-            Logger.error(%{
-              message: "Attempted to refund an invoice that wasn't :succeeded.",
-              invoice: invoice
-            })
-
-            {:error, :invoice_not_refundable}
-          else
-            process_refund_payment(actor, invoice)
-          end
-        else
-          {:error, :unauthorized}
-        end
-      end)
-
-    ret
   end
 
   defp process_refund_payment(%User{} = actor, %Invoice{} = invoice) do
@@ -879,189 +880,201 @@ defmodule Banchan.Payments do
         invoice_id,
         refunded_by_id \\ nil
       ) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        assignments =
-          case refund.status do
-            "succeeded" ->
-              [
-                status: :refunded,
-                refund_status: :succeeded,
-                stripe_refund_id: refund.id,
-                refund_failure_reason: nil
-              ]
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:event, fn _, _ ->
+      assignments =
+        case refund.status do
+          "succeeded" ->
+            [
+              status: :refunded,
+              refund_status: :succeeded,
+              stripe_refund_id: refund.id,
+              refund_failure_reason: nil
+            ]
 
-            "failed" ->
-              [
-                refund_status: :failed,
-                stripe_refund_id: refund.id,
-                refund_failure_reason: refund.failure_reason
-              ]
+          "failed" ->
+            [
+              refund_status: :failed,
+              stripe_refund_id: refund.id,
+              refund_failure_reason: refund.failure_reason
+            ]
 
-            "canceled" ->
-              [refund_status: :canceled, stripe_refund_id: refund.id, refund_failure_reason: nil]
+          "canceled" ->
+            [refund_status: :canceled, stripe_refund_id: refund.id, refund_failure_reason: nil]
 
-            "pending" ->
-              [refund_status: :pending, stripe_refund_id: refund.id, refund_failure_reason: nil]
+          "pending" ->
+            [refund_status: :pending, stripe_refund_id: refund.id, refund_failure_reason: nil]
 
-            "requires_action" ->
-              [
-                refund_status: :requires_action,
-                stripe_refund_id: refund.id,
-                refund_failure_reason: nil
-              ]
-          end
-
-        assignments =
-          if refunded_by_id do
-            assignments ++ [refunded_by_id: refunded_by_id]
-          else
-            assignments
-          end
-
-        update_res =
-          if is_nil(invoice_id) do
-            from(i in Invoice,
-              where: i.status == :succeeded and i.stripe_refund_id == ^refund.id,
-              select: i.id
-            )
-          else
-            from(i in Invoice, where: i.status == :succeeded and i.id == ^invoice_id, select: i.id)
-          end
-          |> Repo.update_all(set: assignments)
-
-        case update_res do
-          {1, [invoice_id]} ->
-            case from(e in Event,
-                   join: i in assoc(e, :invoice),
-                   where: i.id == ^invoice_id,
-                   select: e,
-                   preload: [
-                     :actor,
-                     :commission,
-                     invoice: [],
-                     attachments: [:upload, :thumbnail, :preview]
-                   ]
-                 )
-                 |> Repo.one() do
-              %Event{} = ev -> {:ok, ev}
-              nil -> {:error, :event_not_found}
-            end
-
-          {0, _} ->
-            {:error, :invoice_not_found}
+          "requires_action" ->
+            [
+              refund_status: :requires_action,
+              stripe_refund_id: refund.id,
+              refund_failure_reason: nil
+            ]
         end
-      end)
 
-    case ret do
-      {:ok, event} ->
-        if event.invoice.refund_status == :succeeded do
-          actor =
-            if event.invoice.refunded_by_id do
-              %User{id: event.invoice.refunded_by_id} |> Repo.reload!()
-            else
-              msg = "Bad State: invoice refund succeeded but refunded_by_id is nil!"
-              Logger.error(%{message: msg})
-              raise msg
-            end
+      assignments =
+        if refunded_by_id do
+          assignments ++ [refunded_by_id: refunded_by_id]
+        else
+          assignments
+        end
 
-          Commissions.create_event(
-            :refund_processed,
-            actor,
-            event.commission,
-            true,
-            [],
-            %{
-              amount: Money.new(refund.amount, String.to_atom(String.upcase(refund.currency)))
-            }
+      update_res =
+        if is_nil(invoice_id) do
+          from(i in Invoice,
+            where: i.status == :succeeded and i.stripe_refund_id == ^refund.id,
+            select: i.id
           )
         else
-          Notifications.invoice_refund_updated(event.commission, event, actor)
+          from(i in Invoice, where: i.status == :succeeded and i.id == ^invoice_id, select: i.id)
         end
+        |> Repo.update_all(set: assignments)
 
-        Commissions.Notifications.commission_event_updated(event.commission, event, actor)
-        {:ok, event.invoice}
+      case update_res do
+        {1, [invoice_id]} ->
+          case from(e in Event,
+                 join: i in assoc(e, :invoice),
+                 where: i.id == ^invoice_id,
+                 select: e,
+                 preload: [
+                   :actor,
+                   :commission,
+                   invoice: [],
+                   attachments: [:upload, :thumbnail, :preview]
+                 ]
+               )
+               |> Repo.one() do
+            %Event{} = ev -> {:ok, ev}
+            nil -> {:error, :event_not_found}
+          end
 
-      {:error, err} ->
-        Logger.error(%{message: "Failed to update invoice status to refunded", error: err})
-        {:error, :internal_error}
+        {0, _} ->
+          {:error, :invoice_not_found}
+      end
+    end)
+    |> Ecto.Multi.run(:invoice, fn _, %{event: event} ->
+      if event.invoice.refund_status == :succeeded do
+        actor =
+          if event.invoice.refunded_by_id do
+            %User{id: event.invoice.refunded_by_id} |> Repo.reload!()
+          else
+            msg = "Bad State: invoice refund succeeded but refunded_by_id is nil!"
+            Logger.error(%{message: msg})
+            raise msg
+          end
+
+        Commissions.create_event(
+          :refund_processed,
+          actor,
+          event.commission,
+          true,
+          [],
+          %{
+            amount: Money.new(refund.amount, String.to_atom(String.upcase(refund.currency)))
+          }
+        )
+      else
+        Notifications.invoice_refund_updated(event.commission, event, actor)
+      end
+
+      Commissions.Notifications.commission_event_updated(event.commission, event, actor)
+      {:ok, event.invoice}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{invoice: invoice}} ->
+        {:ok, invoice}
+
+      {:error, _, error, _} ->
+        Logger.error(%{message: "Failed to update invoice status to refunded", error: error})
+        {:error, error}
     end
   end
 
   @doc """
   Refunds or pays out invoices that have been held for longer than they should have.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def purge_expired_invoice(%Invoice{} = invoice) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        invoice = invoice |> Repo.reload() |> Repo.preload(commission: [:studio])
-        system = Accounts.system_user()
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:invoice, fn _, _ ->
+      {:ok, invoice |> Repo.reload() |> Repo.preload(commission: [:studio])}
+    end)
+    |> Ecto.Multi.run(:final_invoice, fn _, %{invoice: invoice} ->
+      system = Accounts.system_user()
 
-        invoice_expired? =
-          if is_nil(invoice.paid_on) do
-            false
-          else
-            age = DateTime.utc_now() |> DateTime.diff(invoice.paid_on)
+      invoice_expired? =
+        if is_nil(invoice.paid_on) do
+          false
+        else
+          age = DateTime.utc_now() |> DateTime.diff(invoice.paid_on)
 
-            age >= max_payment_age(invoice.commission.studio.country)
+          age >= max_payment_age(invoice.commission.studio.country)
+        end
+
+      case {invoice_expired?, invoice.status} do
+        {false, _} ->
+          {:ok, invoice}
+
+        {true, :succeeded} ->
+          # If funds haven't been released, refund the client.
+          with {:ok, invoice} <- refund_payment(system, invoice),
+               :ok <- Notifications.expired_invoice_refunded(invoice) do
+            {:ok, invoice}
           end
 
-        case {invoice_expired?, invoice.status} do
-          {false, _} ->
-            {:ok, invoice}
+        {true, :released} ->
+          # If they _have_ been released, pay out the studio if appropriate.
+          payout =
+            from(p in Payout,
+              join: i in assoc(p, :invoices),
+              where: i.id == ^invoice.id,
+              order_by: [desc: p.updated_at]
+            )
+            |> Repo.one()
 
-          {true, :succeeded} ->
-            # If funds haven't been released, refund the client.
-            with {:ok, invoice} <- refund_payment(system, invoice, true),
-                 :ok <- Notifications.expired_invoice_refunded(invoice) do
+          case payout do
+            %Payout{status: :paid} ->
               {:ok, invoice}
-            end
 
-          {true, :released} ->
-            # If they _have_ been released, pay out the studio if appropriate.
-            payout =
-              from(p in Payout,
-                join: i in assoc(p, :invoices),
-                where: i.id == ^invoice.id,
-                order_by: [desc: p.updated_at]
-              )
-              |> Repo.one()
+            %Payout{status: status, arrival_date: arrival_date}
+            when status in [:pending, :in_transit] ->
+              # There's a payout in flight, but we want to make sure that if
+              # anything happens to it, we still correctly purge. So we
+              # don't do anything, but we requeue purge_expired_invoice/1
+              # for the day after the arrival_date
+              # 1 day
+              next = arrival_date |> DateTime.from_naive!("Etc/UTC") |> DateTime.add(60 * 60 * 24)
 
-            case payout do
-              %Payout{status: :paid} ->
+              with {:ok, _job} <- ExpiredInvoicePurger.schedule_purge(invoice, next) do
                 {:ok, invoice}
+              end
 
-              %Payout{status: status, arrival_date: arrival_date}
-              when status in [:pending, :in_transit] ->
-                # There's a payout in flight, but we want to make sure that if
-                # anything happens to it, we still correctly purge. So we
-                # don't do anything, but we requeue purge_expired_invoice/1
-                # for the day after the arrival_date
-                # 1 day
-                next =
-                  arrival_date |> DateTime.from_naive!("Etc/UTC") |> DateTime.add(60 * 60 * 24)
+            _ ->
+              # If there's no payout for this invoice or the payout is in a
+              # failed state, initiate a new payout just for this invoice.
+              with {:ok, _payout} <-
+                     payout_studio(system, %Studio{id: invoice.commission.studio_id}, invoice),
+                   :ok <- Notifications.expired_invoice_paid_out(invoice) do
+                {:ok, invoice}
+              end
+          end
 
-                with {:ok, _job} <- ExpiredInvoicePurger.schedule_purge(invoice, next) do
-                  {:ok, invoice}
-                end
+        _ ->
+          # Unpaid and refunded invoices don't really have a deadline.
+          {:ok, invoice}
+      end
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{final_invoice: invoice}} ->
+        {:ok, invoice}
 
-              _ ->
-                # If there's no payout for this invoice or the payout is in a
-                # failed state, initiate a new payout just for this invoice.
-                with {:ok, _payout} <-
-                       payout_studio(system, %Studio{id: invoice.commission.studio_id}, invoice),
-                     :ok <- Notifications.expired_invoice_paid_out(invoice) do
-                  {:ok, invoice}
-                end
-            end
-
-          _ ->
-            # Unpaid and refunded invoices don't really have a deadline.
-            {:ok, invoice}
-        end
-      end)
-
-    ret
+      {:error, _, error, _} ->
+        Logger.error(%{message: "Failed to purge expired invoice", error: error})
+        {:error, error}
+    end
   end
 
   @doc """

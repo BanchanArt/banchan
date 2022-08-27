@@ -334,7 +334,7 @@ defmodule Banchan.StudiosTest do
           "text" => "please give me money :("
         })
 
-      assert {:ok, _} = Payments.expire_payment(artist, invoice, true)
+      assert {:ok, _} = Payments.expire_payment(artist, invoice)
 
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_balance, 4, fn opts ->

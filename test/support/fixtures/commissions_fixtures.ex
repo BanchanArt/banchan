@@ -145,7 +145,7 @@ defmodule Banchan.CommissionsFixtures do
 
   def refund_mock_payment(actor, %Invoice{} = invoice) do
     mock_refund_stripe_calls(invoice)
-    Payments.refund_payment(actor, invoice, true)
+    Payments.refund_payment(actor, invoice)
   end
 
   def payment_fixture(
