@@ -5,6 +5,7 @@ defmodule Banchan.Reports do
 
   import Ecto.Query, warn: false
 
+  alias Banchan.Accounts
   alias Banchan.Accounts.User
   alias Banchan.Repo
   alias Banchan.Reports.Report
@@ -176,52 +177,70 @@ defmodule Banchan.Reports do
   Updates a report. Returns the updated report with `reporter` and `investigator` preloaded.
   """
   def update_report(%User{} = actor, %Report{} = report, attrs) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        actor = actor |> Repo.reload()
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _, _ ->
+      actor = actor |> Repo.reload()
 
-        if :admin in actor.roles || :mod in actor.roles do
-          with {:ok, updated_report} <-
-                 report
-                 |> Report.update_changeset(attrs)
-                 |> Repo.update(returning: true) do
-            {:ok, updated_report |> Repo.preload([:reporter, :investigator], force: true)}
-          end
-        else
-          {:error, :unauthorized}
-        end
-      end)
+      if Accounts.mod?(actor) do
+        {:ok, actor}
+      else
+        {:error, :unauthorized}
+      end
+    end)
+    |> Ecto.Multi.update(:updated_report, Report.update_changeset(report, attrs), returning: true)
+    |> Ecto.Multi.run(:final_report, fn _, %{updated_report: report} ->
+      {:ok, report |> Repo.preload([:reporter, :investigator], force: true)}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{final_report: report}} ->
+        {:ok, report}
 
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
   Assigns a report to a particular user.
   """
   def assign_report(%User{} = actor, %Report{} = report, investigator) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        actor = actor |> Repo.reload()
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:actor, fn _, _ ->
+      actor = actor |> Repo.reload()
 
-        investigator = investigator && investigator |> Repo.reload()
+      if Accounts.mod?(actor) do
+        {:ok, actor}
+      else
+        {:error, :unauthorized}
+      end
+    end)
+    |> Ecto.Multi.run(:investigator, fn _, _ ->
+      investigator = investigator && investigator |> Repo.reload()
 
-        cond do
-          investigator && :admin not in investigator.roles && :mod not in investigator.roles ->
-            {:error, :not_an_admin}
+      if investigator && !Accounts.mod?(actor) do
+        {:error, :not_an_admin}
+      else
+        {:ok, investigator}
+      end
+    end)
+    |> Ecto.Multi.update(
+      :updated_report,
+      fn %{investigator: investigator} ->
+        Report.update_changeset(report, %{investigator_id: investigator && investigator.id})
+      end,
+      returning: true
+    )
+    |> Ecto.Multi.run(:final_report, fn _, %{updated_report: report} ->
+      {:ok, report |> Repo.preload([:reporter, :investigator], force: true)}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{final_report: report}} ->
+        {:ok, report}
 
-          :admin in actor.roles || :mod in actor.roles ->
-            with {:ok, updated_report} <-
-                   report
-                   |> Report.update_changeset(%{investigator_id: investigator && investigator.id})
-                   |> Repo.update(returning: true) do
-              {:ok, updated_report |> Repo.preload([:reporter, :investigator], force: true)}
-            end
-
-          true ->
-            {:error, :unauthorized}
-        end
-      end)
-
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 end
