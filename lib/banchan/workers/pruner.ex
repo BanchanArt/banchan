@@ -11,14 +11,14 @@ defmodule Banchan.Workers.Pruner do
   alias Banchan.{Accounts, Offerings, Repo, Studios}
 
   def perform(_) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        Accounts.prune_users()
-        Studios.prune_studios()
-        Offerings.prune_offerings()
-        :ok
-      end)
-
-    ret
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:prune_users, fn _, _ -> Accounts.prune_users() end)
+    |> Ecto.Multi.run(:prune_studios, fn _, _ -> Studios.prune_studios() end)
+    |> Ecto.Multi.run(:prune_offerings, fn _, _ -> Offerings.prune_offerings() end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, _} -> :ok
+      {:error, _, error, _} -> {:error, error}
+    end
   end
 end
