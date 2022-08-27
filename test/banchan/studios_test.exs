@@ -97,7 +97,8 @@ defmodule Banchan.StudiosTest do
   describe "updating" do
     test "update studio settings" do
       user = user_fixture()
-      studio = studio_fixture([user])
+      artist = user_fixture()
+      studio = studio_fixture([artist])
 
       attrs = %{
         default_terms: "new terms",
@@ -108,7 +109,6 @@ defmodule Banchan.StudiosTest do
         Studios.update_studio_settings(
           user,
           studio,
-          false,
           attrs
         )
 
@@ -118,9 +118,8 @@ defmodule Banchan.StudiosTest do
 
       {:ok, studio} =
         Studios.update_studio_settings(
-          user,
+          artist,
           studio,
-          true,
           attrs
         )
 
@@ -134,7 +133,8 @@ defmodule Banchan.StudiosTest do
 
     test "update studio profile" do
       user = user_fixture()
-      studio = studio_fixture([user])
+      artist = user_fixture()
+      studio = studio_fixture([artist])
 
       attrs = %{
         name: "new name",
@@ -146,7 +146,6 @@ defmodule Banchan.StudiosTest do
         Studios.update_studio_profile(
           user,
           studio,
-          false,
           attrs
         )
 
@@ -169,9 +168,8 @@ defmodule Banchan.StudiosTest do
 
       {:ok, studio} =
         Studios.update_studio_profile(
-          user,
+          artist,
           studio,
-          true,
           attrs
         )
 

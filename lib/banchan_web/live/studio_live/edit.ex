@@ -87,7 +87,6 @@ defmodule BanchanWeb.StudioLive.Edit do
     case Studios.update_studio_profile(
            socket.assigns.current_user,
            socket.assigns.studio,
-           socket.assigns.current_user_member?,
            Enum.into(val["studio"], %{
              "card_img_id" => (card_image && card_image.id) || val["studio"]["card_image_id"],
              "header_img_id" =>

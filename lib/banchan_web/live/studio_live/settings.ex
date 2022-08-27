@@ -65,7 +65,6 @@ defmodule BanchanWeb.StudioLive.Settings do
     case Studios.update_studio_settings(
            socket.assigns.current_user,
            socket.assigns.studio,
-           socket.assigns.current_user_member?,
            val["studio"]
          ) do
       {:ok, studio} ->
@@ -230,6 +229,7 @@ defmodule BanchanWeb.StudioLive.Settings do
             label="Go to Dashboard"
             class="btn btn-primary"
             to={Routes.stripe_dashboard_path(Endpoint, :dashboard, @studio.handle)}
+            opts={target: "_blank", rel: "noopener noreferrer"}
           />
 
           <div class="divider" />

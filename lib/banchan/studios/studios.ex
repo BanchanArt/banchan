@@ -569,17 +569,7 @@ defmodule Banchan.Studios do
   @doc """
   Updates the studio profile fields.
   """
-  def update_studio_settings(actor, studio, current_user_member?, attrs)
-
-  def update_studio_settings(%User{roles: roles} = actor, studio, false, attrs) do
-    if :admin in roles || :mod in roles do
-      update_studio_settings(actor, studio, true, attrs)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
-  def update_studio_settings(%User{} = actor, %Studio{} = studio, _, attrs) do
+  def update_studio_settings(%User{} = actor, %Studio{} = studio, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
       check_studio_member(studio, actor)
@@ -600,17 +590,7 @@ defmodule Banchan.Studios do
   @doc """
   Updates the studio profile fields.
   """
-  def update_studio_profile(actor, studio, current_user_member?, attrs)
-
-  def update_studio_profile(%User{roles: roles} = actor, studio, false, attrs) do
-    if :admin in roles || :mod in roles do
-      update_studio_profile(actor, studio, true, attrs)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
-  def update_studio_profile(%User{} = actor, %Studio{} = studio, _, attrs) do
+  def update_studio_profile(%User{} = actor, %Studio{} = studio, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
       check_studio_member(studio, actor)
@@ -716,17 +696,7 @@ defmodule Banchan.Studios do
   @doc """
   Sets the portfolio images for a Studio.
   """
-  def update_portfolio(actor, studio, current_user_member?, portfolio_images)
-
-  def update_portfolio(%User{} = actor, studio, false, images) do
-    if :admin in actor.roles || :mod in actor.roles do
-      update_portfolio(actor, studio, true, images)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
-  def update_portfolio(%User{} = actor, %Studio{} = studio, true, portfolio_images) do
+  def update_portfolio(%User{} = actor, %Studio{} = studio, portfolio_images) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
       check_studio_member(studio, actor)
@@ -818,7 +788,7 @@ defmodule Banchan.Studios do
           {:ok, nil}
       end
     end)
-    |> Ecto.Multi.insert(:disable_history_entry, fn _repo, %{unban_job: job} ->
+    |> Ecto.Multi.insert(:disable_history_entry, fn %{unban_job: job} ->
       %StudioDisableHistory{
         studio_id: studio.id,
         disabled_by_id: actor.id,
@@ -840,6 +810,7 @@ defmodule Banchan.Studios do
   @doc """
   Re-enable a previously disabled studio.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def enable_studio(%User{} = actor, %Studio{} = studio, reason, cancel \\ true) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
@@ -883,16 +854,23 @@ defmodule Banchan.Studios do
       end,
       []
     )
-    |> Ecto.Multi.run(:cancel_job, fn _repo, %{histories: [history | _]} ->
-      if cancel do
-        EnableStudio.cancel_unban(history)
-      else
-        {:ok, nil}
+    |> Ecto.Multi.run(:cancel_job, fn _repo, %{histories: {_, histories}} ->
+      case histories do
+        [history | _] ->
+          if cancel do
+            EnableStudio.cancel_unban(history)
+            {:ok, nil}
+          else
+            {:ok, nil}
+          end
+
+        [] ->
+          {:error, :not_disabled}
       end
     end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{histories: [history | _]}} ->
+      {:ok, %{histories: {_, [history | _]}}} ->
         {:ok, history}
 
       {:error, _, error, _} ->
@@ -1044,10 +1022,10 @@ defmodule Banchan.Studios do
         where: i.status in [:pending, :submitted]
       )
       |> Repo.stream()
-      |> Enum.reduce_while(:ok, fn invoice, :ok ->
+      |> Enum.reduce_while({:ok, []}, fn invoice, {:ok, acc} ->
         case Payments.expire_payment(actor, invoice, true) do
-          {:ok, _} ->
-            {:cont, :ok}
+          {:ok, val} ->
+            {:cont, {:ok, acc ++ [val]}}
 
           {:error, err} ->
             {:halt, {:error, err}}
