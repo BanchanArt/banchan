@@ -219,42 +219,38 @@ defmodule Banchan.Payments do
   @doc """
   Creates a new invoice.
   """
-  def invoice(actor, commission, current_user_member?, drafts, event_data)
+  def invoice(%User{} = actor, %Commission{} = commission, drafts, event_data) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      actor = Repo.reload(actor)
 
-  def invoice(actor, commission, false, drafts, event_data) do
-    if :admin in actor.roles || :mod in actor.roles do
-      invoice(actor, commission, true, drafts, event_data)
-    else
-      {:error, :unauthorized}
+      if Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id}) ||
+           Accounts.mod?(actor) do
+        {:ok, actor}
+      else
+        {:error, :unauthorized}
+      end
+    end)
+    |> Ecto.Multi.run(:event, fn _repo, %{checked_actor: actor} ->
+      Commissions.create_event(:comment, actor, commission, true, drafts, event_data)
+    end)
+    |> Ecto.Multi.insert(:invoice, fn %{event: event} ->
+      %Invoice{
+        client_id: commission.client_id,
+        commission: commission,
+        event: event
+      }
+      |> Invoice.creation_changeset(event_data)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{invoice: invoice, event: event, checked_actor: actor}} ->
+        send_event_update!(event.id, actor)
+        {:ok, invoice}
+
+      {:error, _, error, _} ->
+        {:error, error}
     end
-  end
-
-  def invoice(%User{} = actor, %Commission{} = commission, true, drafts, event_data) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        actor = Repo.reload(actor)
-
-        if Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id}) ||
-             :admin in actor.roles ||
-             :mod in actor.roles do
-          with {:ok, event} <-
-                 Commissions.create_event(:comment, actor, commission, true, drafts, event_data),
-               %Invoice{} = invoice <- %Invoice{
-                 client_id: commission.client_id,
-                 commission: commission,
-                 event: event
-               },
-               %Ecto.Changeset{} = changeset <- Invoice.creation_changeset(invoice, event_data),
-               {:ok, invoice} <- Repo.insert(changeset) do
-            send_event_update!(event.id, actor)
-            {:ok, invoice}
-          end
-        else
-          {:error, :unauthorized}
-        end
-      end)
-
-    ret
   end
 
   defp send_event_update!(event_id, actor \\ nil) do
@@ -276,34 +272,53 @@ defmodule Banchan.Payments do
   @doc """
   Pays out a Studio for the full available and released amount.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def payout_studio(%User{} = actor, %Studio{} = studio, invoice \\ nil) do
-    {:ok, balance} =
-      stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id})
-
-    # TODO: notifications!
-    try do
+    with {:ok, balance} <-
+           stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id}) do
+      # TODO: notifications!
       if invoice do
         payout_single_invoice(actor, studio, balance.available |> Enum.at(0), invoice)
       else
-        {:ok,
-         Enum.reduce(balance.available, [], fn avail, acc ->
-           case payout_available!(actor, studio, avail) do
-             {:ok, nil} ->
-               acc
+        Repo.transaction(fn ->
+          # NB(@zkat): We're not using Ecto.Multi here because we still want
+          # to commit errored payouts that failed because of Stripe failures, so they show up for users.
+          Enum.reduce_while(balance.available, {:ok, []}, fn avail, {:ok, acc} ->
+            case payout_available(actor, studio, avail) do
+              {:ok, nil} ->
+                {:cont, {:ok, acc}}
 
-             {:ok, %Payout{} = payout} ->
-               [payout | acc]
-           end
-         end)}
+              {:ok, payout} ->
+                {:cont, {:ok, [payout | acc]}}
+
+              {:error, error} ->
+                {:halt, {:error, error}}
+            end
+          end)
+        end)
+        |> case do
+          {:ok, {:ok, payouts}} ->
+            {:ok, Enum.reverse(payouts)}
+
+          {:ok, {:error, error}} ->
+            {:error, error}
+
+          {:error, error} ->
+            {:error, error}
+        end
       end
-    catch
-      %Stripe.Error{} = e ->
-        Logger.error("Stripe error during payout: #{e.message}")
-        {:error, e}
+      |> case do
+        {:ok, val} ->
+          {:ok, val}
 
-      {:error, err} ->
-        Logger.error(%{message: "Internal error during payout", error: err})
-        {:error, err}
+        {:error, %Stripe.Error{} = e} ->
+          Logger.error("Stripe error during payout: #{e.message}")
+          {:error, e}
+
+        {:error, error} ->
+          Logger.error(%{message: "Internal error during payout", error: error})
+          {:error, error}
+      end
     end
   end
 
@@ -311,19 +326,19 @@ defmodule Banchan.Payments do
     avail = Money.new(avail.amount, String.to_atom(String.upcase(avail.currency)))
 
     if avail.amount > 0 do
-      create_payout!(actor, studio, [invoice.id], 1, invoice.total_transferred)
+      create_payout(actor, studio, [invoice.id], 1, invoice.total_transferred)
     else
       {:error, :insufficient_funds}
     end
   end
 
-  defp payout_available!(%User{} = actor, %Studio{} = studio, avail) do
+  defp payout_available(%User{} = actor, %Studio{} = studio, avail) do
     avail = Money.new(avail.amount, String.to_atom(String.upcase(avail.currency)))
 
     if avail.amount > 0 do
       with {:ok, {invoice_ids, invoice_count, total}} <- invoice_details(studio, avail) do
         if total.amount > 0 do
-          create_payout!(actor, studio, invoice_ids, invoice_count, total)
+          create_payout(actor, studio, invoice_ids, invoice_count, total)
         else
           {:ok, nil}
         end
@@ -379,83 +394,91 @@ defmodule Banchan.Payments do
     end)
   end
 
-  defp create_payout!(
+  defp create_payout(
          %User{} = actor,
          %Studio{} = studio,
          invoice_ids,
          invoice_count,
          %Money{} = total
        ) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        case %Payout{
-               amount: total,
-               studio_id: studio.id,
-               actor_id: actor && actor.id,
-               invoices: from(i in Invoice, where: i.id in ^invoice_ids) |> Repo.all()
-             }
-             |> Repo.insert(returning: [:id]) do
-          {:ok, payout} ->
-            payout = payout |> Repo.preload(:invoices)
-            actual_count = Enum.count(payout.invoices)
+    Ecto.Multi.new()
+    |> Ecto.Multi.all(:invoices, from(i in Invoice, where: i.id in ^invoice_ids))
+    |> Ecto.Multi.insert(
+      :payout,
+      fn %{invoices: invoices} ->
+        %Payout{
+          amount: total,
+          studio_id: studio.id,
+          actor_id: actor && actor.id,
+          invoices: invoices
+        }
+      end,
+      returning: true
+    )
+    |> Ecto.Multi.one(:invoice_count, fn %{payout: payout} ->
+      from(p in Payout,
+        where: p.id == ^payout.id,
+        join: i in assoc(p, :invoices),
+        select: count(i.id)
+      )
+    end)
+    |> Ecto.Multi.run(:check_invoice_count, fn _, %{invoice_count: actual_count} ->
+      if actual_count == invoice_count do
+        {:ok, true}
+      else
+        Logger.error(%{
+          message:
+            "Wrong number of invoices associated with new Payout (expected: #{invoice_count}, actual: ${actual_count}"
+        })
 
-            if actual_count == invoice_count do
-              {:ok, payout}
-            else
-              Logger.error(%{
-                message:
-                  "Wrong number of invoices associated with new Payout (expected: #{invoice_count}, actual: ${actual_count}"
-              })
+        {:error, :invoice_count_mismatch}
+      end
+    end)
+    |> Ecto.Multi.run(:updated_payout, fn _repo, %{payout: payout} ->
+      case create_stripe_payout(studio, total) do
+        {:ok, stripe_payout} ->
+          process_payout_updated!(stripe_payout, payout.id)
 
-              throw({:error, "Payout failed due to an internal error."})
-            end
+        {:error, err} ->
+          Logger.error(%{message: "Failed to create Stripe payout", error: err})
 
-          {:error, err} ->
-            Logger.error(%{message: "Failed to insert payout row into database", error: err})
-            throw({:error, "Payout failed due to an internal error."})
-        end
-      end)
-
-    case ret do
-      {:ok, payout} ->
-        case create_stripe_payout(studio, total) do
-          {:ok, stripe_payout} ->
-            process_payout_updated!(stripe_payout, payout.id)
-
-          {:error, err} ->
-            Logger.error(%{message: "Failed to create Stripe payout", error: err})
-
-            process_payout_updated!(
-              %Stripe.Payout{
-                status: :failed,
-                arrival_date: DateTime.utc_now() |> DateTime.to_unix()
-              },
-              payout.id
-            )
-
-            throw(err)
-        end
-
-      {:error, err} ->
+          # NB(@zkat): We still return {:ok, payout} here, so folks can
+          # actually see the failed payout on their dashboards when calling
+          # out to stripe failed.
+          with {:ok, _} <-
+                 process_payout_updated!(
+                   %Stripe.Payout{
+                     status: :failed,
+                     arrival_date: DateTime.utc_now() |> DateTime.to_unix()
+                   },
+                   payout.id
+                 ) do
+            {:ok, err}
+          end
+      end
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_payout: %Stripe.Error{} = err}} ->
         {:error, err}
+
+      {:ok, %{updated_payout: payout}} ->
+        {:ok, payout}
+
+      {:error, _, error, _} ->
+        {:error, error}
     end
   end
 
   defp create_stripe_payout(%Studio{} = studio, %Money{} = total) do
-    case stripe_mod().create_payout(
-           %{
-             amount: total.amount,
-             currency: String.downcase(Atom.to_string(total.currency)),
-             statement_descriptor: "Banchan Art Payout"
-           },
-           headers: %{"Stripe-Account" => studio.stripe_id}
-         ) do
-      {:ok, stripe_payout} ->
-        {:ok, stripe_payout}
-
-      {:error, %Stripe.Error{} = error} ->
-        {:error, error}
-    end
+    stripe_mod().create_payout(
+      %{
+        amount: total.amount,
+        currency: String.downcase(Atom.to_string(total.currency)),
+        statement_descriptor: "Banchan Art Payout"
+      },
+      headers: %{"Stripe-Account" => studio.stripe_id}
+    )
   end
 
   ## Updating/Editing

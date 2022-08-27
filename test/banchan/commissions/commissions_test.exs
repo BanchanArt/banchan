@@ -162,7 +162,7 @@ defmodule Banchan.CommissionsTest do
       amount = Money.new(420, :USD)
 
       {:ok, invoice} =
-        Payments.invoice(commission.studio.artists |> List.first(), commission, true, [], %{
+        Payments.invoice(commission.studio.artists |> List.first(), commission, [], %{
           "amount" => amount,
           "text" => "Please pay me?"
         })

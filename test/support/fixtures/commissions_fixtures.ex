@@ -44,7 +44,7 @@ defmodule Banchan.CommissionsFixtures do
   end
 
   def invoice_fixture(%User{} = actor, %Commission{} = commission, data) do
-    {:ok, invoice} = Payments.invoice(actor, commission, true, [], data)
+    {:ok, invoice} = Payments.invoice(actor, commission, [], data)
     invoice
   end
 
