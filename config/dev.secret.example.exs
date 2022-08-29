@@ -11,6 +11,9 @@ config :banchan, Banchan.Repo,
   hostname: "localhost",
   pool_size: 10
 
+config :banchan,
+  github_access_token: ""
+
 # Sentry configuration
 # config :logger,
 #   backends: [:console, Sentry.LoggerBackend]
