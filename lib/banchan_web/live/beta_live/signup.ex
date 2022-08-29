@@ -132,13 +132,16 @@ defmodule BanchanWeb.BetaLive.Signup do
                 clients.
               </div>
               <div class="text-2xl font-semibold">
-                <span class="text-primary">135+</span> currencies.
-              </div>
-              <div class="text-2xl font-semibold">
-                <span class="text-primary">80+</span> artist countries.
+                <span class="text-primary">135+</span> currencies. <span class="text-primary">80+</span> countries.
               </div>
               <div class="text-2xl font-semibold">
                 <span class="text-primary">Prepayments</span> built-in.
+              </div>
+              <div class="text-2xl font-semibold">
+                <span class="text-primary">VAT</span> and <span class="text-primary">Sales Tax</span> handled for you.
+              </div>
+              <div class="text-2xl font-semibold">
+                <span class="text-primary">1099k</span> for US artists.
               </div>
             </div>
             <div class="md:order-1">
