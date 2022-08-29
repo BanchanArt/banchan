@@ -6,6 +6,7 @@ defmodule BanchanWeb.OfferingLive.Show do
 
   import BanchanWeb.StudioLive.Helpers
 
+  alias Banchan.Accounts
   alias Banchan.Commissions.LineItem
   alias Banchan.Offerings
   alias Banchan.Offerings.Notifications
@@ -27,6 +28,7 @@ defmodule BanchanWeb.OfferingLive.Show do
   alias BanchanWeb.StudioLive.Components.OfferingCard
 
   @impl true
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_params(%{"offering_type" => offering_type} = params, uri, socket) do
     if socket.assigns[:offering] do
       Notifications.unsubscribe_from_offering_updates(socket.assigns.offering)
@@ -71,7 +73,8 @@ defmodule BanchanWeb.OfferingLive.Show do
       )
 
     cond do
-      (offering.mature || offering.studio.mature) && !socket.assigns.current_user.mature_ok ->
+      (offering.mature || offering.studio.mature) && !socket.assigns.current_user.mature_ok &&
+        !socket.assigns.current_user_member? && !Accounts.mod?(socket.assigns.current_user) ->
         {:noreply,
          socket
          |> put_flash(
