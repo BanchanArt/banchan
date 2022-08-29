@@ -90,3 +90,4 @@ The undersigned have all agreed to this CLA:
 * Emil Socks (@EmiSocks)
 * Monique Murphy (@moniquemurphy)
 * Bryan Ginger (@bcgoss)
+* Richard Parachini (@LuxBrush)
