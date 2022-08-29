@@ -76,19 +76,6 @@ defmodule BanchanWeb.StudioLive.Shop do
   end
 
   @impl true
-  def handle_event("unarchive_offering", %{"type" => type}, socket) do
-    {:ok, _} =
-      Offerings.unarchive_offering(
-        socket.assigns.current_user,
-        Enum.find(socket.assigns.offerings, &(&1.type == type))
-      )
-
-    offerings = list_offerings(socket)
-
-    {:noreply, socket |> assign(offerings: offerings, page: 1)}
-  end
-
-  @impl true
   def handle_event("archive_studio", _, socket) do
     case Studios.archive_studio(socket.assigns.current_user, socket.assigns.studio) do
       {:ok, _} ->
@@ -227,7 +214,6 @@ defmodule BanchanWeb.StudioLive.Shop do
                 current_user={@current_user}
                 current_user_member?={@current_user_member?}
                 offering={offering}
-                unarchive="unarchive_offering"
               />
             </div>
           {#else}

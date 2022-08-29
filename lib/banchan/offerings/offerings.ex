@@ -125,6 +125,8 @@ defmodule Banchan.Offerings do
   def archive_offering(actor, %Offering{} = offering) do
     {:ok, ret} =
       Repo.transaction(fn ->
+        offering = offering |> Repo.reload()
+
         with {:ok, _actor} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor) do
           {1, [new]} =
             from(o in Offering,
@@ -158,6 +160,8 @@ defmodule Banchan.Offerings do
   def unarchive_offering(actor, %Offering{} = offering) do
     {:ok, ret} =
       Repo.transaction(fn ->
+        offering = offering |> Repo.reload()
+
         with {:ok, _actor} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor) do
           max_idx =
             from(o in Offering, where: o.studio_id == ^offering.studio_id, select: max(o.index))
@@ -623,10 +627,10 @@ defmodule Banchan.Offerings do
   defp filter_include_archived?(q, opts) do
     case Keyword.fetch(opts, :include_archived?) do
       {:ok, true} ->
-        q |> where([o], is_nil(o.archived_at))
+        q
 
       _ ->
-        q
+        q |> where([o], is_nil(o.archived_at))
     end
   end
 

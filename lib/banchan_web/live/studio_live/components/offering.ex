@@ -137,6 +137,24 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   end
 
   @impl true
+  def handle_event("unarchive", _, %{assigns: %{changeset: %{data: data}}} = socket) do
+    if data && data.id do
+      {:ok, _} =
+        Offerings.unarchive_offering(
+          socket.assigns.current_user,
+          %Offering{id: data.id}
+        )
+
+      {:noreply,
+       redirect(socket,
+         to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
+       )}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
   def handle_event("add_option", _, socket) do
     changeset = %OfferingOption{} |> OfferingOption.changeset(%{})
     options = Ecto.Changeset.fetch_field!(socket.assigns.changeset, :options) ++ [changeset]
@@ -551,8 +569,11 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         </Collapse>
         <div class="pt-4 flex flex-row">
           <Submit changeset={@changeset} label="Save" />
-          {#if @changeset.data.id}
+          {#if @changeset.data.id && is_nil(@changeset.data.archived_at)}
             <Button class="btn-error" click="archive" label="Archive" />
+          {/if}
+          {#if @changeset.data.id && @changeset.data.archived_at}
+            <Button class="btn-error" click="unarchive" label="Unarchive" />
           {/if}
         </div>
         {#if @changeset.data.id}
