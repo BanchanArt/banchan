@@ -89,7 +89,6 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
     case Payments.invoice(
            socket.assigns.current_user,
            socket.assigns.commission,
-           socket.assigns.current_user_member?,
            attachments,
            %{event | "amount" => Utils.moneyfy(amount, currency)}
          ) do

@@ -102,7 +102,6 @@ defmodule BanchanWeb.StudioLive.Portfolio do
     case Studios.update_portfolio(
            socket.assigns.current_user,
            socket.assigns.studio,
-           socket.assigns.current_user_member?,
            portfolio_images
          ) do
       {:ok, _} ->

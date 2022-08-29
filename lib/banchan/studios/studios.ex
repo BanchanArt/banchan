@@ -569,76 +569,77 @@ defmodule Banchan.Studios do
   @doc """
   Updates the studio profile fields.
   """
-  def update_studio_settings(actor, studio, current_user_member?, attrs)
+  def update_studio_settings(%User{} = actor, %Studio{} = studio, attrs) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      check_studio_member(studio, actor)
+    end)
+    |> Ecto.Multi.update(:updated_studio, Studio.settings_changeset(studio, attrs),
+      returning: true
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_studio: studio}} ->
+        {:ok, studio}
 
-  def update_studio_settings(%User{roles: roles} = actor, studio, false, attrs) do
-    if :admin in roles || :mod in roles do
-      update_studio_settings(actor, studio, true, attrs)
-    else
-      {:error, :unauthorized}
+      {:error, _, error, _} ->
+        {:error, error}
     end
-  end
-
-  def update_studio_settings(%User{} = actor, %Studio{} = studio, _, attrs) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        with {:ok, _actor} <- check_studio_member(studio, actor) do
-          studio
-          |> Studio.settings_changeset(attrs)
-          |> Repo.update(returning: true)
-        end
-      end)
-
-    ret
   end
 
   @doc """
   Updates the studio profile fields.
   """
-  def update_studio_profile(actor, studio, current_user_member?, attrs)
+  def update_studio_profile(%User{} = actor, %Studio{} = studio, attrs) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      check_studio_member(studio, actor)
+    end)
+    |> Ecto.Multi.run(:changeset, fn _repo, _changes ->
+      changeset =
+        studio
+        |> Studio.profile_changeset(attrs)
 
-  def update_studio_profile(%User{roles: roles} = actor, studio, false, attrs) do
-    if :admin in roles || :mod in roles do
-      update_studio_profile(actor, studio, true, attrs)
-    else
-      {:error, :unauthorized}
-    end
-  end
-
-  def update_studio_profile(%User{} = actor, %Studio{} = studio, _, attrs) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        with {:ok, _actor} <- check_studio_member(studio, actor) do
-          changeset =
-            studio
-            |> Studio.profile_changeset(attrs)
-
-          if changeset.valid? &&
-               (Ecto.Changeset.fetch_change(changeset, :name) != :error ||
-                  Ecto.Changeset.fetch_change(changeset, :handle) != :error) do
-            {:ok, _} =
-              stripe_mod().update_account(studio.stripe_id, %{
-                business_profile: %{
-                  name: Ecto.Changeset.get_field(changeset, :name),
-                  url:
-                    String.replace(
-                      Routes.studio_shop_url(
-                        Endpoint,
-                        :show,
-                        Ecto.Changeset.get_field(changeset, :handle)
-                      ),
-                      "localhost:4000",
-                      "banchan.art"
-                    )
-                }
-              })
-          end
-
-          changeset |> Repo.update(returning: true)
+      if changeset.valid? &&
+           (Ecto.Changeset.fetch_change(changeset, :name) != :error ||
+              Ecto.Changeset.fetch_change(changeset, :handle) != :error) do
+        with {:ok, _} <-
+               stripe_mod().update_account(studio.stripe_id, %{
+                 business_profile: %{
+                   name: Ecto.Changeset.get_field(changeset, :name),
+                   url:
+                     String.replace(
+                       Routes.studio_shop_url(
+                         Endpoint,
+                         :show,
+                         Ecto.Changeset.get_field(changeset, :handle)
+                       ),
+                       "localhost:4000",
+                       "banchan.art"
+                     )
+                 }
+               }) do
+          {:ok, changeset}
         end
-      end)
+      else
+        {:ok, changeset}
+      end
+    end)
+    |> Ecto.Multi.update(
+      :updated_studio,
+      fn %{changeset: changeset} ->
+        changeset
+      end,
+      returning: true
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_studio: studio}} ->
+        {:ok, studio}
 
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
@@ -695,58 +696,65 @@ defmodule Banchan.Studios do
   @doc """
   Sets the portfolio images for a Studio.
   """
-  def update_portfolio(actor, studio, current_user_member?, portfolio_images)
+  def update_portfolio(%User{} = actor, %Studio{} = studio, portfolio_images) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      check_studio_member(studio, actor)
+    end)
+    |> Ecto.Multi.update(
+      :updated_studio,
+      fn _ ->
+        portfolio_images =
+          (portfolio_images || [])
+          |> Enum.with_index()
+          |> Enum.map(fn {%Upload{} = upload, index} ->
+            %PortfolioImage{
+              index: index,
+              upload_id: upload.id
+            }
+          end)
 
-  def update_portfolio(%User{} = actor, studio, false, images) do
-    if :admin in actor.roles || :mod in actor.roles do
-      update_portfolio(actor, studio, true, images)
-    else
-      {:error, :unauthorized}
+        studio
+        |> Repo.preload(:portfolio_imgs)
+        |> Studio.portfolio_changeset(portfolio_images)
+      end,
+      returning: true
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_studio: studio}} ->
+        {:ok, studio}
+
+      {:error, _, error, _} ->
+        {:error, error}
     end
-  end
-
-  def update_portfolio(%User{} = actor, %Studio{} = studio, true, portfolio_images) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        with {:ok, _actor} <- check_studio_member(studio, actor) do
-          portfolio_images =
-            (portfolio_images || [])
-            |> Enum.with_index()
-            |> Enum.map(fn {%Upload{} = upload, index} ->
-              %PortfolioImage{
-                index: index,
-                upload_id: upload.id
-              }
-            end)
-
-          studio
-          |> Repo.preload(:portfolio_imgs)
-          |> Studio.portfolio_changeset(portfolio_images)
-          |> Repo.update(returning: true)
-        end
-      end)
-
-    ret
   end
 
   @doc """
   Updates whether the Studio is a featured studio. This is an admin action.
   """
   def update_featured(%User{} = actor, %Studio{} = studio, attrs) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        actor = actor |> Repo.reload()
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      actor = actor |> Repo.reload()
 
-        if :admin in actor.roles do
-          studio
-          |> Studio.featured_changeset(attrs)
-          |> Repo.update()
-        else
-          {:error, :unauthorized}
-        end
-      end)
+      if Accounts.admin?(actor) do
+        {:ok, actor}
+      else
+        {:error, :unauthorized}
+      end
+    end)
+    |> Ecto.Multi.update(:updated_studio, Studio.featured_changeset(studio, attrs),
+      returning: true
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_studio: studio}} ->
+        {:ok, studio}
 
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
@@ -758,99 +766,141 @@ defmodule Banchan.Studios do
   when the time comes.
   """
   def disable_studio(%User{} = actor, %Studio{} = studio, attrs) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        actor = actor |> Repo.reload()
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      actor = actor |> Repo.reload()
 
-        if :admin in actor.roles || :mod in actor.roles do
-          dummy = %StudioDisableHistory{} |> StudioDisableHistory.disable_changeset(attrs)
+      if Accounts.mod?(actor) do
+        {:ok, actor}
+      else
+        {:error, :unauthorized}
+      end
+    end)
+    |> Ecto.Multi.run(:dummy_history, fn _repo, _changeset ->
+      {:ok, %StudioDisableHistory{} |> StudioDisableHistory.disable_changeset(attrs)}
+    end)
+    |> Ecto.Multi.run(:unban_job, fn _repo, %{dummy_history: dummy} ->
+      case Ecto.Changeset.fetch_change(dummy, :disabled_until) do
+        {:ok, until} when not is_nil(until) ->
+          EnableStudio.schedule_unban(studio, until)
 
-          with {:ok, job} <-
-                 (case Ecto.Changeset.fetch_change(dummy, :disabled_until) do
-                    {:ok, until} when not is_nil(until) ->
-                      EnableStudio.schedule_unban(studio, until)
+        _ ->
+          {:ok, nil}
+      end
+    end)
+    |> Ecto.Multi.insert(:disable_history_entry, fn %{unban_job: job} ->
+      %StudioDisableHistory{
+        studio_id: studio.id,
+        disabled_by_id: actor.id,
+        disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+        lifting_job_id: job && job.id
+      }
+      |> StudioDisableHistory.disable_changeset(attrs)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{disable_history_entry: entry}} ->
+        {:ok, entry}
 
-                    _ ->
-                      {:ok, nil}
-                  end) do
-            %StudioDisableHistory{
-              studio_id: studio.id,
-              disabled_by_id: actor.id,
-              disabled_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-              lifting_job_id: job && job.id
-            }
-            |> StudioDisableHistory.disable_changeset(attrs)
-            |> Repo.insert()
-          end
-        else
-          {:error, :unauthorized}
-        end
-      end)
-
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
   Re-enable a previously disabled studio.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def enable_studio(%User{} = actor, %Studio{} = studio, reason, cancel \\ true) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        actor = actor && actor |> Repo.reload()
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      actor = actor |> Repo.reload()
 
-        if Accounts.system?(actor) || Accounts.admin?(actor) do
-          changeset =
-            StudioDisableHistory.enable_changeset(%StudioDisableHistory{}, %{
-              lifted_reason: reason
-            })
+      if Accounts.admin?(actor) || Accounts.system?(actor) do
+        {:ok, actor}
+      else
+        {:error, :unauthorized}
+      end
+    end)
+    |> Ecto.Multi.run(:changeset, fn _repo, _changes ->
+      changeset =
+        StudioDisableHistory.enable_changeset(%StudioDisableHistory{}, %{
+          lifted_reason: reason
+        })
 
-          if changeset.valid? do
-            {_, [history | _]} =
-              Repo.update_all(
-                from(h in StudioDisableHistory,
-                  where: h.studio_id == ^studio.id and is_nil(h.lifted_at),
-                  select: h
-                ),
-                set: [
-                  lifted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-                  lifted_by_id: actor && actor.id,
-                  lifted_reason: reason
-                ]
-              )
+      if changeset.valid? do
+        {:ok, changeset}
+      else
+        {:error, changeset}
+      end
+    end)
+    |> Ecto.Multi.update_all(
+      :histories,
+      fn _ ->
+        lifted_at = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+        actor_id = actor && actor.id
 
-            if cancel do
-              EnableStudio.cancel_unban(history)
-            end
-
-            {:ok, history}
+        from(h in StudioDisableHistory,
+          where: h.studio_id == ^studio.id and is_nil(h.lifted_at),
+          select: h,
+          update: [
+            set: [
+              lifted_at: ^lifted_at,
+              lifted_by_id: ^actor_id,
+              lifted_reason: ^reason
+            ]
+          ]
+        )
+      end,
+      []
+    )
+    |> Ecto.Multi.run(:cancel_job, fn _repo, %{histories: {_, histories}} ->
+      case histories do
+        [history | _] ->
+          if cancel do
+            EnableStudio.cancel_unban(history)
+            {:ok, nil}
           else
-            {:error, changeset}
+            {:ok, nil}
           end
-        else
-          {:error, :unauthorized}
-        end
-      end)
 
-    ret
+        [] ->
+          {:error, :not_disabled}
+      end
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{histories: {_, [history | _]}}} ->
+        {:ok, history}
+
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
   Updates admin-level fields for a user, such as their roles.
   """
   def update_admin_fields(%User{} = actor, %Studio{} = studio, attrs \\ %{}) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        actor = actor |> Repo.reload()
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      actor = actor |> Repo.reload()
 
-        if :admin in actor.roles || :mod in actor.roles do
-          Studio.admin_changeset(studio, attrs)
-          |> Repo.update()
-        else
-          {:error, :unauthorized}
-        end
-      end)
+      if Accounts.mod?(actor) do
+        {:ok, actor}
+      else
+        {:error, :unauthorized}
+      end
+    end)
+    |> Ecto.Multi.update(:updated_studio, Studio.admin_changeset(studio, attrs), returning: true)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_studio: studio}} ->
+        {:ok, studio}
 
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
@@ -859,22 +909,28 @@ defmodule Banchan.Studios do
   request new commissions, or even view the Studio profile.
   """
   def block_user(%User{} = actor, %Studio{} = studio, %User{} = user, attrs) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        with {:ok, _actor} <- check_studio_member(studio, actor, []) do
-          %StudioBlock{
-            studio_id: studio.id,
-            user_id: user.id
-          }
-          |> StudioBlock.changeset(attrs)
-          |> Repo.insert(
-            on_conflict: {:replace, [:reason]},
-            conflict_target: [:studio_id, :user_id]
-          )
-        end
-      end)
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      check_studio_member(studio, actor, [])
+    end)
+    |> Ecto.Multi.insert(
+      :block,
+      %StudioBlock{
+        studio_id: studio.id,
+        user_id: user.id
+      }
+      |> StudioBlock.changeset(attrs),
+      on_conflict: {:replace, [:reason]},
+      conflict_target: [:studio_id, :user_id]
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{block: block}} ->
+        {:ok, block}
 
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
@@ -882,17 +938,24 @@ defmodule Banchan.Studios do
   the Studio normally again.
   """
   def unblock_user(%User{} = actor, %Studio{} = studio, %User{} = user) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        with {:ok, _actor} <- check_studio_member(studio, actor) do
-          Repo.delete_all(
-            from sb in StudioBlock,
-              where: sb.studio_id == ^studio.id and sb.user_id == ^user.id
-          )
-        end
-      end)
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      check_studio_member(studio, actor)
+    end)
+    |> Ecto.Multi.delete_all(
+      :blocks,
+      from(sb in StudioBlock,
+        where: sb.studio_id == ^studio.id and sb.user_id == ^user.id
+      )
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{blocks: blocks}} ->
+        {:ok, blocks}
 
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   ## Deletion
@@ -902,32 +965,38 @@ defmodule Banchan.Studios do
   preventing new commissions.
   """
   def archive_studio(%User{} = actor, %Studio{} = studio) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        with {:ok, _actor} <- check_studio_member(studio, actor) do
-          studio
-          |> Studio.archive_changeset()
-          |> Repo.update(returning: true)
-        end
-      end)
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      check_studio_member(studio, actor)
+    end)
+    |> Ecto.Multi.update(:updated_studio, Studio.archive_changeset(studio), returning: true)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_studio: studio}} ->
+        {:ok, studio}
 
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
   Unarchives a studio.
   """
   def unarchive_studio(%User{} = actor, %Studio{} = studio) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        with {:ok, _actor} <- check_studio_member(studio, actor) do
-          studio
-          |> Studio.unarchive_changeset()
-          |> Repo.update(returning: true)
-        end
-      end)
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      check_studio_member(studio, actor)
+    end)
+    |> Ecto.Multi.update(:updated_studio, Studio.unarchive_changeset(studio), returning: true)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{updated_studio: studio}} ->
+        {:ok, studio}
 
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
@@ -935,43 +1004,54 @@ defmodule Banchan.Studios do
   days.
   """
   def delete_studio(%User{} = actor, %Studio{} = studio, password) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        with {:ok, actor} <- check_studio_member(studio, actor, [:system, :admin]),
-             {:ok, _} <- check_password(actor, password),
-             # Precheck that all our balances are indeed empty.
-             {:ok, _balance} <- check_balance_empty(studio),
-             # Cancel all open invoices.
-             :ok <-
-               from(i in Invoice,
-                 join: c in assoc(i, :commission),
-                 where: c.studio_id == ^studio.id,
-                 where: i.status in [:pending, :submitted]
-               )
-               |> Repo.stream()
-               |> Enum.reduce_while(:ok, fn invoice, :ok ->
-                 case Payments.expire_payment(actor, invoice, true) do
-                   {:ok, _} ->
-                     {:cont, :ok}
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
+      with {:ok, actor} <- check_studio_member(studio, actor, [:system, :admin]),
+           {:ok, _} <- check_password(actor, password) do
+        {:ok, actor}
+      end
+    end)
+    |> Ecto.Multi.run(:check_balance_empty, fn _repo, _changes ->
+      # Precheck that all our balances are indeed empty.
+      check_balance_empty(studio)
+    end)
+    |> Ecto.Multi.run(:cancel_invoices, fn _repo, %{checked_actor: actor} ->
+      from(i in Invoice,
+        join: c in assoc(i, :commission),
+        where: c.studio_id == ^studio.id,
+        where: i.status in [:pending, :submitted]
+      )
+      |> Repo.stream()
+      |> Enum.reduce_while({:ok, []}, fn invoice, {:ok, acc} ->
+        case Payments.expire_payment(actor, invoice) do
+          {:ok, val} ->
+            {:cont, {:ok, acc ++ [val]}}
 
-                   {:error, err} ->
-                     {:halt, {:error, err}}
-                 end
-               end),
-             # Check balances again to clear up any races.
-             {:ok, _balance} <- check_balance_empty(studio),
-             {:ok, _} <- delete_stripe_account(studio),
-             # Mark the studio for deletion.
-             {:ok, studio} <-
-               studio
-               |> Studio.deletion_changeset()
-               |> Repo.update(returning: true) do
-          Notifications.studio_deleted(actor, studio)
-          {:ok, studio}
+          {:error, err} ->
+            {:halt, {:error, err}}
         end
       end)
+    end)
+    |> Ecto.Multi.run(:check_balance_empty_again, fn _repo, _changes ->
+      # Check balances again to clear up any races.
+      check_balance_empty(studio)
+    end)
+    |> Ecto.Multi.run(:delete_stripe_account, fn _repo, _changes ->
+      delete_stripe_account(studio)
+    end)
+    |> Ecto.Multi.update(:deleted_studio, Studio.deletion_changeset(studio), returning: true)
+    |> Ecto.Multi.run(:notify_members, fn _repo,
+                                          %{deleted_studio: studio, checked_actor: actor} ->
+      {:ok, Notifications.studio_deleted(actor, studio)}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{deleted_studio: studio}} ->
+        {:ok, studio}
 
-    ret
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   defp check_balance_empty(%Studio{} = studio) do

@@ -97,7 +97,8 @@ defmodule Banchan.StudiosTest do
   describe "updating" do
     test "update studio settings" do
       user = user_fixture()
-      studio = studio_fixture([user])
+      artist = user_fixture()
+      studio = studio_fixture([artist])
 
       attrs = %{
         default_terms: "new terms",
@@ -108,7 +109,6 @@ defmodule Banchan.StudiosTest do
         Studios.update_studio_settings(
           user,
           studio,
-          false,
           attrs
         )
 
@@ -118,9 +118,8 @@ defmodule Banchan.StudiosTest do
 
       {:ok, studio} =
         Studios.update_studio_settings(
-          user,
+          artist,
           studio,
-          true,
           attrs
         )
 
@@ -134,7 +133,8 @@ defmodule Banchan.StudiosTest do
 
     test "update studio profile" do
       user = user_fixture()
-      studio = studio_fixture([user])
+      artist = user_fixture()
+      studio = studio_fixture([artist])
 
       attrs = %{
         name: "new name",
@@ -146,7 +146,6 @@ defmodule Banchan.StudiosTest do
         Studios.update_studio_profile(
           user,
           studio,
-          false,
           attrs
         )
 
@@ -169,9 +168,8 @@ defmodule Banchan.StudiosTest do
 
       {:ok, studio} =
         Studios.update_studio_profile(
-          user,
+          artist,
           studio,
-          true,
           attrs
         )
 
@@ -336,7 +334,7 @@ defmodule Banchan.StudiosTest do
           "text" => "please give me money :("
         })
 
-      assert {:ok, _} = Payments.expire_payment(artist, invoice, true)
+      assert {:ok, _} = Payments.expire_payment(artist, invoice)
 
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_balance, 4, fn opts ->
@@ -681,8 +679,8 @@ defmodule Banchan.StudiosTest do
       assert {:error, stripe_err} == result
       assert log =~ "[error] Stripe error during payout: Log me?\n"
 
-      [%Payout{status: :failed, stripe_payout_id: nil}] =
-        from(p in Payout, where: p.studio_id == ^studio.id) |> Repo.all()
+      assert [%Payout{status: :failed, stripe_payout_id: nil}] =
+               from(p in Payout, where: p.studio_id == ^studio.id) |> Repo.all()
 
       # We don't mark them as failed when the failure was immediate. They just
       # stay "released".

@@ -99,12 +99,11 @@ defmodule BanchanWeb.Components.MasonryGallery do
 
   def render(assigns) do
     ~F"""
-    <div class={@class}>
+    <div id={@id} class={@class} :hook="MasonryGallery">
       <Lightbox id={@id <> "-lightbox"}>
         <div
           id={@id <> "-gallery-hook-wrapper"}
-          :hook="MasonryGallery"
-          class="gap-0 sm:gap-2 columns-2 sm:columns-3 md:columns-4"
+          class="item-container gap-0 sm:gap-2 columns-2 sm:columns-3 md:columns-4"
         >
           {#for image <- @images}
             {#case image}
