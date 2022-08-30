@@ -194,18 +194,18 @@ defmodule BanchanWeb.OfferingLive.Show do
               >{@offering.studio.name}</LiveRedirect>
             </div>
             {#if @offering.mature}
-              <div class="badge badge-error badge-outline">Mature</div>
+              <div class="badge badge-error">Mature</div>
             {/if}
             {#if @offering.hidden}
-              <div class="badge badge-error badge-outline">Hidden</div>
+              <div class="badge badge-error">Hidden</div>
             {#elseif @offering.open && !is_nil(@offering.slots)}
-              <div class="whitespace-nowrap badge badge-outline badge-primary">{@available_slots}/{@offering.slots} Slots</div>
+              <div class="whitespace-nowrap badge badge-primary">{@available_slots}/{@offering.slots} Slots</div>
             {#elseif !@offering.open && !is_nil(@offering.slots)}
-              <div class="badge badge-error badge-outline">0/{@offering.slots} Slots</div>
+              <div class="badge badge-error">0/{@offering.slots} Slots</div>
             {#elseif @offering.open}
-              <div class="badge badge-primary badge-outline">Open</div>
+              <div class="badge badge-primary">Open</div>
             {#else}
-              <div class="badge badge-error badge-outline">Closed</div>
+              <div class="badge badge-error">Closed</div>
             {/if}
           </div>
           <div class="divider" />
