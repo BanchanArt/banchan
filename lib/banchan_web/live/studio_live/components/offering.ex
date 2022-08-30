@@ -367,6 +367,16 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     end)
   end
 
+  defp option_currency(changeset, index, studio) do
+    opt = Enum.at(Ecto.Changeset.fetch_field!(changeset, :options), index)
+
+    if opt.price do
+      opt.price.currency
+    else
+      studio.default_currency
+    end
+  end
+
   def render(assigns) do
     ~F"""
     <Form
@@ -515,7 +525,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                             show_label={false}
                             options={@studio.payment_currencies
                             |> Enum.map(&{"#{to_string(&1)}#{Money.Currency.symbol(&1)}", &1})}
-                            selected={@studio.default_currency}
+                            selected={option_currency(@changeset, index, @studio)}
                             opts={required: true}
                           />
                         </div>
