@@ -74,7 +74,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
           <LivePatch class="link" to={Routes.discover_index_path(Endpoint, :index, "offerings", params)}>Search Offerings instead.</LivePatch>
         {/if}
       {#else}
-        <div class="studio-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+        <div class="studio-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
           {#for studio <- @studios}
             <StudioCard studio={studio} />
           {/for}
