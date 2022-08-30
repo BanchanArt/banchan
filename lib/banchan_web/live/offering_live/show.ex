@@ -185,7 +185,7 @@ defmodule BanchanWeb.OfferingLive.Show do
               <div class="w-full h-full aspect-video bg-base-300" />
             {/if}
           </Lightbox>
-          <div class="flex flex-row flex-wrap items-center gap-2">
+          <div class="flex flex-col flex-wrap items-end gap-2">
             <div class="md:text-xl grow">
               By
               <LiveRedirect
