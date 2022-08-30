@@ -55,19 +55,19 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           </:image>
           <div class="absolute top-4 right-4 flex flex-row flex-wrap gap-2">
             {#if @offering.open && !is_nil(@offering.slots)}
-              <div class="whitespace-nowrap badge badge-primary">{@available_slots}/{@offering.slots} Slots</div>
+              <div class="whitespace-nowrap badge badge-primary shadow-md shadow-black">{@available_slots}/{@offering.slots} Slots</div>
             {#elseif !@offering.open && !is_nil(@offering.slots)}
-              <div class="badge badge-error">0/{@offering.slots} Slots</div>
+              <div class="badge badge-error shadow-md shadow-black">0/{@offering.slots} Slots</div>
             {#elseif @offering.open}
-              <div class="badge badge-primary">Open</div>
+              <div class="badge badge-primary shadow-md shadow-black">Open</div>
             {#else}
-              <div class="badge badge-error">Closed</div>
+              <div class="badge badge-error shadow-md shadow-black">Closed</div>
             {/if}
             {#if @offering.mature}
-              <div class="badge badge-error">Mature</div>
+              <div class="badge badge-error shadow-md shadow-black">Mature</div>
             {/if}
             {#if @offering.hidden}
-              <div class="badge badge-error">Hidden</div>
+              <div class="badge badge-error shadow-md shadow-black">Hidden</div>
             {/if}
           </div>
 
