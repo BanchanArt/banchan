@@ -87,6 +87,7 @@ defmodule Banchan.MixProject do
       {:sweet_xml, "~> 0.6"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 0.5"},
+      {:tentacat, "~> 2.2"},
       {:timex, "~> 3.7.6"},
       {:ueberauth_discord, "~> 0.7.0"},
       {:ueberauth_google, "~> 0.10.1"},

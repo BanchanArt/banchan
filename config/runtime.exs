@@ -58,6 +58,16 @@ if config_env() == :prod do
     api_key: stripe_secret,
     endpoint_secret: endpoint_secret
 
+  github_pat =
+    System.get_env("GITHUB_PAT") ||
+      raise """
+      environment variable GITHUB_PAT is missing.
+      You can generate one by going to https://github.com/settings/tokens
+      """
+
+  config :banchan,
+    github_access_token: github_pat
+
   dsn =
     System.get_env("SENTRY_DSN") ||
       raise """
