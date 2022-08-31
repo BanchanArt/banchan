@@ -186,6 +186,14 @@ defmodule BanchanWeb.Components.Layout do
                 </LiveRedirect>
               </li>
               <li>
+                <LiveRedirect to={Routes.report_bug_new_path(Endpoint, :new)}>
+                  <span>
+                    <i class="fas fa-bug" />
+                    Report Bug
+                  </span>
+                </LiveRedirect>
+              </li>
+              <li>
                 <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
                   <span>
                     <i class="fa fa-sign-out-alt" />
