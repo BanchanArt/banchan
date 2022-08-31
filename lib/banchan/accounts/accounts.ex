@@ -1740,5 +1740,12 @@ defmodule Banchan.Accounts do
       body: "reported by [@#{actor.handle}](#{actor_url_fn.(actor)}):\n\n#{body}",
       labels: ["bug", "from-site"]
     })
+    |> case do
+      {201, %{"html_url" => url}, _} ->
+        {:ok, url}
+
+      {_, _, _} ->
+        {:error, :internal_error}
+    end
   end
 end
