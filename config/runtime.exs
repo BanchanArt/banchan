@@ -62,7 +62,8 @@ if config_env() == :prod do
     System.get_env("GITHUB_PAT") ||
       raise """
       environment variable GITHUB_PAT is missing.
-      You can generate one by going to https://github.com/settings/tokens
+      You can generate one by going to https://github.com/settings/tokens.
+      Must have `public_repo` scope.
       """
 
   config :banchan,
