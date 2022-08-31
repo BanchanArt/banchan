@@ -135,8 +135,6 @@ defmodule BanchanWeb.Router do
   scope "/", BanchanWeb do
     pipe_through(:browser)
 
-    get("/go/:handle", DispatchController, :dispatch)
-
     get("/images/:type/:id", PublicImageController, :image)
 
     get("/images/:type/:id/download", PublicImageController, :download)

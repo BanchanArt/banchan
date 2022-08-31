@@ -7,7 +7,6 @@ defmodule Banchan.Accounts.User do
   import Banchan.Validators
 
   alias Banchan.Accounts.DisableHistory
-  alias Banchan.Identities
   alias Banchan.Notifications.{UserNotification, UserNotificationSettings}
   alias Banchan.Studios.Studio
   alias Banchan.Uploads.Upload
@@ -98,7 +97,7 @@ defmodule Banchan.Accounts.User do
     user
     |> cast(attrs, [:handle, :email, :password])
     |> validate_required([:email])
-    |> validate_handle()
+    |> validate_handle(:handle)
     |> validate_unique_email(:email)
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
@@ -120,12 +119,12 @@ defmodule Banchan.Accounts.User do
       :totp_secret,
       :totp_activated
     ])
-    |> validate_handle_unique(:handle)
-    |> unique_constraint(:handle)
+    |> validate_handle(:handle)
     |> validate_required([:email])
     |> validate_unique_email(:email)
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
+    |> unique_constraint(:handle)
   end
 
   def registration_oauth_changeset(user, attrs, opts \\ []) do
@@ -143,14 +142,13 @@ defmodule Banchan.Accounts.User do
       :discord_uid,
       :discord_handle
     ])
-    |> validate_handle_unique(:handle)
-    |> unique_constraint(:handle)
-    |> validate_handle()
+    |> validate_handle(:handle)
     |> validate_unique_email(:email)
     |> validate_bio()
     |> validate_name()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
+    |> unique_constraint(:handle)
   end
 
   @spec login_changeset(
@@ -164,17 +162,6 @@ defmodule Banchan.Accounts.User do
   def login_changeset(user, attrs) do
     user
     |> cast(attrs, [:email, :password])
-  end
-
-  defp validate_handle(changeset) do
-    changeset
-    |> validate_required([:handle])
-    |> validate_format(:handle, ~r/^[a-zA-Z0-9_]+$/,
-      message: "only letters, numbers, and underscores are allowed"
-    )
-    |> validate_length(:handle, min: 3, max: 16)
-    |> validate_handle_unique(:handle)
-    |> unique_constraint(:handle)
   end
 
   def auto_username do
@@ -280,7 +267,7 @@ defmodule Banchan.Accounts.User do
   def handle_changeset(user, attrs) do
     user
     |> cast(attrs, [:handle])
-    |> validate_handle()
+    |> validate_handle(:handle)
   end
 
   @doc """
@@ -403,22 +390,12 @@ defmodule Banchan.Accounts.User do
   def system_registration_changeset(user, attrs) do
     user
     |> cast(attrs, [:handle, :name, :bio, :password])
-    |> validate_handle()
+    |> validate_handle(:handle)
     |> validate_name()
     |> validate_bio()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password([])
     |> put_change(:roles, [:system])
-  end
-
-  defp validate_handle_unique(changeset, field) when is_atom(field) do
-    validate_change(changeset, field, fn current_field, value ->
-      if Identities.validate_uniqueness_of_handle(value) do
-        []
-      else
-        [{current_field, "already exists"}]
-      end
-    end)
   end
 
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
