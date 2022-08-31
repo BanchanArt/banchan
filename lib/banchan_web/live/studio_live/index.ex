@@ -51,7 +51,7 @@ defmodule BanchanWeb.StudioLive.Index do
         {/for}
         <LiveRedirect to={Routes.studio_new_path(Endpoint, :new)}>
           <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full transition-all">
-            <span class="text-6xl mx-auto my-auto flex items-center justify-center h-full">+</span>
+            <span class="text-6xl m-auto before:-mb-6 before:table after:-mt-2 after:table">+</span>
           </Card>
         </LiveRedirect>
       </div>
