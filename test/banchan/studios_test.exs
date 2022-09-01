@@ -37,18 +37,6 @@ defmodule Banchan.StudiosTest do
 
       refute changeset.valid?
     end
-
-    test "cannot use an existing user handle" do
-      user = user_fixture()
-
-      changeset =
-        Studio.profile_changeset(
-          %Studio{},
-          %{name: "valid name", handle: user.handle}
-        )
-
-      refute changeset.valid?
-    end
   end
 
   describe "creation" do
@@ -138,7 +126,7 @@ defmodule Banchan.StudiosTest do
 
       attrs = %{
         name: "new name",
-        handle: "new-handle",
+        handle: "new_handle",
         about: "new about"
       }
 
@@ -174,7 +162,7 @@ defmodule Banchan.StudiosTest do
         )
 
       assert studio.name == "new name"
-      assert studio.handle == "new-handle"
+      assert studio.handle == "new_handle"
       assert studio.about == "new about"
 
       from_db = Repo.get!(Studio, studio.id) |> Repo.preload(:artists)
