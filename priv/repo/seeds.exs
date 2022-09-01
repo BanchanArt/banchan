@@ -41,7 +41,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
     Banchan.Studios.new_studio(
       %Banchan.Studios.Studio{artists: [user]},
       %{
-        handle: "kitteh-studio",
+        handle: "kitteh_studio",
         name: "Kitteh Studio",
         country: "US",
         default_currency: "USD",
@@ -121,7 +121,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
     Banchan.Studios.new_studio(
       %Banchan.Studios.Studio{artists: [user]},
       %{
-        handle: "kitteh-japan",
+        handle: "kitteh_japan",
         name: "Kitteh Studio in Japan",
         country: "JP",
         default_currency: "JPY",
