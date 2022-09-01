@@ -4,6 +4,17 @@ defmodule Banchan.Validators do
   """
   import Ecto.Changeset
 
+  def validate_handle(changeset, field) do
+    changeset
+    |> validate_required(field)
+    |> validate_format(field, ~r/^[a-zA-Z0-9_]+$/,
+      message: "only letters, numbers, and underscores are allowed"
+    )
+    |> validate_length(field, min: 3, max: 24)
+    |> unsafe_validate_unique(field, Banchan.Repo)
+    |> unique_constraint(field)
+  end
+
   def validate_email(changeset, field) do
     changeset
     |> validate_format(field, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")

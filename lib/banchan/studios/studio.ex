@@ -6,7 +6,6 @@ defmodule Banchan.Studios.Studio do
 
   import Banchan.Validators
 
-  alias Banchan.Identities
   alias Banchan.Studios.{Common, PortfolioImage, StudioBlock, StudioDisableHistory}
   alias Banchan.Uploads.Upload
 
@@ -89,7 +88,7 @@ defmodule Banchan.Studios.Studio do
     |> validate_required([:name, :handle, :country, :default_currency, :payment_currencies])
     |> validate_markdown(:about)
     |> validate_default_currency(:default_currency, :payment_currencies)
-    |> validate_handle_unique(:handle)
+    |> validate_handle(:handle)
   end
 
   def settings_changeset(studio, attrs) do
@@ -135,7 +134,7 @@ defmodule Banchan.Studios.Studio do
     |> validate_length(:handle, min: 3, max: 16)
     |> validate_length(:about, max: 1500)
     |> validate_tags()
-    |> validate_handle_unique(:handle)
+    |> validate_handle(:handle)
     |> foreign_key_constraint(:card_img_id)
     |> foreign_key_constraint(:header_img_id)
   end
@@ -187,16 +186,6 @@ defmodule Banchan.Studios.Studio do
 
         _ ->
           []
-      end
-    end)
-  end
-
-  defp validate_handle_unique(changeset, field) when is_atom(field) do
-    validate_change(changeset, field, fn current_field, value ->
-      if Identities.validate_uniqueness_of_handle(value) do
-        []
-      else
-        [{current_field, "already exists"}]
       end
     end)
   end

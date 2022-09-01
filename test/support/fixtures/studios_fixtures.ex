@@ -11,15 +11,13 @@ defmodule Banchan.StudiosFixtures do
 
   def unique_stripe_id, do: "stripe-id#{System.unique_integer()}"
   def unique_studio_email, do: "studio#{System.unique_integer()}@example.com"
-  def unique_studio_handle, do: "studio-handle#{System.unique_integer()}"
-  def unique_studio_name, do: "studio-name#{:rand.uniform(100_000)}"
+  def unique_studio_handle, do: "studio_#{:rand.uniform(100_000)}"
+  def unique_studio_name, do: "studio name#{:rand.uniform(100_000)}"
 
   def valid_studio_attributes(attrs \\ %{}) do
-    name = "studio#{System.unique_integer()}"
-
     Enum.into(attrs, %{
-      name: name,
-      handle: name <> "-handle",
+      name: unique_studio_name(),
+      handle: unique_studio_handle(),
       country: "US",
       default_currency: "USD",
       payment_currencies: ["USD", "EUR", "JPY"]

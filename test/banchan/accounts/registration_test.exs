@@ -46,11 +46,11 @@ defmodule Banchan.AccountsTest.Registration do
     test "validates handle uniqueness" do
       %{handle: handle} = unconfirmed_user_fixture()
       {:error, changeset} = Accounts.register_user(%{handle: handle})
-      assert "already exists" in errors_on(changeset).handle
+      assert "has already been taken" in errors_on(changeset).handle
 
       # Now try with the upper cased handle too, to check that handle case is ignored.
       {:error, changeset} = Accounts.register_user(%{handle: String.upcase(handle)})
-      assert "already exists" in errors_on(changeset).handle
+      assert "has already been taken" in errors_on(changeset).handle
     end
 
     test "validates email uniqueness" do
