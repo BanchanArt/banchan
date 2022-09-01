@@ -7,7 +7,7 @@ defmodule Banchan.Validators do
   def validate_handle(changeset, field) do
     changeset
     |> validate_required(field)
-    |> validate_format(field, ~r/^[a-zA-Z0-9_]+$/,
+    |> validate_format(field, ~r/^[a-zA-Z0-9_-]+$/,
       message: "only letters, numbers, and underscores are allowed"
     )
     |> validate_length(field, min: 3, max: 24)
