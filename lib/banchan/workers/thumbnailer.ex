@@ -8,7 +8,6 @@ defmodule Banchan.Workers.Thumbnailer do
     max_attempts: 5,
     tags: ["thumbnailer", "media"]
 
-  require Logger
   import FFmpex, warn: false
   use FFmpex.Options
 

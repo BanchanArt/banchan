@@ -4,8 +4,6 @@ defmodule BanchanWeb.SettingsLive do
   """
   use BanchanWeb, :surface_view
 
-  require Logger
-
   alias Surface.Components.{Form, LiveRedirect}
 
   alias Banchan.Accounts
@@ -382,9 +380,7 @@ defmodule BanchanWeb.SettingsLive do
          )
          |> redirect(to: Routes.settings_path(Endpoint, :edit))}
 
-      {:error, err} ->
-        Logger.error("Unexpected error sending artist invite", %{error: err})
-
+      {:error, _} ->
         {:noreply,
          socket
          |> put_flash(
