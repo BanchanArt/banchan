@@ -8,6 +8,7 @@ defmodule BanchanWeb.StudioLive.Edit do
 
   alias Banchan.Studios
   alias Banchan.Studios.Studio
+  alias Banchan.Uploads
 
   import BanchanWeb.StudioLive.Helpers
 
@@ -36,16 +37,14 @@ defmodule BanchanWeb.StudioLive.Edit do
        remove_header: false
      )
      |> allow_upload(:card_image,
-       # TODO: Be less restrictive here
-       accept: ~w(.jpg .jpeg .png),
+       accept: Uploads.supported_image_format_extensions(),
        max_entries: 1,
-       max_file_size: 10_000_000
+       max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
      )
      |> allow_upload(:header_image,
-       # TODO: Be less restrictive here
-       accept: ~w(.jpg .jpeg .png),
+       accept: Uploads.supported_image_format_extensions(),
        max_entries: 1,
-       max_file_size: 10_000_000
+       max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
      )}
   end
 

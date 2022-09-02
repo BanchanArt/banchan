@@ -802,9 +802,12 @@ defmodule Banchan.StudiosTest do
       end
     end
 
-    test "payout with insufficient funds" do
-      # TODO: Payout with insufficient funds should fail
-      # TODO: Payout with negative balance should fail
+    @tag skip: "TODO"
+    test "payout with insufficient funds should fail" do
+    end
+
+    @tag skip: "TODO"
+    test "payout with negative balance should fail" do
     end
 
     test "canceled payout" do

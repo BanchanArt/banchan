@@ -9,7 +9,6 @@ defmodule BanchanWeb.Components.Lightbox.Item do
   prop download, :string
 
   # Type of media. Can be :image or :video
-  # TODO: Finish adding video support.
   prop media, :string, default: :image
 
   slot default

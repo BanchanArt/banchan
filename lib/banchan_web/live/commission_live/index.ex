@@ -101,10 +101,6 @@ defmodule BanchanWeb.CommissionLive do
 
   @impl true
   def handle_info(%{event: "new_events", payload: events}, socket) do
-    # TODO: I don't know why, but we sometimes get two `new_events` messages
-    # for a single event addition. So we have to dedup here just in case until
-    # that bug is... fixed? If it's even a bug vs something expected?
-    # events = events |> Enum.map(& Repo.preload(&1, [:actor]))
     events = socket.assigns.commission.events ++ events
 
     users =
@@ -119,6 +115,9 @@ defmodule BanchanWeb.CommissionLive do
 
     events =
       events
+      # TODO: I don't know why, but we sometimes get two `new_events` messages
+      # for a single event addition. So we have to dedup here just in case until
+      # that bug is... fixed? If it's even a bug vs something expected?
       |> Enum.dedup_by(& &1.public_id)
       |> Enum.sort(&(Timex.diff(&1.inserted_at, &2.inserted_at) < 0))
 

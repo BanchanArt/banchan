@@ -805,8 +805,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       assert invoice_box =~ "due to a lost or stolen card."
     end
 
+    @tag skip: "TODO"
     test "refunding after release" do
-      # TODO: Implement this
     end
   end
 

@@ -36,7 +36,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
 
   def handle_event("open_cancel_modal", _, socket) do
     Modal.show(socket.assigns.id <> "_cancel_modal")
-    {:noreply, socket}
+    {:noreply, socket |> assign(modal_error_message: nil)}
   end
 
   def handle_event("cancel_payout", _, socket) do
@@ -50,7 +50,6 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
         {:noreply, socket}
 
       {:error, err} ->
-        # TODO: Show this message
         {:noreply,
          socket |> assign(modal_error_message: "Failed to cancel payout: #{err.user_message}")}
     end

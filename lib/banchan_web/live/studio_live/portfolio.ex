@@ -7,6 +7,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
   import BanchanWeb.StudioLive.Helpers
 
   alias Banchan.Studios
+  alias Banchan.Uploads
 
   alias Surface.Components.Form
 
@@ -33,10 +34,9 @@ defmodule BanchanWeb.StudioLive.Portfolio do
       if socket.assigns.current_user_member? do
         socket
         |> allow_upload(:portfolio_images,
-          # TODO: Be less restrictive here
-          accept: ~w(.jpg .jpeg .png),
+          accept: Uploads.supported_image_format_extensions(),
           max_entries: 40,
-          max_file_size: 10_000_000
+          max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
         )
       else
         socket

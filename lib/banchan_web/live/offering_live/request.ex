@@ -70,12 +70,10 @@ defmodule BanchanWeb.OfferingLive.Request do
            template: template,
            terms: terms
          )
-         # TODO: move max file size somewhere configurable.
-         # TODO: constrain :accept?
          |> allow_upload(:attachment,
            accept: :any,
            max_entries: 10,
-           max_file_size: 25_000_000
+           max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
          )}
 
       true ->

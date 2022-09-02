@@ -10,7 +10,6 @@ defmodule Banchan.Payments do
   alias Banchan.Accounts
   alias Banchan.Accounts.User
   alias Banchan.Commissions
-  # TODO: Move payments-related notifications to Banchan.Payments.Notifications instead.
   alias Banchan.Commissions.{Commission, Event}
   alias Banchan.Payments.{Invoice, Notifications, Payout}
   alias Banchan.Repo
@@ -276,7 +275,6 @@ defmodule Banchan.Payments do
   def payout_studio(%User{} = actor, %Studio{} = studio, invoice \\ nil) do
     with {:ok, balance} <-
            stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id}) do
-      # TODO: notifications!
       if invoice do
         payout_single_invoice(actor, studio, balance.available |> Enum.at(0), invoice)
       else

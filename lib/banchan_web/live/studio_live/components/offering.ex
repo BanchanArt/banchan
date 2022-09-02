@@ -12,6 +12,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
+  alias Banchan.Uploads
   alias Banchan.Utils
 
   alias BanchanWeb.Components.{Button, Collapse, MasonryGallery}
@@ -42,16 +43,14 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     {:ok,
      socket
      |> allow_upload(:card_image,
-       # TODO: Be less restrictive here
-       accept: ~w(.jpg .jpeg .png),
+       accept: Uploads.supported_image_format_extensions(),
        max_entries: 1,
-       max_file_size: 10_000_000
+       max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
      )
      |> allow_upload(:gallery_images,
-       # TODO: Be less restrictive here
-       accept: ~w(.jpg .jpeg .png),
+       accept: Uploads.supported_image_format_extensions(),
        max_entries: 10,
-       max_file_size: 10_000_000
+       max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
      )}
   end
 

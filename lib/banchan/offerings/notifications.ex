@@ -18,8 +18,6 @@ defmodule Banchan.Offerings.Notifications do
   @pubsub Banchan.PubSub
 
   def user_subscribed?(%User{} = user, %Offering{} = offering) do
-    # Intentionally does not check for Studio-level subscriptions.
-    # TODO: maybe this _should_ check for studio-level subs, like commissions do?
     from(sub in OfferingSubscription,
       where: sub.user_id == ^user.id and sub.offering_id == ^offering.id and sub.silenced != true
     )

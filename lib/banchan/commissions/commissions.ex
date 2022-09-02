@@ -35,9 +35,6 @@ defmodule Banchan.Commissions do
 
   @pubsub Banchan.PubSub
 
-  # TODO: maybe this is too wide a net? We can separate this into user-level
-  # and studio-level subscriptions, though it will mean multiple calls to
-  # these subscription functions.
   @doc """
   Subscribes to all new commission broadcasts.
   """
@@ -1116,17 +1113,13 @@ defmodule Banchan.Commissions do
   @doc """
   Deletes an attachment from a comment.
   """
-  # TODO: This is probably the wrong thing. We shouldn't delete this stuff.
-  # Instead, create a history entry of some sort and make the upload
-  # accessible to admins for auditing.
   def delete_attachment!(
         %User{} = actor,
         %Commission{} = commission,
         %Event{} = event,
         %EventAttachment{} = event_attachment
       ) do
-    # NOTE: This also deletes any associated uploads (not the underlying data), because of the db ON DELETE
-    # TODO: Maybe also delete the data from S3/storage?
+    # NB(@zkat): This also deletes any associated Uploads because of an ON DELETE.
     Repo.delete!(event_attachment)
     new_attachments = Enum.reject(event.attachments, &(&1.id == event_attachment.id))
 
