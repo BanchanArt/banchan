@@ -35,16 +35,31 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
     ~F"""
     <offering-card class="w-full relative cursor-pointer">
       <LiveRedirect to={Routes.offering_show_path(Endpoint, :show, @offering.studio.handle, @offering.type)}>
-        <Card class={
-          "h-full sm:hover:scale-105 sm:hover:z-10 transition-all relative",
-          "opacity-50": !is_nil(@offering.archived_at)
-        }>
+        <Card
+          class={
+            "h-full sm:hover:scale-105 sm:hover:z-10 transition-all relative",
+            "opacity-50": !is_nil(@offering.archived_at)
+          }
+          image_class="overflow-hidden"
+        >
           <:header>
             <div class="text-sm sm:text-lg font-bold">{@offering.name}</div>
           </:header>
           <:image>
             <img
-              class={"object-contain aspect-video", "blur-lg": @offering.mature && !@current_user.uncensored_mature}
+              class={
+                "absolute object-contain aspect-video z-10",
+                "blur-lg": @offering.mature && !@current_user.uncensored_mature
+              }
+              draggable="false"
+              src={if @offering.card_img_id do
+                Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)
+              else
+                Routes.static_path(Endpoint, "/images/640x360.png")
+              end}
+            />
+            <img
+              class="aspect-video w-full h-full blur-lg"
               draggable="false"
               src={if @offering.card_img_id do
                 Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)
@@ -53,7 +68,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
               end}
             />
           </:image>
-          <div class="absolute top-4 right-4 flex flex-col flex-wrap gap-2 items-end">
+          <div class="absolute top-4 right-4 flex flex-col flex-wrap gap-2 items-end z-10">
             {#if @offering.open && !is_nil(@offering.slots)}
               <div class="whitespace-nowrap badge badge-primary shadow-md shadow-black">{@available_slots}/{@offering.slots} Slots</div>
             {#elseif !@offering.open && !is_nil(@offering.slots)}
