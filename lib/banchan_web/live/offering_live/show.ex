@@ -172,12 +172,17 @@ defmodule BanchanWeb.OfferingLive.Show do
         <div class="flex flex-col md:order-2 gap-2">
           <Lightbox
             id="card-lightbox-mobile"
-            class="md:hidden w-full bg-base-300 rounded-lg aspect-video mb-4"
+            class="relative md:hidden w-full rounded-lg aspect-video mb-4 overflow-hidden"
           >
             {#if @offering.card_img && !@offering.card_img.pending}
               <Lightbox.Item>
                 <img
-                  class="w-full h-full object-contain aspect-video"
+                  class="absolute w-full h-full object-contain aspect-video overflow-hidden z-10"
+                  src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
+                />
+                <img
+                  class="aspect-video w-full h-full blur-lg"
+                  draggable="false"
                   src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
                 />
               </Lightbox.Item>
@@ -267,12 +272,17 @@ defmodule BanchanWeb.OfferingLive.Show do
         <div class="flex flex-col md:col-span-2 md:order-1 gap-4">
           <Lightbox
             id="card-lightbox-md"
-            class="hidden md:block w-full bg-base-300 rounded-lg aspect-video"
+            class="relative hidden bg-base-300 md:block w-full rounded-lg aspect-video overflow-hidden"
           >
             {#if @offering.card_img && !@offering.card_img.pending}
               <Lightbox.Item>
                 <img
-                  class="w-full h-full object-contain aspect-video"
+                  class="absolute w-full h-full object-contain aspect-video z-10"
+                  src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
+                />
+                <img
+                  class="aspect-video w-full h-full blur-lg"
+                  draggable="false"
                   src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
                 />
               </Lightbox.Item>
