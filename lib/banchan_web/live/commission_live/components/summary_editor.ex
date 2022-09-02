@@ -67,9 +67,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
         {:ok, option} = Enum.fetch(commission.offering.options, idx)
         option
       else
-        %{
-          # TODO: fill this out?
-        }
+        %{}
       end
 
     if !socket.assigns.allow_edits ||

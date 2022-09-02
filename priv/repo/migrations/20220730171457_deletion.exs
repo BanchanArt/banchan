@@ -2,8 +2,6 @@ defmodule Banchan.Repo.Migrations.Deletion do
   use Ecto.Migration
 
   def change do
-    # TODO: Merge this entire migration into the previous migrations when
-    # we're ready for another hard reset. This is super messy.
     alter table(:users) do
       add :deactivated_at, :naive_datetime
     end

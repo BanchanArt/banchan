@@ -185,7 +185,6 @@ defmodule BanchanWeb.DenizenLive.Edit do
                 <div class="mx-auto w-full h-full flex justify-center items-center">
                   <div class="relative">
                     <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70"><i class="fas fa-camera" /></button>
-                    {!-- # TODO: For some reason, this hover:cursor-pointer isn't working on Edge but it works on Firefox. :( --}
                     <CropUploadInput
                       id="header-cropper"
                       aspect_ratio={3.5 / 1}
@@ -225,7 +224,6 @@ defmodule BanchanWeb.DenizenLive.Edit do
                   <div class="absolute top-8 left-8 w-8">
                     <div class="relative">
                       <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70"><i class="fas fa-camera" /></button>
-                      {!-- # TODO: For some reason, this hover:cursor-pointer isn't working on Edge but it works on Firefox. :( --}
                       <CropUploadInput
                         id="pfp-cropper"
                         aspect_ratio={1}

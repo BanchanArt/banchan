@@ -13,7 +13,6 @@ defmodule Banchan.Accounts.User do
 
   @derive {Inspect, except: [:password]}
   schema "users" do
-    # TODO: use trigger functions to track follower/following counts
     field :email, :string
     field :handle, :string, autogenerate: {__MODULE__, :auto_username, []}
     field :password, :string, virtual: true

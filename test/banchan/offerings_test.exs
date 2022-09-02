@@ -57,8 +57,8 @@ defmodule Banchan.OfferingsTest do
       assert [] = Notifications.unread_notifications(client3).entries
     end
 
+    @tag skip: "TODO"
     test "notify when there's a new offering" do
-      # TODO
     end
   end
 

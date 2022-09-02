@@ -16,12 +16,23 @@ defmodule Banchan.Uploads do
     image/svg+xml image/x-xcf
   )
 
+  @image_format_extensions ~w(
+    .bmp .gif .png .jpeg .jpg .jp2 .psd .ico .tiff .webp .svg .xcf
+  )
+
   @video_formats ~w(
     video/mpeg video/mp4 video/ogg video/webm video/x-msvideo video/x-ms-wmv
     video/quicktime
   )
 
   ## Getting
+
+  @doc """
+  Returns a list of extensions currently supported image formats.
+  """
+  def supported_image_format_extensions do
+    @image_format_extensions
+  end
 
   @doc """
   Returns true if an upload (or a given string type) is an image.

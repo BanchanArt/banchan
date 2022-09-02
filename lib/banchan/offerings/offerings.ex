@@ -225,8 +225,6 @@ defmodule Banchan.Offerings do
   end
 
   def make_card_image!(%User{} = user, %Studio{} = studio, src, type, name) do
-    # TODO: need two versions here, the smaller card image and "preview"
-    # version for the offering page.
     {:ok, user} = Studios.check_studio_member(studio, user)
 
     upload = Uploads.save_file!(user, src, type, name)
@@ -758,8 +756,6 @@ defmodule Banchan.Offerings do
         )
         |> where(
           [o, related_to: related_to],
-          # TODO: Cache this db-side somehow? This seems like a lot of work
-          # to be doing on the fly.
           fragment(
             "to_tsquery('banchan_fts', array_to_string(tsvector_to_array(?), ' | ')) @@ ?",
             related_to.search_vector,

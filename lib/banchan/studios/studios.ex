@@ -681,8 +681,6 @@ defmodule Banchan.Studios do
   def make_portfolio_image!(%User{} = user, src, true, type, name) do
     upload = Uploads.save_file!(user, src, type, name)
 
-    # TODO: Also generate a thumbnail?
-
     {:ok, image} =
       Thumbnailer.thumbnail(
         upload,
