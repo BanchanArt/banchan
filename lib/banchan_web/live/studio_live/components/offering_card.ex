@@ -35,16 +35,22 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
     ~F"""
     <offering-card class="w-full relative cursor-pointer">
       <LiveRedirect to={Routes.offering_show_path(Endpoint, :show, @offering.studio.handle, @offering.type)}>
-        <Card class={
-          "h-full sm:hover:scale-105 sm:hover:z-10 transition-all relative",
-          "opacity-50": !is_nil(@offering.archived_at)
-        } image_class="overflow-hidden">
+        <Card
+          class={
+            "h-full sm:hover:scale-105 sm:hover:z-10 transition-all relative",
+            "opacity-50": !is_nil(@offering.archived_at)
+          }
+          image_class="overflow-hidden"
+        >
           <:header>
             <div class="text-sm sm:text-lg font-bold">{@offering.name}</div>
           </:header>
           <:image>
-             <img
-              class={"absolute object-contain aspect-video z-10", "blur-lg": @offering.mature && !@current_user.uncensored_mature}
+            <img
+              class={
+                "absolute object-contain aspect-video z-10",
+                "blur-lg": @offering.mature && !@current_user.uncensored_mature
+              }
               draggable="false"
               src={if @offering.card_img_id do
                 Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)
@@ -53,7 +59,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
               end}
             />
             <img
-              class={"aspect-video w-full h-full blur-lg"}
+              class="aspect-video w-full h-full blur-lg"
               draggable="false"
               src={if @offering.card_img_id do
                 Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)
