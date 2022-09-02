@@ -38,7 +38,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         <Card class={
           "h-full sm:hover:scale-105 sm:hover:z-10 transition-all relative",
           "opacity-50": !is_nil(@offering.archived_at)
-        }, image_class="overflow-hidden">
+        } image_class="overflow-hidden">
           <:header>
             <div class="text-sm sm:text-lg font-bold">{@offering.name}</div>
           </:header>
