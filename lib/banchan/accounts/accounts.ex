@@ -4,6 +4,8 @@ defmodule Banchan.Accounts do
   """
   import Ecto.Query, warn: false
 
+  require Logger
+
   alias Ueberauth.Auth
 
   alias Banchan.Accounts.{
@@ -1438,8 +1440,15 @@ defmodule Banchan.Accounts do
     end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{sent_invites: requests}} -> {:ok, requests |> Enum.reverse()}
-      {:error, _, error, _} -> {:error, error}
+      {:ok, %{sent_invites: requests}} ->
+        {:ok, requests |> Enum.reverse()}
+
+      {:error, _, :no_invites, _} ->
+        {:error, :no_invites}
+
+      {:error, _, error, _} ->
+        Logger.error("Unexpected error sending artist invite: %{inspect(err)}")
+        {:error, error}
     end
   end
 

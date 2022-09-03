@@ -310,11 +310,11 @@ defmodule Banchan.Payments do
           {:ok, val}
 
         {:error, %Stripe.Error{} = e} ->
-          Logger.error("Stripe error during payout: #{e.message}")
+          Logger.error("Stripe error during payout: #{inspect(e)}")
           {:error, e}
 
         {:error, error} ->
-          Logger.error(%{message: "Internal error during payout", error: error})
+          Logger.error("Internal error during payout: #{inspect(error)}")
           {:error, error}
       end
     end
@@ -424,10 +424,9 @@ defmodule Banchan.Payments do
       if actual_count == invoice_count do
         {:ok, true}
       else
-        Logger.error(%{
-          message:
-            "Wrong number of invoices associated with new Payout (expected: #{invoice_count}, actual: ${actual_count}"
-        })
+        Logger.error(
+          "Wrong number of invoices associated with new Payout (expected: #{invoice_count}, actual: ${actual_count}"
+        )
 
         {:error, :invoice_count_mismatch}
       end
@@ -438,7 +437,7 @@ defmodule Banchan.Payments do
           process_payout_updated!(stripe_payout, payout.id)
 
         {:error, err} ->
-          Logger.error(%{message: "Failed to create Stripe payout", error: err})
+          Logger.error("Failed to create Stripe payout: #{inspect(err)}")
 
           # NB(@zkat): We still return {:ok, payout} here, so folks can
           # actually see the failed payout on their dashboards when calling
@@ -628,7 +627,7 @@ defmodule Banchan.Payments do
         {:ok, session.url}
 
       {:error, _, error, _} ->
-        Logger.error(%{message: "Failed to process payment", error: error})
+        Logger.error("Failed to process payment: #{inspect(error)}")
         {:error, :payment_failed}
     end
   end
@@ -803,10 +802,9 @@ defmodule Banchan.Payments do
     end)
     |> Ecto.Multi.run(:refund, fn _, %{actor: actor, invoice: invoice} ->
       if invoice.status != :succeeded do
-        Logger.error(%{
-          message: "Attempted to refund an invoice that wasn't :succeeded.",
-          invoice: invoice
-        })
+        Logger.error(
+          "Attempted to refund an invoice that wasn't :succeeded. Invoice: #{inspect(invoice)}"
+        )
 
         {:error, :invoice_not_refundable}
       else
@@ -826,15 +824,15 @@ defmodule Banchan.Payments do
   defp process_refund_payment(%User{} = actor, %Invoice{} = invoice) do
     case refund_payment_on_stripe(invoice) do
       {:ok, %Stripe.Refund{status: "failed"} = refund} ->
-        Logger.error(%{message: "Refund failed", refund: refund})
+        Logger.error("Refund failed: #{inspect(refund)}")
         process_refund_updated(actor, refund, invoice.id, actor.id)
 
       {:ok, %Stripe.Refund{status: "canceled"} = refund} ->
-        Logger.error(%{message: "Refund canceled", refund: refund})
+        Logger.error("Refund canceled: #{inspect(refund)}")
         process_refund_updated(actor, refund, invoice.id, actor.id)
 
       {:ok, %Stripe.Refund{status: "requires_action"} = refund} ->
-        Logger.info(%{message: "Refund requires action", refund: refund})
+        Logger.info("Refund requires action: #{inspect(refund)}")
         # This should eventually succeed asynchronously.
         process_refund_updated(actor, refund, invoice.id, actor.id)
 
@@ -863,7 +861,7 @@ defmodule Banchan.Payments do
         {:ok, refund}
 
       {:error, err} ->
-        Logger.error(%{message: "Refund failed.", error: err})
+        Logger.error("Refund failed: #{inspect(err)}")
         {:error, err}
     end
   end
@@ -957,8 +955,10 @@ defmodule Banchan.Payments do
           if event.invoice.refunded_by_id do
             %User{id: event.invoice.refunded_by_id} |> Repo.reload!()
           else
-            msg = "Bad State: invoice refund succeeded but refunded_by_id is nil!"
-            Logger.error(%{message: msg})
+            msg =
+              "Bad State: invoice refund succeeded but refunded_by_id is nil! #{inspect(event.invoice)}"
+
+            Logger.error(msg)
             raise msg
           end
 
@@ -985,7 +985,7 @@ defmodule Banchan.Payments do
         {:ok, invoice}
 
       {:error, _, error, _} ->
-        Logger.error(%{message: "Failed to update invoice status to refunded", error: error})
+        Logger.error("Failed to update invoice status to refunded: #{inspect(error)}")
         {:error, error}
     end
   end
@@ -1070,7 +1070,7 @@ defmodule Banchan.Payments do
         {:ok, invoice}
 
       {:error, _, error, _} ->
-        Logger.error(%{message: "Failed to purge expired invoice", error: error})
+        Logger.error("Failed to purge expired invoice: #{inspect(error)}")
         {:error, error}
     end
   end
@@ -1111,10 +1111,9 @@ defmodule Banchan.Payments do
           :ok
 
         {:error, %Stripe.Error{} = err} ->
-          Logger.warn(%{
-            message: "Failed to cancel payout #{payout_id}: #{err.message}",
-            code: err.code
-          })
+          Logger.warn(
+            "Failed to cancel payout #{payout_id} with code #{inspect(err.code)}: #{err.message}"
+          )
 
           {:error, err}
       end
