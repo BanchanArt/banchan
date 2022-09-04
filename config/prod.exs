@@ -1,5 +1,16 @@
 import Config
 
+deploy_env =
+  case System.get_env("BANCHAN_DEPLOY_ENV") do
+    "dev" -> :dev
+    "staging" -> :staging
+    "prod" -> :prod
+    other -> raise "Uknown deploy environment: #{other}"
+  end
+
+config :banchan,
+  deploy_env: deploy_env
+
 # For production, don't forget to configure the url host
 # to something meaningful, Phoenix uses this information
 # when generating URLs.
@@ -34,6 +45,12 @@ config :banchan, BanchanWeb.Endpoint,
 config :logger,
   level: :info,
   backends: [:console, Sentry.LoggerBackend]
+
+config :sentry,
+  tags: %{
+    env: deploy_env
+  },
+  environment_name: deploy_env
 
 config :banchan, Banchan.Repo,
   adapter: Ecto.Adapters.Postgres,

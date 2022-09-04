@@ -9,6 +9,7 @@ import Config
 
 config :banchan,
   env: config_env(),
+  deploy_env: config_env(),
   namespace: Banchan,
   stripe_mod: Banchan.StripeAPI,
   ecto_repos: [Banchan.Repo],
@@ -65,7 +66,7 @@ config :banchan, Oban,
   queues: [mailers: 10, media: 2, unban: 10, pruning: 1, invoice_purge: 10]
 
 config :sentry,
-  included_environments: [:prod],
+  included_environments: [:prod, :staging, :dev],
   enable_source_code_context: true,
   root_source_code_path: File.cwd!(),
   tags: %{
