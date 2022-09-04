@@ -8,7 +8,6 @@ defmodule Banchan.Studios do
   ]
 
   import Ecto.Query, warn: false
-  require Logger
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User

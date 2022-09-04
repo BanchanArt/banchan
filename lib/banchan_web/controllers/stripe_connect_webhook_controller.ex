@@ -67,7 +67,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
   end
 
   defp handle_event(%Stripe.Event{type: type}, conn) do
-    Logger.debug("unhandled_event: #{type}")
+    Logger.info("unhandled_event: #{type}")
 
     conn
     |> resp(200, "OK")
