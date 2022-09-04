@@ -17,7 +17,7 @@ defmodule Banchan.Uploads do
   )
 
   @image_format_extensions ~w(
-    .bmp .gif .png .jpeg .jpg .jp2 .psd .ico .tiff .webp .svg .xcf
+    .bmp .gif .png .jpeg .jpg .jp2 .psd .ico .tiff .webp .svg
   )
 
   @video_formats ~w(
