@@ -163,7 +163,11 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
                     show_label={false}
                     options={@studio.payment_currencies
                     |> Enum.map(&{"#{to_string(&1)}#{Money.Currency.symbol(&1)}", &1})}
-                    selected={@studio.default_currency}
+                    selected={case Ecto.Changeset.fetch_field(@changeset, :amount) do
+                      {_, nil} -> @studio.default_currency
+                      :error -> @studio.default_currency
+                      {_, amount} -> amount.currency
+                    end}
                   />
                 </div>
             {/case}
