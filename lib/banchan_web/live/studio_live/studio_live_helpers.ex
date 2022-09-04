@@ -7,6 +7,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
 
   import Ecto.Query
 
+  alias Banchan.Accounts
   alias Banchan.Accounts.User
   alias Banchan.Studios
 
@@ -32,9 +33,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
 
     cond do
       current_member && !current_user_member? &&
-          (is_nil(socket.assigns.current_user) ||
-             (:admin not in socket.assigns.current_user.roles &&
-                :mod not in socket.assigns.current_user.roles)) ->
+          (is_nil(socket.assigns.current_user) || !Accounts.mod?(socket.assigns.current_user)) ->
         raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
 
       studio.deleted_at ->
@@ -42,15 +41,11 @@ defmodule BanchanWeb.StudioLive.Helpers do
 
       studio.archived_at &&
           (is_nil(socket.assigns.current_user) ||
-             (!current_user_member? &&
-                :admin not in socket.assigns.current_user.roles &&
-                :mod not in socket.assigns.current_user.roles)) ->
+             (!current_user_member? && !Accounts.mod?(socket.assigns.current_user))) ->
         raise Ecto.NoResultsError, queryable: from(u in User, join: s in assoc(u, :studios))
 
       studio.disable_info &&
-          (is_nil(socket.assigns.current_user) ||
-             (:admin not in socket.assigns.current_user.roles &&
-                :mod not in socket.assigns.current_user.roles)) ->
+          (is_nil(socket.assigns.current_user) || !Accounts.mod?(socket.assigns.current_user)) ->
         socket
         |> put_flash(
           :error,
@@ -58,9 +53,16 @@ defmodule BanchanWeb.StudioLive.Helpers do
         )
         |> redirect(to: Routes.studio_disabled_path(Endpoint, :show, studio.handle))
 
-      studio.mature && :admin not in socket.assigns.current_user.roles &&
-        :mod not in socket.assigns.current_user.roles && !socket.assigns.current_user_member? &&
-          (is_nil(socket.assigns.current_user) || !socket.assigns.current_user.mature_ok) ->
+      studio.mature && is_nil(socket.assigns.current_user) ->
+        socket
+        |> put_flash(
+          :error,
+          "You must be logged in to view mature studios."
+        )
+        |> redirect(to: Routes.discover_index_path(Endpoint, :index, "studios"))
+
+      studio.mature && !is_nil(socket.assigns.current_user) &&
+        !socket.assigns.current_user.mature_ok && !Accounts.mod?(socket.assigns.current_user) ->
         socket
         |> put_flash(
           :error,

@@ -73,7 +73,19 @@ defmodule BanchanWeb.OfferingLive.Show do
       )
 
     cond do
-      (offering.mature || offering.studio.mature) && !socket.assigns.current_user.mature_ok &&
+      socket.redirected ->
+        {:noreply, socket}
+
+      offering.mature && is_nil(socket.assigns.current_user) ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "You must be signed in to view mature offerings."
+         )
+         |> push_redirect(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
+
+      offering.mature && socket.assigns.current_user && !socket.assigns.current_user.mature_ok &&
         !socket.assigns.current_user_member? && !Accounts.mod?(socket.assigns.current_user) ->
         {:noreply,
          socket
@@ -231,8 +243,7 @@ defmodule BanchanWeb.OfferingLive.Show do
                   <i class="fas fa-ellipsis-vertical" />
                 </label>
                 <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
-                  {#if @current_user &&
-                      (@current_user_member? || :admin in @current_user.roles || :mod in @current_user.roles)}
+                  {#if @current_user && (@current_user_member? || Accounts.mod?(@current_user))}
                     <li>
                       <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}><i class="fas fa-edit" /> Edit</LiveRedirect>
                     </li>

@@ -656,9 +656,15 @@ defmodule Banchan.Offerings do
           on: us.studio_id == studio.id and current_user.id == us.user_id
         )
         |> where(
-          [offering: o, current_user: current_user, current_user_member?: current_user_member?],
+          [
+            studio: s,
+            offering: o,
+            current_user: current_user,
+            current_user_member?: current_user_member?
+          ],
           not is_nil(current_user_member?) or
-            o.mature != true or (o.mature == true and current_user.mature_ok == true)
+            o.mature != true or
+            ((s.mature == true or o.mature == true) and current_user.mature_ok == true)
         )
         |> where(
           [offering: o, current_user_member?: current_user_member?],
@@ -686,7 +692,7 @@ defmodule Banchan.Offerings do
 
       _ ->
         q
-        |> where([o], o.mature != true and o.hidden == false)
+        |> where([o, studio: s], s.mature != true and o.mature != true and o.hidden == false)
         |> select_merge(%{user_subscribed?: false})
     end
   end
