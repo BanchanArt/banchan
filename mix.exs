@@ -96,7 +96,7 @@ defmodule Banchan.MixProject do
       {:uuid, "~> 1.1"},
 
       # Dev/test deps
-      {:credo, "~> 1.5", only: [:dev, :test], runime: false},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
       {:excoveralls, "~> 0.13", only: :test},
