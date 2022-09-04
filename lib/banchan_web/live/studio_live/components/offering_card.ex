@@ -46,9 +46,10 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
             <div class="text-sm sm:text-lg font-bold">{@offering.name}</div>
           </:header>
           <:image>
+          <div class="absolute overflow-hidden z-10">
             <img
               class={
-                "absolute object-contain aspect-video z-10",
+                "object-contain aspect-video",
                 "blur-lg": @offering.mature && !@current_user.uncensored_mature
               }
               draggable="false"
@@ -58,6 +59,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
                 Routes.static_path(Endpoint, "/images/640x360.png")
               end}
             />
+            </div>
             <img
               class="aspect-video w-full h-full blur-lg"
               draggable="false"
