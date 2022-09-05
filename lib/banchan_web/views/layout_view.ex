@@ -68,7 +68,7 @@ defmodule BanchanWeb.LayoutView do
           type="text/javascript"
           src={Routes.static_path(@conn, "/assets/app.js")}
         />
-        {#if Application.fetch_env!(:banchan, :env) == :prod}
+        {#if Application.fetch_env!(:banchan, :deploy_env) == :prod}
           <script
             defer
             data-domain="banchan.art"

@@ -39,6 +39,7 @@ RUN mix local.hex --force && \
 # set build ENV
 ENV MIX_ENV="prod"
 ARG BANCHAN_HOST
+ARG BANCHAN_DEPLOY_ENV
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
