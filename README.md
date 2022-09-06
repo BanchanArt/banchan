@@ -7,7 +7,7 @@ artists for managing their clients, commissions, and invoices, and for patrons
 to discover artists to commission art from.
 
 It's created, owned, and maintained with love and solidarity by the [Digital
-Workers Guild](https://www.dwg.dev/) ("DWG"), a worker co-operative making
+Workers Guild](https://dwg.dev/) ("DWG"), a worker co-operative making
 stuff for communities that need them.
 
 ## Contributing
