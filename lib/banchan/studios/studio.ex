@@ -35,7 +35,7 @@ defmodule Banchan.Studios.Studio do
     field :stripe_details_submitted, :boolean
 
     field :platform_fee, :decimal,
-      default: Application.fetch_env!(:banchan, :default_platform_fee)
+      default: Application.compile_env!(:banchan, :default_platform_fee)
 
     belongs_to :header_img, Upload, type: :binary_id
     belongs_to :card_img, Upload, type: :binary_id

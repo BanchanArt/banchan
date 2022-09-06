@@ -58,3 +58,6 @@ priv/cert/
 
 # Ignore Mac meta
 .DS_Store
+
+# Ignore asdf settings
+.tool-versions

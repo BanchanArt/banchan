@@ -228,7 +228,7 @@ defmodule BanchanWeb.Router do
     # Enable admin stuff dev/test side but restrict it in prod
     pipe_through([
       :browser
-      | if(Application.fetch_env!(:banchan, :env) in [:dev, :test], do: [], else: [:admin])
+      | if(Application.compile_env!(:banchan, :env) in [:dev, :test], do: [], else: [:admin])
     ])
 
     live_dashboard("/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo)
