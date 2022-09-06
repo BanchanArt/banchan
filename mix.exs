@@ -152,8 +152,9 @@ defmodule Banchan.MixProject do
         "test",
         "format",
         "credo --strict",
-        "sobelow --verbose",
-        "dialyzer --ignore-exit-status"
+        "sobelow --verbose"
+        # ,
+        # "dialyzer --ignore-exit-status"
       ]
     ]
   end
