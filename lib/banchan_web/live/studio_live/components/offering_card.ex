@@ -49,7 +49,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
             <div class="absolute overflow-hidden z-10">
               <img
                 class={
-                  "object-contain aspect-video",
+                  "object-contain aspect-video w-full h-full",
                   "blur-lg": @offering.mature && !@current_user.uncensored_mature
                 }
                 draggable="false"
