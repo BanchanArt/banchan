@@ -9,5 +9,5 @@ started in a few easy steps:
 
 1. Submit a PR adding your name to [our CLA](https://github.com/digitalworkersguild/banchan/blob/main/CLA.md#signatures).
 2. [Read the Getting Started guide](https://github.com/digitalworkersguild/banchan/wiki/Getting-Started).
-3. Find a [good first issue](https://github.com/digitalworkersguild/banchan/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or one that's [help wanted](https://github.com/digitalworkersguild/banchan/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22). You can also reach out to use [on the DWG Discord](https://discord.gg/sU2wSxbT8b).
+3. Find a [good first issue](https://github.com/digitalworkersguild/banchan/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or one that's [help wanted](https://github.com/digitalworkersguild/banchan/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22). You can also reach out to use [on the Banchan Discord](https://discord.gg/FUkTHjGKJF).
 4. Happy hacking!
