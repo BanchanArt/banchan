@@ -27,7 +27,7 @@ defmodule BanchanWeb.Components.Collapse do
       {#if slot_assigned?(:header)}
         <div class="flex flex-row items-center cursor-pointer" :on-click="toggle">
           <div class="grow">
-            <#slot name="header" />
+            <#slot {@header} />
           </div>
           {#if @show_arrow}
             <i class={"fas", "fa-chevron-up": @open, "fa-chevron-down": !@open} />

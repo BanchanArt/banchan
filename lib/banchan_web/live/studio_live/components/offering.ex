@@ -7,7 +7,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   import Slug
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.Input.InputContext
   alias Surface.Components.Form.Inputs
 
   alias Banchan.Offerings
@@ -34,6 +33,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   prop studio, :struct, required: true
   prop offering, :struct
   prop gallery_images, :any
+  prop form, :form, from_context: {Form, :form}
 
   data changeset, :struct
   data uploads, :map
@@ -494,66 +494,64 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           Options include both the "default options", which determine the offering's displayed base price, as well as any "add-ons" than can be added when making a proposal.
         </div>
         <ul class="flex flex-col gap-4">
-          <InputContext :let={form: form}>
-            <Inputs form={form} for={:options} :let={index: index}>
-              <li>
-                <Collapse id={@id <> "-option-" <> "#{index}"} class="border-b-2">
-                  <:header>
-                    <h3 class="text-xl">
-                      {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
+          <Inputs form={@form} for={:options} :let={index: index}>
+            <li>
+              <Collapse id={@id <> "-option-" <> "#{index}"} class="border-b-2">
+                <:header>
+                  <h3 class="text-xl">
+                    {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
 
-                      (opt.name || "New Option") <>
-                        if opt.price do
-                          " - " <> Money.to_string(opt.price)
-                        else
-                          ""
-                        end}
-                    </h3>
-                  </:header>
-                  <TextInput name={:name} info="Name of the option." opts={required: true} />
-                  <TextArea name={:description} info="Description for the option." opts={required: true} />
-                  <div class="flex flex-row gap-2 items-center py-2">
-                    {#case @studio.payment_currencies}
-                      {#match [_]}
-                        <div class="flex flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
-                        <HiddenInput name={:currency} value={@studio.default_currency} />
-                      {#match _}
-                        <div class="flex-basis-1/4">
-                          <Select
-                            name={:currency}
-                            show_label={false}
-                            options={@studio.payment_currencies
-                            |> Enum.map(&{"#{to_string(&1)}#{Money.Currency.symbol(&1)}", &1})}
-                            selected={option_currency(@changeset, index, @studio)}
-                            opts={required: true}
-                          />
-                        </div>
-                    {/case}
-                    <div class="grow">
-                      <TextInput
-                        name={:price}
-                        info="Quoted price for adding this option."
-                        show_label={false}
-                        opts={required: true, placeholder: "12.34"}
-                      />
-                    </div>
+                    (opt.name || "New Option") <>
+                      if opt.price do
+                        " - " <> Money.to_string(opt.price)
+                      else
+                        ""
+                      end}
+                  </h3>
+                </:header>
+                <TextInput name={:name} info="Name of the option." opts={required: true} />
+                <TextArea name={:description} info="Description for the option." opts={required: true} />
+                <div class="flex flex-row gap-2 items-center py-2">
+                  {#case @studio.payment_currencies}
+                    {#match [_]}
+                      <div class="flex flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
+                      <HiddenInput name={:currency} value={@studio.default_currency} />
+                    {#match _}
+                      <div class="flex-basis-1/4">
+                        <Select
+                          name={:currency}
+                          show_label={false}
+                          options={@studio.payment_currencies
+                          |> Enum.map(&{"#{to_string(&1)}#{Money.Currency.symbol(&1)}", &1})}
+                          selected={option_currency(@changeset, index, @studio)}
+                          opts={required: true}
+                        />
+                      </div>
+                  {/case}
+                  <div class="grow">
+                    <TextInput
+                      name={:price}
+                      info="Quoted price for adding this option."
+                      show_label={false}
+                      opts={required: true, placeholder: "12.34"}
+                    />
                   </div>
-                  <Checkbox
-                    name={:multiple}
-                    info="Allow multiple instances of this option at the same time."
-                    label="Allow Multiple"
-                  />
-                  <Checkbox name={:sticky} info="Once this option is added, it can't be removed." label="Sticky" />
-                  <Checkbox
-                    name={:default}
-                    info="Whether this option is added by default. Default options are also used to calculate your offering's base price."
-                    label="Default"
-                  />
-                  <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
-                </Collapse>
-              </li>
-            </Inputs>
-          </InputContext>
+                </div>
+                <Checkbox
+                  name={:multiple}
+                  info="Allow multiple instances of this option at the same time."
+                  label="Allow Multiple"
+                />
+                <Checkbox name={:sticky} info="Once this option is added, it can't be removed." label="Sticky" />
+                <Checkbox
+                  name={:default}
+                  info="Whether this option is added by default. Default options are also used to calculate your offering's base price."
+                  label="Default"
+                />
+                <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
+              </Collapse>
+            </li>
+          </Inputs>
           <li class="field">
             <div class="control">
               <Button class="w-full" click="add_option" label="Add Option" />

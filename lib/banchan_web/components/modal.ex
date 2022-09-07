@@ -55,13 +55,13 @@ defmodule BanchanWeb.Components.Modal do
         >✕</div>
         {#if slot_assigned?(:title)}
           <h3 class="text-lg font-bold">
-            <#slot name="title" />
+            <#slot {@title} />
           </h3>
         {/if}
         <#slot />
         {#if slot_assigned?(:action)}
           <div class="modal-action">
-            <#slot name="action" />
+            <#slot {@action} />
           </div>
         {/if}
       </div>

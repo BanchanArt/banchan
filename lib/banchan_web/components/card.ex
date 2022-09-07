@@ -30,17 +30,17 @@ defmodule BanchanWeb.Components.Card do
     <div class={"shadow-xl bg-base-200 card card-compact flex flex-col flex-grow", @class}>
       {#if slot_assigned?(:image)}
         <figure class={@image_class}>
-          <#slot name="image" />
+          <#slot {@image} />
         </figure>
       {/if}
       <div class="card-body flex flex-col flex-grow">
         {#if slot_assigned?(:header)}
           <header class="card-title flex flex-row items-center">
             <div class="grow">
-              <#slot name="header" />
+              <#slot {@header} />
             </div>
             {#if slot_assigned?(:header_aside)}
-              <#slot name="header_aside" />
+              <#slot {@header_aside} />
             {/if}
           </header>
         {/if}
@@ -49,7 +49,7 @@ defmodule BanchanWeb.Components.Card do
         </div>
         {#if slot_assigned?(:footer)}
           <footer class="card-actions justify-end">
-            <#slot name="footer" />
+            <#slot {@footer} />
           </footer>
         {/if}
       </div>

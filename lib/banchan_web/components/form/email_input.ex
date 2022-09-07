@@ -4,8 +4,8 @@ defmodule BanchanWeb.Components.Form.EmailInput do
   """
   use BanchanWeb, :component
 
+  alias Surface.Components.Form
   alias Surface.Components.Form.{EmailInput, ErrorTag, Field, Label}
-  alias Surface.Components.Form.Input.InputContext
 
   prop name, :any, required: true
   prop opts, :keyword, default: []
@@ -15,23 +15,22 @@ defmodule BanchanWeb.Components.Form.EmailInput do
   prop show_label, :boolean, default: true
   prop info, :string
   prop icon, :string
+  prop form, :form, from_context: {Form, :form}
 
   def render(assigns) do
     ~F"""
     <Field class="field" name={@name}>
       {#if @show_label}
-        <InputContext assigns={assigns} :let={field: field}>
-          <Label class="label">
-            <span class="label-text">
-              {@label || Phoenix.Naming.humanize(field)}
-              {#if @info}
-                <div class="tooltip" data-tip={@info}>
-                  <i class="fas fa-info-circle" />
-                </div>
-              {/if}
-            </span>
-          </Label>
-        </InputContext>
+        <Label class="label">
+          <span class="label-text">
+            {@label || Phoenix.Naming.humanize(@name)}
+            {#if @info}
+              <div class="tooltip" data-tip={@info}>
+                <i class="fas fa-info-circle" />
+              </div>
+            {/if}
+          </span>
+        </Label>
       {/if}
       <div class="flex flex-col">
         <div class="flex flex-row gap-2">
@@ -41,18 +40,16 @@ defmodule BanchanWeb.Components.Form.EmailInput do
             </span>
           {/if}
           <div class={"w-full control", @wrapper_class}>
-            <InputContext :let={form: form, field: field}>
-              <EmailInput
-                class={
-                  "input",
-                  "input-bordered",
-                  "w-full",
-                  @class,
-                  "input-error": !Enum.empty?(Keyword.get_values(form.errors, field))
-                }
-                opts={[{:phx_debounce, "200"} | @opts]}
-              />
-            </InputContext>
+            <EmailInput
+              class={
+                "input",
+                "input-bordered",
+                "w-full",
+                @class,
+                "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
+              }
+              opts={[{:phx_debounce, "200"} | @opts]}
+            />
           </div>
         </div>
         <ErrorTag class="help text-error" />

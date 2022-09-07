@@ -29,7 +29,7 @@ defmodule BanchanWeb.Components.Layout do
           <Nav uri={@uri} current_user={@current_user} />
         </div>
         {#if slot_assigned?(:hero)}
-          <#slot name="hero" />
+          <#slot {@hero} />
         {/if}
         <section class={"flex flex-col flex-grow p-#{@padding} shadow-inner"}>
           <div class="alert alert-info my-2" :if={@current_user && is_nil(@current_user.confirmed_at)}>

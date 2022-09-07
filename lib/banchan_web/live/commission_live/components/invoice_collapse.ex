@@ -6,7 +6,6 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
 
   alias Surface.Components.Form
   alias Surface.Components.Form.{Field, Label}
-  alias Surface.Components.Form.Input.InputContext
 
   alias Banchan.Commissions.Event
   alias Banchan.Payments
@@ -137,19 +136,17 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
             <div class="text-lg font-medium">Send Invoice</div>
           </:header>
           <Field class="field" name={:amount}>
-            <InputContext assigns={assigns}>
-              <Label class="label py-2">
-                <span class="label-text">
-                  Invoice Amount
-                  <div
-                    class="tooltip"
-                    data-tip="Total amount to invoice client for. If you've configured multiple currencies, you may choose which one to invoice with."
-                  >
-                    <i class="fas fa-info-circle" />
-                  </div>
-                </span>
-              </Label>
-            </InputContext>
+            <Label class="label py-2">
+              <span class="label-text">
+                Invoice Amount
+                <div
+                  class="tooltip"
+                  data-tip="Total amount to invoice client for. If you've configured multiple currencies, you may choose which one to invoice with."
+                >
+                  <i class="fas fa-info-circle" />
+                </div>
+              </span>
+            </Label>
           </Field>
           <div class="flex flex-row gap-2 items-center py-2">
             {#case @studio.payment_currencies}

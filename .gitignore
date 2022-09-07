@@ -28,8 +28,9 @@ npm-debug.log
 # The directory NPM downloads your dependencies sources to.
 /assets/node_modules/
 
-# Ignore Surface hooks
+# Ignore Surface hooks and component CSS
 /assets/js/_hooks/
+/assets/css/_components.css
 
 # Ignore assets that are produced by build tools.
 /priv/static/assets

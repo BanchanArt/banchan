@@ -76,6 +76,11 @@ config :sentry,
 
 config :logger, Sentry.LoggerBackend, capture_log_messages: true
 
+config :surface, :components, [
+  {BanchanWeb.Components.Form.Checkbox, propagate_context_to_slots: true},
+  {BanchanWeb.Components.Form.TextArea, propagate_context_to_slots: true}
+]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
