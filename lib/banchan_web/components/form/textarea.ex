@@ -4,8 +4,8 @@ defmodule BanchanWeb.Components.Form.TextArea do
   """
   use BanchanWeb, :component
 
+  alias Surface.Components.Form
   alias Surface.Components.Form.{ErrorTag, Field, Label, TextArea}
-  alias Surface.Components.Form.Input.InputContext
 
   prop name, :any, required: true
   prop opts, :keyword, default: []
@@ -16,6 +16,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
   prop rows, :number
   prop class, :css_class
   prop change, :event
+  prop form, :form, from_context: {Form, :form}
 
   slot left
   slot right
@@ -24,37 +25,33 @@ defmodule BanchanWeb.Components.Form.TextArea do
     ~F"""
     <Field class="field" name={@name}>
       {#if @show_label}
-        <InputContext assigns={assigns} :let={field: field}>
-          <Label class="label">
-            <span class="label-text">
-              {@label || Phoenix.Naming.humanize(field)}
-              {#if @info}
-                <div class="tooltip" data-tip={@info}>
-                  <i class="fas fa-info-circle" />
-                </div>
-              {/if}
-            </span>
-          </Label>
-        </InputContext>
+        <Label class="label">
+          <span class="label-text">
+            {@label || Phoenix.Naming.humanize(@name)}
+            {#if @info}
+              <div class="tooltip" data-tip={@info}>
+                <i class="fas fa-info-circle" />
+              </div>
+            {/if}
+          </span>
+        </Label>
       {/if}
       <div class="flex flex-col">
         <div class="flex flex-row gap-2">
           <div class={"control w-full", @wrapper_class}>
-            <#slot name="left" />
-            <InputContext :let={form: form, field: field}>
-              <TextArea
-                class={
-                  "textarea",
-                  "textarea-bordered",
-                  "h-40",
-                  "w-full",
-                  @class,
-                  "textarea-error": !Enum.empty?(Keyword.get_values(form.errors, field))
-                }
-                opts={[{:phx_debounce, "200"} | @opts]}
-              />
-            </InputContext>
-            <#slot name="right" />
+            <#slot {@left} />
+            <TextArea
+              class={
+                "textarea",
+                "textarea-bordered",
+                "h-40",
+                "w-full",
+                @class,
+                "textarea-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
+              }
+              opts={[{:phx_debounce, "200"} | @opts]}
+            />
+            <#slot {@right} />
           </div>
         </div>
         <ErrorTag class="help text-error" />

@@ -4,8 +4,8 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   """
   use BanchanWeb, :component
 
+  alias Surface.Components.Form
   alias Surface.Components.Form.{Checkbox, ErrorTag, Field, Label}
-  alias Surface.Components.Form.Input.InputContext
 
   prop name, :any, required: true
   prop opts, :keyword, default: []
@@ -14,6 +14,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   prop label, :string
   prop value, :any
   prop info, :string
+  prop form, :form, from_context: {Form, :form}
 
   slot default
 
@@ -29,18 +30,16 @@ defmodule BanchanWeb.Components.Form.Checkbox do
             </div>
           {/if}
         </div>
-        <InputContext :let={form: form, field: field}>
-          <Checkbox
-            value={@value}
-            class={
-              @class,
-              "checkbox",
-              "checkbox-primary",
-              "checkbox-error": !Enum.empty?(Keyword.get_values(form.errors, field))
-            }
-            opts={@opts}
-          />
-        </InputContext>
+        <Checkbox
+          value={@value}
+          class={
+            @class,
+            "checkbox",
+            "checkbox-primary",
+            "checkbox-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
+          }
+          opts={@opts}
+        />
       </Label>
       <ErrorTag class="help text-error" />
     </Field>

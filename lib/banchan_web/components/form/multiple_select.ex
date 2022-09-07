@@ -4,8 +4,8 @@ defmodule BanchanWeb.Components.Form.MultipleSelect do
   """
   use BanchanWeb, :component
 
+  alias Surface.Components.Form
   alias Surface.Components.Form.{ErrorTag, Field, Label, MultipleSelect}
-  alias Surface.Components.Form.Input.InputContext
 
   prop name, :any, required: true
   prop opts, :keyword, default: []
@@ -16,23 +16,22 @@ defmodule BanchanWeb.Components.Form.MultipleSelect do
   prop info, :string
   prop selected, :any
   prop options, :any, default: []
+  prop form, :form, from_context: {Form, :form}
 
   def render(assigns) do
     ~F"""
     <Field class="field" name={@name}>
       {#if @show_label}
-        <InputContext assigns={assigns} :let={field: field}>
-          <Label class="label">
-            <span class="label-text">
-              {@label || Phoenix.Naming.humanize(field)}
-              {#if @info}
-                <div class="tooltip" data-tip={@info}>
-                  <i class="fas fa-info-circle" />
-                </div>
-              {/if}
-            </span>
-          </Label>
-        </InputContext>
+        <Label class="label">
+          <span class="label-text">
+            {@label || Phoenix.Naming.humanize(@name)}
+            {#if @info}
+              <div class="tooltip" data-tip={@info}>
+                <i class="fas fa-info-circle" />
+              </div>
+            {/if}
+          </span>
+        </Label>
       {/if}
       <div class="flex flex-col">
         <div class="flex flex-row gap-2">
@@ -42,20 +41,18 @@ defmodule BanchanWeb.Components.Form.MultipleSelect do
             </span>
           {/if}
           <div class="control w-full">
-            <InputContext :let={form: form, field: field}>
-              <MultipleSelect
-                class={
-                  "textarea",
-                  "textarea-bordered",
-                  "w-full",
-                  @class,
-                  "textarea-error": !Enum.empty?(Keyword.get_values(form.errors, field))
-                }
-                selected={@selected}
-                opts={@opts}
-                options={@options}
-              />
-            </InputContext>
+            <MultipleSelect
+              class={
+                "textarea",
+                "textarea-bordered",
+                "w-full",
+                @class,
+                "textarea-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
+              }
+              selected={@selected}
+              opts={@opts}
+              options={@options}
+            />
           </div>
         </div>
         <ErrorTag class="text-error" />

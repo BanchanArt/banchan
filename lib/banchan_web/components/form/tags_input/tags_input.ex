@@ -4,8 +4,8 @@ defmodule BanchanWeb.Components.Form.TagsInput do
   """
   use BanchanWeb, :live_component
 
+  alias Surface.Components.Form
   alias Surface.Components.Form.{ErrorTag, Field, HiddenInput}
-  alias Surface.Components.Form.Input.InputContext
 
   alias Banchan.Tags
 
@@ -15,6 +15,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
   prop label, :string
   prop show_label, :boolean, default: true
   prop info, :string
+  prop form, :form, from_context: {Form, :form}
 
   data tags, :list, default: []
   data results, :list, default: []
@@ -22,8 +23,12 @@ defmodule BanchanWeb.Components.Form.TagsInput do
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
-    form = Map.get(socket.assigns.__context__, {Surface.Components.Form, :form})
-    socket = assign(socket, tags: Phoenix.HTML.Form.input_value(form, socket.assigns.name) || [])
+
+    socket =
+      assign(socket,
+        tags: Phoenix.HTML.Form.input_value(socket.assigns.form, socket.assigns.name) || []
+      )
+
     {:ok, socket}
   end
 
@@ -130,71 +135,67 @@ defmodule BanchanWeb.Components.Form.TagsInput do
     <div id={@id <> "-wrapper"} :hook="TagsInput">
       <Field class="field" name={@name}>
         {#if @show_label}
-          <InputContext assigns={assigns} :let={form: form, field: field}>
-            <label for={Phoenix.HTML.Form.input_id(form, field) <> "_input"} class="label">
-              <span class="label-text">
-                {@label || Phoenix.Naming.humanize(field)}
-                {#if @info}
-                  <div class="tooltip" data-tip={@info}>
-                    <i class="fas fa-info-circle" />
-                  </div>
-                {/if}
-              </span>
-            </label>
-          </InputContext>
+          <label for={Phoenix.HTML.Form.input_id(@form, @name) <> "_input"} class="label">
+            <span class="label-text">
+              {@label || Phoenix.Naming.humanize(@name)}
+              {#if @info}
+                <div class="tooltip" data-tip={@info}>
+                  <i class="fas fa-info-circle" />
+                </div>
+              {/if}
+            </span>
+          </label>
         {/if}
         <div class="flex flex-col">
-          <InputContext :let={form: form, field: field}>
-            <ul class={
-              "tags-list flex flex-row flex-wrap p-1 gap-1 border shadow focus-within:ring border-base-content border-opacity-20 bg-base-100 rounded-btn cursor-text",
-              "input-error": !Enum.empty?(Keyword.get_values(form.errors, field))
-            }>
-              {#for {tag, index} <- Enum.with_index(@tags)}
-                <li class="badge badge-lg badge-primary gap-2">
-                  <HiddenInput
-                    id={Phoenix.HTML.Form.input_id(form, field) <> "_#{index}"}
-                    name={Phoenix.HTML.Form.input_name(form, field) <> "[]"}
-                    value={tag}
-                  />
-                  <span class="cursor-pointer text-xs" phx-value-index={index} :on-click="remove">✕</span><span>
-                    {tag}</span>
-                </li>
-              {#else}
-                <li>
-                  <HiddenInput name={Phoenix.HTML.Form.input_name(form, field)} value="[]" />
-                </li>
-              {/for}
-              <li class="flex-1 relative min-w-fit w-8">
-                <input
-                  id={Phoenix.HTML.Form.input_id(form, field) <> "_input"}
-                  class="input-field bg-base-100 input-sm w-full h-full focus:outline-none border-none focus:border-none border-transparent focus:border-transparent shadow-none focus:ring-0 focus:ring-transparent overflow-visible"
-                  phx-keydown="handle_input"
-                  phx-update="ignore"
-                  data-event-target={@myself}
-                  phx-target={@myself}
-                />
-                <ol
-                  :if={!Enum.empty?(@results)}
-                  class="absolute float-left menu menu-compact rounded-box p-2 bg-base-300"
-                >
-                  {#for {result, index} <- Enum.with_index(@results)}
-                    <li><button
-                        class={"p-1", active: index == @menu_selected}
-                        type="button"
-                        :on-click="add_selected"
-                        phx-value-tag={result.tag}
-                      >{result.tag}</button></li>
-                  {/for}
-                </ol>
+          <ul class={
+            "tags-list flex flex-row flex-wrap p-1 gap-1 border shadow focus-within:ring border-base-content border-opacity-20 bg-base-100 rounded-btn cursor-text",
+            "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
+          }>
+            {#for {tag, index} <- Enum.with_index(@tags)}
+              <li class="badge badge-lg badge-primary gap-2">
                 <HiddenInput
-                  class="hidden-val"
-                  id={Phoenix.HTML.Form.input_id(form, field) <> "__hidden_val__"}
-                  name={Phoenix.HTML.Form.input_name(form, field) <> "__hidden_val__"}
-                  value=""
+                  id={Phoenix.HTML.Form.input_id(@form, @name) <> "_#{index}"}
+                  name={Phoenix.HTML.Form.input_name(@form, @name) <> "[]"}
+                  value={tag}
                 />
+                <span class="cursor-pointer text-xs" phx-value-index={index} :on-click="remove">✕</span><span>
+                  {tag}</span>
               </li>
-            </ul>
-          </InputContext>
+            {#else}
+              <li>
+                <HiddenInput name={Phoenix.HTML.Form.input_name(@form, @name)} value="[]" />
+              </li>
+            {/for}
+            <li class="flex-1 relative min-w-fit w-8">
+              <input
+                id={Phoenix.HTML.Form.input_id(@form, @name) <> "_input"}
+                class="input-field bg-base-100 input-sm w-full h-full focus:outline-none border-none focus:border-none border-transparent focus:border-transparent shadow-none focus:ring-0 focus:ring-transparent overflow-visible"
+                phx-keydown="handle_input"
+                phx-update="ignore"
+                data-event-target={@myself}
+                phx-target={@myself}
+              />
+              <ol
+                :if={!Enum.empty?(@results)}
+                class="absolute float-left menu menu-compact rounded-box p-2 bg-base-300"
+              >
+                {#for {result, index} <- Enum.with_index(@results)}
+                  <li><button
+                      class={"p-1", active: index == @menu_selected}
+                      type="button"
+                      :on-click="add_selected"
+                      phx-value-tag={result.tag}
+                    >{result.tag}</button></li>
+                {/for}
+              </ol>
+              <HiddenInput
+                class="hidden-val"
+                id={Phoenix.HTML.Form.input_id(@form, @name) <> "__hidden_val__"}
+                name={Phoenix.HTML.Form.input_name(@form, @name) <> "__hidden_val__"}
+                value=""
+              />
+            </li>
+          </ul>
           <ErrorTag class="help text-error" />
         </div>
       </Field>

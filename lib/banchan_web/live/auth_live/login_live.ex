@@ -46,7 +46,7 @@ defmodule BanchanWeb.LoginLive do
           icon="mobile-alt"
           opts={maxlength: 6, placeholder: "optional"}
         />
-        <Checkbox name={:remember_me}>Keep me logged in for 60 days.</Checkbox>
+        <Checkbox name={:remember_me} label="Keep me logged in for 60 days." />
         <Submit class="w-full" changeset={@changeset} label="Log in" />
         <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
           Forgot your password?

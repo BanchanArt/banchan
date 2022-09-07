@@ -5,7 +5,6 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
   use BanchanWeb, :live_component
 
   alias Surface.Components.Form.{ErrorTag, Field, Label, TextArea}
-  alias Surface.Components.Form.Input.InputContext
   alias Surface.Components.LiveFileInput
 
   prop name, :any, required: true
@@ -59,18 +58,16 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
     ~F"""
     <Field class="field" name={@name}>
       {#if @show_label}
-        <InputContext assigns={assigns} :let={field: field}>
-          <Label class="label">
-            <span class="label-text">
-              {@label || Phoenix.Naming.humanize(field)}
-              {#if @info}
-                <div class="tooltip" data-tip={@info}>
-                  <i class="fas fa-info-circle" />
-                </div>
-              {/if}
-            </span>
-          </Label>
-        </InputContext>
+        <Label class="label">
+          <span class="label-text">
+            {@label || Phoenix.Naming.humanize(@name)}
+            {#if @info}
+              <div class="tooltip" data-tip={@info}>
+                <i class="fas fa-info-circle" />
+              </div>
+            {/if}
+          </span>
+        </Label>
       {/if}
       <div class="control">
         <div class="relative">
