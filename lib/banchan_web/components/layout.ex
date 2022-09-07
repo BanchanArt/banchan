@@ -112,6 +112,9 @@ defmodule BanchanWeb.Components.Layout do
                 <li>
                   <a href="/admin/sent_emails" target="_blank" rel="noopener noreferrer"><i class="fas fa-paper-plane" />Sent Emails</a>
                 </li>
+                <li>
+                  <a href="/admin/catalogue" target="_blank" rel="noopener noreferrer"><i class="fas fa-book" />Catalogue</a>
+                </li>
               {/if}
             {/if}
             <li class="menu-title">

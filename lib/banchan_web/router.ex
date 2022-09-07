@@ -3,6 +3,7 @@ defmodule BanchanWeb.Router do
 
   import BanchanWeb.UserAuth
   import Phoenix.LiveDashboard.Router
+  import Surface.Catalogue.Router
 
   alias BanchanWeb.{BasicAuthPlug, EnsureEnabledPlug, EnsureRolePlug}
 
@@ -15,9 +16,8 @@ defmodule BanchanWeb.Router do
                               _ ->
                                 "default-src 'self' 'unsafe-eval' 'unsafe-inline';" <>
                                   "connect-src ws://#{@host}:*;" <>
-                                  "img-src 'self' blob: data:;"
-
-                                "font-src data:;"
+                                  "img-src 'self' blob: data:;" <>
+                                  "font-src data:;"
                             end)
 
   pipeline :browser do
@@ -233,5 +233,9 @@ defmodule BanchanWeb.Router do
 
     live_dashboard("/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo)
     forward("/sent_emails", Bamboo.SentEmailViewerPlug)
+
+    if Application.compile_env!(:banchan, :env) == :dev do
+      surface_catalogue("/catalogue")
+    end
   end
 end

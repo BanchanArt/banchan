@@ -83,6 +83,7 @@ defmodule Banchan.MixProject do
       {:slugify, "~> 1.3.1"},
       {:stripity_stripe, "~> 2.15.0"},
       {:surface, "~> 0.8.0"},
+      {:surface_catalogue, "~> 0.5.0"},
       {:surface_markdown, "~> 0.5.0"},
       {:sweet_xml, "~> 0.6"},
       {:telemetry_metrics, "~> 0.6"},
