@@ -21,12 +21,17 @@ defmodule BanchanWeb.LayoutView do
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-        {live_title_tag(assigns[:page_title] || "Art Goes Here", prefix: "Banchan Art | ")}
+        {live_title_tag(assigns[:page_title] || "The Co-operative Commissions Platform",
+          prefix: "Banchan Art | "
+        )}
         {Phoenix.HTML.Tag.csrf_meta_tag()}
 
         {!-- OpenGraph/Card display --}
         <meta property="og:site_name" content="Banchan Art">
-        <meta property="og:title" content={"Banchan Art | #{assigns[:page_title] || "Art Goes Here"}"}>
+        <meta
+          property="og:title"
+          content={"Banchan Art | #{assigns[:page_title] || "The Co-operative Commissions Platform"}"}
+        />
         <meta
           property="og:description"
           content={assigns[:page_description] ||
