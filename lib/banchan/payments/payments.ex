@@ -269,64 +269,83 @@ defmodule Banchan.Payments do
   end
 
   @doc """
-  Pays out a Studio for the full available and released amount.
+  Pays out a single Invoice.
   """
-  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def payout_studio(%User{} = actor, %Studio{} = studio, invoice \\ nil) do
+  def payout_invoice(%User{} = actor, %Studio{} = studio, %Invoice{} = invoice) do
     with {:ok, balance} <-
            stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id}) do
-      if invoice do
-        payout_single_invoice(actor, studio, balance.available |> Enum.at(0), invoice)
-      else
-        Repo.transaction(fn ->
-          # NB(@zkat): We're not using Ecto.Multi here because we still want
-          # to commit errored payouts that failed because of Stripe failures, so they show up for users.
-          Enum.reduce_while(balance.available, {:ok, []}, fn avail, {:ok, acc} ->
-            case payout_available(actor, studio, avail) do
-              {:ok, nil} ->
-                {:cont, {:ok, acc}}
-
-              {:ok, payout} ->
-                {:cont, {:ok, [payout | acc]}}
-
-              {:error, error} ->
-                {:halt, {:error, error}}
-            end
-          end)
+      avail =
+        balance.available
+        |> Enum.find(fn avail ->
+          curr = avail.currency |> String.upcase() |> String.to_atom()
+          curr == invoice.total_transferred.currency
         end)
-        |> case do
-          {:ok, {:ok, payouts}} ->
-            {:ok, Enum.reverse(payouts)}
 
-          {:ok, {:error, error}} ->
-            {:error, error}
-
-          {:error, error} ->
-            {:error, error}
-        end
+      if avail.amount > 0 do
+        create_payout(actor, studio, [invoice.id], 1, invoice.total_transferred)
+      else
+        {:error, :insufficient_funds}
       end
-      |> case do
-        {:ok, val} ->
-          {:ok, val}
+    end
+    |> case do
+      {:ok, invoice} ->
+        {:ok, invoice}
 
-        {:error, %Stripe.Error{} = e} ->
-          Logger.error("Stripe error during payout: #{inspect(e)}")
-          {:error, e}
+      {:error, %Stripe.Error{} = e} ->
+        Logger.error("Stripe error during payout: #{inspect(e)}")
+        {:error, e}
 
-        {:error, error} ->
-          Logger.error("Internal error during payout: #{inspect(error)}")
-          {:error, error}
-      end
+      {:error, error} ->
+        Logger.error("Internal error during payout: #{inspect(error)}")
+        {:error, error}
     end
   end
 
-  defp payout_single_invoice(%User{} = actor, %Studio{} = studio, avail, %Invoice{} = invoice) do
-    avail = Money.new(avail.amount, String.to_atom(String.upcase(avail.currency)))
+  @doc """
+  Pays out a Studio for the full available and released amount.
+  """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def payout_studio(%User{} = actor, %Studio{} = studio) do
+    with {:ok, balance} <-
+           stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id}) do
+      Repo.transaction(fn ->
+        # NB(@zkat): We're not using Ecto.Multi here because we still want
+        # to commit errored payouts that failed because of Stripe failures, so they show up for users.
+        Enum.reduce_while(balance.available, {:ok, []}, fn avail, {:ok, acc} ->
+          case payout_available(actor, studio, avail) do
+            {:ok, nil} ->
+              {:cont, {:ok, acc}}
 
-    if avail.amount > 0 do
-      create_payout(actor, studio, [invoice.id], 1, invoice.total_transferred)
-    else
-      {:error, :insufficient_funds}
+            {:ok, payout} ->
+              {:cont, {:ok, [payout | acc]}}
+
+            {:error, error} ->
+              {:halt, {:error, error}}
+          end
+        end)
+      end)
+      |> case do
+        {:ok, {:ok, payouts}} ->
+          {:ok, Enum.reverse(payouts)}
+
+        {:ok, {:error, error}} ->
+          {:error, error}
+
+        {:error, error} ->
+          {:error, error}
+      end
+    end
+    |> case do
+      {:ok, payouts} ->
+        {:ok, payouts}
+
+      {:error, %Stripe.Error{} = e} ->
+        Logger.error("Stripe error during payout: #{inspect(e)}")
+        {:error, e}
+
+      {:error, error} ->
+        Logger.error("Internal error during payout: #{inspect(error)}")
+        {:error, error}
     end
   end
 
@@ -460,6 +479,7 @@ defmodule Banchan.Payments do
         {:error, err}
 
       {:ok, %{updated_payout: payout}} ->
+        Notifications.payout_sent(payout)
         {:ok, payout}
 
       {:error, _, error, _} ->
@@ -1053,7 +1073,7 @@ defmodule Banchan.Payments do
               # If there's no payout for this invoice or the payout is in a
               # failed state, initiate a new payout just for this invoice.
               with {:ok, _payout} <-
-                     payout_studio(system, %Studio{id: invoice.commission.studio_id}, invoice),
+                     payout_invoice(system, %Studio{id: invoice.commission.studio_id}, invoice),
                    :ok <- Notifications.expired_invoice_paid_out(invoice) do
                 {:ok, invoice}
               end

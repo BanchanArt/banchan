@@ -36,6 +36,42 @@ defmodule Banchan.Payments.Notifications do
   end
 
   @doc """
+  Notifies studio members that a payout is on its way.
+  """
+  def payout_sent(%Payout{} = payout) do
+    Notifications.with_task(fn ->
+      {:ok, _} =
+        Repo.transaction(fn ->
+          actor = Accounts.system_user()
+
+          payout =
+            payout |> Repo.reload() |> Repo.preload(studio: [artists: [:notification_settings]])
+
+          body =
+            "A payout for #{Money.to_string(payout.amount)} is on its way to your bank account."
+
+          url = Routes.studio_payouts_url(Endpoint, :show, payout.studio.handle, payout.public_id)
+
+          {:safe, safe_url} = Phoenix.HTML.html_escape(url)
+
+          Notifications.notify_subscribers!(
+            actor,
+            payout.studio.artists,
+            %Notifications.UserNotification{
+              type: "payout_sent",
+              title: "Payout on the way!",
+              short_body: body,
+              text_body: "#{body}\n\n#{url}",
+              html_body: "<p>#{body}</p><p><a href=\"#{safe_url}\">View it</a></p>",
+              url: url,
+              read: false
+            }
+          )
+        end)
+    end)
+  end
+
+  @doc """
   Sends a warning that an invoice is about to expire and must either be paid
   out or reimbursed, or the system will do it automatically.
   """

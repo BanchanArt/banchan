@@ -214,7 +214,7 @@ defmodule Banchan.PaymentsTest.Expired do
 
       assert [] = Notifications.unread_notifications(client).entries |> Enum.sort_by(& &1.id)
 
-      assert [%_{type: "expired_invoice_paid_out"}] =
+      assert [%_{type: "expired_invoice_paid_out"}, %_{type: "payout_sent"}] =
                Notifications.unread_notifications(artist).entries |> Enum.sort_by(& &1.id)
     end
 

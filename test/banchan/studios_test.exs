@@ -3,6 +3,7 @@ defmodule Banchan.StudiosTest do
   Tests for Studios-related functionality.
   """
   use Banchan.DataCase, async: true
+  use Bamboo.Test
 
   import Mox
 
@@ -13,6 +14,7 @@ defmodule Banchan.StudiosTest do
   import Banchan.StudiosFixtures
 
   alias Banchan.Commissions
+  alias Banchan.Notifications
   alias Banchan.Payments
   alias Banchan.Payments.{Invoice, Payout}
   alias Banchan.Repo
@@ -392,6 +394,11 @@ defmodule Banchan.StudiosTest do
       end)
 
       {:ok, [%Payout{amount: ^net, status: :pending}]} = Payments.payout_studio(artist, studio)
+
+      Notifications.wait_for_notifications()
+
+      assert [_, _, _, _, _, _, %_{type: "payout_sent"}] =
+               Notifications.unread_notifications(artist).entries |> Enum.sort_by(& &1.id)
 
       payout =
         from(p in Payout, where: p.studio_id == ^studio.id)
