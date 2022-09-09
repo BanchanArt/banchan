@@ -21,8 +21,8 @@
 if Application.fetch_env!(:banchan, :env) == :dev do
   {:ok, user} =
     Banchan.Accounts.register_admin(%{
-      handle: "zkat",
-      email: "kat@dwg.dev",
+      handle: "sampleuser",
+      email: "example@banchan.art",
       password: "foobarbazquux",
       password_confirmation: "foobarbazquux"
     })
