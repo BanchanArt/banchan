@@ -20,7 +20,8 @@ defmodule Banchan.Accounts do
 
   alias Banchan.Repo
   alias Banchan.Uploads
-  alias Banchan.Workers.{EnableUser, Thumbnailer}
+  alias Banchan.Uploads.Upload
+  alias Banchan.Workers.{EnableUser, Thumbnailer, UploadDeleter}
 
   alias BanchanWeb.UserAuth
 
@@ -804,6 +805,27 @@ defmodule Banchan.Accounts do
       end,
       returning: true
     )
+    |> Ecto.Multi.run(:remove_old_pfp_img, fn _, %{updated_user: updated, user: old} ->
+      if old.pfp_img_id && old.pfp_img_id != updated.pfp_img_id do
+        UploadDeleter.schedule_deletion(%Upload{id: old.pfp_img_id})
+      else
+        {:ok, nil}
+      end
+    end)
+    |> Ecto.Multi.run(:remove_old_pfp_thumb, fn _, %{updated_user: updated, user: old} ->
+      if old.pfp_thumb_id && old.pfp_thumb_id != updated.pfp_thumb_id do
+        UploadDeleter.schedule_deletion(%Upload{id: old.pfp_thumb_id})
+      else
+        {:ok, nil}
+      end
+    end)
+    |> Ecto.Multi.run(:remove_old_header_img, fn _, %{updated_user: updated, user: old} ->
+      if old.header_img_id && old.header_img_id != updated.header_img_id do
+        UploadDeleter.schedule_deletion(%Upload{id: old.header_img_id})
+      else
+        {:ok, nil}
+      end
+    end)
     |> Repo.transaction()
     |> case do
       {:ok, %{updated_user: user}} ->
