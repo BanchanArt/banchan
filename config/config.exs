@@ -69,7 +69,7 @@ config :banchan, Oban,
        {"@daily", Banchan.Workers.Pruner}
      ]}
   ],
-  queues: [mailers: 10, media: 2, unban: 10, pruning: 1, invoice_purge: 10]
+  queues: [mailers: 10, media: 2, unban: 10, pruning: 1, invoice_purge: 10, upload_cleanup: 10]
 
 config :sentry,
   included_environments: [:prod, :staging, :dev],
