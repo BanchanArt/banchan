@@ -92,3 +92,4 @@ The undersigned have all agreed to this CLA:
 * Bryan Ginger (@bcgoss)
 * Richard Parachini (@LuxBrush)
 * April Gonçalves (@cyberglot)
+* Marlus Saraiva (@msaraiva)
