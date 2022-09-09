@@ -19,7 +19,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
 
   data tags, :list, default: []
   data results, :list, default: []
-  data menu_selected, :integer
+  data menu_selected, :integer, default: nil
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
