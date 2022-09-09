@@ -378,15 +378,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   def render(assigns) do
     ~F"""
-    <Form
-      for={@changeset}
-      opts={
-        autocomplete: "off",
-        phx_target: @myself,
-        phx_submit: "submit",
-        phx_change: "change"
-      }
-    >
+    <Form for={@changeset} change="change" submit="submit" opts={autocomplete: "off"}>
       <div class="flex flex-col gap-2">
         <TextInput
           name={:name}
