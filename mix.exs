@@ -40,8 +40,15 @@ defmodule Banchan.MixProject do
   end
 
   # Specifies which paths to compile per environment.
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:test), do: ["lib", "test/support"] ++ catalogues()
+  defp elixirc_paths(:dev), do: ["lib"] ++ catalogues()
   defp elixirc_paths(_), do: ["lib"]
+
+  def catalogues do
+    [
+      "priv/catalogue"
+    ]
+  end
 
   # Specifies your project dependencies.
   #
@@ -82,8 +89,8 @@ defmodule Banchan.MixProject do
       {:sentry, "~> 8.0"},
       {:slugify, "~> 1.3.1"},
       {:stripity_stripe, "~> 2.15.0"},
-      {:surface, "~> 0.8.0"},
-      {:surface_catalogue, "~> 0.5.0"},
+      {:surface, "~> 0.8.1"},
+      {:surface_catalogue, "~> 0.5.1"},
       {:surface_markdown, "~> 0.5.0"},
       {:sweet_xml, "~> 0.6"},
       {:telemetry_metrics, "~> 0.6"},
