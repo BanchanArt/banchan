@@ -61,7 +61,8 @@ config :banchan, BanchanWeb.Endpoint,
       ~r"priv/gettext/.*(po)$",
       ~r"lib/banchan_web/(live|views|components)/.*(ex|js)$",
       ~r"lib/banchan_web/templates/.*(eex)$",
-      ~r"lib/banchan_web/live/.*(sface)$"
+      ~r"lib/banchan_web/live/.*(sface)$",
+      ~r"priv/catalogue/.*(ex)$"
     ]
   ]
 
