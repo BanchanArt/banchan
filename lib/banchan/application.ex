@@ -25,6 +25,13 @@ defmodule Banchan.Application do
 
     :ok = Oban.Telemetry.attach_default_logger()
 
+    :telemetry.attach(
+      "oban-errors",
+      [:oban, :job, :exception],
+      &Banchan.Workers.Utils.handle_event/4,
+      []
+    )
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Banchan.Supervisor]
