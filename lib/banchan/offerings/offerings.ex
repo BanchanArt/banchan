@@ -20,7 +20,7 @@ defmodule Banchan.Offerings do
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
-  alias Banchan.Workers.Thumbnailer
+  alias Banchan.Workers.{Thumbnailer, UploadDeleter}
 
   ## Creation
 
@@ -76,46 +76,76 @@ defmodule Banchan.Offerings do
   """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def update_offering(%User{} = actor, %Offering{} = offering, attrs, gallery_images) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        with {:ok, _actor} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor) do
-          offering = Repo.reload(offering) |> Repo.preload(:options)
+    Repo.transaction(fn ->
+      with {:ok, _actor} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor) do
+        offering = Repo.reload(offering) |> Repo.preload([:options, :gallery_imgs])
 
-          open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
+        open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
 
-          changeset =
-            offering
-            |> Repo.preload(:gallery_imgs)
-            |> change_offering(attrs)
+        changeset =
+          offering
+          |> change_offering(attrs)
 
-          changeset =
-            if is_nil(gallery_images) do
-              changeset
-            else
-              gallery_images =
-                (gallery_images || [])
-                |> Enum.with_index()
-                |> Enum.map(fn {%Upload{} = upload, index} ->
-                  %GalleryImage{
-                    index: index,
-                    upload_id: upload.id
-                  }
-                end)
+        changeset =
+          if is_nil(gallery_images) do
+            changeset
+          else
+            gallery_images =
+              (gallery_images || [])
+              |> Enum.with_index()
+              |> Enum.map(fn {%Upload{} = upload, index} ->
+                %GalleryImage{
+                  index: index,
+                  upload_id: upload.id
+                }
+              end)
 
-              changeset |> Ecto.Changeset.put_assoc(:gallery_imgs, gallery_images)
-            end
-
-          with {:ok, changed} <- changeset |> Repo.update(returning: true) do
-            if !open_before? && changed.open do
-              Notifications.offering_opened(changed)
-            end
-
-            {:ok, changed}
+            changeset |> Ecto.Changeset.put_assoc(:gallery_imgs, gallery_images)
           end
-        end
-      end)
 
-    ret
+        old_uploads = offering.gallery_imgs |> Enum.map(& &1.upload_id)
+
+        new_uploads =
+          changeset |> Ecto.Changeset.get_field(:gallery_imgs, []) |> Enum.map(& &1.upload_id)
+
+        drop_uploads =
+          old_uploads
+          |> Enum.filter(&(!Enum.member?(new_uploads, &1)))
+          |> Enum.reduce_while({:ok, []}, fn upload_id, {:ok, acc} ->
+            case UploadDeleter.schedule_deletion(%Upload{id: upload_id}, delete_original: true) do
+              {:ok, job} -> {:cont, {:ok, [job | acc]}}
+              {:error, error} -> {:halt, {:error, error}}
+            end
+          end)
+
+        drop_old_card_img =
+          if offering.card_img_id &&
+               offering.card_img_id != Ecto.Changeset.get_field(changeset, :card_img_id) do
+            UploadDeleter.schedule_deletion(%Upload{id: offering.card_img_id},
+              delete_original: true
+            )
+          else
+            {:ok, nil}
+          end
+
+        with {:ok, changed} <- changeset |> Repo.update(returning: true),
+             {:ok, _} <- drop_old_card_img,
+             {:ok, _jobs} <- drop_uploads do
+          if !open_before? && changed.open do
+            Notifications.offering_opened(changed)
+          end
+
+          {:ok, changed}
+        else
+          {:error, error} ->
+            Repo.rollback(error)
+        end
+      end
+    end)
+    |> case do
+      {:ok, ret} -> ret
+      {:error, error} -> {:error, error}
+    end
   end
 
   @doc """
@@ -787,7 +817,9 @@ defmodule Banchan.Offerings do
              # NB(@zkat): We archive the offering first because this takes
              # care of updating offering order indices. It's a hack but hey it
              # does the job.
-             {:ok, offering} <- archive_offering(actor, offering) do
+             {:ok, offering} <- archive_offering(actor, offering),
+             {:ok, _} <- delete_gallery_imgs(offering),
+             {:ok, _} <- delete_card_img(offering) do
           offering
           |> Offering.deletion_changeset()
           |> Repo.update(returning: true)
@@ -795,6 +827,29 @@ defmodule Banchan.Offerings do
       end)
 
     ret
+  end
+
+  defp delete_gallery_imgs(%Offering{} = offering) do
+    offering = offering |> Repo.preload(:gallery_imgs)
+
+    offering.gallery_imgs
+    |> Enum.reduce_while({:ok, []}, fn %GalleryImage{upload_id: upload_id}, {:ok, acc} ->
+      case UploadDeleter.schedule_deletion(%Upload{id: upload_id}, delete_original: true) do
+        {:ok, _} ->
+          {:cont, {:ok, [upload_id | acc]}}
+
+        {:error, error} ->
+          {:halt, {:error, error}}
+      end
+    end)
+  end
+
+  defp delete_card_img(%Offering{card_img_id: upload_id}) do
+    if upload_id do
+      UploadDeleter.schedule_deletion(%Upload{id: upload_id}, delete_original: true)
+    else
+      {:ok, nil}
+    end
   end
 
   @doc """

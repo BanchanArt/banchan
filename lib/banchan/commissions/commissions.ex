@@ -1152,6 +1152,7 @@ defmodule Banchan.Commissions do
           %{event | attachments: new_attachments},
           actor
         )
+
         {:ok, event_attachment}
 
       {:error, _, error, _} ->

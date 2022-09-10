@@ -123,7 +123,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
          |> push_redirect(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
-      end
+    end
   end
 
   @impl true
