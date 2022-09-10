@@ -36,7 +36,10 @@ defmodule Banchan.Workers.ThumbnailerTest do
             file.name
           )
 
-        assert {:ok, _} = Thumbnailer.thumbnail(upload)
+        assert {:ok, thumbnail} = Thumbnailer.thumbnail(upload)
+
+        Uploads.delete_upload(thumbnail)
+        Uploads.delete_upload(upload)
       end)
     end
 
@@ -58,6 +61,9 @@ defmodule Banchan.Workers.ThumbnailerTest do
                Path.join([@upload_dir, thumbnail.bucket <> "/" <> thumbnail.key])
                |> Mogrify.open()
                |> Mogrify.verbose()
+
+      Uploads.delete_upload(thumbnail)
+      Uploads.delete_upload(upload)
     end
   end
 
@@ -70,5 +76,7 @@ defmodule Banchan.Workers.ThumbnailerTest do
     upload = Uploads.save_file!(user, image_src, image_type, image_name)
 
     assert {:error, :unsupported_input} = Thumbnailer.thumbnail(upload)
+
+    Uploads.delete_upload(upload)
   end
 end
