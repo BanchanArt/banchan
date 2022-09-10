@@ -380,7 +380,14 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     ~F"""
     <Form
       for={@changeset}
-      opts={autocomplete: "off", phx_change: "change", phx_submit: "submit", phx_target: @myself}
+      opts={
+        autocomplete: "off",
+        # NOTE: This is a workaround for a Surface bug in >=0.7.1: https://github.com/surface-ui/surface/issues/582
+        # TODO: make this a regular submit="submit" when the bug gets fixed.
+        phx_target: @myself,
+        phx_submit: "submit",
+        phx_change: "change"
+      }
     >
       <div class="flex flex-col gap-2">
         <TextInput

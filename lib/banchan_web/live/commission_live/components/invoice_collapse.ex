@@ -120,7 +120,17 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
   def render(assigns) do
     ~F"""
     <invoice-collapse id={@id}>
-      <Form for={@changeset} change="change" submit="submit" opts={id: "#{@id}-form"}>
+      <Form
+        for={@changeset}
+        change="change"
+        opts={
+          id: "#{@id}-form",
+          # NOTE: This is a workaround for a Surface bug in >=0.7.1: https://github.com/surface-ui/surface/issues/582
+          # TODO: make this a regular submit="add_comment" when the bug gets fixed.
+          phx_submit: "submit",
+          phx_target: @myself
+        }
+      >
         <Collapse id={@id <> "-invoice-collapse"} class="w-full mt-2">
           <:header>
             <div class="text-lg font-medium">Send Invoice</div>
