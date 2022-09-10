@@ -51,9 +51,11 @@ defmodule BanchanWeb.Components.Nav do
         </div>
       {/if}
 
-      <div class="flex-none">
-        <Notifications id="notifications" uri={@uri} current_user={@current_user} />
-      </div>
+      {#if @current_user}
+        <div class="flex-none">
+          <Notifications id="notifications" uri={@uri} current_user={@current_user} />
+        </div>
+      {/if}
     </nav>
     """
   end
