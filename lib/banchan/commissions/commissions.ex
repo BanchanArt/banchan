@@ -1129,14 +1129,18 @@ defmodule Banchan.Commissions do
     end)
     |> Ecto.Multi.run(:delete_preview, fn _, _ ->
       if event_attachment.preview_id do
-        UploadDeleter.schedule_deletion(%Upload{id: event_attachment.preview_id})
+        UploadDeleter.schedule_deletion(%Upload{id: event_attachment.preview_id},
+          keep_original: true
+        )
       else
         {:ok, nil}
       end
     end)
     |> Ecto.Multi.run(:delete_thumbnail, fn _, _ ->
       if event_attachment.thumbnail_id do
-        UploadDeleter.schedule_deletion(%Upload{id: event_attachment.thumbnail_id})
+        UploadDeleter.schedule_deletion(%Upload{id: event_attachment.thumbnail_id},
+          keep_original: true
+        )
       else
         {:ok, nil}
       end

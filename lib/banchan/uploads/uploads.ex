@@ -57,10 +57,17 @@ defmodule Banchan.Uploads do
   end
 
   @doc """
-  Fetches an upload by its (binary) id.
+  Fetches an upload by its (binary) id, throwing if the Upload does not exist.
   """
   def get_by_id!(id) do
     Repo.get!(Upload, id)
+  end
+
+  @doc """
+  Fetches an upload by its (binary) id, returning nil if the Upload does not exist.
+  """
+  def get_by_id(id) do
+    Repo.get(Upload, id)
   end
 
   @doc """

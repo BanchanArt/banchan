@@ -12,17 +12,23 @@ defmodule Banchan.Workers.UploadDeleter do
 
   @impl Oban.Worker
   def perform(%_{args: %{"id" => id, "keep_original" => keep_original}}) do
-    upload = Uploads.get_by_id!(id)
+    upload = Uploads.get_by_id(id)
 
-    original =
-      if keep_original || !upload.original_id do
-        {:ok, nil}
-      else
-        Uploads.delete_upload(Uploads.get_by_id!(upload.original_id))
+    if is_nil(upload) do
+      :ok
+    else
+      refreshed_upload =
+        if keep_original || !upload.original_id do
+          {:ok, upload}
+        else
+          with {:ok, _} <- Uploads.delete_upload(Uploads.get_by_id(upload.original_id)) do
+            {:ok, Uploads.get_by_id(id)}
+          end
+        end
+
+      with {:ok, %Upload{} = upload} <- refreshed_upload do
+        Uploads.delete_upload(upload)
       end
-
-    with {:ok, _} <- original do
-      Uploads.delete_upload(upload)
     end
   end
 
