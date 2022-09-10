@@ -47,6 +47,30 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                 class="w-full h-full rounded-box bg-base-content flex justify-center items-center animate-pulse"
                 title={attachment.upload.name}
               />
+            {#elseif @editing}
+              <div class="relative">
+                {#if @editing}
+                  <button
+                    type="button"
+                    :on-click={@remove_attachment}
+                    phx-value-attachment-idx={get_attachment_index(@attachments, attachment)}
+                    class="-top-2 -right-2 absolute"
+                  >
+                    <i class="fas fa-times-circle text-2xl" />
+                  </button>
+                {/if}
+                <img
+                  alt={attachment.upload.name}
+                  title={attachment.upload.name}
+                  class="rounded-box"
+                  src={Routes.commission_attachment_path(
+                    Endpoint,
+                    :thumbnail,
+                    @commission.public_id,
+                    attachment.upload_id
+                  )}
+                />
+              </div>
             {#else}
               <Lightbox.Item
                 class="relative"
