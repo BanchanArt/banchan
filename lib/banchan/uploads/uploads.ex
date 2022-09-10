@@ -212,6 +212,26 @@ defmodule Banchan.Uploads do
     |> Repo.update!(return: true)
   end
 
+  ## Deletion
+
+  @doc """
+  Deletes an upload and its stored data.
+  """
+  def delete_upload(%Upload{} = upload) do
+    if Application.fetch_env!(:banchan, :env) == :prod ||
+         !is_nil(Application.get_env(:ex_aws, :region)) do
+      ExAws.S3.delete_object(upload.bucket, upload.key) |> ExAws.request()
+    else
+      local = Path.join([local_upload_dir(), upload.bucket, upload.key])
+      File.rm(local)
+    end
+    |> case do
+      :ok -> Repo.delete(upload)
+      {:ok, _} -> Repo.delete(upload)
+      {:error, error} -> {:error, error}
+    end
+  end
+
   ## Misc internal utilities
 
   defp gen_key do

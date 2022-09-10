@@ -106,14 +106,24 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
     {index, ""} = Integer.parse(idx)
     attachment = Enum.fetch!(socket.assigns.event.attachments, index)
 
-    Commissions.delete_attachment!(
+    Commissions.delete_attachment(
       socket.assigns.current_user,
       socket.assigns.commission,
       socket.assigns.event,
       attachment
     )
+    |> case do
+      {:ok, _} ->
+        {:noreply, socket}
 
-    {:noreply, socket}
+      {:error, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "An internal error happened while trying to delete an attachment.")
+         |> push_redirect(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
+    end
   end
 
   @impl true

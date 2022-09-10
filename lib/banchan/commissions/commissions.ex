@@ -28,7 +28,8 @@ defmodule Banchan.Commissions do
   alias Banchan.Studios
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
-  alias Banchan.Workers.Thumbnailer
+  alias Banchan.Uploads.Upload
+  alias Banchan.Workers.{Thumbnailer, UploadDeleter}
 
   ## Events
 
@@ -1112,20 +1113,50 @@ defmodule Banchan.Commissions do
   @doc """
   Deletes an attachment from a comment.
   """
-  def delete_attachment!(
+  def delete_attachment(
         %User{} = actor,
         %Commission{} = commission,
         %Event{} = event,
         %EventAttachment{} = event_attachment
       ) do
-    # NB(@zkat): This also deletes any associated Uploads because of an ON DELETE.
-    Repo.delete!(event_attachment)
-    new_attachments = Enum.reject(event.attachments, &(&1.id == event_attachment.id))
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:delete_upload, fn _, _ ->
+      if event_attachment.upload_id do
+        UploadDeleter.schedule_deletion(%Upload{id: event_attachment.upload_id})
+      else
+        {:ok, nil}
+      end
+    end)
+    |> Ecto.Multi.run(:delete_preview, fn _, _ ->
+      if event_attachment.preview_id do
+        UploadDeleter.schedule_deletion(%Upload{id: event_attachment.preview_id})
+      else
+        {:ok, nil}
+      end
+    end)
+    |> Ecto.Multi.run(:delete_thumbnail, fn _, _ ->
+      if event_attachment.thumbnail_id do
+        UploadDeleter.schedule_deletion(%Upload{id: event_attachment.thumbnail_id})
+      else
+        {:ok, nil}
+      end
+    end)
+    |> Ecto.Multi.delete(:delete_event_attachment, event_attachment)
+    |> Repo.transaction()
+    |> case do
+      {:ok, _} ->
+        new_attachments = Enum.reject(event.attachments, &(&1.id == event_attachment.id))
 
-    Notifications.commission_event_updated(
-      commission,
-      %{event | attachments: new_attachments},
-      actor
-    )
+        Notifications.commission_event_updated(
+          commission,
+          %{event | attachments: new_attachments},
+          actor
+        )
+
+        {:ok, event_attachment}
+
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 end
