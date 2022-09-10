@@ -784,6 +784,7 @@ defmodule Banchan.Accounts do
       {:ok, %User{}}
 
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def update_user_profile(%User{} = actor, %User{} = user, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:user, fn _, _ -> {:ok, user |> Repo.reload()} end)

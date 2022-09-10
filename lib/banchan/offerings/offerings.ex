@@ -875,6 +875,7 @@ defmodule Banchan.Offerings do
 
         if off.gallery_imgs do
           off.gallery_imgs
+          # credo:disable-for-next-line Credo.Check.Refactor.Nesting
           |> Enum.each(fn %GalleryImage{upload_id: upload_id} ->
             {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: upload_id})
           end)

@@ -591,6 +591,7 @@ defmodule Banchan.Studios do
   @doc """
   Updates the studio profile fields.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def update_studio_profile(%User{} = actor, %Studio{} = studio, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:studio, fn _, _ ->
