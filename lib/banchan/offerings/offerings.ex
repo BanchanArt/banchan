@@ -4,6 +4,8 @@ defmodule Banchan.Offerings do
   """
   import Ecto.Query, warn: false
 
+  require Logger
+
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Commission
 
@@ -859,11 +861,38 @@ defmodule Banchan.Offerings do
   def prune_offerings do
     now = NaiveDateTime.utc_now()
 
-    from(
-      o in Offering,
-      where: not is_nil(o.deleted_at),
-      where: o.deleted_at < datetime_add(^now, -30, "day")
-    )
-    |> Repo.delete_all()
+    Repo.transaction(fn ->
+      from(
+        o in Offering,
+        where: not is_nil(o.deleted_at),
+        where: o.deleted_at < datetime_add(^now, -30, "day"),
+        preload: [:gallery_imgs]
+      )
+      |> Repo.stream()
+      |> Enum.reduce(0, fn off, acc ->
+        # NB(@zkat): We hard match on `{:ok, _}` here because scheduling
+        # deletions should really never fail.
+
+        if off.gallery_imgs do
+          off.gallery_imgs
+          |> Enum.each(fn %GalleryImage{upload_id: upload_id} ->
+            {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: upload_id})
+          end)
+        end
+
+        if off.card_img_id do
+          {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: off.card_img_id})
+        end
+
+        case Repo.delete(off) do
+          {:ok, _} ->
+            acc + 1
+
+          {:error, error} ->
+            Logger.error("Failed to prune offering #{off.id}: #{inspect(error)}")
+            acc
+        end
+      end)
+    end)
   end
 end

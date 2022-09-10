@@ -1774,7 +1774,7 @@ defmodule Banchan.Accounts do
             acc + 1
 
           {:error, error} ->
-            Logger.error("Failed to prune user #{user.id}: #{inspect(error)}")
+            Logger.error("Failed to prune user #{user.handle}: #{inspect(error)}")
             acc
         end
       end)

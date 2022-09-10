@@ -9,6 +9,8 @@ defmodule Banchan.Studios do
 
   import Ecto.Query, warn: false
 
+  require Logger
+
   alias Banchan.Accounts
   alias Banchan.Accounts.User
   alias Banchan.Payments
@@ -26,7 +28,7 @@ defmodule Banchan.Studios do
 
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
-  alias Banchan.Workers.{EnableStudio, Thumbnailer}
+  alias Banchan.Workers.{EnableStudio, Thumbnailer, UploadDeleter}
 
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
@@ -591,6 +593,9 @@ defmodule Banchan.Studios do
   """
   def update_studio_profile(%User{} = actor, %Studio{} = studio, attrs) do
     Ecto.Multi.new()
+    |> Ecto.Multi.run(:studio, fn _, _ ->
+      {:ok, studio |> Repo.reload()}
+    end)
     |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
       check_studio_member(studio, actor)
     end)
@@ -631,6 +636,20 @@ defmodule Banchan.Studios do
       end,
       returning: true
     )
+    |> Ecto.Multi.run(:remove_old_card_img, fn _, %{updated_studio: updated, studio: old} ->
+      if old.card_img_id && old.card_img_id != updated.card_img_id do
+        UploadDeleter.schedule_deletion(%Upload{id: old.pfp_img_id})
+      else
+        {:ok, nil}
+      end
+    end)
+    |> Ecto.Multi.run(:remove_old_header_img, fn _, %{updated_studio: updated, studio: old} ->
+      if old.header_img_id && old.header_img_id != updated.header_img_id do
+        UploadDeleter.schedule_deletion(%Upload{id: old.pfp_img_id})
+      else
+        {:ok, nil}
+      end
+    end)
     |> Repo.transaction()
     |> case do
       {:ok, %{updated_studio: studio}} ->
@@ -1091,12 +1110,34 @@ defmodule Banchan.Studios do
   def prune_studios do
     now = NaiveDateTime.utc_now()
 
-    from(
-      s in Studio,
-      where: not is_nil(s.deleted_at),
-      where: s.deleted_at < datetime_add(^now, -30, "day")
-    )
-    |> Repo.delete_all()
+    Repo.transaction(fn ->
+      from(
+        s in Studio,
+        where: not is_nil(s.deleted_at),
+        where: s.deleted_at < datetime_add(^now, -30, "day")
+      )
+      |> Repo.stream()
+      |> Enum.reduce(0, fn studio, acc ->
+        # NB(@zkat): We hard match on `{:ok, _}` here because scheduling
+        # deletions should really never fail.
+        if studio.card_img_id do
+          {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: studio.card_img_id})
+        end
+
+        if studio.header_img_id do
+          {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: studio.header_img_id})
+        end
+
+        case Repo.delete(studio) do
+          {:ok, _} ->
+            acc + 1
+
+          {:error, error} ->
+            Logger.error("Failed to prune studio #{studio.handle}: #{inspect(error)}")
+            acc
+        end
+      end)
+    end)
   end
 
   ## Misc utilities
