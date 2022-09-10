@@ -1747,15 +1747,38 @@ defmodule Banchan.Accounts do
   def prune_users do
     now = NaiveDateTime.utc_now()
 
-    {n, _} =
+    Repo.transaction(fn ->
       from(
         u in User,
         where: not is_nil(u.deactivated_at),
         where: u.deactivated_at < datetime_add(^now, -30, "day")
       )
-      |> Repo.delete_all()
+      |> Repo.stream()
+      |> Enum.reduce(0, fn user, acc ->
+        # NB(@zkat): We hard match on `{:ok, _}` here because scheduling
+        # deletions should really never fail.
+        if user.pfp_img_id do
+          {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: user.pfp_img_id})
+        end
 
-    {:ok, n}
+        if user.pfp_thumb_id do
+          {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: user.pfp_thumb_id})
+        end
+
+        if user.header_img_id do
+          {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: user.header_img_id})
+        end
+
+        case Repo.delete(user) do
+          {:ok, _} ->
+            acc + 1
+
+          {:error, error} ->
+            Logger.error("Failed to prune user #{user.id}: #{inspect(error)}")
+            acc
+        end
+      end)
+    end)
   end
 
   ## GitHub

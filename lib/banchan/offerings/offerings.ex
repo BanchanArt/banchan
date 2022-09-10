@@ -112,7 +112,7 @@ defmodule Banchan.Offerings do
           old_uploads
           |> Enum.filter(&(!Enum.member?(new_uploads, &1)))
           |> Enum.reduce_while({:ok, []}, fn upload_id, {:ok, acc} ->
-            case UploadDeleter.schedule_deletion(%Upload{id: upload_id}, delete_original: true) do
+            case UploadDeleter.schedule_deletion(%Upload{id: upload_id}) do
               {:ok, job} -> {:cont, {:ok, [job | acc]}}
               {:error, error} -> {:halt, {:error, error}}
             end
@@ -121,9 +121,7 @@ defmodule Banchan.Offerings do
         drop_old_card_img =
           if offering.card_img_id &&
                offering.card_img_id != Ecto.Changeset.get_field(changeset, :card_img_id) do
-            UploadDeleter.schedule_deletion(%Upload{id: offering.card_img_id},
-              delete_original: true
-            )
+            UploadDeleter.schedule_deletion(%Upload{id: offering.card_img_id})
           else
             {:ok, nil}
           end
@@ -834,7 +832,7 @@ defmodule Banchan.Offerings do
 
     offering.gallery_imgs
     |> Enum.reduce_while({:ok, []}, fn %GalleryImage{upload_id: upload_id}, {:ok, acc} ->
-      case UploadDeleter.schedule_deletion(%Upload{id: upload_id}, delete_original: true) do
+      case UploadDeleter.schedule_deletion(%Upload{id: upload_id}) do
         {:ok, _} ->
           {:cont, {:ok, [upload_id | acc]}}
 
@@ -846,7 +844,7 @@ defmodule Banchan.Offerings do
 
   defp delete_card_img(%Offering{card_img_id: upload_id}) do
     if upload_id do
-      UploadDeleter.schedule_deletion(%Upload{id: upload_id}, delete_original: true)
+      UploadDeleter.schedule_deletion(%Upload{id: upload_id})
     else
       {:ok, nil}
     end

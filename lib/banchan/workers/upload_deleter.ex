@@ -11,14 +11,14 @@ defmodule Banchan.Workers.UploadDeleter do
   alias Banchan.Uploads.Upload
 
   @impl Oban.Worker
-  def perform(%_{args: %{"id" => id, "delete_original" => delete_original}}) do
+  def perform(%_{args: %{"id" => id, "keep_original" => keep_original}}) do
     upload = Uploads.get_by_id!(id)
 
     original =
-      if delete_original && upload.original_id do
-        Uploads.delete_upload(Uploads.get_by_id!(upload.original_id))
-      else
+      if keep_original || !upload.original_id do
         {:ok, nil}
+      else
+        Uploads.delete_upload(Uploads.get_by_id!(upload.original_id))
       end
 
     with {:ok, _} <- original do
@@ -29,7 +29,7 @@ defmodule Banchan.Workers.UploadDeleter do
   def schedule_deletion(%Upload{} = upload, opts \\ []) do
     __MODULE__.new(%{
       "id" => upload.id,
-      "delete_original" => Keyword.get(opts, :delete_original, false)
+      "keep_original" => Keyword.get(opts, :keep_original, false)
     })
     |> Oban.insert()
   end
