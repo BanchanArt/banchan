@@ -5,6 +5,8 @@ defmodule Banchan.Application do
 
   use Application
 
+  alias Banchan.Workers.Utils
+
   def start(_type, _args) do
     children = [
       # Start the Ecto repository
@@ -28,7 +30,7 @@ defmodule Banchan.Application do
     :telemetry.attach(
       "oban-errors",
       [:oban, :job, :exception],
-      &Banchan.Workers.Utils.handle_event/4,
+      &Utils.handle_event/4,
       []
     )
 
