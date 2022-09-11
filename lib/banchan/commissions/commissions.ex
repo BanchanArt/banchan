@@ -587,7 +587,8 @@ defmodule Banchan.Commissions do
             studio: studio,
             offering: offering,
             client: actor,
-            line_items: line_items
+            line_items: line_items,
+            terms: offering.terms || studio.default_terms
           }
           |> Commission.creation_changeset(attrs)
 

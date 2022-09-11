@@ -12,6 +12,7 @@ defmodule Banchan.Commissions.Commission do
     field :title, :string
     field :description, :string
     field :tos_ok, :boolean, virtual: true
+    field :terms, :string
 
     field :status, Ecto.Enum,
       values: Common.status_values(),
@@ -41,6 +42,7 @@ defmodule Banchan.Commissions.Commission do
   def creation_changeset(commission, attrs) do
     commission
     |> cast(attrs, [:title, :description, :tos_ok])
+    |> validate_required([:title, :description, :tos_ok])
     |> validate_length(:title, max: 50)
     |> validate_length(:description, max: 160)
     |> cast_assoc(:line_items)
@@ -52,7 +54,6 @@ defmodule Banchan.Commissions.Commission do
         [{field, "You must agree to the Terms and Conditions"}]
       end
     end)
-    |> validate_required([:title, :description, :tos_ok])
   end
 
   @doc false
