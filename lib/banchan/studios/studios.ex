@@ -1129,6 +1129,16 @@ defmodule Banchan.Studios do
           {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: studio.header_img_id})
         end
 
+        portfolio_imgs = Ecto.assoc(studio, :portfolio_imgs) |> Repo.all()
+
+        if portfolio_imgs do
+          portfolio_imgs
+          # credo:disable-for-next-line Credo.Check.Refactor.Nesting
+          |> Enum.each(fn %PortfolioImage{upload_id: upload_id} ->
+            {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: upload_id})
+          end)
+        end
+
         case Repo.delete(studio) do
           {:ok, _} ->
             acc + 1

@@ -865,16 +865,17 @@ defmodule Banchan.Offerings do
       from(
         o in Offering,
         where: not is_nil(o.deleted_at),
-        where: o.deleted_at < datetime_add(^now, -30, "day"),
-        preload: [:gallery_imgs]
+        where: o.deleted_at < datetime_add(^now, -30, "day")
       )
       |> Repo.stream()
       |> Enum.reduce(0, fn off, acc ->
         # NB(@zkat): We hard match on `{:ok, _}` here because scheduling
         # deletions should really never fail.
 
-        if off.gallery_imgs do
-          off.gallery_imgs
+        gallery_imgs = Ecto.assoc(off, :gallery_imgs) |> Repo.all()
+
+        if gallery_imgs do
+          gallery_imgs
           # credo:disable-for-next-line Credo.Check.Refactor.Nesting
           |> Enum.each(fn %GalleryImage{upload_id: upload_id} ->
             {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: upload_id})
