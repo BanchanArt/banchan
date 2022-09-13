@@ -20,9 +20,9 @@
 #
 # $ cat .git/HEAD | awk '{print ".git/"$2}' | xargs cat
 # d0b8727759e1e0e7aa3d41707d12376e373d5ecc
-.git
-!.git/HEAD
-!.git/refs
+# .git
+# !.git/HEAD
+# !.git/refs
 
 # Common development/test artifacts
 /cover/

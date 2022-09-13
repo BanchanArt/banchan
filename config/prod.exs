@@ -46,11 +46,16 @@ config :logger,
   level: :info,
   backends: [:console, Sentry.LoggerBackend]
 
+{hash, 0} = System.cmd("git", ["rev-parse", "HEAD"])
+
+hash = String.trim(hash)
+
 config :sentry,
   tags: %{
     env: deploy_env
   },
-  environment_name: deploy_env
+  environment_name: deploy_env,
+  release: hash
 
 config :banchan, Banchan.Repo,
   adapter: Ecto.Adapters.Postgres,
