@@ -55,7 +55,7 @@ defmodule BanchanWeb.ReportBugLive.New do
               <h1 class="text-2xl">Submit a bug report</h1>
               <p>Use this form to submit bug reports for Banchan Art. Please include as much context as you can.</p>
               <p><span class="text-error">NOTE: This report will be <span class="font-bold">publicly visible</span> on GitHub. Do NOT include anything personal or confidential</span></p>
-              <p>If you need support for something that shouldn't be public, please contact us at <a href="mailto:support@banchan.art">support@banchan.art</a></p>
+              <p>If you need support for something that shouldn't be public, please contact us at <a href="mailto:support@banchan.art" class="link">support@banchan.art</a>.</p>
               <TextInput name={:title} label="Title" opts={required: true, maxlength: "256", minlength: "10"} />
               <MarkdownInput
                 id="body-input"
