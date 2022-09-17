@@ -20,7 +20,7 @@ defmodule BanchanWeb.StaticLive.RefundsAndDisputes do
       <#Markdown class="prose">
         # Refunds and Disputes Policy
 
-        TKTK idk we just take care of it for you? Don't try and scam us?
+        Check back in after launch. We're still working on finalizing this policy.
       </#Markdown>
     </Layout>
     """
