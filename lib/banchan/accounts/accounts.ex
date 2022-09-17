@@ -1545,6 +1545,25 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  Imports invites from a CSV file.
+  """
+  def import_invites_from_csv!(file) do
+    File.stream!(file)
+    |> CSV.decode!(headers: true)
+    |> Enum.each(fn %{"email" => email, "created_at" => created_at} ->
+      {:ok, _} =
+        add_invite_request(
+          email,
+          Timex.parse!(created_at, "{ISO:Extended:Z}")
+          |> DateTime.to_naive()
+          |> NaiveDateTime.truncate(:second)
+        )
+    end)
+
+    :ok
+  end
+
+  @doc """
   Gets an invite request by its id.
   """
   def get_invite_request(id) do
