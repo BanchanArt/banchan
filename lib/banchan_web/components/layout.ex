@@ -65,7 +65,12 @@ defmodule BanchanWeb.Components.Layout do
           </div>
         </footer>
       </div>
-      <div class="drawer-side">
+
+      {!-- # TODO: remove this basic auth check on launch --}
+      <div
+        :if={@current_user || is_nil(Application.get_env(:banchan, :basic_auth))}
+        class="drawer-side"
+      >
         <label for="drawer-toggle" class="drawer-overlay" />
         <aside class="bg-base-200 w-48 shadow">
           <ul tabindex="0" class="menu flex flex-col p-2 gap-2">

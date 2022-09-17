@@ -22,7 +22,6 @@ defmodule BanchanWeb.Router do
 
   pipeline :browser do
     plug(:accepts, ["html"])
-    plug(BasicAuthPlug, [])
     plug(:fetch_session)
     plug(:fetch_live_flash)
     plug(:put_root_layout, {BanchanWeb.LayoutView, :root})
@@ -59,9 +58,13 @@ defmodule BanchanWeb.Router do
     plug(:require_authenticated_user)
   end
 
+  pipeline :basic_authed do
+    plug(BasicAuthPlug, [])
+  end
+
   scope "/", BanchanWeb do
     live_session :users_only, on_mount: {BanchanWeb.UserLiveAuth, :users_only} do
-      pipe_through([:browser, :require_authed, :ensure_enabled])
+      pipe_through([:basic_authed, :browser, :require_authed, :ensure_enabled])
 
       live("/denizens/:handle/edit", DenizenLive.Edit, :edit)
 
@@ -103,7 +106,7 @@ defmodule BanchanWeb.Router do
 
   scope "/", BanchanWeb do
     live_session :artists_only, on_mount: {BanchanWeb.UserLiveAuth, :artists_only} do
-      pipe_through([:browser, :require_authed, :ensure_enabled, :artist])
+      pipe_through([:basic_authed, :browser, :require_authed, :ensure_enabled, :artist])
 
       live("/offerings/:handle/:offering_type/edit", StudioLive.Offerings.Edit, :edit)
 
@@ -121,7 +124,7 @@ defmodule BanchanWeb.Router do
 
   scope "/", BanchanWeb do
     live_session :mods_only, on_mount: {BanchanWeb.UserLiveAuth, :mods_only} do
-      pipe_through([:browser, :require_authed, :ensure_enabled, :mod])
+      pipe_through([:basic_authed, :browser, :require_authed, :ensure_enabled, :mod])
 
       live("/denizens/:handle/moderation", DenizenLive.Moderation, :edit)
       live("/studios/:handle/moderation", StudioLive.Moderation, :edit)
@@ -149,17 +152,34 @@ defmodule BanchanWeb.Router do
 
   scope "/", BanchanWeb do
     live_session :default, on_mount: {BanchanWeb.UserLiveAuth, :default} do
-      pipe_through(:browser)
+      pipe_through([:basic_authed, :browser])
 
       live("/account_disabled", AccountDisabledLive, :show)
     end
   end
 
   scope "/", BanchanWeb do
-    live_session :open, on_mount: {BanchanWeb.UserLiveAuth, :open} do
+    live_session :open_no_basic_auth, on_mount: {BanchanWeb.UserLiveAuth, :open} do
       pipe_through([:browser, :ensure_enabled])
 
       live("/", HomeLive, :index)
+
+      live("/beta", BetaLive.Signup, :new)
+      live("/beta/confirmation", BetaLive.Confirmation, :show)
+
+      live("/about-us", StaticLive.AboutUs, :show)
+      live("/contact", StaticLive.Contact, :show)
+      live("/membership", StaticLive.Membership, :show)
+
+      live("/privacy-policy", StaticLive.PrivacyPolicy, :show)
+      live("/terms-of-service", StaticLive.TermsOfService, :show)
+      live("/refunds-and-disputes", StaticLive.RefundsAndDisputes, :show)
+    end
+  end
+
+  scope "/", BanchanWeb do
+    live_session :open, on_mount: {BanchanWeb.UserLiveAuth, :open} do
+      pipe_through([:basic_authed, :browser, :ensure_enabled])
 
       live("/denizens/:handle", DenizenLive.Show, :show)
       live("/denizens/:handle/following", DenizenLive.Show, :following)
@@ -179,23 +199,12 @@ defmodule BanchanWeb.Router do
 
       live("/reset_password", ForgotPasswordLive, :edit)
       live("/reset_password/:token", ResetPasswordLive, :edit)
-
-      live("/beta", BetaLive.Signup, :new)
-      live("/beta/confirmation", BetaLive.Confirmation, :show)
-
-      live("/about-us", StaticLive.AboutUs, :show)
-      live("/contact", StaticLive.Contact, :show)
-      live("/membership", StaticLive.Membership, :show)
-
-      live("/privacy-policy", StaticLive.PrivacyPolicy, :show)
-      live("/terms-of-service", StaticLive.TermsOfService, :show)
-      live("/refunds-and-disputes", StaticLive.RefundsAndDisputes, :show)
     end
   end
 
   scope "/", BanchanWeb do
     live_session :redirect_if_authed, on_mount: {BanchanWeb.UserLiveAuth, :redirect_if_authed} do
-      pipe_through([:browser, :redirect_if_user_is_authenticated])
+      pipe_through([:basic_authed, :browser, :redirect_if_user_is_authenticated])
 
       live("/login", LoginLive, :new)
       post("/login", UserSessionController, :create)
@@ -207,7 +216,7 @@ defmodule BanchanWeb.Router do
 
   scope "/", BanchanWeb do
     live_session :deactivated, on_mount: {BanchanWeb.UserLiveAuth, :deactivated} do
-      pipe_through([:browser, :require_authed])
+      pipe_through([:basic_authed, :browser, :require_authed])
 
       live("/reactivate", ReactivateLive, :show)
     end
@@ -227,6 +236,7 @@ defmodule BanchanWeb.Router do
   scope "/admin" do
     # Enable admin stuff dev/test side but restrict it in prod
     pipe_through([
+      :basic_authed,
       :browser
       | if(Application.compile_env!(:banchan, :env) in [:dev, :test], do: [], else: [:admin])
     ])
