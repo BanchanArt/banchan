@@ -4,7 +4,7 @@ defmodule BanchanWeb.ReportBugLive.New do
   """
   use BanchanWeb, :surface_view
 
-  alias Banchan.Accounts
+  alias Banchan.Reports
 
   alias Surface.Components.Form
 
@@ -18,11 +18,11 @@ defmodule BanchanWeb.ReportBugLive.New do
 
   @impl true
   def handle_event("submit", %{"bug_report" => %{"title" => title, "body" => body}}, socket) do
-    case Accounts.report_bug(
+    case Reports.report_bug(
            socket.assigns.current_user,
            title,
            body,
-           &Routes.denizen_show_path(Endpoint, :show, &1.handle)
+           &Routes.denizen_show_url(Endpoint, :show, &1.handle)
          ) do
       {:ok, url} ->
         {:noreply, socket |> assign(report_url: url)}

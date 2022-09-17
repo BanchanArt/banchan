@@ -243,4 +243,26 @@ defmodule Banchan.Reports do
         {:error, error}
     end
   end
+
+  ## GitHub
+
+  @doc """
+  File a bug on GitHub
+  """
+  def report_bug(%User{} = actor, title, body, actor_url_fn) do
+    %{access_token: Application.fetch_env!(:banchan, :github_access_token)}
+    |> Tentacat.Client.new()
+    |> Tentacat.Issues.create("BanchanArt", "banchan", %{
+      title: title,
+      body: "reported by [@#{actor.handle}](#{actor_url_fn.(actor)}):\n\n#{body}",
+      labels: ["bug", "from-site"]
+    })
+    |> case do
+      {201, %{"html_url" => url}, _} ->
+        {:ok, url}
+
+      {_, _, _} ->
+        {:error, :internal_error}
+    end
+  end
 end
