@@ -20,7 +20,7 @@ defmodule BanchanWeb.StaticLive.Contact do
       <#Markdown class="prose">
         # Contact Us
 
-        TKTK
+        Feel free to email us at [support@banchan.art](mailto:support@banchan.art).
       </#Markdown>
     </Layout>
     """

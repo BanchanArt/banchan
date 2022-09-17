@@ -102,16 +102,18 @@ defmodule BanchanWeb.BetaLive.Signup do
                 <span class="text-primary whitespace-nowrap">All in one spot</span>.
               </div>
             </div>
-            <div class="blur-edges themed dark">
+            <div class="rounded-lg shadow-xl themed dark shadow-black outline outline-primary outline-3">
               <img
                 alt="Screenshot of an ongoing commission. The title is 'Please draw my OC'. There are various elements of interest on the page, such as a status, a summary of what is being paid for, and some art on the page."
                 src={Routes.static_path(Endpoint, "/images/banchan-comm-dark.png")}
+                class="rounded-lg"
               />
             </div>
-            <div class="blur-edges themed light">
+            <div class="rounded-lg shadow-xl themed light shadow-secondary outline outline-primary outline-3">
               <img
                 alt="Screenshot of an ongoing commission. The title is 'Please draw my OC'. There are various elements of interest on the page, such as a status, a summary of what is being paid for, and some art on the page."
                 src={Routes.static_path(Endpoint, "/images/banchan-comm-light.png")}
+                class="rounded-lg"
               />
             </div>
           </div>
@@ -145,16 +147,18 @@ defmodule BanchanWeb.BetaLive.Signup do
               </div>
             </div>
             <div class="md:order-1">
-              <div class="blur-edges themed dark">
+              <div class="rounded-lg shadow-xl themed dark shadow-black outline outline-primary outline-3">
                 <img
                   alt="Screenshot showing the Banchan invoicing feature. There is a message saying that the commission is complete, and a message box that says Payment Succeeded, $120, plug a Release Now button. There is artwork attached to the message."
                   src={Routes.static_path(Endpoint, "/images/banchan-invoice-dark.png")}
+                  class="rounded-lg"
                 />
               </div>
-              <div class="blur-edges themed light">
+              <div class="rounded-lg shadow-xl themed light shadow-secondary outline outline-primary outline-3">
                 <img
                   alt="Screenshot showing the Banchan invoicing feature. There is a message saying that the commission is complete, and a message box that says Payment Succeeded, $120, plug a Release Now button. There is artwork attached to the message."
                   src={Routes.static_path(Endpoint, "/images/banchan-invoice-light.png")}
+                  class="rounded-lg"
                 />
               </div>
             </div>
@@ -179,16 +183,18 @@ defmodule BanchanWeb.BetaLive.Signup do
               </div>
             </div>
             <div>
-              <div class="blur-edges themed dark">
+              <div class="rounded-lg shadow-xl themed dark shadow-black outline outline-primary outline-3">
                 <img
                   alt="Screenshot of an example Banchan shop, including a beautiful header graphic, the name of the studio, and three separate offerings: Flat Full Color, Full Color Shaded, and Sketch. They each have 3 slots available."
                   src={Routes.static_path(Endpoint, "/images/banchan-shop-dark.png")}
+                  class="rounded-lg"
                 />
               </div>
-              <div class="blur-edges themed light">
+              <div class="rounded-lg shadow-xl themed light shadow-secondary outline outline-primary outline-3">
                 <img
                   alt="Screenshot of an example Banchan shop, including a beautiful header graphic, the name of the studio, and three separate offerings: Flat Full Color, Full Color Shaded, and Sketch. They each have 3 slots available."
                   src={Routes.static_path(Endpoint, "/images/banchan-shop-light.png")}
+                  class="rounded-lg"
                 />
               </div>
             </div>
@@ -198,7 +204,7 @@ defmodule BanchanWeb.BetaLive.Signup do
       <div id="bottom-cta" class="px-2 md:px-4">
         <div class="hero py-8">
           <div class="hero-content flex flex-col items-center gap-10">
-            <div class="card shadow-2xl bg-base-200">
+            <div class="card shadow-xl bg-base-200 shadow-secondary">
               <div class="card-body flex flex-col gap-4 p-4 items-center max-w-4xl">
                 <div class="text-5xl font-bold">
                   Sign Up for Updates and
