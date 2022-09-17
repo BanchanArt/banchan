@@ -89,7 +89,7 @@ defmodule Banchan.MixProject do
       {:sentry, "~> 8.0"},
       {:slugify, "~> 1.3.1"},
       {:stripity_stripe, "~> 2.15.0"},
-      {:surface, "~> 0.8.1"},
+      {:surface, "~> 0.8.2"},
       {:surface_catalogue, "~> 0.5.1"},
       {:surface_markdown, "~> 0.5.0"},
       {:sweet_xml, "~> 0.6"},
