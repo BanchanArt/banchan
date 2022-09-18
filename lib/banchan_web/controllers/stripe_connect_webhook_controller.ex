@@ -24,7 +24,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
   end
 
   defp handle_event(%Stripe.Event{type: "account.updated"} = event, conn) do
-    Studios.update_stripe_state!(event.account, event.data.object)
+    Studios.update_stripe_state!(event.data.object.id, event.data.object)
 
     conn
     |> resp(200, "OK")
