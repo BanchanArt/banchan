@@ -639,14 +639,14 @@ defmodule Banchan.Studios do
     )
     |> Ecto.Multi.run(:remove_old_card_img, fn _, %{updated_studio: updated, studio: old} ->
       if old.card_img_id && old.card_img_id != updated.card_img_id do
-        UploadDeleter.schedule_deletion(%Upload{id: old.pfp_img_id})
+        UploadDeleter.schedule_deletion(%Upload{id: old.card_img_id})
       else
         {:ok, nil}
       end
     end)
     |> Ecto.Multi.run(:remove_old_header_img, fn _, %{updated_studio: updated, studio: old} ->
       if old.header_img_id && old.header_img_id != updated.header_img_id do
-        UploadDeleter.schedule_deletion(%Upload{id: old.pfp_img_id})
+        UploadDeleter.schedule_deletion(%Upload{id: old.header_img_id})
       else
         {:ok, nil}
       end
