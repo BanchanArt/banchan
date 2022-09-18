@@ -592,7 +592,7 @@ defmodule Banchan.CommissionsTest do
       |> expect(:create_refund, fn params, _opts ->
         assert invoice.stripe_charge_id == params.charge
         assert true == params.reverse_transfer
-        assert true == params.refund_application_fee
+        assert false == params.refund_application_fee
 
         {:ok,
          %Stripe.Refund{

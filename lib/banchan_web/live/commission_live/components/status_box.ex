@@ -132,7 +132,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
       <p>
         All deposited funds will be made available immediately to the studio and the commission will be closed.
       </p>
-      <p class="font-bold text-warning">WARNING: You will not be able to request a refund once approved.</p>
+      <p class="font-bold text-warning">WARNING: This is final and you will not be able to request a refund once approved.</p>
       <Button
         class="btn-sm w-full"
         click="update_status"

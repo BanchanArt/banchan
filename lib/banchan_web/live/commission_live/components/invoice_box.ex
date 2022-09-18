@@ -385,7 +385,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         {/if}
         Are you sure you want to refund this payment?
         <p class="font-bold text-warning">
-          WARNING: The Stripe portion of the platform fee can't be reimbursed, but Banchan's portion will be returned.
+          NOTE: The Banchan platform fee will not be reimbursed, just the portion that would go to the studio.
         </p>
         <:action>
           <Button class="refund-btn" click="refund">Confirm</Button>
@@ -395,7 +395,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       {!-- Release confirmation modal --}
       <Modal id={@id <> "_release_modal"} class="release-modal">
         <:title>Confirm Fund Release</:title>
-        Funds will be made available immediately to the studio, instead of waiting until the commission is approved. <p class="font-bold text-warning">WARNING: You will not be able to request a refund once released.</p>
+        Funds will be made available immediately to the studio, instead of waiting until the commission is approved. <p class="font-bold text-warning">WARNING: This is final and you won't be able to request a refund from the studio after this.</p>
         <:action>
           <Button class="release-btn" click="release">Confirm</Button>
         </:action>

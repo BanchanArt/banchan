@@ -873,7 +873,7 @@ defmodule Banchan.Payments do
            %{
              charge: charge_id,
              reverse_transfer: true,
-             refund_application_fee: true
+             refund_application_fee: false
            },
            []
          ) do

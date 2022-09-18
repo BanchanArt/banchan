@@ -136,7 +136,7 @@ defmodule Banchan.CommissionsFixtures do
     |> expect(:create_refund, fn %{
                                    charge: _incoming_charge_id,
                                    reverse_transfer: true,
-                                   refund_application_fee: true
+                                   refund_application_fee: false
                                  },
                                  _ ->
       {:ok, refund}

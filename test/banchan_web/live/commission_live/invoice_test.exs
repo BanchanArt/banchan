@@ -381,7 +381,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       Banchan.StripeAPI.Mock
       |> expect(:create_refund, fn params, _opts ->
         assert true == params.reverse_transfer
-        assert true == params.refund_application_fee
+        assert false == params.refund_application_fee
 
         {:ok,
          %Stripe.Refund{
@@ -548,7 +548,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       Banchan.StripeAPI.Mock
       |> expect(:create_refund, fn params, _opts ->
         assert true == params.reverse_transfer
-        assert true == params.refund_application_fee
+        assert false == params.refund_application_fee
         {:ok, %Stripe.Refund{id: refund_id, status: "pending"}}
       end)
 
