@@ -24,7 +24,9 @@ defmodule Banchan.Workers.Thumbnailer do
           "opts" => opts
         }
       }) do
-    process(%Upload{id: src_id}, %Upload{id: dest_id}, opts)
+    src = Uploads.get_by_id!(src_id)
+    dest = Uploads.get_by_id!(dest_id)
+    process(src, dest, opts)
   end
 
   def thumbnail(upload, opts \\ [])
@@ -73,9 +75,6 @@ defmodule Banchan.Workers.Thumbnailer do
   defp process(src, dest, opts) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        src = Repo.reload(src)
-        dest = Repo.reload(dest)
-
         tmp_src =
           Path.join([
             System.tmp_dir!(),
