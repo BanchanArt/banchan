@@ -148,7 +148,7 @@ defmodule Banchan.Studios do
   Used by webhook to handle Stripe notifications for Studio account state changes.
   """
   def update_stripe_state!(account_id, account) do
-    query = from(s in Studio, where: s.stripe_id == ^account_id)
+    query = from(s in Studio, where: not is_nil(s.stripe_id) and s.stripe_id == ^account_id)
 
     case query
          |> Repo.update_all(
