@@ -152,13 +152,13 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 class="hover:link"
                 to={Routes.studio_followers_path(Endpoint, :index, @studio.handle)}
               >
-                <span class="font-bold">
-                  {#if @followers.total_entries > 9999}
-                    {Number.SI.number_to_si(@followers.total_entries)}
-                  {#else}
+                {#if @followers.total_entries > 9999}
+                  <span class="font-bold">{Number.SI.number_to_si(@followers.total_entries)}</span>
+                {#else}
+                  <span class="font-bold">
                     {Number.Delimit.number_to_delimited(@followers.total_entries, precision: 0)}
-                  {/if}
-                </span>
+                  </span>
+                {/if}
                 <span>
                   {#if @followers.total_entries == 1}
                     Follower
