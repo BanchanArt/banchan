@@ -230,7 +230,8 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/api", BanchanWeb do
-    post("/stripe_webhook", StripeConnectWebhookController, :webhook)
+    post("/stripe_webhook", StripeWebhookController, :webhook)
+    post("/stripe_connect_webhook", StripeConnectWebhookController, :webhook)
   end
 
   scope "/admin" do

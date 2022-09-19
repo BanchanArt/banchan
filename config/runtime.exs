@@ -46,17 +46,26 @@ if config_env() == :prod do
       You can find your Stripe Secret Key at https://dashboard.stripe.com/apikeys
       """
 
-  endpoint_secret =
-    System.get_env("STRIPE_ENDPOINT_SECRET") ||
+  webhook_secret =
+    System.get_env("STRIPE_WEBHOOK_SECRET") ||
       raise """
-      environment variable STRIPE_ENDPOINT_SECRET is missing.
+      environment variable STRIPE_WEBHOOK_SECRET is missing.
+      You can generate one by going to https://dashboard.stripe.com/webhooks and
+      setting up the Stripe webhook according to the Banchan docs.
+      """
+
+  connect_webhook_secret =
+    System.get_env("STRIPE_CONNECT_WEBHOOK_SECRET") ||
+      raise """
+      environment variable STRIPE_CONNECT_WEBHOOK_SECRET is missing.
       You can generate one by going to https://dashboard.stripe.com/webhooks and
       setting up the Stripe webhook according to the Banchan docs.
       """
 
   config :stripity_stripe,
     api_key: stripe_secret,
-    endpoint_secret: endpoint_secret
+    webhook_secret: webhook_secret,
+    connect_webhook_secret: connect_webhook_secret
 
   github_pat =
     System.get_env("GITHUB_PAT") ||

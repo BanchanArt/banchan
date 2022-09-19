@@ -28,7 +28,8 @@ config :stripity_stripe,
   api_key: "",
   # This secret will be printed out by `mix stripe.local`. It looks like
   # `whsec_12345...`. It stays consistent between `mix stripe.local` calls.
-  endpoint_secret: ""
+  connect_webhook_secret: "",
+  webhook_secret: ""
 
 # AWS configuration
 # If left unset, uploads will be saved to `priv/uploads`
