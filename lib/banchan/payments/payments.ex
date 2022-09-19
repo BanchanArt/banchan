@@ -607,7 +607,6 @@ defmodule Banchan.Payments do
                                    } ->
       with transfer_amt <- amount |> Money.add(tip) |> Money.subtract(platform_fee) do
         stripe_mod().create_session(%{
-          payment_method_types: ["card"],
           mode: "payment",
           cancel_url: uri,
           success_url: uri,

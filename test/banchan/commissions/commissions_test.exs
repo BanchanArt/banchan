@@ -194,7 +194,6 @@ defmodule Banchan.CommissionsTest do
 
       Banchan.StripeAPI.Mock
       |> expect(:create_session, fn sess ->
-        assert ["card"] == sess.payment_method_types
         assert "payment" == sess.mode
         assert uri == sess.cancel_url
         assert uri == sess.success_url

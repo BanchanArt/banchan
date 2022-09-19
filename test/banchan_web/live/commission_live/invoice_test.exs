@@ -184,7 +184,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
 
       Banchan.StripeAPI.Mock
       |> expect(:create_session, fn params ->
-        assert ["card"] == params.payment_method_types
         assert "payment" == params.mode
         assert return_url == params.cancel_url
         assert return_url == params.success_url
