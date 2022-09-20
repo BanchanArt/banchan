@@ -56,6 +56,11 @@ defmodule Banchan.StudiosTest do
         assert studio_url == attrs.business_profile.url
         {:ok, %Stripe.Account{id: stripe_id}}
       end)
+      |> expect(:create_apple_pay_domain, fn id, domain ->
+        assert stripe_id == id
+        assert "banchan.art" == domain
+        {:ok, %{}}
+      end)
 
       {:ok, studio} =
         Banchan.Studios.new_studio(
@@ -221,6 +226,9 @@ defmodule Banchan.StudiosTest do
       Banchan.StripeAPI.Mock
       |> expect(:create_account, fn _ ->
         {:ok, %Stripe.Account{id: unique_stripe_id()}}
+      end)
+      |> expect(:create_apple_pay_domain, fn _, _ ->
+        {:ok, %{}}
       end)
 
       {:ok, studio} =

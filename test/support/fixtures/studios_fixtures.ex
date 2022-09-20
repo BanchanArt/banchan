@@ -29,6 +29,9 @@ defmodule Banchan.StudiosFixtures do
     |> expect(:create_account, fn _ ->
       {:ok, %Stripe.Account{id: "stripe-mock-id#{System.unique_integer()}"}}
     end)
+    |> expect(:create_apple_pay_domain, fn _, _ ->
+      {:ok, %{}}
+    end)
   end
 
   def studio_fixture(artists, attrs \\ %{}) do
