@@ -46,4 +46,6 @@ defmodule Banchan.StripeAPI.Base do
   @callback create_price(params :: %{}) :: {:ok, Stripe.Price.t()} | {:error, Stripe.Error.t()}
   @callback retrieve_charge(id :: Stripe.id()) ::
               {:ok, Stripe.Charge.t()} | {:error, Stripe.Error.t()}
+  @callback create_apple_pay_domain(id :: Stripe.id(), domain :: binary()) ::
+              {:ok, map()} | {:error, Stripe.Error.t()}
 end

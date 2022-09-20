@@ -98,4 +98,9 @@ defmodule Banchan.StripeAPI do
   def retrieve_charge(id) do
     Stripe.Charge.retrieve(id, expand: ["balance_transaction"])
   end
+
+  @impl Banchan.StripeAPI.Base
+  def create_apple_pay_domain(id, domain) do
+    Stripe.API.request(%{domain_name: domain}, :post, "apple_pay/domains", %{}, connect_account: id)
+  end
 end

@@ -33,6 +33,8 @@ defmodule Banchan.Studios do
   alias BanchanWeb.Endpoint
   alias BanchanWeb.Router.Helpers, as: Routes
 
+  @host Application.compile_env!(:banchan, [BanchanWeb.Endpoint, :url, :host])
+
   ## Events
 
   @pubsub Banchan.PubSub
@@ -141,7 +143,19 @@ defmodule Banchan.Studios do
         }
       })
 
+    set_up_apple_pay!(acct)
+
     acct.id
+  end
+
+  @doc """
+  Sets up Apple Pay for a connected account by setting its Apple Pay domain name.
+  """
+  def set_up_apple_pay!(account) do
+    {:ok, _} =
+      stripe_mod().create_apple_pay_domain(account.id, String.replace(@host, "localhost", "banchan.art"))
+
+    :ok
   end
 
   @doc """
