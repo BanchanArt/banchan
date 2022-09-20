@@ -66,10 +66,6 @@ defmodule BanchanWeb.StudioLive.Moderation do
     end
   end
 
-  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
-    {:noreply, socket |> Context.put(follower_count: new_count)}
-  end
-
   @impl true
   def handle_params(_params, uri, socket) do
     {:noreply, socket |> assign(uri: uri)}

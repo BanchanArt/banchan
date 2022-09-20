@@ -10,7 +10,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   alias BanchanWeb.Components.{Avatar, Button, Layout, ReportModal, Socials, Tag}
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.{FeaturedToggle, TabButton}
+  alias BanchanWeb.StudioLive.Components.{FeaturedToggle, FollowerCountLive, TabButton}
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, required: true
@@ -148,25 +148,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 {/for}
               </div>
               <div class="p-2">|</div>
-              <LiveRedirect
-                class="hover:link"
-                to={Routes.studio_followers_path(Endpoint, :index, @studio.handle)}
-              >
-                {#if @follower_count > 9999}
-                  <span class="font-bold">{Number.SI.number_to_si(@follower_count)}</span>
-                {#else}
-                  <span class="font-bold">
-                    {Number.Delimit.number_to_delimited(@follower_count, precision: 0)}
-                  </span>
-                {/if}
-                <span>
-                  {#if @follower_count == 1}
-                    Follower
-                  {#else}
-                    Followers
-                  {/if}
-                </span>
-              </LiveRedirect>
+              <FollowerCountLive id="follower-count" session={%{"handle" => @studio.handle}} />
             </div>
           </div>
           <div class="overflow-auto min-w-screen">

@@ -53,10 +53,6 @@ defmodule BanchanWeb.StudioLive.Edit do
     {:noreply, socket |> assign(uri: uri)}
   end
 
-  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
-    {:noreply, socket |> Context.put(follower_count: new_count)}
-  end
-
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_event("submit", val, socket) do
     card_image =

@@ -26,10 +26,6 @@ defmodule BanchanWeb.StudioLive.Followers do
     {:noreply, socket |> assign(uri: uri)}
   end
 
-  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
-    {:noreply, socket |> Context.put(follower_count: new_count)}
-  end
-
   @impl true
   def handle_event("load_more", _, socket) do
     if socket.assigns.followers.total_entries >

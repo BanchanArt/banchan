@@ -55,10 +55,6 @@ defmodule BanchanWeb.StudioLive.Shop do
      |> assign(studio: %{socket.assigns.studio | stripe_details_submitted: submitted?})}
   end
 
-  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
-    {:noreply, socket |> Context.put(follower_count: new_count)}
-  end
-
   def handle_event("load_more", _, socket) do
     if socket.assigns.offerings.total_entries >
          socket.assigns.offerings.page_number * socket.assigns.offerings.page_size do

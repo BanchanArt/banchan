@@ -166,10 +166,6 @@ defmodule BanchanWeb.StudioLive.Payouts do
      )}
   end
 
-  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
-    {:noreply, socket |> Context.put(follower_count: new_count)}
-  end
-
   defp payout_possible?(available) do
     !Enum.empty?(available) &&
       Enum.all?(available, &(&1.amount > 0))

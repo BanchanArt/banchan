@@ -50,10 +50,6 @@ defmodule BanchanWeb.StudioLive.Portfolio do
     {:noreply, socket |> assign(uri: uri)}
   end
 
-  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
-    {:noreply, socket |> Context.put(follower_count: new_count)}
-  end
-
   def handle_info({:updated_gallery_images, _, images}, socket) do
     {:noreply,
      socket
