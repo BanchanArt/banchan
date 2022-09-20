@@ -16,11 +16,11 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   prop current_user_member?, :boolean, required: true
   prop flashes, :string, required: true
   prop studio, :struct, required: true
-  prop followers, :struct, required: true
   prop tab, :atom
   prop uri, :string, required: true
   prop padding, :integer
 
+  data follower_count, :integer, from_context: :follower_count
   data user_following?, :boolean
 
   slot default
@@ -152,15 +152,15 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 class="hover:link"
                 to={Routes.studio_followers_path(Endpoint, :index, @studio.handle)}
               >
-                {#if @followers.total_entries > 9999}
-                  <span class="font-bold">{Number.SI.number_to_si(@followers.total_entries)}</span>
+                {#if @follower_count > 9999}
+                  <span class="font-bold">{Number.SI.number_to_si(@follower_count)}</span>
                 {#else}
                   <span class="font-bold">
-                    {Number.Delimit.number_to_delimited(@followers.total_entries, precision: 0)}
+                    {Number.Delimit.number_to_delimited(@follower_count, precision: 0)}
                   </span>
                 {/if}
                 <span>
-                  {#if @followers.total_entries == 1}
+                  {#if @follower_count == 1}
                     Follower
                   {#else}
                     Followers

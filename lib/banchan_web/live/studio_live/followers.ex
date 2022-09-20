@@ -16,6 +16,7 @@ defmodule BanchanWeb.StudioLive.Followers do
   @impl true
   def mount(params, _session, socket) do
     socket = assign_studio_defaults(params, socket, false, false)
+    socket = socket |> assign(followers: Notifications.list_followers(socket.assigns.studio))
 
     {:ok, socket}
   end
@@ -23,6 +24,10 @@ defmodule BanchanWeb.StudioLive.Followers do
   @impl true
   def handle_params(_params, uri, socket) do
     {:noreply, socket |> assign(uri: uri)}
+  end
+
+  def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
+    {:noreply, socket |> Context.put(follower_count: new_count)}
   end
 
   @impl true
@@ -35,14 +40,14 @@ defmodule BanchanWeb.StudioLive.Followers do
     end
   end
 
-  defp fetch(page, %{assigns: %{followers: followers}} = socket) do
+  defp fetch(page, %{assigns: %{followers: followers, studio: studio}} = socket) do
     socket
     |> assign(
       :followers,
       %{
         followers
         | page_number: page,
-          entries: followers.entries ++ Notifications.list_followers(socket, page: page).entries
+          entries: followers.entries ++ Notifications.list_followers(studio, page: page).entries
       }
     )
   end
@@ -55,7 +60,6 @@ defmodule BanchanWeb.StudioLive.Followers do
       current_user={@current_user}
       flashes={@flash}
       studio={@studio}
-      followers={@followers}
       current_user_member?={@current_user_member?}
       uri={@uri}
     >

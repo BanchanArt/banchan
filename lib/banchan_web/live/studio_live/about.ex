@@ -22,7 +22,7 @@ defmodule BanchanWeb.StudioLive.About do
   end
 
   def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
-    {:noreply, socket |> assign(followers: new_count)}
+    {:noreply, socket |> Context.put(follower_count: new_count)}
   end
 
   @impl true
@@ -33,7 +33,6 @@ defmodule BanchanWeb.StudioLive.About do
       current_user={@current_user}
       flashes={@flash}
       studio={@studio}
-      followers={@followers}
       current_user_member?={@current_user_member?}
       tab={:about}
       uri={@uri}
