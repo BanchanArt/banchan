@@ -101,6 +101,8 @@ defmodule Banchan.StripeAPI do
 
   @impl Banchan.StripeAPI.Base
   def create_apple_pay_domain(id, domain) do
-    Stripe.API.request(%{domain_name: domain}, :post, "apple_pay/domains", %{}, connect_account: id)
+    Stripe.API.request(%{domain_name: domain}, :post, "apple_pay/domains", %{},
+      connect_account: id
+    )
   end
 end

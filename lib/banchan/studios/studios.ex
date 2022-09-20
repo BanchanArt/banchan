@@ -153,7 +153,10 @@ defmodule Banchan.Studios do
   """
   def set_up_apple_pay!(account) do
     {:ok, _} =
-      stripe_mod().create_apple_pay_domain(account.id, String.replace(@host, "localhost", "banchan.art"))
+      stripe_mod().create_apple_pay_domain(
+        account.id,
+        String.replace(@host, "localhost", "banchan.art")
+      )
 
     :ok
   end

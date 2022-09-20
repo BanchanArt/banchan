@@ -8,6 +8,20 @@ defmodule BanchanWeb.Components.Socials do
   prop class, :css_class
 
   def render(assigns) do
+    mastodon_url =
+      if assigns.entity.mastodon_handle do
+        case Regex.named_captures(
+               ~r/(?<handle>[^@]+)@(?<domain>.+)/,
+               assigns.entity.mastodon_handle
+             ) do
+          %{"handle" => handle, "domain" => domain} ->
+            "https://#{domain}/@#{handle}"
+
+          _ ->
+            nil
+        end
+      end
+
     ~F"""
     <div :if={!@entity.disable_info} class={"flex flex-row flex-wrap gap-4", @class}>
       <a
@@ -27,6 +41,16 @@ defmodule BanchanWeb.Components.Socials do
         href={"https://twitter.com/#{@entity.twitter_handle}"}
       >
         <i class="fa-brands fa-twitter" /><div class="font-medium text-sm hover:link">@{@entity.twitter_handle}</div>
+      </a>
+      {!-- # TODO: Need to parse the domain out of the handle --}
+      <a
+        :if={@entity.mastodon_handle}
+        class="flex flex-row flex-nowrap gap-1 items-center"
+        target="_blank"
+        rel="noopener noreferrer"
+        href={mastodon_url}
+      >
+        <i class="fa-brands fa-mastodon" /><div class="font-medium text-sm hover:link">@{@entity.mastodon_handle}</div>
       </a>
       <a
         :if={@entity.instagram_handle}
