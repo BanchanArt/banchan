@@ -54,7 +54,11 @@ config :esbuild,
 config :ueberauth, Ueberauth,
   providers: [
     twitter: {Ueberauth.Strategy.Twitter, []},
-    discord: {Ueberauth.Strategy.Discord, []},
+    discord:
+      {Ueberauth.Strategy.Discord,
+       [
+         default_scope: "identify email"
+       ]},
     google: {Ueberauth.Strategy.Google, []}
   ]
 
