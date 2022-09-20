@@ -42,7 +42,6 @@ defmodule BanchanWeb.Components.Socials do
       >
         <i class="fa-brands fa-twitter" /><div class="font-medium text-sm hover:link">@{@entity.twitter_handle}</div>
       </a>
-      {!-- # TODO: Need to parse the domain out of the handle --}
       <a
         :if={@entity.mastodon_handle}
         class="flex flex-row flex-nowrap gap-1 items-center"
