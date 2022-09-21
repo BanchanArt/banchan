@@ -1,8 +1,8 @@
 # The Parity Public License 7.0.0
 
-Contributor: Digital Workers Guild LLC
+Contributor: Banchan Art LLC
 
-Source Code: https://github.com/digitalworkersguild/banchan
+Source Code: https://github.com/BanchanArt/banchan
 
 ## Purpose
 
