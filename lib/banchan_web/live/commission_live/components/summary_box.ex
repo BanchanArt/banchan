@@ -25,7 +25,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
   alias BanchanWeb.Components.{Button, Collapse}
 
   alias BanchanWeb.Components.Form.{
-    MarkdownInput,
+    QuillInput,
     Submit,
     TextInput
   }
@@ -326,7 +326,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
             cancel_upload="cancel_upload"
           />
           <div class="divider" />
-          <MarkdownInput
+          <QuillInput
             id={@id <> "-markdown-input"}
             name={:text}
             label="Invoice Text"
@@ -368,7 +368,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
             cancel_upload="cancel_upload"
           />
           <div class="divider" />
-          <MarkdownInput
+          <QuillInput
             id={@id <> "-markdown-input"}
             name={:text}
             label="Invoice Text"

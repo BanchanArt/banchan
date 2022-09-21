@@ -9,7 +9,7 @@ defmodule BanchanWeb.Components.ReportModal do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
+  alias BanchanWeb.Components.Form.{QuillInput, Submit}
   alias BanchanWeb.Components.Modal
 
   prop current_user, :struct, required: true
@@ -74,7 +74,7 @@ defmodule BanchanWeb.Components.ReportModal do
       <Modal id={@id <> "-inner-modal"}>
         <:title>Report Abuse</:title>
         <Form for={@report} change="change" submit="submit">
-          <MarkdownInput id={@id <> "-markdown-input"} name={:message} show_label={false} />
+          <QuillInput id={@id <> "-markdown-input"} name={:message} show_label={false} />
           <Submit changeset={@report} label="Report" />
         </Form>
       </Modal>

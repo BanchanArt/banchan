@@ -16,7 +16,7 @@ defmodule BanchanWeb.StudioLive.Edit do
 
   alias BanchanWeb.Components.Form.{
     HiddenInput,
-    MarkdownInput,
+    QuillInput,
     Submit,
     TagsInput,
     TextInput,
@@ -225,7 +225,7 @@ defmodule BanchanWeb.StudioLive.Edit do
               upload={@uploads.header_image}
               cancel="cancel_header_upload"
             />
-            <MarkdownInput
+            <QuillInput
               id="about"
               info="Displayed in the 'About' page. The first few dozen characters will also be displayed as the description in studio cards."
               name={:about}

@@ -10,7 +10,7 @@ defmodule BanchanWeb.ReportLive.Show do
   alias Surface.Components.{Form, LiveRedirect}
 
   alias BanchanWeb.Components.{Avatar, Button, Layout, Markdown, UserHandle}
-  alias BanchanWeb.Components.Form.{MarkdownInput, Select, Submit}
+  alias BanchanWeb.Components.Form.{QuillInput, Select, Submit}
 
   @impl true
   def handle_params(%{"id" => report_id}, _uri, socket) do
@@ -172,7 +172,7 @@ defmodule BanchanWeb.ReportLive.Show do
                   Resolved: :resolved
                 }
               />
-              <MarkdownInput id="notes-field" name={:notes} />
+              <QuillInput id="notes-field" name={:notes} />
               <Submit changeset={@changeset} />
             </Form>
           </div>

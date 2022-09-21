@@ -11,7 +11,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
   alias Surface.Components.Form
 
   alias BanchanWeb.Components.{Avatar, Button, Markdown, ReportModal, UserHandle}
-  alias BanchanWeb.Components.Form.{MarkdownInput, Submit}
+  alias BanchanWeb.Components.Form.{QuillInput, Submit}
   alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox}
 
   prop actor, :struct, required: true
@@ -229,7 +229,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             submit="submit_edit"
             opts={id: "editing-event-#{@event.public_id}"}
           >
-            <MarkdownInput
+            <QuillInput
               id={"editing-event-#{@event.public_id}"}
               name={:text}
               show_label={false}

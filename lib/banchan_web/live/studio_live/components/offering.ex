@@ -20,7 +20,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias BanchanWeb.Components.Form.{
     Checkbox,
     HiddenInput,
-    MarkdownInput,
+    QuillInput,
     Select,
     Submit,
     TagsInput,
@@ -29,17 +29,17 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     UploadInput
   }
 
-  prop current_user, :struct, required: true
-  prop current_user_member?, :boolean, required: true
-  prop studio, :struct, required: true
-  prop offering, :struct
-  prop gallery_images, :any
-  prop form, :form, from_context: {Form, :form}
+  prop(current_user, :struct, required: true)
+  prop(current_user_member?, :boolean, required: true)
+  prop(studio, :struct, required: true)
+  prop(offering, :struct)
+  prop(gallery_images, :any)
+  prop(form, :form, from_context: {Form, :form})
 
-  data changeset, :struct
-  data uploads, :map
-  data remove_card, :boolean, default: false
-  data minimum_release_amount, :struct, default: Payments.minimum_release_amount()
+  data(changeset, :struct)
+  data(uploads, :map)
+  data(remove_card, :boolean, default: false)
+  data(minimum_release_amount, :struct, default: Payments.minimum_release_amount())
 
   def mount(socket) do
     {:ok,
@@ -405,7 +405,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           info="Lowercase, no-spaces, limited characters. This is what will show up in the url and must be unique."
           opts={required: true}
         />
-        <MarkdownInput
+        <QuillInput
           id={@id <> "-description-input"}
           name={:description}
           info="Description of the offering, as it should appear when the offering is expanded."
@@ -605,12 +605,12 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           <:header>
             <h3 class="text-2xl">Terms and Template</h3>
           </:header>
-          <MarkdownInput
+          <QuillInput
             id={@id <> "-tos"}
             name={:terms}
             info="Terms of service specific to this offering. Leave blank to use your studio's default terms."
           />
-          <MarkdownInput
+          <QuillInput
             id={@id <> "-template"}
             name={:template}
             info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."

@@ -14,7 +14,7 @@ defmodule BanchanWeb.OfferingLive.Request do
   import BanchanWeb.StudioLive.Helpers
 
   alias BanchanWeb.CommissionLive.Components.{BalanceBox, OfferingBox, Summary}
-  alias BanchanWeb.Components.Form.{Checkbox, MarkdownInput, Submit, TextInput, UploadInput}
+  alias BanchanWeb.Components.Form.{Checkbox, QuillInput, Submit, TextInput, UploadInput}
   alias BanchanWeb.Components.{Layout, Markdown}
   alias BanchanWeb.Endpoint
 
@@ -342,7 +342,7 @@ defmodule BanchanWeb.OfferingLive.Request do
                 class="w-full"
                 opts={required: true, placeholder: "A Brief Title"}
               />
-              <MarkdownInput
+              <QuillInput
                 id="initial-message"
                 name={:description}
                 show_label={false}

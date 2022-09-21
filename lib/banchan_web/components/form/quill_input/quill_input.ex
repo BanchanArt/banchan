@@ -1,46 +1,25 @@
-defmodule BanchanWeb.Components.Form.MarkdownInput do
+defmodule BanchanWeb.Components.Form.QuillInput do
   @moduledoc """
-  Handy-dandy markdown input textarea with preview tab!
+  quill.js-based rich text editor.
   """
   use BanchanWeb, :live_component
 
   alias Surface.Components.Form.{ErrorTag, Field, Label, TextArea}
   alias Surface.Components.LiveFileInput
 
-  prop name, :any, required: true
-  prop height, :string, default: "224px"
-  prop opts, :keyword, default: []
-  prop label, :string
-  prop show_label, :boolean, default: true
-  prop class, :css_class
-  prop info, :string
-  prop upload, :struct
-  prop cancel_upload, :event
+  prop(name, :any, required: true)
+  prop(form, :form, from_context: {Surface.Components.Form, :form})
+  prop(opts, :keyword, default: [])
+  # TODO: couldn't get this to work, for some reason.
+  # prop height, :string, default: "224px"
+  prop(label, :string)
+  prop(show_label, :boolean, default: true)
+  prop(class, :css_class)
+  prop(info, :string)
+  prop(upload, :struct)
+  prop(cancel_upload, :event)
 
-  data dragging, :boolean, default: false
-
-  def update(assigns, socket) do
-    socket = socket |> assign(assigns)
-
-    val =
-      Phoenix.HTML.Form.input_value(
-        Context.get(socket, Surface.Components.Form, :form),
-        assigns.name
-      )
-
-    if !val || val == "" do
-      {:ok,
-       socket
-       |> push_event("clear-markdown-input", %{id: socket.assigns.id <> "-hook"})}
-    else
-      # NB(@zkat): See comment in hook for why we can't do this.
-      # {:ok,
-      #  socket
-      #  |> push_event("markdown-input-updated", %{id: socket.assigns.id <> "-hook", value: val || ""})}
-
-      {:ok, socket}
-    end
-  end
+  data(dragging, :boolean, default: false)
 
   def handle_event("dragstart", _, socket) do
     {:noreply, assign(socket, dragging: true)}
@@ -56,6 +35,49 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
 
   def render(assigns) do
     ~F"""
+    <style>
+      .field {
+      @apply max-h-full;
+      }
+      .control :global(.ql-editor) {
+      /* TODO: Try and get this to work? idk why the variable isn't getting defined.
+      min-height: s-bind("@height")
+      */
+      min-height: 224px;
+      }
+      .control :global(.ql-toolbar):global(.ql-snow) {
+      @apply rounded-t-xl;
+      --tw-border-opacity: 0.2;
+      border: 1px solid hsl(var(--bc) / var(--tw-border-opacity));
+      }
+      .control :global(.ql-container) {
+      @apply rounded-t-none textarea textarea-bordered;
+      }
+      .control .has_upload :global(.ql-container) {
+      @apply rounded-b-none;
+      }
+      .control :global(.ql-stroke) {
+      --tw-text-opacity: 1;
+      stroke: hsl(var(--nc) / var(--tw-text-opacity));
+      }
+      .control :global(.ql-fill) {
+      --tw-text-opacity: 0.8;
+      fill: hsl(var(--nc) / var(--tw-text-opacity));
+      }
+      .control :global(.ql-picker):global(.ql-expanded) :global(.ql-picker-label) {
+      @apply rounded-md;
+      --tw-border-opacity: 0.2;
+      border: 1px solid hsl(var(--bc) / var(--tw-border-opacity));
+      }
+      .control :global(.ql-picker-label) {
+      color: hsl(var(--nc));
+      }
+      /*
+      .control :global(.ql-picker) :global(.ql-picker-options) {
+      @apply menu rounded-box
+      }
+      */
+    </style>
     <Field class="field" name={@name}>
       {#if @show_label}
         <Label class="label">
@@ -70,33 +92,28 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
         </Label>
       {/if}
       <div class="control">
-        <div class="relative">
+        <div class={"relative", "has-upload": !is_nil(@upload)}>
           <div
             class={@class}
-            phx-update="ignore"
             phx-drop-target={@upload && @upload.ref}
-            :hook="MarkdownInput"
+            phx-update="ignore"
+            :hook="QuillInput"
             id={@id <> "-hook"}
           >
-            <div
-              id={@id <> "-editor"}
-              data-height={@height}
-              phx-update="ignore"
-              class="object-cover editor w-full h-full"
-            />
+            <div id={@id <> "-editor"} phx-update="ignore" class="object-cover editor h-full w-full" />
             <TextArea class="hidden input-textarea" opts={@opts} />
           </div>
           {#if @upload}
+            <LiveFileInput
+              class="file-input file-input-xs w-full file-input-bordered rounded-t-none"
+              upload={@upload}
+            />
             {#if @dragging}
               <div class="absolute h-full w-full opacity-25 bg-neutral border-dashed border-2" />
               <div class="absolute h-full w-full text-center my-auto">
                 Drop Files Here <i class="fas fa-file-upload" />
               </div>
             {/if}
-            <label class="absolute right-2 top-36 z-30">
-              <i class="fas fa-file-upload text-2xl hover:cursor-pointer" />
-              <LiveFileInput class="hidden overflow-hidden" upload={@upload} />
-            </label>
           {/if}
         </div>
       </div>
