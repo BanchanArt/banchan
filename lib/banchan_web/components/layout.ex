@@ -49,12 +49,16 @@ defmodule BanchanWeb.Components.Layout do
           </div>
           <div>
             <span class="footer-title">Legal</span>
-            <LiveRedirect to={Routes.static_terms_of_service_path(Endpoint, :show)} class="link link-hover">Terms of Service</LiveRedirect>
-            <LiveRedirect to={Routes.static_privacy_policy_path(Endpoint, :show)} class="link link-hover">Privacy policy</LiveRedirect>
             <LiveRedirect
-              to={Routes.static_refunds_and_disputes_path(Endpoint, :show)}
+              to={Routes.static_terms_and_conditions_path(Endpoint, :show)}
               class="link link-hover"
-            >Refunds and Disputes</LiveRedirect>
+            >Terms and Conditions</LiveRedirect>
+            <LiveRedirect to={Routes.static_privacy_policy_path(Endpoint, :show)} class="link link-hover">Privacy policy</LiveRedirect>
+            <LiveRedirect to={Routes.static_cookies_policy_path(Endpoint, :show)} class="link link-hover">Cookies policy</LiveRedirect>
+            <LiveRedirect
+              to={Routes.static_disputes_policy_path(Endpoint, :show)}
+              class="link link-hover"
+            >Disputes Policy</LiveRedirect>
           </div>
           <div>
             <span class="footer-title">Social</span>

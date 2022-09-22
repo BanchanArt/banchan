@@ -172,8 +172,9 @@ defmodule BanchanWeb.Router do
       live("/membership", StaticLive.Membership, :show)
 
       live("/privacy-policy", StaticLive.PrivacyPolicy, :show)
-      live("/terms-of-service", StaticLive.TermsOfService, :show)
-      live("/refunds-and-disputes", StaticLive.RefundsAndDisputes, :show)
+      live("/cookies-policy", StaticLive.CookiesPolicy, :show)
+      live("/disputes-policy", StaticLive.DisputesPolicy, :show)
+      live("/terms-and-conditions", StaticLive.TermsAndConditions, :show)
     end
   end
 
