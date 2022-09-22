@@ -36,19 +36,7 @@ defmodule BanchanWeb.BetaLive.Confirmation do
                   class="btn bg-[#5865F2] btn-md rounded-full"
                 >Join our Discord <i class="pl-2 fab fa-discord text-xl" /></a>
               </div>
-              <div class="flex flex-row gap-4">
-                <LiveRedirect class="link" to={Routes.beta_signup_path(Endpoint, :new)}>Go Back</LiveRedirect>
-                |
-                <a
-                  href="https://twitter.com/share?ref_src=twsrc%5Etfw"
-                  class="twitter-share-button link"
-                  data-text="Sign up for beta access to Banchan Art, a co-operative platform for art commissions, owned by artists!"
-                  data-via="BanchanArt"
-                  data-hashtags="#commsopen"
-                  data-show-count="false"
-                >Tweet</a>
-                <script async src="https://platform.twitter.com/widgets.js" charset="utf-8" />
-              </div>
+              <LiveRedirect class="link" to={Routes.beta_signup_path(Endpoint, :new)}>Go Back</LiveRedirect>
               <div class="font-semibold">Follow Us:</div>
               <ul class="flex flex-row gap-4">
                 <li>

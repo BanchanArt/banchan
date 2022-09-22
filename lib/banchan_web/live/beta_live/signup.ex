@@ -238,17 +238,6 @@ defmodule BanchanWeb.BetaLive.Signup do
                 class="btn bg-[#5865F2] btn-md rounded-full"
               >Join Us On Discord <i class="pl-2 fab fa-discord text-xl" />
               </a>
-              <div class="flex flex-row">
-                <a
-                  href="https://twitter.com/share?ref_src=twsrc%5Etfw"
-                  class="twitter-share-button link"
-                  data-text="Sign up for beta access to Banchan Art, a co-operative platform for art commissions, owned by artists!"
-                  data-via="BanchanArt"
-                  data-hashtags="#commsopen"
-                  data-show-count="false"
-                >Tweet</a>
-                <script async src="https://platform.twitter.com/widgets.js" charset="utf-8" />
-              </div>
             </div>
           </div>
         </div>
