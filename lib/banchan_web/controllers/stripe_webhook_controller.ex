@@ -40,15 +40,6 @@ defmodule BanchanWeb.StripeWebhookController do
     |> send_resp()
   end
 
-  defp handle_event(%Stripe.Event{type: "payout." <> type} = event, conn) do
-    Logger.debug("Got a new payout event of type payout.#{type}. Updating database.")
-    Payments.process_payout_updated!(event.data.object)
-
-    conn
-    |> resp(200, "OK")
-    |> send_resp()
-  end
-
   defp handle_event(%Stripe.Event{type: "charge.refund.updated"} = event, conn) do
     {:ok, _} = Payments.process_refund_updated(Accounts.system_user(), event.data.object, nil)
 

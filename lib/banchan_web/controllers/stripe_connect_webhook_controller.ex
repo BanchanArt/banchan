@@ -6,6 +6,7 @@ defmodule BanchanWeb.StripeConnectWebhookController do
 
   require Logger
 
+  alias Banchan.Payments
   alias Banchan.Studios
 
   def webhook(conn, _params) do
@@ -23,6 +24,15 @@ defmodule BanchanWeb.StripeConnectWebhookController do
 
   defp handle_event(%Stripe.Event{type: "account.updated"} = event, conn) do
     Studios.update_stripe_state!(event.data.object.id, event.data.object)
+
+    conn
+    |> resp(200, "OK")
+    |> send_resp()
+  end
+
+  defp handle_event(%Stripe.Event{type: "payout." <> type} = event, conn) do
+    Logger.debug("Got a new payout event of type payout.#{type}. Updating database.")
+    Payments.process_payout_updated!(event.data.object)
 
     conn
     |> resp(200, "OK")
