@@ -55,10 +55,7 @@ defmodule BanchanWeb.Components.Layout do
             >Terms and Conditions</LiveRedirect>
             <LiveRedirect to={Routes.static_privacy_policy_path(Endpoint, :show)} class="link link-hover">Privacy policy</LiveRedirect>
             <LiveRedirect to={Routes.static_cookies_policy_path(Endpoint, :show)} class="link link-hover">Cookies policy</LiveRedirect>
-            <LiveRedirect
-              to={Routes.static_disputes_policy_path(Endpoint, :show)}
-              class="link link-hover"
-            >Disputes Policy</LiveRedirect>
+            <LiveRedirect to={Routes.static_disputes_policy_path(Endpoint, :show)} class="link link-hover">Disputes Policy</LiveRedirect>
           </div>
           <div>
             <span class="footer-title">Social</span>
