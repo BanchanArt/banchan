@@ -3,6 +3,7 @@ defmodule BanchanWeb.UserLiveAuth do
   Handles making sure users are all authenticated within certain LiveViews
   """
   import Phoenix.LiveView
+  import Phoenix.Component
 
   alias Banchan.Accounts
   alias Banchan.Accounts.User

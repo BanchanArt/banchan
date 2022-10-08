@@ -4,6 +4,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
   studio fetching, checking membership, etc.
   """
   import Phoenix.LiveView
+  import Phoenix.Component
 
   import Ecto.Query
 

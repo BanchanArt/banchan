@@ -69,10 +69,9 @@ defmodule Banchan.MixProject do
       {:html_sanitize_ex, "~> 1.4.2"},
       {:httpoison, "~> 1.8.1"},
       {:jason, "~> 1.0"},
-      # TODO: move back to mainline after
-      # https://github.com/elixir-mogrify/mogrify/pull/112 is merged and
-      # released.
-      {:mogrify, github: "BanchanArt/mogrify"},
+      # TODO: move back to hex package after
+      # https://github.com/elixir-mogrify/mogrify/pull/112 is released.
+      {:mogrify, github: "elixir-mogrify/mogrify"},
       {:money, "~> 1.9"},
       {:nimble_totp, "~> 0.1.0"},
       {:number, "~> 1.0.3"},
@@ -80,9 +79,9 @@ defmodule Banchan.MixProject do
       {:pbkdf2_elixir, "~> 1.0"},
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 3.2.0"},
-      {:phoenix_live_dashboard, "~> 0.6.5"},
-      {:phoenix_live_view, "~> 0.17.11"},
-      {:phoenix, "~> 1.6.12"},
+      {:phoenix_live_dashboard, "~> 0.7.0"},
+      {:phoenix_live_view, "~> 0.18.2"},
+      {:phoenix, "~> 1.6.13"},
       {:plug_cowboy, "~> 2.5.2"},
       {:postgrex, "~> 0.16.3"},
       {:qr_code, "~> 2.2.1"},
@@ -90,9 +89,9 @@ defmodule Banchan.MixProject do
       {:sentry, "~> 8.0"},
       {:slugify, "~> 1.3.1"},
       {:stripity_stripe, "~> 2.15.0"},
-      {:surface, "~> 0.8.2"},
-      {:surface_catalogue, "~> 0.5.1"},
-      {:surface_markdown, "~> 0.5.0"},
+      {:surface, "~> 0.9.1"},
+      {:surface_catalogue, "~> 0.5.2"},
+      {:surface_markdown, "~> 0.5.1"},
       {:sweet_xml, "~> 0.6"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 0.5"},

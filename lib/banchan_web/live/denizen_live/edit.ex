@@ -166,9 +166,10 @@ defmodule BanchanWeb.DenizenLive.Edit do
                   class="btn btn-xs btn-circle absolute right-2 top-2 z-20"
                   :on-click="cancel_header_upload"
                 >✕</button>
-                {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.header.entries, 0),
-                  class: "object-cover aspect-header-image rounded-b-xl w-full"
-                )}
+                <.live_img_preview
+                  entry={Enum.at(@uploads.header.entries, 0)}
+                  class="object-cover aspect-header-image rounded-b-xl w-full"
+                />
               {#elseif @user.header_img_id}
                 <button
                   type="button"
@@ -212,7 +213,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
                           class="btn btn-xs btn-circle absolute right-2 top-2"
                           :on-click="cancel_pfp_upload"
                         >✕</button>
-                        {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.pfp.entries, 0))}
+                        <.live_img_preview entry={Enum.at(@uploads.pfp.entries, 0)} />
                       {#else}
                         <button type="button" class="btn btn-xs btn-circle absolute right-2 top-2" :on-click="remove_pfp">✕</button>
                         <HiddenInput name={:pfp_image_id} value={@user.pfp_img_id} />
