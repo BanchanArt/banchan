@@ -705,7 +705,8 @@ defmodule Banchan.Commissions do
       actor.id != commission.client_id &&
         !(commission.studio_id &&
               Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id})) &&
-        :admin not in actor.roles && :mod not in actor.roles ->
+        :admin not in actor.roles &&
+          :mod not in actor.roles ->
         {:error, :unauthorized}
 
       true ->
@@ -1056,38 +1057,34 @@ defmodule Banchan.Commissions do
         with {:ok, actor} <- check_actor_edit_access(actor, commission) do
           event = event |> Repo.reload(force: true) |> Repo.preload(:commission)
 
-          if actor.id == event.actor_id || :admin in actor.roles || :mod in actor.roles do
-            original_text = event.text
-            changeset = Event.changeset(event, attrs)
+          original_text = event.text
+          changeset = Event.changeset(event, attrs)
 
-            with {:ok, event} <- Repo.update(changeset, returning: true),
-                 %Event{} = event <-
-                   Repo.preload(event, [
-                     :actor,
-                     invoice: [],
-                     attachments: [:upload, :thumbnail, :preview]
-                   ]) do
-              if Ecto.Changeset.fetch_change(changeset, :text) == :error do
+          with {:ok, event} <- Repo.update(changeset, returning: true),
+               %Event{} = event <-
+                 Repo.preload(event, [
+                   :actor,
+                   invoice: [],
+                   attachments: [:upload, :thumbnail, :preview]
+                 ]) do
+            if Ecto.Changeset.fetch_change(changeset, :text) == :error do
+              Notifications.commission_event_updated(commission, event, actor)
+              {:ok, event}
+            else
+              # If we're editing the event's text, we want to create a
+              # history entry for it for recordkeeping.
+              history = %CommentHistory{
+                text: original_text,
+                written_at: event.updated_at,
+                event_id: event.id,
+                changed_by_id: actor.id
+              }
+
+              with {:ok, _} <- Repo.insert(history) do
                 Notifications.commission_event_updated(commission, event, actor)
                 {:ok, event}
-              else
-                # If we're editing the event's text, we want to create a
-                # history entry for it for recordkeeping.
-                history = %CommentHistory{
-                  text: original_text,
-                  written_at: event.updated_at,
-                  event_id: event.id,
-                  changed_by_id: actor.id
-                }
-
-                with {:ok, _} <- Repo.insert(history) do
-                  Notifications.commission_event_updated(commission, event, actor)
-                  {:ok, event}
-                end
               end
             end
-          else
-            {:error, :unauthorized}
           end
         end
       end)
