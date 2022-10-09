@@ -98,8 +98,10 @@ defmodule BanchanWeb.CommissionLive do
 
     socket =
       Context.put(socket,
+        commission: socket.assigns.commission,
         current_user_member?: socket.assigns.current_user_member?,
-        uri: uri
+        uri: uri,
+        flash: socket.assigns.flash
       )
 
     {:noreply, socket |> assign(:uri, uri)}
@@ -129,12 +131,14 @@ defmodule BanchanWeb.CommissionLive do
 
     commission = %{socket.assigns.commission | events: events}
     Commission.events_updated("commission")
+    socket = Context.put(socket, commission: commission)
     {:noreply, assign(socket, users: users, commission: commission)}
   end
 
   def handle_info(%{event: "new_status", payload: status}, socket) do
     if socket.assigns.commission do
       commission = %{socket.assigns.commission | status: status}
+      socket = Context.put(socket, commission: commission)
       {:noreply, assign(socket, commission: commission)}
     else
       {:noreply, socket}
@@ -144,6 +148,7 @@ defmodule BanchanWeb.CommissionLive do
   def handle_info(%{event: "new_title", payload: title}, socket) do
     if socket.assigns.commission do
       commission = %{socket.assigns.commission | title: title}
+      socket = Context.put(socket, commission: commission)
       {:noreply, assign(socket, commission: commission)}
     else
       {:noreply, socket}
@@ -163,12 +168,14 @@ defmodule BanchanWeb.CommissionLive do
 
     commission = %{socket.assigns.commission | events: events}
     Commission.events_updated("commission")
+      socket = Context.put(socket, commission: commission)
     {:noreply, assign(socket, commission: commission)}
   end
 
   def handle_info(%{event: "line_items_changed", payload: line_items}, socket) do
-    {:noreply,
-     socket |> assign(commission: %{socket.assigns.commission | line_items: line_items})}
+    commission = %{socket.assigns.commission | line_items: line_items}
+    socket = Context.put(socket, commission: commission)
+    {:noreply, socket |> assign(commission: commission)}
   end
 
   @impl true
@@ -364,7 +371,7 @@ defmodule BanchanWeb.CommissionLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <Layout>
       {#if !@commission}
         <h1 class="text-3xl">My Commissions</h1>
         <div class="divider" />

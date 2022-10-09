@@ -9,8 +9,7 @@ defmodule BanchanWeb.Components.Nav do
   alias BanchanWeb.Components.Notifications
   alias BanchanWeb.Endpoint
 
-  prop current_user, :any
-  prop uri, :string, required: true
+  prop current_user, :any, from_context: :current_user
 
   def render(assigns) do
     ~F"""
@@ -53,7 +52,7 @@ defmodule BanchanWeb.Components.Nav do
 
       {#if @current_user}
         <div class="flex-none">
-          <Notifications id="notifications" uri={@uri} current_user={@current_user} />
+          <Notifications id="notifications" />
         </div>
       {/if}
     </nav>

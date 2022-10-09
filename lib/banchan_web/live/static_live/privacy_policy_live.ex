@@ -10,13 +10,14 @@ defmodule BanchanWeb.StaticLive.PrivacyPolicy do
 
   @impl true
   def handle_params(_params, uri, socket) do
+    socket = Context.put(socket, uri: uri)
     {:noreply, socket |> assign(uri: uri)}
   end
 
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <Layout>
       <#Markdown class="prose">
         # Privacy Policy
 

@@ -13,6 +13,7 @@ defmodule BanchanWeb.BetaLive.Signup do
 
   @impl true
   def handle_params(_params, uri, socket) do
+    socket = Context.put(socket, uri: uri)
     {:noreply, socket |> assign(uri: uri)}
   end
 
@@ -35,7 +36,7 @@ defmodule BanchanWeb.BetaLive.Signup do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <Layout>
       <div id="above-fold" class="md:px-4 mt-20">
         <div class="min-h-screen hero">
           <div class="hero-content flex flex-col md:flex-row">

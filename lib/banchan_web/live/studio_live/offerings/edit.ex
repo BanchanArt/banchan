@@ -26,6 +26,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
 
   @impl true
   def handle_params(_params, uri, socket) do
+    socket = Context.put(socket, uri: uri)
     {:noreply, socket |> assign(uri: uri)}
   end
 
@@ -40,12 +41,8 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
     ~F"""
     <Components.StudioLayout
       id="studio-layout"
-      current_user={@current_user}
-      flashes={@flash}
       studio={@studio}
-      current_user_member?={@current_user_member?}
       tab={:shop}
-      uri={@uri}
     >
       <div>
         <div class="p-6 max-w-lg mx-auto">

@@ -28,7 +28,7 @@ defmodule BanchanWeb.DenizenLive.Show do
   def handle_params(%{"handle" => handle}, uri, socket) do
     user = Accounts.get_user_by_handle!(handle)
     socket = socket |> assign(user: user)
-
+    socket = Context.put(socket, uri: uri)
     {:noreply,
      assign(socket,
        uri: uri,
@@ -152,7 +152,7 @@ defmodule BanchanWeb.DenizenLive.Show do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <Layout>
       <:hero>
         <section>
           {#if @user.header_img && !@user.header_img.pending && !@user.disable_info}

@@ -11,6 +11,7 @@ defmodule BanchanWeb.ReactivateLive do
 
   @impl true
   def handle_params(_params, uri, socket) do
+    socket = Context.put(socket, uri: uri)
     {:noreply, socket |> assign(uri: uri)}
   end
 
@@ -42,7 +43,7 @@ defmodule BanchanWeb.ReactivateLive do
       end
 
     ~F"""
-    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <AuthLayout>
       <h1 class="text-2xl mx-auto">Reactivate Your Account</h1>
       <p>Your account is currently deactivated and will be fully deleted in {days}.</p>
       <Button click="reactivate" class="w-full" label="Reactivate" />

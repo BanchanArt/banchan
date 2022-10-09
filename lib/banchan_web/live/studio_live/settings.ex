@@ -46,6 +46,7 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   @impl true
   def handle_params(_params, uri, socket) do
+    socket = Context.put(socket, uri: uri)
     {:noreply, socket |> assign(uri: uri)}
   end
 
@@ -194,13 +195,9 @@ defmodule BanchanWeb.StudioLive.Settings do
     ~F"""
     <StudioLayout
       id="studio-layout"
-      current_user={@current_user}
-      flashes={@flash}
       studio={@studio}
-      current_user_member?={@current_user_member?}
       tab={:settings}
       padding={0}
-      uri={@uri}
     >
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">

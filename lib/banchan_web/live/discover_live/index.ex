@@ -13,6 +13,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
   @impl true
   def handle_params(params, uri, socket) do
     socket = param_filters(socket, params)
+    socket = Context.put(socket, uri: uri)
     {:noreply, socket |> assign(uri: uri)}
   end
 
@@ -116,7 +117,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
       end
 
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <Layout>
       <h1 class="text-3xl">Discover</h1>
       <div class="divider" />
       <div class="tabs tabs-boxed flex flex-nowrap max-w-xl mx-auto">

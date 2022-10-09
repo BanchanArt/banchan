@@ -22,13 +22,14 @@ defmodule BanchanWeb.LoginLive do
 
   @impl true
   def handle_params(_params, uri, socket) do
+    socket = Context.put(socket, uri: uri)
     {:noreply, socket |> assign(uri: uri)}
   end
 
   @impl true
   def render(assigns) do
     ~F"""
-    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <AuthLayout>
       <Form
         class="flex flex-col gap-4"
         for={@changeset}

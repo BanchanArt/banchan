@@ -47,6 +47,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
 
   @impl true
   def handle_params(_params, uri, socket) do
+    socket = Context.put(socket, uri: uri)
     {:noreply, socket |> assign(uri: uri)}
   end
 
@@ -118,12 +119,8 @@ defmodule BanchanWeb.StudioLive.Portfolio do
     ~F"""
     <StudioLayout
       id="studio-layout"
-      current_user={@current_user}
-      flashes={@flash}
       studio={@studio}
-      current_user_member?={@current_user_member?}
       tab={:portfolio}
-      uri={@uri}
     >
       {#if @current_user_member?}
         <div class="mx-auto py-2">

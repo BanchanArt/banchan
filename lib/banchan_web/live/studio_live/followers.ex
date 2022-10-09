@@ -23,6 +23,7 @@ defmodule BanchanWeb.StudioLive.Followers do
 
   @impl true
   def handle_params(_params, uri, socket) do
+    socket = Context.put(socket, uri: uri)
     {:noreply, socket |> assign(uri: uri)}
   end
 
@@ -53,11 +54,7 @@ defmodule BanchanWeb.StudioLive.Followers do
     ~F"""
     <StudioLayout
       id="studio-layout"
-      current_user={@current_user}
-      flashes={@flash}
       studio={@studio}
-      current_user_member?={@current_user_member?}
-      uri={@uri}
     >
       <h3 class="p-6 text-semibold text-2xl">Followers</h3>
       <ul class="grid sm:px-2 grid grid-cols-2 sm:gap-2 sm:grid-cols-4 auto-rows-fr">

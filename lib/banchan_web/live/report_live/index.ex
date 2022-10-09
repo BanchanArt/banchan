@@ -23,6 +23,7 @@ defmodule BanchanWeb.ReportLive.Index do
 
   @impl true
   def handle_params(params, uri, socket) do
+    socket = Context.put(socket, uri: uri)
     socket =
       socket
       |> assign(
@@ -205,7 +206,7 @@ defmodule BanchanWeb.ReportLive.Index do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <Layout>
       <h1 class="text-3xl">Reports</h1>
       <div class="divider" />
       <div class="flex flex-col pt-4">

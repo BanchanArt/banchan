@@ -36,6 +36,7 @@ defmodule BanchanWeb.OfferingLive.Show do
 
     socket = assign_studio_defaults(params, socket, false, true)
 
+    socket = Context.put(socket, uri: uri)
     offering =
       Offerings.get_offering_by_type!(
         socket.assigns.current_user,
@@ -175,7 +176,7 @@ defmodule BanchanWeb.OfferingLive.Show do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <Layout>
       <h1 class="text-3xl">
         {@offering.name}
       </h1>

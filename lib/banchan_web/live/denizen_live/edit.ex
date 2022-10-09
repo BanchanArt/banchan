@@ -56,6 +56,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
 
   @impl true
   def handle_params(_params, uri, socket) do
+    socket = Context.put(socket, uri: uri)
     {:noreply, socket |> assign(uri: uri)}
   end
 
@@ -148,7 +149,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} padding={0} current_user={@current_user} flashes={@flash}>
+    <Layout padding={0}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Form class="profile-info" for={@changeset} change="change" submit="submit">

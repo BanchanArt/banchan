@@ -16,6 +16,7 @@ defmodule BanchanWeb.BetaLive.Requests do
   @impl true
   def handle_params(_params, uri, socket) do
     socket = socket |> assign(uri: uri, show_sent: false, email_filter: "", page: 1)
+    socket = Context.put(socket, uri: uri)
     {:noreply, socket |> assign(results: list_requests(socket))}
   end
 
@@ -110,7 +111,7 @@ defmodule BanchanWeb.BetaLive.Requests do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <Layout>
       <h1 class="text-3xl">Manage Invite Requests</h1>
       <div class="divider" />
       <div class="flex flex-col md:flex-row md:flex-wrap gap-2">

@@ -13,8 +13,6 @@ defmodule BanchanWeb.Components.Layout do
   alias BanchanWeb.Components.{Flash, Nav}
 
   prop current_user, :any
-  prop flashes, :string
-  prop uri, :string, required: true
   prop padding, :integer, default: 4
 
   slot hero
@@ -26,7 +24,7 @@ defmodule BanchanWeb.Components.Layout do
       <input type="checkbox" id="drawer-toggle" class="drawer-toggle">
       <div class="drawer-content h-screen flex flex-col flex-grow">
         <div class="top-0 z-50 sticky shadow-sm">
-          <Nav uri={@uri} current_user={@current_user} />
+          <Nav />
         </div>
         {#if slot_assigned?(:hero)}
           <#slot {@hero} />
@@ -37,7 +35,7 @@ defmodule BanchanWeb.Components.Layout do
               ⚠️You need to verify your email address before you can do certain things on the site, such as submit new commissions. Please check your email or <LiveRedirect class="link" to={Routes.confirmation_path(Endpoint, :show)}>click here to resend your confirmation</LiveRedirect>.⚠️
             </div>
           </div>
-          <Flash flashes={@flashes} />
+          <Flash />
           <#slot />
         </section>
         <footer class="footer p-10 shadow-sm">
