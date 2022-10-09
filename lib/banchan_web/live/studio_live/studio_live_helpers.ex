@@ -8,6 +8,8 @@ defmodule BanchanWeb.StudioLive.Helpers do
 
   import Ecto.Query
 
+  alias Surface.Components.Context
+
   alias Banchan.Accounts
   alias Banchan.Accounts.User
   alias Banchan.Studios
@@ -30,7 +32,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
       |> assign(current_user_member?: current_user_member?)
 
     socket =
-      Surface.Components.Context.put(socket,
+      Context.put(socket,
         studio: studio,
         current_user_member?: current_user_member?
       )

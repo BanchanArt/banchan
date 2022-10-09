@@ -5,6 +5,8 @@ defmodule BanchanWeb.UserLiveAuth do
   import Phoenix.LiveView
   import Phoenix.Component
 
+  alias Surface.Components.Context
+
   alias Banchan.Accounts
   alias Banchan.Accounts.User
 
@@ -19,13 +21,13 @@ defmodule BanchanWeb.UserLiveAuth do
         find_current_user(session)
       end)
 
-    socket = Surface.Components.Context.put(socket, current_user: socket.assigns.current_user)
+    socket = Context.put(socket, current_user: socket.assigns.current_user)
 
     socket =
       socket
       |> detach_hook(:context_uri_hook, :handle_params)
       |> attach_hook(:context_uri_hook, :handle_params, fn _params, uri, socket ->
-        {:cont, socket |> assign(uri: uri) |> Surface.Components.Context.put(uri: uri)}
+        {:cont, socket |> assign(uri: uri) |> Context.put(uri: uri)}
       end)
 
     cond do
