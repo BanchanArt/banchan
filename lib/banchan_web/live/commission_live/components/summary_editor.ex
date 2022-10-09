@@ -13,9 +13,9 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   alias BanchanWeb.CommissionLive.Components.Summary
   alias BanchanWeb.Components.Modal
 
-  prop commission, :struct, required: true
-  prop current_user, :struct, required: true
-  prop current_user_member?, :boolean, required: true
+  prop commission, :struct, from_context: :commission
+  prop current_user, :struct, from_context: :current_user
+  prop current_user_member?, :boolean, from_context: :current_user_member?
   prop allow_edits, :boolean, required: true
 
   data studio, :struct

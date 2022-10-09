@@ -9,9 +9,9 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
 
   alias BanchanWeb.Components.{Button, Collapse}
 
-  prop current_user, :struct, required: true
-  prop current_user_member?, :boolean, required: true
-  prop commission, :struct, required: true
+  prop current_user, :struct, from_context: :current_user
+  prop current_user_member?, :boolean, from_context: :current_user_member?
+  prop commission, :struct, from_context: :commission
 
   data invoices_paid?, :boolean
 

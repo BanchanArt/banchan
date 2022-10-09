@@ -15,11 +15,11 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
   alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox}
 
   prop actor, :struct, required: true
-  prop current_user, :struct, required: true
-  prop current_user_member?, :boolean, required: true
-  prop commission, :struct, required: true
+  prop current_user, :struct, from_context: :current_user
+  prop current_user_member?, :boolean, from_context: :current_user_member?
+  prop commission, :struct, from_context: :commission
   prop event, :struct, required: true
-  prop uri, :string, required: true
+  prop uri, :string, from_context: :uri
   prop report_modal_id, :string, required: true
 
   data changeset, :struct
@@ -246,14 +246,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
       {#if @event.invoice}
         <div :if={@event.text} class="divider" />
         <div class="pb-4">
-          <InvoiceBox
-            id={"invoice-box-#{@event.public_id}"}
-            current_user={@current_user}
-            current_user_member?={@current_user_member?}
-            uri={@uri}
-            commission={@commission}
-            event={@event}
-          />
+          <InvoiceBox id={"invoice-box-#{@event.public_id}"} event={@event} />
         </div>
       {/if}
 
@@ -263,12 +256,10 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
           <AttachmentBox
             base_id={@id <> "-attachments"}
             editing={!is_nil(@changeset)}
-            commission={@commission}
             attachments={@event.attachments}
             open_preview="open_preview"
             remove_attachment="remove_attachment"
             pending_payment={@event.invoice && @event.invoice.required && !Payments.invoice_paid?(@event.invoice)}
-            current_user_member?={@current_user_member?}
           />
         </div>
       {/if}

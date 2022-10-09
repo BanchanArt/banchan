@@ -9,9 +9,9 @@ defmodule BanchanWeb.CommissionLive.Components.UploadsBox do
   alias BanchanWeb.CommissionLive.Components.AttachmentBox
   alias BanchanWeb.Components.Collapse
 
-  prop current_user, :struct, required: true
-  prop current_user_member?, :boolean, required: true
-  prop commission, :struct, required: true
+  prop current_user, :struct, from_context: :current_user
+  prop current_user_member?, :boolean, from_context: :current_user_member?
+  prop commission, :struct, from_context: :commission
 
   data attachments, :list
   data loaded, :boolean, default: false
@@ -60,11 +60,7 @@ defmodule BanchanWeb.CommissionLive.Components.UploadsBox do
         <:header>
           <div class="text-lg font-medium">Uploads ({Enum.count(@attachments)})</div>
         </:header>
-        <AttachmentBox
-          base_id={@id <> "-attachments"}
-          commission={@commission}
-          attachments={@attachments}
-        />
+        <AttachmentBox base_id={@id <> "-attachments"} attachments={@attachments} />
       </Collapse>
     </div>
     """

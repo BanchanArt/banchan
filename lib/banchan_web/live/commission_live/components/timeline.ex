@@ -9,10 +9,9 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
   alias BanchanWeb.CommissionLive.Components.{Comment, TimelineItem}
 
   prop users, :map, required: true
-  prop current_user, :struct, required: true
-  prop current_user_member?, :boolean, required: true
-  prop commission, :any, required: true
-  prop uri, :string, required: true
+  prop current_user, :struct, from_context: :current_user
+  prop current_user_member?, :boolean, from_context: :current_user_member?
+  prop commission, :any, from_context: :commission
   prop report_modal_id, :string, required: true
 
   def fmt_time(time) do
@@ -39,12 +38,8 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
               <article class="timeline-item scroll-mt-36 snap-start" id={"event-#{event.public_id}"}>
                 <Comment
                   id={"event-#{event.public_id}"}
-                  uri={@uri}
                   actor={Map.get(@users, event.actor_id)}
                   event={event}
-                  commission={@commission}
-                  current_user={@current_user}
-                  current_user_member?={@current_user_member?}
                   report_modal_id={@report_modal_id}
                 />
               </article>
@@ -56,16 +51,15 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
             {#for event <- chunk}
               {#case event.type}
                 {#match :line_item_added}
-                  <TimelineItem uri={@uri} icon="➕" actor={Map.get(@users, event.actor_id)} event={event}>
+                  <TimelineItem icon="➕" actor={Map.get(@users, event.actor_id)} event={event}>
                     added <strong>{event.text}</strong> ({Money.to_string(event.amount)})
                   </TimelineItem>
                 {#match :line_item_removed}
-                  <TimelineItem uri={@uri} icon="✖" actor={Map.get(@users, event.actor_id)} event={event}>
+                  <TimelineItem icon="✖" actor={Map.get(@users, event.actor_id)} event={event}>
                     removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))})
                   </TimelineItem>
                 {#match :payment_processed}
                   <TimelineItem
-                    uri={@uri}
                     icon={Money.Currency.symbol(event.amount)}
                     actor={Map.get(@users, event.actor_id)}
                     event={event}
@@ -74,7 +68,6 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                   </TimelineItem>
                 {#match :refund_processed}
                   <TimelineItem
-                    uri={@uri}
                     icon={Money.Currency.symbol(event.amount)}
                     actor={Map.get(@users, event.actor_id)}
                     event={event}
@@ -82,11 +75,11 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                     refunded {Money.to_string(event.amount)}
                   </TimelineItem>
                 {#match :status}
-                  <TimelineItem uri={@uri} icon="S" actor={Map.get(@users, event.actor_id)} event={event}>
+                  <TimelineItem icon="S" actor={Map.get(@users, event.actor_id)} event={event}>
                     changed the status to <strong>{Common.humanize_status(event.status)}</strong>
                   </TimelineItem>
                 {#match :title_changed}
-                  <TimelineItem uri={@uri} icon="T" actor={Map.get(@users, event.actor_id)} event={event}>
+                  <TimelineItem icon="T" actor={Map.get(@users, event.actor_id)} event={event}>
                     changed the title <span class="line-through">{event.text}</span> {@commission.title}
                   </TimelineItem>
               {/case}

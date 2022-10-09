@@ -9,7 +9,7 @@ defmodule BanchanWeb.CommissionLive.Components.TimelineItem do
   prop actor, :struct, required: true
   prop event, :struct, required: true
   prop icon, :string, default: ""
-  prop uri, :string, required: true
+  prop uri, :string, from_context: :uri
 
   slot default
 

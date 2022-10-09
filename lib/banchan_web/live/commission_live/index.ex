@@ -96,6 +96,12 @@ defmodule BanchanWeb.CommissionLive do
           assign(socket, commission: nil, users: %{}, current_user_member?: false)
       end
 
+    socket =
+      Context.put(socket,
+        current_user_member?: socket.assigns.current_user_member?,
+        uri: uri
+      )
+
     {:noreply, socket |> assign(:uri, uri)}
   end
 
@@ -430,14 +436,7 @@ defmodule BanchanWeb.CommissionLive do
         </div>
         {#if @commission}
           <div class="basis-full">
-            <Commission
-              id="commission"
-              uri={@uri}
-              users={@users}
-              current_user={@current_user}
-              commission={@commission}
-              current_user_member?={@current_user_member?}
-            />
+            <Commission id="commission" users={@users} commission={@commission} />
           </div>
         {/if}
       </div>

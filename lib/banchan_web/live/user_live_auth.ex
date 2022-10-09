@@ -19,6 +19,8 @@ defmodule BanchanWeb.UserLiveAuth do
         find_current_user(session)
       end)
 
+    socket = Surface.Components.Context.put(socket, current_user: socket.assigns.current_user)
+
     cond do
       auth == :redirect_if_authed && socket.assigns.current_user ->
         {:halt,

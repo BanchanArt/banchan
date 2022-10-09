@@ -29,6 +29,12 @@ defmodule BanchanWeb.StudioLive.Helpers do
       |> assign(studio: studio)
       |> assign(current_user_member?: current_user_member?)
 
+    socket =
+      Surface.Components.Context.put(socket,
+        studio: studio,
+        current_user_member?: current_user_member?
+      )
+
     cond do
       current_member && !current_user_member? &&
           (is_nil(socket.assigns.current_user) || !Accounts.mod?(socket.assigns.current_user)) ->

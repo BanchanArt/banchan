@@ -9,11 +9,11 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
   alias BanchanWeb.Components.Lightbox
 
   prop base_id, :string, required: true
-  prop commission, :struct, required: true
+  prop commission, :struct, from_context: :commission
   prop attachments, :list, required: true
   prop editing, :boolean, default: false
   prop pending_payment, :boolean, default: false
-  prop current_user_member?, :boolean, default: false
+  prop current_user_member?, :boolean, from_context: :current_user_member?
 
   prop open_preview, :event
   prop remove_attachment, :event
