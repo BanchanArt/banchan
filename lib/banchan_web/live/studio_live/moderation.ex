@@ -67,11 +67,6 @@ defmodule BanchanWeb.StudioLive.Moderation do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def handle_event("change", %{"studio" => studio}, socket) do
     changeset =
       Studio.admin_changeset(socket.assigns.studio, studio)
@@ -169,14 +164,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout
-      id="studio-layout"
-      current_user={@current_user}
-      flashes={@flash}
-      studio={@studio}
-      current_user_member?={@current_user_member?}
-      uri={@uri}
-    >
+    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Form as={:studio} for={@changeset} change="change" submit="submit">

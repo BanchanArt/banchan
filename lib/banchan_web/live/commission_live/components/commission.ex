@@ -25,10 +25,9 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   }
 
   prop users, :map, required: true
-  prop current_user, :struct, required: true
-  prop current_user_member?, :boolean, required: true
+  prop current_user, :struct, from_context: :current_user
+  prop current_user_member?, :boolean, from_context: :current_user_member?
   prop commission, :struct, required: true
-  prop uri, :string, required: true
 
   prop subscribed?, :boolean
   prop archived?, :boolean
@@ -61,6 +60,8 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             socket.assigns.current_user_member?
           )
       )
+
+    socket = Context.put(socket, commission: socket.assigns.commission)
 
     {:ok, socket}
   end
@@ -216,12 +217,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               class="rounded-box hover:bg-base-200 p-2 transition-all"
             />
             <div class="divider" />
-            <StatusBox
-              id={@id <> "-status-box"}
-              commission={@commission}
-              current_user={@current_user}
-              current_user_member?={@current_user_member?}
-            />
+            <StatusBox id={@id <> "-status-box"} />
             <div class="divider" />
             <div class="text-lg font-medium">Summary</div>
             <BalanceBox
@@ -232,50 +228,22 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             />
             <Collapse id="summary-details" class="px-2">
               <:header><div class="font-medium">Details:</div></:header>
-              <SummaryEditor
-                id={@id <> "-summary-editor"}
-                current_user={@current_user}
-                current_user_member?={@current_user_member?}
-                commission={@commission}
-                allow_edits={@current_user_member?}
-              />
+              <SummaryEditor id={@id <> "-summary-editor"} allow_edits={@current_user_member?} />
             </Collapse>
             {#if @current_user_member?}
               <div class="divider" />
-              <InvoiceCollapse
-                id={@id <> "-invoice-collapse"}
-                commission={@commission}
-                current_user={@current_user}
-                current_user_member?={@current_user_member?}
-              />
+              <InvoiceCollapse id={@id <> "-invoice-collapse"} />
             {/if}
             <div class="divider" />
-            <UploadsBox
-              id={@id <> "-uploads-box"}
-              current_user={@current_user}
-              current_user_member?={@current_user_member?}
-              commission={@commission}
-            />
+            <UploadsBox id={@id <> "-uploads-box"} />
             {bottom_buttons(assigns, true)}
           </div>
           <div class="divider md:hidden" />
           <div class="flex flex-col md:col-span-2 md:order-1">
-            <Timeline
-              uri={@uri}
-              users={@users}
-              commission={@commission}
-              current_user={@current_user}
-              current_user_member?={@current_user_member?}
-              report_modal_id={@id <> "-report-modal"}
-            />
+            <Timeline users={@users} report_modal_id={@id <> "-report-modal"} />
             <div class="divider" />
             <div class="flex flex-col gap-4">
-              <CommentBox
-                id={@id <> "-comment-box"}
-                commission={@commission}
-                current_user={@current_user}
-                current_user_member?={@current_user_member?}
-              />
+              <CommentBox id={@id <> "-comment-box"} />
             </div>
             {bottom_buttons(assigns, false)}
             {#if @commission.terms}

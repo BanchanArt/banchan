@@ -56,11 +56,6 @@ defmodule BanchanWeb.HomeLive do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def handle_event("search", search, socket) do
     params = []
 
@@ -80,7 +75,7 @@ defmodule BanchanWeb.HomeLive do
   def render(assigns) do
     ~F"""
     {#if @current_user || is_nil(Application.get_env(:banchan, :basic_auth))}
-      <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+      <Layout flashes={@flash}>
         <:hero>
           <div id="carousel-handler" class="flex-grow">
             <Carousel
@@ -172,7 +167,7 @@ defmodule BanchanWeb.HomeLive do
         </div>
       </Layout>
     {#else}
-      <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+      <Layout flashes={@flash}>
         <div id="above-fold" class="md:px-4">
           <div class="min-h-screen hero">
             <div class="hero-content flex flex-col md:flex-row">

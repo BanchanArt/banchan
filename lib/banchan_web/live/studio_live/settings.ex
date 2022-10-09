@@ -45,11 +45,6 @@ defmodule BanchanWeb.StudioLive.Settings do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def handle_event("toggle_subscribed", _, socket) do
     if socket.assigns.subscribed? do
       Notifications.unsubscribe_user!(socket.assigns.current_user, socket.assigns.studio)
@@ -192,16 +187,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout
-      id="studio-layout"
-      current_user={@current_user}
-      flashes={@flash}
-      studio={@studio}
-      current_user_member?={@current_user_member?}
-      tab={:settings}
-      padding={0}
-      uri={@uri}
-    >
+    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:settings} padding={0}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <h2 class="text-xl py-6">Notifications</h2>

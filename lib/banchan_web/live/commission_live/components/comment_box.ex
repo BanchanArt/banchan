@@ -16,9 +16,9 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
     Submit
   }
 
-  prop commission, :struct, required: true
-  prop current_user, :struct, required: true
-  prop current_user_member?, :boolean, required: true
+  prop commission, :struct, from_context: :commission
+  prop current_user, :struct, from_context: :current_user
+  prop current_user_member?, :boolean, from_context: :current_user_member?
 
   data changeset, :struct
   data uploads, :map

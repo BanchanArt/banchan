@@ -22,11 +22,6 @@ defmodule BanchanWeb.StudioLive.Followers do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def handle_event("load_more", _, socket) do
     if socket.assigns.followers.total_entries >
          socket.assigns.followers.page_number * socket.assigns.followers.page_size do
@@ -51,14 +46,7 @@ defmodule BanchanWeb.StudioLive.Followers do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout
-      id="studio-layout"
-      current_user={@current_user}
-      flashes={@flash}
-      studio={@studio}
-      current_user_member?={@current_user_member?}
-      uri={@uri}
-    >
+    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio}>
       <h3 class="p-6 text-semibold text-2xl">Followers</h3>
       <ul class="grid sm:px-2 grid grid-cols-2 sm:gap-2 sm:grid-cols-4 auto-rows-fr">
         {#for user <- @followers}

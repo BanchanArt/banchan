@@ -9,14 +9,9 @@ defmodule BanchanWeb.BetaLive.Confirmation do
   alias BanchanWeb.Components.Layout
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <Layout flashes={@flash}>
       <div id="above-fold" class="md:px-4">
         <div class="min-h-screen hero">
           <div class="hero-content flex flex-col md:flex-row">

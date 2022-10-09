@@ -20,14 +20,9 @@ defmodule BanchanWeb.AccountDisabledLive do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} padding={0} current_user={@current_user} flashes={@flash}>
+    <Layout flashes={@flash} padding={0}>
       <div class="w-full h-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <div class="text-xl">

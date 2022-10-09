@@ -12,13 +12,12 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{FeaturedToggle, FollowerCountLive, TabButton}
 
-  prop current_user, :struct, required: true
-  prop current_user_member?, :boolean, required: true
-  prop flashes, :string, required: true
+  prop current_user, :struct, from_context: :current_user
+  prop current_user_member?, :boolean, from_context: :current_user_member?
   prop studio, :struct, required: true
   prop tab, :atom
-  prop uri, :string, required: true
   prop padding, :integer
+  prop flashes, :any, required: true
 
   data follower_count, :integer, from_context: :follower_count
   data user_following?, :boolean
@@ -72,7 +71,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} padding={@padding} current_user={@current_user} flashes={@flashes}>
+    <Layout flashes={@flashes} padding={@padding}>
       <:hero>
         <section>
           {#if @studio.header_img && !@studio.header_img.pending && !@studio.disable_info}

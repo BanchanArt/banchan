@@ -55,11 +55,6 @@ defmodule BanchanWeb.DenizenLive.Edit do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def handle_event("change", %{"user" => user}, socket) do
     changeset =
       socket.assigns.user
@@ -148,7 +143,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} padding={0} current_user={@current_user} flashes={@flash}>
+    <Layout flashes={@flash} padding={0}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Form class="profile-info" for={@changeset} change="change" submit="submit">

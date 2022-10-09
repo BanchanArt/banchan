@@ -13,11 +13,11 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   alias BanchanWeb.Components.{Button, Modal}
   alias BanchanWeb.Components.Form.{Submit, TextInput}
 
-  prop current_user_member?, :boolean, required: true
-  prop current_user, :struct, required: true
-  prop commission, :struct, required: true
+  prop current_user_member?, :boolean, from_context: :current_user_member?
+  prop current_user, :struct, from_context: :current_user
+  prop commission, :struct, from_context: :commission
   prop event, :struct, required: true
-  prop uri, :string, required: true
+  prop uri, :string, from_context: :uri
 
   # NOTE: We're not actually going to create an event directly. We're just
   # punning off this for the changeset validation.

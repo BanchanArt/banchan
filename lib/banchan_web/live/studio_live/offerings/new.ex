@@ -15,11 +15,6 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
     {:ok, socket |> assign(gallery_images: nil)}
   end
 
-  @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
   def handle_info({:updated_gallery_images, _, images}, socket) do
     {:noreply,
      socket
@@ -29,15 +24,7 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   @impl true
   def render(assigns) do
     ~F"""
-    <Components.StudioLayout
-      id="studio-layout"
-      current_user={@current_user}
-      flashes={@flash}
-      studio={@studio}
-      current_user_member?={@current_user_member?}
-      tab={:shop}
-      uri={@uri}
-    >
+    <Components.StudioLayout id="studio-layout" flashes={@flash} studio={@studio} tab={:shop}>
       <div>
         <div class="p-6 max-w-lg mx-auto">
           <h1 class="text-3xl">New Offering</h1>

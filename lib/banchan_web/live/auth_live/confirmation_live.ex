@@ -13,14 +13,9 @@ defmodule BanchanWeb.ConfirmationLive do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def render(assigns) do
     ~F"""
-    <AuthLayout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <AuthLayout flashes={@flash}>
       <Form class="flex flex-col gap-4" for={:user} submit="submit">
         <h1 class="text-2xl mx-auto">Resend Confirmation</h1>
         <p>Email confirmation will be sent again to this address.</p>

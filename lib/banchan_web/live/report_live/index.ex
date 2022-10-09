@@ -22,7 +22,7 @@ defmodule BanchanWeb.ReportLive.Index do
   ]
 
   @impl true
-  def handle_params(params, uri, socket) do
+  def handle_params(params, _uri, socket) do
     socket =
       socket
       |> assign(
@@ -43,7 +43,7 @@ defmodule BanchanWeb.ReportLive.Index do
         list_reports(socket)
       )
 
-    {:noreply, socket |> assign(uri: uri)}
+    {:noreply, socket}
   end
 
   @impl true
@@ -205,7 +205,7 @@ defmodule BanchanWeb.ReportLive.Index do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <Layout flashes={@flash}>
       <h1 class="text-3xl">Reports</h1>
       <div class="divider" />
       <div class="flex flex-col pt-4">

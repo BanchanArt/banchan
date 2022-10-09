@@ -25,13 +25,12 @@ defmodule BanchanWeb.DenizenLive.Show do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def handle_params(%{"handle" => handle}, uri, socket) do
+  def handle_params(%{"handle" => handle}, _uri, socket) do
     user = Accounts.get_user_by_handle!(handle)
     socket = socket |> assign(user: user)
 
     {:noreply,
      assign(socket,
-       uri: uri,
        studios: list_studios(socket),
        following: Studios.Notifications.following_count(user),
        page_title: "#{user.name} (@#{user.handle})",
@@ -152,7 +151,7 @@ defmodule BanchanWeb.DenizenLive.Show do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout uri={@uri} current_user={@current_user} flashes={@flash}>
+    <Layout flashes={@flash}>
       <:hero>
         <section>
           {#if @user.header_img && !@user.header_img.pending && !@user.disable_info}

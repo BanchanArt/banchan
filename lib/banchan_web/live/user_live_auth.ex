@@ -5,6 +5,8 @@ defmodule BanchanWeb.UserLiveAuth do
   import Phoenix.LiveView
   import Phoenix.Component
 
+  alias Surface.Components.Context
+
   alias Banchan.Accounts
   alias Banchan.Accounts.User
 
@@ -17,6 +19,15 @@ defmodule BanchanWeb.UserLiveAuth do
       |> assign(page_title: "The Co-operative Commissions Platform")
       |> assign_new(:current_user, fn ->
         find_current_user(session)
+      end)
+
+    socket = Context.put(socket, current_user: socket.assigns.current_user)
+
+    socket =
+      socket
+      |> detach_hook(:context_uri_hook, :handle_params)
+      |> attach_hook(:context_uri_hook, :handle_params, fn _params, uri, socket ->
+        {:cont, socket |> assign(uri: uri) |> Context.put(uri: uri)}
       end)
 
     cond do
