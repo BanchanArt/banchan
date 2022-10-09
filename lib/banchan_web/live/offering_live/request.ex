@@ -19,9 +19,8 @@ defmodule BanchanWeb.OfferingLive.Request do
   alias BanchanWeb.Endpoint
 
   @impl true
-  def handle_params(%{"offering_type" => offering_type} = params, uri, socket) do
+  def handle_params(%{"offering_type" => offering_type} = params, _uri, socket) do
     socket = assign_studio_defaults(params, socket, false, true)
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
 
     offering =
       Offerings.get_offering_by_type!(
@@ -64,7 +63,6 @@ defmodule BanchanWeb.OfferingLive.Request do
         {:noreply,
          socket
          |> assign(
-           uri: uri,
            changeset: Commission.creation_changeset(%Commission{}, %{}),
            line_items: default_items,
            offering: offering,
@@ -305,7 +303,7 @@ defmodule BanchanWeb.OfferingLive.Request do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout>
+    <Layout flash={@flash}>
       <h1 class="text-2xl font-bold">Request a Commission</h1>
       <div class="divider" />
       <div class="flex flex-col space-y-2 md:container md:mx-auto p-2">

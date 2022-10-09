@@ -14,7 +14,7 @@ defmodule BanchanWeb.DenizenLive.Index do
   alias BanchanWeb.Components.{Avatar, InfiniteScroll, Layout, UserHandle}
 
   @impl true
-  def handle_params(params, uri, socket) do
+  def handle_params(params, _uri, socket) do
     socket =
       socket
       |> assign(
@@ -31,9 +31,7 @@ defmodule BanchanWeb.DenizenLive.Index do
 
     socket = socket |> assign(results: list_users(socket))
 
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-
-    {:noreply, socket |> assign(uri: uri)}
+    {:noreply, socket}
   end
 
   @impl true
@@ -122,7 +120,7 @@ defmodule BanchanWeb.DenizenLive.Index do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout>
+    <Layout flash={@flash}>
       <h1 class="text-3xl">Users</h1>
       <div class="divider" />
       <div class="flex flex-col pt-4">

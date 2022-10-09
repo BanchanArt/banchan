@@ -32,12 +32,6 @@ defmodule BanchanWeb.SetupMfaLive do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def handle_event("setup_mfa", _, socket) do
     user = socket.assigns.current_user
 
@@ -131,7 +125,7 @@ defmodule BanchanWeb.SetupMfaLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <AuthLayout>
+    <AuthLayout flash={@flash}>
       {#if @qrcode_svg && !@totp_activated}
         <h1 class="text-2xl">Your QR Code</h1>
         <br>

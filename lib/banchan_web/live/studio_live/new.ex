@@ -57,12 +57,6 @@ defmodule BanchanWeb.StudioLive.New do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def handle_event("change", %{"studio" => studio, "_target" => target}, socket) do
     studio =
       if target == ["studio", "name"] do
@@ -100,7 +94,7 @@ defmodule BanchanWeb.StudioLive.New do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout padding={0}>
+    <Layout flash={@flash} padding={0}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-sm w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Form

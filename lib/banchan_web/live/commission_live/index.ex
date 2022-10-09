@@ -25,7 +25,7 @@ defmodule BanchanWeb.CommissionLive do
 
   @impl true
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def handle_params(params, uri, socket) do
+  def handle_params(params, _uri, socket) do
     socket =
       socket
       |> assign(
@@ -99,12 +99,10 @@ defmodule BanchanWeb.CommissionLive do
     socket =
       Context.put(socket,
         commission: socket.assigns.commission,
-        current_user_member?: socket.assigns.current_user_member?,
-        uri: uri,
-        flash: socket.assigns.flash
+        current_user_member?: socket.assigns.current_user_member?
       )
 
-    {:noreply, socket |> assign(:uri, uri)}
+    {:noreply, socket}
   end
 
   @impl true
@@ -371,7 +369,7 @@ defmodule BanchanWeb.CommissionLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout>
+    <Layout flash={@flash}>
       {#if !@commission}
         <h1 class="text-3xl">My Commissions</h1>
         <div class="divider" />

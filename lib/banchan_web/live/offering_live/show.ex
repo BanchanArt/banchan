@@ -29,14 +29,12 @@ defmodule BanchanWeb.OfferingLive.Show do
 
   @impl true
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def handle_params(%{"offering_type" => offering_type} = params, uri, socket) do
+  def handle_params(%{"offering_type" => offering_type} = params, _uri, socket) do
     if socket.assigns[:offering] do
       Notifications.unsubscribe_from_offering_updates(socket.assigns.offering)
     end
 
     socket = assign_studio_defaults(params, socket, false, true)
-
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
 
     offering =
       Offerings.get_offering_by_type!(
@@ -101,7 +99,6 @@ defmodule BanchanWeb.OfferingLive.Show do
         {:noreply,
          socket
          |> assign(
-           uri: uri,
            offering: offering,
            gallery_images: gallery_images,
            line_items: line_items,
@@ -177,7 +174,7 @@ defmodule BanchanWeb.OfferingLive.Show do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout>
+    <Layout flash={@flash}>
       <h1 class="text-3xl">
         {@offering.name}
       </h1>

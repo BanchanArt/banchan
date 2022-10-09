@@ -24,12 +24,6 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
     {:ok, assign(socket, offering: offering, gallery_images: nil)}
   end
 
-  @impl true
-  def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
   def handle_info({:updated_gallery_images, _, images}, socket) do
     {:noreply,
      socket
@@ -39,7 +33,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
   @impl true
   def render(assigns) do
     ~F"""
-    <Components.StudioLayout id="studio-layout" studio={@studio} tab={:shop}>
+    <Components.StudioLayout id="studio-layout" flash={@flash} studio={@studio} tab={:shop}>
       <div>
         <div class="p-6 max-w-lg mx-auto">
           <h1 class="text-3xl">Edit Offering</h1>

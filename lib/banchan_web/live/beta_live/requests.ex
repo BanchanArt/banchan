@@ -14,9 +14,9 @@ defmodule BanchanWeb.BetaLive.Requests do
   alias BanchanWeb.Components.Form.Checkbox
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    socket = socket |> assign(uri: uri, show_sent: false, email_filter: "", page: 1)
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
+  def handle_params(_params, _uri, socket) do
+    socket = socket |> assign(show_sent: false, email_filter: "", page: 1)
+
     {:noreply, socket |> assign(results: list_requests(socket))}
   end
 
@@ -111,7 +111,7 @@ defmodule BanchanWeb.BetaLive.Requests do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout>
+    <Layout flash={@flash}>
       <h1 class="text-3xl">Manage Invite Requests</h1>
       <div class="divider" />
       <div class="flex flex-col md:flex-row md:flex-wrap gap-2">

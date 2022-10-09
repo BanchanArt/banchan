@@ -12,12 +12,6 @@ defmodule BanchanWeb.BetaLive.Signup do
   alias BanchanWeb.Components.Layout
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def handle_event("submit", %{"email" => email}, socket) do
     with {:ok, req} <- Accounts.add_invite_request(email),
          {:ok, _} <- Accounts.deliver_artist_invite_confirmation(req) do
@@ -36,7 +30,7 @@ defmodule BanchanWeb.BetaLive.Signup do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout>
+    <Layout flash={@flash}>
       <div id="above-fold" class="md:px-4 mt-20">
         <div class="min-h-screen hero">
           <div class="hero-content flex flex-col md:flex-row">

@@ -17,6 +17,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   prop studio, :struct, required: true
   prop tab, :atom
   prop padding, :integer
+  prop flash, :any, required: true
 
   data follower_count, :integer, from_context: :follower_count
   data user_following?, :boolean
@@ -70,7 +71,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   def render(assigns) do
     ~F"""
-    <Layout padding={@padding}>
+    <Layout flash={@flash} padding={@padding}>
       <:hero>
         <section>
           {#if @studio.header_img && !@studio.header_img.pending && !@studio.disable_info}

@@ -35,15 +35,9 @@ defmodule BanchanWeb.StudioLive.Index do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def render(assigns) do
     ~F"""
-    <Layout>
+    <Layout flash={@flash}>
       <h1 class="text-3xl">My Studios</h1>
       <div class="divider" />
       <div class="studio-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">

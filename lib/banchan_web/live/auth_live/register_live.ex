@@ -28,12 +28,6 @@ defmodule BanchanWeb.RegisterLive do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def handle_event("change", val, socket) do
     changeset =
       %User{}
@@ -56,7 +50,7 @@ defmodule BanchanWeb.RegisterLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <AuthLayout>
+    <AuthLayout flash={@flash}>
       <Form
         class="flex flex-col gap-4"
         for={@changeset}

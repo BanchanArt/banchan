@@ -37,12 +37,6 @@ defmodule BanchanWeb.StudioLive.Shop do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def handle_info(%{event: "charges_state_changed", payload: enabled?}, socket) do
     {:noreply,
      socket
@@ -159,7 +153,7 @@ defmodule BanchanWeb.StudioLive.Shop do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout id="studio-layout" studio={@studio} tab={:shop}>
+    <StudioLayout flash={@flash} id="studio-layout" studio={@studio} tab={:shop}>
       {#if Studios.charges_enabled?(@studio) && is_nil(@studio.disable_info) && is_nil(@studio.deleted_at) &&
           is_nil(@studio.archived_at)}
         <div

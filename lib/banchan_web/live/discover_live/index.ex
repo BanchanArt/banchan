@@ -11,10 +11,10 @@ defmodule BanchanWeb.DiscoverLive.Index do
   alias BanchanWeb.DiscoverLive.Components.{Offerings, Studios}
 
   @impl true
-  def handle_params(params, uri, socket) do
+  def handle_params(params, _uri, socket) do
     socket = param_filters(socket, params)
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, socket |> assign(uri: uri)}
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -117,7 +117,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
       end
 
     ~F"""
-    <Layout>
+    <Layout flash={@flash}>
       <h1 class="text-3xl">Discover</h1>
       <div class="divider" />
       <div class="tabs tabs-boxed flex flex-nowrap max-w-xl mx-auto">

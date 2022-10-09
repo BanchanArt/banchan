@@ -55,12 +55,6 @@ defmodule BanchanWeb.SettingsLive do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def handle_event("toggle_theme", val, socket) do
     {:noreply,
      socket
@@ -395,7 +389,7 @@ defmodule BanchanWeb.SettingsLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <AuthLayout>
+    <AuthLayout flash={@flash}>
       <h1 class="text-2xl">Account Settings</h1>
       <div class="divider" />
       <h2 class="text-xl">Appearance</h2>

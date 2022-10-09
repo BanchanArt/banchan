@@ -28,15 +28,9 @@ defmodule BanchanWeb.ResetPasswordLive do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def render(assigns) do
     ~F"""
-    <AuthLayout>
+    <AuthLayout flash={@flash}>
       <Form class="flex flex-col gap-4" for={@changeset} change="change" submit="submit">
         <h1 class="text-2xl">Reset Password</h1>
         <TextInput

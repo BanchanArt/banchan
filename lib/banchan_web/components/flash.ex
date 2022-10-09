@@ -4,7 +4,7 @@ defmodule BanchanWeb.Components.Flash do
   """
   use BanchanWeb, :component
 
-  prop flash, :any, from_context: :flash
+  prop flash, :any, required: true
 
   def render(assigns) do
     ~F"""

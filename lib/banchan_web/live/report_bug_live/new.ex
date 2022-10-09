@@ -12,9 +12,8 @@ defmodule BanchanWeb.ReportBugLive.New do
   alias BanchanWeb.Components.Form.{MarkdownInput, Submit, TextInput}
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, assign(socket, uri: uri, report_url: nil)}
+  def handle_params(_params, _uri, socket) do
+    {:noreply, assign(socket, report_url: nil)}
   end
 
   @impl true
@@ -45,7 +44,7 @@ defmodule BanchanWeb.ReportBugLive.New do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout padding={0}>
+    <Layout flash={@flash} padding={0}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-lg w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           {#if @report_url}

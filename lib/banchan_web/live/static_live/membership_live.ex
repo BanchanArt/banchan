@@ -9,15 +9,9 @@ defmodule BanchanWeb.StaticLive.Membership do
   alias BanchanWeb.Components.Layout
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
-    {:noreply, socket |> assign(uri: uri)}
-  end
-
-  @impl true
   def render(assigns) do
     ~F"""
-    <Layout>
+    <Layout flash={@flash}>
       <#Markdown class="prose">
         # Joining Banchan
 

@@ -21,6 +21,13 @@ defmodule BanchanWeb.UserLiveAuth do
 
     socket = Surface.Components.Context.put(socket, current_user: socket.assigns.current_user)
 
+    socket =
+      socket
+      |> detach_hook(:context_uri_hook, :handle_params)
+      |> attach_hook(:context_uri_hook, :handle_params, fn _params, uri, socket ->
+        {:cont, socket |> assign(uri: uri) |> Surface.Components.Context.put(uri: uri)}
+      end)
+
     cond do
       auth == :redirect_if_authed && socket.assigns.current_user ->
         {:halt,
