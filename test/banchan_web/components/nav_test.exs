@@ -10,7 +10,7 @@ defmodule BanchanWeb.Components.SessionTest do
     html =
       render_surface do
         ~F"""
-        <Nav uri="https://example.com" current_user={nil} />
+        <Nav />
         """
       end
 

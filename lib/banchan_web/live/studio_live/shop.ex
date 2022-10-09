@@ -153,7 +153,7 @@ defmodule BanchanWeb.StudioLive.Shop do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout flash={@flash} id="studio-layout" studio={@studio} tab={:shop}>
+    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:shop}>
       {#if Studios.charges_enabled?(@studio) && is_nil(@studio.disable_info) && is_nil(@studio.deleted_at) &&
           is_nil(@studio.archived_at)}
         <div

@@ -10,7 +10,7 @@ defmodule BanchanWeb.Components.NavTest do
     html =
       render_surface do
         ~F"""
-        <Layout uri="https://example.com" current_user={nil} flashes={%{}} />
+        <Layout flashes={%{}} />
         """
       end
 
@@ -23,7 +23,7 @@ defmodule BanchanWeb.Components.NavTest do
     html =
       render_surface do
         ~F"""
-        <Layout uri="https://example.com" current_user={nil} flashes={%{}} />
+        <Layout flashes={%{}} />
         """
       end
 

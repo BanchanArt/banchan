@@ -117,7 +117,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
       end
 
     ~F"""
-    <Layout flash={@flash}>
+    <Layout flashes={@flash}>
       <h1 class="text-3xl">Discover</h1>
       <div class="divider" />
       <div class="tabs tabs-boxed flex flex-nowrap max-w-xl mx-auto">

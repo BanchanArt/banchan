@@ -186,7 +186,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout flash={@flash} id="studio-layout" studio={@studio} tab={:payouts}>
+    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:payouts}>
       <div class="flex flex-col grow max-h-full">
         <div class="flex flex-row grow md:grow-0">
           <div class={"flex flex-col basis-full md:basis-1/4 px-4 sidebar", "hidden md:flex": @payout_id}>

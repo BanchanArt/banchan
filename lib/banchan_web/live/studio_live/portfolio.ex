@@ -111,7 +111,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout flash={@flash} id="studio-layout" studio={@studio} tab={:portfolio}>
+    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:portfolio}>
       {#if @current_user_member?}
         <div class="mx-auto py-2">
           <Form for={:portfolio} change="change" submit="submit">

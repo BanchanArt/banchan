@@ -120,7 +120,7 @@ defmodule BanchanWeb.DenizenLive.Index do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flash={@flash}>
+    <Layout flashes={@flash}>
       <h1 class="text-3xl">Users</h1>
       <div class="divider" />
       <div class="flex flex-col pt-4">

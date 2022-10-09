@@ -50,7 +50,7 @@ defmodule BanchanWeb.RegisterLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <AuthLayout flash={@flash}>
+    <AuthLayout flashes={@flash}>
       <Form
         class="flex flex-col gap-4"
         for={@changeset}

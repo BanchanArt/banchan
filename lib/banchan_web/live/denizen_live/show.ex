@@ -151,7 +151,7 @@ defmodule BanchanWeb.DenizenLive.Show do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flash={@flash}>
+    <Layout flashes={@flash}>
       <:hero>
         <section>
           {#if @user.header_img && !@user.header_img.pending && !@user.disable_info}

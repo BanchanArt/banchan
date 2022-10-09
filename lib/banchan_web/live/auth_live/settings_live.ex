@@ -389,7 +389,7 @@ defmodule BanchanWeb.SettingsLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <AuthLayout flash={@flash}>
+    <AuthLayout flashes={@flash}>
       <h1 class="text-2xl">Account Settings</h1>
       <div class="divider" />
       <h2 class="text-xl">Appearance</h2>

@@ -11,7 +11,7 @@ defmodule BanchanWeb.StaticLive.AboutUs do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flash={@flash}>
+    <Layout flashes={@flash}>
       <#Markdown class="prose">
         # About Banchan Art
 

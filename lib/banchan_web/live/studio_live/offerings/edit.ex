@@ -33,7 +33,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
   @impl true
   def render(assigns) do
     ~F"""
-    <Components.StudioLayout id="studio-layout" flash={@flash} studio={@studio} tab={:shop}>
+    <Components.StudioLayout id="studio-layout" flashes={@flash} studio={@studio} tab={:shop}>
       <div>
         <div class="p-6 max-w-lg mx-auto">
           <h1 class="text-3xl">Edit Offering</h1>

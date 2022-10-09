@@ -369,7 +369,7 @@ defmodule BanchanWeb.CommissionLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flash={@flash}>
+    <Layout flashes={@flash}>
       {#if !@commission}
         <h1 class="text-3xl">My Commissions</h1>
         <div class="divider" />

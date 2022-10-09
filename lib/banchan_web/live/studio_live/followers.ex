@@ -46,7 +46,7 @@ defmodule BanchanWeb.StudioLive.Followers do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout flash={@flash} id="studio-layout" studio={@studio}>
+    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio}>
       <h3 class="p-6 text-semibold text-2xl">Followers</h3>
       <ul class="grid sm:px-2 grid grid-cols-2 sm:gap-2 sm:grid-cols-4 auto-rows-fr">
         {#for user <- @followers}

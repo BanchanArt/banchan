@@ -11,7 +11,7 @@ defmodule BanchanWeb.StaticLive.Membership do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flash={@flash}>
+    <Layout flashes={@flash}>
       <#Markdown class="prose">
         # Joining Banchan
 

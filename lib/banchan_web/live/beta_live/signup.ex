@@ -30,7 +30,7 @@ defmodule BanchanWeb.BetaLive.Signup do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flash={@flash}>
+    <Layout flashes={@flash}>
       <div id="above-fold" class="md:px-4 mt-20">
         <div class="min-h-screen hero">
           <div class="hero-content flex flex-col md:flex-row">

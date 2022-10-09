@@ -94,7 +94,7 @@ defmodule BanchanWeb.StudioLive.New do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flash={@flash} padding={0}>
+    <Layout flashes={@flash} padding={0}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-sm w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Form

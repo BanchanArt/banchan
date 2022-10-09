@@ -303,7 +303,7 @@ defmodule BanchanWeb.OfferingLive.Request do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flash={@flash}>
+    <Layout flashes={@flash}>
       <h1 class="text-2xl font-bold">Request a Commission</h1>
       <div class="divider" />
       <div class="flex flex-col space-y-2 md:container md:mx-auto p-2">

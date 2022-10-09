@@ -13,7 +13,7 @@ defmodule BanchanWeb.Components.Layout do
   alias BanchanWeb.Components.{Flash, Nav}
 
   prop current_user, :any, from_context: :current_user
-  prop flash, :any, required: true
+  prop flashes, :any, required: true
   prop padding, :integer, default: 4
 
   slot hero
@@ -36,7 +36,7 @@ defmodule BanchanWeb.Components.Layout do
               ⚠️You need to verify your email address before you can do certain things on the site, such as submit new commissions. Please check your email or <LiveRedirect class="link" to={Routes.confirmation_path(Endpoint, :show)}>click here to resend your confirmation</LiveRedirect>.⚠️
             </div>
           </div>
-          <Flash flash={@flash}/>
+          <Flash flashes={@flashes} />
           <#slot />
         </section>
         <footer class="footer p-10 shadow-sm">

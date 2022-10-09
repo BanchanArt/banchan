@@ -37,7 +37,7 @@ defmodule BanchanWeb.ReactivateLive do
       end
 
     ~F"""
-    <AuthLayout flash={@flash}>
+    <AuthLayout flashes={@flash}>
       <h1 class="text-2xl mx-auto">Reactivate Your Account</h1>
       <p>Your account is currently deactivated and will be fully deleted in {days}.</p>
       <Button click="reactivate" class="w-full" label="Reactivate" />

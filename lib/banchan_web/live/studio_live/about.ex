@@ -19,7 +19,7 @@ defmodule BanchanWeb.StudioLive.About do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout flash={@flash} id="studio-layout" studio={@studio} tab={:about}>
+    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:about}>
       <div class="w-full mx-auto md:bg-base-300">
         <div class="max-w-prose w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Markdown content={@studio.about} />

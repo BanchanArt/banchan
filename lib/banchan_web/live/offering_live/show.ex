@@ -174,7 +174,7 @@ defmodule BanchanWeb.OfferingLive.Show do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flash={@flash}>
+    <Layout flashes={@flash}>
       <h1 class="text-3xl">
         {@offering.name}
       </h1>
