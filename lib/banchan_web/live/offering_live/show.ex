@@ -36,7 +36,8 @@ defmodule BanchanWeb.OfferingLive.Show do
 
     socket = assign_studio_defaults(params, socket, false, true)
 
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
+
     offering =
       Offerings.get_offering_by_type!(
         socket.assigns.current_user,

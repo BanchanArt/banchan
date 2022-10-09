@@ -36,7 +36,7 @@ defmodule BanchanWeb.StudioLive.Index do
 
   @impl true
   def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
     {:noreply, socket |> assign(uri: uri)}
   end
 

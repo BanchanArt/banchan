@@ -46,7 +46,7 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   @impl true
   def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
     {:noreply, socket |> assign(uri: uri)}
   end
 
@@ -193,12 +193,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout
-      id="studio-layout"
-      studio={@studio}
-      tab={:settings}
-      padding={0}
-    >
+    <StudioLayout id="studio-layout" studio={@studio} tab={:settings} padding={0}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <h2 class="text-xl py-6">Notifications</h2>

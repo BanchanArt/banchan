@@ -28,7 +28,8 @@ defmodule BanchanWeb.DenizenLive.Show do
   def handle_params(%{"handle" => handle}, uri, socket) do
     user = Accounts.get_user_by_handle!(handle)
     socket = socket |> assign(user: user)
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
+
     {:noreply,
      assign(socket,
        uri: uri,

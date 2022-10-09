@@ -31,7 +31,7 @@ defmodule BanchanWeb.DenizenLive.Index do
 
     socket = socket |> assign(results: list_users(socket))
 
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
 
     {:noreply, socket |> assign(uri: uri)}
   end

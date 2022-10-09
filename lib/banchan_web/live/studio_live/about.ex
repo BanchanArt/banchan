@@ -18,18 +18,14 @@ defmodule BanchanWeb.StudioLive.About do
 
   @impl true
   def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
     {:noreply, socket |> assign(uri: uri)}
   end
 
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout
-      id="studio-layout"
-      studio={@studio}
-      tab={:about}
-    >
+    <StudioLayout id="studio-layout" studio={@studio} tab={:about}>
       <div class="w-full mx-auto md:bg-base-300">
         <div class="max-w-prose w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Markdown content={@studio.about} />

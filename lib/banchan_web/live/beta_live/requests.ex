@@ -16,7 +16,7 @@ defmodule BanchanWeb.BetaLive.Requests do
   @impl true
   def handle_params(_params, uri, socket) do
     socket = socket |> assign(uri: uri, show_sent: false, email_filter: "", page: 1)
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
     {:noreply, socket |> assign(results: list_requests(socket))}
   end
 

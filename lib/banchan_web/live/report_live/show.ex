@@ -14,7 +14,7 @@ defmodule BanchanWeb.ReportLive.Show do
 
   @impl true
   def handle_params(%{"id" => report_id}, uri, socket) do
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
     report = Reports.get_report_by_id!(report_id)
 
     {:noreply,

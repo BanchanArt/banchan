@@ -17,7 +17,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   @impl true
   def handle_params(params, uri, socket) do
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
+
     if socket.redirected do
       {:noreply, socket}
     else
@@ -188,11 +189,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout
-      id="studio-layout"
-      studio={@studio}
-      tab={:payouts}
-    >
+    <StudioLayout id="studio-layout" studio={@studio} tab={:payouts}>
       <div class="flex flex-col grow max-h-full">
         <div class="flex flex-row grow md:grow-0">
           <div class={"flex flex-col basis-full md:basis-1/4 px-4 sidebar", "hidden md:flex": @payout_id}>

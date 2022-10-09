@@ -168,7 +168,7 @@ defmodule BanchanWeb.CommissionLive do
 
     commission = %{socket.assigns.commission | events: events}
     Commission.events_updated("commission")
-      socket = Context.put(socket, commission: commission)
+    socket = Context.put(socket, commission: commission)
     {:noreply, assign(socket, commission: commission)}
   end
 

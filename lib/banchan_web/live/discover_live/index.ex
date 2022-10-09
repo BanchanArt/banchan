@@ -13,7 +13,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
   @impl true
   def handle_params(params, uri, socket) do
     socket = param_filters(socket, params)
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
     {:noreply, socket |> assign(uri: uri)}
   end
 

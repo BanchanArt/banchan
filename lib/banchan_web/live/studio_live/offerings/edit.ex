@@ -26,7 +26,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
 
   @impl true
   def handle_params(_params, uri, socket) do
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
     {:noreply, socket |> assign(uri: uri)}
   end
 
@@ -39,11 +39,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
   @impl true
   def render(assigns) do
     ~F"""
-    <Components.StudioLayout
-      id="studio-layout"
-      studio={@studio}
-      tab={:shop}
-    >
+    <Components.StudioLayout id="studio-layout" studio={@studio} tab={:shop}>
       <div>
         <div class="p-6 max-w-lg mx-auto">
           <h1 class="text-3xl">Edit Offering</h1>

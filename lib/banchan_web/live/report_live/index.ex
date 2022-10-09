@@ -23,7 +23,8 @@ defmodule BanchanWeb.ReportLive.Index do
 
   @impl true
   def handle_params(params, uri, socket) do
-    socket = Context.put(socket, uri: uri)
+    socket = Context.put(socket, uri: uri, flash: socket.assigns.flash)
+
     socket =
       socket
       |> assign(
