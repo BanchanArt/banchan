@@ -54,7 +54,7 @@ defmodule BanchanWeb.Components.Notifications do
            old_parsed_uri
            | query:
                case Map.delete(URI.decode_query(old_parsed_uri.query || ""), "notification_ref") do
-                map when map == %{} ->
+                 map when map == %{} ->
                    nil
 
                  other ->

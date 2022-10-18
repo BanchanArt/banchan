@@ -11,7 +11,7 @@ defmodule Banchan.StripeAPI do
 
   @impl Banchan.StripeAPI.Base
   def retrieve_account(id) do
-    Stripe.Account.retrieve([account: id])
+    Stripe.Account.retrieve(account: id)
   end
 
   @impl Banchan.StripeAPI.Base
