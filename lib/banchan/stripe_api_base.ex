@@ -4,15 +4,17 @@ defmodule Banchan.StripeAPI.Base do
   should be directed throuh here. This makes it possible to mock responses for
   unit testing.
   """
-  @callback create_account(params :: %{}) ::
+  @type params :: map()
+
+  @callback create_account(params) ::
               {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
   @callback retrieve_account(id :: Stripe.id()) ::
               {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
-  @callback create_account_link(params :: %{}) ::
+  @callback create_account_link(params) ::
               {:ok, Stripe.AccountLink.t()} | {:error, Stripe.Error.t()}
   @callback retrieve_balance(opts :: Stripe.options()) ::
               {:ok, Stripe.Balance.t()} | {:error, Stripe.Error.t()}
-  @callback create_payout(params :: %{}, opts :: Stripe.options()) ::
+  @callback create_payout(params, opts :: Stripe.options()) ::
               {:ok, Stripe.Payout.t()} | {:error, Stripe.Error.t()}
   @callback cancel_payout(payout :: Stripe.id(), opts :: Stripe.options()) ::
               {:ok, Stripe.Payout.t()} | {:error, Stripe.Error.t()}
@@ -20,7 +22,7 @@ defmodule Banchan.StripeAPI.Base do
               {:ok, Stripe.Session.t()} | {:error, Stripe.Error.t()}
   @callback retrieve_payment_intent(
               intent :: Stripe.id() | Stripe.PaymentIntent.t(),
-              params :: %{},
+              params,
               Stripe.options()
             ) :: {:ok, Stripe.PaymentIntent.t()} | {:error, Stripe.Error.t()}
   @callback retrieve_balance_transaction(id :: Stripe.id(), opts :: Stripe.options()) ::
@@ -31,19 +33,19 @@ defmodule Banchan.StripeAPI.Base do
               signature :: String.t(),
               endpoint_secret :: String.t()
             ) :: {:ok, Stripe.Event.t()} | {:error, Stripe.Error.t()}
-  @callback create_refund(params :: %{}, opts :: Stripe.options()) ::
+  @callback create_refund(params, opts :: Stripe.options()) ::
               {:ok, Stripe.Refund.t()} | {:error, Stripe.Error.t()}
   @callback retrieve_session(id :: Stripe.id(), opts :: Stripe.options()) ::
               {:ok, Stripe.Session.t()} | {:error, Stripe.Error.t()}
   @callback retrieve_transfer(id :: Stripe.id()) ::
               {:ok, Stripe.Transfer.t()} | {:error, Stripe.Error.t()}
-  @callback update_account(id :: Stripe.id(), params :: %{}) ::
+  @callback update_account(id :: Stripe.id(), params) ::
               {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
-  @callback create_login_link(id :: Stripe.id(), params :: %{}) ::
+  @callback create_login_link(id :: Stripe.id(), params) ::
               {:ok, Stripe.LoginLink.t()} | {:error, Stripe.Error.t()}
   @callback delete_account(id :: Stripe.id()) ::
               {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
-  @callback create_price(params :: %{}) :: {:ok, Stripe.Price.t()} | {:error, Stripe.Error.t()}
+  @callback create_price(params) :: {:ok, Stripe.Price.t()} | {:error, Stripe.Error.t()}
   @callback retrieve_charge(id :: Stripe.id()) ::
               {:ok, Stripe.Charge.t()} | {:error, Stripe.Error.t()}
   @callback create_apple_pay_domain(id :: Stripe.id(), domain :: binary()) ::
