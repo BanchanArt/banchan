@@ -88,7 +88,7 @@ defmodule Banchan.MixProject do
       {:scrivener_ecto, "~> 2.7.0"},
       {:sentry, "~> 8.0"},
       {:slugify, "~> 1.3.1"},
-      {:stripity_stripe, "~> 2.15.0"},
+      {:stripity_stripe, "~> 2.17.2"},
       {:surface, "~> 0.9.1"},
       {:surface_catalogue, "~> 0.5.2"},
       {:surface_markdown, "~> 0.5.1"},
