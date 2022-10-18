@@ -356,7 +356,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       assert page_live
              |> element("#available button")
-             |> render() =~ "spinner"
+             |> render() =~ "Pay Out"
 
       Notifications.wait_for_notifications()
 
