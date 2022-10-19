@@ -5,7 +5,7 @@ defmodule Banchan.StudiosTest do
   use Banchan.DataCase, async: true
   use Bamboo.Test
 
-  import Mox
+  import Hammox
 
   import ExUnit.CaptureLog
 

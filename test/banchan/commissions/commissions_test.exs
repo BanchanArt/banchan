@@ -5,7 +5,7 @@ defmodule Banchan.CommissionsTest do
   use Banchan.DataCase, async: true
 
   import ExUnit.CaptureLog
-  import Mox
+  import Hammox
 
   import Banchan.AccountsFixtures
   import Banchan.CommissionsFixtures

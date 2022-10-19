@@ -5,7 +5,7 @@ defmodule Banchan.CommissionsFixtures do
   """
   @dialyzer [:no_return]
 
-  import Mox
+  import Hammox
 
   import Ecto.Query
 
@@ -58,7 +58,39 @@ defmodule Banchan.CommissionsFixtures do
     sess = %Stripe.Session{
       id: sess_id,
       url: checkout_uri,
-      payment_intent: "stripe-mock-payment-intent-id#{System.unique_integer()}"
+      line_items: [],
+      shipping_address_collection: %{allowed_countries: []},
+      shipping: %{name: "home", address: %{
+        carrier: "",
+        name: "address_name",
+        eta: nil,
+          phone: nil,
+          status: nil,
+          tracking_number: nil,
+          tracking_url: nil,
+        address: %{
+          city: nil,
+          country: nil,
+          line1: nil,
+          line2: nil,
+          postal_code: nil,
+          state: nil
+      }}},
+      billing_address_collection: "address",
+      payment_method_types: [],
+      payment_status: "paid",
+      object: "TODO",
+      locale: false,
+      livemode: false,
+      customer_email: "id#{System.unique_integer()}@.email.com",
+      client_reference_id: "id#{System.unique_integer()}",
+      payment_intent: "stripe-mock-payment-intent-id#{System.unique_integer()}",
+      automatic_tax: %{enabled: true, status: nil},
+      cancel_url: false,
+      success_url: "callback_url",
+      mode: "payment",
+      currency: "usd",
+      metadata: %{}
     }
 
     Banchan.StripeAPI.Mock

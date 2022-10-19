@@ -5,7 +5,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
   use BanchanWeb.ConnCase, async: true
 
   import ExUnit.CaptureLog
-  import Mox
+  import Hammox
   import Phoenix.LiveViewTest
 
   import Banchan.CommissionsFixtures

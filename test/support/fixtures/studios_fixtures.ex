@@ -5,7 +5,7 @@ defmodule Banchan.StudiosFixtures do
   """
   @dialyzer [:no_return]
 
-  import Mox
+  import Hammox
 
   alias Banchan.Studios.Studio
 
@@ -27,7 +27,25 @@ defmodule Banchan.StudiosFixtures do
   defp stripe_account_mock do
     Banchan.StripeAPI.Mock
     |> expect(:create_account, fn _ ->
-      {:ok, %Stripe.Account{id: "stripe-mock-id#{System.unique_integer()}"}}
+      {:ok,
+       %Stripe.Account{
+         id: "stripe-mock-id#{System.unique_integer()}",
+         charges_enabled: false,
+         controller: %{},
+         country: "US",
+         default_currency: "USD",
+         details_submitted: false,
+         metadata: %{},
+           object: "idk",
+         type: "some type",
+         external_accounts: %Stripe.List{
+           data: [],
+           has_more: false,
+           object: "idk",
+           total_count: nil,
+           url: "url"
+         }
+       }}
     end)
     |> expect(:create_apple_pay_domain, fn _, _ ->
       {:ok, %{}}

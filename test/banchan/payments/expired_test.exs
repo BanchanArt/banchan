@@ -4,7 +4,7 @@ defmodule Banchan.PaymentsTest.Expired do
   """
   use Banchan.DataCase, async: true
 
-  import Mox
+  import Hammox
 
   import Banchan.CommissionsFixtures
 
