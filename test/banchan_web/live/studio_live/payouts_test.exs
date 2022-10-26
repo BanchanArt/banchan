@@ -425,18 +425,20 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
              |> element(".payout-rows")
              |> render() =~ "$391.24"
 
-      logged_message = capture_log([async: true, level: :info], fn ->
-        assert page_live
-               |> element("#available button")
-               # disabled immediately
-               |> render_click() =~ "disabled=\"disabled\""
+      logged_message =
+        capture_log([async: true, level: :info], fn ->
+          assert page_live
+                 |> element("#available button")
+                 # disabled immediately
+                 |> render_click() =~ "disabled=\"disabled\""
 
-        Notifications.wait_for_notifications()
+          Notifications.wait_for_notifications()
 
-        assert page_live
-               |> element(".flash-container")
-               |> render() =~ "Payout failed: external message"
-      end)
+          assert page_live
+                 |> element(".flash-container")
+                 |> render() =~ "Payout failed: external message"
+        end)
+
       assert logged_message =~ "Failed to create Stripe payout"
       assert logged_message =~ "whatever"
 
