@@ -93,3 +93,4 @@ The undersigned have all agreed to this CLA:
 * Richard Parachini (@LuxBrush)
 * April Gonçalves (@cyberglot)
 * Marlus Saraiva (@msaraiva)
+* Daniel Kukula (@dkuku)
