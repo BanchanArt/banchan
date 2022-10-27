@@ -872,7 +872,6 @@ defmodule Banchan.Studios do
       :histories,
       fn _ ->
         lifted_at = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-        actor_id = actor && actor.id
 
         from(h in StudioDisableHistory,
           where: h.studio_id == ^studio.id and is_nil(h.lifted_at),
@@ -880,7 +879,7 @@ defmodule Banchan.Studios do
           update: [
             set: [
               lifted_at: ^lifted_at,
-              lifted_by_id: ^actor_id,
+              lifted_by_id: ^actor.id,
               lifted_reason: ^reason
             ]
           ]

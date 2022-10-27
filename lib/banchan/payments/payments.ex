@@ -426,7 +426,7 @@ defmodule Banchan.Payments do
         %Payout{
           amount: total,
           studio_id: studio.id,
-          actor_id: actor && actor.id,
+          actor_id: actor.id,
           invoices: invoices
         }
       end,

@@ -356,7 +356,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       assert page_live
              |> element("#available button")
-             |> render() =~ "spinner"
+             |> render() =~ "Pay Out"
 
       Notifications.wait_for_notifications()
 
@@ -425,21 +425,22 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
              |> element(".payout-rows")
              |> render() =~ "$391.24"
 
-      # TODO: This silences the console, but I couldn't get it to actually
-      # capture the log output. As of this comment, there's definitely a line
-      # in the logs about this, though!
-      capture_log([async: true], fn ->
-        assert page_live
-               |> element("#available button")
-               # disabled immediately
-               |> render_click() =~ "disabled=\"disabled\""
+      logged_message =
+        capture_log([async: true, level: :info], fn ->
+          assert page_live
+                 |> element("#available button")
+                 # disabled immediately
+                 |> render_click() =~ "disabled=\"disabled\""
 
-        Notifications.wait_for_notifications()
+          Notifications.wait_for_notifications()
 
-        assert page_live
-               |> element(".flash-container")
-               |> render() =~ "Payout failed: external message"
-      end)
+          assert page_live
+                 |> element(".flash-container")
+                 |> render() =~ "Payout failed: external message"
+        end)
+
+      assert logged_message =~ "Failed to create Stripe payout"
+      assert logged_message =~ "whatever"
 
       assert page_live
              |> element(".payout-row .amount")
