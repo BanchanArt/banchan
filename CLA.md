@@ -94,3 +94,4 @@ The undersigned have all agreed to this CLA:
 * April Gonçalves (@cyberglot)
 * Marlus Saraiva (@msaraiva)
 * Daniel Kukula (@dkuku)
+* James Bromley (@jayber)
