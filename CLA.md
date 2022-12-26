@@ -95,3 +95,4 @@ The undersigned have all agreed to this CLA:
 * Marlus Saraiva (@msaraiva)
 * Daniel Kukula (@dkuku)
 * James Bromley (@jayber)
+* Ryan Shipp (@rshipp)
