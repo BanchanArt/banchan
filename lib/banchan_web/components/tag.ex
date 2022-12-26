@@ -22,8 +22,8 @@ defmodule BanchanWeb.Components.Tag do
         {@tag}
       </LiveRedirect>
     {#else}
-      <div class="rounded-full badge badge-outline badge-primary font-semibold uppercase no-underline">
-        {@tag}
+      <div class="rounded-full badge badge-outline badge-primary font-semibold uppercase no-underline max-w-full">
+        <p class="truncate" title={@tag}>{@tag}</p>
       </div>
     {/if}
     """
