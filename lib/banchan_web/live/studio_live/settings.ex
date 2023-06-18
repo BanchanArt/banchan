@@ -286,7 +286,7 @@ defmodule BanchanWeb.StudioLive.Settings do
             <:header>
               <div class="font-semibold text-error">Delete</div>
             </:header>
-            <Form class="flex flex-col gap-4" for={:delete} as={:delete} submit="delete_studio">
+            <Form class="flex flex-col gap-4" for={%{}} as={:delete} submit="delete_studio">
               <div class="prose">
                 <p>This operation <strong>can't be reversed</strong>. The studio's handle will also not be available for the next 30 days.</p>
                 <p>You will no longer have access to payout records, and all current open invoices will be canceled.</p>

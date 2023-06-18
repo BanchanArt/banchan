@@ -94,10 +94,6 @@ defmodule BanchanWeb.RegisterLive do
         </div>
         <div class="flex flex-row gap-2 justify-center">
           <Link
-            class="btn bg-twitter flex-1 text-xl"
-            to={Routes.user_o_auth_path(Endpoint, :request, "twitter")}
-          ><i class="px-2 fa-brands fa-twitter" /></Link>
-          <Link
             class="btn bg-discord flex-1 text-xl"
             to={Routes.user_o_auth_path(Endpoint, :request, "discord")}
           ><i class="px-2 fa-brands fa-discord" /></Link>

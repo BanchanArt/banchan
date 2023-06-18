@@ -1,6 +1,7 @@
 defmodule BanchanWeb.UserSessionControllerTest do
   use BanchanWeb.ConnCase, async: true
 
+  alias Phoenix.Flash
   import Phoenix.LiveViewTest
 
   import Banchan.AccountsFixtures
@@ -182,14 +183,14 @@ defmodule BanchanWeb.UserSessionControllerTest do
       conn = conn |> log_in_user(user) |> delete(Routes.user_session_path(conn, :delete))
       assert redirected_to(conn) == "/"
       refute get_session(conn, :user_token)
-      assert get_flash(conn, :info) =~ "Logged out successfully"
+      assert Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"
     end
 
     test "succeeds even if the user is not logged in", %{conn: conn} do
       conn = delete(conn, Routes.user_session_path(conn, :delete))
       assert redirected_to(conn) == "/"
       refute get_session(conn, :user_token)
-      assert get_flash(conn, :info) =~ "Logged out successfully"
+      assert Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"
     end
   end
 end

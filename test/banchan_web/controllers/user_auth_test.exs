@@ -1,6 +1,8 @@
 defmodule BanchanWeb.UserAuthTest do
   use BanchanWeb.ConnCase, async: true
 
+  alias Phoenix.Flash
+
   alias Banchan.Accounts
   alias BanchanWeb.UserAuth
   import Banchan.AccountsFixtures
@@ -136,7 +138,7 @@ defmodule BanchanWeb.UserAuthTest do
       conn = conn |> fetch_flash() |> UserAuth.require_authenticated_user([])
       assert conn.halted
       assert redirected_to(conn) == Routes.login_path(conn, :new)
-      assert get_flash(conn, :error) == "You must log in to access this page."
+      assert Flash.get(conn.assigns.flash, :error) == "You must log in to access this page."
     end
 
     test "stores the path to redirect to on GET", %{conn: conn} do

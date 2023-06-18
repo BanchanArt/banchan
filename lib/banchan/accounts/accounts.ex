@@ -343,32 +343,6 @@ defmodule Banchan.Accounts do
     User.registration_changeset(user, attrs, hash_password: false)
   end
 
-  @doc """
-  Either find or create a user based on Ueberauth OAuth credentials.
-  """
-  def handle_oauth(%Auth{provider: :twitter} = auth) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.one(:user, from(u in User, where: u.twitter_uid == ^auth.uid))
-    |> Ecto.Multi.run(:updated_user, fn _, %{user: user} ->
-      case user do
-        %User{} = user ->
-          {:ok, user}
-
-        nil ->
-          create_user_from_twitter(auth)
-          |> add_oauth_pfp(auth)
-      end
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{updated_user: user}} ->
-        {:ok, user}
-
-      {:error, _, error, _} ->
-        {:error, error}
-    end
-  end
-
   def handle_oauth(%Auth{provider: :discord} = auth) do
     Ecto.Multi.new()
     |> Ecto.Multi.one(:user, from(u in User, where: u.discord_uid == ^auth.uid))
@@ -417,61 +391,6 @@ defmodule Banchan.Accounts do
 
   def handle_oauth(%Auth{}) do
     {:error, :unsupported}
-  end
-
-  defp create_user_from_twitter(%Auth{} = auth) do
-    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-    pw = random_password()
-
-    attrs = %{
-      twitter_uid: auth.uid,
-      email: auth.info.email,
-      handle: auth.info.nickname,
-      name: auth.info.name,
-      bio: auth.info.description,
-      twitter_handle: auth.info.nickname,
-      password: pw,
-      password_confirmation: pw,
-      confirmed_at: now
-    }
-
-    case %User{}
-         |> User.registration_oauth_changeset(attrs)
-         |> Repo.insert() do
-      {:ok, user} ->
-        {:ok, user}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        changeset.errors
-        |> Enum.reduce(attrs, fn {field, _}, acc ->
-          case field do
-            :handle ->
-              Map.put(acc, :handle, "user#{:rand.uniform(100_000_000)}")
-
-            :bio ->
-              Map.put(
-                acc,
-                :bio,
-                Ecto.Changeset.get_change(changeset, :bio) |> binary_part(0, 160)
-              )
-
-            :name ->
-              Map.put(
-                acc,
-                :name,
-                Ecto.Changeset.get_change(changeset, :name) |> binary_part(0, 32)
-              )
-
-            :email ->
-              Map.put(acc, :email, nil)
-
-            _ ->
-              acc
-          end
-        end)
-        |> then(&User.registration_oauth_changeset(%User{}, &1))
-        |> Repo.insert()
-    end
   end
 
   defp create_user_from_discord(%Auth{} = auth) do

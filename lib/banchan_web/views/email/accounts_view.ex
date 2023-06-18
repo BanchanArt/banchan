@@ -126,7 +126,7 @@ defmodule BanchanWeb.Email.AccountsView do
     ~F"""
     <p>You've successfully signed up for the Banchan Art beta waiting list.</p>
     <p>When it's your turn, we'll send you an email with a link you can use to flag your Banchan account as an artist, which will let you make your own studios and start accepting commissions.</p>
-    <p>In the meantime, you can <a href="https://discord.gg/FUkTHjGKJF">Join us on Discord</a> or <a href="https://twitter.com/BanchanArt">Follow us on Twitter</a> to stay up to date on the latest news.</p>
+    <p>In the meantime, you can <a href="https://discord.gg/FUkTHjGKJF">join us on Discord</a> or follow us on <a href="https://mastodon.art/@Banchan">Mastodon</a> or <a href="https://twitter.com/BanchanArt">Twitter</a> to stay up to date on the latest news.</p>
     <p>If you didn't sign up for this, or aren't expecting someone else to invite you, please ignore this.</p>
     <p>- The Banchan Art Team</p>
     """

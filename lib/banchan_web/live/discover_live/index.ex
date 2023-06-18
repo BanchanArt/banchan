@@ -132,7 +132,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
         </div>
       </div>
       <div class="form-control mx-auto max-w-3xl py-4 w-full md:w-content">
-        <Form for={:search} change="change" submit="submit" class="w-full">
+        <Form for={%{}} as={:search} change="change" submit="submit" class="w-full">
           <div class="flex flex-row flex-nowrap grow w-full">
             {#if @type == "studios"}
               <Select

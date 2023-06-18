@@ -63,7 +63,7 @@ defmodule BanchanWeb.BetaLive.Signup do
                   </div>
                   <div>(or at least the Closed Beta)</div>
                 </div>
-                <Form for={:signup} submit="submit" class="w-full max-w-xl py-4 form-control">
+                <Form for={%{}} as={:signup} submit="submit" class="w-full max-w-xl py-4 form-control">
                   <div class="input-group">
                     <EmailInput
                       name={:email}
@@ -205,7 +205,7 @@ defmodule BanchanWeb.BetaLive.Signup do
                   Sign Up for Updates and
                   <span class="text-primary">Beta Access</span>
                 </div>
-                <Form for={:signup} submit="submit" class="w-full max-w-xl py-4 form-control">
+                <Form for={%{}} as={:signup} submit="submit" class="w-full max-w-xl py-4 form-control">
                   <div class="input-group">
                     <EmailInput
                       id="bottom-cta-input"

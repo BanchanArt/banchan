@@ -64,6 +64,7 @@ defmodule Banchan.Reports do
       as: :investigator,
       join: cu in User,
       as: :current_user,
+      on: true,
       where: cu.id == ^current_user.id,
       where: :admin in cu.roles or :mod in cu.roles,
       select: r,

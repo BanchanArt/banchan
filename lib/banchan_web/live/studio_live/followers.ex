@@ -25,13 +25,13 @@ defmodule BanchanWeb.StudioLive.Followers do
   def handle_event("load_more", _, socket) do
     if socket.assigns.followers.total_entries >
          socket.assigns.followers.page_number * socket.assigns.followers.page_size do
-      {:noreply, fetch(socket.assigns.followers.page_number + 1, socket)}
+      {:noreply, fetch_results(socket.assigns.followers.page_number + 1, socket)}
     else
       {:noreply, socket}
     end
   end
 
-  defp fetch(page, %{assigns: %{followers: followers, studio: studio}} = socket) do
+  defp fetch_results(page, %{assigns: %{followers: followers, studio: studio}} = socket) do
     socket
     |> assign(
       :followers,

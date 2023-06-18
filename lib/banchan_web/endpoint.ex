@@ -24,8 +24,7 @@ defmodule BanchanWeb.Endpoint do
     at: "/",
     from: :banchan,
     gzip: false,
-    only:
-      ~w(assets fonts images js robots.txt android-chrome-96x96.png apple-touch-icon.png browserconfig.xml favicon-16x16.png favicon-32x32.png mstile-150x150.png site.webmanifest .well-known)
+    only: BanchanWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

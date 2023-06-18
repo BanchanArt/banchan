@@ -34,9 +34,7 @@ defmodule BanchanWeb.Components.MasonryGallery.LiveImgPreview do
         >✕</button>
       {/if}
       <Lightbox.Item>
-        {Phoenix.LiveView.Helpers.live_img_preview(@entry,
-          class: "w-full h-full object-cover"
-        )}
+        <.live_img_preview entry={@entry} class="w-full h-full object-cover" />
       </Lightbox.Item>
     </div>
     """

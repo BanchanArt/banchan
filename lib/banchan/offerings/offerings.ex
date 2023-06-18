@@ -312,6 +312,7 @@ defmodule Banchan.Offerings do
               select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
           ),
         as: :gallery_uploads,
+        on: true,
         left_lateral_join:
           used_slots in subquery(
             from c in Commission,
@@ -322,6 +323,7 @@ defmodule Banchan.Offerings do
               select: %{used_slots: count(c.id)}
           ),
         as: :used_slots,
+        on: true,
         where: o.studio_id == ^studio.id and o.type == ^type,
         select:
           merge(o, %{
@@ -558,6 +560,7 @@ defmodule Banchan.Offerings do
             select: %{used_slots: count(c.id)}
         ),
       as: :used_slots,
+      on: true,
       left_lateral_join:
         default_prices in subquery(
           from oo in OfferingOption,
@@ -572,6 +575,7 @@ defmodule Banchan.Offerings do
             }
         ),
       as: :default_prices,
+      on: true,
       left_lateral_join:
         gallery_uploads in subquery(
           from i in GalleryImage,
@@ -581,6 +585,7 @@ defmodule Banchan.Offerings do
             select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
         ),
       as: :gallery_uploads,
+      on: true,
       select:
         merge(o, %{
           studio: s,

@@ -17,12 +17,20 @@ defmodule BanchanWeb do
   and import those modules here.
   """
 
+  def static_paths, do: ~w(
+    assets fonts images js robots.txt android-chrome-96x96.png
+    apple-touch-icon.png browserconfig.xml favicon-16x16.png
+    favicon-32x32.png mstile-150x150.png site.webmanifest .well-known
+  )
+
   def controller do
     quote do
       use Phoenix.Controller, namespace: BanchanWeb
 
       import Plug.Conn
       import BanchanWeb.Gettext
+
+      unquote(verified_routes())
 
       alias BanchanWeb.Endpoint
       alias BanchanWeb.Router.Helpers, as: Routes
@@ -141,9 +149,20 @@ defmodule BanchanWeb do
 
       import Surface
 
+      unquote(verified_routes())
+
       defp internal_patch_to(url, opts) do
         send(self(), {:_internal_patch_to, url, opts})
       end
+    end
+  end
+
+  def verified_routes do
+    quote do
+      use Phoenix.VerifiedRoutes,
+        endpoint: BanchanWeb.Endpoint,
+        router: BanchanWeb.Router,
+        statics: BanchanWeb.static_paths()
     end
   end
 

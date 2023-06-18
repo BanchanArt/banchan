@@ -24,7 +24,7 @@ defmodule BanchanWeb.Components.Form.MarkdownInput do
 
     val =
       Phoenix.HTML.Form.input_value(
-        Map.get(assigns[:__context__], {Surface.Components.Form, :form}),
+        Context.get(socket, Surface.Components.Form, :form),
         assigns.name
       )
 

@@ -11,13 +11,13 @@ defmodule Banchan.Uploads do
   # image/heic needs additional support for Ubuntu. See https://askubuntu.com/questions/1131996/problems-with-compiling-imagemagick-with-heic
   @image_formats ~w(
     image/bmp image/gif image/png image/jpeg image/jpg
-    image/jp2 image/psd image/vnd.adobe.photoshop image/x-icon
+    image/psd image/vnd.adobe.photoshop image/x-icon
     image/vnd.microsoft.icon image/tiff image/webp
     image/svg+xml image/x-xcf
   )
 
   @image_format_extensions ~w(
-    .bmp .gif .png .jpeg .jpg .jp2 .psd .ico .tiff .webp .svg
+    .bmp .gif .png .jpeg .jpg .psd .ico .tiff .webp .svg
   )
 
   @video_formats ~w(

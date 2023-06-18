@@ -163,6 +163,7 @@ defmodule Banchan.Studios.Notifications do
     from(
       u in User,
       join: studio_sub in StudioSubscription,
+      on: true,
       left_join: settings in assoc(u, :notification_settings),
       where:
         studio_sub.studio_id == ^studio.id and u.id == studio_sub.user_id and

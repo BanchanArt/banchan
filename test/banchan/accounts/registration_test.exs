@@ -131,86 +131,86 @@ defmodule Banchan.AccountsTest.Registration do
       {:error, :unsupported} = Accounts.handle_oauth(auth)
     end
 
-    test "Twitter: registers a new user when logging in" do
-      auth = %Auth{
-        provider: :twitter,
-        uid: gen_random_string(),
-        info: %{
-          email: unique_user_email(),
-          nickname: unique_user_handle(),
-          name: gen_random_string(),
-          description: gen_random_string(),
-          other: gen_random_string()
-        }
-      }
+    # test "Twitter: registers a new user when logging in" do
+    #   auth = %Auth{
+    #     provider: :twitter,
+    #     uid: gen_random_string(),
+    #     info: %{
+    #       email: unique_user_email(),
+    #       nickname: unique_user_handle(),
+    #       name: gen_random_string(),
+    #       description: gen_random_string(),
+    #       other: gen_random_string()
+    #     }
+    #   }
 
-      assert {:ok, %User{id: user_id} = user} = Accounts.handle_oauth(auth)
+    #   assert {:ok, %User{id: user_id} = user} = Accounts.handle_oauth(auth)
 
-      assert user.handle == auth.info.nickname
-      assert user.twitter_uid == auth.uid
-      assert user.twitter_handle == auth.info.nickname
-      assert user.email == auth.info.email
-      assert user.name == auth.info.name
-      assert user.bio == auth.info.description
+    #   assert user.handle == auth.info.nickname
+    #   assert user.twitter_uid == auth.uid
+    #   assert user.twitter_handle == auth.info.nickname
+    #   assert user.email == auth.info.email
+    #   assert user.name == auth.info.name
+    #   assert user.bio == auth.info.description
 
-      admin = user_fixture(%{roles: [:admin]})
-      %User{id: system_id} = Accounts.system_user()
+    #   admin = user_fixture(%{roles: [:admin]})
+    #   %User{id: system_id} = Accounts.system_user()
 
-      assert [%User{id: ^system_id}, %User{id: ^user_id} | _] =
-               Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
-    end
+    #   assert [%User{id: ^system_id}, %User{id: ^user_id} | _] =
+    #            Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
+    # end
 
-    test "Twitter: massages incoming fields that don't pass our own validations" do
-      auth = %Auth{
-        provider: :twitter,
-        uid: gen_random_string(),
-        info: %{
-          email: "not an email",
-          nickname: "1" <> unique_user_handle() <> "!",
-          name: gen_random_string(33),
-          description: gen_random_string(161)
-        }
-      }
+    # test "Twitter: massages incoming fields that don't pass our own validations" do
+    #   auth = %Auth{
+    #     provider: :twitter,
+    #     uid: gen_random_string(),
+    #     info: %{
+    #       email: "not an email",
+    #       nickname: "1" <> unique_user_handle() <> "!",
+    #       name: gen_random_string(33),
+    #       description: gen_random_string(161)
+    #     }
+    #   }
 
-      assert {:ok, %User{id: user_id} = user} = Accounts.handle_oauth(auth)
+    #   assert {:ok, %User{id: user_id} = user} = Accounts.handle_oauth(auth)
 
-      assert user.handle =~ ~r/^user\d+$/
-      assert user.email == nil
-      assert user.name == binary_part(auth.info.name, 0, 32)
-      assert user.bio == binary_part(auth.info.description, 0, 160)
+    #   assert user.handle =~ ~r/^user\d+$/
+    #   assert user.email == nil
+    #   assert user.name == binary_part(auth.info.name, 0, 32)
+    #   assert user.bio == binary_part(auth.info.description, 0, 160)
 
-      admin = user_fixture(%{roles: [:admin]})
-      %User{id: system_id} = Accounts.system_user()
+    #   admin = user_fixture(%{roles: [:admin]})
+    #   %User{id: system_id} = Accounts.system_user()
 
-      assert [%User{id: ^system_id}, %User{id: ^user_id} | _] =
-               Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
-    end
+    #   assert [%User{id: ^system_id}, %User{id: ^user_id} | _] =
+    #            Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
+    # end
 
-    test "Twitter: returns an existing user." do
-      auth = %Auth{
-        provider: :twitter,
-        uid: gen_random_string(),
-        info: %{
-          email: unique_user_email(),
-          nickname: unique_user_handle(),
-          name: gen_random_string(),
-          description: gen_random_string()
-        }
-      }
+    # test "Twitter: returns an existing user." do
+    #   auth = %Auth{
+    #     provider: :twitter,
+    #     uid: gen_random_string(),
+    #     info: %{
+    #       email: unique_user_email(),
+    #       nickname: unique_user_handle(),
+    #       name: gen_random_string(),
+    #       description: gen_random_string()
+    #     }
+    #   }
 
-      assert {:ok, %User{id: user_id}} = Accounts.handle_oauth(auth)
-      assert {:ok, %User{id: ^user_id}} = Accounts.handle_oauth(auth)
+    #   assert {:ok, %User{id: user_id}} = Accounts.handle_oauth(auth)
+    #   assert {:ok, %User{id: ^user_id}} = Accounts.handle_oauth(auth)
 
-      %User{id: admin_id} = admin = user_fixture(%{roles: [:admin]})
-      %User{id: system_id} = Accounts.system_user()
+    #   %User{id: admin_id} = admin = user_fixture(%{roles: [:admin]})
+    #   %User{id: system_id} = Accounts.system_user()
 
-      assert [%User{id: ^system_id}, %User{id: ^user_id}, %User{id: ^admin_id}] =
-               Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
-    end
+    #   assert [%User{id: ^system_id}, %User{id: ^user_id}, %User{id: ^admin_id}] =
+    #            Accounts.list_users(admin, %UserFilter{}).entries |> Enum.sort_by(& &1.id)
+    # end
 
-    @tag skip: "TODO"
-    test "Twitter: set Twitter pfp as Banchan pfp" do
-    end
+    # @tag skip: "TODO"
+    # test "Twitter: set Twitter pfp as Banchan pfp" do
+    # end
 
     test "Discord: registers a new user when logging in" do
       auth = %Auth{

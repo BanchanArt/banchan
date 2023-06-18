@@ -378,17 +378,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   def render(assigns) do
     ~F"""
-    <Form
-      for={@changeset}
-      opts={
-        autocomplete: "off",
-        # NOTE: This is a workaround for a Surface bug in >=0.7.1: https://github.com/surface-ui/surface/issues/582
-        # TODO: make this a regular submit="submit" when the bug gets fixed.
-        phx_target: @myself,
-        phx_submit: "submit",
-        phx_change: "change"
-      }
-    >
+    <Form for={@changeset} submit="submit" change="change" opts={autocomplete: "off"}>
       <div class="flex flex-col gap-2">
         <TextInput
           name={:name}
@@ -452,9 +442,10 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                 class="btn btn-xs btn-circle absolute right-2 top-4"
                 :on-click="cancel_card_upload"
               >✕</button>
-              {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
-                class: "object-contain aspect-video rounded-xl w-full"
-              )}
+              <.live_img_preview
+                entry={Enum.at(@uploads.card_image.entries, 0)}
+                class="object-contain aspect-video rounded-xl w-full"
+              />
             {#else}
               <button
                 type="button"
