@@ -156,26 +156,6 @@ if config_env() == :prod do
     client_id: discord_client_id,
     client_secret: discord_client_secret
 
-  twitter_consumer_key =
-    System.get_env("TWITTER_CONSUMER_KEY") ||
-      raise """
-      environment variable TWITTER_CONSUMER_KEY is missing.
-      You can find your Twitter Consumer Key at https://developer.twitter.com/en/portal/dashboard.
-      You'll need an Elevated project.
-      """
-
-  twitter_consumer_secret =
-    System.get_env("TWITTER_CONSUMER_SECRET") ||
-      raise """
-      environment variable TWITTER_CONSUMER_SECRET is missing.
-      You can find your Twitter Consumer Secret at https://developer.twitter.com/en/portal/dashboard.
-      You'll need an Elevated project.
-      """
-
-  config :ueberauth, Ueberauth.Strategy.Twitter.OAuth,
-    consumer_key: twitter_consumer_key,
-    consumer_secret: twitter_consumer_secret
-
   # TODO: Re-enable when we're ready to do google oauth again
   # google_client_id =
   #   System.get_env("GOOGLE_CLIENT_ID") ||

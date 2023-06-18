@@ -103,7 +103,7 @@ defmodule BanchanWeb.HomeLive do
           </div>
         </:hero>
         <div class="flex flex-col gap-2">
-          <Form for={:search} submit="search" class="w-full">
+          <Form for={%{}} as={:search} submit="search" class="w-full">
             <div class="flex flex-row flex-nowrap w-full md:w-content max-w-xl mx-auto">
               <Field name={:query} class="w-full">
                 <TextInput

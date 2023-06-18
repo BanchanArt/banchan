@@ -8,7 +8,7 @@ defmodule Banchan.MixProject do
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: [warnings_as_errors: true],
-      compilers: [:phoenix, :gettext] ++ Mix.compilers() ++ [:surface],
+      compilers: Mix.compilers() ++ [:surface],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
@@ -40,78 +40,86 @@ defmodule Banchan.MixProject do
   end
 
   # Specifies which paths to compile per environment.
-  defp elixirc_paths(:test), do: ["lib", "test/support"] ++ catalogues()
-  defp elixirc_paths(:dev), do: ["lib"] ++ catalogues()
+  # ++ catalogues()
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  # ++ catalogues()
+  defp elixirc_paths(:dev), do: ["lib"]
   defp elixirc_paths(_), do: ["lib"]
 
-  def catalogues do
-    [
-      "priv/catalogue"
-    ]
-  end
+  # def catalogues do
+  #   [
+  #     "priv/catalogue"
+  #   ]
+  # end
 
   # Specifies your project dependencies.
   #
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:bamboo, "~> 2.2.0"},
+      {:bamboo, "~> 2.3.0"},
       {:bamboo_phoenix, "~> 1.0.0"},
-      {:csv, "~> 2.5"},
-      {:earmark, "~> 1.4.20"},
-      {:ecto_psql_extras, "~> 0.7.4"},
-      {:ecto_sql, "~> 3.8.3"},
-      {:ex_aws_s3, "~> 2.3.2"},
-      {:ex_aws, "~> 2.3.1"},
+      {:csv, "~> 3.0.5"},
+      {:earmark, "~> 1.4.32"},
+      {:ecto_psql_extras, "~> 0.7.11"},
+      {:ecto_sql, "~> 3.10.1"},
+      {:ex_aws, "~> 2.4.2"},
+      {:ex_aws_s3, "~> 2.4.0"},
       {:ffmpex, "~> 0.10.0"},
-      {:gettext, "~> 0.11"},
-      {:hackney, "~> 1.18"},
+      {:gettext, "~> 0.22.2"},
+      {:hackney, "~> 1.18.1"},
       {:html_sanitize_ex, "~> 1.4.2"},
+      # TODO: Can't bump this one to ~>2 because of tentacat
       {:httpoison, "~> 1.8.1"},
-      {:jason, "~> 1.0"},
-      # TODO: move back to hex package after
-      # https://github.com/elixir-mogrify/mogrify/pull/112 is released.
-      {:mogrify, github: "elixir-mogrify/mogrify"},
-      {:money, "~> 1.9"},
-      {:nimble_totp, "~> 0.1.0"},
-      {:number, "~> 1.0.3"},
-      {:oban, "~> 2.13"},
-      {:pbkdf2_elixir, "~> 1.0"},
-      {:phoenix_ecto, "~> 4.4"},
-      {:phoenix_html, "~> 3.2.0"},
-      {:phoenix_live_dashboard, "~> 0.7.0"},
-      {:phoenix_live_view, "~> 0.18.2"},
-      {:phoenix, "~> 1.6.13"},
-      {:plug_cowboy, "~> 2.5.2"},
-      {:postgrex, "~> 0.16.3"},
-      {:qr_code, "~> 2.2.1"},
+      {:jason, "~> 1.4.0"},
+      {:mogrify, "~> 0.9.3"},
+      {:money, "~> 1.12.2"},
+      {:nimble_totp, "~> 1.0.0"},
+      {:number, "~> 1.0.4"},
+      {:oban, "~> 2.15.1"},
+      {:pbkdf2_elixir, "~> 2.1.0"},
+      {:phoenix, "~> 1.7.6"},
+      {:phoenix_ecto, "~> 4.4.2"},
+      {:phoenix_html, "~> 3.3.1"},
+      {:phoenix_live_dashboard, "~> 0.8.0"},
+      # TODO: set this to a proper LiveView release when
+      # https://github.com/phoenixframework/phoenix_live_view/commit/7daaf5ccb5a631f448eea5f8538508feb175c6f5
+      # get included in a release (likely ~> 0.19.3)
+      {:phoenix_live_view,
+       github: "phoenixframework/phoenix_live_view",
+       ref: "7aa516ff8107196a27cc11982415d86958fc8b98",
+       override: true},
+      {:phoenix_view, "~> 2.0"},
+      {:plug_cowboy, "~> 2.6.1"},
+      {:postgrex, "~> 0.17.1"},
+      {:qr_code, "~> 3.0.0"},
       {:scrivener_ecto, "~> 2.7.0"},
-      {:sentry, "~> 8.0"},
+      {:sentry, "~> 8.0.6"},
       {:slugify, "~> 1.3.1"},
-      {:stripity_stripe, "~> 2.17.2"},
-      {:surface, "~> 0.9.1"},
-      {:surface_catalogue, "~> 0.5.2"},
-      {:surface_markdown, "~> 0.5.1"},
-      {:sweet_xml, "~> 0.6"},
-      {:telemetry_metrics, "~> 0.6"},
-      {:telemetry_poller, "~> 0.5"},
-      {:tentacat, "~> 2.2"},
-      {:timex, "~> 3.7.6"},
+      {:stripity_stripe, "~> 2.17.3"},
+      {:surface, "~> 0.11.0"},
+      # TODO: Not compatible with Surface 0.11 yet.
+      # {:surface_catalogue, "~> 0.6.0"},
+      {:surface_markdown, "~> 0.6.1"},
+      {:sweet_xml, "~> 0.7.3"},
+      {:telemetry_metrics, "~> 0.6.1"},
+      {:telemetry_poller, "~> 1.0.0"},
+      {:tentacat, "~> 2.2.0"},
+      {:timex, "~> 3.7.11"},
       {:ueberauth_discord, "~> 0.7.0"},
-      {:ueberauth_google, "~> 0.10.1"},
-      {:ueberauth_twitter, "~> 0.4.1"},
-      {:ueberauth, "~> 0.7"},
-      {:uuid, "~> 1.1"},
+      {:ueberauth_google, "~> 0.10.2"},
+      {:ueberauth, "~> 0.10.5"},
+      {:uuid, "~> 1.1.8"},
 
       # Dev/test deps
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
-      {:excoveralls, "~> 0.13", only: :test},
-      {:floki, "~> 0.33.0", only: :test},
-      {:mox, "~> 1.0.1", only: :test},
-      {:phoenix_live_reload, "~> 1.3.3", only: :dev},
-      {:sobelow, "~> 0.8", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.3.0", only: [:dev, :test], runtime: false},
+      {:esbuild, "~> 0.7.0", runtime: Mix.env() == :dev},
+      {:excoveralls, "~> 0.16.1", only: :test},
+      {:floki, "~> 0.34.3", only: :test},
+      {:mox, "~> 1.0.2", only: :test},
+      {:phoenix_live_reload, "~> 1.4.1", only: :dev},
+      {:sobelow, "~> 0.12.2", only: [:dev, :test], runtime: false},
       {:surface_formatter, "~> 0.7.5", only: :dev}
     ]
   end

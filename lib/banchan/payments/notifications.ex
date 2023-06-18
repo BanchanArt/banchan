@@ -13,8 +13,7 @@ defmodule Banchan.Payments.Notifications do
   alias Banchan.Workers.Mailer
 
   # Unfortunate, but needed for crafting URLs for notifications
-  alias BanchanWeb.Endpoint
-  alias BanchanWeb.Router.Helpers, as: Routes
+  use Phoenix.VerifiedRoutes, endpoint: BanchanWeb.Endpoint, router: BanchanWeb.Router
 
   @pubsub Banchan.PubSub
 
@@ -50,7 +49,7 @@ defmodule Banchan.Payments.Notifications do
           body =
             "A payout for #{Money.to_string(payout.amount)} is on its way to your bank account."
 
-          url = Routes.studio_payouts_url(Endpoint, :show, payout.studio.handle, payout.public_id)
+          url = url(~p"/studios/#{payout.studio.handle}/payouts/#{payout.public_id}")
 
           {:safe, safe_url} = Phoenix.HTML.html_escape(url)
 
@@ -91,7 +90,7 @@ defmodule Banchan.Payments.Notifications do
           "An invoice payment for #{invoice.total_transferred} is expiring in 72 hours. Unreleased expired payments will be reimbursed to the client automatically."
 
         url =
-          Routes.commission_url(Endpoint, :show, invoice.commission.public_id)
+          url(~p"/commissions/#{invoice.commission.public_id}")
           |> replace_fragment(invoice.event)
 
         {:safe, safe_url} = Phoenix.HTML.html_escape(url)
@@ -140,7 +139,7 @@ defmodule Banchan.Payments.Notifications do
           "An invoice payment for #{invoice.total_transferred} has expired and has been refunded. Please initiate a new payment."
 
         url =
-          Routes.commission_url(Endpoint, :show, invoice.commission.public_id)
+          url(~p"/commissions/#{invoice.commission.public_id}")
           |> replace_fragment(invoice.event)
 
         {:safe, safe_url} = Phoenix.HTML.html_escape(url)
@@ -183,7 +182,7 @@ defmodule Banchan.Payments.Notifications do
           "An invoice payment for #{invoice.total_transferred} has expired and a payout has been automatically initiated for it."
 
         url =
-          Routes.commission_url(Endpoint, :show, invoice.commission.public_id)
+          url(~p"/commissions/#{invoice.commission.public_id}")
           |> replace_fragment(invoice.event)
 
         {:safe, safe_url} = Phoenix.HTML.html_escape(url)
@@ -235,7 +234,7 @@ defmodule Banchan.Payments.Notifications do
           subs = Commissions.Notifications.subscribers(commission)
 
           url =
-            Routes.commission_url(Endpoint, :show, commission.public_id)
+            url(~p"/commissions/#{commission.public_id}")
             |> replace_fragment(event)
 
           body = refund_updated_body(event.invoice.refund_status)

@@ -51,7 +51,7 @@ defmodule BanchanWeb.ReportBugLive.New do
             <p>Thanks for your bug report! You can view the issue and sign up for updates <a href={@report_url} class="link link-primary">here</a>.</p>
             <Button label="Report Another" click="reset" />
           {#else}
-            <Form class="flex flex-col gap-4" for={:bug_report} submit="submit">
+            <Form class="flex flex-col gap-4" for={%{}} as={:bug_report} submit="submit">
               <h1 class="text-2xl">Submit a bug report</h1>
               <p>Use this form to submit bug reports for Banchan Art. Please include as much context as you can.</p>
               <p><span class="text-error">NOTE: This report will be <span class="font-bold">publicly visible</span> on GitHub. Do NOT include anything personal or confidential</span></p>

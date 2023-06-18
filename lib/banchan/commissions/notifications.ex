@@ -13,8 +13,7 @@ defmodule Banchan.Commissions.Notifications do
   alias Banchan.Studios.{Studio, StudioSubscription}
 
   # Unfortunate, but needed for crafting URLs for notifications
-  alias BanchanWeb.Endpoint
-  alias BanchanWeb.Router.Helpers, as: Routes
+  use Phoenix.VerifiedRoutes, endpoint: BanchanWeb.Endpoint, router: BanchanWeb.Router
 
   @pubsub Banchan.PubSub
 
@@ -61,8 +60,11 @@ defmodule Banchan.Commissions.Notifications do
     from(
       u in User,
       join: comm_sub in CommissionSubscription,
+      on: true,
       join: studio_sub in StudioSubscription,
+      on: true,
       left_join: settings in assoc(u, :notification_settings),
+      on: true,
       where:
         ((comm_sub.commission_id == ^commission.id and u.id == comm_sub.user_id) or
            (studio_sub.studio_id == ^commission.studio_id and u.id == studio_sub.user_id)) and
@@ -99,7 +101,7 @@ defmodule Banchan.Commissions.Notifications do
         Repo.transaction(fn ->
           subs = Studios.Notifications.subscribers(%Studio{id: commission.studio_id})
 
-          url = Routes.commission_url(Endpoint, :show, commission.public_id)
+          url = url(~p"/commissions/#{commission.public_id}")
           {:safe, safe_url} = Phoenix.HTML.html_escape(url)
 
           Notifications.notify_subscribers!(
@@ -175,7 +177,7 @@ defmodule Banchan.Commissions.Notifications do
 
           Enum.each(events, fn event ->
             url =
-              Routes.commission_url(Endpoint, :show, commission.public_id)
+              url(~p"/commissions/#{commission.public_id}")
               |> replace_fragment(event)
 
             body = new_event_notification_body(event)
@@ -306,7 +308,7 @@ defmodule Banchan.Commissions.Notifications do
           subs = subscribers(commission)
 
           url =
-            Routes.commission_url(Endpoint, :show, commission.public_id)
+            url(~p"/commissions/#{commission.public_id}")
             |> replace_fragment(event)
 
           body = "An invoice has been released before commission approval."

@@ -59,6 +59,7 @@ defmodule BanchanWeb.Components.Layout do
           <div>
             <span class="footer-title">Social</span>
             <div class="grid grid-flow-col gap-4">
+              <a href="https://mastodon.art/@Banchan" target="_blank" rel="noopener noreferrer"><i class="fab fa-mastodon text-xl" /></a>
               <a href="https://twitter.com/BanchanArt" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter text-xl" /></a>
               <a href="https://discord.gg/FUkTHjGKJF" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord text-xl" /></a>
             </div>
@@ -117,9 +118,11 @@ defmodule BanchanWeb.Components.Layout do
                 <li>
                   <a href="/admin/sent_emails" target="_blank" rel="noopener noreferrer"><i class="fas fa-paper-plane" />Sent Emails</a>
                 </li>
+                {!--
                 <li>
                   <a href="/admin/catalogue" target="_blank" rel="noopener noreferrer"><i class="fas fa-book" />Catalogue</a>
                 </li>
+                --}
               {/if}
             {/if}
             <li class="menu-title">

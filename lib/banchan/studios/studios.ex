@@ -30,8 +30,7 @@ defmodule Banchan.Studios do
   alias Banchan.Uploads.Upload
   alias Banchan.Workers.{EnableStudio, Thumbnailer, UploadDeleter}
 
-  alias BanchanWeb.Endpoint
-  alias BanchanWeb.Router.Helpers, as: Routes
+  use Phoenix.VerifiedRoutes, endpoint: BanchanWeb.Endpoint, router: BanchanWeb.Router
 
   @host Application.compile_env!(:banchan, [BanchanWeb.Endpoint, :url, :host])
 
@@ -77,11 +76,7 @@ defmodule Banchan.Studios do
                 studio
                 | stripe_id:
                     create_stripe_account(
-                      Routes.studio_shop_url(
-                        Endpoint,
-                        :show,
-                        Ecto.Changeset.get_field(changeset, :handle)
-                      ),
+                      url(~p"/studios/#{Ecto.Changeset.get_field(changeset, :handle)}"),
                       Ecto.Changeset.get_field(changeset, :country)
                     )
               }
@@ -459,7 +454,8 @@ defmodule Banchan.Studios do
               where: parent_as(:studio).id == follower.studio_id,
               select: %{followers: count(follower)}
           ),
-          as: :followers
+          as: :followers,
+          on: true
         )
         |> order_by([followers: followers], desc: followers.followers)
 
@@ -631,11 +627,7 @@ defmodule Banchan.Studios do
                    name: Ecto.Changeset.get_field(changeset, :name),
                    url:
                      String.replace(
-                       Routes.studio_shop_url(
-                         Endpoint,
-                         :show,
-                         Ecto.Changeset.get_field(changeset, :handle)
-                       ),
+                       url(~p"/studios/#{Ecto.Changeset.get_field(changeset, :handle)}"),
                        "localhost:4000",
                        "banchan.art"
                      )

@@ -23,15 +23,17 @@ defmodule BanchanWeb.ConnCase do
     quote do
       use Oban.Testing, repo: Banchan.Repo
 
+      # The default endpoint for testing
+      @endpoint BanchanWeb.Endpoint
+
+      use BanchanWeb, :verified_routes
+
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
       import BanchanWeb.ConnCase
 
       alias BanchanWeb.Router.Helpers, as: Routes
-
-      # The default endpoint for testing
-      @endpoint BanchanWeb.Endpoint
     end
   end
 

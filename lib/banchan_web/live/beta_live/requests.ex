@@ -115,7 +115,7 @@ defmodule BanchanWeb.BetaLive.Requests do
       <h1 class="text-3xl">Manage Invite Requests</h1>
       <div class="divider" />
       <div class="flex flex-col md:flex-row md:flex-wrap gap-2">
-        <Form class="send-invites" for={:send_invites} submit="submit_invites">
+        <Form class="send-invites" for={%{}} as={:send_invites} submit="submit_invites">
           <div class="input-group">
             <NumberInput class="input input-bordered" name={:count} opts={placeholder: "Invites to send"} />
             <Submit class="btn btn-primary rounded-lg">Send Invites</Submit>
@@ -123,7 +123,8 @@ defmodule BanchanWeb.BetaLive.Requests do
         </Form>
         <Form
           class="grow email-filter"
-          for={:email_filter}
+          for={%{}}
+          as={:email_filter}
           change="change_email_filter"
           submit="change_email_filter"
         >
@@ -132,7 +133,13 @@ defmodule BanchanWeb.BetaLive.Requests do
             <Submit class="btn btn-primary rounded-lg">Filter</Submit>
           </div>
         </Form>
-        <Form class="show-sent" for={:show_sent} change="change_show_sent" submit="change_show_sent">
+        <Form
+          class="show-sent"
+          for={%{}}
+          as={:show_sent}
+          change="change_show_sent"
+          submit="change_show_sent"
+        >
           <Checkbox name={:show_sent} label="Show sent invites" value={@show_sent} />
         </Form>
       </div>

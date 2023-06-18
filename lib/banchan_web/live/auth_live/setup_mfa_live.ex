@@ -16,13 +16,15 @@ defmodule BanchanWeb.SetupMfaLive do
     user = socket.assigns.current_user
 
     if user.totp_secret do
-      totp_uri =
-        NimbleTOTP.otpauth_uri("Banchan:#{user.email}", user.totp_secret, issuer: "Banchan")
-
       secret = Base.encode32(user.totp_secret, padding: false)
-      qr_code = QRCode.create!(totp_uri)
-      svg = qr_code |> QRCode.Svg.to_base64()
-      totp_svg = "data:image/svg+xml;base64,#{svg}"
+
+      svg_base64 =
+        NimbleTOTP.otpauth_uri("Banchan:#{user.email}", user.totp_secret, issuer: "Banchan")
+        |> QRCode.create!()
+        |> QRCode.render(:svg)
+        |> QRCode.to_base64()
+
+      totp_svg = "data:image/svg+xml;base64,#{svg_base64}"
 
       {:ok,
        socket |> assign(qrcode_svg: totp_svg, secret: secret, totp_activated: user.totp_activated)}
@@ -136,19 +138,19 @@ defmodule BanchanWeb.SetupMfaLive do
         {@secret}
         <div class="divider" />
         <h1 class="text-2xl">Confirm MFA 6-digit OTP</h1>
-        <Form class="flex flex-col gap-4" for={:user} submit="confirm_mfa">
+        <Form class="flex flex-col gap-4" for={%{}} as={:user} submit="confirm_mfa">
           <TextInput name={:token} label="One Time Password" opts={required: true} />
           <Submit class="w-full" label="Activate" />
         </Form>
       {#elseif @qrcode_svg && @totp_activated}
         <h1 class="text-2xl">You have MFA enabled</h1>
-        <Form for={:user} submit="deactivate_mfa">
+        <Form for={%{}} as={:user} submit="deactivate_mfa">
           <TextInput name={:password} label="Current Password" opts={required: true, type: "password"} />
           <Submit class="w-full btn-error" label="Deactivate MFA" />
         </Form>
       {#else}
         <h1 class="text-2xl">MFA Setup</h1>
-        <Form for={:user} submit="setup_mfa">
+        <Form for={%{}} as={:user} submit="setup_mfa">
           You do not have MFA enabled.
           <Submit class="w-full" label="Set up MFA" />
         </Form>

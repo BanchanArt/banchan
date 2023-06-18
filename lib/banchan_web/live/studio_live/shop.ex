@@ -53,7 +53,7 @@ defmodule BanchanWeb.StudioLive.Shop do
   def handle_event("load_more", _, socket) do
     if socket.assigns.offerings.total_entries >
          socket.assigns.offerings.page_number * socket.assigns.offerings.page_size do
-      {:noreply, fetch(socket.assigns.offerings.page_number + 1, socket)}
+      {:noreply, fetch_results(socket.assigns.offerings.page_number + 1, socket)}
     else
       {:noreply, socket}
     end
@@ -138,7 +138,7 @@ defmodule BanchanWeb.StudioLive.Shop do
     )
   end
 
-  defp fetch(page, %{assigns: %{offerings: offerings}} = socket) do
+  defp fetch_results(page, %{assigns: %{offerings: offerings}} = socket) do
     socket
     |> assign(
       :offerings,

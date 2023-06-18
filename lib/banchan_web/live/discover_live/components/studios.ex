@@ -28,7 +28,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
   def handle_event("load_more", _, socket) do
     if socket.assigns.studios.total_entries >
          socket.assigns.studios.page_number * socket.assigns.studios.page_size do
-      {:noreply, fetch(socket.assigns.studios.page_number + 1, socket)}
+      {:noreply, fetch_results(socket.assigns.studios.page_number + 1, socket)}
     else
       {:noreply, socket}
     end
@@ -45,7 +45,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
     )
   end
 
-  defp fetch(page, %{assigns: %{studios: studios}} = socket) do
+  defp fetch_results(page, %{assigns: %{studios: studios}} = socket) do
     socket
     |> assign(
       :studios,

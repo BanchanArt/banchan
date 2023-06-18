@@ -70,7 +70,7 @@ You can contact the following people about this Code of Conduct, either privatel
 * Kat Marchán (admin, maintainer)
   * Twitter: [@zkat__](https://twitter.com/zkat__)
   * Mastodon: [@zkat@toot.cat](https://toot.cat/@zkat)
-  * Discord: `kat#8645`
+  * Discord: `zkat__`
 * Atrian Wagner (admin, maintainer)
   * Discord: `skullbunnygalaxy#9753`
 

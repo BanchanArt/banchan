@@ -3,7 +3,7 @@ defmodule BanchanWeb.Router do
 
   import BanchanWeb.UserAuth
   import Phoenix.LiveDashboard.Router
-  import Surface.Catalogue.Router
+  # import Surface.Catalogue.Router
 
   alias BanchanWeb.{BasicAuthPlug, EnsureEnabledPlug, EnsureRolePlug}
 
@@ -246,8 +246,8 @@ defmodule BanchanWeb.Router do
     live_dashboard("/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo)
     forward("/sent_emails", Bamboo.SentEmailViewerPlug)
 
-    if Application.compile_env!(:banchan, :env) == :dev do
-      surface_catalogue("/catalogue")
-    end
+    # if Application.compile_env!(:banchan, :env) == :dev do
+    #   surface_catalogue("/catalogue")
+    # end
   end
 end

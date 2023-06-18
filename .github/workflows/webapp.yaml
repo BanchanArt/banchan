@@ -17,8 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.13.2]
-        otp: [24]
+        elixir: [1.14.5]
+        otp: [25]
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
@@ -31,11 +31,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup
-        uses: actions/setup-elixir@v1
+        uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
-          experimental-otp: true
 
       - name: Retrieve Cached Dependencies
         uses: actions/cache@v2
@@ -63,8 +62,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.13.2]
-        otp: [24]
+        elixir: [1.14.5]
+        otp: [25]
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
@@ -77,11 +76,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup
-        uses: actions/setup-elixir@v1
+        uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
-          experimental-otp: true
 
       - name: Retrieve Cached Dependencies
         uses: actions/cache@v2
@@ -120,8 +118,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        elixir: [1.13.2]
-        otp: [24]
+        elixir: [1.14.5]
+        otp: [25]
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
@@ -134,11 +132,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup
-        uses: actions/setup-elixir@v1
+        uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
-          experimental-otp: true
 
       - name: Retrieve Cached Dependencies
         uses: actions/cache@v2

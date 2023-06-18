@@ -114,7 +114,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
     <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:portfolio}>
       {#if @current_user_member?}
         <div class="mx-auto py-2">
-          <Form for={:portfolio} change="change" submit="submit">
+          <Form for={%{}} as={:portfolio} change="change" submit="submit">
             <div class="flex flex-row">
               <UploadInput
                 label="Portfolio Images"

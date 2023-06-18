@@ -583,7 +583,7 @@ defmodule BanchanWeb.SettingsLive do
         <:header>
           <div class="font-semibold text-error">Deactivate</div>
         </:header>
-        <Form class="flex flex-col gap-4" for={:deactivate} as={:deactivate} submit="submit_deactivate">
+        <Form class="flex flex-col gap-4" for={%{}} as={:deactivate} submit="submit_deactivate">
           <p>
             You will have 30 days to change your mind.
           </p>

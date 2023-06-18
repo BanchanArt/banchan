@@ -12,8 +12,7 @@ defmodule Banchan.Offerings.Notifications do
   alias Banchan.Uploads.Upload
 
   # Unfortunate, but needed for crafting URLs for notifications
-  alias BanchanWeb.Endpoint
-  alias BanchanWeb.Router.Helpers, as: Routes
+  use Phoenix.VerifiedRoutes, endpoint: BanchanWeb.Endpoint, router: BanchanWeb.Router
 
   @pubsub Banchan.PubSub
 
@@ -69,13 +68,7 @@ defmodule Banchan.Offerings.Notifications do
 
           studio = Repo.preload(offering, :studio).studio
 
-          url =
-            Routes.offering_show_url(
-              Endpoint,
-              :show,
-              studio.handle,
-              offering.type
-            )
+          url = url(~p"/offerings/#{studio.handle}/#{offering.type}")
 
           {:safe, safe_url} = Phoenix.HTML.html_escape(url)
 

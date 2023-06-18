@@ -163,9 +163,10 @@ defmodule BanchanWeb.StudioLive.Edit do
                   class="btn btn-xs btn-circle absolute right-2 top-2"
                   :on-click="cancel_card_upload"
                 >✕</button>
-                {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.card_image.entries, 0),
-                  class: "object-cover aspect-video rounded-xl w-full"
-                )}
+                <.live_img_preview
+                  entry={Enum.at(@uploads.card_image.entries, 0)}
+                  class="object-cover aspect-video rounded-xl w-full"
+                />
               {#else}
                 <button
                   type="button"
@@ -199,9 +200,10 @@ defmodule BanchanWeb.StudioLive.Edit do
                   class="btn btn-xs btn-circle absolute right-2 top-2"
                   :on-click="cancel_header_upload"
                 >✕</button>
-                {Phoenix.LiveView.Helpers.live_img_preview(Enum.at(@uploads.header_image.entries, 0),
-                  class: "object-cover aspect-header-image rounded-xl w-full"
-                )}
+                <.live_img_preview
+                  entry={Enum.at(@uploads.header_image.entries, 0)}
+                  class="object-cover aspect-header-image rounded-xl w-full"
+                />
               {#else}
                 <button
                   type="button"
