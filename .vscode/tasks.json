@@ -1,0 +1,64 @@
+{
+  "version": "2.0.0",
+  "command": "mix",
+  "presentation": {
+    "echo": false,
+    "reveal": "always",
+    "focus": false,
+    "panel": "dedicated",
+    "showReuseMessage": true
+  },
+  "tasks": [
+    {
+      "command": "mix",
+      "type": "shell",
+      "label": "build",
+      "args": ["compile"],
+      "problemMatcher": ["$mixCompileError", "$mixCompileWarning"],
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "command": "mix",
+      "type": "shell",
+      "label": "test",
+      "args": ["test"],
+      "problemMatcher": [
+        "$mixCompileError",
+        "$mixCompileWarning",
+        "$mixTestFailure"
+      ],
+      "group": {
+        "kind": "test"
+      }
+    },
+    {
+      "label": "Create terminals",
+      "dependsOn": ["Local Stripe Server", "Phoenix Server"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Local Stripe Server",
+      "type": "shell",
+      "command": "mix",
+      "args": ["stripe.local"],
+      "isBackground": true,
+      "presentation": {
+        "group": "servers"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Phoenix Server",
+      "type": "shell",
+      "command": "mix",
+      "args": ["phx.server"],
+      "isBackground": true,
+      "presentation": {
+        "group": "servers"
+      },
+      "problemMatcher": ["$mixCompileError", "$mixCompileWarning"]
+    }
+  ]
+}

@@ -40,9 +40,6 @@ npm-debug.log
 # Ignore the Mnesia cache
 /Mnesia.*
 
-# Ignore .vscode dir
-/.vscode
-
 # Elixir LS
 /.elixir_ls
 
