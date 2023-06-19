@@ -67,7 +67,7 @@ defmodule BanchanWeb.SetupMfaLive do
           socket =
             socket
             |> put_flash(:info, "MFA token deactivated")
-            |> push_redirect(to: Routes.setup_mfa_path(socket, :edit))
+            |> push_navigate(to: Routes.setup_mfa_path(socket, :edit))
 
           {:noreply, socket}
 
@@ -75,7 +75,7 @@ defmodule BanchanWeb.SetupMfaLive do
           socket =
             socket
             |> put_flash(:error, "Invalid password")
-            |> push_redirect(to: Routes.setup_mfa_path(socket, :edit))
+            |> push_navigate(to: Routes.setup_mfa_path(socket, :edit))
 
           {:noreply, socket}
       end

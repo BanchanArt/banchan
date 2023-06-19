@@ -21,7 +21,7 @@ defmodule BanchanWeb.ResetPasswordLive do
       else
         socket
         |> put_flash(:error, "Reset password link is invalid or it has expired.")
-        |> push_redirect(to: Routes.home_path(Endpoint, :index))
+        |> push_navigate(to: Routes.home_path(Endpoint, :index))
       end
 
     {:ok, socket}
@@ -69,7 +69,7 @@ defmodule BanchanWeb.ResetPasswordLive do
         socket =
           socket
           |> put_flash(:info, "Password reset successfully.")
-          |> push_redirect(to: Routes.login_path(Endpoint, :new))
+          |> push_navigate(to: Routes.login_path(Endpoint, :new))
 
         {:noreply, socket}
 

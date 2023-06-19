@@ -30,7 +30,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
       {:ok,
        socket
        |> put_flash(:error, "You are not authorized to access this page.")
-       |> push_redirect(to: Routes.denizen_show_path(Endpoint, :show, handle))}
+       |> push_navigate(to: Routes.denizen_show_path(Endpoint, :show, handle))}
     else
       {:ok,
        socket
@@ -115,7 +115,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
         socket = put_flash(socket, :info, "Profile updated")
 
         {:noreply,
-         push_redirect(socket, to: Routes.denizen_show_path(Endpoint, :show, user.handle))}
+         push_navigate(socket, to: Routes.denizen_show_path(Endpoint, :show, user.handle))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}

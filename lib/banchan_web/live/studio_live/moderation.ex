@@ -60,7 +60,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
       {:ok,
        socket
        |> put_flash(:error, "You are not authorized to access this page.")
-       |> push_redirect(
+       |> push_navigate(
          to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
        )}
     end
@@ -86,7 +86,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
         {:noreply,
          socket
          |> put_flash(:error, "You are not authorized to perform this action.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -97,7 +97,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
         {:noreply,
          socket
          |> put_flash(:info, "Studio updated.")
-         |> push_redirect(to: Routes.studio_shop_path(Endpoint, :show, studio.handle))}
+         |> push_navigate(to: Routes.studio_shop_path(Endpoint, :show, studio.handle))}
     end
   end
 
@@ -122,7 +122,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
         {:noreply,
          socket
          |> put_flash(:info, "Studio disabled.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -152,7 +152,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
         {:noreply,
          socket
          |> put_flash(:info, "Studio enabled.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 

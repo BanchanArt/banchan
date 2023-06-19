@@ -43,7 +43,7 @@ defmodule BanchanWeb.ConfirmationLive do
         "If your email is in our system and it has not been confirmed yet, " <>
           "you will receive an email with instructions shortly."
       )
-      |> push_redirect(to: Routes.home_path(Endpoint, :index))
+      |> push_navigate(to: Routes.home_path(Endpoint, :index))
 
     {:noreply, socket}
   end

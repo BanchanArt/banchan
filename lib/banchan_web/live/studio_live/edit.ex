@@ -92,7 +92,7 @@ defmodule BanchanWeb.StudioLive.Edit do
           socket
           |> assign(changeset: Studio.profile_changeset(studio, %{}), studio: studio)
           |> put_flash(:info, "Profile updated")
-          |> push_redirect(to: Routes.studio_shop_path(Endpoint, :show, studio.handle))
+          |> push_navigate(to: Routes.studio_shop_path(Endpoint, :show, studio.handle))
 
         {:noreply, socket}
 
@@ -103,7 +103,7 @@ defmodule BanchanWeb.StudioLive.Edit do
         {:noreply,
          socket
          |> put_flash(:error, "You are not authorized to edit this studio")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
     end

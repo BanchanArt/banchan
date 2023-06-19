@@ -73,7 +73,7 @@ defmodule BanchanWeb.StudioLive.Shop do
         {:noreply,
          socket
          |> put_flash(:info, "Studio archived.")
-         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.home_path(Endpoint, :index))}
 
       {:error, _} ->
         {:noreply,
@@ -82,7 +82,7 @@ defmodule BanchanWeb.StudioLive.Shop do
            :error,
            "Studio could not be unarchived due to an internal error. Try again later or report this to support@banchan.art"
          )
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
     end
@@ -95,7 +95,7 @@ defmodule BanchanWeb.StudioLive.Shop do
         {:noreply,
          socket
          |> put_flash(:info, "Studio unarchived.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -106,7 +106,7 @@ defmodule BanchanWeb.StudioLive.Shop do
            :error,
            "Studio could not be unarchived due to an internal error. Try again later or report this to support@banchan.art"
          )
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
     end

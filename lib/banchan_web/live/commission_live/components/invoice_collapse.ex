@@ -104,7 +104,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceCollapse do
         {:noreply,
          socket
          |> put_flash(:error, "You are blocked from further interaction with this studio.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
     end

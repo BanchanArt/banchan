@@ -68,7 +68,7 @@ defmodule BanchanWeb.HomeLive do
 
     {:noreply,
      socket
-     |> push_redirect(to: Routes.discover_index_path(Endpoint, :index, "offerings", params))}
+     |> push_navigate(to: Routes.discover_index_path(Endpoint, :index, "offerings", params))}
   end
 
   @impl true

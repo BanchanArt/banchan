@@ -82,7 +82,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
         {:noreply,
          socket
          |> put_flash(:error, "You are blocked from further interaction with this studio.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
 
@@ -90,7 +90,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
         {:noreply,
          socket
          |> put_flash(:error, "You are not authorized to perform this action.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
     end
@@ -120,7 +120,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
         {:noreply,
          socket
          |> put_flash(:error, "An internal error happened while trying to delete an attachment.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
     end

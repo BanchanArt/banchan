@@ -229,7 +229,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         {:noreply,
          socket
          |> put_flash(:info, "Offering successfully deleted.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -240,7 +240,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
            :error,
            "An error occurred while trying to delete this offering. Wait a bit and try again."
          )
-         |> push_redirect(
+         |> push_navigate(
            to:
              Routes.studio_offerings_edit_path(
                Endpoint,

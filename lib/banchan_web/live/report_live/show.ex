@@ -69,13 +69,13 @@ defmodule BanchanWeb.ReportLive.Show do
         {:noreply,
          socket
          |> put_flash(:error, "You are not authorized to perform this action.")
-         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.home_path(Endpoint, :index))}
 
       {:error, :unauthorized} ->
         {:noreply,
          socket
          |> put_flash(:error, "You are not authorized to perform this action.")
-         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.home_path(Endpoint, :index))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, socket |> assign(changeset: changeset)}
@@ -97,7 +97,7 @@ defmodule BanchanWeb.ReportLive.Show do
         {:noreply,
          socket
          |> put_flash(:error, "You are not authorized to perform this action.")
-         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.home_path(Endpoint, :index))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, socket |> assign(changeset: changeset)}

@@ -97,7 +97,7 @@ defmodule BanchanWeb.SettingsLive do
             :info,
             "Your handle has been updated. Please log in again."
           )
-          |> push_redirect(to: Routes.login_path(Endpoint, :new))
+          |> push_navigate(to: Routes.login_path(Endpoint, :new))
 
         {:noreply, socket}
 
@@ -208,7 +208,7 @@ defmodule BanchanWeb.SettingsLive do
           )
 
         {:noreply,
-         push_redirect(socket,
+         push_navigate(socket,
            to:
              Routes.user_session_path(
                Endpoint,

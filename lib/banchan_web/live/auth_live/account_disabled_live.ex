@@ -13,7 +13,7 @@ defmodule BanchanWeb.AccountDisabledLive do
     user = socket.assigns.current_user && Repo.preload(socket.assigns.current_user, :disable_info)
 
     if is_nil(user) || is_nil(user.disable_info) do
-      {:ok, socket |> push_redirect(to: Routes.login_path(Endpoint, :new))}
+      {:ok, socket |> push_navigate(to: Routes.login_path(Endpoint, :new))}
     else
       {:ok, socket |> assign(current_user: user)}
     end

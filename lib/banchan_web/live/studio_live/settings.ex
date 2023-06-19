@@ -67,7 +67,7 @@ defmodule BanchanWeb.StudioLive.Settings do
           socket
           |> assign(changeset: Studio.settings_changeset(studio, %{}), studio: studio)
           |> put_flash(:info, "Settings updated")
-          |> push_redirect(to: Routes.studio_settings_path(Endpoint, :show, studio.handle))
+          |> push_navigate(to: Routes.studio_settings_path(Endpoint, :show, studio.handle))
 
         {:noreply, socket}
 
@@ -78,7 +78,7 @@ defmodule BanchanWeb.StudioLive.Settings do
         {:noreply,
          socket
          |> put_flash(:error, "You are not authorized to edit this studio")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
     end
@@ -103,7 +103,7 @@ defmodule BanchanWeb.StudioLive.Settings do
         {:noreply,
          socket
          |> put_flash(:info, "Studio archived")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -111,7 +111,7 @@ defmodule BanchanWeb.StudioLive.Settings do
         {:noreply,
          socket
          |> put_flash(:error, "An unexpected error occurred. Please try again later.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
     end
@@ -126,7 +126,7 @@ defmodule BanchanWeb.StudioLive.Settings do
         {:noreply,
          socket
          |> put_flash(:info, "Studio unarchived")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -134,7 +134,7 @@ defmodule BanchanWeb.StudioLive.Settings do
         {:noreply,
          socket
          |> put_flash(:error, "An unexpected error occurred. Please try again later.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
     end
@@ -150,7 +150,7 @@ defmodule BanchanWeb.StudioLive.Settings do
         {:noreply,
          socket
          |> put_flash(:info, "Studio has been successfully deleted.")
-         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.home_path(Endpoint, :index))}
 
       {:error, :pending_funds} ->
         {:noreply,
@@ -159,7 +159,7 @@ defmodule BanchanWeb.StudioLive.Settings do
            :error,
            "Can't delete a studio when funds are still pending either in invoices or in payouts."
          )
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -167,7 +167,7 @@ defmodule BanchanWeb.StudioLive.Settings do
         {:noreply,
          socket
          |> put_flash(:error, "Invalid password when trying to delete studio. Please try again.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -178,7 +178,7 @@ defmodule BanchanWeb.StudioLive.Settings do
            :error,
            "Something went wrong while marking the studio for deletion. Please try again later."
          )
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.studio_settings_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
     end

@@ -30,7 +30,7 @@ defmodule BanchanWeb.StudioLive.Index do
          :error,
          "You can't access this page because you don't have the `artist` role."
        )
-       |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+       |> push_navigate(to: Routes.home_path(Endpoint, :index))}
     end
   end
 

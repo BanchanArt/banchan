@@ -17,7 +17,7 @@ defmodule BanchanWeb.BetaLive.Signup do
          {:ok, _} <- Accounts.deliver_artist_invite_confirmation(req) do
       {:noreply,
        socket
-       |> push_redirect(to: Routes.beta_confirmation_path(Endpoint, :show))}
+       |> push_navigate(to: Routes.beta_confirmation_path(Endpoint, :show))}
     else
       {:error, _} ->
         {:noreply,

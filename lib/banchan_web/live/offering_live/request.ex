@@ -42,7 +42,7 @@ defmodule BanchanWeb.OfferingLive.Request do
           )
 
         {:noreply,
-         push_redirect(socket,
+         push_navigate(socket,
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -84,7 +84,7 @@ defmodule BanchanWeb.OfferingLive.Request do
           )
 
         {:noreply,
-         push_redirect(socket,
+         push_navigate(socket,
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
     end
@@ -202,7 +202,7 @@ defmodule BanchanWeb.OfferingLive.Request do
         socket = put_flash(socket, :error, "You can't do that because your account is disabled.")
 
         {:noreply,
-         push_redirect(socket,
+         push_navigate(socket,
            to: Routes.home_path(Endpoint, :index)
          )}
 
@@ -211,7 +211,7 @@ defmodule BanchanWeb.OfferingLive.Request do
           put_flash(socket, :error, "You are not allowed to create commissions from this studio.")
 
         {:noreply,
-         push_redirect(socket,
+         push_navigate(socket,
            to: Routes.home_path(Endpoint, :index)
          )}
 
@@ -224,7 +224,7 @@ defmodule BanchanWeb.OfferingLive.Request do
           )
 
         {:noreply,
-         push_redirect(socket,
+         push_navigate(socket,
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -237,7 +237,7 @@ defmodule BanchanWeb.OfferingLive.Request do
           )
 
         {:noreply,
-         push_redirect(socket,
+         push_navigate(socket,
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -250,7 +250,7 @@ defmodule BanchanWeb.OfferingLive.Request do
           )
 
         {:noreply,
-         push_redirect(socket,
+         push_navigate(socket,
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -263,7 +263,7 @@ defmodule BanchanWeb.OfferingLive.Request do
           )
 
         {:noreply,
-         push_redirect(socket,
+         push_navigate(socket,
            to:
              Routes.offering_show_path(
                Endpoint,
@@ -277,7 +277,7 @@ defmodule BanchanWeb.OfferingLive.Request do
         socket = put_flash(socket, :error, "No more slots are available for this commission.")
 
         {:noreply,
-         push_redirect(socket,
+         push_navigate(socket,
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
 
@@ -290,7 +290,7 @@ defmodule BanchanWeb.OfferingLive.Request do
           )
 
         {:noreply,
-         push_redirect(socket,
+         push_navigate(socket,
            to: Routes.studio_shop_path(Endpoint, :show, socket.assigns.studio.handle)
          )}
     end

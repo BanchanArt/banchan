@@ -47,7 +47,7 @@ defmodule BanchanWeb.StudioLive.New do
         )
 
       {:ok,
-       push_redirect(socket,
+       push_navigate(socket,
          to: Routes.confirmation_path(Endpoint, :show)
        )}
     else

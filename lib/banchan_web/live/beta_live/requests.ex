@@ -33,13 +33,13 @@ defmodule BanchanWeb.BetaLive.Requests do
         {:noreply,
          socket
          |> put_flash(:info, "Invites sent!")
-         |> push_redirect(to: Routes.beta_requests_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.beta_requests_path(Endpoint, :index))}
 
       {:error, reason} ->
         {:noreply,
          socket
          |> put_flash(:error, "Unexpected error while inviting batch: #{reason}")
-         |> push_redirect(to: Routes.beta_requests_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.beta_requests_path(Endpoint, :index))}
     end
   end
 
@@ -67,13 +67,13 @@ defmodule BanchanWeb.BetaLive.Requests do
         {:noreply,
          socket
          |> put_flash(:info, "Invite sent to #{req.email}")
-         |> push_redirect(to: Routes.beta_requests_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.beta_requests_path(Endpoint, :index))}
 
       {:error, err} ->
         {:noreply,
          socket
          |> put_flash(:error, "Unexpected error while inviting #{req.email}: #{err}")
-         |> push_redirect(to: Routes.beta_requests_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.beta_requests_path(Endpoint, :index))}
     end
   end
 

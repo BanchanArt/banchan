@@ -71,7 +71,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
              :error,
              "Something went wrong while processing your payment, please try again."
            )
-           |> push_redirect(
+           |> push_navigate(
              to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
            )}
       end
@@ -108,7 +108,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
            :error,
            "Something went wrong while expiring your payment, please try again."
          )
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
     end
@@ -141,7 +141,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         {:noreply,
          socket
          |> put_flash(:error, "You are blocked from further interaction with this studio.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
 
@@ -173,7 +173,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         {:noreply,
          socket
          |> put_flash(:error, "Failed to release invoice, possibly due to a state change")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
 
@@ -181,7 +181,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         {:noreply,
          socket
          |> put_flash(:error, "You are blocked from further interaction with this studio.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
          )}
 
@@ -189,7 +189,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         {:noreply,
          socket
          |> put_flash(:error, "You are not authorized to access that commission.")
-         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.home_path(Endpoint, :index))}
 
       {:error, :disabled} ->
         {:noreply,
@@ -198,7 +198,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
            :error,
            "You are not authorized to access that commission because your account has been disabled."
          )
-         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.home_path(Endpoint, :index))}
     end
   end
 

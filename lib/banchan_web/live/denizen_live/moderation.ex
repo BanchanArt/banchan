@@ -50,7 +50,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
       {:ok,
        socket
        |> put_flash(:error, "You are not authorized to access this page.")
-       |> push_redirect(to: Routes.denizen_show_path(Endpoint, :show, handle))}
+       |> push_navigate(to: Routes.denizen_show_path(Endpoint, :show, handle))}
     end
   end
 
@@ -77,7 +77,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
         {:noreply,
          socket
          |> put_flash(:info, "User updated.")
-         |> push_redirect(to: Routes.denizen_show_path(Endpoint, :show, user.handle))}
+         |> push_navigate(to: Routes.denizen_show_path(Endpoint, :show, user.handle))}
     end
   end
 
@@ -102,7 +102,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
         {:noreply,
          socket
          |> put_flash(:info, "User disabled.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.denizen_show_path(Endpoint, :show, socket.assigns.user.handle)
          )}
 
@@ -132,7 +132,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
         {:noreply,
          socket
          |> put_flash(:info, "User enabled.")
-         |> push_redirect(
+         |> push_navigate(
            to: Routes.denizen_show_path(Endpoint, :show, socket.assigns.user.handle)
          )}
 

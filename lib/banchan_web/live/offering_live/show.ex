@@ -83,7 +83,7 @@ defmodule BanchanWeb.OfferingLive.Show do
            :error,
            "You must be signed in to view mature offerings."
          )
-         |> push_redirect(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
+         |> push_navigate(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
 
       offering.mature && socket.assigns.current_user && !socket.assigns.current_user.mature_ok &&
         !socket.assigns.current_user_member? && !Accounts.mod?(socket.assigns.current_user) ->
@@ -93,7 +93,7 @@ defmodule BanchanWeb.OfferingLive.Show do
            :error,
            "This offering is marked as mature, but you have not enabled mature content. You can enable this in your user settings."
          )
-         |> push_redirect(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
+         |> push_navigate(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
 
       is_nil(offering.archived_at) || socket.assigns.current_user_member? ->
         {:noreply,
@@ -110,7 +110,7 @@ defmodule BanchanWeb.OfferingLive.Show do
         {:noreply,
          socket
          |> put_flash(:error, "This offering is unavailable.")
-         |> push_redirect(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
+         |> push_navigate(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
     end
   end
 

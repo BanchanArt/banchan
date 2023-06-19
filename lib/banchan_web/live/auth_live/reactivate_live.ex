@@ -16,7 +16,7 @@ defmodule BanchanWeb.ReactivateLive do
         {:noreply,
          socket
          |> put_flash(:info, "Your account has been reactivated. Welcome back!")
-         |> push_redirect(to: Routes.home_path(Endpoint, :index))}
+         |> push_navigate(to: Routes.home_path(Endpoint, :index))}
 
       {:error, _} ->
         {:noreply,
