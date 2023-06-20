@@ -2,7 +2,7 @@ defmodule BanchanWeb.ReportBugLive.New do
   @moduledoc """
   Lets users submit GitHub bugs without having GitHub accounts themselves.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Reports
 

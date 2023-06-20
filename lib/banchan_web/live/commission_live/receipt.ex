@@ -2,7 +2,7 @@ defmodule BanchanWeb.CommissionLive.Receipt do
   @moduledoc """
   Plain ol' view to render invoice receipts.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Commissions
   alias Banchan.Repo
@@ -27,7 +27,7 @@ defmodule BanchanWeb.CommissionLive.Receipt do
   def render(assigns) do
     ~F"""
     <div class="prose">
-      {raw(Phoenix.View.render_to_string(BanchanWeb.Email.CommissionsView, "receipt.html", assigns))}
+      {raw(Phoenix.View.render_to_string(BanchanWeb.Email.Commissions, "receipt.html", assigns))}
     </div>
     """
   end

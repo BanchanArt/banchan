@@ -46,7 +46,7 @@ defmodule Banchan.Workers.Mailer do
       to: recipient,
       subject: subject
     )
-    |> Bamboo.Phoenix.put_html_layout({BanchanWeb.LayoutView, "email.html"})
+    |> Bamboo.Phoenix.put_html_layout({BanchanWeb.Email.LayoutHTML, "email"})
     |> then(&Bamboo.Phoenix.render_email(view, &1, template, assigns))
   end
 

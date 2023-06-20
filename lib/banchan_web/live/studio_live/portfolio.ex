@@ -2,7 +2,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
   @moduledoc """
   Portfolio tab page for a studio.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   import BanchanWeb.StudioLive.Helpers
 

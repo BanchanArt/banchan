@@ -1,8 +1,8 @@
-defmodule BanchanWeb.Email.AccountsView do
+defmodule BanchanWeb.Email.Accounts do
   @moduledoc """
   Rendering emails related to the Accounts context.
   """
-  use BanchanWeb, :view
+  use BanchanWeb, :html
 
   def render("confirmation_instructions.html", assigns) do
     ~F"""

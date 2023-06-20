@@ -2,7 +2,7 @@ defmodule BanchanWeb.LoginLive do
   @moduledoc """
   Account Login
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
   on_mount BanchanWeb.UserLiveAuth
 
   alias Surface.Components.{Form, Link, LiveRedirect}

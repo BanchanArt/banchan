@@ -2,7 +2,7 @@ defmodule BanchanWeb.BetaLive.Signup do
   @moduledoc """
   LiveView for the Banchan beta signup form.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Accounts
 

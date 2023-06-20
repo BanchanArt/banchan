@@ -2,7 +2,7 @@ defmodule BanchanWeb.SetupMfaLive do
   @moduledoc """
   Account Setup MFA
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.Form
 

@@ -2,7 +2,7 @@ defmodule BanchanWeb.OfferingLive.Show do
   @moduledoc """
   Shows details about an offering.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   import BanchanWeb.StudioLive.Helpers
 

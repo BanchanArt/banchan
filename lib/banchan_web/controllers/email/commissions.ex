@@ -1,5 +1,8 @@
-defmodule BanchanWeb.Email.CommissionsView do
-  use BanchanWeb, :view
+defmodule BanchanWeb.Email.Commissions do
+  @moduledoc """
+  Rendering emails related to the Commissions context.
+  """
+  use BanchanWeb, :html
 
   alias Banchan.Commissions
 

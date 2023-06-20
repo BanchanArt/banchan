@@ -13,7 +13,7 @@ defmodule Banchan.Accounts.Notifications do
     Mailer.new_email(
       user.email,
       "Confirm Your Banchan Art Email",
-      BanchanWeb.Email.AccountsView,
+      BanchanWeb.Email.Accounts,
       :confirmation_instructions,
       user: user,
       url: url
@@ -28,7 +28,7 @@ defmodule Banchan.Accounts.Notifications do
     Mailer.new_email(
       user.email,
       "Reset Your Banchan Art Email",
-      BanchanWeb.Email.AccountsView,
+      BanchanWeb.Email.Accounts,
       :reset_password_instructions,
       user: user,
       url: url
@@ -43,7 +43,7 @@ defmodule Banchan.Accounts.Notifications do
     Mailer.new_email(
       user.email,
       "Update Your Banchan Art Email",
-      BanchanWeb.Email.AccountsView,
+      BanchanWeb.Email.Accounts,
       :update_email_instructions,
       user: user,
       url: url
@@ -58,7 +58,7 @@ defmodule Banchan.Accounts.Notifications do
     Mailer.new_email(
       email,
       "You're invited to be an artist on Banchan Art!",
-      BanchanWeb.Email.AccountsView,
+      BanchanWeb.Email.Accounts,
       :artist_invite,
       url: url
     )
@@ -72,7 +72,7 @@ defmodule Banchan.Accounts.Notifications do
     Mailer.new_email(
       email,
       "You're signed up for the Banchan Art artist beta!",
-      BanchanWeb.Email.AccountsView,
+      BanchanWeb.Email.Accounts,
       :invite_request_confirmation
     )
     |> Mailer.deliver()

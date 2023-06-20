@@ -2,7 +2,7 @@ defmodule BanchanWeb.BetaLive.Requests do
   @moduledoc """
   LiveView for managing beta invites.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Accounts
   alias Banchan.Accounts.InviteRequest

@@ -2,7 +2,7 @@ defmodule BanchanWeb.ReportLive.Index do
   @moduledoc """
   List/search/filter abuse reports.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Reports
   alias Banchan.Reports.ReportFilter

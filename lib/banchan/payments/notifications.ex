@@ -212,7 +212,7 @@ defmodule Banchan.Payments.Notifications do
     Mailer.new_email(
       client.email,
       "Banchan Art Receipt for #{commission.title}",
-      BanchanWeb.Email.CommissionsView,
+      BanchanWeb.Email.Commissions,
       :receipt,
       invoice: invoice |> Repo.preload([:event]),
       commission: commission |> Repo.preload([:line_items]),

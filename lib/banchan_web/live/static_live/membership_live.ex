@@ -2,7 +2,7 @@ defmodule BanchanWeb.StaticLive.Membership do
   @moduledoc """
   Banchan Membership Page
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.Markdown
 

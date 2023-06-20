@@ -2,7 +2,7 @@ defmodule BanchanWeb.StudioLive.Index do
   @moduledoc """
   Generic listing of your own studios, plus the ability to create new ones.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Studios
 

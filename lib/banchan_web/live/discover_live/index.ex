@@ -2,7 +2,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
   @moduledoc """
   General search and discovery page.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.{Form, LivePatch}
   alias Surface.Components.Form.{Field, Select, Submit, TextInput}

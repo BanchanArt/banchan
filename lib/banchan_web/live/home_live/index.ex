@@ -2,7 +2,7 @@ defmodule BanchanWeb.HomeLive do
   @moduledoc """
   Banchan Homepage
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Offerings
   alias Banchan.Studios

@@ -1,8 +1,8 @@
-defmodule BanchanWeb.Email.StudiosView do
+defmodule BanchanWeb.Email.Studios do
   @moduledoc """
   Rendering emails related to the Studios context.
   """
-  use BanchanWeb, :view
+  use BanchanWeb, :html
 
   def render("studio_deleted.html", assigns) do
     ~F"""
