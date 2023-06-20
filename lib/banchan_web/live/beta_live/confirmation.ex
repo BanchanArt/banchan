@@ -2,7 +2,7 @@ defmodule BanchanWeb.BetaLive.Confirmation do
   @moduledoc """
   Confirmation page for beta signup.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.LiveRedirect
 

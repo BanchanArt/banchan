@@ -2,7 +2,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
   @moduledoc """
   Banchan user profile pages
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.Form
 

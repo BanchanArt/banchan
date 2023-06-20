@@ -3,7 +3,7 @@ defmodule BanchanWeb.StudioLive.Components.FollowerCountLive do
   Follower count LiveView. It's a LiveView because components can't receive
   PubSub messages.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.LiveRedirect
 

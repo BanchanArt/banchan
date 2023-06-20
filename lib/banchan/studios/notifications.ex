@@ -188,7 +188,7 @@ defmodule Banchan.Studios.Notifications do
         Mailer.new_email(
           member.email,
           "Your Studio has been successfully deleted",
-          BanchanWeb.Email.StudiosView,
+          BanchanWeb.Email.Studios,
           :studio_deleted,
           actor: actor,
           member: member,

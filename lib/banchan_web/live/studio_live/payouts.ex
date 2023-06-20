@@ -2,7 +2,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
   @moduledoc """
   Studio payouts page.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   import BanchanWeb.StudioLive.Helpers
 

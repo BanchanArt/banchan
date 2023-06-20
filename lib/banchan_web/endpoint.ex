@@ -11,7 +11,8 @@ defmodule BanchanWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_banchan_key",
-    signing_salt: "sgxg5EhZ"
+    signing_salt: "sgxg5EhZ",
+    same_site: "Lax"
   ]
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]

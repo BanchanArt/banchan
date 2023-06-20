@@ -2,7 +2,7 @@ defmodule BanchanWeb.StudioLive.Disabled do
   @moduledoc """
   LiveView people get redirected to when the studio is disabled.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   import BanchanWeb.StudioLive.Helpers
 

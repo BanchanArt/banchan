@@ -2,7 +2,7 @@ defmodule BanchanWeb.StaticLive.TermsAndConditions do
   @moduledoc """
   Banchan Terms and Conditions Page
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.Markdown
 

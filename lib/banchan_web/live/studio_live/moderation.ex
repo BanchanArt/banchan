@@ -2,7 +2,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
   @moduledoc """
   Admin-level studio editing, such as changing platform fees, disabling, etc.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.Form
 

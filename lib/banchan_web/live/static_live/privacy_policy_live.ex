@@ -2,7 +2,7 @@ defmodule BanchanWeb.StaticLive.PrivacyPolicy do
   @moduledoc """
   Banchan Privacy Policy
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.Markdown
 

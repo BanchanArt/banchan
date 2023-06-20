@@ -2,7 +2,7 @@ defmodule BanchanWeb.ConfirmationLive do
   @moduledoc """
   Account Email Confirmation
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.Form
 

@@ -2,7 +2,7 @@ defmodule BanchanWeb.OfferingLive.Request do
   @moduledoc """
   Subpage for creating a new commission based on an offering type.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, LineItem}

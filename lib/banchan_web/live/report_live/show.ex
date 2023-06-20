@@ -2,7 +2,7 @@ defmodule BanchanWeb.ReportLive.Show do
   @moduledoc """
   Shows report details and allows editing.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Reports
   alias Banchan.Reports.Report

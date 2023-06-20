@@ -2,7 +2,7 @@ defmodule BanchanWeb.StudioLive.New do
   @moduledoc """
   New studio creation page.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   import Slug
   alias Surface.Components.Form

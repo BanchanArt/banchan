@@ -2,7 +2,7 @@ defmodule BanchanWeb.DenizenLive.Show do
   @moduledoc """
   Banchan denizen profile pages
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Accounts
   alias Banchan.Studios

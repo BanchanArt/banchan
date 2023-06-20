@@ -2,7 +2,7 @@ defmodule BanchanWeb.SettingsLive do
   @moduledoc """
   Account settings page
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.{Form, LiveRedirect}
 

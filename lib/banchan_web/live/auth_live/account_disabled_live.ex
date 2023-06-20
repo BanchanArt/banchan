@@ -2,7 +2,7 @@ defmodule BanchanWeb.AccountDisabledLive do
   @moduledoc """
   Page shown to disabled users.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Repo
 

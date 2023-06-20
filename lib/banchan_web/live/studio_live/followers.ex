@@ -2,7 +2,7 @@ defmodule BanchanWeb.StudioLive.Followers do
   @moduledoc """
   LiveView for the studio followers listing.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.LiveRedirect
 

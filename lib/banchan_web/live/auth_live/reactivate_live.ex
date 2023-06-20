@@ -2,7 +2,7 @@ defmodule BanchanWeb.ReactivateLive do
   @moduledoc """
   Account reactivation page.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Accounts
 

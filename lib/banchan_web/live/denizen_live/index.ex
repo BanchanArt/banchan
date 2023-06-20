@@ -2,7 +2,7 @@ defmodule BanchanWeb.DenizenLive.Index do
   @moduledoc """
   Global listing of users.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Banchan.Accounts
   alias Banchan.Accounts.UserFilter

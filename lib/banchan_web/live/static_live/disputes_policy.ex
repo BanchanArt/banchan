@@ -2,7 +2,7 @@ defmodule BanchanWeb.StaticLive.DisputesPolicy do
   @moduledoc """
   Banchan Disputes Policy Page
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.Markdown
 

@@ -2,7 +2,7 @@ defmodule BanchanWeb.CommissionLive do
   @moduledoc """
   Artist dashboard
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.Form
   alias Surface.Components.Form.{Field, Submit}

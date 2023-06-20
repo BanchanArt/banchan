@@ -23,9 +23,29 @@ defmodule BanchanWeb do
     favicon-32x32.png mstile-150x150.png site.webmanifest .well-known
   )
 
+  def router do
+    quote do
+      use Phoenix.Router
+
+      import Plug.Conn
+      import Phoenix.Controller
+      import Phoenix.LiveView.Router
+    end
+  end
+
+  def channel do
+    quote do
+      use Phoenix.Channel
+      import BanchanWeb.Gettext
+    end
+  end
+
   def controller do
     quote do
-      use Phoenix.Controller, namespace: BanchanWeb
+      use Phoenix.Controller,
+        namespace: BanchanWeb,
+        formats: [:html, :json],
+        layouts: [html: BanchanWeb.Layouts]
 
       import Plug.Conn
       import BanchanWeb.Gettext
@@ -37,26 +57,25 @@ defmodule BanchanWeb do
     end
   end
 
-  def view do
+  def html do
     quote do
-      use Phoenix.View,
-        root: "lib/banchan_web/templates",
-        namespace: BanchanWeb
+      use Phoenix.Component
 
       # Import convenience functions from controllers
       import Phoenix.Controller,
-        only: [get_flash: 1, get_flash: 2, view_module: 1, view_template: 1]
+        only: [get_csrf_token: 0, view_module: 1, view_template: 1]
 
-      # Include shared imports and aliases for views
-      unquote(view_helpers())
+      # Include general helpers for rendering HTML
+      unquote(html_helpers())
+      import Surface
     end
   end
 
-  def surface_view do
+  def live_view do
     quote do
       use Surface.LiveView
 
-      unquote(view_helpers())
+      unquote(html_helpers())
 
       alias Banchan.Accounts.User
 
@@ -101,7 +120,7 @@ defmodule BanchanWeb do
     quote do
       use Surface.Component, unquote(args)
 
-      unquote(view_helpers())
+      unquote(html_helpers())
     end
   end
 
@@ -109,28 +128,11 @@ defmodule BanchanWeb do
     quote do
       use Surface.LiveComponent, unquote(args)
 
-      unquote(view_helpers())
+      unquote(html_helpers())
     end
   end
 
-  def router do
-    quote do
-      use Phoenix.Router
-
-      import Plug.Conn
-      import Phoenix.Controller
-      import Phoenix.LiveView.Router
-    end
-  end
-
-  def channel do
-    quote do
-      use Phoenix.Channel
-      import BanchanWeb.Gettext
-    end
-  end
-
-  defp view_helpers do
+  defp html_helpers do
     quote do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
@@ -140,6 +142,8 @@ defmodule BanchanWeb do
 
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
+
+      alias Phoenix.LiveView.JS
 
       import BanchanWeb.ErrorHelpers
       import BanchanWeb.Gettext

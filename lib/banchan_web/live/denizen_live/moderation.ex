@@ -2,7 +2,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
   @moduledoc """
   Admin-level user editing, such as changing roles, disabling, and such.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.Form
 

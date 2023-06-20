@@ -2,7 +2,7 @@ defmodule BanchanWeb.StudioLive.About do
   @moduledoc """
   LiveView for viewing individual Studios
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias BanchanWeb.Components.Markdown
 

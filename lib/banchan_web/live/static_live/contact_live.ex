@@ -2,7 +2,7 @@ defmodule BanchanWeb.StaticLive.Contact do
   @moduledoc """
   Banchan Contact Page
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.Markdown
 

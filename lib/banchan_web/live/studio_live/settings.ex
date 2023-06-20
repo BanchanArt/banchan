@@ -2,7 +2,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   @moduledoc """
   Banchan studio settings editing.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias Surface.Components.{Form, Link}
 

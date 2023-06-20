@@ -2,7 +2,7 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   @moduledoc """
   LiveView for creating new studio offerings.
   """
-  use BanchanWeb, :surface_view
+  use BanchanWeb, :live_view
 
   alias BanchanWeb.StudioLive.Components
 
