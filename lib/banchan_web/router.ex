@@ -3,7 +3,7 @@ defmodule BanchanWeb.Router do
 
   import BanchanWeb.UserAuth
   import Phoenix.LiveDashboard.Router
-  # import Surface.Catalogue.Router
+  import Surface.Catalogue.Router
 
   alias BanchanWeb.{BasicAuthPlug, EnsureEnabledPlug, EnsureRolePlug}
 
@@ -16,11 +16,12 @@ defmodule BanchanWeb.Router do
                                   "img-src 'self' blob: data:;" <>
                                   "font-src data:;"
 
+                              # The cloudflare URLs are to get the Surface catalogue displaying right.
                               _ ->
-                                "default-src 'self' 'unsafe-eval' 'unsafe-inline';" <>
+                                "default-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdnjs.cloudflare.com;" <>
                                   "connect-src ws://#{@host}:* blob:;" <>
                                   "img-src 'self' blob: data:;" <>
-                                  "font-src data:;"
+                                  "font-src data: https://cdnjs.cloudflare.com;"
                             end)
 
   pipeline :browser do
@@ -248,8 +249,20 @@ defmodule BanchanWeb.Router do
     live_dashboard("/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo)
     forward("/sent_emails", Bamboo.SentEmailViewerPlug)
 
+    # Moved out of /admin until a Surface Catalogue bug is fixed. See below.
     # if Application.compile_env!(:banchan, :env) == :dev do
     #   surface_catalogue("/catalogue")
     # end
+  end
+
+  scope "/" do
+    pipe_through([
+      :basic_authed,
+      :browser
+    ])
+
+    if Application.compile_env!(:banchan, :env) == :dev do
+      surface_catalogue("/catalogue")
+    end
   end
 end

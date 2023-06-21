@@ -40,17 +40,15 @@ defmodule Banchan.MixProject do
   end
 
   # Specifies which paths to compile per environment.
-  # ++ catalogues()
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
-  # ++ catalogues()
-  defp elixirc_paths(:dev), do: ["lib"]
+  defp elixirc_paths(:test), do: ["lib", "test/support"] ++ catalogues()
+  defp elixirc_paths(:dev), do: ["lib"] ++ catalogues()
   defp elixirc_paths(_), do: ["lib"]
 
-  # def catalogues do
-  #   [
-  #     "priv/catalogue"
-  #   ]
-  # end
+  def catalogues do
+    [
+      "priv/catalogue"
+    ]
+  end
 
   # Specifies your project dependencies.
   #
@@ -100,8 +98,7 @@ defmodule Banchan.MixProject do
       {:ssl_verify_fun, "~> 1.1.7", manager: :rebar3, override: true},
       {:stripity_stripe, "~> 2.17.3"},
       {:surface, "~> 0.11.0"},
-      # TODO: Not compatible with Surface 0.11 yet.
-      # {:surface_catalogue, "~> 0.6.0"},
+      {:surface_catalogue, "~> 0.6.1"},
       {:surface_markdown, "~> 0.6.1"},
       {:sweet_xml, "~> 0.7.3"},
       {:telemetry_metrics, "~> 0.6.1"},

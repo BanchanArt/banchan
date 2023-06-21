@@ -1,11 +1,15 @@
 defmodule BanchanWeb.Components.ButtonPlayground do
-  # use Surface.Catalogue.Playground,
-  #   subject: BanchanWeb.Components.Button,
-  #   height: "100px"
+  @moduledoc """
+  Catalogue playground for the `<Button>` component.
+  """
 
-  #   @props []
+  use Surface.Catalogue.Playground,
+    subject: BanchanWeb.Components.Button,
+    height: "100px"
 
-  #   @slots [
-  #     default: "My button"
-  #   ]
+    @props []
+
+    @slots [
+      default: "My button"
+    ]
 end
