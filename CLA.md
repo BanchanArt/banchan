@@ -96,3 +96,4 @@ The undersigned have all agreed to this CLA:
 * Daniel Kukula (@dkuku)
 * James Bromley (@jayber)
 * Ryan Shipp (@rshipp)
+* Serra Allgood (@serra-allgood)
