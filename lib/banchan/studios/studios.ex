@@ -30,7 +30,7 @@ defmodule Banchan.Studios do
   alias Banchan.Uploads.Upload
   alias Banchan.Workers.{EnableStudio, Thumbnailer, UploadDeleter}
 
-  use Phoenix.VerifiedRoutes, endpoint: BanchanWeb.Endpoint, router: BanchanWeb.Router
+  use BanchanWeb, :verified_routes
 
   @host Application.compile_env!(:banchan, [BanchanWeb.Endpoint, :url, :host])
 

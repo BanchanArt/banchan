@@ -12,7 +12,7 @@ defmodule Banchan.Offerings.Notifications do
   alias Banchan.Uploads.Upload
 
   # Unfortunate, but needed for crafting URLs for notifications
-  use Phoenix.VerifiedRoutes, endpoint: BanchanWeb.Endpoint, router: BanchanWeb.Router
+  use BanchanWeb, :verified_routes
 
   @pubsub Banchan.PubSub
 

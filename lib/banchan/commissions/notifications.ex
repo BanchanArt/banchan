@@ -13,7 +13,7 @@ defmodule Banchan.Commissions.Notifications do
   alias Banchan.Studios.{Studio, StudioSubscription}
 
   # Unfortunate, but needed for crafting URLs for notifications
-  use Phoenix.VerifiedRoutes, endpoint: BanchanWeb.Endpoint, router: BanchanWeb.Router
+  use BanchanWeb, :verified_routes
 
   @pubsub Banchan.PubSub
 
