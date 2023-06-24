@@ -11,7 +11,10 @@ defmodule BanchanWeb.Router do
 
   @content_security_policy (case Application.compile_env!(:banchan, :env) do
                               :prod ->
-                                "default-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src wss://#{@host};img-src 'self' blob: data:; font-src data:;"
+                                "default-src 'self' 'unsafe-eval' 'unsafe-inline';" <>
+                                  "connect-src wss://#{@host};" <>
+                                  "img-src 'self' blob: data:;" <>
+                                  "font-src data:;"
 
                               _ ->
                                 "default-src 'self' 'unsafe-eval' 'unsafe-inline';" <>
