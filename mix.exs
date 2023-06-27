@@ -132,7 +132,7 @@ defmodule Banchan.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
+      setup: ["deps.get", "ecto.setup", "cmd --cd assets npm install"],
       "deploy.dev": [
         "cmd fly deploy -a banchan-dev --build-arg BANCHAN_HOST=dev.banchan.art --build-arg BANCHAN_DEPLOY_ENV=dev"
       ],
