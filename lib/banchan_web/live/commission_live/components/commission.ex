@@ -220,16 +220,16 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             <StatusBox id={@id <> "-status-box"} />
             <div class="divider" />
             <div class="text-lg font-medium">Summary</div>
+            <Collapse id="summary-details" class="px-2">
+              <:header><div class="font-medium">Details:</div></:header>
+              <SummaryEditor id={@id <> "-summary-editor"} allow_edits={@current_user_member?} />
+            </Collapse>
             <BalanceBox
               id={@id <> "-balance-box"}
               default_currency={Studios.default_currency(@commission.studio)}
               deposited={@deposited}
               line_items={@commission.line_items}
             />
-            <Collapse id="summary-details" class="px-2">
-              <:header><div class="font-medium">Details:</div></:header>
-              <SummaryEditor id={@id <> "-summary-editor"} allow_edits={@current_user_member?} />
-            </Collapse>
             {#if @current_user_member?}
               <div class="divider" />
               <InvoiceCollapse id={@id <> "-invoice-collapse"} />
