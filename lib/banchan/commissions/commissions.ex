@@ -398,7 +398,7 @@ defmodule Banchan.Commissions do
           i in Invoice,
           where:
             i.commission_id == ^commission.id and
-              i.status == :succeeded,
+              i.status in [:succeeded, :released],
           select: i.amount
         )
         |> Repo.all()
