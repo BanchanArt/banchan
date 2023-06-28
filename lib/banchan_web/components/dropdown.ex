@@ -1,0 +1,23 @@
+defmodule BanchanWeb.Components.Dropdown do
+  @moduledoc """
+  Non-form dropdown with fancier features than Select. Meant more for things
+  like dropdowns that change things and such.
+  """
+  use BanchanWeb, :component
+
+  prop class, :css_class
+  prop label, :string, required: true
+
+  slot default
+
+  def render(assigns) do
+    ~F"""
+    <details class="dropdown">
+      <summary class="m-1 btn">{@label}</summary>
+      <ul class="shadow menu dropdown-content z-[1] bg-base-200 rounded-box w-52">
+        <#slot />
+      </ul>
+    </details>
+    """
+  end
+end
