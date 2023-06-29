@@ -7,13 +7,17 @@ defmodule BanchanWeb.Components.Dropdown do
 
   prop class, :css_class
   prop label, :string, required: true
+  prop show_caret?, :boolean
 
   slot default
 
   def render(assigns) do
     ~F"""
     <details class="dropdown">
-      <summary class="m-1 btn">{@label}</summary>
+      <summary class="m-1 btn">
+        {@label}
+        <i class="fas fa-chevron-down ml-2" :if={@show_caret?} />
+      </summary>
       <ul class="shadow menu dropdown-content z-[1] bg-base-200 rounded-box w-52">
         <#slot />
       </ul>
