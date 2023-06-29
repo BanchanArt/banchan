@@ -248,10 +248,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             {bottom_buttons(assigns, false)}
             {#if @commission.terms}
               <div class="divider" />
-              <Collapse id="terms-collapse">
-                <:header>Commission Terms</:header>
-                <Markdown content={@commission.terms} />
-              </Collapse>
+              <div class="rounded-lg shadow-lg bg-base-200 p-4">
+                <Collapse id="terms-collapse">
+                  <:header>Commission Terms</:header>
+                  <Markdown content={@commission.terms} />
+                </Collapse>
+              </div>
             {/if}
           </div>
         </div>
