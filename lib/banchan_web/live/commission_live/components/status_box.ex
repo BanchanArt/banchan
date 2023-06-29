@@ -62,37 +62,22 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
           <StatusItem
             click="update_status"
             status={:accepted}
-            commission={@commission}
-            current_user_member?={@current_user_member?}
-            current_user={@current_user}
           />
           <StatusItem
             click="update_status"
             status={:rejected}
-            commission={@commission}
-            current_user_member?={@current_user_member?}
-            current_user={@current_user}
           />
           <StatusItem
             click="update_status"
             status={:paused}
-            commission={@commission}
-            current_user_member?={@current_user_member?}
-            current_user={@current_user}
           />
           <StatusItem
             click="update_status"
             status={:in_progress}
-            commission={@commission}
-            current_user_member?={@current_user_member?}
-            current_user={@current_user}
           />
           <StatusItem
             click="update_status"
             status={:waiting}
-            commission={@commission}
-            current_user_member?={@current_user_member?}
-            current_user={@current_user}
           />
         </Dropdown>
         <div

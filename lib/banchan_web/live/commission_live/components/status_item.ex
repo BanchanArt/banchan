@@ -11,9 +11,9 @@ defmodule BanchanWeb.CommissionLive.Components.StatusItem do
 
   prop status, :atom, required: true
   prop click, :event, required: true
-  prop current_user_member?, :boolean, required: true
-  prop current_user, :struct, required: true
-  prop commission, :struct, required: true
+  prop current_user, :struct, from_context: :current_user
+  prop current_user_member?, :boolean, from_context: :current_user_member?
+  prop commission, :struct, from_context: :commission
 
   def render(assigns) do
     ~F"""
