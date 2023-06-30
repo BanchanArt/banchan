@@ -10,6 +10,7 @@ defmodule Banchan.Offerings.Offering do
   alias Banchan.Commissions.Commission
   alias Banchan.Offerings.{GalleryImage, OfferingOption}
   alias Banchan.Repo
+  alias Banchan.Studios
   alias Banchan.Studios.Studio
   alias Banchan.Uploads.Upload
 
@@ -27,6 +28,7 @@ defmodule Banchan.Offerings.Offering do
     field :archived_at, :naive_datetime
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
+    field :currency, Ecto.Enum, values: Studios.Common.supported_currencies(), virtual: true
     field :deleted_at, :naive_datetime
 
     field :option_prices, {:array, Money.Ecto.Composite.Type}, virtual: true
@@ -64,6 +66,7 @@ defmodule Banchan.Offerings.Offering do
       :index,
       :name,
       :description,
+      :currency,
       :open,
       :slots,
       :max_proposals,
@@ -90,12 +93,25 @@ defmodule Banchan.Offerings.Offering do
     |> validate_length(:description, max: 500)
     |> validate_length(:terms, max: 1500)
     |> validate_length(:template, max: 1500)
+    |> validate_option_currencies()
     |> validate_tags()
     |> unsafe_validate_unique([:type, :studio_id], Repo)
     |> validate_length(:tags, max: 5)
     |> foreign_key_constraint(:card_img_id)
     |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])
+  end
+
+  def validate_option_currencies(changeset) do
+    curr = fetch_field!(changeset, :currency)
+    changeset
+    |> validate_change(:options, fn _, opts ->
+      if opts |> Enum.filter(& &1.action in [:update, :insert]) |> Enum.all?(&(fetch_field!(&1, :price).currency == curr)) do
+        []
+      else
+        [{:currency, "All options must use the configured currency on the offering."}]
+      end
+    end)
   end
 
   @doc """
