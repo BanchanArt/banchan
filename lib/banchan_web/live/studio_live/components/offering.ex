@@ -497,10 +497,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                 <TextInput name={:name} info="Name of the option." opts={required: true} />
                 <TextArea name={:description} info="Description for the option." opts={required: true} />
                 <div class="flex flex-row gap-2 items-center py-2">
-                  <div class="flex flex-basis-1/4">{
-                    currency = (@changeset |> Ecto.Changeset.fetch_field!(:options) |> Enum.at(index)).price.currency
-                    to_string(currency) <> Money.Currency.symbol(currency)
-                  }</div>
+                  <div class="flex flex-basis-1/4">{currency = (@changeset |> Ecto.Changeset.fetch_field!(:options) |> Enum.at(index)).price.currency
+                    to_string(currency) <> Money.Currency.symbol(currency)}</div>
                   <div class="grow">
                     <TextInput
                       name={:price}

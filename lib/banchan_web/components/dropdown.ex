@@ -14,7 +14,7 @@ defmodule BanchanWeb.Components.Dropdown do
   def render(assigns) do
     ~F"""
     <details class="dropdown">
-      <summary class="m-1 btn">
+      <summary class={@class}>
         {@label}
         <i class="fas fa-chevron-down ml-2" :if={@show_caret?} />
       </summary>

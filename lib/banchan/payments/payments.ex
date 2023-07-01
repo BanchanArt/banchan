@@ -73,6 +73,20 @@ defmodule Banchan.Payments do
   end
 
   @doc """
+  Gets the final invoice for a commission, if one exists.
+  """
+  def final_invoice(%Commission{} = commission) do
+    from(i in Invoice,
+      where:
+        i.commission_id == ^commission.id and i.final == true and
+          i.status in [:succeeded, :released, :pending, :submitted],
+      order_by: [desc: i.inserted_at],
+      limit: 1
+    )
+    |> Repo.one()
+  end
+
+  @doc """
   True if a given invoice has been paid. Expects an already-loaded invoice
   with the latest data.
   """
@@ -218,7 +232,7 @@ defmodule Banchan.Payments do
   @doc """
   Creates a new invoice.
   """
-  def invoice(%User{} = actor, %Commission{} = commission, drafts, event_data) do
+  def invoice(%User{} = actor, %Commission{} = commission, drafts, event_data, final? \\ false) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
       actor = Repo.reload(actor)
@@ -230,6 +244,13 @@ defmodule Banchan.Payments do
         {:error, :unauthorized}
       end
     end)
+    |> Ecto.Multi.run(:existing_final?, fn _repo, _ ->
+      if final_invoice(commission) do
+        {:error, :final_invoice_already_exists}
+      else
+        {:ok, true}
+      end
+    end)
     |> Ecto.Multi.run(:event, fn _repo, %{checked_actor: actor} ->
       Commissions.create_event(:comment, actor, commission, true, drafts, event_data)
     end)
@@ -237,7 +258,8 @@ defmodule Banchan.Payments do
       %Invoice{
         client_id: commission.client_id,
         commission: commission,
-        event: event
+        event: event,
+        final: final?
       }
       |> Invoice.creation_changeset(event_data)
     end)
@@ -718,6 +740,11 @@ defmodule Banchan.Payments do
           }
         )
 
+        if invoice.final do
+          release_all_payments(client, commission)
+          Commissions.update_status(client, commission, :approved)
+        end
+
         if client.email do
           Notifications.send_receipt(invoice, client, commission)
         end
@@ -726,6 +753,43 @@ defmodule Banchan.Payments do
       end)
 
     :ok
+  end
+
+  defp release_all_payments(%User{} = actor, %Commission{} = commission) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:actor, fn _, _ ->
+      Commissions.check_actor_edit_access(actor, commission)
+    end)
+    |> Ecto.Multi.update_all(
+      :invoices,
+      fn %{actor: actor} ->
+        from(i in Invoice,
+          join: c in assoc(i, :commission),
+          where: c.client_id == ^actor.id and i.status == :succeeded,
+          select: i
+        )
+      end,
+      set: [status: :released]
+    )
+    |> Ecto.Multi.all(:events, fn _ ->
+      from(e in Event,
+        join: i in assoc(e, :invoice),
+        where: e.commission_id == ^commission.id and i.commission_id == ^commission.id,
+        select: e,
+        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
+      )
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{events: events, actor: actor, invoices: {_, invoices}}} ->
+        Enum.each(events, fn event ->
+          Commissions.Notifications.commission_event_updated(commission, event, actor)
+        end)
+        {:ok, invoices}
+
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """

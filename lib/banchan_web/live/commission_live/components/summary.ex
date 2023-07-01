@@ -12,6 +12,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   prop studio, :struct, required: true
   prop line_items, :list, required: true
   prop allow_edits, :boolean, default: false
+  prop show_options, :boolean, default: true
   prop offering, :struct
   prop add_item, :event
   prop remove_item, :event
@@ -39,7 +40,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                 type="button"
                 disabled="true"
                 title="This item cannot be removed"
-                class="w-8 place-self-center text-xl fas fa-thumbtack"
+                class="w-8 place-self-center text-xl fas fa-check"
               />
             {/if}
             <div class="grow w-full flex flex-col">
@@ -50,7 +51,8 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
           </li>
         {/for}
       </ul>
-      {#if @offering &&
+      {#if @show_options &&
+          @offering &&
           Enum.any?(@offering.options, fn option ->
             option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))
           end)}

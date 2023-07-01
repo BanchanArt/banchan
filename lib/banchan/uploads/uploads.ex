@@ -57,6 +57,13 @@ defmodule Banchan.Uploads do
   end
 
   @doc """
+  Convert an error atom to a human-readable error message.
+  """
+  def error_to_string(:too_large), do: "Too large"
+  def error_to_string(:too_many_files), do: "You have selected too many files"
+  def error_to_string(:not_accepted), do: "You have selected an unsupported file type"
+
+  @doc """
   Fetches an upload by its (binary) id, throwing if the Upload does not exist.
   """
   def get_by_id!(id) do

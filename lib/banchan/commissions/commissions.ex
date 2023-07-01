@@ -785,29 +785,14 @@ defmodule Banchan.Commissions do
               end
             end
 
-            if commission.status == :approved do
-              # Release any successful deposits.
-              from(i in Invoice,
-                where: i.commission_id == ^commission.id and i.status == :succeeded
-              )
-              |> Repo.update_all(set: [status: :released])
-
-              from(e in Event,
-                join: i in assoc(e, :invoice),
-                where: i.commission_id == ^commission.id and i.status == :released,
-                select: e,
-                preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
-              )
-              |> Repo.all()
-              |> Enum.each(fn ev ->
-                Notifications.commission_event_updated(commission, ev, actor)
-              end)
-            end
-
             # current_user_member? is checked as part of check_status_transition!
             with {:ok, _event} <-
                    create_event(:status, actor, commission, true, [], %{status: status}) do
               Notifications.commission_status_changed(commission, actor)
+
+              if commission.status == :approved do
+                Notifications.commission_approved(commission)
+              end
 
               {:ok, commission}
             end
@@ -847,22 +832,18 @@ defmodule Banchan.Commissions do
   def status_transition_allowed?(true, _, :submitted, :rejected), do: true
   def status_transition_allowed?(true, _, :accepted, :in_progress), do: true
   def status_transition_allowed?(true, _, :accepted, :paused), do: true
-  def status_transition_allowed?(true, _, :accepted, :ready_for_review), do: true
   def status_transition_allowed?(true, _, :in_progress, :paused), do: true
   def status_transition_allowed?(true, _, :in_progress, :waiting), do: true
-  def status_transition_allowed?(true, _, :in_progress, :ready_for_review), do: true
   def status_transition_allowed?(true, _, :paused, :in_progress), do: true
   def status_transition_allowed?(true, _, :paused, :waiting), do: true
   def status_transition_allowed?(true, _, :waiting, :in_progress), do: true
   def status_transition_allowed?(true, _, :waiting, :paused), do: true
-  def status_transition_allowed?(true, _, :waiting, :ready_for_review), do: true
-  def status_transition_allowed?(true, _, :ready_for_review, :in_progress), do: true
   def status_transition_allowed?(true, _, :approved, :accepted), do: true
   def status_transition_allowed?(true, _, :withdrawn, :accepted), do: true
   def status_transition_allowed?(true, _, :rejected, :accepted), do: true
 
   # Transition changes clients can make
-  def status_transition_allowed?(_, true, :ready_for_review, :approved), do: true
+  def status_transition_allowed?(_, true, _, :approved), do: true
   def status_transition_allowed?(_, true, :withdrawn, :submitted), do: true
 
   # Either party can withdraw a commission

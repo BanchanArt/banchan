@@ -20,6 +20,7 @@ defmodule Banchan.Payments.Invoice do
     field :payout_available_on, :utc_datetime
     field :paid_on, :utc_datetime
     field :required, :boolean
+    field :final, :boolean
 
     field :refund_status, Ecto.Enum,
       values: [

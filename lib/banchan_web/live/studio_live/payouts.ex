@@ -208,6 +208,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
                 </div>
               {/if}
               <Button
+                class="my-2"
                 click="fypm"
                 disabled={@fypm_pending || is_nil(@balance) || !payout_possible?(@balance.available)}
               >

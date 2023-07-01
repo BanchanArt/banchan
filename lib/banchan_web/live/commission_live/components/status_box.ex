@@ -54,38 +54,19 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   def render(assigns) do
     ~F"""
     <div class="flex flex-col gap-2 w-full">
-      <div class="flex flex-row gap-2 items-center">
-        <div class="text-xl font-medium">
-          Status:
-        </div>
-        <Dropdown show_caret? label={Commissions.Common.humanize_status(@commission.status)}>
-          <StatusItem
-            click="update_status"
-            status={:accepted}
-          />
-          <StatusItem
-            click="update_status"
-            status={:rejected}
-          />
-          <StatusItem
-            click="update_status"
-            status={:paused}
-          />
-          <StatusItem
-            click="update_status"
-            status={:in_progress}
-          />
-          <StatusItem
-            click="update_status"
-            status={:waiting}
-          />
-        </Dropdown>
-        <div
-          class="tooltip md:tooltip-left"
-          data-tip={Commissions.Common.status_description(@commission.status)}
-        >
-          <i class="fas fa-info-circle" />
-        </div>
+      <Dropdown
+        show_caret?
+        class="btn"
+        label={Commissions.Common.humanize_status(@commission.status)}
+      >
+        <StatusItem click="update_status" status={:accepted} />
+        <StatusItem click="update_status" status={:rejected} />
+        <StatusItem click="update_status" status={:paused} />
+        <StatusItem click="update_status" status={:in_progress} />
+        <StatusItem click="update_status" status={:waiting} />
+      </Dropdown>
+      <div class="text-md">
+        {Commissions.Common.status_description(@commission.status)}
       </div>
     </div>
     """

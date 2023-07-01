@@ -11,16 +11,18 @@ defmodule BanchanWeb.Email.Commissions do
   def render("receipt.html", assigns) do
     estimate = Commissions.line_item_estimate(assigns.commission.line_items)
 
+    default_currency = Enum.at(assigns.commission.line_items, 0).amount.currency
+
     deposited =
       if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        [Money.new(0, assigns.default_currency)]
+        [Money.new(0, default_currency)]
       else
         assigns.deposited |> Map.values()
       end
 
     tipped =
       if is_nil(assigns.tipped) || Enum.empty?(assigns.tipped) do
-        [Money.new(0, assigns.default_currency)]
+        [Money.new(0, default_currency)]
       else
         assigns.tipped |> Map.values()
       end
@@ -99,16 +101,18 @@ defmodule BanchanWeb.Email.Commissions do
   def render("receipt.text", assigns) do
     estimate = Commissions.line_item_estimate(assigns.commission.line_items)
 
+    default_currency = Enum.at(assigns.commission.line_items, 0).amount.currency
+
     deposited =
       if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        [Money.new(0, assigns.default_currency)]
+        [Money.new(0, default_currency)]
       else
         assigns.deposited |> Map.values()
       end
 
     tipped =
       if is_nil(assigns.tipped) || Enum.empty?(assigns.tipped) do
-        [Money.new(0, assigns.default_currency)]
+        [Money.new(0, default_currency)]
       else
         assigns.tipped |> Map.values()
       end

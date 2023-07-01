@@ -332,6 +332,40 @@ defmodule Banchan.Commissions.Notifications do
     end)
   end
 
+  @doc """
+  Sends out web/email notifications only, when a commission has been finalized
+  and all invoices have been released.
+  """
+  def commission_approved(%Commission{} = commission, actor \\ nil) do
+    # No need for a broadcast. That's already being handled by commission_event_updated
+    Notifications.with_task(fn ->
+      {:ok, _} =
+        Repo.transaction(fn ->
+          subs = subscribers(commission)
+
+          url = url(~p"/commissions/#{commission.public_id}")
+
+          body = "The commission has been approved. All deposits and attachments have been released."
+          {:safe, safe_url} = Phoenix.HTML.html_escape(url)
+
+          Notifications.notify_subscribers!(
+            actor,
+            subs,
+            %Notifications.UserNotification{
+              type: "commission_approved",
+              title: commission.title,
+              short_body: body,
+              text_body: "#{body}\n\n#{url}",
+              html_body: "<p>#{body}</p><p><a href=\"#{safe_url}\">View it</a></p>",
+              url: url,
+              read: false
+            },
+            is_reply: true
+          )
+        end)
+    end)
+  end
+
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
   end
