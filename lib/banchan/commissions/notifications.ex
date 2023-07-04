@@ -345,7 +345,9 @@ defmodule Banchan.Commissions.Notifications do
 
           url = url(~p"/commissions/#{commission.public_id}")
 
-          body = "The commission has been approved. All deposits and attachments have been released."
+          body =
+            "The commission has been approved. All deposits and attachments have been released."
+
           {:safe, safe_url} = Phoenix.HTML.html_escape(url)
 
           Notifications.notify_subscribers!(

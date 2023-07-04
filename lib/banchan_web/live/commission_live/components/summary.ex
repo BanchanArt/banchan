@@ -9,7 +9,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   alias BanchanWeb.Components.Collapse
   alias BanchanWeb.Components.Form.{HiddenInput, Select, Submit, TextArea, TextInput}
 
-  prop studio, :struct, required: true
+  prop studio, :struct
   prop line_items, :list, required: true
   prop allow_edits, :boolean, default: false
   prop show_options, :boolean, default: true
@@ -25,7 +25,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   def render(assigns) do
     ~F"""
     <div class="flex flex-col">
-      <ul class="flex flex-col pt-2">
+      <ul class="flex flex-col">
         {#for {item, idx} <- Enum.with_index(@line_items)}
           <li class="flex flex-row p-2 gap-2">
             {#if @allow_edits && !item.sticky}

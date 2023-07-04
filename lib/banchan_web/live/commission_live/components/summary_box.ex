@@ -10,7 +10,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
   alias Banchan.Commissions.Event
   alias Banchan.Payments
   alias Banchan.Repo
-  alias Banchan.Studios
   alias Banchan.Uploads
   alias Banchan.Utils
 
@@ -67,7 +66,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
        changeset: Event.invoice_changeset(%Event{}, %{}),
        currency: Enum.at(socket.assigns.commission.line_items, 0).amount.currency,
        studio: studio,
-       final_invoice: final_invoice && (final_invoice |> Repo.preload(:event)),
+       final_invoice: final_invoice && final_invoice |> Repo.preload(:event),
        deposited:
          Commissions.deposited_amount(
            socket.assigns.current_user,
@@ -172,7 +171,11 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
            socket.assigns.current_user,
            socket.assigns.commission,
            attachments,
-           Map.put(event, "amount", Ecto.Changeset.fetch_field!(socket.assigns.changeset, :amount)),
+           Map.put(
+             event,
+             "amount",
+             Ecto.Changeset.fetch_field!(socket.assigns.changeset, :amount)
+           ),
            true
          ) do
       {:ok, _event} ->
@@ -214,7 +217,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
         <div class="divider" />
         <BalanceBox
           id={@id <> "-balance-box"}
-          default_currency={Studios.default_currency(@commission.studio)}
           deposited={@deposited}
           line_items={@commission.line_items}
           amount_due
@@ -246,27 +248,47 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
         <div class="text-lg font-medium pb-2">Summary</div>
         <Collapse id={@id <> "-summary-details"} class="px-2">
           <:header><div class="font-medium">Details:</div></:header>
-          <SummaryEditor id={@id <> "-summary-editor"} allow_edits={@current_user_member?} />
+          <SummaryEditor
+            id={@id <> "-summary-editor"}
+            allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
+            show_options={Commissions.commission_open?(@commission)}
+          />
         </Collapse>
         <BalanceBox
           id={@id <> "-balance-box"}
-          default_currency={Studios.default_currency(@commission.studio)}
           deposited={@deposited}
           line_items={@commission.line_items}
         />
-        <div class="input-group">
-          {#if @current_user_member?}
-            <Button disabled={@final_invoice} click="request_deposit" class="btn-sm grow" label="Request Deposit" />
-            <Button disabled={@final_invoice} click="final_invoice" class="btn-sm grow" label="Final Invoice" />
-          {/if}
-        </div>
-        {#if @current_user.id == @commission.client_id}
-          <Button disabled={@final_invoice} click="release_deposit" class="btn-sm grow" label="Release Deposit" />
-        {/if}
-        {#if @final_invoice}
-          <div>
-            You can't take any further invoice actions until the <a class="link link-primary" href={"#event-#{@final_invoice.event.public_id}"}>pending final invoice</a> is handled.
+        {#if @commission.status != :approved}
+          <div class="input-group">
+            {#if @current_user_member?}
+              <Button
+                disabled={@final_invoice}
+                click="request_deposit"
+                class="btn-sm grow"
+                label="Request Deposit"
+              />
+              <Button
+                disabled={@final_invoice}
+                click="final_invoice"
+                class="btn-sm grow"
+                label="Final Invoice"
+              />
+            {/if}
           </div>
+          {#if @current_user.id == @commission.client_id}
+            <Button
+              disabled={@final_invoice}
+              click="release_deposit"
+              class="btn-sm grow"
+              label="Release Deposit"
+            />
+          {/if}
+          {#if @final_invoice}
+            <div>
+              You can't take any further invoice actions until the <a class="link link-primary" href={"#event-#{@final_invoice.event.public_id}"}>pending final invoice</a> is handled.
+            </div>
+          {/if}
         {/if}
       {/if}
     </div>

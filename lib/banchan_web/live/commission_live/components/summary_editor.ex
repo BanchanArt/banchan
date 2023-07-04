@@ -17,6 +17,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   prop current_user, :struct, from_context: :current_user
   prop current_user_member?, :boolean, from_context: :current_user_member?
   prop allow_edits, :boolean, required: true
+  prop show_options, :boolean, default: true
 
   data studio, :struct
   data custom_changeset, :struct
@@ -210,6 +211,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       line_items={@commission.line_items}
       offering={@commission.offering}
       allow_edits={@allow_edits}
+      show_options={@show_options}
       add_item="add_item"
       remove_item="remove_item"
       custom_changeset={@custom_changeset}

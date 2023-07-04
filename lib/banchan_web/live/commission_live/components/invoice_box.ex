@@ -4,14 +4,16 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   """
   use BanchanWeb, :live_component
 
+  alias Banchan.Commissions
   alias Banchan.Commissions.Event
   alias Banchan.Payments
   alias Banchan.Utils
 
   alias Surface.Components.{Form, LiveRedirect}
 
+  alias BanchanWeb.CommissionLive.Components.{BalanceBox, Summary}
   alias BanchanWeb.Components.{Button, Modal}
-  alias BanchanWeb.Components.Form.{Submit, TextInput}
+  alias BanchanWeb.Components.Form.{HiddenInput, Submit, TextInput}
 
   prop current_user_member?, :boolean, from_context: :current_user_member?
   prop current_user, :struct, from_context: :current_user
@@ -214,7 +216,19 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   def render(assigns) do
     ~F"""
-    <div class="flex flex-col invoice-box">
+    <div class="flex flex-col items-center invoice-box px-2">
+      {!-- # NOTE: Older invoices don't have these fields, so we need to check for them here. --}
+      {#if @event.invoice.line_items && @event.invoice.deposited}
+        <div class="max-w-md">
+          <Summary line_items={@event.invoice.line_items} show_options={false} />
+          <BalanceBox
+            id={@id <> "-balance-box"}
+            line_items={@event.invoice.line_items}
+            deposited={%{@event.invoice.deposited.currency => @event.invoice.deposited}}
+          />
+        </div>
+        <div class="divider" />
+      {/if}
       {!-- Invoice box --}
       <div class="place-self-center stats">
         <div class="stat">
@@ -223,12 +237,16 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               {#if @current_user.id == @commission.client_id}
                 <div class="stat-title">Payment Requested</div>
                 <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
-                <div class="stat-desc">Please consider adding a tip!</div>
+                <div :if={@event.invoice.final} class="stat-desc">Please consider adding a tip!</div>
                 <Form for={@changeset} class="stat-actions flex flex-col gap-2" change="change" submit="submit">
-                  <div class="flex flex-row gap-2">
-                    {Money.Currency.symbol(@event.invoice.amount)}
-                    <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
-                  </div>
+                  {#if @event.invoice.final}
+                    <div class="flex flex-row gap-2">
+                      {Money.Currency.symbol(@event.invoice.amount)}
+                      <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
+                    </div>
+                  {#else}
+                    <HiddenInput name={:amount} value="0" />
+                  {/if}
                   <Submit class="pay-invoice btn-sm w-full" changeset={@changeset} label="Pay" />
                   {#if @current_user_member?}
                     <Button
@@ -257,7 +275,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-title">Payment in Process</div>
               <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
+                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
               <div class="stat-actions">
                 <div class="flex flex-col gap-2">
@@ -277,7 +297,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
             {#match :expired}
               <div class="stat-title text-warning">Payment session expired.</div>
               <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
-              <div class="stat-desc">You'll need to start a new session.</div>
+              <div class="stat-desc">You'll need to start a new invoice.</div>
             {#match :succeeded}
               <div class="stat-title">Payment Succeeded</div>
               <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>

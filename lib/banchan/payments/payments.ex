@@ -255,13 +255,36 @@ defmodule Banchan.Payments do
       Commissions.create_event(:comment, actor, commission, true, drafts, event_data)
     end)
     |> Ecto.Multi.insert(:invoice, fn %{event: event} ->
+      currency = Enum.at(commission.line_items, 0).amount.currency
+
+      deposited =
+        Map.get(Commissions.deposited_amount(actor, commission, true), currency) ||
+          Money.new(0, currency)
+
       %Invoice{
         client_id: commission.client_id,
         commission: commission,
         event: event,
         final: final?
       }
-      |> Invoice.creation_changeset(event_data)
+      |> Invoice.creation_changeset(
+        event_data
+        |> Map.put(
+          "line_items",
+          Enum.map(
+            commission.line_items,
+            &%{
+              "name" => &1.name,
+              "description" => &1.description,
+              "amount" => %{
+                "amount" => &1.amount.amount,
+                "currency" => &1.amount.currency
+              }
+            }
+          )
+        )
+        |> Map.put("deposited", deposited)
+      )
     end)
     |> Repo.transaction()
     |> case do
@@ -785,6 +808,7 @@ defmodule Banchan.Payments do
         Enum.each(events, fn event ->
           Commissions.Notifications.commission_event_updated(commission, event, actor)
         end)
+
         {:ok, invoices}
 
       {:error, _, error, _} ->

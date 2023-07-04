@@ -7,7 +7,6 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
 
   alias Banchan.Commissions
 
-  prop default_currency, :atom, required: true
   prop line_items, :list, required: true
   prop deposited, :struct
   prop amount_due, :boolean, default: false
@@ -21,22 +20,22 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
 
     deposited =
       if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        [Money.new(0, assigns.default_currency)]
+        [Money.new(0, estimate.currency)]
       else
         assigns.deposited |> Map.values()
       end
 
     remaining =
       if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        Map.values(estimate)
+        [estimate]
       else
         assigns.deposited
-        |> Enum.map(fn {currency, amount} ->
-          Money.subtract(Map.get(estimate, currency, Money.new(0, currency)), amount)
+        |> Enum.map(fn {_currency, amount} ->
+          Money.subtract(estimate, amount)
         end)
       end
 
-    estimate = Map.values(estimate)
+    estimate = [estimate]
 
     {:ok,
      socket

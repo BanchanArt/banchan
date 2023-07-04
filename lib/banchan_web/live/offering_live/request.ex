@@ -321,11 +321,7 @@ defmodule BanchanWeb.OfferingLive.Request do
                 studio={@studio}
               />
               <div class="pt-6">
-                <BalanceBox
-                  id="balance-box"
-                  default_currency={@studio.default_currency}
-                  line_items={@line_items}
-                />
+                <BalanceBox id="balance-box" line_items={@line_items} />
               </div>
             </div>
             <div class="divider md:hidden" />

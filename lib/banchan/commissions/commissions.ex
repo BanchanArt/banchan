@@ -473,21 +473,23 @@ defmodule Banchan.Commissions do
   end
 
   @doc """
+  Gets the currency used for the commission.
+  """
+  def commission_currency(%Commission{} = commission) do
+    Enum.at(commission.line_items, 0).amount.currency
+  end
+
+  @doc """
   Calculates the total commission cost based on the current line items.
   """
   def line_item_estimate(line_items) do
+    currency = Enum.at(line_items, 0).amount.currency
+
     Enum.reduce(
       line_items,
-      %{},
+      Money.new(0, currency),
       fn item, acc ->
-        current =
-          Map.get(
-            acc,
-            item.amount.currency,
-            Money.new(0, item.amount.currency)
-          )
-
-        Map.put(acc, item.amount.currency, Money.add(current, item.amount))
+        Money.add(acc, item.amount)
       end
     )
   end
@@ -838,7 +840,6 @@ defmodule Banchan.Commissions do
   def status_transition_allowed?(true, _, :paused, :waiting), do: true
   def status_transition_allowed?(true, _, :waiting, :in_progress), do: true
   def status_transition_allowed?(true, _, :waiting, :paused), do: true
-  def status_transition_allowed?(true, _, :approved, :accepted), do: true
   def status_transition_allowed?(true, _, :withdrawn, :accepted), do: true
   def status_transition_allowed?(true, _, :rejected, :accepted), do: true
 

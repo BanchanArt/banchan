@@ -75,7 +75,10 @@ defmodule Banchan.Commissions.Common do
     do: "The studio is waiting for a response from the client before continuing work."
 
   def status_description(:ready_for_review), do: "The studio is waiting for a final review."
-  def status_description(:approved), do: "The commission has received final approval."
+
+  def status_description(:approved),
+    do:
+      "The commission has received final approval and all payments and attachments have been released."
 
   def status_description(:withdrawn),
     do: "The client has withdrawn this commission. It is now closed."

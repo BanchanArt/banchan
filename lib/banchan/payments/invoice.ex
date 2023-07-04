@@ -14,6 +14,7 @@ defmodule Banchan.Payments.Invoice do
     field :stripe_charge_id, :string
     field :amount, Money.Ecto.Composite.Type
     field :tip, Money.Ecto.Composite.Type
+    field :deposited, Money.Ecto.Composite.Type
     field :platform_fee, Money.Ecto.Composite.Type
     field :total_charged, Money.Ecto.Composite.Type
     field :total_transferred, Money.Ecto.Composite.Type
@@ -62,6 +63,12 @@ defmodule Banchan.Payments.Invoice do
 
     many_to_many :payouts, Banchan.Payments.Payout, join_through: "invoices_payouts"
 
+    embeds_many :line_items, LineItem do
+      field :amount, Money.Ecto.Map.Type
+      field :name, :string
+      field :description, :string
+    end
+
     timestamps()
   end
 
@@ -75,9 +82,11 @@ defmodule Banchan.Payments.Invoice do
 
   def creation_changeset(payment, attrs) do
     payment
-    |> cast(attrs, [:amount, :required])
+    |> cast(attrs, [:amount, :required, :deposited])
+    |> cast_embed(:line_items, with: &line_item_changeset/2, required: true)
     |> validate_money(:amount)
-    |> validate_required([:amount])
+    |> validate_money(:deposited)
+    |> validate_required([:amount, :deposited])
   end
 
   @doc false
@@ -100,6 +109,7 @@ defmodule Banchan.Payments.Invoice do
       :checkout_url,
       :status
     ])
+    |> validate_money(:amount)
     |> validate_money(:tip)
     |> validate_money(:platform_fee)
     |> validate_required([
@@ -109,6 +119,17 @@ defmodule Banchan.Payments.Invoice do
       :stripe_session_id,
       :checkout_url,
       :status
+    ])
+  end
+
+  defp line_item_changeset(schema, params) do
+    schema
+    |> cast(params, [:amount, :name, :description])
+    |> validate_money(:amount)
+    |> validate_required([
+      :amount,
+      :name,
+      :description
     ])
   end
 end
