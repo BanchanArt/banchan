@@ -9,35 +9,20 @@ defmodule BanchanWeb.Email.Commissions do
   alias BanchanWeb.Components.Markdown
 
   def render("receipt.html", assigns) do
-    estimate = Commissions.line_item_estimate(assigns.commission.line_items)
+    estimate = Commissions.line_item_estimate(assigns.invoice.line_items)
 
-    default_currency = Enum.at(assigns.commission.line_items, 0).amount.currency
+    default_currency = estimate.currency
 
-    deposited =
-      if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        [Money.new(0, default_currency)]
-      else
-        assigns.deposited |> Map.values()
-      end
+    deposited = assigns.deposited || Money.new(0, default_currency)
 
     tipped =
       if is_nil(assigns.tipped) || Enum.empty?(assigns.tipped) do
-        [Money.new(0, default_currency)]
+        Money.new(0, default_currency)
       else
-        assigns.tipped |> Map.values()
+        assigns.tipped |> Map.values() |> Enum.at(0)
       end
 
-    remaining =
-      if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        Map.values(estimate)
-      else
-        assigns.deposited
-        |> Enum.map(fn {currency, amount} ->
-          Money.subtract(Map.get(estimate, currency, Money.new(0, currency)), amount)
-        end)
-      end
-
-    estimate = Map.values(estimate)
+    remaining = Money.subtract(estimate, deposited)
 
     ~F"""
     <h2>Banchan Art Payment Receipt</h2>
@@ -49,7 +34,7 @@ defmodule BanchanWeb.Email.Commissions do
         <th>Description</th>
         <th>Amount</th>
       </tr>
-      {#for item <- @commission.line_items}
+      {#for item <- @invoice.line_items}
         <tr>
           <td>{item.name}</td>
           <td>{item.description}</td>
@@ -64,70 +49,39 @@ defmodule BanchanWeb.Email.Commissions do
       </tr>
       <tr>
         <td colspan="2">Paid to Date</td>
-        <td>
-          {#for val <- deposited}
-            {Money.to_string(val)}
-          {/for}
-        </td>
+        <td>{Money.to_string(deposited)}</td>
       </tr>
       <tr>
         <td colspan="2">Quote</td>
-        <td>
-          {#for val <- estimate}
-            {Money.to_string(val)}
-          {/for}
-        </td>
+        <td>{Money.to_string(estimate)}</td>
       </tr>
       <tr>
         <td colspan="2">Balance</td>
-        <td>
-          {#for val <- remaining}
-            {Money.to_string(val)}
-          {/for}
-        </td>
+        <td>{Money.to_string(remaining)}</td>
       </tr>
       <tr>
-        <td colspan="2">Additional Tips</td>
-        <td>
-          {#for val <- tipped}
-            {Money.to_string(val)}
-          {/for}
-        </td>
+        <td colspan="2">Additional Tip</td>
+        <td>{Money.to_string(tipped)}</td>
       </tr>
     </table>
     """
   end
 
   def render("receipt.text", assigns) do
-    estimate = Commissions.line_item_estimate(assigns.commission.line_items)
+    estimate = Commissions.line_item_estimate(assigns.invoice.line_items)
 
-    default_currency = Enum.at(assigns.commission.line_items, 0).amount.currency
+    default_currency = estimate.currency
 
-    deposited =
-      if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        [Money.new(0, default_currency)]
-      else
-        assigns.deposited |> Map.values()
-      end
+    deposited = assigns.deposited || Money.new(0, default_currency)
 
     tipped =
       if is_nil(assigns.tipped) || Enum.empty?(assigns.tipped) do
-        [Money.new(0, default_currency)]
+        Money.new(0, default_currency)
       else
-        assigns.tipped |> Map.values()
+        assigns.tipped |> Map.values() |> Enum.at(0)
       end
 
-    remaining =
-      if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        Map.values(estimate)
-      else
-        assigns.deposited
-        |> Enum.map(fn {currency, amount} ->
-          Money.subtract(Map.get(estimate, currency, Money.new(0, currency)), amount)
-        end)
-      end
-
-    estimate = Map.values(estimate)
+    remaining = Money.subtract(estimate, deposited)
 
     """
     Banchan Art Payment Receipt
@@ -140,15 +94,15 @@ defmodule BanchanWeb.Email.Commissions do
 
     Line Items:
 
-    #{assigns.commission.line_items |> Enum.map_join("\n", fn item -> """
+    #{assigns.invoice.line_items |> Enum.map_join("\n", fn item -> """
       * #{item.name} - #{Money.to_string(item.amount)}
         #{item.description}
       """ end)}
     Invoice Charged: #{Money.to_string(assigns.invoice.total_charged)}
-    Paid to Date: #{deposited |> Enum.map_join(" + ", &Money.to_string(&1))}
-    Quote: #{estimate |> Enum.map_join(" + ", &Money.to_string(&1))}
-    Balance: #{remaining |> Enum.map_join(" + ", &Money.to_string(&1))}
-    Additional Tips: #{tipped |> Enum.map_join(" + ", &Money.to_string(&1))}
+    Paid to Date: #{Money.to_string(deposited)}
+    Quote: #{Money.to_string(estimate)}
+    Balance: #{Money.to_string(remaining)}
+    Additional Tip: #{Money.to_string(tipped)}
     """
   end
 end

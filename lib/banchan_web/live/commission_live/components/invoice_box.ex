@@ -376,10 +376,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         </span>
       {#elseif @event.invoice.status == :succeeded}
         <span class="italic p-4 text-xs">
-          Note: Banchan.Art will hold all funds for this commission until a final draft is approved. (<LiveRedirect
-            class="link font-semibold"
-            to={Routes.commission_receipt_path(Endpoint, :show, @commission.public_id, @event.public_id)}
-          >Receipt</LiveRedirect>)
+          Note: Banchan.Art will hold all funds for this commission until a final draft is approved.
         </span>
       {#elseif @event.invoice.status == :released}
         <span class="italic p-4 text-xs">
@@ -389,10 +386,6 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               to={Routes.studio_payouts_path(Endpoint, :index, @commission.studio.handle)}
               class="link font-semibold"
             >Go to Studio Payouts</LiveRedirect>)
-            (<LiveRedirect
-              class="link font-semibold"
-              to={Routes.commission_receipt_path(Endpoint, :show, @commission.public_id, @event.public_id)}
-            >Receipt</LiveRedirect>)
           {/if}
         </span>
       {/if}
