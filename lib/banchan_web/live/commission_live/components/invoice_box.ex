@@ -216,17 +216,15 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   def render(assigns) do
     ~F"""
-    <div class="flex flex-col items-center invoice-box px-2">
+    <div class="flex flex-col invoice-box px-2">
       {!-- # NOTE: Older invoices don't have these fields, so we need to check for them here. --}
       {#if @event.invoice.line_items && @event.invoice.deposited}
-        <div class="max-w-md">
-          <Summary line_items={@event.invoice.line_items} show_options={false} />
-          <BalanceBox
-            id={@id <> "-balance-box"}
-            line_items={@event.invoice.line_items}
-            deposited={%{@event.invoice.deposited.currency => @event.invoice.deposited}}
-          />
-        </div>
+        <Summary line_items={@event.invoice.line_items} show_options={false} />
+        <BalanceBox
+          id={@id <> "-balance-box"}
+          line_items={@event.invoice.line_items}
+          deposited={%{@event.invoice.deposited.currency => @event.invoice.deposited}}
+        />
         <div class="divider" />
       {/if}
       {!-- Invoice box --}
