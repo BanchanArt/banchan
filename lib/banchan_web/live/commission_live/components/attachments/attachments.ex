@@ -2,7 +2,7 @@ defmodule BanchanWeb.CommissionLive.Components.Attachments do
   @moduledoc """
   Container for attachments, both for live uploads and for display.
   """
-  use BanchanWeb, :live_component
+  use BanchanWeb, :component
 
   alias Banchan.Uploads
 
@@ -11,6 +11,7 @@ defmodule BanchanWeb.CommissionLive.Components.Attachments do
   alias BanchanWeb.CommissionLive.Components.Attachments
   alias BanchanWeb.Components.Lightbox
 
+  prop id, :string, required: true
   prop upload, :struct
   prop cancel_upload, :event
 

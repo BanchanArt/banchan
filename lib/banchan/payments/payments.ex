@@ -87,6 +87,16 @@ defmodule Banchan.Payments do
   end
 
   @doc """
+  Returns a pending invoice, if any.
+  """
+  def open_invoice(%Commission{} = commission) do
+    from(i in Invoice,
+      where: i.commission_id == ^commission.id and i.status in [:pending, :submitted]
+    )
+    |> Repo.one()
+  end
+
+  @doc """
   True if a given invoice has been paid. Expects an already-loaded invoice
   with the latest data.
   """
@@ -244,9 +254,9 @@ defmodule Banchan.Payments do
         {:error, :unauthorized}
       end
     end)
-    |> Ecto.Multi.run(:existing_final?, fn _repo, _ ->
-      if final_invoice(commission) do
-        {:error, :final_invoice_already_exists}
+    |> Ecto.Multi.run(:existing_open?, fn _repo, _ ->
+      if open_invoice(commission) do
+        {:error, :existing_open_invoice}
       else
         {:ok, true}
       end
@@ -257,9 +267,20 @@ defmodule Banchan.Payments do
     |> Ecto.Multi.insert(:invoice, fn %{event: event} ->
       currency = Enum.at(commission.line_items, 0).amount.currency
 
+      estimate = Commissions.line_item_estimate(commission.line_items)
+
+      deposited_amounts = Commissions.deposited_amount(actor, commission, true)
+
       deposited =
-        Map.get(Commissions.deposited_amount(actor, commission, true), currency) ||
+        Map.get(deposited_amounts, currency) ||
           Money.new(0, currency)
+
+      remaining =
+        if Enum.empty?(deposited_amounts) do
+          estimate
+        else
+          Money.subtract(estimate, deposited)
+        end
 
       %Invoice{
         client_id: commission.client_id,
@@ -284,6 +305,8 @@ defmodule Banchan.Payments do
           )
         )
         |> Map.put("deposited", deposited)
+        |> Map.put("required", "true"),
+        remaining
       )
     end)
     |> Repo.transaction()
@@ -620,19 +643,28 @@ defmodule Banchan.Payments do
           tax_behavior: "exclusive"
         },
         quantity: 1
-      },
-      %{
-        price_data: %{
-          product_data: %{
-            name: "Extra Tip"
-          },
-          unit_amount: tip.amount,
-          currency: String.downcase(to_string(tip.currency)),
-          tax_behavior: "exclusive"
-        },
-        quantity: 1
       }
     ]
+
+    items =
+      if tip.amount > 0 do
+        items ++
+          [
+            %{
+              price_data: %{
+                product_data: %{
+                  name: "Extra Tip"
+                },
+                unit_amount: tip.amount,
+                currency: String.downcase(to_string(tip.currency)),
+                tax_behavior: "exclusive"
+              },
+              quantity: 1
+            }
+          ]
+      else
+        items
+      end
 
     Ecto.Multi.new()
     |> Ecto.Multi.one(

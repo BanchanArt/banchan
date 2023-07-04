@@ -23,7 +23,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   # NOTE: We're not actually going to create an event directly. We're just
   # punning off this for the changeset validation.
-  data changeset, :struct, default: %Event{} |> Event.amount_changeset(%{})
+  data changeset, :struct
 
   data release_modal_open, :boolean, default: false
 
@@ -31,6 +31,20 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
+  end
+
+  def update(assigns, socket) do
+    socket = socket |> assign(assigns)
+
+    {:ok,
+     socket
+     |> assign(
+       changeset:
+         %Event{}
+         |> Event.amount_changeset(%{
+           "amount" => Utils.moneyfy(0, socket.assigns.event.invoice.amount.currency)
+         })
+     )}
   end
 
   @impl true
@@ -374,7 +388,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         </span>
       {#elseif @event.invoice.status == :succeeded}
         <span class="italic p-4 text-xs">
-          Note: Banchan.Art will hold all funds for this commission until a final draft is approved.
+          Note: Banchan.Art will hold all funds for this commission until a final invoice is paid or the client releases them early.
         </span>
       {#elseif @event.invoice.status == :released}
         <span class="italic p-4 text-xs">

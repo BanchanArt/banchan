@@ -80,11 +80,11 @@ defmodule Banchan.Payments.Invoice do
     |> validate_required([:amount])
   end
 
-  def creation_changeset(payment, attrs) do
+  def creation_changeset(payment, attrs, %Money{} = remaining) do
     payment
     |> cast(attrs, [:amount, :required, :deposited])
     |> cast_embed(:line_items, with: &line_item_changeset/2, required: true)
-    |> validate_money(:amount)
+    |> validate_money(:amount, remaining)
     |> validate_money(:deposited)
     |> validate_required([:amount, :deposited])
   end

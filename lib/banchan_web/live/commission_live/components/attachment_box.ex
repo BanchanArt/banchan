@@ -33,7 +33,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
       <Lightbox id={@base_id <> "-attachment-box-lightbox"} class="flex flex-row flex-wrap gap-4 p-2">
         {#for attachment <- Enum.filter(@attachments, &(&1.thumbnail_id && !Uploads.video?(&1.upload)))}
           <div class="h-32 w-32">
-            {#if @pending_payment && !@current_user_member?}
+            {#if @pending_payment}
               <div
                 class="w-full h-full rounded-box bg-base-content flex justify-center items-center"
                 title={attachment.upload.name}
@@ -120,7 +120,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
       </Lightbox>
       <div class="flex flex-col p-2">
         {#for attachment <- Enum.filter(@attachments, &(!&1.thumbnail_id || Uploads.video?(&1.upload)))}
-          {#if @pending_payment && !@current_user_member?}
+          {#if @pending_payment}
             <div title={attachment.upload.name} class="border-2 p-4 m-1">
               <i class="float-right fas fa-lock" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
             </div>
