@@ -253,15 +253,15 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       mock_balance(studio, [Money.new(42_000, :USD), Money.new(64, :JPY)], [])
       process_final_payment!(comm1)
-      process_final_payment!(comm2)
+      process_final_payment!(comm2, Money.new(0, :JPY))
 
       {:ok, page_live, _html} =
         live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
 
       rendered = page_live |> element("#available") |> render()
 
-      assert rendered =~ "$420.00"
-      assert rendered =~ "¥64"
+      assert rendered =~ "$390.60"
+      assert rendered =~ "¥60"
     end
   end
 

@@ -58,11 +58,12 @@ defmodule Banchan.CommissionsFixtures do
         line_items,
         [],
         attrs
+        |> Map.delete(:line_items)
         |> Enum.into(%{
           title: "some title",
           description: "Some Description",
           tos_ok: true,
-          currency: :USD
+          currency: Enum.at(line_items, 0).amount.currency
         })
       )
 
