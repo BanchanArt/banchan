@@ -315,7 +315,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-title">Payment Succeeded</div>
               <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
+                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
               <div class="stat-actions">
                 <div class="flex flex-col gap-2">
@@ -339,13 +341,17 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-title">Payment Released to Studio</div>
               <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
+                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
             {#match :refunded}
               <div class="stat-title text-warning">Payment Refunded</div>
               <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
+                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
               <div class="stat-desc">Payment has been refunded to the client.</div>
             {#match nil}
