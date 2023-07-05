@@ -357,27 +357,26 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
             {/if}
           </div>
           {#if @current_user.id == @commission.client_id}
-            <Collapse
-              id={@id <> "-release-confirmation"}
-              show_arrow={false}
-              class="grow rounded-lg my-2 bg-base-200"
-            >
-              <:header>
-                <button type="button" class="btn btn-primary btn-sm w-full">
-                  Release Deposits
-                </button>
-              </:header>
-              <p>
-                All completed deposits will be <b class="font-bold">taken out of escrow</b> and sent to the studio, making them available for payout. You won't be able to ask for a refund from the studio for those invoices after this point.
-              </p>
-              <p class="py-2">Are you sure?</p>
-              <Button
-                disabled={@existing_open}
-                click="release_deposits"
-                class="btn-sm w-full"
-                label="Confirm"
-              />
-            </Collapse>
+            {#if @existing_open}
+              <Button disabled={@existing_open} class="btn-sm w-full" label="Release Deposits" />
+            {#else}
+              <Collapse
+                id={@id <> "-release-confirmation"}
+                show_arrow={false}
+                class="grow rounded-lg my-2 bg-base-200"
+              >
+                <:header>
+                  <button type="button" class="btn btn-primary btn-sm w-full">
+                    Release Deposits
+                  </button>
+                </:header>
+                <p>
+                  All completed deposits will be <b class="font-bold">taken out of escrow</b> and sent to the studio, making them available for payout. You won't be able to ask for a refund from the studio for those invoices after this point.
+                </p>
+                <p class="py-2">Are you sure?</p>
+                <Button click="release_deposits" class="btn-sm w-full" label="Confirm" />
+              </Collapse>
+            {/if}
           {/if}
           {#if @existing_open}
             <div>

@@ -396,7 +396,8 @@ defmodule Banchan.Offerings do
     offering.currency ||
       (
         options = Repo.preload(offering, :options).options
-        !Enum.empty?(options) && Enum.at(options, 0).price.currency) ||
+        !Enum.empty?(options) && Enum.at(options, 0).price.currency
+      ) ||
       from(
         s in Studio,
         where: s.id == ^offering.studio_id,
