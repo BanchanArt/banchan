@@ -145,9 +145,6 @@ defmodule Banchan.OfferingsTest do
       Commissions.update_status(artist, comm1 |> Repo.reload(), :in_progress)
       assert 2 == get_slots.()
 
-      Commissions.update_status(artist, comm1 |> Repo.reload(), :ready_for_review)
-      assert 2 == get_slots.()
-
       comm2 =
         commission_fixture(%{
           client: client,
@@ -202,7 +199,7 @@ defmodule Banchan.OfferingsTest do
       assert 0 == get_slots.()
 
       # We're still dealing with the overflow, so still 0
-      Commissions.update_status(client, comm1 |> Repo.reload(), :approved)
+      process_final_payment!(comm1)
       assert 0 == get_slots.()
 
       # Still can't make that comm...
@@ -221,8 +218,7 @@ defmodule Banchan.OfferingsTest do
                )
 
       # Give back slots one by one.
-      Commissions.update_status(artist, comm2 |> Repo.reload(), :ready_for_review)
-      Commissions.update_status(client, comm2 |> Repo.reload(), :approved)
+      process_final_payment!(comm2)
       assert 1 == get_slots.()
 
       # Still closed!
@@ -264,12 +260,10 @@ defmodule Banchan.OfferingsTest do
           }
         )
 
-      Commissions.update_status(artist, comm3 |> Repo.reload(), :ready_for_review)
-      Commissions.update_status(client, comm3 |> Repo.reload(), :approved)
+      process_final_payment!(comm3)
       assert 2 == get_slots.()
 
-      Commissions.update_status(artist, comm4 |> Repo.reload(), :ready_for_review)
-      Commissions.update_status(client, comm4 |> Repo.reload(), :approved)
+      process_final_payment!(comm4)
       assert 3 == get_slots.()
     end
   end
@@ -347,10 +341,7 @@ defmodule Banchan.OfferingsTest do
       Commissions.update_status(artist, comm1 |> Repo.reload(), :in_progress)
       assert 3 == Offerings.offering_available_proposals(offering)
 
-      Commissions.update_status(artist, comm1 |> Repo.reload(), :ready_for_review)
-      assert 3 == Offerings.offering_available_proposals(offering)
-
-      Commissions.update_status(client, comm1 |> Repo.reload(), :approved)
+      process_final_payment!(comm1)
       assert 3 == Offerings.offering_available_proposals(offering)
 
       comm2 =

@@ -13,7 +13,6 @@ defmodule Banchan.StudiosTest do
   import Banchan.CommissionsFixtures
   import Banchan.StudiosFixtures
 
-  alias Banchan.Commissions
   alias Banchan.Notifications
   alias Banchan.Payments
   alias Banchan.Payments.{Invoice, Payout}
@@ -290,40 +289,41 @@ defmodule Banchan.StudiosTest do
 
     test "basic payout" do
       commission = commission_fixture()
-      client = commission.client
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
-      amount = Money.new(420, :USD)
-      tip = Money.new(69, :USD)
 
       banchan_fee =
-        amount
-        |> Money.add(tip)
+        Money.new(10_000, :USD)
         |> Money.multiply(studio.platform_fee)
 
       net =
-        amount
-        |> Money.add(tip)
+        Money.new(10_000, :USD)
         |> Money.subtract(banchan_fee)
         |> Money.multiply(2)
+
+      total = Money.new(42_000, :USD)
+
+      total_net =
+        total
+        |> Money.subtract(Money.multiply(total, studio.platform_fee))
 
       # Two successful invoices and one expired one
       invoice =
         invoice_fixture(artist, commission, %{
-          "amount" => amount,
+          "amount" => Money.new(10_000, :USD),
           "text" => "please give me money :("
         })
 
-      sess = checkout_session_fixture(invoice, tip)
+      sess = checkout_session_fixture(invoice)
       succeed_mock_payment!(sess)
 
       invoice =
         invoice_fixture(artist, commission, %{
-          "amount" => amount,
+          "amount" => Money.new(10_000, :USD),
           "text" => "please give me money :("
         })
 
-      sess = checkout_session_fixture(invoice, tip)
+      sess = checkout_session_fixture(invoice)
       succeed_mock_payment!(sess)
 
       invoice =
@@ -335,7 +335,7 @@ defmodule Banchan.StudiosTest do
       assert {:ok, _} = Payments.expire_payment(artist, invoice)
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_balance, 4, fn opts ->
+      |> expect(:retrieve_balance, 2, fn opts ->
         assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
 
         {:ok,
@@ -367,14 +367,33 @@ defmodule Banchan.StudiosTest do
 
       assert {:ok, []} == Payments.payout_studio(artist, studio)
 
-      {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
-      {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
-      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :approved)
+      Banchan.StripeAPI.Mock
+      |> expect(:retrieve_balance, 2, fn opts ->
+        assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
+
+        {:ok,
+         %Stripe.Balance{
+           available: [
+             %{
+               currency: "usd",
+               amount: total_net.amount
+             }
+           ],
+           pending: [
+             %{
+               currency: "usd",
+               amount: 0
+             }
+           ]
+         }}
+      end)
+
+      process_final_payment!(commission)
 
       stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
 
       Banchan.StripeAPI.Mock
-      |> expect(:retrieve_charge, 2, fn _ ->
+      |> expect(:retrieve_charge, 3, fn _ ->
         {:ok,
          %Stripe.Charge{
            balance_transaction: %Stripe.BalanceTransaction{
@@ -386,7 +405,7 @@ defmodule Banchan.StudiosTest do
         assert %{"Stripe-Account" => studio.stripe_id} == Keyword.get(opts, :headers)
 
         assert %{
-                 amount: net.amount,
+                 amount: total_net.amount,
                  currency: "usd",
                  statement_descriptor: "Banchan Art Payout"
                } == params
@@ -401,11 +420,12 @@ defmodule Banchan.StudiosTest do
          }}
       end)
 
-      {:ok, [%Payout{amount: ^net, status: :pending}]} = Payments.payout_studio(artist, studio)
+      {:ok, [%Payout{amount: ^total_net, status: :pending}]} =
+        Payments.payout_studio(artist, studio)
 
       Notifications.wait_for_notifications()
 
-      assert [_, _, _, _, _, _, %_{type: "payout_sent"}] =
+      assert [_, _, _, _, _, _, _, _, _, _, %_{type: "payout_sent"}] =
                Notifications.unread_notifications(artist).entries |> Enum.sort_by(& &1.id)
 
       payout =
@@ -436,11 +456,11 @@ defmodule Banchan.StudiosTest do
       # that the payment has been completed.
       {:ok, balance} = Payments.get_banchan_balance(studio)
 
-      assert [net] == balance.stripe_available
+      assert [total_net] == balance.stripe_available
       assert [Money.new(0, :USD)] == balance.stripe_pending
       assert [] == balance.held_back
       assert [] == balance.released
-      assert [net] == balance.on_the_way
+      assert [total_net] == balance.on_the_way
       assert [] == balance.paid
       assert [] == balance.available
 
@@ -482,16 +502,15 @@ defmodule Banchan.StudiosTest do
       assert [] == balance.held_back
       assert [] == balance.released
       assert [] == balance.on_the_way
-      assert [net] == balance.paid
+      assert [total_net] == balance.paid
       assert [] == balance.available
     end
 
     test "stripe pending vs released -> available" do
       commission = commission_fixture()
-      client = commission.client
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
-      amount = Money.new(420, :USD)
+      amount = Money.new(42_000, :USD)
       tip = Money.new(69, :USD)
 
       banchan_fee =
@@ -548,9 +567,7 @@ defmodule Banchan.StudiosTest do
 
       assert {:ok, []} == Payments.payout_studio(artist, studio)
 
-      {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
-      {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
-      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :approved)
+      process_final_payment!(commission)
 
       # No money available on Stripe yet, so no payout happens.
       assert {:ok, []} == Payments.payout_studio(artist, studio)
@@ -606,11 +623,10 @@ defmodule Banchan.StudiosTest do
 
     test "immediate failed payout" do
       commission = commission_fixture()
-      client = commission.client
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
-      amount = Money.new(420, :USD)
-      tip = Money.new(69, :USD)
+      amount = Money.new(42_000, :USD)
+      tip = Money.new(69_00, :USD)
 
       banchan_fee =
         amount
@@ -622,14 +638,7 @@ defmodule Banchan.StudiosTest do
         |> Money.add(tip)
         |> Money.subtract(banchan_fee)
 
-      invoice =
-        invoice_fixture(artist, commission, %{
-          "amount" => amount,
-          "text" => "please give me money :("
-        })
-
-      sess = checkout_session_fixture(invoice, tip)
-      succeed_mock_payment!(sess)
+      process_final_payment!(commission, tip)
 
       Banchan.StripeAPI.Mock
       |> expect(:retrieve_balance, 2, fn opts ->
@@ -659,10 +668,6 @@ defmodule Banchan.StudiosTest do
            }
          }}
       end)
-
-      {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
-      {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
-      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :approved)
 
       stripe_err = %Stripe.Error{
         source: %{},
@@ -701,11 +706,10 @@ defmodule Banchan.StudiosTest do
 
     test "delayed payout failure" do
       commission = commission_fixture()
-      client = commission.client
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
-      amount = Money.new(420, :USD)
-      tip = Money.new(69, :USD)
+      amount = Money.new(42_000, :USD)
+      tip = Money.new(69_00, :USD)
 
       banchan_fee =
         amount
@@ -717,19 +721,7 @@ defmodule Banchan.StudiosTest do
         |> Money.add(tip)
         |> Money.subtract(banchan_fee)
 
-      # Two successful invoices and one expired one
-      invoice =
-        invoice_fixture(artist, commission, %{
-          "amount" => amount,
-          "text" => "please give me money :("
-        })
-
-      sess = checkout_session_fixture(invoice, tip)
-      succeed_mock_payment!(sess)
-
-      {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
-      {:ok, _} = Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
-      {:ok, _} = Commissions.update_status(client, commission |> Repo.reload(), :approved)
+      process_final_payment!(commission, tip)
 
       stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
 
@@ -830,8 +822,8 @@ defmodule Banchan.StudiosTest do
       commission = commission_fixture()
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
-      amount = Money.new(420, :USD)
-      tip = Money.new(69, :USD)
+      amount = Money.new(42_000, :USD)
+      tip = Money.new(6900, :USD)
 
       banchan_fee =
         amount
@@ -843,17 +835,7 @@ defmodule Banchan.StudiosTest do
         |> Money.add(tip)
         |> Money.subtract(banchan_fee)
 
-      # Two successful invoices and one expired one
-      invoice =
-        invoice_fixture(artist, commission, %{
-          "amount" => amount,
-          "text" => "please give me money :("
-        })
-
-      sess = checkout_session_fixture(invoice, tip)
-      succeed_mock_payment!(sess)
-
-      approve_commission(commission)
+      process_final_payment!(commission, tip)
 
       stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
 
@@ -939,8 +921,8 @@ defmodule Banchan.StudiosTest do
       commission = commission_fixture()
       studio = commission.studio
       artist = Enum.at(studio.artists, 0)
-      amount = Money.new(420, :USD)
-      tip = Money.new(69, :USD)
+      amount = Money.new(42_000, :USD)
+      tip = Money.new(6900, :USD)
 
       banchan_fee =
         amount
@@ -952,17 +934,7 @@ defmodule Banchan.StudiosTest do
         |> Money.add(tip)
         |> Money.subtract(banchan_fee)
 
-      # Two successful invoices and one expired one
-      invoice =
-        invoice_fixture(artist, commission, %{
-          "amount" => amount,
-          "text" => "please give me money :("
-        })
-
-      sess = checkout_session_fixture(invoice, tip)
-      succeed_mock_payment!(sess)
-
-      approve_commission(commission)
+      process_final_payment!(commission, tip)
 
       stripe_payout_id = "stripe_payout_id#{System.unique_integer()}"
 

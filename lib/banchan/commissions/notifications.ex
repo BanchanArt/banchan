@@ -239,6 +239,14 @@ defmodule Banchan.Commissions.Notifications do
     "The commission status has been changed to #{Common.humanize_status(status)}."
   end
 
+  defp new_event_notification_body(%Event{type: :all_invoices_released}) do
+    "All deposits for the commission have been released."
+  end
+
+  defp new_event_notification_body(%Event{type: :invoice_released}) do
+    "An invoice deposit has been released."
+  end
+
   @doc """
   Broadcasts commission title changes so commission pages can live-update.
   """
@@ -293,76 +301,6 @@ defmodule Banchan.Commissions.Notifications do
 
       # NOTE: No notification here because new_events takes care of notifying
       # about this already.
-    end)
-  end
-
-  @doc """
-  Sends out web/email notifications only, when an invoice is released by the
-  client before a commission has been approved.
-  """
-  def invoice_released(%Commission{} = commission, %Event{} = event, actor \\ nil) do
-    # No need for a broadcast. That's already being handled by commission_event_updated
-    Notifications.with_task(fn ->
-      {:ok, _} =
-        Repo.transaction(fn ->
-          subs = subscribers(commission)
-
-          url =
-            url(~p"/commissions/#{commission.public_id}")
-            |> replace_fragment(event)
-
-          body = "An invoice has been released before commission approval."
-          {:safe, safe_url} = Phoenix.HTML.html_escape(url)
-
-          Notifications.notify_subscribers!(
-            actor,
-            subs,
-            %Notifications.UserNotification{
-              type: "invoice_released",
-              title: commission.title,
-              short_body: body,
-              text_body: "#{body}\n\n#{url}",
-              html_body: "<p>#{body}</p><p><a href=\"#{safe_url}\">View it</a></p>",
-              url: url,
-              read: false
-            },
-            is_reply: true
-          )
-        end)
-    end)
-  end
-
-  @doc """
-  Sends out web/email notifications only, when all invoices are released by the
-  client before a commission has been approved.
-  """
-  def all_deposits_released(%Commission{} = commission, actor \\ nil) do
-    # No need for a broadcast. That's already being handled by commission_event_updated
-    Notifications.with_task(fn ->
-      {:ok, _} =
-        Repo.transaction(fn ->
-          subs = subscribers(commission)
-
-          url = url(~p"/commissions/#{commission.public_id}")
-
-          body = "Deposits have been released before commission approval."
-          {:safe, safe_url} = Phoenix.HTML.html_escape(url)
-
-          Notifications.notify_subscribers!(
-            actor,
-            subs,
-            %Notifications.UserNotification{
-              type: "all_deposits_released",
-              title: commission.title,
-              short_body: body,
-              text_body: "#{body}\n\n#{url}",
-              html_body: "<p>#{body}</p><p><a href=\"#{safe_url}\">View it</a></p>",
-              url: url,
-              read: false
-            },
-            is_reply: true
-          )
-        end)
     end)
   end
 

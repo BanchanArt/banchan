@@ -771,7 +771,11 @@ defmodule Banchan.Commissions do
         with {:ok, actor} <- check_actor_edit_access(actor, commission) do
           changeset = Repo.reload(commission) |> Commission.status_changeset(%{status: status})
 
-          check_status_transition!(actor, commission, changeset.changes.status)
+          check_status_transition!(
+            actor,
+            commission,
+            Ecto.Changeset.fetch_field!(changeset, :status)
+          )
 
           with {:ok, commission} <- changeset |> Repo.update() do
             if commission.status == :accepted do

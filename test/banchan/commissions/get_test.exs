@@ -74,7 +74,6 @@ defmodule Banchan.CommissionsTest.Get do
       # Open Statuses
       commission = commission_fixture()
       artist = commission.studio.artists |> Enum.at(0)
-      client = commission.client
 
       assert Commissions.commission_open?(commission)
 
@@ -90,12 +89,9 @@ defmodule Banchan.CommissionsTest.Get do
       {:ok, commission} = Commissions.update_status(artist, commission, :waiting)
       assert Commissions.commission_open?(commission)
 
-      {:ok, commission} = Commissions.update_status(artist, commission, :ready_for_review)
-      assert Commissions.commission_open?(commission)
-
       # Closed statuses
-      {:ok, commission} = Commissions.update_status(client, commission, :approved)
-      refute Commissions.commission_open?(commission)
+      process_final_payment!(commission)
+      refute Commissions.commission_open?(commission |> Repo.reload!())
 
       commission = commission_fixture()
       client = commission.client

@@ -136,8 +136,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       commission: commission
     } do
       amount = Money.new(42_000, :USD)
-      tip = Money.new(6900, :USD)
-      platform_fee = Money.multiply(Money.add(amount, tip), studio.platform_fee)
+      platform_fee = Money.multiply(amount, studio.platform_fee)
 
       invoice =
         invoice_fixture(artist, commission, %{
@@ -163,15 +162,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
             tax_behavior: "exclusive",
             unit_amount: amount.amount
           }
-        },
-        %{
-          quantity: 1,
-          price_data: %{
-            currency: "usd",
-            product_data: %{name: "Extra Tip"},
-            tax_behavior: "exclusive",
-            unit_amount: tip.amount
-          }
         }
       ]
 
@@ -191,7 +181,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
 
         assert %{
                  transfer_data: %{
-                   amount: (amount |> Money.add(tip) |> Money.subtract(platform_fee)).amount,
+                   amount: (amount |> Money.subtract(platform_fee)).amount,
                    destination: studio.stripe_id
                  }
                } == params.payment_intent_data
@@ -200,7 +190,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       end)
 
       client_page_live
-      |> form(".invoice-box form", %{"event[amount]": "69"})
+      |> form(".invoice-box form")
       |> render_submit()
 
       assert_redirected(client_page_live, "https://some.stripe.url")
@@ -262,7 +252,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
            id: trans_id,
            destination_payment: %{
              balance_transaction: %{
-               amount: Money.add(amount, tip).amount,
+               amount: amount.amount,
                currency: amount.currency |> to_string |> String.downcase()
              }
            }
@@ -276,7 +266,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
            id: id,
            created: 1,
            available_on: 1,
-           amount: (amount |> Money.add(tip) |> Money.subtract(platform_fee)).amount,
+           amount: (amount |> Money.subtract(platform_fee)).amount,
            currency: "usd"
          }}
       end)

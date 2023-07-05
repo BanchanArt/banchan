@@ -265,7 +265,7 @@ defmodule Banchan.Payments do
       Commissions.create_event(:comment, actor, commission, true, drafts, event_data)
     end)
     |> Ecto.Multi.insert(:invoice, fn %{event: event} ->
-      estimate = Commissions.line_item_estimate(commission.line_items)
+      estimate = Commissions.line_item_estimate(Repo.preload(commission, :line_items).line_items)
 
       deposited = Commissions.deposited_amount(actor, commission, true)
 
@@ -282,7 +282,7 @@ defmodule Banchan.Payments do
         |> Map.put(
           "line_items",
           Enum.map(
-            commission.line_items,
+            Repo.preload(commission, :line_items).line_items,
             &%{
               "name" => &1.name,
               "description" => &1.description,
@@ -570,7 +570,9 @@ defmodule Banchan.Payments do
       fn %{actor: actor} ->
         from(i in Invoice,
           join: c in assoc(i, :commission),
-          where: i.id == ^invoice.id and c.client_id == ^actor.id and i.status == :succeeded,
+          where:
+            i.id == ^invoice.id and c.client_id == ^actor.id and i.status == :succeeded and
+              c.id == ^commission.id,
           select: i
         )
       end,
@@ -603,7 +605,6 @@ defmodule Banchan.Payments do
     |> Repo.transaction()
     |> case do
       {:ok, %{event: event, actor: actor}} ->
-        Commissions.Notifications.invoice_released(commission, event, actor)
         Commissions.Notifications.commission_event_updated(commission, event, actor)
         {:ok, event}
 
@@ -617,17 +618,6 @@ defmodule Banchan.Payments do
   """
   def release_all_deposits(%User{} = actor, %Commission{} = commission) do
     release_all_payments(actor, commission)
-    |> case do
-      {:ok, invoices} ->
-        if !Enum.empty?(invoices) do
-          Commissions.Notifications.all_deposits_released(commission, actor)
-        end
-
-        {:ok, invoices}
-
-      other ->
-        other
-    end
   end
 
   @doc """
@@ -809,8 +799,8 @@ defmodule Banchan.Payments do
         )
 
         if invoice.final do
-          release_all_payments(client, commission)
-          Commissions.update_status(client, commission, :approved)
+          {:ok, _} = Commissions.update_status(client, commission, :approved)
+          {:ok, _} = release_all_payments(client, commission)
         end
 
         if client.email do
@@ -833,7 +823,7 @@ defmodule Banchan.Payments do
       fn %{actor: actor} ->
         from(i in Invoice,
           join: c in assoc(i, :commission),
-          where: c.client_id == ^actor.id and i.status == :succeeded,
+          where: c.client_id == ^actor.id and i.status == :succeeded and c.id == ^commission.id,
           select: i
         )
       end,
@@ -848,12 +838,11 @@ defmodule Banchan.Payments do
       )
     end)
     |> Ecto.Multi.run(:create_event, fn _, %{invoices: {n, invoices}} ->
-      Commissions.create_event(:all_invoices_released, actor, commission, false, [], %{
-        amount:
-          if n > 0 do
-            invoices |> Enum.map(& &1.amount) |> Enum.reduce(&Money.add/2)
-          end
-      })
+      if n > 0 do
+        Commissions.create_event(:all_invoices_released, actor, commission, false, [], %{
+          amount: invoices |> Enum.map(& &1.amount) |> Enum.reduce(&Money.add/2)
+        })
+      end
     end)
     |> Repo.transaction()
     |> case do
