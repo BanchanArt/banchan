@@ -333,6 +333,40 @@ defmodule Banchan.Commissions.Notifications do
   end
 
   @doc """
+  Sends out web/email notifications only, when all invoices are released by the
+  client before a commission has been approved.
+  """
+  def all_deposits_released(%Commission{} = commission, actor \\ nil) do
+    # No need for a broadcast. That's already being handled by commission_event_updated
+    Notifications.with_task(fn ->
+      {:ok, _} =
+        Repo.transaction(fn ->
+          subs = subscribers(commission)
+
+          url = url(~p"/commissions/#{commission.public_id}")
+
+          body = "Deposits have been released before commission approval."
+          {:safe, safe_url} = Phoenix.HTML.html_escape(url)
+
+          Notifications.notify_subscribers!(
+            actor,
+            subs,
+            %Notifications.UserNotification{
+              type: "all_deposits_released",
+              title: commission.title,
+              short_body: body,
+              text_body: "#{body}\n\n#{url}",
+              html_body: "<p>#{body}</p><p><a href=\"#{safe_url}\">View it</a></p>",
+              url: url,
+              read: false
+            },
+            is_reply: true
+          )
+        end)
+    end)
+  end
+
+  @doc """
   Sends out web/email notifications only, when a commission has been finalized
   and all invoices have been released.
   """

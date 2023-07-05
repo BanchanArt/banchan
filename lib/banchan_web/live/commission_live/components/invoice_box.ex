@@ -238,6 +238,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           id={@id <> "-balance-box"}
           line_items={@event.invoice.line_items}
           deposited={%{@event.invoice.deposited.currency => @event.invoice.deposited}}
+          amount_due={@event.invoice.final}
         />
         <div class="divider" />
       {/if}

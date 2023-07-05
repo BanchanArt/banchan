@@ -581,20 +581,21 @@ defmodule Banchan.Payments do
       fn %{actor: actor} ->
         from(i in Invoice,
           join: c in assoc(i, :commission),
-          where: i.id == ^invoice.id and c.client_id == ^actor.id and i.status == :succeeded
+          where: i.id == ^invoice.id and c.client_id == ^actor.id and i.status == :succeeded,
+          select: i
         )
       end,
       set: [status: :released]
     )
-    |> Ecto.Multi.run(:check_updated_count, fn _, %{invoices: {n, _}} ->
-      case n do
-        0 ->
+    |> Ecto.Multi.run(:updated_invoice, fn _, %{invoices: invoice_info} ->
+      case invoice_info do
+        {0, _} ->
           {:error, :invalid_invoice_status}
 
-        1 ->
-          {:ok, true}
+        {1, [invoice]} ->
+          {:ok, invoice}
 
-        n when is_integer(n) ->
+        {n, _} when is_integer(n) ->
           {:error, :updated_too_many_invoices}
       end
     end)
@@ -605,6 +606,11 @@ defmodule Banchan.Payments do
         preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
       )
     end)
+    |> Ecto.Multi.run(:create_event, fn _, %{updated_invoice: invoice} ->
+      Commissions.create_event(:invoice_released, actor, commission, false, [], %{
+        amount: invoice.total_charged
+      })
+    end)
     |> Repo.transaction()
     |> case do
       {:ok, %{event: event, actor: actor}} ->
@@ -614,6 +620,24 @@ defmodule Banchan.Payments do
 
       {:error, _, error, _} ->
         {:error, error}
+    end
+  end
+
+  @doc """
+  Releases all completed payments for a commission.
+  """
+  def release_all_deposits(%User{} = actor, %Commission{} = commission) do
+    release_all_payments(actor, commission)
+    |> case do
+      {:ok, invoices} ->
+        if !Enum.empty?(invoices) do
+          Commissions.Notifications.all_deposits_released(commission, actor)
+        end
+
+        {:ok, invoices}
+
+      other ->
+        other
     end
   end
 
@@ -834,12 +858,22 @@ defmodule Banchan.Payments do
         preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
       )
     end)
+    |> Ecto.Multi.run(:create_event, fn _, %{invoices: {n, invoices}} ->
+      Commissions.create_event(:all_invoices_released, actor, commission, false, [], %{
+        amount:
+          if n > 0 do
+            invoices |> Enum.map(& &1.amount) |> Enum.reduce(&Money.add/2)
+          end
+      })
+    end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{events: events, actor: actor, invoices: {_, invoices}}} ->
-        Enum.each(events, fn event ->
-          Commissions.Notifications.commission_event_updated(commission, event, actor)
-        end)
+      {:ok, %{events: events, actor: actor, invoices: {n, invoices}}} ->
+        if n > 0 do
+          Enum.each(events, fn event ->
+            Commissions.Notifications.commission_event_updated(commission, event, actor)
+          end)
+        end
 
         {:ok, invoices}
 

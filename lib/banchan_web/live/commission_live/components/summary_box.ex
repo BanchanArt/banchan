@@ -42,7 +42,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
   data studio, :struct
   data open_final_invoice, :boolean, default: false
   data open_deposit_requested, :boolean, default: false
-  data open_release_deposit, :boolean, default: false
   data uploads, :map
 
   def update(assigns, socket) do
@@ -51,11 +50,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     if (socket.assigns.open_final_invoice || socket.assigns.open_deposit_requested) &&
          !socket.assigns.current_user_member? do
       raise "Only studio members can post invoices."
-    end
-
-    if socket.assigns.open_release_deposit &&
-         !socket.assigns.current_user.id != socket.assigns.commission.client_id do
-      raise "Only clients can release deposits."
     end
 
     estimate = Commissions.line_item_estimate(assigns.commission.line_items)
@@ -104,7 +98,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
      assign(socket,
        open_final_invoice: false,
        open_deposit_requested: false,
-       open_release_deposit: false,
        changeset:
          Event.invoice_changeset(
            %Event{},
@@ -120,7 +113,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
        socket,
        open_final_invoice: true,
        open_deposit_requested: false,
-       open_release_deposit: false,
        changeset:
          Event.invoice_changeset(
            %Event{},
@@ -134,15 +126,13 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     {:noreply,
      assign(socket,
        open_deposit_requested: true,
-       open_final_invoice: false,
-       open_release_deposit: false
+       open_final_invoice: false
      )}
   end
 
   def handle_event("release_deposit", _, socket) do
     {:noreply,
      assign(socket,
-       open_release_deposit: true,
        open_final_invoice: false,
        open_deposit_requested: false
      )}
@@ -193,6 +183,22 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     )
   end
 
+  def handle_event("release_deposits", _, socket) do
+    Payments.release_all_deposits(socket.assigns.current_user, socket.assigns.commission)
+    |> case do
+      {:ok, _} ->
+        IO.puts("Deposits released")
+        Collapse.set_open(socket.assigns.id <> "-release-confirmation", false)
+        {:noreply, socket}
+
+      {:error, :blocked} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are blocked from further interaction with this studio.")
+         |> push_navigate(to: ~p"/commissions/#{socket.assigns.commission.public_id}")}
+    end
+  end
+
   defp change_invoice(event, socket) do
     changeset =
       %Event{}
@@ -217,7 +223,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
          assign(socket,
            changeset: Event.invoice_changeset(%Event{}, %{}),
            open_final_invoice: false,
-           open_release_deposit: false,
            open_deposit_requested: false
          )}
 
@@ -324,7 +329,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
             <Submit changeset={@changeset} class="grow" label="Send Invoice" />
           </div>
         </Form>
-      {#elseif @open_release_deposit}
       {#else}
         <div class="text-lg font-medium pb-2">Summary</div>
         <Collapse id={@id <> "-summary-details"} class="px-2">
@@ -358,12 +362,27 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
             {/if}
           </div>
           {#if @current_user.id == @commission.client_id}
-            <Button
-              disabled={@existing_open}
-              click="release_deposit"
-              class="btn-sm grow"
-              label="Release Deposit"
-            />
+            <Collapse
+              id={@id <> "-release-confirmation"}
+              show_arrow={false}
+              class="grow rounded-lg my-2 bg-base-200"
+            >
+              <:header>
+                <button type="button" class="btn btn-primary btn-sm w-full">
+                  Release Deposits
+                </button>
+              </:header>
+              <p>
+                All completed deposits will be <b class="font-bold">taken out of escrow</b> and sent to the studio, making them available for payout. You won't be able to ask for a refund from the studio for those invoices after this point.
+              </p>
+              <p class="py-2">Are you sure?</p>
+              <Button
+                disabled={@existing_open}
+                click="release_deposits"
+                class="btn-sm w-full"
+                label="Confirm"
+              />
+            </Collapse>
           {/if}
           {#if @existing_open}
             <div>

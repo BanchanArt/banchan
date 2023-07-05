@@ -31,7 +31,9 @@ defmodule Banchan.Commissions.Common do
     :payment_processed,
     :refund_processed,
     :status,
-    :title_changed
+    :title_changed,
+    :invoice_released,
+    :all_invoices_released
   ]
 
   @doc """

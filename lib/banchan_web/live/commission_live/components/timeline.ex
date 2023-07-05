@@ -82,6 +82,24 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                   <TimelineItem icon="T" actor={Map.get(@users, event.actor_id)} event={event}>
                     changed the title <span class="line-through">{event.text}</span> {@commission.title}
                   </TimelineItem>
+                {#match :invoice_released}
+                  <TimelineItem
+                    icon={Money.Currency.symbol(event.amount)}
+                    actor={Map.get(@users, event.actor_id)}
+                    event={event}
+                  >
+                    released a deposit for {Money.to_string(event.amount)}
+                  </TimelineItem>
+                {#match :all_invoices_released}
+                  {#unless is_nil(event.amount)}
+                    <TimelineItem
+                      icon={Money.Currency.symbol(event.amount)}
+                      actor={Map.get(@users, event.actor_id)}
+                      event={event}
+                    >
+                      released all deposits, totaling {Money.to_string(event.amount)}
+                    </TimelineItem>
+                  {/unless}
               {/case}
             {/for}
           </div>
