@@ -48,13 +48,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
       |> assign(
         archived?: Commissions.archived?(socket.assigns.current_user, socket.assigns.commission),
         subscribed?:
-          Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.commission),
-        deposited:
-          Commissions.deposited_amount(
-            socket.assigns.current_user,
-            socket.assigns.commission,
-            socket.assigns.current_user_member?
-          )
+          Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.commission)
       )
 
     socket = Context.put(socket, commission: socket.assigns.commission)

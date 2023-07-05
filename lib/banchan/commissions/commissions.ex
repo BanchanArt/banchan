@@ -373,20 +373,16 @@ defmodule Banchan.Commissions do
   end
 
   def deposited_amount(_, %Commission{} = commission, _) do
-    if Ecto.assoc_loaded?(commission.events) do
+    currency = commission_currency(commission)
+
+    if Ecto.assoc_loaded?(commission.events) &&
+         Enum.all?(commission.events, &Ecto.assoc_loaded?(&1.invoice)) do
       Enum.reduce(
         commission.events,
-        %{},
+        Money.new(0, currency),
         fn event, acc ->
           if event.invoice && event.invoice.status in [:succeeded, :released] do
-            current =
-              Map.get(
-                acc,
-                event.invoice.amount.currency,
-                Money.new(0, event.invoice.amount.currency)
-              )
-
-            Map.put(acc, event.invoice.amount.currency, Money.add(current, event.invoice.amount))
+            Money.add(acc, event.invoice.amount)
           else
             acc
           end
@@ -405,11 +401,8 @@ defmodule Banchan.Commissions do
 
       Enum.reduce(
         deposits,
-        %{},
-        fn dep, acc ->
-          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
-          Map.put(acc, dep.currency, Money.add(current, dep))
-        end
+        Money.new(0, currency),
+        &Money.add/2
       )
     end
   end
@@ -431,20 +424,16 @@ defmodule Banchan.Commissions do
   end
 
   def tipped_amount(_, %Commission{} = commission, _) do
-    if Ecto.assoc_loaded?(commission.events) do
+    currency = commission_currency(commission)
+
+    if Ecto.assoc_loaded?(commission.events) &&
+         Enum.all?(commission.events, &Ecto.assoc_loaded?(&1.invoice)) do
       Enum.reduce(
         commission.events,
-        %{},
+        Money.new(0, currency),
         fn event, acc ->
           if event.invoice && event.invoice.status in [:succeeded, :released] do
-            current =
-              Map.get(
-                acc,
-                event.invoice.tip.currency,
-                Money.new(0, event.invoice.tip.currency)
-              )
-
-            Map.put(acc, event.invoice.tip.currency, Money.add(current, event.invoice.tip.amount))
+            Money.add(acc, event.invoice.tip)
           else
             acc
           end
@@ -463,27 +452,37 @@ defmodule Banchan.Commissions do
 
       Enum.reduce(
         deposits,
-        %{},
-        fn dep, acc ->
-          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
-          Map.put(acc, dep.currency, Money.add(current, dep))
-        end
+        Money.new(0, currency),
+        &Money.add/2
       )
     end
   end
 
   @doc """
-  Gets the currency used for the commission.
+  Gets the currency used for the commission, taking into account legacy
+  commissions before the currency field existed.
   """
   def commission_currency(%Commission{} = commission) do
-    Enum.at(commission.line_items, 0).amount.currency
+    commission.currency ||
+      (!Enum.empty?(commission.line_items) && Enum.at(commission.line_items, 0).amount.currency) ||
+      from(
+        s in Studio,
+        where: s.id == ^commission.studio_id,
+        select: s.default_currency
+      )
+      |> Repo.one!()
   end
 
   @doc """
   Calculates the total commission cost based on the current line items.
   """
   def line_item_estimate(line_items) do
-    currency = Enum.at(line_items, 0).amount.currency
+    currency =
+      if Enum.empty?(line_items) do
+        :USD
+      else
+        Enum.at(line_items, 0).amount.currency
+      end
 
     Enum.reduce(
       line_items,
@@ -588,6 +587,7 @@ defmodule Banchan.Commissions do
           %Commission{
             studio: studio,
             offering: offering,
+            currency: Offerings.offering_currency(offering),
             client: actor,
             line_items: line_items,
             terms: offering.terms || studio.default_terms

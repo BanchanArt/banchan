@@ -28,7 +28,7 @@ defmodule Banchan.Offerings.Offering do
     field :archived_at, :naive_datetime
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
-    field :currency, Ecto.Enum, values: Studios.Common.supported_currencies(), virtual: true
+    field :currency, Ecto.Enum, values: Studios.Common.supported_currencies()
     field :deleted_at, :naive_datetime
 
     field :option_prices, {:array, Money.Ecto.Composite.Type}, virtual: true

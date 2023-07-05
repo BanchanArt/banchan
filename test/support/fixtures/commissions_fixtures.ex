@@ -15,7 +15,7 @@ defmodule Banchan.CommissionsFixtures do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions
-  alias Banchan.Commissions.Commission
+  alias Banchan.Commissions.{Commission, LineItem}
   alias Banchan.Payments
   alias Banchan.Payments.Invoice
   alias Banchan.Repo
@@ -24,19 +24,44 @@ defmodule Banchan.CommissionsFixtures do
     artist = Map.get(attrs, :artist) || user_fixture(%{roles: [:artist]})
     studio = Map.get(attrs, :studio) || studio_fixture([artist])
     offering = Map.get(attrs, :offering) || offering_fixture(studio)
+    offering = Repo.preload(offering, :options)
+
+    line_items =
+      if Enum.empty?(offering.options) do
+        [
+          %LineItem{
+            option: nil,
+            amount: Money.new(10_000, studio.default_currency),
+            name: "custom line item",
+            description: "custom line item description"
+          }
+        ]
+      else
+        option = Enum.at(offering.options, 0)
+
+        [
+          %LineItem{
+            option: option,
+            amount: option.price,
+            name: option.name,
+            description: option.description
+          }
+        ]
+      end
 
     {:ok, commission} =
       Commissions.create_commission(
         Map.get(attrs, :client) || user_fixture(),
         studio,
         offering,
-        [],
+        line_items,
         [],
         attrs
         |> Enum.into(%{
           title: "some title",
           description: "Some Description",
-          tos_ok: true
+          tos_ok: true,
+          currency: :USD
         })
       )
 

@@ -265,22 +265,11 @@ defmodule Banchan.Payments do
       Commissions.create_event(:comment, actor, commission, true, drafts, event_data)
     end)
     |> Ecto.Multi.insert(:invoice, fn %{event: event} ->
-      currency = Enum.at(commission.line_items, 0).amount.currency
-
       estimate = Commissions.line_item_estimate(commission.line_items)
 
-      deposited_amounts = Commissions.deposited_amount(actor, commission, true)
+      deposited = Commissions.deposited_amount(actor, commission, true)
 
-      deposited =
-        Map.get(deposited_amounts, currency) ||
-          Money.new(0, currency)
-
-      remaining =
-        if Enum.empty?(deposited_amounts) do
-          estimate
-        else
-          Money.subtract(estimate, deposited)
-        end
+      remaining = Money.subtract(estimate, deposited)
 
       %Invoice{
         client_id: commission.client_id,

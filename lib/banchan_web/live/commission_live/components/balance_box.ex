@@ -18,24 +18,9 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
   def update(assigns, socket) do
     estimate = Commissions.line_item_estimate(assigns.line_items)
 
-    deposited =
-      if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        [Money.new(0, estimate.currency)]
-      else
-        assigns.deposited |> Map.values()
-      end
+    deposited = assigns.deposited || Money.new(0, estimate.currency)
 
-    remaining =
-      if is_nil(assigns.deposited) || Enum.empty?(assigns.deposited) do
-        [estimate]
-      else
-        assigns.deposited
-        |> Enum.map(fn {_currency, amount} ->
-          Money.subtract(estimate, amount)
-        end)
-      end
-
-    estimate = [estimate]
+    remaining = Money.subtract(estimate, deposited)
 
     {:ok,
      socket
@@ -54,22 +39,14 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
         <div class="p-2 flex flex-col gap-2">
           <div class="flex flex-row items-center">
             <div class="font-medium grow">Subtotal:</div>
-            <div class="flex flex-col">
-              {#for val <- @estimate_amt}
-                <div class="text-sm font-medium">
-                  {Money.to_string(val)}
-                </div>
-              {/for}
+            <div class="text-sm font-medium">
+              {Money.to_string(@estimate_amt)}
             </div>
           </div>
           <div class="flex flex-row items-center">
             <div class="font-medium grow">Deposited:</div>
-            <div class="flex flex-col">
-              {#for val <- @deposited_amt}
-                <div class="text-sm font-medium">
-                  {Money.to_string(val)}
-                </div>
-              {/for}
+            <div class="text-sm font-medium">
+              {Money.to_string(@deposited_amt)}
             </div>
           </div>
           <div class="flex flex-row items-center">
@@ -80,29 +57,17 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
                 Balance:
               {/if}
             </div>
-            <div class="flex flex-col">
-              {#for val <- @remaining_amt}
-                <div class="text-md font-bold text-primary">
-                  {Money.to_string(val)}
-                </div>
-              {/for}
+            <div class="text-md font-bold text-primary">
+              {Money.to_string(@remaining_amt)}
             </div>
           </div>
         </div>
       {#else}
         <div class="px-2 flex flex-row">
           <div class="font-medium grow">Subtotal:</div>
-          {#if Enum.empty?(@estimate_amt)}
-            <span class="font-medium">TBD</span>
-          {#else}
-            <div class="flex flex-col">
-              {#for val <- @estimate_amt}
-                <div class="text-sm font-medium">
-                  {Money.to_string(val)}
-                </div>
-              {/for}
-            </div>
-          {/if}
+          <div class="text-sm font-medium">
+            {Money.to_string(@estimate_amt)}
+          </div>
         </div>
       {/if}
     </div>

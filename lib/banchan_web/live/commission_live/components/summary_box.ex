@@ -61,12 +61,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
         socket.assigns.current_user_member?
       )
 
-    remaining =
-      if is_nil(deposited) || Enum.empty?(deposited) do
-        estimate
-      else
-        Money.subtract(estimate, Map.get(deposited, estimate.currency))
-      end
+    remaining = Money.subtract(estimate, deposited)
 
     studio = (socket.assigns.commission |> Repo.preload(:studio)).studio
 

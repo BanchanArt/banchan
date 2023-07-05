@@ -15,12 +15,7 @@ defmodule BanchanWeb.Email.Commissions do
 
     deposited = assigns.deposited || Money.new(0, default_currency)
 
-    tipped =
-      if is_nil(assigns.tipped) || Enum.empty?(assigns.tipped) do
-        Money.new(0, default_currency)
-      else
-        assigns.tipped |> Map.values() |> Enum.at(0)
-      end
+    tipped = assigns.tipped || Money.new(0, default_currency)
 
     remaining = Money.subtract(estimate, deposited)
 
@@ -74,12 +69,7 @@ defmodule BanchanWeb.Email.Commissions do
 
     deposited = assigns.deposited || Money.new(0, default_currency)
 
-    tipped =
-      if is_nil(assigns.tipped) || Enum.empty?(assigns.tipped) do
-        Money.new(0, default_currency)
-      else
-        assigns.tipped |> Map.values() |> Enum.at(0)
-      end
+    tipped = assigns.tipped || Money.new(0, default_currency)
 
     remaining = Money.subtract(estimate, deposited)
 
