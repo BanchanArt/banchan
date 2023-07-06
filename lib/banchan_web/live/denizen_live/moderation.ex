@@ -59,7 +59,9 @@ defmodule BanchanWeb.DenizenLive.Moderation do
     changeset =
       User.admin_changeset(
         socket.assigns.current_user,
-        socket.assigns.user, user |> Map.put("roles", Map.get(user, "roles", [])))
+        socket.assigns.user,
+        user |> Map.put("roles", Map.get(user, "roles", []))
+      )
       |> Map.put(:action, :update)
 
     {:noreply, socket |> assign(changeset: changeset)}

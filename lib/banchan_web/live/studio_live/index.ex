@@ -46,7 +46,10 @@ defmodule BanchanWeb.StudioLive.Index do
         {/for}
         <LiveRedirect to={Routes.studio_new_path(Endpoint, :new)}>
           <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full transition-all">
-            <span class="text-6xl m-auto before:-mb-3.5 before:table after:-mt-3.5 after:table">+</span>
+            <div class="m-auto flex flex-col items-center">
+              <span class="text-3xl m-auto">New Studio</span>
+              <span class="text-sm p-2">Commissions are done through studios, rather than user accounts.</span>
+            </div>
           </Card>
         </LiveRedirect>
       </div>
