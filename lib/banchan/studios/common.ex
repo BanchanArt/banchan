@@ -142,6 +142,7 @@ defmodule Banchan.Studios.Common do
     :ZAR,
     :ZMW
   ]
+  |> Enum.sort_by(&(Money.Currency.get(&1).name))
 
   @doc """
   Returns a list of supported currencies as atoms using their uppercase
