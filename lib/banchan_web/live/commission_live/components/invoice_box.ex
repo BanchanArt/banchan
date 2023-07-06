@@ -263,7 +263,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                   <Submit class="pay-invoice btn-sm w-full" changeset={@changeset} label="Pay" />
                   {#if @current_user_member?}
                     <Button
-                      class="cancel-payment-request btn-xs btn-link w-full"
+                      class="cancel-payment-request btn-xs btn-link w-full btn-error"
                       click="force_expire"
                       label="Cancel Payment"
                     />
@@ -276,7 +276,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 {#if @current_user_member?}
                   <div class="stat-actions">
                     <Button
-                      class="cancel-payment-request btn-xs btn-link btn-warning"
+                      class="cancel-payment-request btn-xs btn-link btn-error"
                       primary={false}
                       click="force_expire"
                       label="Cancel Payment"
@@ -300,7 +300,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                   {#if @current_user_member?}
                     <Button
                       primary={false}
-                      class="cancel-payment-request btn-xs btn-link"
+                      class="cancel-payment-request btn-xs btn-link btn-error"
                       click="force_expire"
                       label="Cancel Payment"
                     />
