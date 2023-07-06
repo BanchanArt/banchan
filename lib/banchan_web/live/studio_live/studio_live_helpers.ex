@@ -72,7 +72,7 @@ defmodule BanchanWeb.StudioLive.Helpers do
         socket
         |> put_flash(
           :error,
-          "This studio is marked as mature, but you have not enabled mature content. You can enable this in your user settings."
+          "This studio is marked as mature, but you have not enabled mature content, meaning it won't show up when you search for it yourself. You can enable this in your user settings."
         )
         |> redirect(to: Routes.discover_index_path(Endpoint, :index, "studios"))
 

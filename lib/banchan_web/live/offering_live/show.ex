@@ -92,7 +92,7 @@ defmodule BanchanWeb.OfferingLive.Show do
          socket
          |> put_flash(
            :error,
-           "This offering is marked as mature, but you have not enabled mature content. You can enable this in your user settings."
+           "This offering is marked as mature, but you have not enabled mature content for yourself, meaning it won't show up when you search for it yourself. You can enable this in your user settings."
          )
          |> push_navigate(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
 
