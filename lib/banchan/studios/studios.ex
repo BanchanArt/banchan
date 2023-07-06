@@ -122,14 +122,7 @@ defmodule Banchan.Studios do
         country: to_string(country),
         settings: %{payouts: %{schedule: %{interval: "manual"}}},
         capabilities: %{transfers: %{requested: true}},
-        tos_acceptance: %{
-          service_agreement:
-            if country == :US do
-              "full"
-            else
-              "recipient"
-            end
-        },
+        tos_acceptance: %{service_agreement: "recipient"},
         business_profile: %{
           # Commercial Photograpy, Art, and Graphics
           mcc: "7333",

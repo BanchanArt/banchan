@@ -75,7 +75,6 @@ defmodule BanchanWeb.Router do
 
       live("/commissions", CommissionLive, :index)
       live("/commissions/:commission_id", CommissionLive, :show)
-      live("/commissions/:commission_id/receipt/:event_id", CommissionLive.Receipt, :show)
 
       live("/settings", SettingsLive, :edit)
       live("/mfa_setup", SetupMfaLive, :edit)

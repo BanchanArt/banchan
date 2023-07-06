@@ -389,6 +389,24 @@ defmodule Banchan.Offerings do
   end
 
   @doc """
+  Gets the currency for the offering, taking into account legacy offerings
+  with null currency fields.
+  """
+  def offering_currency(%Offering{} = offering) do
+    offering.currency ||
+      (
+        options = Repo.preload(offering, :options).options
+        !Enum.empty?(options) && Enum.at(options, 0).price.currency
+      ) ||
+      from(
+        s in Studio,
+        where: s.id == ^offering.studio_id,
+        select: s.default_currency
+      )
+      |> Repo.one!()
+  end
+
+  @doc """
   Calculates the offering's available slots. If `reload` is false, this
   assumes the offering has been loaded through `list_offerings/1`, which
   populates the relevant virtual field.

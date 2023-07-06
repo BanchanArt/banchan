@@ -68,6 +68,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             Offering.changeset(
               socket.assigns.offering ||
                 %Offering{
+                  currency: socket.assigns.studio.default_currency,
                   options: [
                     %OfferingOption{
                       name: "Base Price",
@@ -352,9 +353,10 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         key = to_string(idx)
 
         opt =
-          case Map.fetch(opt, "currency") do
+          case Map.fetch(offering, "currency") do
             {:ok, currency} ->
-              Map.update(opt, "price", "", &Utils.moneyfy(&1, currency))
+              opt
+              |> Map.update("price", "", &Utils.moneyfy(&1, currency))
 
             :error ->
               opt
@@ -364,16 +366,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
       end)
       |> Map.new()
     end)
-  end
-
-  defp option_currency(changeset, index, studio) do
-    opt = Enum.at(Ecto.Changeset.fetch_field!(changeset, :options), index)
-
-    if opt.price do
-      opt.price.currency
-    else
-      studio.default_currency
-    end
   end
 
   def render(assigns) do
@@ -505,22 +497,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                 <TextInput name={:name} info="Name of the option." opts={required: true} />
                 <TextArea name={:description} info="Description for the option." opts={required: true} />
                 <div class="flex flex-row gap-2 items-center py-2">
-                  {#case @studio.payment_currencies}
-                    {#match [_]}
-                      <div class="flex flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
-                      <HiddenInput name={:currency} value={@studio.default_currency} />
-                    {#match _}
-                      <div class="flex-basis-1/4">
-                        <Select
-                          name={:currency}
-                          show_label={false}
-                          options={@studio.payment_currencies
-                          |> Enum.map(&{"#{to_string(&1)}#{Money.Currency.symbol(&1)}", &1})}
-                          selected={option_currency(@changeset, index, @studio)}
-                          opts={required: true}
-                        />
-                      </div>
-                  {/case}
+                  <div class="flex flex-basis-1/4">{currency = (@changeset |> Ecto.Changeset.fetch_field!(:options) |> Enum.at(index)).price.currency
+                    to_string(currency) <> Money.Currency.symbol(currency)}</div>
                   <div class="grow">
                     <TextInput
                       name={:price}
@@ -551,6 +529,14 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             </div>
           </li>
         </ul>
+        <Select
+          name={:currency}
+          label="Option Currency"
+          info="Currency to use for all options. Only one currency is allowed per offering."
+          options={@studio.payment_currencies
+          |> Enum.map(&{"#{to_string(&1)}#{Money.Currency.symbol(&1)}", &1})}
+          opts={required: true}
+        />
         <div class="divider" />
         <Collapse class="border-b-2 pb-2" id={@id <> "-terms-collapse"}>
           <:header>

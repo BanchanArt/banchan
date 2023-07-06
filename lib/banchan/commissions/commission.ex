@@ -6,6 +6,7 @@ defmodule Banchan.Commissions.Commission do
   import Ecto.Changeset
 
   alias Banchan.Commissions.Common
+  alias Banchan.Studios
 
   schema "commissions" do
     field :public_id, :string, autogenerate: {Common, :gen_public_id, []}
@@ -13,6 +14,7 @@ defmodule Banchan.Commissions.Commission do
     field :description, :string
     field :tos_ok, :boolean, virtual: true
     field :terms, :string
+    field :currency, Ecto.Enum, values: Studios.Common.supported_currencies()
 
     field :status, Ecto.Enum,
       values: Common.status_values(),
@@ -41,8 +43,8 @@ defmodule Banchan.Commissions.Commission do
   @doc false
   def creation_changeset(commission, attrs) do
     commission
-    |> cast(attrs, [:title, :description, :tos_ok])
-    |> validate_required([:title, :description, :tos_ok])
+    |> cast(attrs, [:title, :description, :tos_ok, :currency])
+    |> validate_required([:title, :description, :tos_ok, :currency])
     |> validate_length(:title, max: 50)
     |> validate_length(:description, max: 160)
     |> cast_assoc(:line_items)

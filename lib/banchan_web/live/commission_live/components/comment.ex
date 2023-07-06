@@ -154,8 +154,10 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
           <Avatar class="w-6" user={@actor} />
           <UserHandle user={@actor} />
           <span>
-            {#if @event.invoice}
-              posted an invoice
+            {#if @event.invoice && @event.invoice.final}
+              posted a final invoice
+            {#elseif @event.invoice}
+              posted a deposit invoice
             {#else}
               commented
             {/if}

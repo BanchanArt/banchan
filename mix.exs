@@ -166,7 +166,7 @@ defmodule Banchan.MixProject do
       quality: [
         "compile --all-warnings --warnings-as-errors",
         "test",
-        "format",
+        "format --check-formatted",
         "credo --strict",
         "sobelow --verbose"
         # ,

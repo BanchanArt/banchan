@@ -60,10 +60,19 @@ defmodule BanchanWeb.OfferingLive.Request do
             }
           end)
 
+        currency = Offerings.offering_currency(offering)
+
         {:noreply,
          socket
          |> assign(
-           changeset: Commission.creation_changeset(%Commission{}, %{}),
+           changeset:
+             Commission.creation_changeset(
+               %Commission{
+                 currency: currency
+               },
+               %{}
+             ),
+           currency: currency,
            line_items: default_items,
            offering: offering,
            template: template,
@@ -119,7 +128,9 @@ defmodule BanchanWeb.OfferingLive.Request do
   @impl true
   def handle_event("change", %{"commission" => commission}, socket) do
     changeset =
-      %Commission{}
+      %Commission{
+        currency: socket.assigns.currency
+      }
       |> Commission.creation_changeset(commission)
       |> Map.put(:action, :update)
 
@@ -321,11 +332,7 @@ defmodule BanchanWeb.OfferingLive.Request do
                 studio={@studio}
               />
               <div class="pt-6">
-                <BalanceBox
-                  id="balance-box"
-                  default_currency={@studio.default_currency}
-                  line_items={@line_items}
-                />
+                <BalanceBox id="balance-box" line_items={@line_items} />
               </div>
             </div>
             <div class="divider md:hidden" />

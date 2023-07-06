@@ -4,14 +4,16 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   """
   use BanchanWeb, :live_component
 
+  alias Banchan.Commissions
   alias Banchan.Commissions.Event
   alias Banchan.Payments
   alias Banchan.Utils
 
   alias Surface.Components.{Form, LiveRedirect}
 
+  alias BanchanWeb.CommissionLive.Components.{BalanceBox, Summary}
   alias BanchanWeb.Components.{Button, Modal}
-  alias BanchanWeb.Components.Form.{Submit, TextInput}
+  alias BanchanWeb.Components.Form.{HiddenInput, Submit, TextInput}
 
   prop current_user_member?, :boolean, from_context: :current_user_member?
   prop current_user, :struct, from_context: :current_user
@@ -21,7 +23,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   # NOTE: We're not actually going to create an event directly. We're just
   # punning off this for the changeset validation.
-  data changeset, :struct, default: %Event{} |> Event.amount_changeset(%{})
+  data changeset, :struct
 
   data release_modal_open, :boolean, default: false
 
@@ -29,6 +31,20 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
+  end
+
+  def update(assigns, socket) do
+    socket = socket |> assign(assigns)
+
+    {:ok,
+     socket
+     |> assign(
+       changeset:
+         %Event{}
+         |> Event.amount_changeset(%{
+           "amount" => Utils.moneyfy(0, socket.assigns.event.invoice.amount.currency)
+         })
+     )}
   end
 
   @impl true
@@ -214,7 +230,18 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
 
   def render(assigns) do
     ~F"""
-    <div class="flex flex-col invoice-box">
+    <div class="flex flex-col invoice-box px-2">
+      {!-- # NOTE: Older invoices don't have these fields, so we need to check for them here. --}
+      {#if @event.invoice.line_items && @event.invoice.deposited}
+        <Summary line_items={@event.invoice.line_items} show_options={false} />
+        <BalanceBox
+          id={@id <> "-balance-box"}
+          line_items={@event.invoice.line_items}
+          deposited={@event.invoice.deposited}
+          amount_due={@event.invoice.final}
+        />
+        <div class="divider" />
+      {/if}
       {!-- Invoice box --}
       <div class="place-self-center stats">
         <div class="stat">
@@ -223,12 +250,16 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               {#if @current_user.id == @commission.client_id}
                 <div class="stat-title">Payment Requested</div>
                 <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
-                <div class="stat-desc">Please consider adding a tip!</div>
+                <div :if={@event.invoice.final} class="stat-desc">Please consider adding a tip!</div>
                 <Form for={@changeset} class="stat-actions flex flex-col gap-2" change="change" submit="submit">
-                  <div class="flex flex-row gap-2">
-                    {Money.Currency.symbol(@event.invoice.amount)}
-                    <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
-                  </div>
+                  {#if @event.invoice.final}
+                    <div class="flex flex-row gap-2">
+                      {Money.Currency.symbol(@event.invoice.amount)}
+                      <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
+                    </div>
+                  {#else}
+                    <HiddenInput name={:amount} value="0" />
+                  {/if}
                   <Submit class="pay-invoice btn-sm w-full" changeset={@changeset} label="Pay" />
                   {#if @current_user_member?}
                     <Button
@@ -257,7 +288,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-title">Payment in Process</div>
               <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
+                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
               <div class="stat-actions">
                 <div class="flex flex-col gap-2">
@@ -277,12 +310,14 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
             {#match :expired}
               <div class="stat-title text-warning">Payment session expired.</div>
               <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
-              <div class="stat-desc">You'll need to start a new session.</div>
+              <div class="stat-desc">You'll need to start a new invoice.</div>
             {#match :succeeded}
               <div class="stat-title">Payment Succeeded</div>
               <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
+                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
               <div class="stat-actions">
                 <div class="flex flex-col gap-2">
@@ -306,13 +341,17 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-title">Payment Released to Studio</div>
               <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
+                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
             {#match :refunded}
               <div class="stat-title text-warning">Payment Refunded</div>
               <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)} ({Float.round(@event.invoice.tip.amount / @event.invoice.amount.amount * 100)}%)</div>
+                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
+                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
               <div class="stat-desc">Payment has been refunded to the client.</div>
             {#match nil}
@@ -356,10 +395,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         </span>
       {#elseif @event.invoice.status == :succeeded}
         <span class="italic p-4 text-xs">
-          Note: Banchan.Art will hold all funds for this commission until a final draft is approved. (<LiveRedirect
-            class="link font-semibold"
-            to={Routes.commission_receipt_path(Endpoint, :show, @commission.public_id, @event.public_id)}
-          >Receipt</LiveRedirect>)
+          Note: Banchan.Art will hold all funds for this commission until a final invoice is paid or the client releases them early.
         </span>
       {#elseif @event.invoice.status == :released}
         <span class="italic p-4 text-xs">
@@ -369,10 +405,6 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               to={Routes.studio_payouts_path(Endpoint, :index, @commission.studio.handle)}
               class="link font-semibold"
             >Go to Studio Payouts</LiveRedirect>)
-            (<LiveRedirect
-              class="link font-semibold"
-              to={Routes.commission_receipt_path(Endpoint, :show, @commission.public_id, @event.public_id)}
-            >Receipt</LiveRedirect>)
           {/if}
         </span>
       {/if}

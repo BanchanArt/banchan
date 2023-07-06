@@ -17,6 +17,7 @@ defmodule BanchanWeb.OfferingLive.Show do
 
   alias BanchanWeb.Components.{
     Button,
+    Collapse,
     Layout,
     Lightbox,
     Markdown,
@@ -305,6 +306,15 @@ defmodule BanchanWeb.OfferingLive.Show do
             <div class="divider" />
             <Markdown class="pb-4" content={@offering.description} />
           </div>
+          {#if @offering.terms}
+            <div class="divider md:hidden" />
+            <div class="rounded-lg shadow-lg bg-base-200 p-4">
+              <Collapse id="terms-collapse">
+                <:header>Commission Terms</:header>
+                <Markdown content={@offering.terms} />
+              </Collapse>
+            </div>
+          {/if}
           {#if !Enum.empty?(@gallery_images)}
             <div class="rounded-lg shadow-lg bg-base-200 p-4">
               <div class="text-2xl">Gallery</div>

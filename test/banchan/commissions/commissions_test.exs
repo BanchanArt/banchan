@@ -14,7 +14,7 @@ defmodule Banchan.CommissionsTest do
 
   alias Banchan.Accounts
   alias Banchan.Commissions
-  alias Banchan.Commissions.Event
+  alias Banchan.Commissions.{Event, LineItem}
   alias Banchan.Notifications
   alias Banchan.Offerings
   alias Banchan.Payments
@@ -94,7 +94,14 @@ defmodule Banchan.CommissionsTest do
           user,
           studio,
           offering,
-          [],
+          [
+            %LineItem{
+              option: nil,
+              amount: Money.new(10_000, studio.default_currency),
+              name: "custom line item",
+              description: "custom line item description"
+            }
+          ],
           [],
           %{
             title: "some title",
@@ -135,8 +142,7 @@ defmodule Banchan.CommissionsTest do
 
       assert {:error, :offering_closed} == new_comm.()
 
-      {:ok, _comm1} = Commissions.update_status(user, comm1 |> Repo.reload(), :ready_for_review)
-      {:ok, _comm1} = Commissions.update_status(user, comm1 |> Repo.reload(), :approved)
+      process_final_payment!(comm1)
 
       # Closed until we reopen explicitly.
       assert {:error, :offering_closed} == new_comm.()
@@ -552,7 +558,7 @@ defmodule Banchan.CommissionsTest do
 
       assert [] == Notifications.unread_notifications(client).entries
 
-      assert [%{short_body: "An invoice has been released before commission approval."}] =
+      assert [%{short_body: "An invoice deposit has been released."}] =
                Notifications.unread_notifications(artist).entries
 
       # Can't re-release once it's been released.

@@ -59,10 +59,10 @@ defmodule Banchan.Commissions.Event do
     |> validate_text()
   end
 
-  def invoice_changeset(event, attrs) do
+  def invoice_changeset(event, attrs, remaining \\ 99_999) do
     event
     |> cast(attrs, [:text, :amount])
-    |> validate_money(:amount)
+    |> validate_money(:amount, remaining)
     |> validate_required([:amount])
     |> validate_text()
   end

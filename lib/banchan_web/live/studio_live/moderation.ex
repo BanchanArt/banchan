@@ -180,7 +180,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
               info="These are internal notes for admins and moderators about this user. They are not displayed to the user or anyone else."
               name={:moderation_notes}
             />
-            <Submit label="Save" changeset={@changeset} />
+            <Submit class="mt-2" label="Save" changeset={@changeset} />
           </Form>
           <div class="divider" />
           {#if @studio.disable_info}
@@ -189,7 +189,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
                 Re-enable {@studio.name}
               </div>
               <MarkdownInput id="lifted_reason" name={:lifted_reason} opts={required: true} />
-              <Submit label="Enable" changeset={@enable_changeset} />
+              <Submit class="my-2" label="Enable" changeset={@enable_changeset} />
             </Form>
           {#else}
             <Form as={:disable} for={@disable_changeset} change="change_disable" submit="submit_disable">
@@ -198,7 +198,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
               </div>
               <MarkdownInput id="disabled_reason" name={:disabled_reason} opts={required: true} />
               <DateTimeLocalInput name={:disabled_until} />
-              <Submit label="Disable" changeset={@disable_changeset} />
+              <Submit class="my-2" label="Disable" changeset={@disable_changeset} />
             </Form>
           {/if}
           <div :if={!Enum.empty?(@studio.disable_history)} class="divider" />

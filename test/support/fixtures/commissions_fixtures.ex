@@ -15,7 +15,7 @@ defmodule Banchan.CommissionsFixtures do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions
-  alias Banchan.Commissions.Commission
+  alias Banchan.Commissions.{Commission, LineItem}
   alias Banchan.Payments
   alias Banchan.Payments.Invoice
   alias Banchan.Repo
@@ -24,31 +24,58 @@ defmodule Banchan.CommissionsFixtures do
     artist = Map.get(attrs, :artist) || user_fixture(%{roles: [:artist]})
     studio = Map.get(attrs, :studio) || studio_fixture([artist])
     offering = Map.get(attrs, :offering) || offering_fixture(studio)
+    offering = Repo.preload(offering, :options)
+
+    line_items =
+      Map.get(attrs, :line_items) ||
+        if Enum.empty?(offering.options) do
+          [
+            %LineItem{
+              option: nil,
+              amount: Money.new(42_000, studio.default_currency),
+              name: "custom line item",
+              description: "custom line item description"
+            }
+          ]
+        else
+          option = Enum.at(offering.options, 0)
+
+          [
+            %LineItem{
+              option: option,
+              amount: option.price,
+              name: option.name,
+              description: option.description
+            }
+          ]
+        end
 
     {:ok, commission} =
       Commissions.create_commission(
         Map.get(attrs, :client) || user_fixture(),
         studio,
         offering,
-        [],
+        line_items,
         [],
         attrs
+        |> Map.delete(:line_items)
         |> Enum.into(%{
           title: "some title",
           description: "Some Description",
-          tos_ok: true
+          tos_ok: true,
+          currency: Enum.at(line_items, 0).amount.currency
         })
       )
 
     commission |> Repo.preload(studio: [:artists])
   end
 
-  def invoice_fixture(%User{} = actor, %Commission{} = commission, data) do
-    {:ok, invoice} = Payments.invoice(actor, commission, [], data)
+  def invoice_fixture(%User{} = actor, %Commission{} = commission, data, final? \\ false) do
+    {:ok, invoice} = Payments.invoice(actor, commission, [], data, final?)
     invoice
   end
 
-  def checkout_session_fixture(%Invoice{} = invoice, %Money{} = tip) do
+  def checkout_session_fixture(%Invoice{} = invoice, tip \\ Money.new(0, :USD)) do
     commission = (invoice |> Repo.preload(:commission)).commission
     event = (invoice |> Repo.preload(event: [:invoice])).event
     client = (invoice |> Repo.preload(:client)).client
@@ -153,13 +180,19 @@ defmodule Banchan.CommissionsFixtures do
         %Commission{} = commission,
         %Money{} = amount,
         %Money{} = tip,
-        succeed \\ true
+        succeed \\ true,
+        final? \\ false
       ) do
     invoice =
-      invoice_fixture(actor, commission, %{
-        "amount" => amount,
-        "text" => "Please pay me :("
-      })
+      invoice_fixture(
+        actor,
+        commission,
+        %{
+          "amount" => amount,
+          "text" => "Please pay me :("
+        },
+        final?
+      )
 
     session = checkout_session_fixture(invoice, tip)
 
@@ -172,13 +205,12 @@ defmodule Banchan.CommissionsFixtures do
     session
   end
 
-  def approve_commission(%Commission{} = commission) do
-    commission = Repo.reload(commission)
+  def process_final_payment!(%Commission{} = commission, tip \\ Money.new(0, :USD)) do
+    client = Repo.preload(commission, :client).client
+    deposited = Commissions.deposited_amount(client, commission, false)
+    estimate = Commissions.line_item_estimate(Repo.preload(commission, :line_items).line_items)
     studio = Repo.preload(commission, :studio).studio
     artist = Repo.preload(studio, :artists).artists |> Enum.at(0)
-    client = Repo.preload(commission, :client).client
-    Commissions.update_status(artist, commission |> Repo.reload(), :accepted)
-    Commissions.update_status(artist, commission |> Repo.reload(), :ready_for_review)
-    Commissions.update_status(client, commission |> Repo.reload(), :approved)
+    payment_fixture(artist, commission, Money.subtract(estimate, deposited), tip, true, true)
   end
 end

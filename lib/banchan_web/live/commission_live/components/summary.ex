@@ -9,9 +9,10 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   alias BanchanWeb.Components.Collapse
   alias BanchanWeb.Components.Form.{HiddenInput, Select, Submit, TextArea, TextInput}
 
-  prop studio, :struct, required: true
+  prop studio, :struct
   prop line_items, :list, required: true
   prop allow_edits, :boolean, default: false
+  prop show_options, :boolean, default: true
   prop offering, :struct
   prop add_item, :event
   prop remove_item, :event
@@ -24,7 +25,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   def render(assigns) do
     ~F"""
     <div class="flex flex-col">
-      <ul class="flex flex-col pt-2">
+      <ul class="flex flex-col">
         {#for {item, idx} <- Enum.with_index(@line_items)}
           <li class="flex flex-row p-2 gap-2">
             {#if @allow_edits && !item.sticky}
@@ -39,7 +40,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                 type="button"
                 disabled="true"
                 title="This item cannot be removed"
-                class="w-8 place-self-center text-xl fas fa-thumbtack"
+                class="w-8 place-self-center text-xl fas fa-check"
               />
             {/if}
             <div class="grow w-full flex flex-col">
@@ -50,7 +51,8 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
           </li>
         {/for}
       </ul>
-      {#if @offering &&
+      {#if @show_options &&
+          @offering &&
           Enum.any?(@offering.options, fn option ->
             option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))
           end)}

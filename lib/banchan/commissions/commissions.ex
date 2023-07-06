@@ -373,20 +373,16 @@ defmodule Banchan.Commissions do
   end
 
   def deposited_amount(_, %Commission{} = commission, _) do
-    if Ecto.assoc_loaded?(commission.events) do
+    currency = commission_currency(commission)
+
+    if Ecto.assoc_loaded?(commission.events) &&
+         Enum.all?(commission.events, &Ecto.assoc_loaded?(&1.invoice)) do
       Enum.reduce(
         commission.events,
-        %{},
+        Money.new(0, currency),
         fn event, acc ->
           if event.invoice && event.invoice.status in [:succeeded, :released] do
-            current =
-              Map.get(
-                acc,
-                event.invoice.amount.currency,
-                Money.new(0, event.invoice.amount.currency)
-              )
-
-            Map.put(acc, event.invoice.amount.currency, Money.add(current, event.invoice.amount))
+            Money.add(acc, event.invoice.amount)
           else
             acc
           end
@@ -398,18 +394,15 @@ defmodule Banchan.Commissions do
           i in Invoice,
           where:
             i.commission_id == ^commission.id and
-              i.status == :succeeded,
+              i.status in [:succeeded, :released],
           select: i.amount
         )
         |> Repo.all()
 
       Enum.reduce(
         deposits,
-        %{},
-        fn dep, acc ->
-          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
-          Map.put(acc, dep.currency, Money.add(current, dep))
-        end
+        Money.new(0, currency),
+        &Money.add/2
       )
     end
   end
@@ -431,20 +424,16 @@ defmodule Banchan.Commissions do
   end
 
   def tipped_amount(_, %Commission{} = commission, _) do
-    if Ecto.assoc_loaded?(commission.events) do
+    currency = commission_currency(commission)
+
+    if Ecto.assoc_loaded?(commission.events) &&
+         Enum.all?(commission.events, &Ecto.assoc_loaded?(&1.invoice)) do
       Enum.reduce(
         commission.events,
-        %{},
+        Money.new(0, currency),
         fn event, acc ->
           if event.invoice && event.invoice.status in [:succeeded, :released] do
-            current =
-              Map.get(
-                acc,
-                event.invoice.tip.currency,
-                Money.new(0, event.invoice.tip.currency)
-              )
-
-            Map.put(acc, event.invoice.tip.currency, Money.add(current, event.invoice.tip.amount))
+            Money.add(acc, event.invoice.tip)
           else
             acc
           end
@@ -463,31 +452,43 @@ defmodule Banchan.Commissions do
 
       Enum.reduce(
         deposits,
-        %{},
-        fn dep, acc ->
-          current = Map.get(acc, dep.currency, Money.new(0, dep.currency))
-          Map.put(acc, dep.currency, Money.add(current, dep))
-        end
+        Money.new(0, currency),
+        &Money.add/2
       )
     end
+  end
+
+  @doc """
+  Gets the currency used for the commission, taking into account legacy
+  commissions before the currency field existed.
+  """
+  def commission_currency(%Commission{} = commission) do
+    commission.currency ||
+      (!Enum.empty?(commission.line_items) && Enum.at(commission.line_items, 0).amount.currency) ||
+      from(
+        s in Studio,
+        where: s.id == ^commission.studio_id,
+        select: s.default_currency
+      )
+      |> Repo.one!()
   end
 
   @doc """
   Calculates the total commission cost based on the current line items.
   """
   def line_item_estimate(line_items) do
+    currency =
+      if Enum.empty?(line_items) do
+        :USD
+      else
+        Enum.at(line_items, 0).amount.currency
+      end
+
     Enum.reduce(
       line_items,
-      %{},
+      Money.new(0, currency),
       fn item, acc ->
-        current =
-          Map.get(
-            acc,
-            item.amount.currency,
-            Money.new(0, item.amount.currency)
-          )
-
-        Map.put(acc, item.amount.currency, Money.add(current, item.amount))
+        Money.add(acc, item.amount)
       end
     )
   end
@@ -586,6 +587,7 @@ defmodule Banchan.Commissions do
           %Commission{
             studio: studio,
             offering: offering,
+            currency: Offerings.offering_currency(offering),
             client: actor,
             line_items: line_items,
             terms: offering.terms || studio.default_terms
@@ -769,7 +771,11 @@ defmodule Banchan.Commissions do
         with {:ok, actor} <- check_actor_edit_access(actor, commission) do
           changeset = Repo.reload(commission) |> Commission.status_changeset(%{status: status})
 
-          check_status_transition!(actor, commission, changeset.changes.status)
+          check_status_transition!(
+            actor,
+            commission,
+            Ecto.Changeset.fetch_field!(changeset, :status)
+          )
 
           with {:ok, commission} <- changeset |> Repo.update() do
             if commission.status == :accepted do
@@ -785,29 +791,14 @@ defmodule Banchan.Commissions do
               end
             end
 
-            if commission.status == :approved do
-              # Release any successful deposits.
-              from(i in Invoice,
-                where: i.commission_id == ^commission.id and i.status == :succeeded
-              )
-              |> Repo.update_all(set: [status: :released])
-
-              from(e in Event,
-                join: i in assoc(e, :invoice),
-                where: i.commission_id == ^commission.id and i.status == :released,
-                select: e,
-                preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
-              )
-              |> Repo.all()
-              |> Enum.each(fn ev ->
-                Notifications.commission_event_updated(commission, ev, actor)
-              end)
-            end
-
             # current_user_member? is checked as part of check_status_transition!
             with {:ok, _event} <-
                    create_event(:status, actor, commission, true, [], %{status: status}) do
               Notifications.commission_status_changed(commission, actor)
+
+              if commission.status == :approved do
+                Notifications.commission_approved(commission)
+              end
 
               {:ok, commission}
             end
@@ -841,35 +832,30 @@ defmodule Banchan.Commissions do
   end
 
   # Transition changes studios can make
-  defp status_transition_allowed?(artist?, client?, from, to)
+  def status_transition_allowed?(artist?, client?, from, to)
 
-  defp status_transition_allowed?(true, _, :submitted, :accepted), do: true
-  defp status_transition_allowed?(true, _, :submitted, :rejected), do: true
-  defp status_transition_allowed?(true, _, :accepted, :in_progress), do: true
-  defp status_transition_allowed?(true, _, :accepted, :paused), do: true
-  defp status_transition_allowed?(true, _, :accepted, :ready_for_review), do: true
-  defp status_transition_allowed?(true, _, :in_progress, :paused), do: true
-  defp status_transition_allowed?(true, _, :in_progress, :waiting), do: true
-  defp status_transition_allowed?(true, _, :in_progress, :ready_for_review), do: true
-  defp status_transition_allowed?(true, _, :paused, :in_progress), do: true
-  defp status_transition_allowed?(true, _, :paused, :waiting), do: true
-  defp status_transition_allowed?(true, _, :waiting, :in_progress), do: true
-  defp status_transition_allowed?(true, _, :waiting, :paused), do: true
-  defp status_transition_allowed?(true, _, :waiting, :ready_for_review), do: true
-  defp status_transition_allowed?(true, _, :ready_for_review, :in_progress), do: true
-  defp status_transition_allowed?(true, _, :approved, :accepted), do: true
-  defp status_transition_allowed?(true, _, :withdrawn, :accepted), do: true
-  defp status_transition_allowed?(true, _, :rejected, :accepted), do: true
+  def status_transition_allowed?(true, _, :submitted, :accepted), do: true
+  def status_transition_allowed?(true, _, :submitted, :rejected), do: true
+  def status_transition_allowed?(true, _, :accepted, :in_progress), do: true
+  def status_transition_allowed?(true, _, :accepted, :paused), do: true
+  def status_transition_allowed?(true, _, :in_progress, :paused), do: true
+  def status_transition_allowed?(true, _, :in_progress, :waiting), do: true
+  def status_transition_allowed?(true, _, :paused, :in_progress), do: true
+  def status_transition_allowed?(true, _, :paused, :waiting), do: true
+  def status_transition_allowed?(true, _, :waiting, :in_progress), do: true
+  def status_transition_allowed?(true, _, :waiting, :paused), do: true
+  def status_transition_allowed?(true, _, :withdrawn, :accepted), do: true
+  def status_transition_allowed?(true, _, :rejected, :accepted), do: true
 
   # Transition changes clients can make
-  defp status_transition_allowed?(_, true, :ready_for_review, :approved), do: true
-  defp status_transition_allowed?(_, true, :withdrawn, :submitted), do: true
+  def status_transition_allowed?(_, true, _, :approved), do: true
+  def status_transition_allowed?(_, true, :withdrawn, :submitted), do: true
 
   # Either party can withdraw a commission
-  defp status_transition_allowed?(_, _, _, :withdrawn), do: true
+  def status_transition_allowed?(_, _, _, :withdrawn), do: true
 
   # Everything else is a no from me, Bob.
-  defp status_transition_allowed?(_, _, _, _), do: false
+  def status_transition_allowed?(_, _, _, _), do: false
 
   @doc """
   Adds a new line item to an existing commission. Only studio members and

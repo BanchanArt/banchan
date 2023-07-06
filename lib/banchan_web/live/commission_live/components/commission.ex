@@ -8,18 +8,15 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, Notifications}
-  alias Banchan.Studios
 
   alias BanchanWeb.Components.{Button, Collapse, Markdown, ReportModal}
   alias BanchanWeb.Components.Form.{Submit, TextInput}
 
   alias BanchanWeb.CommissionLive.Components.{
-    BalanceBox,
     CommentBox,
-    InvoiceCollapse,
     OfferingBox,
     StatusBox,
-    SummaryEditor,
+    SummaryBox,
     Timeline,
     UploadsBox
   }
@@ -32,7 +29,6 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   prop subscribed?, :boolean
   prop archived?, :boolean
 
-  data deposited, :struct
   data title_changeset, :struct, default: nil
 
   def events_updated(id) do
@@ -52,13 +48,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
       |> assign(
         archived?: Commissions.archived?(socket.assigns.current_user, socket.assigns.commission),
         subscribed?:
-          Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.commission),
-        deposited:
-          Commissions.deposited_amount(
-            socket.assigns.current_user,
-            socket.assigns.commission,
-            socket.assigns.current_user_member?
-          )
+          Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.commission)
       )
 
     socket = Context.put(socket, commission: socket.assigns.commission)
@@ -219,21 +209,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             <div class="divider" />
             <StatusBox id={@id <> "-status-box"} />
             <div class="divider" />
-            <div class="text-lg font-medium">Summary</div>
-            <BalanceBox
-              id={@id <> "-balance-box"}
-              default_currency={Studios.default_currency(@commission.studio)}
-              deposited={@deposited}
-              line_items={@commission.line_items}
-            />
-            <Collapse id="summary-details" class="px-2">
-              <:header><div class="font-medium">Details:</div></:header>
-              <SummaryEditor id={@id <> "-summary-editor"} allow_edits={@current_user_member?} />
-            </Collapse>
-            {#if @current_user_member?}
-              <div class="divider" />
-              <InvoiceCollapse id={@id <> "-invoice-collapse"} />
-            {/if}
+            <SummaryBox id={@id <> "-summary-box"} />
             <div class="divider" />
             <UploadsBox id={@id <> "-uploads-box"} />
             {bottom_buttons(assigns, true)}
@@ -248,10 +224,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             {bottom_buttons(assigns, false)}
             {#if @commission.terms}
               <div class="divider" />
-              <Collapse id="terms-collapse">
-                <:header>Commission Terms</:header>
-                <Markdown content={@commission.terms} />
-              </Collapse>
+              <div class="rounded-lg shadow-lg bg-base-200 p-4">
+                <Collapse id="terms-collapse">
+                  <:header>Commission Terms</:header>
+                  <Markdown content={@commission.terms} />
+                </Collapse>
+              </div>
             {/if}
           </div>
         </div>
@@ -298,7 +276,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
         <Collapse
           id={@id <> "-withdraw-confirmation" <> if desktop?, do: "-desktop", else: "-mobile"}
           show_arrow={false}
-          class="w-full my-2 bg-base-200"
+          class="w-full rounded-lg my-2 bg-base-200"
         >
           <:header>
             <button type="button" class="btn btn-sm w-full">
