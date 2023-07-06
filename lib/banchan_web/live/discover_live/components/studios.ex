@@ -4,8 +4,9 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
   """
   use BanchanWeb, :live_component
 
-  alias Surface.Components.LivePatch
+  alias Surface.Components.{LivePatch, LiveRedirect}
 
+  alias Banchan.Accounts
   alias Banchan.Studios
 
   alias BanchanWeb.Components.{InfiniteScroll, StudioCard}
@@ -67,7 +68,12 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
       end
 
     ~F"""
-    <discover-studios>
+    <discover-studios class="flex flex-col items-center">
+      {#if Accounts.artist?(@current_user)}
+        <div class="pb-2">
+          Looking for your own studios? Go to the <LiveRedirect class="link" to={~p"/studios"}>My Studios</LiveRedirect> page.
+        </div>
+      {/if}
       {#if Enum.empty?(@studios)}
         <div class="text-2xl">No Results</div>
         {#if @suggest_offerings}

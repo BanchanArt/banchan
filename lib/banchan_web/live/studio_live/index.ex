@@ -48,7 +48,7 @@ defmodule BanchanWeb.StudioLive.Index do
           <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full transition-all">
             <div class="m-auto flex flex-col items-center">
               <span class="text-3xl m-auto">New Studio</span>
-              <span class="text-sm p-2">Commissions are done through studios, rather than user accounts.</span>
+              <span class="text-sm p-2">Commissions are done through studios, rather than user accounts. Click here to create one.</span>
             </div>
           </Card>
         </LiveRedirect>

@@ -208,7 +208,7 @@ defmodule BanchanWeb.StudioLive.Shop do
               <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full transition-all">
                 <div class="flex flex-col items-center m-auto">
                   <span class="text-4xl">New Offering</span>
-                  <span class="text-sm">Offerings are what users can select when they want a commission. For example, "Illustration", or "Chibi".</span>
+                  <span class="text-sm">Offerings are what users can select when they want a commission. For example, "Illustration", or "Chibi". Click here to make one.</span>
                 </div>
               </Card>
             </LiveRedirect>

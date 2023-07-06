@@ -240,6 +240,13 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  Returns true if user is an artist.
+  """
+  def artist?(%User{} = user) do
+    has_roles?(user, [:artist])
+  end
+
+  @doc """
   Returns true if user has mod or admin privs.
   """
   def mod?(%User{} = user) do
