@@ -14,7 +14,7 @@ defmodule BanchanWeb.AuthLive.Components.AuthLayout do
     ~F"""
     <Layout flashes={@flashes} padding={0}>
       <div class="w-full md:bg-base-300">
-        <div class="max-w-sm w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+        <div class="max-w-md w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <#slot />
         </div>
       </div>
