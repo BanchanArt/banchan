@@ -243,7 +243,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
 
   def render(assigns) do
     ~F"""
-    <div class="rounded-lg bg-base-200 p-4 shadow-lg flex flex-col gap-2">
+    <div id={@id} class="rounded-lg bg-base-200 p-4 shadow-lg flex flex-col gap-2">
       {#if @open_final_invoice}
         <div class="text-lg font-medium pb-2">Final Invoice</div>
         <div class="text-sm">Attachments will be released on payment. All deposits will be immediately released, along with this payment, and the commission will be closed.</div>
@@ -345,13 +345,13 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
               <Button
                 disabled={@existing_open}
                 click="request_deposit"
-                class="btn-sm grow"
+                class="btn-sm grow request-deposit"
                 label="Request Deposit"
               />
               <Button
                 disabled={@existing_open}
                 click="final_invoice"
-                class="btn-sm grow"
+                class="btn-sm grow final-invoice"
                 label="Final Invoice"
               />
             {/if}
