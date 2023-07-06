@@ -55,20 +55,22 @@ defmodule BanchanWeb.DenizenLive.Moderation do
   end
 
   @impl true
-  def handle_event("change", val, socket) do
+  def handle_event("change", %{"user" => user}, socket) do
     changeset =
-      User.admin_changeset(socket.assigns.current_user, socket.assigns.user, val["user"])
+      User.admin_changeset(
+        socket.assigns.current_user,
+        socket.assigns.user, user |> Map.put("roles", Map.get(user, "roles", [])))
       |> Map.put(:action, :update)
 
     {:noreply, socket |> assign(changeset: changeset)}
   end
 
   @impl true
-  def handle_event("submit", val, socket) do
+  def handle_event("submit", %{"user" => user}, socket) do
     case Accounts.update_admin_fields(
            socket.assigns.current_user,
            socket.assigns.user,
-           val["user"]
+           user |> Map.put("roles", Map.get(user, "roles", []))
          ) do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, socket |> assign(changeset: changeset)}
