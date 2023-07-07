@@ -61,6 +61,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
         open: true,
         hidden: false,
         max_proposals: 3,
+        currency: :USD,
         options: [
           %{
             name: "Base Price",
@@ -97,6 +98,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
         open: true,
         hidden: true,
         slots: 3,
+        currency: :USD,
         options: [
           %{
             name: "Base Price",
@@ -141,6 +143,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
         open: true,
         hidden: false,
         max_proposals: 3,
+        currency: :USD,
         options: [
           %{
             name: "Base Price",
