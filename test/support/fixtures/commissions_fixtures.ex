@@ -69,12 +69,13 @@ defmodule Banchan.CommissionsFixtures do
 
     status = Map.get(attrs, :status, :accepted)
 
-    commission = if status != commission.status do
-      {:ok, commission} = Commissions.update_status(artist, commission, status)
-      commission
-    else
-      commission
-    end
+    commission =
+      if status != commission.status do
+        {:ok, commission} = Commissions.update_status(artist, commission, status)
+        commission
+      else
+        commission
+      end
 
     commission |> Repo.preload(studio: [:artists], client: [], offering: [])
   end
