@@ -109,7 +109,10 @@ defmodule Banchan.Offerings.Offering do
     |> validate_change(:options, fn _, opts ->
       if opts
          |> Enum.filter(&(&1.action in [:update, :insert]))
-         |> Enum.all?(&(fetch_field!(&1, :price).currency == curr)) do
+         |> Enum.all?(fn opt ->
+             price = fetch_field!(opt, :price)
+             !opt.valid? || (price && (price.currency == curr))
+         end) do
         []
       else
         [{:currency, "All options must use the configured currency on the offering."}]
