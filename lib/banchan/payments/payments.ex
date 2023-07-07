@@ -850,6 +850,7 @@ defmodule Banchan.Payments do
           amount: invoices |> Enum.map(& &1.amount) |> Enum.reduce(&Money.add/2)
         })
       end
+      {:ok, true}
     end)
     |> Repo.transaction()
     |> case do
