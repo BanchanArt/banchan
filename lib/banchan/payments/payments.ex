@@ -261,6 +261,13 @@ defmodule Banchan.Payments do
         {:ok, true}
       end
     end)
+    |> Ecto.Multi.run(:active_comm?, fn _repo, _ ->
+      if Commissions.commission_active?(commission) do
+        {:ok, true}
+      else
+        {:error, :inactive_commission}
+      end
+    end)
     |> Ecto.Multi.run(:event, fn _repo, %{checked_actor: actor} ->
       Commissions.create_event(:comment, actor, commission, true, drafts, event_data)
     end)
