@@ -19,7 +19,10 @@ config :banchan,
 
 # Configures the endpoint
 config :banchan, BanchanWeb.Endpoint,
-  render_errors: [view: BanchanWeb.ErrorView, accepts: ~w(html json), layout: false],
+  render_errors: [
+    formats: [html: BanchanWeb.ErrorHTML, json: BanchanWeb.ErrorJSON],
+    layout: false
+  ],
   pubsub_server: Banchan.PubSub,
   live_view: [signing_salt: "qB2PgmVY"]
 
