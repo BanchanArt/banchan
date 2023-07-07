@@ -29,7 +29,7 @@ defmodule BanchanWeb.Components.MasonryGallery.Upload do
           type="button"
           phx-value-type="existing"
           phx-value-id={@upload.id}
-          class="btn btn-xs btn-circle absolute right-2 top-2"
+          class="btn btn-xs btn-circle absolute left-2 top-2"
           :on-click={@deleted}
         >✕</button>
       {/if}
