@@ -7,6 +7,8 @@ defmodule BanchanWeb.CommissionLive.Components.OfferingBox do
 
   alias Surface.Components.LiveRedirect
 
+  alias BanchanWeb.Components.OfferingCard
+
   prop offering, :struct, required: true
   prop class, :css_class
 
@@ -21,14 +23,18 @@ defmodule BanchanWeb.CommissionLive.Components.OfferingBox do
         class={@class}
         to={Routes.offering_show_path(Endpoint, :show, @offering.studio.handle, @offering.type)}
       >
-        <img
-          :if={!is_nil(@offering.card_img_id)}
-          src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
-          class="aspect-header-image object-cover rounded-box"
-        />
-        <div class="px-2 text-lg">
-          <span class="font-medium">{@offering.name}</span> by {@offering.studio.name}
-        </div>
+        {#if !is_nil(@offering.card_img_id)}
+          <OfferingCard
+            image={@offering.card_img_id}
+            name={"#{@offering.name} by #{@offering.studio.name}"}
+            show_pills?={false}
+            show_base_price?={false}
+          />
+        {#else}
+          <div class="px-2 text-lg">
+            <span class="font-medium">{@offering.name}</span> by {@offering.studio.name}
+          </div>
+        {/if}
       </LiveRedirect>
     {/if}
     """

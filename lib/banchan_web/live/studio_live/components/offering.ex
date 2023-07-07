@@ -71,8 +71,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                   currency: socket.assigns.studio.default_currency,
                   options: [
                     %OfferingOption{
-                      name: "Base Price",
-                      description: "Base price, without add-ons",
+                      name: "Default Option 1",
+                      description: "Base commission.",
                       price: Money.new(0, socket.assigns.studio.default_currency),
                       default: true,
                       sticky: true
@@ -505,12 +505,12 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <div class="divider" />
         <h3 class="text-2xl">Options</h3>
         <div>
-          Options include both the "default options", which determine the offering's displayed base price, as well as any "add-ons" than can be added when making a proposal.
+          Options are the items that will be available for clients to put in their "carts". The commission's Base Price is based on the default options.
         </div>
         <div>
-          You can choose to not have any options, in which case you will be able to add custom options during the commission, based on a specific request. The Base Price will be displayed as "Inquire".
+          If you do not define any options, the Base Price will be displayed as "Inquire", and you will need to add custom options during the commission.
         </div>
-        <ul class="flex flex-col gap-4">
+        <ul class="flex flex-col gap-4 pt-4">
           <Inputs form={@form} for={:options} :let={index: index}>
             <li>
               <Collapse id={@id <> "-option-" <> "#{index}"} class="border-b-2">
@@ -541,12 +541,18 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                   info="Allow multiple instances of this option at the same time."
                   label="Allow Multiple"
                 />
-                <Checkbox name={:sticky} info="Once this option is added, it can't be removed." label="Sticky" />
                 <Checkbox
                   name={:default}
                   info="Whether this option is added by default. Default options are also used to calculate your offering's base price."
                   label="Default"
                 />
+                {#if Ecto.Changeset.fetch_field!(@changeset, :options) |> Enum.at(0) |> then(& &1.default)}
+                  <Checkbox
+                    name={:sticky}
+                    info="Sticky defaults can't be removed from the cart."
+                    label="Sticky Default"
+                  />
+                {/if}
                 <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
               </Collapse>
             </li>

@@ -40,11 +40,11 @@ defmodule BanchanWeb.Components.Form.UploadInput do
       <p class="text-error">{error_to_string(err)}</p>
     {/for}
     <div
-      class="relative h-15 rounded-lg border-dashed border-2 border-primary flex justify-center items-center"
+      class="relative h-15 rounded-lg border-dashed border-2 border-primary flex justify-center items-center cursor-pointer"
       phx-drop-target={@upload.ref}
     >
-      <div class="absolute">
-        <span class="block font-normal">{@label} <i class="fas fa-file-upload" /></span>
+      <div class="absolute cursor-pointer">
+        <span class="block font-normal cursor-pointer">{@label} <i class="fas fa-file-upload" /></span>
       </div>
       {#if @crop}
         <CropUploadInput
@@ -53,10 +53,10 @@ defmodule BanchanWeb.Components.Form.UploadInput do
           upload={@upload}
           target={@cancel.target}
           title={"Crop " <> @label}
-          class="h-full w-full opacity-0 hover:cursor-pointer"
+          class="h-full w-full opacity-0 cursor-pointer"
         />
       {#else}
-        <LiveFileInput class="h-full w-full opacity-0 hover:cursor-pointer" upload={@upload} />
+        <LiveFileInput class="h-full w-full opacity-0 cursor-pointer" upload={@upload} />
       {/if}
     </div>
     """
