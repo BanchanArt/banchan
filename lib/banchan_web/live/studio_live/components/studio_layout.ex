@@ -148,6 +148,13 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
               </div>
               <div class="p-2">|</div>
               <FollowerCountLive id="follower-count" session={%{"handle" => @studio.handle}} />
+              {#if @current_user_member?}
+                <div class="pl-2">|</div>
+                <LiveRedirect class="btn btn-link" to={~p"/commissions?studio=#{@studio.handle}"}>
+                  <i class="fas fa-palette pr-2" />
+                  Studio Commissions
+                </LiveRedirect>
+              {/if}
             </div>
           </div>
           <div class="overflow-auto min-w-screen">
