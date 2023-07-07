@@ -96,6 +96,8 @@ defmodule Banchan.MixProject do
       {:scrivener_ecto, "~> 2.7.0"},
       {:sentry, "~> 8.0.6"},
       {:slugify, "~> 1.3.1"},
+      # TODO: remove this line when the package gets fixed. See https://github.com/elixir-lang/elixir/issues/12681#issuecomment-1598312912
+      {:ssl_verify_fun, "~> 1.1.7", manager: :rebar3, override: true},
       {:stripity_stripe, "~> 2.17.3"},
       {:surface, "~> 0.11.0"},
       # TODO: Not compatible with Surface 0.11 yet.
