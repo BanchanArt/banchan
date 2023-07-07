@@ -375,16 +375,7 @@ defmodule Banchan.Offerings do
       nil
     else
       offering.option_prices
-      |> Enum.reduce(%{}, fn price, acc ->
-        current =
-          Map.get(
-            acc,
-            price.currency,
-            Money.new(0, price.currency)
-          )
-
-        Map.put(acc, price.currency, Money.add(current, price))
-      end)
+      |> Enum.reduce(&Money.add/2)
     end
   end
 

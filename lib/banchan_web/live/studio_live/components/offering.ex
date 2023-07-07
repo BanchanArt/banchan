@@ -14,7 +14,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias Banchan.Uploads
   alias Banchan.Utils
 
-  alias BanchanWeb.Components.{Button, Collapse, MasonryGallery}
+  alias BanchanWeb.Components.{Button, Collapse, MasonryGallery, OfferingCard}
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
@@ -370,7 +370,12 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   def render(assigns) do
     ~F"""
-    <Form for={@changeset} submit="submit" change="change" opts={autocomplete: "off"}>
+    <Form
+      for={@changeset}
+      submit="submit"
+      change="change"
+      opts={autocomplete: "off", "phx-target": @myself}
+    >
       <div class="flex flex-col gap-2">
         <TextInput
           name={:name}
@@ -422,68 +427,88 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           info="Max slots available. Slots are used up as you accept commissions. Leave blank for unlimited slots."
         />
         <div class="divider" />
-        <Collapse id={@id <> "-images"} class="pt-4 border-b-2">
-          <:header>
-            <h3 class="text-xl pb-2">
-              Images
-            </h3>
-            <div>You must have a header image in order to be listed on site search.</div>
-          </:header>
-          <div class="relative aspect-video py-2">
-            {#if Enum.empty?(@uploads.card_image.entries) &&
-                (@remove_card || !(@offering && @offering.card_img_id))}
-              <HiddenInput name={:card_image_id} value={nil} />
-              <div class="aspect-video bg-base-300 w-full" />
-            {#elseif !Enum.empty?(@uploads.card_image.entries)}
-              <button
-                type="button"
-                phx-value-ref={(@uploads.card_image.entries |> Enum.at(0)).ref}
-                class="btn btn-xs btn-circle absolute right-2 top-4"
-                :on-click="cancel_card_upload"
-              >✕</button>
-              <.live_img_preview
-                entry={Enum.at(@uploads.card_image.entries, 0)}
-                class="object-contain aspect-video rounded-xl w-full"
-              />
-            {#else}
-              <button
-                type="button"
-                class="btn btn-xs btn-circle absolute right-2 top-4"
-                :on-click="remove_card"
-              >✕</button>
-              <HiddenInput name={:card_image_id} value={@offering.card_img_id} />
-              <img
-                class="object-cover aspect-video rounded-xl w-full"
-                src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
-              />
-            {/if}
-          </div>
-          <UploadInput
-            label="Card Image"
-            upload={@uploads.card_image}
-            cancel="cancel_card_upload"
-            hide_list
+        <h2 class="text-2xl">Card Image</h2>
+        <div>You must have a card image in order for the offering to be listed on site search. Otherwise, you will only be able to link directly to it.</div>
+        <div class="relative">
+          {#if Enum.empty?(@uploads.card_image.entries) &&
+              (@remove_card || !(@offering && @offering.card_img_id))}
+            <HiddenInput name={:card_image_id} value={nil} />
+          {#elseif !Enum.empty?(@uploads.card_image.entries)}
+            <button
+              type="button"
+              phx-value-ref={(@uploads.card_image.entries |> Enum.at(0)).ref}
+              class="btn btn-md btn-circle absolute left-2 top-2 z-20"
+              :on-click="cancel_card_upload"
+            >✕</button>
+          {#else}
+            <button
+              type="button"
+              class="btn btn-md btn-circle absolute left-2 top-2 z-20"
+              :on-click="remove_card"
+            >✕</button>
+            <HiddenInput name={:card_image_id} value={@offering.card_img_id} />
+          {/if}
+          <OfferingCard
+            name={Ecto.Changeset.get_field(@changeset, :name)}
+            image={cond do
+              Enum.empty?(@uploads.card_image.entries) &&
+                  (@remove_card || !(@offering && @offering.card_img_id)) ->
+                nil
+
+              !Enum.empty?(@uploads.card_image.entries) ->
+                Enum.at(@uploads.card_image.entries, 0)
+
+              true ->
+                @offering.card_img_id
+            end}
+            base_price={if is_nil(Ecto.Changeset.get_field(@changeset, :options)) ||
+                 Enum.empty?(Ecto.Changeset.get_field(@changeset, :options)) do
+              nil
+            else
+              Ecto.Changeset.get_field(@changeset, :options)
+              |> Enum.filter(&(&1.default && &1.price))
+              |> Enum.map(& &1.price)
+              |> Enum.reduce(Money.new(0, Ecto.Changeset.fetch_field!(@changeset, :currency)), &Money.add/2)
+            end}
+            open?={Ecto.Changeset.get_field(@changeset, :open)}
+            hidden?={Ecto.Changeset.get_field(@changeset, :hidden)}
+            mature?={Ecto.Changeset.get_field(@changeset, :mature)}
+            hover_grow?={false}
+            total_slots={Ecto.Changeset.get_field(@changeset, :slots)}
+            available_slots={Ecto.Changeset.get_field(@changeset, :slots)}
           />
-          <MasonryGallery
-            id={@id <> "-gallery-preview"}
-            class="py-2 rounded-lg"
-            send_updates_to={self()}
-            images={@gallery_images}
-            editable
-            upload_type={:offering_gallery_img}
-            entries={@uploads.gallery_images.entries}
-          />
-          <UploadInput
-            label="Gallery Images"
-            upload={@uploads.gallery_images}
-            cancel="cancel_gallery_upload"
-            hide_list
-          />
-        </Collapse>
-        <h3 class="text-2xl pt-10">Options</h3>
+        </div>
+        <UploadInput
+          label="Upload Card Image"
+          upload={@uploads.card_image}
+          cancel="cancel_card_upload"
+          hide_list
+        />
         <div class="divider" />
-        <div class="pb-4">
+        <h3 class="text-2xl">Gallery Images</h3>
+        <div>Gallery images will be shown on the offering's page, as example works. You can drag and drop them to reorder them.</div>
+        <MasonryGallery
+          id={@id <> "-gallery-preview"}
+          class="py-2 rounded-lg"
+          send_updates_to={self()}
+          images={@gallery_images}
+          editable
+          upload_type={:offering_gallery_img}
+          entries={@uploads.gallery_images.entries}
+        />
+        <UploadInput
+          label="Upload Gallery Images"
+          upload={@uploads.gallery_images}
+          cancel="cancel_gallery_upload"
+          hide_list
+        />
+        <div class="divider" />
+        <h3 class="text-2xl">Options</h3>
+        <div>
           Options include both the "default options", which determine the offering's displayed base price, as well as any "add-ons" than can be added when making a proposal.
+        </div>
+        <div>
+          You can choose to not have any options, in which case you will be able to add custom options during the commission, based on a specific request. The Base Price will be displayed as "Inquire".
         </div>
         <ul class="flex flex-col gap-4">
           <Inputs form={@form} for={:options} :let={index: index}>
