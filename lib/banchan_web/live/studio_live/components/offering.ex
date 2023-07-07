@@ -393,14 +393,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
           name={:tags}
         />
-        <TextInput
-          name={:slots}
-          info="Max slots available. Slots are used up as you accept commissions. Leave blank for unlimited slots."
-        />
-        <TextInput
-          name={:max_proposals}
-          info="Max proposals. Unlike slots, these are used as soon as someone makes a proposal. Use this setting to prevent your inbox from getting flooded with too many proposals. Leave blank for unlimited proposals."
-        />
         <Checkbox
           name={:open}
           label="Open"
@@ -416,11 +408,26 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           label="Mature"
           info="Mark this offering as mature content. Note: if you plan on doing mature/NSFW commissions through this offering, this MUST be checked."
         />
+        <div class="divider" />
+        <div>While Slots determines how many commissions you're willing to accept at a time, Max Proposals determines how many people can make a proposal at the same time.</div>
+        <div>This is useful if you want to limit the number of commission requests you get at once. Accepted commissions do not count towards your Max Proposals, and proposed commissions do not count towards your Slots.
+        </div>
+        <div>Leave Max Proposals blank to make it unlimited.</div>
+        <TextInput
+          name={:max_proposals}
+          info="Max proposals. Unlike slots, these are used as soon as someone makes a proposal. Use this setting to prevent your inbox from getting flooded with too many proposals. Leave blank for unlimited proposals."
+        />
+        <TextInput
+          name={:slots}
+          info="Max slots available. Slots are used up as you accept commissions. Leave blank for unlimited slots."
+        />
+        <div class="divider" />
         <Collapse id={@id <> "-images"} class="pt-4 border-b-2">
           <:header>
             <h3 class="text-xl pb-2">
               Images
             </h3>
+            <div>You must have a header image in order to be listed on site search.</div>
           </:header>
           <div class="relative aspect-video py-2">
             {#if Enum.empty?(@uploads.card_image.entries) &&
