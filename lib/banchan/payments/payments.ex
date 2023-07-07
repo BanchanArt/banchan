@@ -1262,7 +1262,7 @@ defmodule Banchan.Payments do
           :ok
 
         {:error, %Stripe.Error{} = err} ->
-          Logger.warn(
+          Logger.warning(
             "Failed to cancel payout #{payout_id} with code #{inspect(err.code)}: #{err.message}"
           )
 
