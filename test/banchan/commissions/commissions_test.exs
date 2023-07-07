@@ -124,7 +124,7 @@ defmodule Banchan.CommissionsTest do
       {:ok, comm1} = new_comm.()
       {:ok, comm2} = new_comm.()
 
-      {:ok, _comm1} = Commissions.update_status(user, comm1, :accepted)
+      {:ok, comm1} = Commissions.update_status(user, comm1, :accepted)
 
       assert {:error, :offering_closed} == new_comm.()
 

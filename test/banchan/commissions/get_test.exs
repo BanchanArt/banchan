@@ -72,7 +72,7 @@ defmodule Banchan.CommissionsTest.Get do
   describe "commission_open?/1" do
     test "returns true if the commission is an open state, false otherwise" do
       # Open Statuses
-      commission = commission_fixture()
+      commission = commission_fixture(%{status: :submitted})
       artist = commission.studio.artists |> Enum.at(0)
 
       assert Commissions.commission_open?(commission)
@@ -99,7 +99,7 @@ defmodule Banchan.CommissionsTest.Get do
       {:ok, commission} = Commissions.update_status(client, commission, :withdrawn)
       refute Commissions.commission_open?(commission)
 
-      commission = commission_fixture()
+      commission = commission_fixture(%{status: :submitted})
       artist = commission.studio.artists |> Enum.at(0)
 
       {:ok, commission} = Commissions.update_status(artist, commission, :rejected)
