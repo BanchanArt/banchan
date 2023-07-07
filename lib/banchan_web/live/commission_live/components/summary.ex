@@ -102,7 +102,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                   <div class="flex flex-row gap-2 items-center py-2">
                     {#case @studio.payment_currencies}
                       {#match [_]}
-                        <div class="flex flex-basis-1/4">{"#{to_string(@studio.default_currency)}#{Money.Currency.symbol(@studio.default_currency)}"}</div>
+                        <div class="flex flex-basis-1/4">{Money.Currency.symbol(@studio.default_currency)}</div>
                         <HiddenInput name={:currency} value={@studio.default_currency} />
                       {#match _}
                         <div class="flex-basis-1/4">
@@ -110,7 +110,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                             name={:currency}
                             show_label={false}
                             options={@studio.payment_currencies
-                            |> Enum.map(&{"#{to_string(&1)}#{Money.Currency.symbol(&1)}", &1})}
+                            |> Enum.map(&{Money.Currency.symbol(&1), &1})}
                             selected={@studio.default_currency}
                           />
                         </div>
