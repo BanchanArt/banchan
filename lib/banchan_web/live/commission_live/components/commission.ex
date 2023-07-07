@@ -202,16 +202,16 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
       <div class="p-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="flex flex-col md:order-2">
-            <OfferingBox
-              offering={@commission.offering}
-              class="rounded-box hover:bg-base-200 p-2 transition-all"
-            />
+            <SummaryBox id={@id <> "-summary-box"} />
             <div class="divider" />
             <StatusBox id={@id <> "-status-box"} />
             <div class="divider" />
-            <SummaryBox id={@id <> "-summary-box"} />
-            <div class="divider" />
             <UploadsBox id={@id <> "-uploads-box"} />
+            <div class="divider" />
+            <OfferingBox
+              offering={@commission.offering}
+              class="rounded-box hover:bg-base-200 transition-all"
+            />
             {bottom_buttons(assigns, true)}
           </div>
           <div class="divider md:hidden" />

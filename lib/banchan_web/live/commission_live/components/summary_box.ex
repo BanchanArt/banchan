@@ -339,17 +339,17 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           deposited={@deposited}
           line_items={@commission.line_items}
         />
-        {#if @commission.status != :approved}
+        {#if Commissions.commission_open?(@commission) && Commissions.commission_active?(@commission)}
           <div class="input-group">
             {#if @current_user_member?}
               <Button
-                disabled={@existing_open}
+                disabled={@existing_open || !Commissions.commission_active?(@commission)}
                 click="request_deposit"
                 class="btn-sm grow request-deposit"
                 label="Request Deposit"
               />
               <Button
-                disabled={@existing_open}
+                disabled={@existing_open || !Commissions.commission_active?(@commission)}
                 click="final_invoice"
                 class="btn-sm grow final-invoice"
                 label="Final Invoice"
@@ -357,8 +357,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
             {/if}
           </div>
           {#if @current_user.id == @commission.client_id}
-            {#if @existing_open}
-              <Button disabled={@existing_open} class="btn-sm w-full" label="Release Deposits" />
+            {#if @existing_open || !Commissions.commission_active?(@commission)}
+              <Button disabled class="btn-sm w-full" label="Release Deposits" />
             {#else}
               <Collapse
                 id={@id <> "-release-confirmation"}
@@ -378,11 +378,15 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
               </Collapse>
             {/if}
           {/if}
-          {#if @existing_open}
-            <div>
-              You can't take any further invoice actions until the <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> is handled.
-            </div>
-          {/if}
+        {/if}
+        {#if !Commissions.commission_open?(@commission)}
+          <div>This commission is closed. You can't take any further actions on it unless it's reopened.</div>
+        {#elseif !Commissions.commission_active?(@commission)}
+          <div>Only open and accepted commissions can be invoiced. Accept the commission to continue.</div>
+        {#elseif @existing_open}
+          <div>
+            You can't take any further invoice actions until the <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> is handled.
+          </div>
         {/if}
       {/if}
     </div>

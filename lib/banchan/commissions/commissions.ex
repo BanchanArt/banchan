@@ -324,6 +324,15 @@ defmodule Banchan.Commissions do
   def commission_open?(%Commission{}), do: true
 
   @doc """
+  Is the commission in an active/accepted state?
+
+  NOTE: This expects the commission to be in its latest state.
+  """
+  def commission_active?(%Commission{status: status}) do
+    status in [:accepted, :in_progress, :paused, :waiting]
+  end
+
+  @doc """
   Gets an attachment with preloaded uploads data.
   """
   def get_attachment_if_allowed!(commission_id, upload_id, user) do

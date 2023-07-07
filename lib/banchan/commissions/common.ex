@@ -60,7 +60,8 @@ defmodule Banchan.Commissions.Common do
   Description of a commission status.
   """
   def status_description(:submitted),
-    do: "The commission has been submitted to the studio and is awaiting acceptance."
+    do:
+      "The commission has been submitted to the studio and is awaiting acceptance. Accepting a commission will use a slot."
 
   def status_description(:accepted),
     do: "The commission has been accepted by the studio and work will begin soon."
