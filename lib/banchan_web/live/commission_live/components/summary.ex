@@ -116,7 +116,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                         </div>
                     {/case}
                     <div class="grow">
-                      <TextInput name={:amount} show_label={false} opts={required: true, placeholder: "12.34"} />
+                      <TextInput name={:amount} show_label={false} opts={required: true} />
                     </div>
                   </div>
                   <Submit class="w-full" changeset={@custom_changeset} />
