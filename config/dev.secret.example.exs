@@ -12,6 +12,7 @@ config :banchan, Banchan.Repo,
   pool_size: 10
 
 config :banchan,
+  # You only need to set this if you want bug reports to work. Otherwise, leave blank.
   github_access_token: ""
 
 # Sentry configuration
