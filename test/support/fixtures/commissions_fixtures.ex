@@ -67,7 +67,16 @@ defmodule Banchan.CommissionsFixtures do
         })
       )
 
-    commission |> Repo.preload(studio: [:artists])
+    status = Map.get(attrs, :status, :accepted)
+
+    commission = if status != commission.status do
+      {:ok, commission} = Commissions.update_status(artist, commission, status)
+      commission
+    else
+      commission
+    end
+
+    commission |> Repo.preload(studio: [:artists], client: [], offering: [])
   end
 
   def invoice_fixture(%User{} = actor, %Commission{} = commission, data, final? \\ false) do

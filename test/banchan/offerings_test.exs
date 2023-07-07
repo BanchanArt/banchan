@@ -131,6 +131,7 @@ defmodule Banchan.OfferingsTest do
 
       comm1 =
         commission_fixture(%{
+          status: :submitted,
           client: client,
           artist: artist,
           studio: studio,
@@ -142,11 +143,12 @@ defmodule Banchan.OfferingsTest do
       Commissions.update_status(artist, comm1, :accepted)
       assert 2 == get_slots.()
 
-      Commissions.update_status(artist, comm1 |> Repo.reload(), :in_progress)
+      {:ok, comm1} = Commissions.update_status(artist, comm1 |> Repo.reload(), :in_progress)
       assert 2 == get_slots.()
 
       comm2 =
         commission_fixture(%{
+          status: :submitted,
           client: client,
           artist: artist,
           studio: studio,
@@ -155,6 +157,7 @@ defmodule Banchan.OfferingsTest do
 
       comm3 =
         commission_fixture(%{
+          status: :submitted,
           client: client,
           artist: artist,
           studio: studio,
@@ -163,6 +166,7 @@ defmodule Banchan.OfferingsTest do
 
       comm4 =
         commission_fixture(%{
+          status: :submitted,
           client: client,
           artist: artist,
           studio: studio,
@@ -173,10 +177,10 @@ defmodule Banchan.OfferingsTest do
       assert 2 == get_slots.()
 
       # Now we accept each new commission
-      Commissions.update_status(artist, comm2, :accepted)
+      {:ok, comm2} = Commissions.update_status(artist, comm2, :accepted)
       assert 1 == get_slots.()
 
-      Commissions.update_status(artist, comm3, :accepted)
+      {:ok, comm3} = Commissions.update_status(artist, comm3, :accepted)
       assert 0 == get_slots.()
 
       # Creating new commissions is blocked.
@@ -195,7 +199,7 @@ defmodule Banchan.OfferingsTest do
                )
 
       # Overflow is fine. Just get 0 back.
-      Commissions.update_status(artist, comm4, :accepted)
+      {:ok, comm4} = Commissions.update_status(artist, comm4, :accepted)
       assert 0 == get_slots.()
 
       # We're still dealing with the overflow, so still 0
@@ -327,6 +331,7 @@ defmodule Banchan.OfferingsTest do
 
       comm1 =
         commission_fixture(%{
+          status: :submitted,
           client: client,
           artist: artist,
           studio: studio,
@@ -338,7 +343,7 @@ defmodule Banchan.OfferingsTest do
       Commissions.update_status(artist, comm1, :accepted)
       assert 3 == Offerings.offering_available_proposals(offering)
 
-      Commissions.update_status(artist, comm1 |> Repo.reload(), :in_progress)
+      {:ok, comm1} = Commissions.update_status(artist, comm1 |> Repo.reload(), :in_progress)
       assert 3 == Offerings.offering_available_proposals(offering)
 
       process_final_payment!(comm1)
@@ -346,6 +351,7 @@ defmodule Banchan.OfferingsTest do
 
       comm2 =
         commission_fixture(%{
+          status: :submitted,
           client: client,
           artist: artist,
           studio: studio,
@@ -356,6 +362,7 @@ defmodule Banchan.OfferingsTest do
 
       comm3 =
         commission_fixture(%{
+          status: :submitted,
           client: client,
           artist: artist,
           studio: studio,
@@ -366,6 +373,7 @@ defmodule Banchan.OfferingsTest do
 
       comm4 =
         commission_fixture(%{
+          status: :submitted,
           client: client,
           artist: artist,
           studio: studio,
