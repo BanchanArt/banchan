@@ -110,8 +110,7 @@ defmodule Banchan.Offerings.Offering do
       if opts
          |> Enum.filter(&(&1.action in [:update, :insert]))
          |> Enum.all?(fn opt ->
-           price = fetch_field!(opt, :price)
-           !opt.valid? || (price && price.currency == curr)
+           !opt.valid? || (get_field(opt, :price) && fetch_field!(opt, :price).currency == curr)
          end) do
         []
       else
