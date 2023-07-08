@@ -84,7 +84,7 @@ defmodule Banchan.Commissions.Common do
       "The commission has received final approval and all payments and attachments have been released."
 
   def status_description(:withdrawn),
-    do: "The client has withdrawn this commission. It is now closed."
+    do: "The commission has been withdrawn. It is now closed."
 
   @doc """
   Generates a new public_id for a commission.
