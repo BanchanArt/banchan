@@ -870,6 +870,36 @@ defmodule Banchan.Payments do
   end
 
   @doc """
+  Go over all payments for a commission, cancel any pending ones, and refund
+  any unreleased completed ones.
+  """
+  def refund_and_cancel_all_payments(%User{} = actor, %Commission{} = commission) do
+    with {:ok, _} <- Commissions.check_actor_edit_access(actor, commission) do
+      # We intentionally do this outside of a transaction, in case a single one
+      # fails, so we don't end up in a weird state on random errors.
+      list_invoices(commission: commission, with_statuses: [:pending, :submitted, :succeeded])
+      |> Enum.reduce_while(:ok, fn invoice, :ok ->
+        case invoice.status do
+          status when status in [:pending, :submitted] ->
+            case expire_payment(actor, invoice) do
+              {:ok, _} -> {:cont, :ok}
+              {:error, error} -> {:halt, {:error, error}}
+            end
+
+          :succeeded ->
+            case refund_payment(actor, invoice) do
+              {:ok, _} -> {:cont, :ok}
+              {:error, error} -> {:halt, {:error, error}}
+            end
+
+          _ ->
+            :ok
+        end
+      end)
+    end
+  end
+
+  @doc """
   Webhook handler for when a payment has been expired by a Studio member.
   """
   def process_payment_expired!(session) do

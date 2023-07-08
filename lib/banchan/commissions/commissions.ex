@@ -23,6 +23,7 @@ defmodule Banchan.Commissions do
 
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
+  alias Banchan.Payments
   alias Banchan.Payments.Invoice
   alias Banchan.Repo
   alias Banchan.Studios
@@ -800,6 +801,10 @@ defmodule Banchan.Commissions do
               end
             end
 
+            if commission.status in [:rejected, :withdrawn] do
+              Payments.refund_and_cancel_all_payments(actor, commission)
+            end
+
             # current_user_member? is checked as part of check_status_transition!
             with {:ok, _event} <-
                    create_event(:status, actor, commission, true, [], %{status: status}) do
@@ -847,21 +852,22 @@ defmodule Banchan.Commissions do
   def status_transition_allowed?(true, _, :submitted, :rejected), do: true
   def status_transition_allowed?(true, _, :accepted, :in_progress), do: true
   def status_transition_allowed?(true, _, :accepted, :paused), do: true
+  def status_transition_allowed?(true, _, :accepted, :rejected), do: true
   def status_transition_allowed?(true, _, :in_progress, :paused), do: true
   def status_transition_allowed?(true, _, :in_progress, :waiting), do: true
+  def status_transition_allowed?(true, _, :in_progress, :rejected), do: true
   def status_transition_allowed?(true, _, :paused, :in_progress), do: true
   def status_transition_allowed?(true, _, :paused, :waiting), do: true
+  def status_transition_allowed?(true, _, :paused, :rejected), do: true
   def status_transition_allowed?(true, _, :waiting, :in_progress), do: true
   def status_transition_allowed?(true, _, :waiting, :paused), do: true
-  def status_transition_allowed?(true, _, :withdrawn, :accepted), do: true
+  def status_transition_allowed?(true, _, :waiting, :rejected), do: true
   def status_transition_allowed?(true, _, :rejected, :accepted), do: true
 
   # Transition changes clients can make
   def status_transition_allowed?(_, true, _, :approved), do: true
   def status_transition_allowed?(_, true, :withdrawn, :submitted), do: true
-
-  # Either party can withdraw a commission
-  def status_transition_allowed?(_, _, _, :withdrawn), do: true
+  def status_transition_allowed?(_, true, _, :withdrawn), do: true
 
   # Everything else is a no from me, Bob.
   def status_transition_allowed?(_, _, _, _), do: false
