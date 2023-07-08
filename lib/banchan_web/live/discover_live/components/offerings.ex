@@ -12,7 +12,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
   alias BanchanWeb.Components.InfiniteScroll
   alias BanchanWeb.StudioLive.Components.OfferingCard
 
-  prop current_user, :struct, required: true
+  prop current_user, :struct, from_context: :current_user
   prop query, :string
   prop order_by, :atom, default: :featured
   prop page_size, :integer, default: 24
@@ -69,7 +69,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
 
     ~F"""
     <discover-offerings class="flex flex-col items-center">
-      {#if Accounts.artist?(@current_user)}
+      {#if !is_nil(@current_user) && Accounts.artist?(@current_user)}
         <div class="pb-2">
           Looking for your own offerings? Go to the <LiveRedirect class="link" to={~p"/studios"}>My Studios</LiveRedirect> page and select a studio.
         </div>

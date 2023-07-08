@@ -11,7 +11,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
 
   alias BanchanWeb.Components.{InfiniteScroll, StudioCard}
 
-  prop current_user, :struct, required: true
+  prop current_user, :struct, from_context: :current_user
   prop query, :string
   prop order_by, :atom, default: :homepage
   prop page_size, :integer, default: 24
@@ -69,7 +69,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
 
     ~F"""
     <discover-studios class="flex flex-col items-center">
-      {#if Accounts.artist?(@current_user)}
+      {#if !is_nil(@current_user) && Accounts.artist?(@current_user)}
         <div class="pb-2">
           Looking for your own studios? Go to the <LiveRedirect class="link" to={~p"/studios"}>My Studios</LiveRedirect> page.
         </div>
