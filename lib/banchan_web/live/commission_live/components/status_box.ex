@@ -8,9 +8,10 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   alias Banchan.Payments
 
   alias BanchanWeb.Components.{
-    # Button,
+    Button,
     Collapse,
-    Dropdown
+    Dropdown,
+    Modal
   }
 
   alias BanchanWeb.CommissionLive.Components.StatusItem
@@ -34,7 +35,26 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
     {:ok, socket |> assign(invoices_paid?: invoices_paid?)}
   end
 
+  def handle_event("update_status", %{"value" => "rejected"}, socket) do
+    if Commissions.commission_active?(socket.assigns.commission) do
+      Modal.show(socket.assigns.id <> "-reject-modal")
+      {:noreply, socket}
+    else
+      update_status("rejected", socket)
+    end
+  end
+
   def handle_event("update_status", %{"value" => status}, socket) do
+    update_status(status, socket)
+  end
+
+  def handle_event("confirm_reject", _, socket) do
+    ret = update_status("rejected", socket)
+    Modal.hide(socket.assigns.id <> "-reject-modal")
+    ret
+  end
+
+  defp update_status(status, socket) do
     case Commissions.update_status(socket.assigns.current_user, socket.assigns.commission, status) do
       {:ok, _} ->
         Collapse.set_open(socket.assigns.id <> "-approval-collapse", false)
@@ -64,6 +84,17 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
       <div class="text-md">
         {Commissions.Common.status_description(@commission.status)}
       </div>
+
+      <Modal id={@id <> "-reject-modal"} class="reject-modal">
+        <:title>Confirm Rejection</:title>
+        Are you sure you want to reject this commission after accepting it?
+        <p class="font-bold text-warning">
+          NOTE: Any unreleased deposits will be canceled or refunded.
+        </p>
+        <:action>
+          <Button class="reject-btn" click="confirm_reject">Confirm</Button>
+        </:action>
+      </Modal>
     </div>
     """
   end
