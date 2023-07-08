@@ -59,6 +59,14 @@ defmodule BanchanWeb.StudioLive.Helpers do
         )
         |> redirect(to: Routes.studio_disabled_path(Endpoint, :show, studio.handle))
 
+      studio.mature && !Application.get_env(:banchan, :mature_content_enabled?) ->
+        socket
+        |> put_flash(
+          :error,
+          "This kind of content is currently disabled."
+        )
+        |> redirect(to: Routes.discover_index_path(Endpoint, :index, "studios"))
+
       studio.mature && is_nil(socket.assigns.current_user) ->
         socket
         |> put_flash(

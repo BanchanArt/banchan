@@ -408,11 +408,13 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           label="Hide"
           info="Hide this offering from the shop, search, and listings. You will still be able to link people to it."
         />
-        <Checkbox
-          name={:mature}
-          label="Mature"
-          info="Mark this offering as mature content. Note: if you plan on doing mature/NSFW commissions through this offering, this MUST be checked."
-        />
+        {#if Application.get_env(:banchan, :mature_content_enabled?)}
+          <Checkbox
+            name={:mature}
+            label="Mature"
+            info="Mark this offering as mature content. Note: if you plan on doing mature/NSFW commissions through this offering, this MUST be checked."
+          />
+        {/if}
         <div class="divider" />
         <div>While Slots determines how many commissions you're willing to accept at a time, Max Proposals determines how many people can make a proposal at the same time.</div>
         <div>This is useful if you want to limit the number of commission requests you get at once. Accepted commissions do not count towards your Max Proposals, and proposed commissions do not count towards your Slots.

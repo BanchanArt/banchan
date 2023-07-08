@@ -551,28 +551,30 @@ defmodule BanchanWeb.SettingsLive do
         <Submit class="w-full" changeset={@muted_changeset} label="Save" />
       </Form>
       <div class="divider" />
-      <Form
-        class="flex flex-col gap-4"
-        for={@maturity_changeset}
-        as={:change_maturity}
-        change="change_maturity"
-        submit="submit_maturity"
-      >
-        <h3 class="text-lg">Mature Content</h3>
-        <p>By choosing to display mature content on the site, you assert that you are legally an adult in your country and able to view this content.</p>
-        <Checkbox
-          name={:mature_ok}
-          info="Whether to show mature content items (studios, offerings, etc) at all."
-          label="List Mature Content"
-        />
-        <Checkbox
-          name={:uncensored_mature}
-          info="Whether to show mature content uncensored. By default, you need to click through to view mature content you come aross."
-          label="Uncensor Mature Content by Default"
-        />
-        <Submit class="w-full" changeset={@maturity_changeset} label="Save" />
-      </Form>
-      <div class="divider" />
+      {#if Application.get_env(:banchan, :mature_content_enabled?)}
+        <Form
+          class="flex flex-col gap-4"
+          for={@maturity_changeset}
+          as={:change_maturity}
+          change="change_maturity"
+          submit="submit_maturity"
+        >
+          <h3 class="text-lg">Mature Content</h3>
+          <p>By choosing to display mature content on the site, you assert that you are legally an adult in your country and able to view this content.</p>
+          <Checkbox
+            name={:mature_ok}
+            info="Whether to show mature content items (studios, offerings, etc) at all."
+            label="List Mature Content"
+          />
+          <Checkbox
+            name={:uncensored_mature}
+            info="Whether to show mature content uncensored. By default, you need to click through to view mature content you come aross."
+            label="Uncensor Mature Content by Default"
+          />
+          <Submit class="w-full" changeset={@maturity_changeset} label="Save" />
+        </Form>
+        <div class="divider" />
+      {/if}
       <h3 class="text-lg">⚠️Deactivate Account⚠️</h3>
       <div class="prose">
         <p>You can deactivate your account. Existing commissions (and their comments), uploads, studios, etc. will be retained, but with your account anonymized, and your user profile will be disabled.</p>
