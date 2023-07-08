@@ -104,7 +104,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
         details_submitted: true
       })
 
-      net = Money.new(39_124, :USD)
+      net = Money.new(37_862, :USD)
       mock_balance(studio, [net], [], 3)
       process_final_payment!(commission, Money.new(69, :USD))
 
@@ -220,7 +220,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       studio: studio,
       commission: commission
     } do
-      mock_balance(studio, [Money.new(39_124, :USD)], [])
+      mock_balance(studio, [Money.new(37_862, :USD)], [])
       process_final_payment!(commission, Money.new(69, :USD))
 
       {:ok, page_live, _html} =
@@ -228,7 +228,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       assert page_live
              |> element("#available")
-             |> render() =~ "$391.24"
+             |> render() =~ "$378.62"
     end
 
     test "Displays multiple balance currencies reasonably", %{
@@ -260,8 +260,8 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       rendered = page_live |> element("#available") |> render()
 
-      assert rendered =~ "$390.60"
-      assert rendered =~ "¥60"
+      assert rendered =~ "$378.00"
+      assert rendered =~ "¥58"
     end
   end
 
@@ -281,7 +281,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       studio: studio,
       commission: commission
     } do
-      net = Money.new(39_124, :USD)
+      net = Money.new(37_862, :USD)
       mock_balance(studio, [net], [], 2)
       payment_fixture(artist, commission, Money.new(42_000, :USD), Money.new(69, :USD))
 
@@ -308,7 +308,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       studio: studio,
       commission: commission
     } do
-      net = Money.new(39_124, :USD)
+      net = Money.new(37_862, :USD)
       mock_balance(studio, [net], [], 2)
       process_final_payment!(commission, Money.new(69, :USD))
 
@@ -375,7 +375,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       assert page_live
              |> element(".payout-row")
-             |> render() =~ "$391.24"
+             |> render() =~ "$378.62"
     end
 
     test "failed payouts report stripe errors", %{
@@ -383,7 +383,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       studio: studio,
       commission: commission
     } do
-      net = Money.new(39_124, :USD)
+      net = Money.new(37_862, :USD)
       mock_balance(studio, [net], [], 2)
       process_final_payment!(commission, Money.new(69, :USD))
 
@@ -430,7 +430,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       refute page_live
              |> element(".payout-rows")
-             |> render() =~ "$391.24"
+             |> render() =~ "$378.62"
 
       logged_message =
         capture_log([async: true, level: :info], fn ->
@@ -451,7 +451,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       assert page_live
              |> element(".payout-row .amount")
-             |> render() =~ "$391.24"
+             |> render() =~ "$378.62"
 
       assert page_live
              |> element(".payout-row .badge")
@@ -479,7 +479,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       studio: studio,
       commission: commission
     } do
-      net = Money.new(39_124, :USD)
+      net = Money.new(37_862, :USD)
       mock_balance(studio, [net], [], 2)
       process_final_payment!(commission, Money.new(69, :USD))
 
