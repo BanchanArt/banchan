@@ -77,6 +77,15 @@ defmodule BanchanWeb.OfferingLive.Show do
       socket.redirected ->
         {:noreply, socket}
 
+      offering.mature && !Application.get_env(:banchan, :mature_content_enabled?) ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "This kind of content is currently disabled."
+         )
+         |> push_navigate(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
+
       offering.mature && is_nil(socket.assigns.current_user) ->
         {:noreply,
          socket

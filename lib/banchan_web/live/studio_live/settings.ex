@@ -217,11 +217,13 @@ defmodule BanchanWeb.StudioLive.Settings do
 
           <h2 class="text-xl py-6">Edit Studio Settings</h2>
           <Form class="flex flex-col gap-2" for={@changeset} change="change" submit="submit">
-            <Checkbox
-              name={:mature}
-              label="Mature"
-              info="Mark this studio as exclusively for mature content. You can still make indiviual mature offerings if this is unchecked."
-            />
+            {#if Application.get_env(:banchan, :mature_content_enabled?)}
+              <Checkbox
+                name={:mature}
+                label="Mature"
+                info="Mark this studio as exclusively for mature content. You can still make indiviual mature offerings if this is unchecked."
+              />
+            {/if}
             <Select
               name={:default_currency}
               info="Default currency to display in currencies dropdown when entering invoice amounts."

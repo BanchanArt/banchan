@@ -691,6 +691,8 @@ defmodule Banchan.Offerings do
 
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp filter_current_user(q, opts) do
+    mature_content_enabled? = Application.get_env(:banchan, :mature_content_enabled?, false)
+
     case Keyword.fetch(opts, :current_user) do
       {:ok, %User{} = current_user} ->
         q
@@ -708,7 +710,8 @@ defmodule Banchan.Offerings do
           ],
           not is_nil(current_user_member?) or
             o.mature != true or
-            ((s.mature == true or o.mature == true) and current_user.mature_ok == true)
+            ((s.mature == true or o.mature == true) and ^mature_content_enabled? == true and
+               current_user.mature_ok == true)
         )
         |> where(
           [offering: o, current_user_member?: current_user_member?],

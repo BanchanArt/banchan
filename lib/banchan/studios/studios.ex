@@ -357,6 +357,7 @@ defmodule Banchan.Studios do
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp filter_current_user(q, opts) do
     include_own_archived? = Keyword.get(opts, :include_own_archived?) == true
+    mature_content_enabled? = Application.get_env(:banchan, :mature_content_enabled?, false)
 
     case Keyword.fetch(opts, :current_user) do
       {:ok, %User{} = current_user} ->
@@ -366,6 +367,7 @@ defmodule Banchan.Studios do
           [s, current_user: current_user, artist: artist],
           s.mature != true or
             (s.mature == true and
+               ^mature_content_enabled? == true and
                (current_user.mature_ok == true or :admin in current_user.roles or
                   :mod in current_user.roles or artist.id == current_user.id))
         )
