@@ -56,3 +56,10 @@ config :logger, level: :warning
 #   compile_time_purge_matching: [
 #     [level_lower_than: :debug]
 #   ]
+
+try do
+  import_config "test.secret.exs"
+rescue
+  # The file is optional.
+  File.Error -> :ok
+end
