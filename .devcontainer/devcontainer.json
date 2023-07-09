@@ -11,12 +11,13 @@
 		"vscode": {
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
-				"jakebecker.elixir-ls"
+				"jakebecker.elixir-ls",
+				"msaraiva.surface"
 			]
 		}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// This can be used to network with other containers or with the host. 
+	// This can be used to network with other containers or with the host.
 	"forwardPorts": [
 		4000,
 		4001,
