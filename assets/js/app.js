@@ -3,6 +3,7 @@ import { Socket, LongPoll } from "phoenix"
 import topbar from "topbar"
 import Hooks from "./_hooks"
 import { LiveSocket } from "phoenix_live_view"
+import { replaceIcons } from "./_hooks/BanchanWeb.Components.Icon.hooks"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket('/live', Socket, {
@@ -39,6 +40,8 @@ window.addEventListener("phx:page-loading-stop", () => {
 
 // connect if there are any LiveViews on the page
 liveSocket.connect()
+
+replaceIcons();
 
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()

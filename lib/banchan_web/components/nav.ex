@@ -6,7 +6,7 @@ defmodule BanchanWeb.Components.Nav do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.Components.Notifications
+  alias BanchanWeb.Components.{Icon, Notifications}
   alias BanchanWeb.Endpoint
 
   prop current_user, :any, from_context: :current_user
@@ -42,10 +42,7 @@ defmodule BanchanWeb.Components.Nav do
       {#if is_nil(@current_user)}
         <div class="mx-4">
           <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
-            <span>
-              <i class="fa fa-sign-in-alt" />
-              Log in
-            </span>
+            <Icon name="log-in">Log in</Icon>
           </LiveRedirect>
         </div>
       {/if}
