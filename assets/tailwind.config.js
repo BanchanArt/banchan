@@ -1,4 +1,5 @@
-const plugin = require('tailwindcss/plugin')
+const plugin = require('tailwindcss/plugin');
+const colors = require('tailwindcss/colors');
 
 module.exports = {
   mode: "jit",
@@ -18,7 +19,7 @@ module.exports = {
           }),
         },
         { values: theme('textShadow') }
-      )
+      );
     }),
   ],
   theme: {
@@ -58,31 +59,31 @@ module.exports = {
     themes: [
       {
         'light': {
-          'primary': '#66cc8a',
-          'primary-focus': '#41be6d',
-          'primary-content': '#f9fafb',
+          'primary': colors.emerald[500],
+          'primary-focus': colors.emerald[600],
+          'primary-content': colors.emerald[50],
 
-          'secondary': '#5a7c65',
-          'secondary-focus': '#48604f',
-          'secondary-content': '#f9fafb',
+          'secondary': colors.cyan[500],
+          'secondary-focus': colors.cyan[600],
+          'secondary-content': colors.cyan[50],
 
-          'accent': '#ea5234',
-          'accent-focus': '#d03516',
-          'accent-content': '#f9fafb',
+          'accent': colors.purple[500],
+          'accent-focus': colors.purple[600],
+          'accent-content': colors.purple[50],
 
-          'neutral': '#333c4d',
-          'neutral-focus': '#1f242e',
-          'neutral-content': '#f9fafb',
+          'neutral': colors.zinc[500],
+          'neutral-focus': colors.zinc[600],
+          'neutral-content': colors.zinc[50],
 
-          'base-100': '#ffffff',
-          'base-200': '#f9fafb',
-          'base-300': '#f0f0f0',
-          'base-content': '#333c4d',
+          'base-100': colors.zinc[50],
+          'base-200': colors.zinc[100],
+          'base-300': colors.zinc[200],
+          'base-content': colors.zinc[700],
 
-          'info': '#1c92f2',
-          'success': '#009485',
-          'warning': '#ff9900',
-          'error': '#ff5724',
+          'info': colors.blue[500],
+          'success': colors.emerald[500],
+          'warning': colors.amber[500],
+          'error': colors.red[500],
 
           '--rounded-box': '1rem',
           '--rounded-btn': '0.5rem',
@@ -98,31 +99,31 @@ module.exports = {
       },
       {
         'dark': {
-          'primary': '#5db776',
-          'primary-focus': '#239261',
-          'primary-content': '#ffffff',
+          'primary': colors.emerald[500],
+          'primary-focus': colors.emerald[600],
+          'primary-content': colors.emerald[50],
 
-          'secondary': '#418052',
-          'secondary-focus': '#186644',
-          'secondary-content': '#ffffff',
+          'secondary': colors.cyan[500],
+          'secondary-focus': colors.cyan[600],
+          'secondary-content': colors.cyan[50],
 
-          'accent': '#d99330',
-          'accent-focus': '#b57721',
-          'accent-content': '#ffffff',
+          'accent': colors.purple[500],
+          'accent-focus': colors.purple[600],
+          'accent-content': colors.purple[50],
 
-          'neutral': '#2a2e37',
-          'neutral-focus': '#16181d',
-          'neutral-content': '#ffffff',
+          'neutral': colors.zinc[500],
+          'neutral-focus': colors.zinc[600],
+          'neutral-content': colors.zinc[50],
 
-          'base-100': '#3b424e',
-          'base-200': '#2a2e37',
-          'base-300': '#16181d',
-          'base-content': '#ebecf0',
+          'base-100': colors.zinc[800],
+          'base-200': colors.zinc[900],
+          'base-300': colors.zinc[950],
+          'base-content': colors.zinc[200],
 
-          'info': '#66c7ff',
-          'success': '#87cf3a',
-          'warning': '#e1d460',
-          'error': '#ff6b6b',
+          'info': colors.blue[400],
+          'success': colors.emerald[400],
+          'warning': colors.amber[400],
+          'error': colors.red[400],
 
           '--rounded-box': '1rem',
           '--rounded-btn': '0.5rem',
