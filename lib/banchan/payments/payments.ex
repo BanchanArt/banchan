@@ -620,6 +620,7 @@ defmodule Banchan.Payments do
   @doc """
   Releases a payment.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def release_payment(%User{} = actor, %Commission{} = commission, %Invoice{} = invoice) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:actor, fn _, _ ->
@@ -698,6 +699,7 @@ defmodule Banchan.Payments do
   @doc """
   Releases all completed payments for a commission.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def release_all_deposits(%User{} = actor, %Commission{} = commission) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:actor, fn _, _ ->
