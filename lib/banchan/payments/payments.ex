@@ -237,6 +237,59 @@ defmodule Banchan.Payments do
     |> Repo.paginate(page: page, page_size: 10)
   end
 
+  @doc """
+  Gets the minimum amount that can be released from a commission (essentially,
+  the commission's minimum price).
+
+  We do this because having many very small transactions would be catastrophic
+  for the platform, as Stripe costs scale really poorly in that case.
+  """
+  def minimum_release_amount do
+    {amt, curr} = Application.fetch_env!(:banchan, :minimum_release_amount)
+    Money.new(amt, curr)
+  end
+
+  @doc """
+  Stripe's minimum transaction amount.
+  """
+  def minimum_transaction_amount do
+    Money.new(50, :USD)
+  end
+
+  @doc """
+  Returns the total amount of money that has been released for a commission.
+  """
+  def released_amount(%Commission{} = commission) do
+    curr = Commissions.commission_currency(commission)
+
+    from(i in Invoice,
+      where: i.commission_id == ^commission.id and i.status == :released,
+      select: i
+    )
+    |> Repo.all()
+    |> Enum.reduce(Money.new(0, curr), fn invoice, total ->
+      Money.add(invoice.amount, invoice.tip || Money.new(0, curr))
+      |> Money.add(total)
+    end)
+  end
+
+  @doc """
+  Returns the total amount of money that is currently in escrow for a commission.
+  """
+  def escrowed_amount(%Commission{} = commission) do
+    curr = Commissions.commission_currency(commission)
+
+    from(i in Invoice,
+      where: i.commission_id == ^commission.id and i.status == :succeeded,
+      select: i
+    )
+    |> Repo.all()
+    |> Enum.reduce(Money.new(0, curr), fn invoice, total ->
+      Money.add(invoice.amount, invoice.tip || Money.new(0, curr))
+      |> Money.add(total)
+    end)
+  end
+
   ## Creation
 
   @doc """
@@ -572,6 +625,28 @@ defmodule Banchan.Payments do
     |> Ecto.Multi.run(:actor, fn _, _ ->
       Commissions.check_actor_edit_access(actor, commission)
     end)
+    |> Ecto.Multi.run(:check_minimum_amount, fn _, _ ->
+      min = minimum_release_amount()
+
+      curr = Commissions.commission_currency(commission)
+
+      released_amt =
+        list_invoices(commission: commission, with_statuses: [:released])
+        |> Enum.reduce(Money.new(0, curr), fn invoice, total ->
+          Money.add(invoice.amount, invoice.tip || Money.new(0, curr))
+          |> Money.add(total)
+        end)
+
+      total = Money.add(released_amt, invoice.total_charged)
+
+      case cmp_money(total, min) do
+        cmp when cmp in [:gt, :eq] ->
+          {:ok, true}
+
+        :lt ->
+          {:error, :release_under_threshold}
+      end
+    end)
     |> Ecto.Multi.update_all(
       :invoices,
       fn %{actor: actor} ->
@@ -624,7 +699,72 @@ defmodule Banchan.Payments do
   Releases all completed payments for a commission.
   """
   def release_all_deposits(%User{} = actor, %Commission{} = commission) do
-    release_all_payments(actor, commission)
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:actor, fn _, _ ->
+      Commissions.check_actor_edit_access(actor, commission)
+    end)
+    |> Ecto.Multi.run(:check_minimum_amount, fn _, _ ->
+      min = minimum_release_amount()
+
+      curr = Commissions.commission_currency(commission)
+
+      total =
+        list_invoices(commission: commission, with_statuses: [:released, :succeeded])
+        |> Enum.reduce(Money.new(0, curr), fn invoice, total ->
+          Money.add(invoice.amount, invoice.tip || Money.new(0, curr))
+          |> Money.add(total)
+        end)
+
+      case cmp_money(total, min) do
+        cmp when cmp in [:gt, :eq] ->
+          {:ok, true}
+
+        :lt ->
+          {:error, :release_under_threshold}
+      end
+    end)
+    |> Ecto.Multi.update_all(
+      :invoices,
+      fn %{actor: actor} ->
+        from(i in Invoice,
+          join: c in assoc(i, :commission),
+          where: c.client_id == ^actor.id and i.status == :succeeded and c.id == ^commission.id,
+          select: i
+        )
+      end,
+      set: [status: :released]
+    )
+    |> Ecto.Multi.all(:events, fn _ ->
+      from(e in Event,
+        join: i in assoc(e, :invoice),
+        where: e.commission_id == ^commission.id and i.commission_id == ^commission.id,
+        select: e,
+        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
+      )
+    end)
+    |> Ecto.Multi.run(:create_event, fn _, %{invoices: {n, invoices}} ->
+      if n > 0 do
+        Commissions.create_event(:all_invoices_released, actor, commission, false, [], %{
+          amount: invoices |> Enum.map(& &1.amount) |> Enum.reduce(&Money.add/2)
+        })
+      end
+
+      {:ok, true}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{events: events, actor: actor, invoices: {n, invoices}}} ->
+        if n > 0 do
+          Enum.each(events, fn event ->
+            Commissions.Notifications.commission_event_updated(commission, event, actor)
+          end)
+        end
+
+        {:ok, invoices}
+
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
@@ -807,7 +947,7 @@ defmodule Banchan.Payments do
 
         if invoice.final do
           {:ok, _} = Commissions.update_status(client, commission, :approved)
-          {:ok, _} = release_all_payments(client, commission)
+          {:ok, _} = release_all_deposits(client, commission)
         end
 
         if client.email do
@@ -818,55 +958,6 @@ defmodule Banchan.Payments do
       end)
 
     :ok
-  end
-
-  defp release_all_payments(%User{} = actor, %Commission{} = commission) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.run(:actor, fn _, _ ->
-      Commissions.check_actor_edit_access(actor, commission)
-    end)
-    |> Ecto.Multi.update_all(
-      :invoices,
-      fn %{actor: actor} ->
-        from(i in Invoice,
-          join: c in assoc(i, :commission),
-          where: c.client_id == ^actor.id and i.status == :succeeded and c.id == ^commission.id,
-          select: i
-        )
-      end,
-      set: [status: :released]
-    )
-    |> Ecto.Multi.all(:events, fn _ ->
-      from(e in Event,
-        join: i in assoc(e, :invoice),
-        where: e.commission_id == ^commission.id and i.commission_id == ^commission.id,
-        select: e,
-        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
-      )
-    end)
-    |> Ecto.Multi.run(:create_event, fn _, %{invoices: {n, invoices}} ->
-      if n > 0 do
-        Commissions.create_event(:all_invoices_released, actor, commission, false, [], %{
-          amount: invoices |> Enum.map(& &1.amount) |> Enum.reduce(&Money.add/2)
-        })
-      end
-
-      {:ok, true}
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{events: events, actor: actor, invoices: {n, invoices}}} ->
-        if n > 0 do
-          Enum.each(events, fn event ->
-            Commissions.Notifications.commission_event_updated(commission, event, actor)
-          end)
-        end
-
-        {:ok, invoices}
-
-      {:error, _, error, _} ->
-        {:error, error}
-    end
   end
 
   @doc """

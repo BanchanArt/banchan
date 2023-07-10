@@ -9,6 +9,7 @@ defmodule Banchan.Commissions.Event do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.{CommentHistory, Commission, Common, EventAttachment}
+  alias Banchan.Payments
   alias Banchan.Payments.Invoice
 
   schema "commission_events" do
@@ -32,9 +33,21 @@ defmodule Banchan.Commissions.Event do
 
   @doc false
   def changeset(event, attrs) do
+    min = Payments.minimum_transaction_amount()
+
     event
     |> cast(attrs, [:type, :text, :amount, :status])
     |> validate_money(:amount)
+    |> validate_change(:amount, fn _, amount ->
+      if Payments.cmp_money(min, amount) in [:lt, :eq] do
+        []
+      else
+        [
+          {:amount,
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+        ]
+      end
+    end)
     |> validate_required([:type])
     |> validate_text()
   end
@@ -46,9 +59,21 @@ defmodule Banchan.Commissions.Event do
   end
 
   def amount_changeset(event, attrs) do
+    min = Payments.minimum_transaction_amount()
+
     event
     |> cast(attrs, [:amount])
     |> validate_money(:amount)
+    |> validate_change(:amount, fn _, amount ->
+      if Payments.cmp_money(min, amount) in [:lt, :eq] do
+        []
+      else
+        [
+          {:amount,
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+        ]
+      end
+    end)
     |> validate_required([:amount])
   end
 
@@ -60,9 +85,21 @@ defmodule Banchan.Commissions.Event do
   end
 
   def invoice_changeset(event, attrs, remaining \\ 99_999) do
+    min = Payments.minimum_transaction_amount()
+
     event
     |> cast(attrs, [:text, :amount])
     |> validate_money(:amount, remaining)
+    |> validate_change(:amount, fn _, amount ->
+      if Payments.cmp_money(min, amount) in [:lt, :eq] do
+        []
+      else
+        [
+          {:amount,
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+        ]
+      end
+    end)
     |> validate_required([:amount])
     |> validate_text()
   end

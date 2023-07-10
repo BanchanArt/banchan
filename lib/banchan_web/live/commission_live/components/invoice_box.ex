@@ -20,14 +20,16 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   prop commission, :struct, from_context: :commission
   prop event, :struct, required: true
   prop uri, :string, from_context: :uri
+  prop escrowed_amount, :struct, from_context: :escrowed_amount
+  prop released_amount, :struct, from_context: :released_amount
 
   # NOTE: We're not actually going to create an event directly. We're just
   # punning off this for the changeset validation.
   data changeset, :struct
-
   data release_modal_open, :boolean, default: false
-
   data refund_error_message, :string, default: nil
+  data minimum_release_amount, :struct, default: Payments.minimum_release_amount()
+  data can_release, :boolean, default: false
 
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
@@ -39,6 +41,11 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
     {:ok,
      socket
      |> assign(
+       can_release:
+         Payments.cmp_money(
+           socket.assigns.minimum_release_amount,
+           Money.add(socket.assigns.released_amount, socket.assigns.event.invoice.amount)
+         ) in [:lt, :eq],
        changeset:
          %Event{}
          |> Event.amount_changeset(%{
@@ -207,6 +214,17 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
          |> put_flash(:error, "You are not authorized to access that commission.")
          |> push_navigate(to: Routes.home_path(Endpoint, :index))}
 
+      {:error, :release_under_threshold} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "You cannot release this invoice because the total released amount would be under Banchan's minimum of #{Payments.convert_money(socket.assigns.minimum_release_amount, Commissions.commission_currency(socket.assigns.commission))}"
+         )
+         |> push_navigate(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
+
       {:error, :disabled} ->
         {:noreply,
          socket
@@ -328,7 +346,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                       class="open-refund-modal modal-button btn-xs btn-link w-full"
                     />
                   {/if}
-                  {#if @current_user.id == @commission.client_id}
+                  {#if @current_user.id == @commission.client_id && @can_release}
                     <Button
                       label="Release Now"
                       click="open_release_modal"

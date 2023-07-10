@@ -15,6 +15,7 @@ config :banchan,
   ecto_repos: [Banchan.Repo],
   upload_dir: Path.expand("../priv/uploads", __DIR__),
   platform_currency: :USD,
+  minimum_release_amount: {2000, :USD},
   default_platform_fee: System.get_env("BANCHAN_PLATFORM_FEE") || 0.1,
   max_attachment_size: 25_000_000,
   mature_content_enabled?: true

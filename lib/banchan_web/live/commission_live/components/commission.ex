@@ -8,6 +8,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, Notifications}
+  alias Banchan.Payments
 
   alias BanchanWeb.Components.{Button, Collapse, Markdown, ReportModal}
   alias BanchanWeb.Components.Form.{Submit, TextInput}
@@ -37,7 +38,13 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
 
   def update(%{events_updated: true}, socket) do
     UploadsBox.reload(socket.assigns.id <> "-uploads-box")
-    {:ok, socket}
+
+    {:ok,
+     socket
+     |> Context.put(
+       released_amount: Payments.released_amount(socket.assigns.commission),
+       escrowed_amount: Payments.escrowed_amount(socket.assigns.commission)
+     )}
   end
 
   def update(assigns, socket) do
@@ -50,8 +57,10 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
         subscribed?:
           Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.commission)
       )
-
-    socket = Context.put(socket, commission: socket.assigns.commission)
+      |> Context.put(
+        released_amount: Payments.released_amount(socket.assigns.commission),
+        escrowed_amount: Payments.escrowed_amount(socket.assigns.commission)
+      )
 
     {:ok, socket}
   end

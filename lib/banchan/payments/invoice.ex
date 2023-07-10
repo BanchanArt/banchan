@@ -7,6 +7,8 @@ defmodule Banchan.Payments.Invoice do
 
   import Banchan.Validators
 
+  alias Banchan.Payments
+
   schema "commission_invoices" do
     field :stripe_session_id, :string
     field :checkout_url, :string
@@ -74,19 +76,43 @@ defmodule Banchan.Payments.Invoice do
 
   @doc false
   def amount_changeset(payment, attrs) do
+    min = Payments.minimum_transaction_amount()
+
     payment
     |> cast(attrs, [:amount])
     |> validate_money(:amount)
     |> validate_required([:amount])
+    |> validate_change(:amount, fn _, amount ->
+      if Payments.cmp_money(min, amount) in [:lt, :eq] do
+        []
+      else
+        [
+          {:amount,
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+        ]
+      end
+    end)
   end
 
   def creation_changeset(payment, attrs, %Money{} = remaining) do
+    min = Payments.minimum_transaction_amount()
+
     payment
     |> cast(attrs, [:amount, :required, :deposited])
     |> cast_embed(:line_items, with: &line_item_changeset/2, required: true)
     |> validate_money(:amount, remaining)
     |> validate_money(:deposited)
     |> validate_required([:amount, :deposited])
+    |> validate_change(:amount, fn _, amount ->
+      if Payments.cmp_money(min, amount) in [:lt, :eq] do
+        []
+      else
+        [
+          {:amount,
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+        ]
+      end
+    end)
   end
 
   @doc false
@@ -99,6 +125,8 @@ defmodule Banchan.Payments.Invoice do
 
   @doc false
   def submit_changeset(payment, attrs) do
+    min = Payments.minimum_transaction_amount()
+
     payment
     |> cast(attrs, [
       :amount,
@@ -112,6 +140,16 @@ defmodule Banchan.Payments.Invoice do
     |> validate_money(:amount)
     |> validate_money(:tip)
     |> validate_money(:platform_fee)
+    |> validate_change(:amount, fn _, amount ->
+      if Payments.cmp_money(min, amount) in [:lt, :eq] do
+        []
+      else
+        [
+          {:amount,
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+        ]
+      end
+    end)
     |> validate_required([
       :amount,
       :tip,

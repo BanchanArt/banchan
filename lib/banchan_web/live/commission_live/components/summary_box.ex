@@ -33,6 +33,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
   prop current_user, :struct, from_context: :current_user
   prop current_user_member?, :boolean, from_context: :current_user_member?
   prop commission, :struct, from_context: :commission
+  prop escrowed_amount, :struct, from_context: :escrowed_amount
+  prop released_amount, :struct, from_context: :released_amount
 
   data currency, :atom
   data changeset, :struct
@@ -43,6 +45,9 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
   data open_final_invoice, :boolean, default: false
   data open_deposit_requested, :boolean, default: false
   data uploads, :map
+  data minimum_release_amount, :struct, default: Payments.minimum_release_amount()
+  data can_release, :boolean, default: false
+  data can_finalize, :boolean, default: false
 
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
@@ -71,11 +76,21 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
      socket
      |> assign(
        changeset: Event.invoice_changeset(%Event{}, %{}, remaining),
-       currency: Enum.at(socket.assigns.commission.line_items, 0).amount.currency,
+       currency: Commissions.commission_currency(socket.assigns.commission),
        studio: studio,
        existing_open: existing_open,
        remaining: remaining,
-       deposited: deposited
+       deposited: deposited,
+       can_finalize:
+         Payments.cmp_money(
+           socket.assigns.minimum_release_amount,
+           estimate
+         ) in [:lt, :eq],
+       can_release:
+         Payments.cmp_money(
+           socket.assigns.minimum_release_amount,
+           Money.add(socket.assigns.released_amount, socket.assigns.escrowed_amount)
+         ) in [:lt, :eq]
      )
      |> allow_upload(:attachments,
        accept: :any,
@@ -182,9 +197,19 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     Payments.release_all_deposits(socket.assigns.current_user, socket.assigns.commission)
     |> case do
       {:ok, _} ->
-        IO.puts("Deposits released")
         Collapse.set_open(socket.assigns.id <> "-release-confirmation", false)
         {:noreply, socket}
+
+      {:error, :release_under_threshold} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "You cannot release this commission's deposits because the total released amount would be under Banchan's minimum of #{Payments.convert_money(socket.assigns.minimum_release_amount, Commissions.commission_currency(socket.assigns.commission))}"
+         )
+         |> push_navigate(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
 
       {:error, :blocked} ->
         {:noreply,
@@ -349,15 +374,19 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
                 label="Request Deposit"
               />
               <Button
-                disabled={@existing_open || !Commissions.commission_active?(@commission)}
+                disabled={@existing_open || !Commissions.commission_active?(@commission) || !@can_finalize}
                 click="final_invoice"
                 class="btn-sm grow final-invoice"
                 label="Final Invoice"
               />
             {/if}
           </div>
+          {#if !@can_finalize}
+            <p>You can't send a final invoice for this commission unless the subtotal is at least Banchan's commission minimum of {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))}. Add more options (or custom options) under "Details" until the threshold is reached.</p>
+          {/if}
           {#if @current_user.id == @commission.client_id}
-            {#if @existing_open || !Commissions.commission_active?(@commission)}
+            {#if @existing_open || !Commissions.commission_active?(@commission) || !@can_release ||
+                @deposited.amount == 0}
               <Button disabled class="btn-sm w-full" label="Release Deposits" />
             {#else}
               <Collapse
@@ -376,6 +405,13 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
                 <p class="py-2">Are you sure?</p>
                 <Button click="release_deposits" class="btn-sm w-full" label="Confirm" />
               </Collapse>
+            {/if}
+            {#if !@can_release && @deposited.amount > 0}
+              <p>
+                You can't release any deposits until the total released deposits would
+                add up to at least {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))
+                |> Money.to_string()}.
+              </p>
             {/if}
           {/if}
         {/if}
