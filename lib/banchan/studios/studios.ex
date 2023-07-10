@@ -575,9 +575,9 @@ defmodule Banchan.Studios do
   end
 
   @doc """
-  Returns the default currency for a studio. Takes into account global default.
+  Returns the default currency for a studio. Takes into account global platform currency.
   """
-  def default_currency(nil), do: :USD
+  def default_currency(nil), do: Payments.platform_currency()
   def default_currency(%Studio{default_currency: default_currency}), do: default_currency
 
   ## Updating/Editing

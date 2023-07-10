@@ -11,7 +11,7 @@ defmodule Banchan.Payments do
   alias Banchan.Accounts.User
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, Event}
-  alias Banchan.Payments.{Invoice, Notifications, Payout}
+  alias Banchan.Payments.{Forex, Invoice, Notifications, Payout}
   alias Banchan.Repo
   alias Banchan.Studios
   alias Banchan.Studios.Studio
@@ -1352,6 +1352,104 @@ defmodule Banchan.Payments do
       {0, _} ->
         raise Ecto.NoResultsError, queryable: query
     end
+  end
+
+  ## Exchange Rates
+
+  @doc """
+  Returns the atom for the configured platform currency.
+  """
+  def platform_currency, do: Application.fetch_env!(:banchan, :platform_currency)
+
+  @doc """
+  Compares two Money structs, converting the second to the first's currency
+  according to the latest exchange rates.
+
+  Returns `:lt` if the first item is less than the second, `:gt` if the first
+  item is greater than the second, and `:eq` if they're the same.
+  """
+  def cmp_money(%Money{} = a, %Money{} = b) do
+    # Ideally, `a` here will usually be in :platform_currency, to minimize
+    # exchange rate lookups.
+    b = if a.currency == b.currency, do: b, else: convert_money(b, a.currency)
+    Money.cmp(a, b)
+  end
+
+  @doc """
+  Converts a Money struct to a different currency, according to the latest exchange rates.
+  """
+  def convert_money(%Money{currency: from} = money, to) do
+    if money.currency == to do
+      money
+    else
+      rate = get_exchange_rate(to, from)
+
+      if is_nil(rate) do
+        raise "No exchange rate available for #{from} -> #{to}"
+      else
+        Money.parse!(
+          Decimal.div(
+            Money.to_decimal(money),
+            Decimal.from_float(rate)
+          )
+          |> Decimal.to_string(),
+          to
+        )
+      end
+    end
+  end
+
+  @doc """
+  Fetches the latest exchange rate for the given currencies. Returns `nil` if
+  no such exchange rate is availale.
+  """
+  def get_exchange_rate(from, to) do
+    Forex.get_forex_rate(Forex, from, to)
+  end
+
+  @doc """
+  Fetches the latest exchange rates from an API and updates the values in the
+  database, returning the latest values as a Map.
+  """
+  def update_exchange_rates(base_currency) do
+    # This is a nice, free API and we don't really hit it very often at all.
+    case HTTPoison.get("https://api.exchangerate.host/latest?base=#{base_currency}") do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        currency_names = Studios.Common.supported_currencies() |> Enum.map(&to_string/1)
+
+        Repo.transaction(fn ->
+          body
+          |> Jason.decode!()
+          |> Map.get("rates")
+          |> Enum.filter(fn {currency, _} ->
+            currency in currency_names
+          end)
+          |> Map.new(fn {currency, rate} ->
+            {String.to_existing_atom(currency),
+             Repo.insert!(
+               Forex.changeset(%Forex{from: base_currency}, %{to: currency, rate: rate}),
+               returning: true,
+               on_conflict: {:replace_all_except, [:id, :inserted_at]},
+               conflict_target: [:from, :to]
+             )}
+          end)
+        end)
+
+      {:error, error} ->
+        Logger.error("Failed to update exchange rates for #{base_currency}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  @doc """
+  Loads the exchange rates for a curency from the database.
+  """
+  def load_exchange_rates(base_currency) do
+    from(x in Forex, where: x.from == ^base_currency, select: x)
+    |> Repo.all()
+    |> Map.new(fn forex ->
+      {forex.to, forex}
+    end)
   end
 
   ## Misc utilities

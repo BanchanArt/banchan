@@ -489,7 +489,7 @@ defmodule Banchan.Commissions do
   def line_item_estimate(line_items) do
     currency =
       if Enum.empty?(line_items) do
-        :USD
+        Payments.platform_currency()
       else
         Enum.at(line_items, 0).amount.currency
       end
