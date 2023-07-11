@@ -15,21 +15,21 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   alias BanchanWeb.Components.{Button, Modal}
   alias BanchanWeb.Components.Form.{HiddenInput, Submit, TextInput}
 
-  prop current_user_member?, :boolean, from_context: :current_user_member?
-  prop current_user, :struct, from_context: :current_user
-  prop commission, :struct, from_context: :commission
-  prop event, :struct, required: true
-  prop uri, :string, from_context: :uri
-  prop escrowed_amount, :struct, from_context: :escrowed_amount
-  prop released_amount, :struct, from_context: :released_amount
+  prop(current_user_member?, :boolean, from_context: :current_user_member?)
+  prop(current_user, :struct, from_context: :current_user)
+  prop(commission, :struct, from_context: :commission)
+  prop(event, :struct, required: true)
+  prop(uri, :string, from_context: :uri)
+  prop(escrowed_amount, :struct, from_context: :escrowed_amount)
+  prop(released_amount, :struct, from_context: :released_amount)
 
   # NOTE: We're not actually going to create an event directly. We're just
   # punning off this for the changeset validation.
-  data changeset, :struct
-  data release_modal_open, :boolean, default: false
-  data refund_error_message, :string, default: nil
-  data minimum_release_amount, :struct, default: Payments.minimum_release_amount()
-  data can_release, :boolean, default: false
+  data(changeset, :struct)
+  data(release_modal_open, :boolean, default: false)
+  data(refund_error_message, :string, default: nil)
+  data(minimum_release_amount, :struct, default: Payments.minimum_release_amount())
+  data(can_release, :boolean, default: false)
 
   defp replace_fragment(uri, event) do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
@@ -70,6 +70,11 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       |> Map.put(:action, :insert)
 
     {:noreply, socket |> assign(:changeset, changeset)}
+  end
+
+  @impl true
+  def handle_event("submit_without_tip", _, socket) do
+    handle_event("submit", %{"invoice" => %{"tip" => "0"}}, socket)
   end
 
   @impl true
@@ -265,7 +270,8 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           id={@id <> "-balance-box"}
           line_items={@event.invoice.line_items}
           deposited={@event.invoice.deposited}
-          amount_due={@event.invoice.final}
+          invoiced
+          tipped={@event.invoice.final && @event.invoice.tip}
         />
         <div class="divider" />
       {/if}
@@ -288,6 +294,13 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                     <HiddenInput name={:tip} value="0" />
                   {/if}
                   <Submit class="pay-invoice btn-sm w-full" changeset={@changeset} label="Pay" />
+                  {#if @event.invoice.final}
+                    <Button
+                      class="approve-without-tip btn-xs btn-link w-full btn-warning"
+                      click="submit_without_tip"
+                      label="Approve Without Tip"
+                    />
+                  {/if}
                   {#if @current_user_member?}
                     <Button
                       class="cancel-payment-request btn-xs btn-link w-full btn-error"

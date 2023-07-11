@@ -40,6 +40,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
   data(changeset, :struct)
   data(deposited, :struct)
   data(remaining, :struct)
+  data(final_invoice, :struct)
   data(existing_open, :boolean)
   data(studio, :struct)
   data(open_final_invoice, :boolean, default: false)
@@ -72,6 +73,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
 
     existing_open = Payments.open_invoice(socket.assigns.commission) |> Repo.preload(:event)
 
+    final_invoice = Payments.final_invoice(socket.assigns.commission)
+
     {:ok,
      socket
      |> assign(
@@ -81,6 +84,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
        existing_open: existing_open,
        remaining: remaining,
        deposited: deposited,
+       final_invoice: final_invoice,
        can_finalize:
          Payments.cmp_money(
            socket.assigns.minimum_release_amount,
@@ -163,8 +167,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
 
   def handle_event("change_deposit", %{"invoice" => %{"amount" => amount} = invoice}, socket) do
     change_invoice(
-      Map.put(
-        invoice,
+      invoice
+      |> Map.put(
         "amount",
         Utils.moneyfy(amount, Commissions.commission_currency(socket.assigns.commission))
       ),
@@ -185,12 +189,13 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
 
   def handle_event("change_final", %{"invoice" => invoice}, socket) do
     change_invoice(
-      Map.put(
-        invoice,
+      invoice
+      |> Map.put(
         "amount",
         Ecto.Changeset.fetch_field!(socket.assigns.changeset, :amount)
       ),
-      socket
+      socket,
+      true
     )
   end
 
@@ -232,10 +237,27 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     end
   end
 
-  defp change_invoice(invoice, socket) do
+  defp change_invoice(invoice, socket, final? \\ false) do
     changeset =
-      %Invoice{}
-      |> Invoice.creation_changeset(invoice, socket.assigns.remaining)
+      %Invoice{deposited: socket.assigns.deposited, final: final?}
+      |> Invoice.creation_changeset(
+        invoice
+        |> Map.put(
+          "line_items",
+          Enum.map(
+            socket.assigns.commission.line_items,
+            &%{
+              "name" => &1.name,
+              "description" => &1.description,
+              "amount" => %{
+                "amount" => &1.amount.amount,
+                "currency" => &1.amount.currency
+              }
+            }
+          )
+        ),
+        socket.assigns.remaining
+      )
       |> Map.put(:action, :update)
 
     {:noreply, assign(socket, changeset: changeset)}
@@ -376,6 +398,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           id={@id <> "-balance-box"}
           deposited={@deposited}
           line_items={@commission.line_items}
+          tipped={@final_invoice && @final_invoice.tip}
         />
         {#if Commissions.commission_open?(@commission) && Commissions.commission_active?(@commission)}
           <div class="input-group">

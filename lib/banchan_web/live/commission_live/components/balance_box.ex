@@ -9,7 +9,8 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
 
   prop line_items, :list, required: true
   prop deposited, :struct
-  prop amount_due, :boolean, default: false
+  prop invoiced, :boolean, default: false
+  prop tipped, :struct
 
   data estimate_amt, :list
   data deposited_amt, :list
@@ -49,10 +50,18 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
               {Money.to_string(@deposited_amt)}
             </div>
           </div>
+          {#if @tipped}
+            <div class="flex flex-row items-center">
+              <div class="font-medium grow">Tipped:</div>
+              <div class="text-sm font-medium">
+                {Money.to_string(@tipped)}
+              </div>
+            </div>
+          {/if}
           <div class="flex flex-row items-center">
             <div class="font-bold grow">
-              {#if @amount_due}
-                Amount Due:
+              {#if @invoiced}
+                Invoiced:
               {#else}
                 Balance:
               {/if}
