@@ -36,12 +36,14 @@ defmodule BanchanWeb.Email.Commissions do
           <td>{Money.to_string(item.amount)}</td>
         </tr>
       {/for}
-      <tr>
-        <td colspan="2">Invoice Charged</td>
-        <td>
-          {Money.to_string(@invoice.total_charged)}
-        </td>
-      </tr>
+      {#if !is_nil(@invoice.total_charged)}
+        <tr>
+          <td colspan="2">Invoice Charged</td>
+          <td>
+            {Money.to_string(@invoice.total_charged)}
+          </td>
+        </tr>
+      {/if}
       <tr>
         <td colspan="2">Paid to Date</td>
         <td>{Money.to_string(deposited)}</td>
@@ -88,7 +90,9 @@ defmodule BanchanWeb.Email.Commissions do
       * #{item.name} - #{Money.to_string(item.amount)}
         #{item.description}
       """ end)}
-    Invoice Charged: #{Money.to_string(assigns.invoice.total_charged)}
+    #{if !is_nil(assigns.invoice.total_charged) do
+      "Invoice Charged: #{Money.to_string(assigns.invoice.total_charged)}"
+    end}
     Paid to Date: #{Money.to_string(deposited)}
     Quote: #{Money.to_string(estimate)}
     Balance: #{Money.to_string(remaining)}

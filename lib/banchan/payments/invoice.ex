@@ -167,8 +167,6 @@ defmodule Banchan.Payments.Invoice do
       :amount,
       :tip,
       :platform_fee,
-      :stripe_session_id,
-      :checkout_url,
       :status
     ])
   end

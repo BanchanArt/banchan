@@ -781,6 +781,45 @@ defmodule Banchan.Payments do
 
   def process_payment(
         %User{} = actor,
+        %Event{invoice: %Invoice{amount: %Money{amount: 0}, final: true} = invoice} = event,
+        %Commission{} = commission,
+        _uri,
+        %Money{amount: 0}
+      ) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:updated_invoice, fn _ ->
+      invoice
+      |> Invoice.submit_changeset(%{
+        tip: Money.new(0, invoice.amount.currency),
+        platform_fee: Money.new(0, invoice.amount.currency),
+        status: :succeeded
+      })
+    end)
+    |> Ecto.Multi.run(:finalize, fn _, %{updated_invoice: invoice} ->
+      client = Repo.reload!(%User{id: invoice.client_id})
+      {:ok, _} = Commissions.update_status(client, commission, :approved)
+      {:ok, _} = release_all_deposits(client, commission)
+
+      if client.email do
+        Notifications.send_receipt(invoice, client, commission)
+      end
+
+      send_event_update!(event.id, actor)
+      {:ok, true}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, _} ->
+        {:ok, :no_payment_necessary}
+
+      {:error, _, error, _} ->
+        Logger.error("Failed to process payment: #{inspect(error)}")
+        {:error, :payment_failed}
+    end
+  end
+
+  def process_payment(
+        %User{} = actor,
         %Event{invoice: %Invoice{amount: amount} = invoice} = event,
         %Commission{} = commission,
         uri,

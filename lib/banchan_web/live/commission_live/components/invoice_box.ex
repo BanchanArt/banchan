@@ -90,6 +90,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         Utils.moneyfy(tip, socket.assigns.event.invoice.amount.currency)
       )
       |> case do
+        {:ok, :no_payment_necessary} ->
+          {:noreply, socket}
+
         {:ok, url} ->
           {:noreply, socket |> redirect(external: url)}
 

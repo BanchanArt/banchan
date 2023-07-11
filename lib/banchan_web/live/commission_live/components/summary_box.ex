@@ -7,8 +7,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
   use BanchanWeb, :live_component
 
   alias Banchan.Commissions
-  alias Banchan.Commissions.Event
   alias Banchan.Payments
+  alias Banchan.Payments.Invoice
   alias Banchan.Repo
   alias Banchan.Uploads
   alias Banchan.Utils
@@ -30,24 +30,24 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     TextInput
   }
 
-  prop current_user, :struct, from_context: :current_user
-  prop current_user_member?, :boolean, from_context: :current_user_member?
-  prop commission, :struct, from_context: :commission
-  prop escrowed_amount, :struct, from_context: :escrowed_amount
-  prop released_amount, :struct, from_context: :released_amount
+  prop(current_user, :struct, from_context: :current_user)
+  prop(current_user_member?, :boolean, from_context: :current_user_member?)
+  prop(commission, :struct, from_context: :commission)
+  prop(escrowed_amount, :struct, from_context: :escrowed_amount)
+  prop(released_amount, :struct, from_context: :released_amount)
 
-  data currency, :atom
-  data changeset, :struct
-  data deposited, :struct
-  data remaining, :struct
-  data existing_open, :boolean
-  data studio, :struct
-  data open_final_invoice, :boolean, default: false
-  data open_deposit_requested, :boolean, default: false
-  data uploads, :map
-  data minimum_release_amount, :struct, default: Payments.minimum_release_amount()
-  data can_release, :boolean, default: false
-  data can_finalize, :boolean, default: false
+  data(currency, :atom)
+  data(changeset, :struct)
+  data(deposited, :struct)
+  data(remaining, :struct)
+  data(existing_open, :boolean)
+  data(studio, :struct)
+  data(open_final_invoice, :boolean, default: false)
+  data(open_deposit_requested, :boolean, default: false)
+  data(uploads, :map)
+  data(minimum_release_amount, :struct, default: Payments.minimum_release_amount())
+  data(can_release, :boolean, default: false)
+  data(can_finalize, :boolean, default: false)
 
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
@@ -75,7 +75,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     {:ok,
      socket
      |> assign(
-       changeset: Event.invoice_changeset(%Event{}, %{}, remaining),
+       changeset: Invoice.creation_changeset(%Invoice{}, %{}, remaining),
        currency: Commissions.commission_currency(socket.assigns.commission),
        studio: studio,
        existing_open: existing_open,
@@ -109,8 +109,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
        open_final_invoice: false,
        open_deposit_requested: false,
        changeset:
-         Event.invoice_changeset(
-           %Event{},
+         Invoice.creation_changeset(
+           %Invoice{},
            %{},
            socket.assigns.remaining
          )
@@ -124,9 +124,22 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
        open_final_invoice: true,
        open_deposit_requested: false,
        changeset:
-         Event.invoice_changeset(
-           %Event{},
-           %{"amount" => socket.assigns.remaining},
+         Invoice.creation_changeset(
+           %Invoice{amount: socket.assigns.remaining, deposited: socket.assigns.deposited},
+           %{
+             "line_items" =>
+               Enum.map(
+                 socket.assigns.commission.line_items,
+                 &%{
+                   "name" => &1.name,
+                   "description" => &1.description,
+                   "amount" => %{
+                     "amount" => &1.amount.amount,
+                     "currency" => &1.amount.currency
+                   }
+                 }
+               )
+           },
            socket.assigns.remaining
          )
      )}
@@ -148,10 +161,10 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
      )}
   end
 
-  def handle_event("change_deposit", %{"event" => %{"amount" => amount} = event}, socket) do
+  def handle_event("change_deposit", %{"invoice" => %{"amount" => amount} = invoice}, socket) do
     change_invoice(
       Map.put(
-        event,
+        invoice,
         "amount",
         Utils.moneyfy(amount, Commissions.commission_currency(socket.assigns.commission))
       ),
@@ -159,10 +172,10 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     )
   end
 
-  def handle_event("submit_deposit", %{"event" => %{"amount" => amount} = event}, socket) do
+  def handle_event("submit_deposit", %{"invoice" => %{"amount" => amount} = invoice}, socket) do
     submit_invoice(
       Map.put(
-        event,
+        invoice,
         "amount",
         Utils.moneyfy(amount, Commissions.commission_currency(socket.assigns.commission))
       ),
@@ -170,10 +183,10 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     )
   end
 
-  def handle_event("change_final", %{"event" => event}, socket) do
+  def handle_event("change_final", %{"invoice" => invoice}, socket) do
     change_invoice(
       Map.put(
-        event,
+        invoice,
         "amount",
         Ecto.Changeset.fetch_field!(socket.assigns.changeset, :amount)
       ),
@@ -181,10 +194,10 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     )
   end
 
-  def handle_event("submit_final", %{"event" => event}, socket) do
+  def handle_event("submit_final", %{"invoice" => invoice}, socket) do
     submit_invoice(
       Map.put(
-        event,
+        invoice,
         "amount",
         Ecto.Changeset.fetch_field!(socket.assigns.changeset, :amount)
       ),
@@ -219,29 +232,29 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     end
   end
 
-  defp change_invoice(event, socket) do
+  defp change_invoice(invoice, socket) do
     changeset =
-      %Event{}
-      |> Event.invoice_changeset(event, socket.assigns.remaining)
+      %Invoice{}
+      |> Invoice.creation_changeset(invoice, socket.assigns.remaining)
       |> Map.put(:action, :update)
 
     {:noreply, assign(socket, changeset: changeset)}
   end
 
-  defp submit_invoice(event, socket, final? \\ false) do
+  defp submit_invoice(invoice, socket, final? \\ false) do
     attachments = process_uploads(socket)
 
     case Payments.invoice(
            socket.assigns.current_user,
            socket.assigns.commission,
            attachments,
-           event,
+           invoice,
            final?
          ) do
       {:ok, _event} ->
         {:noreply,
          assign(socket,
-           changeset: Event.invoice_changeset(%Event{}, %{}),
+           changeset: Invoice.creation_changeset(%Invoice{}, %{}, socket.assigns.remaining),
            open_final_invoice: false,
            open_deposit_requested: false
          )}
