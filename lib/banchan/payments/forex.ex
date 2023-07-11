@@ -67,6 +67,10 @@ defmodule Banchan.Payments.Forex do
     end)
   end
 
+  def forget_rates(agent, from) do
+    Agent.update(agent, fn rates -> Map.delete(rates, from) end)
+  end
+
   defp latest_rates(from, db_rates, agent_rates) do
     case Payments.update_exchange_rates(from) do
       {:ok, updated} ->

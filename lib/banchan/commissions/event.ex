@@ -33,21 +33,9 @@ defmodule Banchan.Commissions.Event do
 
   @doc false
   def changeset(event, attrs) do
-    min = Payments.minimum_transaction_amount()
-
     event
     |> cast(attrs, [:type, :text, :amount, :status])
     |> validate_money(:amount)
-    |> validate_change(:amount, fn _, amount ->
-      if Payments.cmp_money(min, amount) in [:lt, :eq] do
-        []
-      else
-        [
-          {:amount,
-           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
-        ]
-      end
-    end)
     |> validate_required([:type])
     |> validate_text()
   end

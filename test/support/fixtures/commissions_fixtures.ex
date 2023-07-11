@@ -223,4 +223,22 @@ defmodule Banchan.CommissionsFixtures do
     artist = Repo.preload(studio, :artists).artists |> Enum.at(0)
     payment_fixture(artist, commission, Money.subtract(estimate, deposited), tip, true, true)
   end
+
+  def mock_exchange_rates do
+    Banchan.Http.Mock
+    |> expect(:get, fn "https://api.exchangerate.host/latest?base=USD" ->
+      {:ok,
+       %HTTPoison.Response{
+         status_code: 200,
+         body:
+           Jason.encode!(%{
+             "rates" => %{
+               "EUR" => 0.913,
+               "GBP" => 0.7809,
+               "JPY" => 142.833
+             }
+           })
+       }}
+    end)
+  end
 end

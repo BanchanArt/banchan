@@ -638,13 +638,15 @@ defmodule Banchan.Payments do
           |> Money.add(total)
         end)
 
-      total = Money.add(released_amt, invoice.total_charged)
+      total =
+        Money.add(invoice.amount, invoice.tip || Money.new(0, curr))
+        |> Money.add(released_amt)
 
-      case cmp_money(total, min) do
-        cmp when cmp in [:gt, :eq] ->
+      case cmp_money(min, total) do
+        cmp when cmp in [:lt, :eq] ->
           {:ok, true}
 
-        :lt ->
+        :gt ->
           {:error, :release_under_threshold}
       end
     end)
@@ -717,11 +719,11 @@ defmodule Banchan.Payments do
           |> Money.add(total)
         end)
 
-      case cmp_money(total, min) do
-        cmp when cmp in [:gt, :eq] ->
+      case cmp_money(min, total) do
+        cmp when cmp in [:lt, :eq] ->
           {:ok, true}
 
-        :lt ->
+        :gt ->
           {:error, :release_under_threshold}
       end
     end)
@@ -1471,7 +1473,7 @@ defmodule Banchan.Payments do
   @doc """
   Converts a Money struct to a different currency, according to the latest exchange rates.
   """
-  def convert_money(%Money{currency: from} = money, to) do
+  def convert_money(%Money{currency: from} = money, to) when is_atom(to) do
     if money.currency == to do
       money
     else
@@ -1496,7 +1498,7 @@ defmodule Banchan.Payments do
   Fetches the latest exchange rate for the given currencies. Returns `nil` if
   no such exchange rate is availale.
   """
-  def get_exchange_rate(from, to) do
+  def get_exchange_rate(from, to) when is_atom(from) and is_atom(to) do
     Forex.get_forex_rate(Forex, from, to)
   end
 
@@ -1504,9 +1506,9 @@ defmodule Banchan.Payments do
   Fetches the latest exchange rates from an API and updates the values in the
   database, returning the latest values as a Map.
   """
-  def update_exchange_rates(base_currency) do
+  def update_exchange_rates(base_currency) when is_atom(base_currency) do
     # This is a nice, free API and we don't really hit it very often at all.
-    case HTTPoison.get("https://api.exchangerate.host/latest?base=#{base_currency}") do
+    case http_mod().get("https://api.exchangerate.host/latest?base=#{base_currency}") do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         currency_names = Studios.Common.supported_currencies() |> Enum.map(&to_string/1)
 
@@ -1535,9 +1537,9 @@ defmodule Banchan.Payments do
   end
 
   @doc """
-  Loads the exchange rates for a curency from the database.
+  Loads the exchange rates for a currency from the database.
   """
-  def load_exchange_rates(base_currency) do
+  def load_exchange_rates(base_currency) when is_atom(base_currency) do
     from(x in Forex, where: x.from == ^base_currency, select: x)
     |> Repo.all()
     |> Map.new(fn forex ->
@@ -1545,9 +1547,24 @@ defmodule Banchan.Payments do
     end)
   end
 
+  @doc """
+  Clears saved exchange rates for a currency both from the database and the
+  in-memory cache.
+  """
+  def clear_exchange_rates(base_currency) when is_atom(base_currency) do
+    from(x in Forex, where: x.from == ^base_currency, select: x)
+    |> Repo.delete_all()
+
+    Forex.forget_rates(Forex, base_currency)
+  end
+
   ## Misc utilities
 
   defp stripe_mod do
     Application.get_env(:banchan, :stripe_mod)
+  end
+
+  defp http_mod do
+    Application.get_env(:banchan, :http_mod)
   end
 end

@@ -5,8 +5,8 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   use BanchanWeb, :live_component
 
   alias Banchan.Commissions
-  alias Banchan.Commissions.Event
   alias Banchan.Payments
+  alias Banchan.Payments.Invoice
   alias Banchan.Utils
 
   alias Surface.Components.{Form, LiveRedirect}
@@ -47,19 +47,25 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
            Money.add(socket.assigns.released_amount, socket.assigns.event.invoice.amount)
          ) in [:lt, :eq],
        changeset:
-         %Event{}
-         |> Event.amount_changeset(%{
-           "amount" => Utils.moneyfy(0, socket.assigns.event.invoice.amount.currency)
+         %Invoice{
+           final: socket.assigns.event.invoice.final,
+           amount: socket.assigns.event.invoice.amount
+         }
+         |> Invoice.tip_changeset(%{
+           "tip" => Utils.moneyfy(0, socket.assigns.event.invoice.amount.currency)
          })
      )}
   end
 
   @impl true
-  def handle_event("change", %{"event" => %{"amount" => amount}}, socket) do
+  def handle_event("change", %{"invoice" => %{"tip" => tip}}, socket) do
     changeset =
-      %Event{}
-      |> Event.amount_changeset(%{
-        "amount" => Utils.moneyfy(amount, socket.assigns.event.invoice.amount.currency)
+      %Invoice{
+        amount: socket.assigns.event.invoice.amount,
+        final: socket.assigns.event.invoice.final
+      }
+      |> Invoice.tip_changeset(%{
+        "tip" => Utils.moneyfy(tip, socket.assigns.event.invoice.amount.currency)
       })
       |> Map.put(:action, :insert)
 
@@ -67,11 +73,11 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
   end
 
   @impl true
-  def handle_event("submit", %{"event" => %{"amount" => amount}}, socket) do
+  def handle_event("submit", %{"invoice" => %{"tip" => tip}}, socket) do
     changeset =
-      %Event{}
-      |> Event.amount_changeset(%{
-        "amount" => Utils.moneyfy(amount, socket.assigns.event.invoice.amount.currency)
+      %Invoice{final: socket.assigns.event.invoice.final}
+      |> Invoice.tip_changeset(%{
+        "tip" => Utils.moneyfy(tip, socket.assigns.event.invoice.amount.currency)
       })
       |> Map.put(:action, :insert)
 
@@ -81,7 +87,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         socket.assigns.event,
         socket.assigns.commission,
         replace_fragment(socket.assigns.uri, socket.assigns.event),
-        Utils.moneyfy(amount, socket.assigns.event.invoice.amount.currency)
+        Utils.moneyfy(tip, socket.assigns.event.invoice.amount.currency)
       )
       |> case do
         {:ok, url} ->
@@ -273,10 +279,10 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                   {#if @event.invoice.final}
                     <div class="flex flex-row gap-2">
                       {Money.Currency.symbol(@event.invoice.amount)}
-                      <TextInput name={:amount} show_label={false} opts={placeholder: "Tip"} />
+                      <TextInput name={:tip} show_label={false} opts={placeholder: "Tip"} />
                     </div>
                   {#else}
-                    <HiddenInput name={:amount} value="0" />
+                    <HiddenInput name={:tip} value="0" />
                   {/if}
                   <Submit class="pay-invoice btn-sm w-full" changeset={@changeset} label="Pay" />
                   {#if @current_user_member?}

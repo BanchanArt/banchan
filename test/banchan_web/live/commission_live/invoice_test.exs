@@ -2,11 +2,13 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
   @moduledoc """
   Test for the creating and managing invoices on the commissions page.
   """
-  use BanchanWeb.ConnCase, async: true
+  use BanchanWeb.ConnCase
 
   import ExUnit.CaptureLog
   import Mox
   import Phoenix.LiveViewTest
+
+  alias Ecto.Adapters.SQL.Sandbox
 
   import Banchan.CommissionsFixtures
 
@@ -20,6 +22,8 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
     commission = commission_fixture()
 
     on_exit(fn -> Notifications.wait_for_notifications() end)
+
+    Sandbox.mode(Banchan.Repo, {:shared, self()})
 
     %{
       commission: commission,
