@@ -129,9 +129,12 @@ defmodule Banchan.Payments do
         from(i in Invoice,
           join: c in assoc(i, :commission),
           left_join: p in assoc(i, :payouts),
+          # Final invoices that didn't have a tip don't have Stripe
+          # sessions or transfers associated with them.
           where:
             c.studio_id == ^studio.id and
-              (i.status == :succeeded or i.status == :released),
+              (i.status == :succeeded or i.status == :released) and
+              not is_nil(i.total_transferred),
           group_by: [
             fragment("CASE WHEN ? = 'pending' OR ? = 'in_transit' THEN 'on_the_way'
                   WHEN ? = 'paid' THEN 'paid'
@@ -781,11 +784,13 @@ defmodule Banchan.Payments do
 
   def process_payment(
         %User{} = actor,
-        %Event{invoice: %Invoice{amount: %Money{amount: 0}, final: true} = invoice} = event,
+        %Event{invoice: %Invoice{amount: %Money{amount: 0}, tip: tip, final: true} = invoice} =
+          event,
         %Commission{} = commission,
         _uri,
         %Money{amount: 0}
-      ) do
+      )
+      when is_nil(tip) or tip.amount == 0 do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:updated_invoice, fn _ ->
       invoice
