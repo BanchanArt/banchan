@@ -1,0 +1,32 @@
+name: Deploy to Staging
+on:
+  workflow_run:
+    workflows: ["Build and Test"]
+    branches: [main]
+    types:
+      - completed
+
+env:
+  MIX_ENV: prod
+  BANCHAN_DEPLOY_ENV: staging
+  BANCHAN_HOST: dev.banchan.art
+
+jobs:
+  deploy:
+    name: Deploy Banchan to Staging Server
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        elixir: [1.14.5]
+        otp: [25]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Setup BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+      - run: mix deploy.dev --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_DEV_DEPLOY_API_TOKEN }}

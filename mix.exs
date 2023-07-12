@@ -136,10 +136,10 @@ defmodule Banchan.MixProject do
     [
       setup: ["deps.get", "ecto.setup", "cmd --cd assets npm install"],
       "deploy.dev": [
-        "cmd fly deploy -a banchan-dev --build-arg BANCHAN_HOST=dev.banchan.art --build-arg BANCHAN_DEPLOY_ENV=dev"
+        "cmd flyctl deploy -a banchan-dev --build-arg BANCHAN_HOST=dev.banchan.art --build-arg BANCHAN_DEPLOY_ENV=dev"
       ],
       "deploy.prod": [
-        "cmd fly deploy -a banchan-prod --build-arg BANCHAN_HOST=banchan.art --build-arg BANCHAN_DEPLOY_ENV=prod"
+        "cmd flyctl deploy -a banchan-prod --build-arg BANCHAN_HOST=banchan.art --build-arg BANCHAN_DEPLOY_ENV=prod"
       ],
       "stripe.local": [
         "cmd stripe listen --forward-to localhost:4000/api/stripe_webhook"
