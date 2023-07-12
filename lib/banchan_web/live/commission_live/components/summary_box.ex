@@ -386,8 +386,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
         </Form>
       {#else}
         <div class="text-lg font-medium pb-2">Summary</div>
-        <Collapse id={@id <> "-summary-details"} class="px-2">
-          <:header><div class="font-medium">Details:</div></:header>
+        <Collapse id={@id <> "-summary-options"} class="px-2">
+          <:header><div class="font-medium">Options:</div></:header>
           <SummaryEditor
             id={@id <> "-summary-editor"}
             allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
@@ -404,13 +404,13 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           <div class="input-group">
             {#if @current_user_member?}
               <Button
-                disabled={@existing_open || !Commissions.commission_active?(@commission)}
+                disabled={@existing_open || !Commissions.commission_active?(@commission) || @remaining.amount <= 0}
                 click="request_deposit"
                 class="btn-sm grow request-deposit"
                 label="Request Deposit"
               />
               <Button
-                disabled={@existing_open || !Commissions.commission_active?(@commission) || !@can_finalize}
+                disabled={@existing_open || !Commissions.commission_active?(@commission) || !@can_finalize || @remaining.amount < 0}
                 click="final_invoice"
                 class="btn-sm grow final-invoice"
                 label="Final Invoice"
@@ -418,7 +418,16 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
             {/if}
           </div>
           {#if !@can_finalize}
-            <p>You can't send a final invoice for this commission unless the subtotal is at least Banchan's commission minimum of {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))}. Add more options (or custom options) under "Details" until the threshold is reached.</p>
+            <p>You can't send a final invoice for this commission unless the subtotal is at least Banchan's commission minimum of {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))}. Add more options (or custom options) under "Options" until the threshold is reached.</p>
+          {/if}
+          {#if @remaining.amount < 0}
+            <p class="text-lg font-semibold text-error">
+              Your commission's balance is negative.
+            </p>
+            <p>
+              You likely removed options since the last deposit was made. You must add new options to the commission
+              or reimburse one or more deposits to make the balance positive before you can invoice again.
+            </p>
           {/if}
           {#if @current_user.id == @commission.client_id}
             {#if @existing_open || !Commissions.commission_active?(@commission) || !@can_release ||
