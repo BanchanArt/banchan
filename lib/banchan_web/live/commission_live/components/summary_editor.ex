@@ -7,7 +7,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.LineItem
-  alias Banchan.Repo
   alias Banchan.Utils
 
   alias BanchanWeb.CommissionLive.Components.Summary
@@ -19,7 +18,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   prop allow_edits, :boolean, required: true
   prop show_options, :boolean, default: true
 
-  data studio, :struct
   data custom_changeset, :struct
   data loaded, :boolean, default: false
 
@@ -45,12 +43,9 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
           socket
         end
 
-      studio = (socket.assigns.commission |> Repo.preload(:studio)).studio
-
       {:ok,
        socket
        |> assign(
-         studio: studio,
          custom_changeset: custom_changeset,
          loaded: true
        )}
@@ -217,7 +212,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       custom_collapse_id={@id <> "_custom_collapse"}
       change_custom="change_custom"
       submit_custom="submit_custom"
-      studio={@studio}
     />
     """
   end

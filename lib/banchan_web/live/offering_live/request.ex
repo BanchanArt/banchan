@@ -329,7 +329,6 @@ defmodule BanchanWeb.OfferingLive.Request do
                 remove_item="remove_item"
                 line_items={@line_items}
                 offering={@offering}
-                studio={@studio}
               />
               <div class="pt-6">
                 <BalanceBox id="balance-box" line_items={@line_items} />

@@ -235,7 +235,7 @@ defmodule BanchanWeb.OfferingLive.Show do
             {/if}
           </div>
           <div class="divider" />
-          <Summary line_items={@line_items} offering={@offering} studio={@studio} />
+          <Summary line_items={@line_items} offering={@offering} />
           {#if !Enum.empty?(@offering.tags)}
             <h3 class="pt-2 text-lg">Tags</h3>
             <div class="flex flex-row flex-wrap gap-1">
