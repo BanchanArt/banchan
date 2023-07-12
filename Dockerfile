@@ -61,11 +61,14 @@ COPY lib lib
 
 COPY assets assets
 
-# Compile the release
+# Pre-compile the Surface hooks for assets.deploy
 RUN mix compile
 
 # compile assets
 RUN mix assets.deploy
+
+# Compile the actual release
+RUN mix compile
 
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
