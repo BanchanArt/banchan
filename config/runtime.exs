@@ -25,6 +25,10 @@ if config_env() == :prod do
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
 
+  config :banchan, Banchan.Workers.FlyBackup,
+    fly_access_token: System.get_env("FLY_ACCESS_TOKEN"),
+    fly_db_app: System.get_env("FLY_DB_APP")
+
   secret_key_base =
     System.get_env("SECRET_KEY_BASE") ||
       raise """

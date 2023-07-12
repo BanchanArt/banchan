@@ -76,10 +76,19 @@ config :banchan, Oban,
     Oban.Plugins.Lifeline,
     {Oban.Plugins.Cron,
      crontab: [
-       {"@daily", Banchan.Workers.Pruner}
+       {"@daily", Banchan.Workers.Pruner},
+       {"@weekly", Banchan.Workers.FlyBackup}
      ]}
   ],
-  queues: [mailers: 10, media: 2, unban: 10, pruning: 1, invoice_purge: 10, upload_cleanup: 10]
+  queues: [
+    mailers: 10,
+    media: 2,
+    unban: 10,
+    pruning: 1,
+    invoice_purge: 10,
+    upload_cleanup: 10,
+    backup: 1
+  ]
 
 config :sentry,
   included_environments: [:prod, :staging, :dev],

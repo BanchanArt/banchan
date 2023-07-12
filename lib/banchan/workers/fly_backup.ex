@@ -1,0 +1,89 @@
+defmodule Banchan.Workers.FlyBackup do
+  @moduledoc """
+  Periodic worker that connects to a fly.io database and runs a backup
+  command, making sure all relevant authentication is done.
+
+  Backups are based on `wal-g`, and the setup is documented at
+  https://community.fly.io/t/point-in-time-backups-using-postgres-and-wal-g/6867
+
+  This module only takes care of the periodic snapshot backups, rather than
+  the streaming ones.
+  """
+  use Oban.Worker,
+    queue: :backup,
+    unique: [period: 60],
+    max_attempts: 5,
+    tags: ["backup", "system"]
+
+  require Logger
+
+  @impl Oban.Worker
+  def perform(%_{args: _}) do
+    run_backup()
+  end
+
+  def run_backup do
+    case Application.fetch_env(:banchan, Banchan.Workers.FlyBackup) do
+      {:ok, config} ->
+        case {Keyword.get(config, :fly_access_token), Keyword.get(config, :fly_db_app)} do
+          {token, app} when is_nil(token) or is_nil(app) ->
+            Logger.info("FlyBackup not configured (app or token missing), skipping backup.")
+
+          {token, app} ->
+            do_backup(token, app)
+        end
+
+      :error ->
+        Logger.info("Not FlyBackup config found, skipping backup.")
+        :ok
+    end
+  end
+
+  defp do_backup(token, fly_app) do
+    config_path = Path.join([System.user_home!(), ".fly", "config.yml"])
+
+    Logger.info("Running backup")
+
+    with :ok <-
+           File.write(config_path, """
+           access_token: #{token}
+           """),
+         {output, code} <-
+           System.cmd(
+             "fly",
+             [
+               "ssh",
+               "console",
+               "-a",
+               fly_app,
+               "-C",
+               "bash -c \"PGUSER=postgres PGPASSWORD=$OPERATOR_PASSWORD wal-g backup-push /data/postgres\""
+             ],
+             stderr_to_stdout: true
+           ),
+         {:ok, _} <-
+           File.rm_rf(config_path) do
+      {output, code}
+    end
+    |> case do
+      {:error, error} ->
+        {:error, error}
+
+      {output, 0} ->
+        Logger.info("Backup succeeded: #{output}")
+        :ok
+
+      {output, code} ->
+        if code == 1 && String.match?(output, ~r/Error: The handle is invalid/) &&
+             String.match?(output, ~r/Write backup with name/) do
+          # For some reason, the backup command over fly ssh complains about
+          # the handle being invalid, *after* already succeeding.
+          # It only seems to happen when I test this on Windows, though.
+          Logger.warning("Backup succeeded with bad error code #{code}: #{output}")
+          :ok
+        else
+          {:error, "Backup failed with code #{code}: #{output}"}
+        end
+    end
+  end
+end

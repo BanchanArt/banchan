@@ -77,7 +77,7 @@ RUN mix release
 # the compiled release and other runtime necessities
 FROM ${RUNNER_IMAGE}
 
-RUN apt-get update -y && apt-get install -y libstdc++6 openssl libncurses5 locales imagemagick ca-certificates \
+RUN apt-get update -y && apt-get install -y curl libstdc++6 openssl libncurses5 locales imagemagick ca-certificates \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # Set the locale
@@ -87,16 +87,23 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+RUN useradd -ms /bin/bash tteokbokki
 WORKDIR "/app"
-RUN chown nobody /app
+RUN chown tteokbokki /app
 
 # set runner ENV
 ENV MIX_ENV="prod"
 
 # Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/banchan ./
+COPY --from=builder --chown=tteokbokki:root /app/_build/${MIX_ENV}/rel/banchan ./
 
-USER nobody
+USER tteokbokki
+
+# Install flyctl so we can run backups.
+RUN curl -L https://fly.io/install.sh | sh
+
+ENV FLYCTL_INSTALL "/home/tteokbokki/.fly"
+ENV PATH "$FLYCTL_INSTALL/bin:$PATH"
 
 CMD ["/app/bin/server"]
 # Appended by flyctl
