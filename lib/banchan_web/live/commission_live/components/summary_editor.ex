@@ -11,7 +11,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
   alias Banchan.Utils
 
   alias BanchanWeb.CommissionLive.Components.Summary
-  alias BanchanWeb.Components.Modal
+  alias BanchanWeb.Components.Collapse
 
   prop commission, :struct, from_context: :commission
   prop current_user, :struct, from_context: :current_user
@@ -137,8 +137,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
           "line_item" => %{
             "name" => name,
             "description" => description,
-            "amount" => amount,
-            "currency" => currency
+            "amount" => amount
           }
         },
         socket
@@ -148,7 +147,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       |> LineItem.custom_changeset(%{
         name: name,
         description: description,
-        amount: Utils.moneyfy(amount, currency)
+        amount: Utils.moneyfy(amount, Commissions.commission_currency(socket.assigns.commission))
       })
       |> Map.put(:action, :insert)
 
@@ -162,8 +161,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
           "line_item" => %{
             "name" => name,
             "description" => description,
-            "amount" => amount,
-            "currency" => currency
+            "amount" => amount
           }
         },
         socket
@@ -177,13 +175,14 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
         %{
           name: name,
           description: description,
-          amount: Utils.moneyfy(amount, currency)
+          amount:
+            Utils.moneyfy(amount, Commissions.commission_currency(socket.assigns.commission))
         },
         socket.assigns.current_user_member?
       )
       |> case do
         {:ok, {_commission, _events}} ->
-          Modal.hide(socket.assigns.id <> "_custom_modal")
+          Collapse.set_open(socket.assigns.id <> "_custom_collapse", false)
 
           {:noreply,
            assign(socket,

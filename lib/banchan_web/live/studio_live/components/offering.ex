@@ -11,6 +11,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
+  alias Banchan.Payments
   alias Banchan.Uploads
   alias Banchan.Utils
 
@@ -38,6 +39,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   data changeset, :struct
   data uploads, :map
   data remove_card, :boolean, default: false
+  data minimum_release_amount, :struct, default: Payments.minimum_release_amount()
 
   def mount(socket) do
     {:ok,
@@ -368,6 +370,18 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     end)
   end
 
+  defp options_estimate(changeset) do
+    currency = Ecto.Changeset.fetch_field!(changeset, :currency)
+
+    Ecto.Changeset.fetch_field!(changeset, :options)
+    |> Enum.reduce(
+      Money.new(0, currency),
+      fn item, acc ->
+        Money.add(acc, item.price)
+      end
+    )
+  end
+
   def render(assigns) do
     ~F"""
     <Form
@@ -573,6 +587,15 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           |> Enum.map(&{"#{to_string(&1)}#{Money.Currency.symbol(&1)}", &1})}
           opts={required: true}
         />
+        {#if Payments.cmp_money(@minimum_release_amount, options_estimate(@changeset)) == :gt}
+          <p class="text-warning">
+            Warning: Your line items add up to less than {Payments.convert_money(
+              @minimum_release_amount,
+              Ecto.Changeset.fetch_field!(@changeset, :currency)
+            )
+            |> Money.to_string()}. You can still create this offering, but you will have to add custom options during the commission itself in order to be able to invoice your clients.
+          </p>
+        {/if}
         <div class="divider" />
         <Collapse class="border-b-2 pb-2" id={@id <> "-terms-collapse"}>
           <:header>

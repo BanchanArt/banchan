@@ -11,7 +11,7 @@ defmodule Banchan.Payments do
   alias Banchan.Accounts.User
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, Event}
-  alias Banchan.Payments.{Invoice, Notifications, Payout}
+  alias Banchan.Payments.{Forex, Invoice, Notifications, Payout}
   alias Banchan.Repo
   alias Banchan.Studios
   alias Banchan.Studios.Studio
@@ -129,9 +129,12 @@ defmodule Banchan.Payments do
         from(i in Invoice,
           join: c in assoc(i, :commission),
           left_join: p in assoc(i, :payouts),
+          # Final invoices that didn't have a tip don't have Stripe
+          # sessions or transfers associated with them.
           where:
             c.studio_id == ^studio.id and
-              (i.status == :succeeded or i.status == :released),
+              (i.status == :succeeded or i.status == :released) and
+              not is_nil(i.total_transferred),
           group_by: [
             fragment("CASE WHEN ? = 'pending' OR ? = 'in_transit' THEN 'on_the_way'
                   WHEN ? = 'paid' THEN 'paid'
@@ -235,6 +238,59 @@ defmodule Banchan.Payments do
       order_by: {:desc, p.inserted_at}
     )
     |> Repo.paginate(page: page, page_size: 10)
+  end
+
+  @doc """
+  Gets the minimum amount that can be released from a commission (essentially,
+  the commission's minimum price).
+
+  We do this because having many very small transactions would be catastrophic
+  for the platform, as Stripe costs scale really poorly in that case.
+  """
+  def minimum_release_amount do
+    {amt, curr} = Application.fetch_env!(:banchan, :minimum_release_amount)
+    Money.new(amt, curr)
+  end
+
+  @doc """
+  Stripe's minimum transaction amount.
+  """
+  def minimum_transaction_amount do
+    Money.new(50, :USD)
+  end
+
+  @doc """
+  Returns the total amount of money that has been released for a commission.
+  """
+  def released_amount(%Commission{} = commission) do
+    curr = Commissions.commission_currency(commission)
+
+    from(i in Invoice,
+      where: i.commission_id == ^commission.id and i.status == :released,
+      select: i
+    )
+    |> Repo.all()
+    |> Enum.reduce(Money.new(0, curr), fn invoice, total ->
+      Money.add(invoice.amount, invoice.tip || Money.new(0, curr))
+      |> Money.add(total)
+    end)
+  end
+
+  @doc """
+  Returns the total amount of money that is currently in escrow for a commission.
+  """
+  def escrowed_amount(%Commission{} = commission) do
+    curr = Commissions.commission_currency(commission)
+
+    from(i in Invoice,
+      where: i.commission_id == ^commission.id and i.status == :succeeded,
+      select: i
+    )
+    |> Repo.all()
+    |> Enum.reduce(Money.new(0, curr), fn invoice, total ->
+      Money.add(invoice.amount, invoice.tip || Money.new(0, curr))
+      |> Money.add(total)
+    end)
   end
 
   ## Creation
@@ -567,10 +623,35 @@ defmodule Banchan.Payments do
   @doc """
   Releases a payment.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def release_payment(%User{} = actor, %Commission{} = commission, %Invoice{} = invoice) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:actor, fn _, _ ->
       Commissions.check_actor_edit_access(actor, commission)
+    end)
+    |> Ecto.Multi.run(:check_minimum_amount, fn _, _ ->
+      min = minimum_release_amount()
+
+      curr = Commissions.commission_currency(commission)
+
+      released_amt =
+        list_invoices(commission: commission, with_statuses: [:released])
+        |> Enum.reduce(Money.new(0, curr), fn invoice, total ->
+          Money.add(invoice.amount, invoice.tip || Money.new(0, curr))
+          |> Money.add(total)
+        end)
+
+      total =
+        Money.add(invoice.amount, invoice.tip || Money.new(0, curr))
+        |> Money.add(released_amt)
+
+      case cmp_money(min, total) do
+        cmp when cmp in [:lt, :eq] ->
+          {:ok, true}
+
+        :gt ->
+          {:error, :release_under_threshold}
+      end
     end)
     |> Ecto.Multi.update_all(
       :invoices,
@@ -623,8 +704,74 @@ defmodule Banchan.Payments do
   @doc """
   Releases all completed payments for a commission.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def release_all_deposits(%User{} = actor, %Commission{} = commission) do
-    release_all_payments(actor, commission)
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:actor, fn _, _ ->
+      Commissions.check_actor_edit_access(actor, commission)
+    end)
+    |> Ecto.Multi.run(:check_minimum_amount, fn _, _ ->
+      min = minimum_release_amount()
+
+      curr = Commissions.commission_currency(commission)
+
+      total =
+        list_invoices(commission: commission, with_statuses: [:released, :succeeded])
+        |> Enum.reduce(Money.new(0, curr), fn invoice, total ->
+          Money.add(invoice.amount, invoice.tip || Money.new(0, curr))
+          |> Money.add(total)
+        end)
+
+      case cmp_money(min, total) do
+        cmp when cmp in [:lt, :eq] ->
+          {:ok, true}
+
+        :gt ->
+          {:error, :release_under_threshold}
+      end
+    end)
+    |> Ecto.Multi.update_all(
+      :invoices,
+      fn %{actor: actor} ->
+        from(i in Invoice,
+          join: c in assoc(i, :commission),
+          where: c.client_id == ^actor.id and i.status == :succeeded and c.id == ^commission.id,
+          select: i
+        )
+      end,
+      set: [status: :released]
+    )
+    |> Ecto.Multi.all(:events, fn _ ->
+      from(e in Event,
+        join: i in assoc(e, :invoice),
+        where: e.commission_id == ^commission.id and i.commission_id == ^commission.id,
+        select: e,
+        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
+      )
+    end)
+    |> Ecto.Multi.run(:create_event, fn _, %{invoices: {n, invoices}} ->
+      if n > 0 do
+        Commissions.create_event(:all_invoices_released, actor, commission, false, [], %{
+          amount: invoices |> Enum.map(& &1.amount) |> Enum.reduce(&Money.add/2)
+        })
+      end
+
+      {:ok, true}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{events: events, actor: actor, invoices: {n, invoices}}} ->
+        if n > 0 do
+          Enum.each(events, fn event ->
+            Commissions.Notifications.commission_event_updated(commission, event, actor)
+          end)
+        end
+
+        {:ok, invoices}
+
+      {:error, _, error, _} ->
+        {:error, error}
+    end
   end
 
   @doc """
@@ -633,6 +780,47 @@ defmodule Banchan.Payments do
   def process_payment(%User{id: user_id}, _, %Commission{client_id: client_id}, _, _)
       when user_id != client_id do
     {:error, :unauthorized}
+  end
+
+  def process_payment(
+        %User{} = actor,
+        %Event{invoice: %Invoice{amount: %Money{amount: 0}, tip: tip, final: true} = invoice} =
+          event,
+        %Commission{} = commission,
+        _uri,
+        %Money{amount: 0}
+      )
+      when is_nil(tip) or tip.amount == 0 do
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:updated_invoice, fn _ ->
+      invoice
+      |> Invoice.submit_changeset(%{
+        tip: Money.new(0, invoice.amount.currency),
+        platform_fee: Money.new(0, invoice.amount.currency),
+        status: :succeeded
+      })
+    end)
+    |> Ecto.Multi.run(:finalize, fn _, %{updated_invoice: invoice} ->
+      client = Repo.reload!(%User{id: invoice.client_id})
+      {:ok, _} = Commissions.update_status(client, commission, :approved)
+      {:ok, _} = release_all_deposits(client, commission)
+
+      if client.email do
+        Notifications.send_receipt(invoice, client, commission)
+      end
+
+      send_event_update!(event.id, actor)
+      {:ok, true}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, _} ->
+        {:ok, :no_payment_necessary}
+
+      {:error, _, error, _} ->
+        Logger.error("Failed to process payment: #{inspect(error)}")
+        {:error, :payment_failed}
+    end
   end
 
   def process_payment(
@@ -807,7 +995,7 @@ defmodule Banchan.Payments do
 
         if invoice.final do
           {:ok, _} = Commissions.update_status(client, commission, :approved)
-          {:ok, _} = release_all_payments(client, commission)
+          {:ok, _} = release_all_deposits(client, commission)
         end
 
         if client.email do
@@ -818,55 +1006,6 @@ defmodule Banchan.Payments do
       end)
 
     :ok
-  end
-
-  defp release_all_payments(%User{} = actor, %Commission{} = commission) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.run(:actor, fn _, _ ->
-      Commissions.check_actor_edit_access(actor, commission)
-    end)
-    |> Ecto.Multi.update_all(
-      :invoices,
-      fn %{actor: actor} ->
-        from(i in Invoice,
-          join: c in assoc(i, :commission),
-          where: c.client_id == ^actor.id and i.status == :succeeded and c.id == ^commission.id,
-          select: i
-        )
-      end,
-      set: [status: :released]
-    )
-    |> Ecto.Multi.all(:events, fn _ ->
-      from(e in Event,
-        join: i in assoc(e, :invoice),
-        where: e.commission_id == ^commission.id and i.commission_id == ^commission.id,
-        select: e,
-        preload: [:actor, invoice: [], attachments: [:upload, :thumbnail, :preview]]
-      )
-    end)
-    |> Ecto.Multi.run(:create_event, fn _, %{invoices: {n, invoices}} ->
-      if n > 0 do
-        Commissions.create_event(:all_invoices_released, actor, commission, false, [], %{
-          amount: invoices |> Enum.map(& &1.amount) |> Enum.reduce(&Money.add/2)
-        })
-      end
-
-      {:ok, true}
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{events: events, actor: actor, invoices: {n, invoices}}} ->
-        if n > 0 do
-          Enum.each(events, fn event ->
-            Commissions.Notifications.commission_event_updated(commission, event, actor)
-          end)
-        end
-
-        {:ok, invoices}
-
-      {:error, _, error, _} ->
-        {:error, error}
-    end
   end
 
   @doc """
@@ -1354,9 +1493,122 @@ defmodule Banchan.Payments do
     end
   end
 
+  ## Exchange Rates
+
+  @doc """
+  Returns the atom for the configured platform currency.
+  """
+  def platform_currency, do: Application.fetch_env!(:banchan, :platform_currency)
+
+  @doc """
+  Compares two Money structs, converting the second to the first's currency
+  according to the latest exchange rates.
+
+  Returns `:lt` if the first item is less than the second, `:gt` if the first
+  item is greater than the second, and `:eq` if they're the same.
+  """
+  def cmp_money(%Money{} = a, %Money{} = b) do
+    # Ideally, `a` here will usually be in :platform_currency, to minimize
+    # exchange rate lookups.
+    b = if a.currency == b.currency, do: b, else: convert_money(b, a.currency)
+    Money.cmp(a, b)
+  end
+
+  @doc """
+  Converts a Money struct to a different currency, according to the latest exchange rates.
+  """
+  def convert_money(%Money{currency: from} = money, to) when is_atom(to) do
+    if money.currency == to do
+      money
+    else
+      rate = get_exchange_rate(to, from)
+
+      if is_nil(rate) do
+        raise "No exchange rate available for #{from} -> #{to}"
+      else
+        Money.parse!(
+          Decimal.div(
+            Money.to_decimal(money),
+            Decimal.from_float(rate)
+          )
+          |> Decimal.to_string(),
+          to
+        )
+      end
+    end
+  end
+
+  @doc """
+  Fetches the latest exchange rate for the given currencies. Returns `nil` if
+  no such exchange rate is availale.
+  """
+  def get_exchange_rate(from, to) when is_atom(from) and is_atom(to) do
+    Forex.get_forex_rate(Forex, from, to)
+  end
+
+  @doc """
+  Fetches the latest exchange rates from an API and updates the values in the
+  database, returning the latest values as a Map.
+  """
+  def update_exchange_rates(base_currency) when is_atom(base_currency) do
+    # This is a nice, free API and we don't really hit it very often at all.
+    case http_mod().get("https://api.exchangerate.host/latest?base=#{base_currency}") do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        currency_names = Studios.Common.supported_currencies() |> Enum.map(&to_string/1)
+
+        Repo.transaction(fn ->
+          body
+          |> Jason.decode!()
+          |> Map.get("rates")
+          |> Enum.filter(fn {currency, _} ->
+            currency in currency_names
+          end)
+          |> Map.new(fn {currency, rate} ->
+            {String.to_existing_atom(currency),
+             Repo.insert!(
+               Forex.changeset(%Forex{from: base_currency}, %{to: currency, rate: rate}),
+               returning: true,
+               on_conflict: {:replace_all_except, [:id, :inserted_at]},
+               conflict_target: [:from, :to]
+             )}
+          end)
+        end)
+
+      {:error, error} ->
+        Logger.error("Failed to update exchange rates for #{base_currency}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  @doc """
+  Loads the exchange rates for a currency from the database.
+  """
+  def load_exchange_rates(base_currency) when is_atom(base_currency) do
+    from(x in Forex, where: x.from == ^base_currency, select: x)
+    |> Repo.all()
+    |> Map.new(fn forex ->
+      {forex.to, forex}
+    end)
+  end
+
+  @doc """
+  Clears saved exchange rates for a currency both from the database and the
+  in-memory cache.
+  """
+  def clear_exchange_rates(base_currency) when is_atom(base_currency) do
+    from(x in Forex, where: x.from == ^base_currency, select: x)
+    |> Repo.delete_all()
+
+    Forex.forget_rates(Forex, base_currency)
+  end
+
   ## Misc utilities
 
   defp stripe_mod do
     Application.get_env(:banchan, :stripe_mod)
+  end
+
+  defp http_mod do
+    Application.get_env(:banchan, :http_mod)
   end
 end

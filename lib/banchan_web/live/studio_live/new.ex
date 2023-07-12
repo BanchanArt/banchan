@@ -7,6 +7,7 @@ defmodule BanchanWeb.StudioLive.New do
   import Slug
   alias Surface.Components.Form
 
+  alias Banchan.Payments
   alias Banchan.Studios
   alias Banchan.Studios.Studio
 
@@ -35,7 +36,8 @@ defmodule BanchanWeb.StudioLive.New do
       socket
       |> assign(
         countries: Studios.Common.supported_countries(),
-        currencies: currencies
+        currencies: currencies,
+        platform_currency: Payments.platform_currency()
       )
 
     if is_nil(socket.assigns.current_user.confirmed_at) do
@@ -138,7 +140,7 @@ defmodule BanchanWeb.StudioLive.New do
               name={:default_currency}
               info="Currency that will appear by default in your currency drop down (if you choose more than one currency)."
               prompt="Pick a currency..."
-              selected={:USD}
+              selected={@platform_currency}
               options={@currencies}
               opts={required: true}
             />
@@ -146,7 +148,7 @@ defmodule BanchanWeb.StudioLive.New do
               name={:payment_currencies}
               info="Currencies you want to invoice with. Note that people from other countries can still pay you even if their local currency isn't listed here, so you can just pick based on what will look right for your clients."
               options={@currencies}
-              selected={:USD}
+              selected={@platform_currency}
               opts={required: true}
             />
             <Submit changeset={@changeset} label="Save" />

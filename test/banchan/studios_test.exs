@@ -567,7 +567,7 @@ defmodule Banchan.StudiosTest do
 
       assert {:ok, []} == Payments.payout_studio(artist, studio)
 
-      process_final_payment!(commission)
+      process_final_payment!(commission |> Repo.reload())
 
       # No money available on Stripe yet, so no payout happens.
       assert {:ok, []} == Payments.payout_studio(artist, studio)

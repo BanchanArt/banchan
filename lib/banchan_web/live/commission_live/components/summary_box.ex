@@ -7,8 +7,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
   use BanchanWeb, :live_component
 
   alias Banchan.Commissions
-  alias Banchan.Commissions.Event
   alias Banchan.Payments
+  alias Banchan.Payments.Invoice
   alias Banchan.Repo
   alias Banchan.Uploads
   alias Banchan.Utils
@@ -30,19 +30,24 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     TextInput
   }
 
-  prop current_user, :struct, from_context: :current_user
-  prop current_user_member?, :boolean, from_context: :current_user_member?
-  prop commission, :struct, from_context: :commission
+  prop(current_user, :struct, from_context: :current_user)
+  prop(current_user_member?, :boolean, from_context: :current_user_member?)
+  prop(commission, :struct, from_context: :commission)
+  prop(escrowed_amount, :struct, from_context: :escrowed_amount)
+  prop(released_amount, :struct, from_context: :released_amount)
 
-  data currency, :atom
-  data changeset, :struct
-  data deposited, :struct
-  data remaining, :struct
-  data existing_open, :boolean
-  data studio, :struct
-  data open_final_invoice, :boolean, default: false
-  data open_deposit_requested, :boolean, default: false
-  data uploads, :map
+  data(currency, :atom)
+  data(changeset, :struct)
+  data(deposited, :struct)
+  data(remaining, :struct)
+  data(final_invoice, :struct)
+  data(existing_open, :boolean)
+  data(open_final_invoice, :boolean, default: false)
+  data(open_deposit_requested, :boolean, default: false)
+  data(uploads, :map)
+  data(minimum_release_amount, :struct, default: Payments.minimum_release_amount())
+  data(can_release, :boolean, default: false)
+  data(can_finalize, :boolean, default: false)
 
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
@@ -63,19 +68,29 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
 
     remaining = Money.subtract(estimate, deposited)
 
-    studio = (socket.assigns.commission |> Repo.preload(:studio)).studio
-
     existing_open = Payments.open_invoice(socket.assigns.commission) |> Repo.preload(:event)
+
+    final_invoice = Payments.final_invoice(socket.assigns.commission)
 
     {:ok,
      socket
      |> assign(
-       changeset: Event.invoice_changeset(%Event{}, %{}, remaining),
-       currency: Enum.at(socket.assigns.commission.line_items, 0).amount.currency,
-       studio: studio,
+       changeset: Invoice.creation_changeset(%Invoice{}, %{}, remaining),
+       currency: Commissions.commission_currency(socket.assigns.commission),
        existing_open: existing_open,
        remaining: remaining,
-       deposited: deposited
+       deposited: deposited,
+       final_invoice: final_invoice,
+       can_finalize:
+         Payments.cmp_money(
+           socket.assigns.minimum_release_amount,
+           estimate
+         ) in [:lt, :eq],
+       can_release:
+         Payments.cmp_money(
+           socket.assigns.minimum_release_amount,
+           Money.add(socket.assigns.released_amount, socket.assigns.escrowed_amount)
+         ) in [:lt, :eq]
      )
      |> allow_upload(:attachments,
        accept: :any,
@@ -94,8 +109,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
        open_final_invoice: false,
        open_deposit_requested: false,
        changeset:
-         Event.invoice_changeset(
-           %Event{},
+         Invoice.creation_changeset(
+           %Invoice{},
            %{},
            socket.assigns.remaining
          )
@@ -109,9 +124,22 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
        open_final_invoice: true,
        open_deposit_requested: false,
        changeset:
-         Event.invoice_changeset(
-           %Event{},
-           %{"amount" => socket.assigns.remaining},
+         Invoice.creation_changeset(
+           %Invoice{amount: socket.assigns.remaining, deposited: socket.assigns.deposited},
+           %{
+             "line_items" =>
+               Enum.map(
+                 socket.assigns.commission.line_items,
+                 &%{
+                   "name" => &1.name,
+                   "description" => &1.description,
+                   "amount" => %{
+                     "amount" => &1.amount.amount,
+                     "currency" => &1.amount.currency
+                   }
+                 }
+               )
+           },
            socket.assigns.remaining
          )
      )}
@@ -133,10 +161,10 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
      )}
   end
 
-  def handle_event("change_deposit", %{"event" => %{"amount" => amount} = event}, socket) do
+  def handle_event("change_deposit", %{"invoice" => %{"amount" => amount} = invoice}, socket) do
     change_invoice(
-      Map.put(
-        event,
+      invoice
+      |> Map.put(
         "amount",
         Utils.moneyfy(amount, Commissions.commission_currency(socket.assigns.commission))
       ),
@@ -144,10 +172,10 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     )
   end
 
-  def handle_event("submit_deposit", %{"event" => %{"amount" => amount} = event}, socket) do
+  def handle_event("submit_deposit", %{"invoice" => %{"amount" => amount} = invoice}, socket) do
     submit_invoice(
       Map.put(
-        event,
+        invoice,
         "amount",
         Utils.moneyfy(amount, Commissions.commission_currency(socket.assigns.commission))
       ),
@@ -155,21 +183,22 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     )
   end
 
-  def handle_event("change_final", %{"event" => event}, socket) do
+  def handle_event("change_final", %{"invoice" => invoice}, socket) do
     change_invoice(
-      Map.put(
-        event,
+      invoice
+      |> Map.put(
         "amount",
         Ecto.Changeset.fetch_field!(socket.assigns.changeset, :amount)
       ),
-      socket
+      socket,
+      true
     )
   end
 
-  def handle_event("submit_final", %{"event" => event}, socket) do
+  def handle_event("submit_final", %{"invoice" => invoice}, socket) do
     submit_invoice(
       Map.put(
-        event,
+        invoice,
         "amount",
         Ecto.Changeset.fetch_field!(socket.assigns.changeset, :amount)
       ),
@@ -182,9 +211,19 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     Payments.release_all_deposits(socket.assigns.current_user, socket.assigns.commission)
     |> case do
       {:ok, _} ->
-        IO.puts("Deposits released")
         Collapse.set_open(socket.assigns.id <> "-release-confirmation", false)
         {:noreply, socket}
+
+      {:error, :release_under_threshold} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "You cannot release this commission's deposits because the total released amount would be under Banchan's minimum of #{Payments.convert_money(socket.assigns.minimum_release_amount, Commissions.commission_currency(socket.assigns.commission))}"
+         )
+         |> push_navigate(
+           to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+         )}
 
       {:error, :blocked} ->
         {:noreply,
@@ -194,29 +233,46 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     end
   end
 
-  defp change_invoice(event, socket) do
+  defp change_invoice(invoice, socket, final? \\ false) do
     changeset =
-      %Event{}
-      |> Event.invoice_changeset(event, socket.assigns.remaining)
+      %Invoice{deposited: socket.assigns.deposited, final: final?}
+      |> Invoice.creation_changeset(
+        invoice
+        |> Map.put(
+          "line_items",
+          Enum.map(
+            socket.assigns.commission.line_items,
+            &%{
+              "name" => &1.name,
+              "description" => &1.description,
+              "amount" => %{
+                "amount" => &1.amount.amount,
+                "currency" => &1.amount.currency
+              }
+            }
+          )
+        ),
+        socket.assigns.remaining
+      )
       |> Map.put(:action, :update)
 
     {:noreply, assign(socket, changeset: changeset)}
   end
 
-  defp submit_invoice(event, socket, final? \\ false) do
+  defp submit_invoice(invoice, socket, final? \\ false) do
     attachments = process_uploads(socket)
 
     case Payments.invoice(
            socket.assigns.current_user,
            socket.assigns.commission,
            attachments,
-           event,
+           invoice,
            final?
          ) do
       {:ok, _event} ->
         {:noreply,
          assign(socket,
-           changeset: Event.invoice_changeset(%Event{}, %{}),
+           changeset: Invoice.creation_changeset(%Invoice{}, %{}, socket.assigns.remaining),
            open_final_invoice: false,
            open_deposit_requested: false
          )}
@@ -247,13 +303,13 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
       {#if @open_final_invoice}
         <div class="text-lg font-medium pb-2">Final Invoice</div>
         <div class="text-sm">Attachments will be released on payment. All deposits will be immediately released, along with this payment, and the commission will be closed.</div>
-        <Summary studio={@studio} line_items={@commission.line_items} show_options={false} />
+        <Summary line_items={@commission.line_items} show_options={false} />
         <div class="divider" />
         <BalanceBox
           id={@id <> "-balance-box"}
           deposited={@deposited}
           line_items={@commission.line_items}
-          amount_due
+          invoiced
         />
         <div class="divider" />
         <Form
@@ -285,7 +341,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
       {#elseif @open_deposit_requested}
         <div class="text-lg font-medium pb-2">Partial Deposit</div>
         <div class="text-sm">Attachments will be released on payment. Deposit will be held until final invoice is submitted, or deposit is released early. by client.</div>
-        <Summary studio={@studio} line_items={@commission.line_items} show_options={false} />
+        <Summary line_items={@commission.line_items} show_options={false} />
         <div class="divider" />
         <BalanceBox
           id={@id <> "-balance-box"}
@@ -326,8 +382,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
         </Form>
       {#else}
         <div class="text-lg font-medium pb-2">Summary</div>
-        <Collapse id={@id <> "-summary-details"} class="px-2">
-          <:header><div class="font-medium">Details:</div></:header>
+        <Collapse id={@id <> "-summary-options"} class="px-2">
+          <:header><div class="font-medium">Options:</div></:header>
           <SummaryEditor
             id={@id <> "-summary-editor"}
             allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
@@ -338,26 +394,41 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           id={@id <> "-balance-box"}
           deposited={@deposited}
           line_items={@commission.line_items}
+          tipped={@final_invoice && @final_invoice.tip}
         />
         {#if Commissions.commission_open?(@commission) && Commissions.commission_active?(@commission)}
           <div class="input-group">
             {#if @current_user_member?}
               <Button
-                disabled={@existing_open || !Commissions.commission_active?(@commission)}
+                disabled={@existing_open || !Commissions.commission_active?(@commission) || @remaining.amount <= 0}
                 click="request_deposit"
                 class="btn-sm grow request-deposit"
                 label="Request Deposit"
               />
               <Button
-                disabled={@existing_open || !Commissions.commission_active?(@commission)}
+                disabled={@existing_open || !Commissions.commission_active?(@commission) || !@can_finalize ||
+                  @remaining.amount < 0}
                 click="final_invoice"
                 class="btn-sm grow final-invoice"
                 label="Final Invoice"
               />
             {/if}
           </div>
+          {#if !@can_finalize}
+            <p>You can't send a final invoice for this commission unless the subtotal is at least Banchan's commission minimum of {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))}. Add more options (or custom options) under "Options" until the threshold is reached.</p>
+          {/if}
+          {#if @remaining.amount < 0}
+            <p class="text-lg font-semibold text-error">
+              Your commission's balance is negative.
+            </p>
+            <p>
+              You likely removed options since the last deposit was made. You must add new options to the commission
+              or reimburse one or more deposits to make the balance positive before you can invoice again.
+            </p>
+          {/if}
           {#if @current_user.id == @commission.client_id}
-            {#if @existing_open || !Commissions.commission_active?(@commission)}
+            {#if @existing_open || !Commissions.commission_active?(@commission) || !@can_release ||
+                @deposited.amount == 0}
               <Button disabled class="btn-sm w-full" label="Release Deposits" />
             {#else}
               <Collapse
@@ -376,6 +447,13 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
                 <p class="py-2">Are you sure?</p>
                 <Button click="release_deposits" class="btn-sm w-full" label="Confirm" />
               </Collapse>
+            {/if}
+            {#if !@can_release && @deposited.amount > 0}
+              <p>
+                You can't release any deposits until the total released deposits would
+                add up to at least {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))
+                |> Money.to_string()}.
+              </p>
             {/if}
           {/if}
         {/if}

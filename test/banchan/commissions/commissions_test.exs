@@ -504,8 +504,8 @@ defmodule Banchan.CommissionsTest do
       studio = commission.studio
       client = commission.client
       artist = Enum.at(studio.artists, 0)
-      amount = Money.new(420, :USD)
-      tip = Money.new(69, :USD)
+      amount = Money.new(42_000, :USD)
+      tip = Money.new(6_900, :USD)
 
       invoice =
         invoice_fixture(artist, commission, %{

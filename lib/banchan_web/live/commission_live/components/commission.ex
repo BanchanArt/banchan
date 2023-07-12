@@ -8,6 +8,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, Notifications}
+  alias Banchan.Payments
 
   alias BanchanWeb.Components.{Button, Collapse, Markdown, ReportModal}
   alias BanchanWeb.Components.Form.{Submit, TextInput}
@@ -21,15 +22,15 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
     UploadsBox
   }
 
-  prop users, :map, required: true
-  prop current_user, :struct, from_context: :current_user
-  prop current_user_member?, :boolean, from_context: :current_user_member?
-  prop commission, :struct, required: true
+  prop(users, :map, required: true)
+  prop(current_user, :struct, from_context: :current_user)
+  prop(current_user_member?, :boolean, from_context: :current_user_member?)
+  prop(commission, :struct, required: true)
 
-  prop subscribed?, :boolean
-  prop archived?, :boolean
+  prop(subscribed?, :boolean)
+  prop(archived?, :boolean)
 
-  data title_changeset, :struct, default: nil
+  data(title_changeset, :struct, default: nil)
 
   def events_updated(id) do
     send_update(__MODULE__, id: id, events_updated: true)
@@ -37,7 +38,13 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
 
   def update(%{events_updated: true}, socket) do
     UploadsBox.reload(socket.assigns.id <> "-uploads-box")
-    {:ok, socket}
+
+    {:ok,
+     socket
+     |> Context.put(
+       released_amount: Payments.released_amount(socket.assigns.commission),
+       escrowed_amount: Payments.escrowed_amount(socket.assigns.commission)
+     )}
   end
 
   def update(assigns, socket) do
@@ -50,8 +57,10 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
         subscribed?:
           Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.commission)
       )
-
-    socket = Context.put(socket, commission: socket.assigns.commission)
+      |> Context.put(
+        released_amount: Payments.released_amount(socket.assigns.commission),
+        escrowed_amount: Payments.escrowed_amount(socket.assigns.commission)
+      )
 
     {:ok, socket}
   end
@@ -271,8 +280,13 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           Archive
         {/if}
       </button>
-      {#if (@current_user.id == @commission.client_id || :admin in @current_user.roles ||
-           :mod in @current_user.roles) && @commission.status != :withdrawn}
+      {#if Commissions.status_transition_allowed?(
+          @current_user_member?,
+          @current_user.id == @commission.client_id || :admin in @current_user.roles ||
+            :mod in @current_user.roles,
+          @commission.status,
+          :withdrawn
+        )}
         <Collapse
           id={@id <> "-withdraw-confirmation" <> if desktop?, do: "-desktop", else: "-mobile"}
           show_arrow={false}

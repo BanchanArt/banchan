@@ -15,7 +15,7 @@ defmodule Banchan.CommissionsFixtures do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions
-  alias Banchan.Commissions.{Commission, LineItem}
+  alias Banchan.Commissions.{Commission, Event, LineItem}
   alias Banchan.Payments
   alias Banchan.Payments.Invoice
   alias Banchan.Repo
@@ -204,15 +204,28 @@ defmodule Banchan.CommissionsFixtures do
         final?
       )
 
-    session = checkout_session_fixture(invoice, tip)
+    if !final? || invoice.amount.amount > 0 || tip.amount > 0 do
+      session = checkout_session_fixture(invoice, tip)
 
-    if succeed do
-      succeed_mock_payment!(session)
-    else
-      expire_mock_payment(session)
+      if succeed do
+        succeed_mock_payment!(session)
+      else
+        expire_mock_payment(session)
+      end
     end
 
-    session
+    if final? && invoice.amount.amount == 0 && tip.amount == 0 do
+      {:ok, _} =
+        Payments.process_payment(
+          Repo.reload(%User{id: commission.client_id}),
+          Repo.reload(%Event{id: invoice.event_id}) |> Repo.preload(:invoice),
+          commission,
+          nil,
+          tip
+        )
+    end
+
+    :ok
   end
 
   def process_final_payment!(%Commission{} = commission, tip \\ Money.new(0, :USD)) do
@@ -222,5 +235,23 @@ defmodule Banchan.CommissionsFixtures do
     studio = Repo.preload(commission, :studio).studio
     artist = Repo.preload(studio, :artists).artists |> Enum.at(0)
     payment_fixture(artist, commission, Money.subtract(estimate, deposited), tip, true, true)
+  end
+
+  def mock_exchange_rates do
+    Banchan.Http.Mock
+    |> expect(:get, fn "https://api.exchangerate.host/latest?base=USD" ->
+      {:ok,
+       %HTTPoison.Response{
+         status_code: 200,
+         body:
+           Jason.encode!(%{
+             "rates" => %{
+               "EUR" => 0.913,
+               "GBP" => 0.7809,
+               "JPY" => 142.833
+             }
+           })
+       }}
+    end)
   end
 end

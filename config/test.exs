@@ -4,7 +4,8 @@ import Config
 config :pbkdf2_elixir, :rounds, 1
 
 config :banchan,
-  stripe_mod: Banchan.StripeAPI.Mock
+  stripe_mod: Banchan.StripeAPI.Mock,
+  http_mod: Banchan.Http.Mock
 
 # Configure your database
 #

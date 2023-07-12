@@ -7,23 +7,25 @@ defmodule Banchan.Payments.Invoice do
 
   import Banchan.Validators
 
-  schema "commission_invoices" do
-    field :stripe_session_id, :string
-    field :checkout_url, :string
-    field :stripe_refund_id, :string
-    field :stripe_charge_id, :string
-    field :amount, Money.Ecto.Composite.Type
-    field :tip, Money.Ecto.Composite.Type
-    field :deposited, Money.Ecto.Composite.Type
-    field :platform_fee, Money.Ecto.Composite.Type
-    field :total_charged, Money.Ecto.Composite.Type
-    field :total_transferred, Money.Ecto.Composite.Type
-    field :payout_available_on, :utc_datetime
-    field :paid_on, :utc_datetime
-    field :required, :boolean
-    field :final, :boolean
+  alias Banchan.Payments
 
-    field :refund_status, Ecto.Enum,
+  schema "commission_invoices" do
+    field(:stripe_session_id, :string)
+    field(:checkout_url, :string)
+    field(:stripe_refund_id, :string)
+    field(:stripe_charge_id, :string)
+    field(:amount, Money.Ecto.Composite.Type)
+    field(:tip, Money.Ecto.Composite.Type)
+    field(:deposited, Money.Ecto.Composite.Type)
+    field(:platform_fee, Money.Ecto.Composite.Type)
+    field(:total_charged, Money.Ecto.Composite.Type)
+    field(:total_transferred, Money.Ecto.Composite.Type)
+    field(:payout_available_on, :utc_datetime)
+    field(:paid_on, :utc_datetime)
+    field(:required, :boolean)
+    field(:final, :boolean)
+
+    field(:refund_status, Ecto.Enum,
       values: [
         :pending,
         :succeeded,
@@ -31,15 +33,17 @@ defmodule Banchan.Payments.Invoice do
         :canceled,
         :requires_action
       ]
+    )
 
-    field :refund_failure_reason, Ecto.Enum,
+    field(:refund_failure_reason, Ecto.Enum,
       values: [
         :lost_or_stolen_card,
         :expired_or_canceled_card,
         :unknown
       ]
+    )
 
-    field :status, Ecto.Enum,
+    field(:status, Ecto.Enum,
       values: [
         # Studio has requested payment. No other action taken.
         :pending,
@@ -55,29 +59,31 @@ defmodule Banchan.Payments.Invoice do
         :released
       ],
       default: :pending
+    )
 
-    belongs_to :refunded_by, Banchan.Accounts.User
-    belongs_to :commission, Banchan.Commissions.Commission
-    belongs_to :client, Banchan.Accounts.User
-    belongs_to :event, Banchan.Commissions.Event
+    belongs_to(:refunded_by, Banchan.Accounts.User)
+    belongs_to(:commission, Banchan.Commissions.Commission)
+    belongs_to(:client, Banchan.Accounts.User)
+    belongs_to(:event, Banchan.Commissions.Event)
 
-    many_to_many :payouts, Banchan.Payments.Payout, join_through: "invoices_payouts"
+    many_to_many(:payouts, Banchan.Payments.Payout, join_through: "invoices_payouts")
 
     embeds_many :line_items, LineItem do
-      field :amount, Money.Ecto.Map.Type
-      field :name, :string
-      field :description, :string
+      field(:amount, Money.Ecto.Map.Type)
+      field(:name, :string)
+      field(:description, :string)
     end
 
     timestamps()
   end
 
-  @doc false
-  def amount_changeset(payment, attrs) do
-    payment
-    |> cast(attrs, [:amount])
+  def tip_changeset(invoice, attrs) do
+    invoice
+    |> cast(attrs, [:amount, :tip, :final])
+    |> validate_money(:tip)
     |> validate_money(:amount)
-    |> validate_required([:amount])
+    |> validate_min_amount()
+    |> validate_final_amount()
   end
 
   def creation_changeset(payment, attrs, %Money{} = remaining) do
@@ -87,18 +93,53 @@ defmodule Banchan.Payments.Invoice do
     |> validate_money(:amount, remaining)
     |> validate_money(:deposited)
     |> validate_required([:amount, :deposited])
+    |> validate_min_amount()
+    |> validate_final_amount()
   end
 
-  @doc false
-  def tip_changeset(payment, attrs) do
-    payment
-    |> cast(attrs, [:tip])
-    |> validate_money(:tip)
-    |> validate_required([:tip])
+  defp validate_min_amount(changeset) do
+    min = Payments.minimum_transaction_amount()
+    final? = fetch_field!(changeset, :final)
+
+    changeset
+    |> validate_change(:amount, fn _, amount ->
+      # It's ok to fall through on 0. We check that the _total_ is greater than 0 in the next step.
+      if (final? && amount.amount == 0) || Payments.cmp_money(min, amount) in [:lt, :eq] do
+        []
+      else
+        [
+          {:amount,
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+        ]
+      end
+    end)
+  end
+
+  defp validate_final_amount(changeset) do
+    if fetch_field!(changeset, :final) do
+      min = Payments.minimum_transaction_amount()
+      deposited = fetch_field!(changeset, :deposited)
+
+      changeset
+      |> validate_change(:amount, fn _, amount ->
+        if Payments.cmp_money(min, Money.add(amount, deposited)) in [:lt, :eq] do
+          []
+        else
+          [
+            {:amount,
+             "Commissions can't be under Banchan's minimum of #{Payments.convert_money(min, amount.currency) |> Money.to_string()}."}
+          ]
+        end
+      end)
+    else
+      changeset
+    end
   end
 
   @doc false
   def submit_changeset(payment, attrs) do
+    min = Payments.minimum_transaction_amount()
+
     payment
     |> cast(attrs, [
       :amount,
@@ -112,12 +153,20 @@ defmodule Banchan.Payments.Invoice do
     |> validate_money(:amount)
     |> validate_money(:tip)
     |> validate_money(:platform_fee)
+    |> validate_change(:amount, fn _, amount ->
+      if Payments.cmp_money(min, amount) in [:lt, :eq] do
+        []
+      else
+        [
+          {:amount,
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+        ]
+      end
+    end)
     |> validate_required([
       :amount,
       :tip,
       :platform_fee,
-      :stripe_session_id,
-      :checkout_url,
       :status
     ])
   end

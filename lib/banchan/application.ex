@@ -20,9 +20,12 @@ defmodule Banchan.Application do
       # Start the Task supervisor for handling notifications
       {Task.Supervisor, name: Banchan.NotificationTaskSupervisor},
       # Start Oban
-      {Oban, Application.fetch_env!(:banchan, Oban)}
+      {Oban, Application.fetch_env!(:banchan, Oban)},
       # Start a worker by calling: Banchan.Worker.start_link(arg)
       # {Banchan.Worker, arg}
+      # GenServer for managing foreign exchange rate fetching.
+      {Banchan.Payments.Forex,
+       name: Banchan.Payments.Forex, base_currency: Banchan.Payments.platform_currency()}
     ]
 
     :ok = Oban.Telemetry.attach_default_logger()

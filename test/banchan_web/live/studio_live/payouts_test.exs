@@ -2,11 +2,13 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
   @moduledoc """
   Tests for the studio payouts management page(s).
   """
-  use BanchanWeb.ConnCase, async: true
+  use BanchanWeb.ConnCase
 
   import ExUnit.CaptureLog
   import Mox
   import Phoenix.LiveViewTest
+
+  alias Ecto.Adapters.SQL.Sandbox
 
   import Banchan.CommissionsFixtures
 
@@ -42,9 +44,57 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
     end)
   end
 
+  setup :set_mox_from_context
   setup :verify_on_exit!
 
+  defp setup_forex do
+    forex = Process.whereis(Banchan.Payments.Forex)
+
+    Payments.clear_exchange_rates(:USD)
+    Payments.clear_exchange_rates(:JPY)
+
+    Sandbox.allow(Banchan.Repo, self(), forex)
+
+    Banchan.Http.Mock
+    |> expect(:get, 1, fn "https://api.exchangerate.host/latest?base=USD" ->
+      {:ok,
+       %HTTPoison.Response{
+         status_code: 200,
+         body:
+           Jason.encode!(%{
+             "rates" => %{
+               "EUR" => 0.913,
+               "JPY" => 142.833
+             }
+           })
+       }}
+    end)
+
+    Sandbox.allow(Banchan.Repo, self(), forex)
+
+    Banchan.Http.Mock
+    |> expect(:get, 1, fn "https://api.exchangerate.host/latest?base=JPY" ->
+      {:ok,
+       %HTTPoison.Response{
+         status_code: 200,
+         body:
+           Jason.encode!(%{
+             "rates" => %{
+               "EUR" => 0.913,
+               "JPY" => 142.833
+             }
+           })
+       }}
+    end)
+
+    # Prevent a deadlock during currency exchange stuff.
+    Payments.get_exchange_rate(:USD, :JPY)
+    Payments.get_exchange_rate(:JPY, :USD)
+  end
+
   setup do
+    setup_forex()
+
     commission = commission_fixture()
 
     on_exit(fn -> Notifications.wait_for_notifications() end)
@@ -196,6 +246,8 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
   describe "view stats" do
     setup %{conn: conn, studio: studio, artist: artist} do
+      setup_forex()
+
       Studios.update_stripe_state!(studio.stripe_id, %Stripe.Account{
         charges_enabled: true,
         details_submitted: true
@@ -244,14 +296,14 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
           line_items: [
             %LineItem{
               option: nil,
-              amount: Money.new(64, :JPY),
+              amount: Money.new(64_000, :JPY),
               name: "custom line item",
               description: "custom line item description"
             }
           ]
         })
 
-      mock_balance(studio, [Money.new(42_000, :USD), Money.new(64, :JPY)], [])
+      mock_balance(studio, [Money.new(42_000, :USD), Money.new(64_000, :JPY)], [])
       process_final_payment!(comm1)
       process_final_payment!(comm2, Money.new(0, :JPY))
 
@@ -261,12 +313,14 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       rendered = page_live |> element("#available") |> render()
 
       assert rendered =~ "$378.00"
-      assert rendered =~ "¥58"
+      assert rendered =~ "¥57,600"
     end
   end
 
   describe "trigger payout" do
     setup %{conn: conn, studio: studio, artist: artist} do
+      setup_forex()
+
       Studios.update_stripe_state!(studio.stripe_id, %Stripe.Account{
         charges_enabled: true,
         details_submitted: true
@@ -465,6 +519,8 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
   describe "cancel payout" do
     setup %{conn: conn, studio: studio, artist: artist} do
+      setup_forex()
+
       Studios.update_stripe_state!(studio.stripe_id, %Stripe.Account{
         charges_enabled: true,
         details_submitted: true
