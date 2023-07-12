@@ -406,7 +406,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
                 label="Request Deposit"
               />
               <Button
-                disabled={@existing_open || !Commissions.commission_active?(@commission) || !@can_finalize || @remaining.amount < 0}
+                disabled={@existing_open || !Commissions.commission_active?(@commission) || !@can_finalize ||
+                  @remaining.amount < 0}
                 click="final_invoice"
                 class="btn-sm grow final-invoice"
                 label="Final Invoice"

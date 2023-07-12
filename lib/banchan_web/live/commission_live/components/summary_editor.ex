@@ -137,7 +137,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
           "line_item" => %{
             "name" => name,
             "description" => description,
-            "amount" => amount,
+            "amount" => amount
           }
         },
         socket
@@ -161,7 +161,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
           "line_item" => %{
             "name" => name,
             "description" => description,
-            "amount" => amount,
+            "amount" => amount
           }
         },
         socket
@@ -175,7 +175,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
         %{
           name: name,
           description: description,
-          amount: Utils.moneyfy(amount, Commissions.commission_currency(socket.assigns.commission))
+          amount:
+            Utils.moneyfy(amount, Commissions.commission_currency(socket.assigns.commission))
         },
         socket.assigns.current_user_member?
       )

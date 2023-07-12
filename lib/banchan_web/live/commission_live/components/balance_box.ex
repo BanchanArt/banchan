@@ -66,7 +66,11 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
                 Balance:
               {/if}
             </div>
-            <div class={"text-md font-bold", "text-primary": @remaining_amt.amount > 0, "text-error": @remaining_amt.amount < 0}>
+            <div class={
+              "text-md font-bold",
+              "text-primary": @remaining_amt.amount > 0,
+              "text-error": @remaining_amt.amount < 0
+            }>
               {Money.to_string(@remaining_amt)}
             </div>
           </div>
