@@ -42,7 +42,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
   data(remaining, :struct)
   data(final_invoice, :struct)
   data(existing_open, :boolean)
-  data(studio, :struct)
   data(open_final_invoice, :boolean, default: false)
   data(open_deposit_requested, :boolean, default: false)
   data(uploads, :map)
@@ -69,8 +68,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
 
     remaining = Money.subtract(estimate, deposited)
 
-    studio = (socket.assigns.commission |> Repo.preload(:studio)).studio
-
     existing_open = Payments.open_invoice(socket.assigns.commission) |> Repo.preload(:event)
 
     final_invoice = Payments.final_invoice(socket.assigns.commission)
@@ -80,7 +77,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
      |> assign(
        changeset: Invoice.creation_changeset(%Invoice{}, %{}, remaining),
        currency: Commissions.commission_currency(socket.assigns.commission),
-       studio: studio,
        existing_open: existing_open,
        remaining: remaining,
        deposited: deposited,
@@ -307,7 +303,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
       {#if @open_final_invoice}
         <div class="text-lg font-medium pb-2">Final Invoice</div>
         <div class="text-sm">Attachments will be released on payment. All deposits will be immediately released, along with this payment, and the commission will be closed.</div>
-        <Summary studio={@studio} line_items={@commission.line_items} show_options={false} />
+        <Summary line_items={@commission.line_items} show_options={false} />
         <div class="divider" />
         <BalanceBox
           id={@id <> "-balance-box"}
@@ -345,7 +341,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
       {#elseif @open_deposit_requested}
         <div class="text-lg font-medium pb-2">Partial Deposit</div>
         <div class="text-sm">Attachments will be released on payment. Deposit will be held until final invoice is submitted, or deposit is released early. by client.</div>
-        <Summary studio={@studio} line_items={@commission.line_items} show_options={false} />
+        <Summary line_items={@commission.line_items} show_options={false} />
         <div class="divider" />
         <BalanceBox
           id={@id <> "-balance-box"}

@@ -138,7 +138,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
             "name" => name,
             "description" => description,
             "amount" => amount,
-            "currency" => currency
           }
         },
         socket
@@ -148,7 +147,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
       |> LineItem.custom_changeset(%{
         name: name,
         description: description,
-        amount: Utils.moneyfy(amount, currency)
+        amount: Utils.moneyfy(amount, Commissions.commission_currency(socket.assigns.commission))
       })
       |> Map.put(:action, :insert)
 
@@ -163,7 +162,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
             "name" => name,
             "description" => description,
             "amount" => amount,
-            "currency" => currency
           }
         },
         socket
@@ -177,7 +175,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryEditor do
         %{
           name: name,
           description: description,
-          amount: Utils.moneyfy(amount, currency)
+          amount: Utils.moneyfy(amount, Commissions.commission_currency(socket.assigns.commission))
         },
         socket.assigns.current_user_member?
       )

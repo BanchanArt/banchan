@@ -4,12 +4,14 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   """
   use BanchanWeb, :component
 
+  alias Banchan.Commissions
+
   alias Surface.Components.Form
 
   alias BanchanWeb.Components.Collapse
-  alias BanchanWeb.Components.Form.{HiddenInput, Select, Submit, TextArea, TextInput}
+  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
 
-  prop studio, :struct
+  prop commission, :struct, from_context: :commission
   prop line_items, :list, required: true
   prop allow_edits, :boolean, default: false
   prop show_options, :boolean, default: true
@@ -100,21 +102,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                   <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
                   <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
                   <div class="flex flex-row gap-2 items-center py-2">
-                    {#case @studio.payment_currencies}
-                      {#match [_]}
-                        <div class="flex flex-basis-1/4">{Money.Currency.symbol(@studio.default_currency)}</div>
-                        <HiddenInput name={:currency} value={@studio.default_currency} />
-                      {#match _}
-                        <div class="flex-basis-1/4">
-                          <Select
-                            name={:currency}
-                            show_label={false}
-                            options={@studio.payment_currencies
-                            |> Enum.map(&{Money.Currency.symbol(&1), &1})}
-                            selected={@studio.default_currency}
-                          />
-                        </div>
-                    {/case}
+                    <div class="flex flex-basis-1/4">{Money.Currency.symbol(Commissions.commission_currency(@commission))}</div>
                     <div class="grow">
                       <TextInput name={:amount} show_label={false} opts={required: true} />
                     </div>
