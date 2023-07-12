@@ -848,6 +848,8 @@ defmodule Banchan.Commissions do
   # Transition changes studios can make
   def status_transition_allowed?(artist?, client?, from, to)
 
+  def status_transition_allowed?(true, _, from, to) when from == to, do: false
+
   def status_transition_allowed?(true, _, :submitted, :accepted), do: true
   def status_transition_allowed?(true, _, :submitted, :rejected), do: true
   def status_transition_allowed?(true, _, :accepted, :in_progress), do: true
@@ -867,6 +869,8 @@ defmodule Banchan.Commissions do
   # Transition changes clients can make
   def status_transition_allowed?(_, true, _, :approved), do: true
   def status_transition_allowed?(_, true, :withdrawn, :submitted), do: true
+  def status_transition_allowed?(_, true, :rejected, :withdrawn), do: false
+  def status_transition_allowed?(_, true, :approved, :withdrawn), do: false
   def status_transition_allowed?(_, true, _, :withdrawn), do: true
 
   # Everything else is a no from me, Bob.

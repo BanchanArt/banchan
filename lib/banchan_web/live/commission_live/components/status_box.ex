@@ -75,6 +75,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
     ~F"""
     <div class="flex flex-col gap-2 w-full">
       <Dropdown show_caret? class="btn" label={Commissions.Common.humanize_status(@commission.status)}>
+        <StatusItem click="update_status" status={:submitted} />
         <StatusItem click="update_status" status={:accepted} />
         <StatusItem click="update_status" status={:rejected} />
         <StatusItem click="update_status" status={:paused} />
