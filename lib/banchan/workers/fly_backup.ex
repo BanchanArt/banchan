@@ -61,9 +61,61 @@ defmodule Banchan.Workers.FlyBackup do
              ],
              stderr_to_stdout: true
            ),
+         {backup_list, 0} <-
+           System.cmd(
+             "fly",
+             [
+               "ssh",
+               "console",
+               "-a",
+               fly_app,
+               "-C",
+               "bash -c \"PGUSER=postgres PGPASSWORD=$OPERATOR_PASSWORD wal-g backup-list\""
+             ],
+             stderr_to_stdout: true
+           ),
+         {wal_show, 0} <-
+           System.cmd(
+             "fly",
+             [
+               "ssh",
+               "console",
+               "-a",
+               fly_app,
+               "-C",
+               "bash -c \"PGUSER=postgres PGPASSWORD=$OPERATOR_PASSWORD wal-g wal-show\""
+             ],
+             stderr_to_stdout: true
+           ),
+         {verify_integrity, 0} <-
+           System.cmd(
+             "fly",
+             [
+               "ssh",
+               "console",
+               "-a",
+               fly_app,
+               "-C",
+               "bash -c \"PGUSER=postgres PGPASSWORD=$OPERATOR_PASSWORD wal-g wal-verify integrity\""
+             ],
+             stderr_to_stdout: true
+           ),
+         {verify_timeline, 0} <-
+           System.cmd(
+             "fly",
+             [
+               "ssh",
+               "console",
+               "-a",
+               fly_app,
+               "-C",
+               "bash -c \"PGUSER=postgres PGPASSWORD=$OPERATOR_PASSWORD wal-g wal-verify timeline\""
+             ],
+             stderr_to_stdout: true
+           ),
          {:ok, _} <-
            File.rm_rf(config_path) do
-      {output, code}
+      {output <> backup_list <> wal_show <> verify_integrity <> verify_timeline, code}
     end
     |> case do
       {:error, error} ->
