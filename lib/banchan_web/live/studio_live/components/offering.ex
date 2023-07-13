@@ -377,7 +377,11 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     |> Enum.reduce(
       Money.new(0, currency),
       fn item, acc ->
-        Money.add(acc, item.price)
+        if is_nil(item.price) do
+          acc
+        else
+          Money.add(acc, item.price)
+        end
       end
     )
   end
