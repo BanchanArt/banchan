@@ -356,7 +356,8 @@ defmodule Banchan.Commissions do
             ul.id == ^upload_id and
             (artist.id == ^user.id or
                (c.client_id == ^user.id and
-                  ((i.required and i.status == :succeeded) or not i.required or is_nil(i.required)))),
+                  ((i.required and i.status in [:succeeded, :released]) or not i.required or
+                     is_nil(i.required)))),
         select: ea,
         select_merge: %{
           upload: ul,
@@ -513,7 +514,7 @@ defmodule Banchan.Commissions do
       where:
         e.commission_id == ^commission.id and
           (is_nil(i.required) or
-             not i.required or (i.required and i.status == :succeeded)),
+             not i.required or (i.required and i.status in [:succeeded, :released])),
       order_by: [desc: e.inserted_at],
       preload: [:upload, :thumbnail, :preview]
     )
