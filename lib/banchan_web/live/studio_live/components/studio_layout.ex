@@ -133,7 +133,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
             </div>
             <div :if={!Enum.empty?(@studio.tags)} class="my-2 flex flex-row flex-wrap gap-1">
               {#for tag <- @studio.tags}
-                <Tag tag={tag} />
+                <Tag tag={tag} type="studios" />
               {/for}
             </div>
             <Socials entity={@studio} class="my-4" />
