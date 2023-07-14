@@ -160,7 +160,11 @@ defmodule Banchan.Studios do
          code: :invalid_request_error,
          message: "Apple Pay is not currently supported in your country" <> country
        }} ->
-        Logger.error("Tried to enable Apple Pay for a country where it isn't supported" <> country <> " Account ID: #{account.id}.")
+        Logger.error(
+          "Tried to enable Apple Pay for a country where it isn't supported" <>
+            country <> " Account ID: #{account.id}."
+        )
+
         :ok
 
       {:error, error} ->
