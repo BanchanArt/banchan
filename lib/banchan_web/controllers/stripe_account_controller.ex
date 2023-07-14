@@ -13,7 +13,7 @@ defmodule BanchanWeb.StripeAccountController do
       if Studios.charges_enabled?(studio, true) do
         conn
         |> put_flash(:success, "Your account is already connected to Stripe.")
-        |> redirect(to: Routes.studio_shop_url(Endpoint, :show, studio.handle))
+        |> redirect(to: ~p"/studios/#{studio.handle}")
       else
         url =
           Studios.get_onboarding_link!(
