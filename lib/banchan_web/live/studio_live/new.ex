@@ -69,7 +69,7 @@ defmodule BanchanWeb.StudioLive.New do
 
     changeset =
       %Studio{}
-      |> Studio.profile_changeset(studio)
+      |> Studio.creation_changeset(studio)
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)
