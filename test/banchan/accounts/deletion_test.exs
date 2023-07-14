@@ -110,14 +110,22 @@ defmodule Banchan.AccountsTest.Deletion do
       refute Accounts.get_user_by_session_token(token2)
     end
 
-    test "does not require password for OAuth email-less users" do
+    test "does not require password for OAuth users" do
       %User{id: user_id} = user = unconfirmed_user_fixture()
 
-      {1, _} =
-        Repo.update_all(Ecto.Query.from(u in User, where: u.id == ^user.id), set: [email: nil])
+      [
+        %{provider: "discord", attrs: [discord_uid: "discord-user-id"]},
+        %{provider: "google", attrs: [google_uid: "google-user-id"]}
+      ]
+      |> Enum.each(fn test_variant ->
+        {1, _} =
+          Repo.update_all(Ecto.Query.from(u in User, where: u.id == ^user.id),
+            set: test_variant[:attrs]
+          )
 
-      assert {:ok, %User{id: ^user_id, deactivated_at: %NaiveDateTime{}}} =
-               Accounts.deactivate_user(user, user, nil)
+        assert {:ok, %User{id: ^user_id, deactivated_at: %NaiveDateTime{}}} =
+                 Accounts.deactivate_user(user, user, nil)
+      end)
     end
   end
 
