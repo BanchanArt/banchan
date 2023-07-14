@@ -138,7 +138,7 @@ defmodule Banchan.Studios do
         }
       })
 
-    set_up_apple_pay!(acct)
+    set_up_apple_pay(acct)
 
     acct.id
   end
@@ -146,14 +146,27 @@ defmodule Banchan.Studios do
   @doc """
   Sets up Apple Pay for a connected account by setting its Apple Pay domain name.
   """
-  def set_up_apple_pay!(account) do
-    {:ok, _} =
-      stripe_mod().create_apple_pay_domain(
-        account.id,
-        String.replace(@host, "localhost", "banchan.art")
-      )
+  def set_up_apple_pay(account) do
+    case stripe_mod().create_apple_pay_domain(
+           account.id,
+           String.replace(@host, "localhost", "banchan.art")
+         ) do
+      {:ok, _} ->
+        :ok
 
-    :ok
+      {:error,
+       %Stripe.Error{
+         source: :stripe,
+         code: :invalid_request_error,
+         message: "Apple Pay is not currently supported in your country" <> country
+       }} ->
+        Logger.error("Tried to enable Apple Pay for a country where it isn't supported" <> country <> " Account ID: #{account.id}.")
+        :ok
+
+      {:error, error} ->
+        Logger.error("Error enabling Apple Pay for account #{account.id}: #{inspect(error)}")
+        {:error, error}
+    end
   end
 
   @doc """
