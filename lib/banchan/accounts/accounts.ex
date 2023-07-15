@@ -1660,9 +1660,9 @@ defmodule Banchan.Accounts do
         user
         |> User.deactivate_changeset()
         |> then(fn changeset ->
-          # NB(@zkat): Users without emails are OAuth users. They also
-          # do not have passwords. So we just skip the password check.
-          if user.email && !admin?(actor) do
+          # NB(@serra-allgood): OAuth users do not have meaningful passwords.
+          # So we just skip the password check.
+          if !oauth_user?(user) && !admin?(actor) do
             User.validate_current_password(changeset, password)
           else
             changeset
@@ -1725,5 +1725,12 @@ defmodule Banchan.Accounts do
         end
       end)
     end)
+  end
+
+  @doc """
+  Returns where user is from OAuth registration
+  """
+  def oauth_user?(%User{} = user) do
+    !is_nil(user.discord_uid) || !is_nil(user.google_uid)
   end
 end

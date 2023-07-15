@@ -591,7 +591,7 @@ defmodule BanchanWeb.SettingsLive do
           </p>
           <p class="py-2 font-semibold">Are you sure?</p>
 
-          {#if @current_user.email}
+          {#if !Accounts.oauth_user?(@current_user)}
             <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
           {/if}
           <Submit class="w-full btn-error" label="Confirm" />
