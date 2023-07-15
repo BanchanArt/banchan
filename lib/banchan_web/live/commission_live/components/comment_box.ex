@@ -112,7 +112,12 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
   def render(assigns) do
     ~F"""
     <div id={@id} class="message-box">
-      <Form for={@changeset} change="change" submit="add_comment" opts={id: @id <> "_form", "phx-target": @myself}>
+      <Form
+        for={@changeset}
+        change="change"
+        submit="add_comment"
+        opts={id: @id <> "_form", "phx-target": @myself}
+      >
         <div class="block space-y-4">
           <MarkdownInput
             id={@id <> "_markdown_input"}
