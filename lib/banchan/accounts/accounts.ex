@@ -400,19 +400,39 @@ defmodule Banchan.Accounts do
     {:error, :unsupported}
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp create_user_from_discord(%Auth{} = auth) do
     pw = random_password()
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+    username = auth.extra.raw_info.user["username"]
+    discriminator = auth.extra.raw_info.user["discriminator"]
+    legacy? = discriminator not in ["0", "0000"]
 
     attrs = %{
       discord_uid: auth.uid,
       email: auth.info.email,
       handle:
-        auth.extra.raw_info.user["username"] <> "_" <> auth.extra.raw_info.user["discriminator"],
+        username <>
+          if legacy? do
+            "_" <> discriminator
+          else
+            ""
+          end,
       name:
-        auth.extra.raw_info.user["username"] <> "#" <> auth.extra.raw_info.user["discriminator"],
+        username <>
+          if legacy? do
+            "#" <> discriminator
+          else
+            ""
+          end,
       discord_handle:
-        auth.extra.raw_info.user["username"] <> "#" <> auth.extra.raw_info.user["discriminator"],
+        username <>
+          if legacy? do
+            "#" <> discriminator
+          else
+            ""
+          end,
       password: pw,
       password_confirmation: pw,
       confirmed_at: now
@@ -429,7 +449,7 @@ defmodule Banchan.Accounts do
         |> Enum.reduce(attrs, fn {field, _}, acc ->
           case field do
             :handle ->
-              Map.put(acc, :handle, "user#{:rand.uniform(100_000_000)}")
+              Map.put(acc, :handle, "#{username}#{:rand.uniform(100_000_000)}")
 
             :name ->
               Map.put(
