@@ -284,7 +284,7 @@ defmodule Banchan.AccountsTest.Settings do
                  "must be a valid Twitter handle, without the @ sign."
                ],
                discord_handle: [
-                 "must be a valid Discord handle, including the number (myname#1234)."
+                 "must be a valid Discord handle."
                ]
              } == errors_on(changeset)
     end
