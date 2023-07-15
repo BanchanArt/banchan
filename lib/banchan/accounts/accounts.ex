@@ -1731,6 +1731,6 @@ defmodule Banchan.Accounts do
   Returns where user is from OAuth registration
   """
   def oauth_user?(%User{} = user) do
-    !!user.discord_uid || !!user.google_uid
+    !is_nil(user.discord_uid) || !is_nil(user.google_uid)
   end
 end
