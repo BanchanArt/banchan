@@ -14,7 +14,12 @@ defmodule BanchanWeb.Components.Icon do
 
   def render(assigns) do
     ~F"""
-    <div class={"inline flex flex-row gap-#{@gap}", @class}>
+    <style>
+      bc-icon {
+      @apply inline flex flex-row;
+      }
+    </style>
+    <bc-icon class={"gap-#{@gap}", @class}>
       <i
         id={for _ <- 1..10,
             into: "",
@@ -22,7 +27,7 @@ defmodule BanchanWeb.Components.Icon do
         :hook="Icon"
         data-lucide={@name}
       /><#slot />
-    </div>
+    </bc-icon>
     """
   end
 end

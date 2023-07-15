@@ -5,6 +5,8 @@ defmodule BanchanWeb.Components.Dropdown do
   """
   use BanchanWeb, :component
 
+  alias BanchanWeb.Components.Icon
+
   prop class, :css_class
   prop label, :string, required: true
   prop show_caret?, :boolean
@@ -13,15 +15,17 @@ defmodule BanchanWeb.Components.Dropdown do
 
   def render(assigns) do
     ~F"""
-    <details class="dropdown">
-      <summary class={@class}>
+    <bc-dropdown class="dropdown">
+      <label tabindex="0" class={@class}>
         {@label}
-        <i class="fas fa-chevron-down ml-2" :if={@show_caret?} />
-      </summary>
-      <ul class="shadow menu dropdown-content z-[1] bg-base-200 rounded-box w-52">
+        {#if @show_caret?}
+          <Icon name="chevron-down" />
+        {/if}
+      </label>
+      <ul tabindex="0" class="dropdown-content menu shadow z-[1] bg-base-200 rounded-box w-52">
         <#slot />
       </ul>
-    </details>
+    </bc-dropdown>
     """
   end
 end
