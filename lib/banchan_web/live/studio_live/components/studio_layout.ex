@@ -154,6 +154,9 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 </LiveRedirect>
               {/if}
             </div>
+            <p class="pt-4">
+              {@studio.about}
+            </p>
           </div>
           <div class="overflow-auto min-w-screen">
             <nav class="tabs px-2 flex flex-nowrap">
@@ -162,12 +165,6 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 tab_name={:shop}
                 current_tab={@tab}
                 to={Routes.studio_shop_path(Endpoint, :show, @studio.handle)}
-              />
-              <TabButton
-                label="About"
-                tab_name={:about}
-                current_tab={@tab}
-                to={Routes.studio_about_path(Endpoint, :show, @studio.handle)}
               />
               <TabButton
                 label="Portfolio"
