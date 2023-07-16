@@ -449,7 +449,7 @@ defmodule Banchan.Accounts do
         |> Enum.reduce(attrs, fn {field, _}, acc ->
           case field do
             :handle ->
-              Map.put(acc, :handle, "#{username}#{:rand.uniform(100_000_000)}")
+              Map.put(acc, :handle, "user#{:rand.uniform(100_000_000)}")
 
             :name ->
               Map.put(
