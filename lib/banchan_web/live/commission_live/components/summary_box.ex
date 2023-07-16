@@ -458,7 +458,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           {/if}
         {/if}
         {#if !Commissions.commission_open?(@commission)}
-          <div>This commission is closed. You can't take any further actions on it unless it's reopened.</div>
+          <div>This commission is closed. You can't take any further actions on it.</div>
         {#elseif !Commissions.commission_active?(@commission)}
           <div>Only open and accepted commissions can be invoiced. Accept the commission to continue.</div>
         {#elseif @existing_open}
