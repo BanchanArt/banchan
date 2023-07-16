@@ -217,12 +217,12 @@ defmodule BanchanWeb.Components.Notifications do
             {/if}
           </span>
         {/if}
-        <button type="button" :on-click="toggle_menu" class="btn btn-circle btn-ghost">
+        <button type="button" :on-click="toggle_menu" class="btn btn-circle">
           <i class="fas fa-bell" />
         </button>
       </div>
       {#if @open}
-        <div class="translate-x-px translate-y-px origin-top right-0 absolute menu rounded-box shadow-2xl bg-base-300 p-2 w-80 z-30 divide-y-2 divide-neutral-content divide-opacity-10 text-base-content">
+        <div class="translate-x-px translate-y-px origin-top right-0 absolute menu rounded-box shadow-2xl bg-base-200 p-2 w-80 z-30 divide-y-2 divide-neutral-content divide-opacity-10 text-base-content">
           {#if !@notifications || Enum.empty?(@notifications.entries)}
             <div class="px-8 m-2">No notifications</div>
           {#else}
