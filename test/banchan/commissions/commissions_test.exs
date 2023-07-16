@@ -558,7 +558,7 @@ defmodule Banchan.CommissionsTest do
 
       assert [] == Notifications.unread_notifications(client).entries
 
-      assert [%{short_body: "An invoice deposit has been released."}] =
+      assert [%{short_body: "An invoice deposit has been released to the studio."}] =
                Notifications.unread_notifications(artist).entries
 
       # Can't re-release once it's been released.
