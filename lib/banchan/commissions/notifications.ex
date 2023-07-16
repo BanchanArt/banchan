@@ -228,7 +228,7 @@ defmodule Banchan.Commissions.Notifications do
   end
 
   defp new_event_notification_body(%Event{type: :payment_processed, amount: amount}) do
-    "A payment for #{Money.to_string(amount)} (including tips) has been successfully processed. It will be available for payout when the commission is completed and accepted."
+    "A payment for #{Money.to_string(amount)} has been successfully processed."
   end
 
   defp new_event_notification_body(%Event{type: :refund_processed, amount: amount}) do
@@ -244,7 +244,7 @@ defmodule Banchan.Commissions.Notifications do
   end
 
   defp new_event_notification_body(%Event{type: :invoice_released}) do
-    "An invoice deposit has been released."
+    "An invoice deposit has been released to the studio."
   end
 
   @doc """
