@@ -309,7 +309,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           id={@id <> "-balance-box"}
           deposited={@deposited}
           line_items={@commission.line_items}
-          invoiced
+          invoiced={@remaining}
         />
         <div class="divider" />
         <Form

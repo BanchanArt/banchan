@@ -51,7 +51,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
            final: socket.assigns.event.invoice.final,
            amount: socket.assigns.event.invoice.amount
          }
-         |> Invoice.tip_changeset(%{})
+         |> Invoice.tip_changeset(%{
+           "tip" => Money.new(0, socket.assigns.event.invoice.amount.currency)
+         })
      )}
   end
 
@@ -268,7 +270,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
           id={@id <> "-balance-box"}
           line_items={@event.invoice.line_items}
           deposited={@event.invoice.deposited}
-          invoiced
+          invoiced={@event.invoice.amount}
           tipped={@event.invoice.final && @event.invoice.tip}
         />
         <div class="divider" />

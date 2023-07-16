@@ -13,11 +13,7 @@ defmodule BanchanWeb.Email.Commissions do
 
     default_currency = estimate.currency
 
-    deposited = assigns.deposited || Money.new(0, default_currency)
-
     tipped = assigns.tipped || Money.new(0, default_currency)
-
-    remaining = Money.subtract(estimate, deposited)
 
     ~F"""
     <h2>Banchan Art Payment Receipt</h2>
@@ -36,25 +32,9 @@ defmodule BanchanWeb.Email.Commissions do
           <td>{Money.to_string(item.amount)}</td>
         </tr>
       {/for}
-      {#if !is_nil(@invoice.total_charged)}
-        <tr>
-          <td colspan="2">Invoice Charged</td>
-          <td>
-            {Money.to_string(@invoice.total_charged)}
-          </td>
-        </tr>
-      {/if}
       <tr>
-        <td colspan="2">Paid to Date</td>
-        <td>{Money.to_string(deposited)}</td>
-      </tr>
-      <tr>
-        <td colspan="2">Quote</td>
+        <td colspan="2">Total Invoiced</td>
         <td>{Money.to_string(estimate)}</td>
-      </tr>
-      <tr>
-        <td colspan="2">Balance</td>
-        <td>{Money.to_string(remaining)}</td>
       </tr>
       <tr>
         <td colspan="2">Additional Tip</td>
@@ -69,11 +49,7 @@ defmodule BanchanWeb.Email.Commissions do
 
     default_currency = estimate.currency
 
-    deposited = assigns.deposited || Money.new(0, default_currency)
-
     tipped = assigns.tipped || Money.new(0, default_currency)
-
-    remaining = Money.subtract(estimate, deposited)
 
     """
     Banchan Art Payment Receipt
@@ -90,12 +66,7 @@ defmodule BanchanWeb.Email.Commissions do
       * #{item.name} - #{Money.to_string(item.amount)}
         #{item.description}
       """ end)}
-    #{if !is_nil(assigns.invoice.total_charged) do
-      "Invoice Charged: #{Money.to_string(assigns.invoice.total_charged)}"
-    end}
-    Paid to Date: #{Money.to_string(deposited)}
-    Quote: #{Money.to_string(estimate)}
-    Balance: #{Money.to_string(remaining)}
+    Total Invoiced: #{Money.to_string(estimate)}
     Additional Tip: #{Money.to_string(tipped)}
     """
   end

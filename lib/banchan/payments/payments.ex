@@ -806,7 +806,11 @@ defmodule Banchan.Payments do
       {:ok, _} = release_all_deposits(client, commission)
 
       if client.email do
-        Notifications.send_receipt(invoice, client, commission)
+        Notifications.send_receipt(
+          invoice |> Repo.reload(),
+          client,
+          commission |> Repo.reload() |> Repo.preload(line_items: [])
+        )
       end
 
       send_event_update!(event.id, actor)
@@ -999,7 +1003,11 @@ defmodule Banchan.Payments do
         end
 
         if client.email do
-          Notifications.send_receipt(invoice, client, commission)
+          Notifications.send_receipt(
+            invoice |> Repo.reload(),
+            client,
+            commission |> Repo.reload() |> Repo.preload(line_items: [])
+          )
         end
 
         send_event_update!(invoice.event_id)

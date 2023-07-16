@@ -216,8 +216,7 @@ defmodule Banchan.Payments.Notifications do
       :receipt,
       invoice: invoice |> Repo.preload([:event]),
       commission: commission,
-      deposited: invoice.deposited,
-      tipped: Commissions.tipped_amount(client, commission, true)
+      tipped: Commissions.tipped_amount(client, commission, false)
     )
     |> Mailer.deliver()
   end

@@ -9,7 +9,7 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
 
   prop line_items, :list, required: true
   prop deposited, :struct
-  prop invoiced, :boolean, default: false
+  prop invoiced, :struct
   prop tipped, :struct
 
   data estimate_amt, :list
@@ -21,15 +21,13 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
 
     deposited = assigns.deposited || Money.new(0, estimate.currency)
 
-    remaining = Money.subtract(estimate, deposited)
-
     {:ok,
      socket
      |> assign(assigns)
      |> assign(
        estimate_amt: estimate,
        deposited_amt: deposited,
-       remaining_amt: remaining
+       remaining_amt: assigns.invoiced || Money.subtract(estimate, deposited)
      )}
   end
 
