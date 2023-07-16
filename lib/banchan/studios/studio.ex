@@ -85,7 +85,10 @@ defmodule Banchan.Studios.Studio do
       :payment_currencies
     ])
     |> validate_required([:name, :handle, :country, :default_currency, :payment_currencies])
+    |> validate_length(:name, min: 3, max: 32)
+    |> validate_length(:handle, min: 3, max: 16)
     |> validate_markdown(:about)
+    |> validate_length(:about, max: 500)
     |> validate_default_currency(:default_currency, :payment_currencies)
     |> validate_handle(:handle)
   end
@@ -131,7 +134,7 @@ defmodule Banchan.Studios.Studio do
     |> validate_markdown(:about)
     |> validate_length(:name, min: 3, max: 32)
     |> validate_length(:handle, min: 3, max: 16)
-    |> validate_length(:about, max: 1500)
+    |> validate_length(:about, max: 500)
     |> validate_tags()
     |> validate_handle(:handle)
     |> foreign_key_constraint(:card_img_id)
