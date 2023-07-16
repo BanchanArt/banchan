@@ -4,6 +4,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
   """
   use BanchanWeb, :live_component
 
+  alias Banchan.Accounts
   alias Banchan.Studios
 
   alias Surface.Components.LiveRedirect
@@ -87,20 +88,20 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
               <div class="font-medium text-2xl md:text-3xl grow">
                 {@studio.name}
               </div>
-              {#if @current_user}
+              {#if @current_user && (Accounts.mod?(@current_user) || !@current_user_member?)}
                 <div class="dropdown dropdown-end">
                   <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
                     <i class="fas fa-ellipsis-vertical" />
                   </label>
                   <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
-                    {#if :admin in @current_user.roles || :mod in @current_user.roles}
+                    {#if Accounts.mod?(@current_user)}
                       <li>
                         <LiveRedirect to={Routes.studio_moderation_path(Endpoint, :edit, @studio.handle)}>
                           <i class="fas fa-gavel" /> Moderation
                         </LiveRedirect>
                       </li>
                     {/if}
-                    {#if :admin in @current_user.roles}
+                    {#if Accounts.admin?(@current_user)}
                       <li>
                         <FeaturedToggle id="featured-toggle" current_user={@current_user} studio={@studio} />
                       </li>
@@ -113,7 +114,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                   </ul>
                 </div>
               {/if}
-              {#if @current_user}
+              {#if @current_user && !@current_user_member?}
                 <Button click="toggle_follow" class="ml-auto btn-sm btn-outline rounded-full my-2 px-2 py-0">
                   {if @user_following? do
                     "Unfollow"
