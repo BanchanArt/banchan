@@ -51,9 +51,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
            final: socket.assigns.event.invoice.final,
            amount: socket.assigns.event.invoice.amount
          }
-         |> Invoice.tip_changeset(%{
-           "tip" => Utils.moneyfy(0, socket.assigns.event.invoice.amount.currency)
-         })
+         |> Invoice.tip_changeset(%{})
      )}
   end
 
@@ -65,7 +63,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         final: socket.assigns.event.invoice.final
       }
       |> Invoice.tip_changeset(%{
-        "tip" => Utils.moneyfy(tip, socket.assigns.event.invoice.amount.currency)
+        "tip" => tip && Utils.moneyfy(tip, socket.assigns.event.invoice.amount.currency)
       })
       |> Map.put(:action, :insert)
 
@@ -82,7 +80,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
     changeset =
       %Invoice{final: socket.assigns.event.invoice.final}
       |> Invoice.tip_changeset(%{
-        "tip" => Utils.moneyfy(tip, socket.assigns.event.invoice.amount.currency)
+        "tip" => tip && Utils.moneyfy(tip, socket.assigns.event.invoice.amount.currency)
       })
       |> Map.put(:action, :insert)
 
@@ -92,7 +90,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
         socket.assigns.event,
         socket.assigns.commission,
         replace_fragment(socket.assigns.uri, socket.assigns.event),
-        Utils.moneyfy(tip, socket.assigns.event.invoice.amount.currency)
+        tip && Utils.moneyfy(tip, socket.assigns.event.invoice.amount.currency)
       )
       |> case do
         {:ok, :no_payment_necessary} ->
@@ -286,9 +284,16 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 <div :if={@event.invoice.final} class="stat-desc">Please consider adding a tip!</div>
                 <Form for={@changeset} class="stat-actions flex flex-col gap-2" change="change" submit="submit">
                   {#if @event.invoice.final}
-                    <div class="flex flex-row gap-2">
+                    <div class="flex flex-row items-center gap-2">
+                      Tip:
                       {Money.Currency.symbol(@event.invoice.amount)}
-                      <TextInput name={:tip} show_label={false} opts={placeholder: "Tip"} />
+                      <TextInput name={:tip} show_label={false} opts={placeholder: "optional"} />
+                      <span>({estimate = Commissions.line_item_estimate(@commission.line_items)
+
+                        Float.round(
+                          (Ecto.Changeset.get_field(@changeset, :tip) || Money.new(0, estimate.currency)).amount /
+                            estimate.amount * 100
+                        )}%)</span>
                     </div>
                   {#else}
                     <HiddenInput name={:tip} value="0" />
