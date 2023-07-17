@@ -452,7 +452,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
               <p>
                 You can't release any deposits until the total released deposits would
                 add up to at least {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))
-                |> Money.to_string()}.
+                |> Payments.print_money()}.
               </p>
             {/if}
           {/if}

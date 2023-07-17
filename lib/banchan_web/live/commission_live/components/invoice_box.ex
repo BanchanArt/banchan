@@ -282,7 +282,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
             {#match :pending}
               {#if @current_user.id == @commission.client_id}
                 <div class="stat-title">Payment Requested</div>
-                <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+                <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
                 <div :if={@event.invoice.final} class="stat-desc">Please consider adding a tip!</div>
                 <Form for={@changeset} class="stat-actions flex flex-col gap-2" change="change" submit="submit">
                   {#if @event.invoice.final}
@@ -318,7 +318,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 </Form>
               {#else}
                 <div class="stat-title">Payment Requested</div>
-                <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+                <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
                 <div class="stat-desc">Waiting for Payment</div>
                 {#if @current_user_member?}
                   <div class="stat-actions">
@@ -333,9 +333,9 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               {/if}
             {#match :submitted}
               <div class="stat-title">Payment in Process</div>
-              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+              <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                <div class="stat-desc">Tip: +{Payments.print_money(@event.invoice.tip)}
                   ({estimate = Commissions.line_item_estimate(@commission.line_items)
                   Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
@@ -356,13 +356,13 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               </div>
             {#match :expired}
               <div class="stat-title text-warning">Payment session expired.</div>
-              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+              <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
               <div class="stat-desc">You'll need to start a new invoice.</div>
             {#match :succeeded}
               <div class="stat-title">Payment Succeeded</div>
-              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+              <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                <div class="stat-desc">Tip: +{Payments.print_money(@event.invoice.tip)}
                   ({estimate = Commissions.line_item_estimate(@commission.line_items)
                   Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
@@ -386,17 +386,17 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               </div>
             {#match :released}
               <div class="stat-title">Payment Released to Studio</div>
-              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+              <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                <div class="stat-desc">Tip: +{Payments.print_money(@event.invoice.tip)}
                   ({estimate = Commissions.line_item_estimate(@commission.line_items)
                   Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
             {#match :refunded}
               <div class="stat-title text-warning">Payment Refunded</div>
-              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+              <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Money.to_string(@event.invoice.tip)}
+                <div class="stat-desc">Tip: +{Payments.print_money(@event.invoice.tip)}
                   ({estimate = Commissions.line_item_estimate(@commission.line_items)
                   Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
               {/if}
@@ -408,7 +408,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                 Invoice for the event. If it's anything but a quick flash,
                 there's probably a bug. --}
               <div class="stat-title text-warning">Payment Refunded</div>
-              <div class="stat-value">{Money.to_string(@event.invoice.amount)}</div>
+              <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
               <div class="stat-desc">Please wait...</div>
           {/case}
         </div>

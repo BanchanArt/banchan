@@ -5,6 +5,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   use BanchanWeb, :component
 
   alias Banchan.Commissions
+  alias Banchan.Payments
 
   alias Surface.Components.Form
 
@@ -49,7 +50,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
               <div class="font-medium text-sm">{item.name}</div>
               <div class="text-xs">{item.description}</div>
             </div>
-            <div class="p-2 font-medium text-sm">{Money.to_string(item.amount)}</div>
+            <div class="p-2 font-medium text-sm">{Payments.print_money(item.amount)}</div>
           </li>
         {/for}
       </ul>
@@ -77,7 +78,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                   <div class="font-medium text-sm">{option.name}</div>
                   <div class="text-xs">{option.description}</div>
                 </div>
-                <div class="p-2 text-sm font-medium">{Money.to_string(option.price)}</div>
+                <div class="p-2 text-sm font-medium">{Payments.print_money(option.price)}</div>
               </li>
             {/if}
           {/for}

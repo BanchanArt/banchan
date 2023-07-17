@@ -5,6 +5,7 @@ defmodule BanchanWeb.Email.Commissions do
   use BanchanWeb, :html
 
   alias Banchan.Commissions
+  alias Banchan.Payments
 
   alias BanchanWeb.Components.Markdown
 
@@ -29,16 +30,16 @@ defmodule BanchanWeb.Email.Commissions do
         <tr>
           <td>{item.name}</td>
           <td>{item.description}</td>
-          <td>{Money.to_string(item.amount)}</td>
+          <td>{Payments.print_money(item.amount)}</td>
         </tr>
       {/for}
       <tr>
         <td colspan="2">Total Invoiced</td>
-        <td>{Money.to_string(estimate)}</td>
+        <td>{Payments.print_money(estimate)}</td>
       </tr>
       <tr>
         <td colspan="2">Additional Tip</td>
-        <td>{Money.to_string(tipped)}</td>
+        <td>{Payments.print_money(tipped)}</td>
       </tr>
     </table>
     """
@@ -63,11 +64,11 @@ defmodule BanchanWeb.Email.Commissions do
     Line Items:
 
     #{assigns.invoice.line_items |> Enum.map_join("\n", fn item -> """
-      * #{item.name} - #{Money.to_string(item.amount)}
+      * #{item.name} - #{Payments.print_money(item.amount)}
         #{item.description}
       """ end)}
-    Total Invoiced: #{Money.to_string(estimate)}
-    Additional Tip: #{Money.to_string(tipped)}
+    Total Invoiced: #{Payments.print_money(estimate)}
+    Additional Tip: #{Payments.print_money(tipped)}
     """
   end
 end

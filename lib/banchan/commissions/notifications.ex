@@ -8,6 +8,7 @@ defmodule Banchan.Commissions.Notifications do
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, CommissionSubscription, Common, Event}
   alias Banchan.Notifications
+  alias Banchan.Payments
   alias Banchan.Repo
   alias Banchan.Studios
   alias Banchan.Studios.{Studio, StudioSubscription}
@@ -220,19 +221,19 @@ defmodule Banchan.Commissions.Notifications do
   end
 
   defp new_event_notification_body(%Event{type: :line_item_added, amount: amount, text: text}) do
-    "A new line item has been added to this commission:\n\n#{text}: #{Money.to_string(amount)}"
+    "A new line item has been added to this commission:\n\n#{text}: #{Payments.print_money(amount)}"
   end
 
   defp new_event_notification_body(%Event{type: :line_item_removed, amount: amount, text: text}) do
-    "A line item has been removed from this commission:\n\n#{text}: #{Money.to_string(amount)}"
+    "A line item has been removed from this commission:\n\n#{text}: #{Payments.print_money(amount)}"
   end
 
   defp new_event_notification_body(%Event{type: :payment_processed, amount: amount}) do
-    "A payment for #{Money.to_string(amount)} has been successfully processed."
+    "A payment for #{Payments.print_money(amount)} has been successfully processed."
   end
 
   defp new_event_notification_body(%Event{type: :refund_processed, amount: amount}) do
-    "A refund for #{Money.to_string(amount)} has been issued successfully. Funds should clear in 5-10 days."
+    "A refund for #{Payments.print_money(amount)} has been issued successfully. Funds should clear in 5-10 days."
   end
 
   defp new_event_notification_body(%Event{type: :status, status: status}) do

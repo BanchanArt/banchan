@@ -8,6 +8,7 @@ defmodule Banchan.Payments.Notifications do
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, Event}
   alias Banchan.Notifications
+  alias Banchan.Payments
   alias Banchan.Payments.{Invoice, Payout}
   alias Banchan.Repo
   alias Banchan.Workers.Mailer
@@ -47,7 +48,7 @@ defmodule Banchan.Payments.Notifications do
             payout |> Repo.reload() |> Repo.preload(studio: [artists: [:notification_settings]])
 
           body =
-            "A payout for #{Money.to_string(payout.amount)} is on its way to your bank account."
+            "A payout for #{Payments.print_money(payout.amount)} is on its way to your bank account."
 
           url = url(~p"/studios/#{payout.studio.handle}/payouts/#{payout.public_id}")
 

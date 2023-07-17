@@ -11,6 +11,7 @@ defmodule Banchan.Payments do
   alias Banchan.Accounts.User
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, Event}
+  alias Banchan.Payments
   alias Banchan.Payments.{Forex, Invoice, Notifications, Payout}
   alias Banchan.Repo
   alias Banchan.Studios
@@ -514,7 +515,7 @@ defmodule Banchan.Payments do
               # NB(@zkat): This should _generally_ not happen, but may as well
               # check for it.
               Logger.error(
-                "Invoice #{invoice.id} has a total of at least #{Money.add(invoice_total, total) |> Money.to_string()}, but the available balance is only #{Money.to_string(avail)}"
+                "Invoice #{invoice.id} has a total of at least #{Money.add(invoice_total, total) |> Payments.print_money()}, but the available balance is only #{Payments.print_money(avail)}"
               )
 
               {:halt, acc}
@@ -1628,6 +1629,51 @@ defmodule Banchan.Payments do
   end
 
   ## Misc utilities
+
+  @doc """
+  Formats money with improved semantics over the default Money.to_string/2.
+  For example, differentiating between different kinds of dollars that would
+  usually just use `$` as a symbol.
+  """
+  def print_money(%Money{} = money) do
+    currency = Money.Currency.get(money)
+
+    case currency.symbol do
+      "$" -> "#{dollar_prefix(money.currency)}$#{Money.to_string(money, symbol: false)}"
+      "" -> "#{blank_prefix(money.currency)}#{Money.to_string(money, symbol: false)}"
+      _ -> Money.to_string(money)
+    end
+  end
+
+  defp dollar_prefix(:USD), do: ""
+  defp dollar_prefix(:AUD), do: "AU"
+  defp dollar_prefix(:ARS), do: "Arg"
+  defp dollar_prefix(:BBD), do: "BB"
+  defp dollar_prefix(:BND), do: "B"
+  defp dollar_prefix(:BSD), do: "B"
+  defp dollar_prefix(:CVE), do: "Esc"
+  defp dollar_prefix(:KYD), do: "KY"
+  defp dollar_prefix(:CLP), do: "CLP"
+  defp dollar_prefix(:COP), do: "COP"
+  defp dollar_prefix(:XCD), do: "EC"
+  defp dollar_prefix(:FJD), do: "FJ"
+  defp dollar_prefix(:GYD), do: "GY"
+  defp dollar_prefix(:HKD), do: "HK"
+  defp dollar_prefix(:LRD), do: "LD"
+  defp dollar_prefix(:MXN), do: "Mex"
+  defp dollar_prefix(:NZD), do: "NZ"
+  defp dollar_prefix(:NAD), do: "N"
+  defp dollar_prefix(:SBD), do: "SI"
+  defp dollar_prefix(:SRD), do: "Sr"
+  defp dollar_prefix(_), do: ""
+
+  defp blank_prefix(:XOF), do: "F.CFA "
+  defp blank_prefix(:XPF), do: "F.CFA "
+  defp blank_prefix(:HTG), do: "G "
+  defp blank_prefix(:LSL), do: "R "
+  defp blank_prefix(:RWF), do: "R₣‎"
+  defp blank_prefix(:TJS), do: "SM "
+  defp blank_prefix(_), do: ""
 
   defp stripe_mod do
     Application.get_env(:banchan, :stripe_mod)

@@ -6,6 +6,7 @@ defmodule BanchanWeb.StudioLive.Components.PayoutRow do
 
   alias Surface.Components.LivePatch
 
+  alias Banchan.Payments
   alias Banchan.Payments.Payout
 
   prop studio, :struct, required: true
@@ -26,7 +27,7 @@ defmodule BanchanWeb.StudioLive.Components.PayoutRow do
       <LivePatch class="grow" to={payout_url}>
         <div>
           <div class="amount text-xl flex flex-col">
-            <span>{Money.to_string(@payout.amount)}</span>
+            <span>{Payments.print_money(@payout.amount)}</span>
             <div class="badge badge-primary badge-sm cursor-default">{Payout.humanize_status(@payout.status)}</div>
           </div>
           <div

@@ -4,6 +4,8 @@ defmodule Banchan.Validators do
   """
   import Ecto.Changeset
 
+  alias Banchan.Payments
+
   def validate_handle(changeset, field) do
     changeset
     |> validate_required(field)
@@ -36,7 +38,7 @@ defmodule Banchan.Validators do
       _, %Money{} when not is_nil(max) ->
         [
           {field,
-           "Must be an amount between #{Money.new(0, max.currency) |> Money.to_string()} and #{Money.to_string(max)}."}
+           "Must be an amount between #{Money.new(0, max.currency) |> Payments.print_money()} and #{Payments.print_money(max)}."}
         ]
 
       _, "" ->

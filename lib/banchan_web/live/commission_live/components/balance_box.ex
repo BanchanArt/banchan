@@ -6,6 +6,7 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
   use BanchanWeb, :live_component
 
   alias Banchan.Commissions
+  alias Banchan.Payments
 
   prop line_items, :list, required: true
   prop deposited, :struct
@@ -39,20 +40,20 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
           <div class="flex flex-row items-center">
             <div class="font-medium grow">Subtotal:</div>
             <div class="text-sm font-medium">
-              {Money.to_string(@estimate_amt)}
+              {Payments.print_money(@estimate_amt)}
             </div>
           </div>
           <div class="flex flex-row items-center">
             <div class="font-medium grow">Deposited:</div>
             <div class="text-sm font-medium">
-              {Money.to_string(@deposited_amt)}
+              {Payments.print_money(@deposited_amt)}
             </div>
           </div>
           {#if @tipped}
             <div class="flex flex-row items-center">
               <div class="font-medium grow">Tipped:</div>
               <div class="text-sm font-medium">
-                {Money.to_string(@tipped)}
+                {Payments.print_money(@tipped)}
               </div>
             </div>
           {/if}
@@ -69,7 +70,7 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
               "text-primary": @remaining_amt.amount > 0,
               "text-error": @remaining_amt.amount < 0
             }>
-              {Money.to_string(@remaining_amt)}
+              {Payments.print_money(@remaining_amt)}
             </div>
           </div>
         </div>
@@ -77,7 +78,7 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
         <div class="px-2 flex flex-row">
           <div class="font-medium grow">Subtotal:</div>
           <div class="text-sm font-medium">
-            {Money.to_string(@estimate_amt)}
+            {Payments.print_money(@estimate_amt)}
           </div>
         </div>
       {/if}

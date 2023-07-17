@@ -4,6 +4,8 @@ defmodule BanchanWeb.Components.OfferingCard do
   """
   use BanchanWeb, :component
 
+  alias Banchan.Payments
+
   alias BanchanWeb.Components.{Card, OfferingCardImg}
 
   prop current_user, :any, from_context: :current_user
@@ -64,7 +66,7 @@ defmodule BanchanWeb.Components.OfferingCard do
             {#if is_nil(@base_price)}
               <span class="font-semibold cursor-default">Inquire</span>
             {#else}
-              <span class="font-semibold cursor-default">{Money.to_string(@base_price)}</span>
+              <span class="font-semibold cursor-default">{Payments.print_money(@base_price)}</span>
             {/if}
           </p>
         </div>

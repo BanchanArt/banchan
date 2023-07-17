@@ -58,7 +58,7 @@ defmodule Banchan.Commissions.Event do
       else
         [
           {:amount,
-           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Payments.print_money()}"}
         ]
       end
     end)
@@ -84,7 +84,7 @@ defmodule Banchan.Commissions.Event do
       else
         [
           {:amount,
-           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Payments.print_money()}"}
         ]
       end
     end)

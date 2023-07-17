@@ -199,7 +199,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
                     {#for avail <- @balance.available}
                       {#if avail.amount > 0}
                         <div class="stat">
-                          <div class="stat-value">{Money.to_string(avail)}</div>
+                          <div class="stat-value">{Payments.print_money(avail)}</div>
                           <div class="stat-desc">Available for Payout</div>
                         </div>
                       {/if}

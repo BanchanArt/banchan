@@ -109,7 +109,7 @@ defmodule Banchan.Payments.Invoice do
       else
         [
           {:amount,
-           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Payments.print_money()}"}
         ]
       end
     end)
@@ -127,7 +127,7 @@ defmodule Banchan.Payments.Invoice do
         else
           [
             {:amount,
-             "Commissions can't be under Banchan's minimum of #{Payments.convert_money(min, amount.currency) |> Money.to_string()}."}
+             "Commissions can't be under Banchan's minimum of #{Payments.convert_money(min, amount.currency) |> Payments.print_money()}."}
           ]
         end
       end)
@@ -159,7 +159,7 @@ defmodule Banchan.Payments.Invoice do
       else
         [
           {:amount,
-           "must be at least #{Payments.convert_money(min, amount.currency) |> Money.to_string()}"}
+           "must be at least #{Payments.convert_money(min, amount.currency) |> Payments.print_money()}"}
         ]
       end
     end)

@@ -553,7 +553,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
                     (opt.name || "New Option") <>
                       if opt.price do
-                        " - " <> Money.to_string(opt.price)
+                        " - " <> Payments.print_money(opt.price)
                       else
                         ""
                       end}
@@ -610,7 +610,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
               @minimum_release_amount,
               Ecto.Changeset.fetch_field!(@changeset, :currency)
             )
-            |> Money.to_string()}. You can still create this offering, but you will have to add custom options during the commission itself in order to be able to invoice your clients.
+            |> Payments.print_money()}. You can still create this offering, but you will have to add custom options during the commission itself in order to be able to invoice your clients.
           </p>
         {/if}
         <div class="divider" />

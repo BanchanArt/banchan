@@ -84,7 +84,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
           {#if @data_pending}
             <i class="fas fa-spinner animate-spin" />
           {#else}
-            <div class="text-3xl font-bold">{Money.to_string(@payout.amount)}</div>
+            <div class="text-3xl font-bold">{Payments.print_money(@payout.amount)}</div>
           {/if}
           <h3
             class="text-xl"
@@ -133,7 +133,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
                     {invoice.amount
                     |> Money.add(invoice.tip)
                     |> Money.subtract(invoice.platform_fee)
-                    |> Money.to_string()}
+                    |> Payments.print_money()}
                   </div>
                   <div class="stat-desc">
                     Net Amount
@@ -184,16 +184,16 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
                   {invoice.updated_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
                 </td>
                 <td class="text-success">
-                  {Money.to_string(invoice.total_transferred)}
+                  {Payments.print_money(invoice.total_transferred)}
                 </td>
                 <td>
-                  {Money.to_string(invoice.amount)}
+                  {Payments.print_money(invoice.amount)}
                 </td>
                 <td>
-                  {Money.to_string(invoice.tip)}
+                  {Payments.print_money(invoice.tip)}
                 </td>
                 <td>
-                  {Money.to_string(invoice.platform_fee)}
+                  {Payments.print_money(invoice.platform_fee)}
                 </td>
               </tr>
             {/for}

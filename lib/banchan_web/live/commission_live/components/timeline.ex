@@ -5,6 +5,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
   use BanchanWeb, :component
 
   alias Banchan.Commissions.Common
+  alias Banchan.Payments
 
   alias BanchanWeb.CommissionLive.Components.{Comment, TimelineItem}
 
@@ -52,11 +53,11 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
               {#case event.type}
                 {#match :line_item_added}
                   <TimelineItem icon="➕" actor={Map.get(@users, event.actor_id)} event={event}>
-                    added <strong>{event.text}</strong> ({Money.to_string(event.amount)})
+                    added <strong>{event.text}</strong> ({Payments.print_money(event.amount)})
                   </TimelineItem>
                 {#match :line_item_removed}
                   <TimelineItem icon="✖" actor={Map.get(@users, event.actor_id)} event={event}>
-                    removed <strong>{event.text}</strong> ({Money.to_string(Money.multiply(event.amount, -1))})
+                    removed <strong>{event.text}</strong> ({Payments.print_money(Money.multiply(event.amount, -1))})
                   </TimelineItem>
                 {#match :payment_processed}
                   <TimelineItem
@@ -64,7 +65,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                     actor={Map.get(@users, event.actor_id)}
                     event={event}
                   >
-                    paid {Money.to_string(event.amount)}
+                    paid {Payments.print_money(event.amount)}
                   </TimelineItem>
                 {#match :refund_processed}
                   <TimelineItem
@@ -72,7 +73,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                     actor={Map.get(@users, event.actor_id)}
                     event={event}
                   >
-                    refunded {Money.to_string(event.amount)}
+                    refunded {Payments.print_money(event.amount)}
                   </TimelineItem>
                 {#match :status}
                   <TimelineItem icon="S" actor={Map.get(@users, event.actor_id)} event={event}>
@@ -88,7 +89,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                     actor={Map.get(@users, event.actor_id)}
                     event={event}
                   >
-                    released a deposit for {Money.to_string(event.amount)}
+                    released a deposit for {Payments.print_money(event.amount)}
                   </TimelineItem>
                 {#match :all_invoices_released}
                   {#unless is_nil(event.amount)}
@@ -97,7 +98,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                       actor={Map.get(@users, event.actor_id)}
                       event={event}
                     >
-                      released all deposits, totaling {Money.to_string(event.amount)}
+                      released all deposits, totaling {Payments.print_money(event.amount)}
                     </TimelineItem>
                   {/unless}
               {/case}
