@@ -10,14 +10,15 @@ $fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
 @import "../node_modules/tailwindcss/components";
 @import "../node_modules/tailwindcss/utilities";
 
-@import "../node_modules/@toast-ui/editor/dist/toastui-editor";
-@import "../node_modules/@toast-ui/editor/dist/theme/toastui-editor-dark";
+@import "../node_modules/quill/dist/quill.snow";
 
 @import "../node_modules/@splidejs/splide/src/css/themes/default/index";
 
 @import "../node_modules/cropperjs/dist/cropper";
 
 @import "./spotlight";
+
+@import "_components";
 
 :root {
   --rounded-box: 1rem;        /* border-radius for cards and other big elements */

@@ -12,7 +12,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
   alias Surface.Components.Form
 
   alias BanchanWeb.Components.Form.{
-    MarkdownInput,
+    QuillInput,
     Submit
   }
 
@@ -119,7 +119,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
         opts={id: @id <> "_form", "phx-target": @myself}
       >
         <div class="block space-y-4">
-          <MarkdownInput
+          <QuillInput
             id={@id <> "_markdown_input"}
             name={:text}
             show_label={false}

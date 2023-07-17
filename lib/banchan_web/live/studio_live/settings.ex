@@ -15,8 +15,8 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
-    MarkdownInput,
     MultipleSelect,
+    QuillInput,
     Select,
     Submit,
     TextInput
@@ -236,12 +236,12 @@ defmodule BanchanWeb.StudioLive.Settings do
               options={@currencies}
               opts={required: true}
             />
-            <MarkdownInput
+            <QuillInput
               id="default-terms"
               info="Default Terms of Service to display to users, when an offering hasn't configured its own."
               name={:default_terms}
             />
-            <MarkdownInput
+            <QuillInput
               id="default-template"
               info="Default commission submission template, when an offering hasn't configured its own."
               name={:default_template}

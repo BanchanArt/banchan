@@ -9,7 +9,7 @@ defmodule BanchanWeb.ReportBugLive.New do
   alias Surface.Components.Form
 
   alias BanchanWeb.Components.{Button, Layout}
-  alias BanchanWeb.Components.Form.{MarkdownInput, Submit, TextInput}
+  alias BanchanWeb.Components.Form.{QuillInput, Submit, TextInput}
 
   @impl true
   def handle_params(_params, _uri, socket) do
@@ -57,7 +57,7 @@ defmodule BanchanWeb.ReportBugLive.New do
               <p><span class="text-error">NOTE: This report will be <span class="font-bold">publicly visible</span> on GitHub. Do NOT include anything personal or confidential</span></p>
               <p>If you need support for something that shouldn't be public, please contact us at <a href="mailto:support@banchan.art" class="link">support@banchan.art</a>.</p>
               <TextInput name={:title} label="Title" opts={required: true, maxlength: "256", minlength: "10"} />
-              <MarkdownInput
+              <QuillInput
                 id="body-input"
                 name={:body}
                 label="Body"

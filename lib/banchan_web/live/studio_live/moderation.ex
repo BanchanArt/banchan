@@ -16,7 +16,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
 
   alias BanchanWeb.Components.Form.{
     DateTimeLocalInput,
-    MarkdownInput,
+    QuillInput,
     Submit,
     TextInput
   }
@@ -175,7 +175,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
               name={:platform_fee}
               info="Multiplier to use when calculating the platform fee paid by this studio for transactions."
             />
-            <MarkdownInput
+            <QuillInput
               id="moderation_notes"
               info="These are internal notes for admins and moderators about this user. They are not displayed to the user or anyone else."
               name={:moderation_notes}
@@ -188,7 +188,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
               <div class="text-xl">
                 Re-enable {@studio.name}
               </div>
-              <MarkdownInput id="lifted_reason" name={:lifted_reason} opts={required: true} />
+              <QuillInput id="lifted_reason" name={:lifted_reason} opts={required: true} />
               <Submit class="my-2" label="Enable" changeset={@enable_changeset} />
             </Form>
           {#else}
@@ -196,7 +196,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
               <div class="text-xl">
                 Disable {@studio.name}
               </div>
-              <MarkdownInput id="disabled_reason" name={:disabled_reason} opts={required: true} />
+              <QuillInput id="disabled_reason" name={:disabled_reason} opts={required: true} />
               <DateTimeLocalInput name={:disabled_until} />
               <Submit class="my-2" label="Disable" changeset={@disable_changeset} />
             </Form>

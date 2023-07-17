@@ -12,8 +12,8 @@ defmodule BanchanWeb.DenizenLive.Moderation do
 
   alias BanchanWeb.Components.Form.{
     DateTimeLocalInput,
-    MarkdownInput,
     MultipleSelect,
+    QuillInput,
     Submit
   }
 
@@ -160,7 +160,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
               name={:roles}
               options={@roles}
             />
-            <MarkdownInput
+            <QuillInput
               id="moderation_notes"
               info="These are internal notes for admins and moderators about this user. They are not displayed to the user or anyone else."
               name={:moderation_notes}
@@ -173,7 +173,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
               <div class="text-xl">
                 Re-enable @{@user.handle}
               </div>
-              <MarkdownInput id="lifted_reason" name={:lifted_reason} opts={required: true} />
+              <QuillInput id="lifted_reason" name={:lifted_reason} opts={required: true} />
               <Submit label="Enable" changeset={@enable_changeset} />
             </Form>
           {#else}
@@ -181,7 +181,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
               <div class="text-xl">
                 Disable @{@user.handle}
               </div>
-              <MarkdownInput id="disabled_reason" name={:disabled_reason} opts={required: true} />
+              <QuillInput id="disabled_reason" name={:disabled_reason} opts={required: true} />
               <DateTimeLocalInput name={:disabled_until} />
               <Submit label="Disable" changeset={@disable_changeset} />
             </Form>
