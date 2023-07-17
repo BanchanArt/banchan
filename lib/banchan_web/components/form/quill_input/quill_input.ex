@@ -58,19 +58,19 @@ defmodule BanchanWeb.Components.Form.QuillInput do
       }
       .control :global(.ql-stroke) {
       --tw-text-opacity: 1;
-      stroke: hsl(var(--nc) / var(--tw-text-opacity));
+      stroke: hsl(var(--n) / var(--tw-text-opacity));
       }
       .control :global(.ql-fill) {
       --tw-text-opacity: 0.8;
-      fill: hsl(var(--nc) / var(--tw-text-opacity));
+      fill: hsl(var(--n) / var(--tw-text-opacity));
       }
       .control :global(.ql-picker):global(.ql-expanded) :global(.ql-picker-label) {
       @apply rounded-md;
       --tw-border-opacity: 0.2;
-      border: 1px solid hsl(var(--bc) / var(--tw-border-opacity));
+      border: 1px solid hsl(var(--b) / var(--tw-border-opacity));
       }
       .control :global(.ql-picker-label) {
-      color: hsl(var(--nc));
+      color: hsl(var(--n));
       }
       /*
       .control :global(.ql-picker) :global(.ql-picker-options) {
