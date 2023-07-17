@@ -428,28 +428,23 @@ defmodule Banchan.Payments do
   def payout_studio(%User{} = actor, %Studio{} = studio) do
     with {:ok, balance} <-
            stripe_mod().retrieve_balance(headers: %{"Stripe-Account" => studio.stripe_id}) do
-      Repo.transaction(fn ->
-        # NB(@zkat): We're not using Ecto.Multi here because we still want
-        # to commit errored payouts that failed because of Stripe failures, so they show up for users.
-        Enum.reduce_while(balance.available, {:ok, []}, fn avail, {:ok, acc} ->
-          case payout_available(actor, studio, avail) do
-            {:ok, nil} ->
-              {:cont, {:ok, acc}}
+      # NB(@zkat): We're not using Ecto.Multi here because we still want
+      # to commit errored payouts that failed because of Stripe failures, so they show up for users.
+      Enum.reduce_while(balance.available, {:ok, []}, fn avail, {:ok, acc} ->
+        case payout_available(actor, studio, avail) do
+          {:ok, nil} ->
+            {:cont, {:ok, acc}}
 
-            {:ok, payout} ->
-              {:cont, {:ok, [payout | acc]}}
+          {:ok, payout} ->
+            {:cont, {:ok, [payout | acc]}}
 
-            {:error, error} ->
-              {:halt, {:error, error}}
-          end
-        end)
+          {:error, error} ->
+            {:halt, {:error, error}}
+        end
       end)
       |> case do
-        {:ok, {:ok, payouts}} ->
+        {:ok, payouts} ->
           {:ok, Enum.reverse(payouts)}
-
-        {:ok, {:error, error}} ->
-          {:error, error}
 
         {:error, error} ->
           {:error, error}
@@ -498,7 +493,7 @@ defmodule Banchan.Payments do
           not is_nil(i.stripe_charge_id) and
           (is_nil(p.id) or p.status not in [:pending, :in_transit, :paid]) and
           fragment("(?).currency = ?::char(3)", i.total_transferred, ^currency_str) and
-          i.payout_available_on <= ^now,
+          (is_nil(i.payout_available_on) or i.payout_available_on <= ^now),
       order_by: {:asc, i.updated_at}
     )
     |> Repo.all()
@@ -515,9 +510,13 @@ defmodule Banchan.Payments do
             charge.balance_transaction.status != "available" ->
               {:cont, acc}
 
-            invoice_total.amount + total.amount > avail.amount ->
+            Money.add(invoice_total, total) |> Money.cmp(avail) == :gt ->
               # NB(@zkat): This should _generally_ not happen, but may as well
               # check for it.
+              Logger.error(
+                "Invoice #{invoice.id} has a total of at least #{Money.add(invoice_total, total) |> Money.to_string()}, but the available balance is only #{Money.to_string(avail)}"
+              )
+
               {:halt, acc}
 
             true ->

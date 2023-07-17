@@ -8,6 +8,7 @@ defmodule BanchanWeb.StripeWebhookController do
 
   alias Banchan.Accounts
   alias Banchan.Payments
+  alias Banchan.Studios
 
   def webhook(conn, _params) do
     [sig] = get_req_header(conn, "stripe-signature")
@@ -42,6 +43,25 @@ defmodule BanchanWeb.StripeWebhookController do
 
   defp handle_event(%Stripe.Event{type: "charge.refund.updated"} = event, conn) do
     {:ok, _} = Payments.process_refund_updated(Accounts.system_user(), event.data.object, nil)
+
+    conn
+    |> resp(200, "OK")
+    |> send_resp()
+  end
+
+  # NB(@zkat): I guess this fires over here on local dev? It should be in the ConnectWebhookController...
+  defp handle_event(%Stripe.Event{type: "payout." <> type} = event, conn) do
+    Logger.debug("Got a new payout event of type payout.#{type}. Updating database.")
+    Payments.process_payout_updated!(event.data.object)
+
+    conn
+    |> resp(200, "OK")
+    |> send_resp()
+  end
+
+  # NB(@zkat): I guess this fires over here on local dev? It should be in the ConnectWebhookController...
+  defp handle_event(%Stripe.Event{type: "account.updated"} = event, conn) do
+    Studios.update_stripe_state!(event.data.object.id, event.data.object)
 
     conn
     |> resp(200, "OK")
