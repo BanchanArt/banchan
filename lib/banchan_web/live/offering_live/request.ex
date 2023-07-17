@@ -29,7 +29,7 @@ defmodule BanchanWeb.OfferingLive.Request do
         offering_type
       )
 
-    terms = offering.terms || socket.assigns.studio.default_terms || ""
+    terms = offering.terms || socket.assigns.studio.default_terms
     template = offering.template || socket.assigns.studio.default_template
 
     cond do
@@ -127,11 +127,18 @@ defmodule BanchanWeb.OfferingLive.Request do
 
   @impl true
   def handle_event("change", %{"commission" => commission}, socket) do
+    tos_ok =
+      if is_nil(socket.assigns.terms) do
+        "true"
+      else
+        Map.get(commission, "tos_ok", "false")
+      end
+
     changeset =
       %Commission{
         currency: socket.assigns.currency
       }
-      |> Commission.creation_changeset(commission)
+      |> Commission.creation_changeset(commission |> Map.put("tos_ok", tos_ok))
       |> Map.put(:action, :update)
 
     socket = assign(socket, changeset: changeset)
@@ -176,6 +183,13 @@ defmodule BanchanWeb.OfferingLive.Request do
   @impl true
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_event("submit", %{"commission" => commission}, socket) do
+    tos_ok =
+      if is_nil(socket.assigns.terms) do
+        "true"
+      else
+        Map.get(commission, "tos_ok", "false")
+      end
+
     attachments =
       consume_uploaded_entries(socket, :attachment, fn %{path: path}, entry ->
         {:ok,
@@ -193,7 +207,7 @@ defmodule BanchanWeb.OfferingLive.Request do
            socket.assigns.offering,
            socket.assigns.line_items,
            attachments,
-           commission
+           commission |> Map.put("tos_ok", tos_ok)
          ) do
       {:ok, created_commission} ->
         {:noreply,
@@ -354,19 +368,21 @@ defmodule BanchanWeb.OfferingLive.Request do
                   value: Map.get(@changeset.changes, :description, @template)
                 }
               />
-              <div class="pt-2">
-                <h3 class="py-4 font-bold text-xl">Commission Terms and Conditions</h3>
-                <div class="p-2 max-h-60 overflow-auto">
-                  <div class="p-2">
-                    <Markdown content={@terms} />
+              {#if !is_nil(@terms)}
+                <div class="pt-2">
+                  <h3 class="py-4 font-bold text-xl">Commission Terms and Conditions</h3>
+                  <div class="p-2 max-h-60 overflow-auto">
+                    <div class="p-2">
+                      <Markdown content={@terms} />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="p-2">
-                <Checkbox name={:tos_ok} opts={required: true}>
-                  I have read and agree to these Terms.
-                </Checkbox>
-              </div>
+                <div class="p-2">
+                  <Checkbox name={:tos_ok} opts={required: true}>
+                    I have read and agree to these Terms.
+                  </Checkbox>
+                </div>
+              {/if}
               <div class="p-2">
                 <Submit changeset={@changeset} />
               </div>
