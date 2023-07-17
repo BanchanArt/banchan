@@ -81,7 +81,11 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                     }
                   ]
                 },
-              %{}
+              %{
+                currency:
+                  (socket.assigns.offering && socket.assigns.offering.currency) ||
+                    socket.assigns.studio.default_currency
+              }
             )
       )
 
@@ -200,9 +204,15 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     offering = moneyfy_offering(offering)
 
     changeset =
-      (socket.assigns.offering || %Offering{})
-      |> Offerings.change_offering(offering)
-      |> Map.put(:action, :update)
+      if is_nil(socket.assigns.offering) do
+        %Offering{}
+        |> Offerings.change_offering(offering)
+        |> Map.put(:action, :insert)
+      else
+        socket.assigns.offering
+        |> Offerings.change_offering(offering)
+        |> Map.put(:action, :update)
+      end
 
     socket =
       socket
@@ -488,7 +498,10 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
               Ecto.Changeset.get_field(@changeset, :options)
               |> Enum.filter(&(&1.default && &1.price))
               |> Enum.map(& &1.price)
-              |> Enum.reduce(Money.new(0, Ecto.Changeset.fetch_field!(@changeset, :currency)), &Money.add/2)
+              |> Enum.reduce(
+                Money.new(0, Ecto.Changeset.get_field(@changeset, :currency, @studio.default_currency)),
+                &Money.add/2
+              )
             end}
             open?={Ecto.Changeset.get_field(@changeset, :open)}
             hidden?={Ecto.Changeset.get_field(@changeset, :hidden)}
