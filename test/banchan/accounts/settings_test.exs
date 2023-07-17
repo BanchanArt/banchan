@@ -86,7 +86,7 @@ defmodule Banchan.AccountsTest.Settings do
       assert {:error, changeset} =
                Accounts.update_admin_fields(admin, user, %{
                  "moderation_notes" =>
-                   gen_random_string(500) <> "<script>alert('hello')</script>",
+                   gen_random_string(500) <> "\n<script>alert('hello')</script>",
                  "roles" => ["cool"]
                })
 

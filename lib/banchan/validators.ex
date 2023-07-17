@@ -52,9 +52,10 @@ defmodule Banchan.Validators do
 
   def validate_markdown(changeset, field) do
     validate_change(changeset, field, fn _, data ->
+      html = Earmark.as_html!(data)
       # NB(@zkat): We don't care about whitespace changes.
-      if String.replace(data, ~r/\s+/, "") ==
-           String.replace(HtmlSanitizeEx.markdown_html(data), ~r/\s+/, "") do
+      if html |> String.replace(~r/\s+/, "") ==
+           html |> HtmlSanitizeEx.markdown_html() |> String.replace(~r/\s+/, "") do
         []
       else
         [{field, "Disallowed HTML detected. Some tags, like <script>, are not allowed."}]
