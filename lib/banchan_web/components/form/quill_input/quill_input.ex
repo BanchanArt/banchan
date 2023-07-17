@@ -53,7 +53,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
       .control :global(.ql-container) {
       @apply rounded-t-none textarea textarea-bordered;
       }
-      .control .has_upload :global(.ql-container) {
+      .control .has-upload :global(.ql-container) {
       @apply rounded-b-none;
       }
       .control :global(.ql-stroke) {
