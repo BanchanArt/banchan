@@ -168,7 +168,12 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
           quantity: 1,
           price_data: %{
             currency: "usd",
-            product_data: %{name: "Commission Invoice Payment"},
+            product_data: %{
+              name: "Commission Deposit",
+              description:
+                "Deposit for commission 'some title'. Will be kept in escrow until commission is completed or invoice is released early.",
+              tax_code: "txcd_10505001"
+            },
             tax_behavior: "exclusive",
             unit_amount: amount.amount
           }

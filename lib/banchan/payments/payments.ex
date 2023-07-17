@@ -838,7 +838,21 @@ defmodule Banchan.Payments do
       %{
         price_data: %{
           product_data: %{
-            name: "Commission Invoice Payment"
+            name:
+              if invoice.final do
+                "Final Invoice Payment"
+              else
+                "Commission Deposit"
+              end,
+            description:
+              if invoice.final do
+                "Final payment for commission '#{commission.title}'. Will be immediately released on payment."
+              else
+                "Deposit for commission '#{commission.title}'. Will be kept in escrow until commission is completed or invoice is released early."
+              end,
+            # Digital Finished Artwork - downloaded - non subscription - with
+            # permanent rights
+            tax_code: "txcd_10505001"
           },
           unit_amount: amount.amount,
           currency: String.downcase(to_string(amount.currency)),
@@ -855,7 +869,10 @@ defmodule Banchan.Payments do
             %{
               price_data: %{
                 product_data: %{
-                  name: "Extra Tip"
+                  name: "Extra Tip",
+                  description: "Thank you for your generosity!",
+                  # Optional Gratuity
+                  tax_code: "txcd_90020001"
                 },
                 unit_amount: tip.amount,
                 currency: String.downcase(to_string(tip.currency)),

@@ -193,10 +193,15 @@ defmodule Banchan.CommissionsTest do
       net = amount |> Money.add(tip) |> Money.subtract(fee)
 
       invoice =
-        invoice_fixture(artist, commission, %{
-          "amount" => amount,
-          "text" => "Send help."
-        })
+        invoice_fixture(
+          artist,
+          commission,
+          %{
+            "amount" => amount,
+            "text" => "Send help."
+          },
+          true
+        )
 
       Banchan.StripeAPI.Mock
       |> expect(:create_session, fn sess ->
@@ -213,7 +218,12 @@ defmodule Banchan.CommissionsTest do
                    quantity: 1,
                    price_data: %{
                      currency: "usd",
-                     product_data: %{name: "Commission Invoice Payment"},
+                     product_data: %{
+                       name: "Final Invoice Payment",
+                       description:
+                         "Final payment for commission 'some title'. Will be immediately released on payment.",
+                       tax_code: "txcd_10505001"
+                     },
                      tax_behavior: "exclusive",
                      unit_amount: amount.amount
                    }
@@ -222,7 +232,11 @@ defmodule Banchan.CommissionsTest do
                    quantity: 1,
                    price_data: %{
                      currency: "usd",
-                     product_data: %{name: "Extra Tip"},
+                     product_data: %{
+                       name: "Extra Tip",
+                       description: "Thank you for your generosity!",
+                       tax_code: "txcd_90020001"
+                     },
                      tax_behavior: "exclusive",
                      unit_amount: tip.amount
                    }
