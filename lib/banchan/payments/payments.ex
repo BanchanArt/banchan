@@ -495,6 +495,7 @@ defmodule Banchan.Payments do
       left_join: p in assoc(i, :payouts),
       where:
         c.studio_id == ^studio.id and i.status == :released and
+          not is_nil(i.stripe_charge_id) and
           (is_nil(p.id) or p.status not in [:pending, :in_transit, :paid]) and
           fragment("(?).currency = ?::char(3)", i.total_transferred, ^currency_str) and
           i.payout_available_on <= ^now,
