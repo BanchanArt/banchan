@@ -12,6 +12,7 @@ defmodule Banchan.Commissions.LineItem do
     field :description, :string
     field :name, :string
     field :sticky, :boolean
+    field :count, :integer, default: 1
 
     belongs_to :commission, Banchan.Commissions.Commission
     belongs_to :option, Banchan.Offerings.OfferingOption, foreign_key: :offering_option_id
@@ -22,9 +23,10 @@ defmodule Banchan.Commissions.LineItem do
   @doc false
   def changeset(line_item, attrs) do
     line_item
-    |> cast(attrs, [:amount, :name, :description, :sticky])
+    |> cast(attrs, [:amount, :name, :description, :sticky, :count])
     |> cast_assoc(:commission)
     |> cast_assoc(:option)
+    |> validate_number(:count, greater_than_or_equal_to: 1)
     |> validate_money(:amount)
     |> validate_required([:amount, :name, :description])
     |> validate_length(:name, max: 50)

@@ -1640,7 +1640,7 @@ defmodule Banchan.Payments do
       "$" -> currency_symbol(money.currency) <> Money.to_string(money, symbol: false)
       "" -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
       " " -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
-      _ -> Money.to_string(money)
+      _ -> Money.to_string(money, symbol: true)
     end
   end
 

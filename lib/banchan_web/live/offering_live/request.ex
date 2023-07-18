@@ -13,7 +13,7 @@ defmodule BanchanWeb.OfferingLive.Request do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.CommissionLive.Components.{BalanceBox, OfferingBox, Summary}
+  alias BanchanWeb.CommissionLive.Components.{AddonList, BalanceBox, OfferingBox, Summary}
   alias BanchanWeb.Components.Form.{Checkbox, QuillInput, Submit, TextInput, UploadInput}
   alias BanchanWeb.Components.{Layout, Markdown}
   alias BanchanWeb.Endpoint
@@ -56,7 +56,7 @@ defmodule BanchanWeb.OfferingLive.Request do
               amount: option.price,
               name: option.name,
               description: option.description,
-              sticky: option.sticky
+              sticky: option.default
             }
           end)
 
@@ -334,19 +334,18 @@ defmodule BanchanWeb.OfferingLive.Request do
       <div class="flex flex-col space-y-2 md:container md:mx-auto p-2">
         <Form for={@changeset} change="change" submit="submit">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="flex flex-col md:order-2">
+            <div class="flex flex-col md:order-2 rounded-lg bg-base-200 p-4 shadow-lg">
               <OfferingBox offering={@offering} class="rounded-box hover:bg-base-200 p-2 transition-all" />
               <div class="divider" />
-              <Summary
-                add_item="add_item"
-                allow_edits
-                remove_item="remove_item"
-                line_items={@line_items}
-                offering={@offering}
-              />
-              <div class="pt-6">
-                <BalanceBox id="balance-box" line_items={@line_items} />
-              </div>
+              <div class="font-medium text-sm opacity-50">Cart</div>
+              <Summary allow_edits remove_item="remove_item" line_items={@line_items} />
+              <div class="divider" />
+              <BalanceBox id="balance-box" line_items={@line_items} />
+              {#if Enum.any?(@offering.options, &(!&1.default))}
+                <div class="divider" />
+                <div class="px-2 font-medium text-sm opacity-50">Add-ons</div>
+                <AddonList id="addon-list" offering={@offering} line_items={@line_items} add_item="add_item" />
+              {/if}
             </div>
             <div class="divider md:hidden" />
             <div class="flex flex-col md:col-span-2 md:order-1 gap-4">

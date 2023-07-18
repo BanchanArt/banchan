@@ -16,6 +16,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
   alias Surface.Components.Form
 
   alias BanchanWeb.CommissionLive.Components.{
+    AddonPicker,
     Attachments,
     BalanceBox,
     Summary,
@@ -303,7 +304,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
       {#if @open_final_invoice}
         <div class="text-lg font-medium pb-2">Final Invoice</div>
         <div class="text-sm">Attachments will be released on payment. All deposits will be immediately released, along with this payment, and the commission will be closed.</div>
-        <Summary line_items={@commission.line_items} show_options={false} />
+        <Summary line_items={@commission.line_items} />
         <div class="divider" />
         <BalanceBox
           id={@id <> "-balance-box"}
@@ -341,7 +342,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
       {#elseif @open_deposit_requested}
         <div class="text-lg font-medium pb-2">Partial Deposit</div>
         <div class="text-sm">Attachments will be released on payment. Deposit will be held until final invoice is submitted, or deposit is released early. by client.</div>
-        <Summary line_items={@commission.line_items} show_options={false} />
+        <Summary line_items={@commission.line_items} />
         <div class="divider" />
         <BalanceBox
           id={@id <> "-balance-box"}
@@ -355,7 +356,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           id={"#{@id}-form"}
           opts={"phx-target": @myself}
         >
-          <div class="flex flex-row gap-2 items-center px-2">
+          <div class="flex flex-row gap-2 items-center">
             <div class="text-md font-medium">Deposit:</div>
             {Money.Currency.symbol(Commissions.commission_currency(@commission))}
             <TextInput name={:amount} show_label={false} />
@@ -382,90 +383,104 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
         </Form>
       {#else}
         <div class="text-lg font-medium pb-2">Summary</div>
-        <Collapse id={@id <> "-summary-options"} class="px-2">
-          <:header><div class="font-medium">Options:</div></:header>
-          <SummaryEditor
-            id={@id <> "-summary-editor"}
-            allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
-            show_options={Commissions.commission_open?(@commission)}
-          />
+        <Collapse id={@id <> "-summary-options"}>
+          <:header><div class="font-medium text-sm opacity-50">Cart</div></:header>
+          <div class="pt-2">
+            <SummaryEditor
+              id={@id <> "-summary-editor"}
+              allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
+            />
+          </div>
         </Collapse>
+        <div class="divider" />
         <BalanceBox
           id={@id <> "-balance-box"}
           deposited={@deposited}
           line_items={@commission.line_items}
           tipped={@final_invoice && @final_invoice.tip}
         />
-        {#if Commissions.commission_open?(@commission) && Commissions.commission_active?(@commission)}
-          <div class="input-group">
-            {#if @current_user_member?}
-              <Button
-                disabled={@existing_open || !Commissions.commission_active?(@commission) || @remaining.amount <= 0}
-                click="request_deposit"
-                class="btn-sm grow request-deposit"
-                label="Request Deposit"
-              />
-              <Button
-                disabled={@existing_open || !Commissions.commission_active?(@commission) || !@can_finalize ||
-                  @remaining.amount < 0}
-                click="final_invoice"
-                class="btn-sm grow final-invoice"
-                label="Final Invoice"
-              />
+        <div class="divider" />
+        {#if @commission.offering}
+          <div class="px-2 font-medium text-sm opacity-50">Add-ons</div>
+          <AddonPicker
+            id={@id <> "-addon-picker"}
+            allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
+            allow_custom
+          />
+          <div class="divider" />
+        {/if}
+        <div class="pb-4 flex flex-col gap-2">
+          {#if Commissions.commission_open?(@commission) && Commissions.commission_active?(@commission)}
+            <div class="input-group">
+              {#if @current_user_member?}
+                <Button
+                  disabled={@existing_open || !Commissions.commission_active?(@commission) || @remaining.amount <= 0}
+                  click="request_deposit"
+                  class="btn-sm grow request-deposit"
+                  label="Request Deposit"
+                />
+                <Button
+                  disabled={@existing_open || !Commissions.commission_active?(@commission) || !@can_finalize ||
+                    @remaining.amount < 0}
+                  click="final_invoice"
+                  class="btn-sm grow final-invoice"
+                  label="Final Invoice"
+                />
+              {/if}
+            </div>
+            {#if !@can_finalize}
+              <p>You can't send a final invoice for this commission unless the subtotal is at least Banchan's commission minimum of {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))}. Add more options (or custom options) under "Options" until the threshold is reached.</p>
             {/if}
-          </div>
-          {#if !@can_finalize}
-            <p>You can't send a final invoice for this commission unless the subtotal is at least Banchan's commission minimum of {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))}. Add more options (or custom options) under "Options" until the threshold is reached.</p>
-          {/if}
-          {#if @remaining.amount < 0}
-            <p class="text-lg font-semibold text-error">
-              Your commission's balance is negative.
-            </p>
-            <p>
-              You likely removed options since the last deposit was made. You must add new options to the commission
-              or reimburse one or more deposits to make the balance positive before you can invoice again.
-            </p>
-          {/if}
-          {#if @current_user.id == @commission.client_id}
-            {#if @existing_open || !Commissions.commission_active?(@commission) || !@can_release ||
-                @deposited.amount == 0}
-              <Button disabled class="btn-sm w-full" label="Release Deposits" />
-            {#else}
-              <Collapse
-                id={@id <> "-release-confirmation"}
-                show_arrow={false}
-                class="grow rounded-lg my-2 bg-base-200"
-              >
-                <:header>
-                  <button type="button" class="btn btn-primary btn-sm w-full">
-                    Release Deposits
-                  </button>
-                </:header>
-                <p class="py-2">Are you sure?</p>
-                <Button click="release_deposits" class="btn-sm w-full" label="Confirm" />
-              </Collapse>
+            {#if @remaining.amount < 0}
+              <p class="text-lg font-semibold text-error">
+                Your commission's balance is negative.
+              </p>
               <p>
-                Upon release, all completed deposits will be <b class="font-bold">taken out of escrow</b> and sent to the studio. You won't be able to ask for a refund from the studio afterwards.
+                You likely removed options since the last deposit was made. You must add new options to the commission
+                or reimburse one or more deposits to make the balance positive before you can invoice again.
               </p>
             {/if}
-            {#if !@can_release && @deposited.amount > 0}
-              <p>
-                You can't release any deposits until the total released deposits would
-                add up to at least {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))
-                |> Payments.print_money()}.
-              </p>
+            {#if @current_user.id == @commission.client_id}
+              {#if @existing_open || !Commissions.commission_active?(@commission) || !@can_release ||
+                  @deposited.amount == 0}
+                <Button disabled class="btn-sm w-full" label="Release Deposits" />
+              {#else}
+                <Collapse
+                  id={@id <> "-release-confirmation"}
+                  show_arrow={false}
+                  class="grow rounded-lg my-2 bg-base-200"
+                >
+                  <:header>
+                    <button type="button" class="btn btn-primary btn-sm w-full">
+                      Release Deposits
+                    </button>
+                  </:header>
+                  <p class="py-2">Are you sure?</p>
+                  <Button click="release_deposits" class="btn-sm w-full" label="Confirm" />
+                </Collapse>
+                <p>
+                  Upon release, all completed deposits will be <b class="font-bold">taken out of escrow</b> and sent to the studio. You won't be able to ask for a refund from the studio afterwards.
+                </p>
+              {/if}
+              {#if !@can_release && @deposited.amount > 0}
+                <p>
+                  You can't release any deposits until the total released deposits would
+                  add up to at least {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))
+                  |> Payments.print_money()}.
+                </p>
+              {/if}
             {/if}
           {/if}
-        {/if}
-        {#if !Commissions.commission_open?(@commission)}
-          <div>This commission is closed. You can't take any further actions on it.</div>
-        {#elseif !Commissions.commission_active?(@commission)}
-          <div>Only open and accepted commissions can be invoiced. Accept the commission to continue.</div>
-        {#elseif @existing_open}
-          <div>
-            You can't take any further invoice actions until the <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> is handled.
-          </div>
-        {/if}
+          {#if !Commissions.commission_open?(@commission)}
+            <div>This commission is closed. You can't take any further actions on it.</div>
+          {#elseif !Commissions.commission_active?(@commission)}
+            <div>Only open and accepted commissions can be invoiced. Accept the commission to continue.</div>
+          {#elseif @existing_open}
+            <div>
+              You can't take any further invoice actions until the <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> is handled.
+            </div>
+          {/if}
+        </div>
       {/if}
     </div>
     """

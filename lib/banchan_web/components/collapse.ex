@@ -34,7 +34,7 @@ defmodule BanchanWeb.Components.Collapse do
           {/if}
         </div>
       {/if}
-      <div class={"p-2", hidden: !@open}>
+      <div class={hidden: !@open}>
         <#slot />
       </div>
     </div>

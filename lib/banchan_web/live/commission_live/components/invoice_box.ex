@@ -265,7 +265,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
     <div class="flex flex-col invoice-box px-2">
       {!-- # NOTE: Older invoices don't have these fields, so we need to check for them here. --}
       {#if @event.invoice.line_items && @event.invoice.deposited}
-        <Summary line_items={@event.invoice.line_items} show_options={false} />
+        <Summary line_items={@event.invoice.line_items} />
         <BalanceBox
           id={@id <> "-balance-box"}
           line_items={@event.invoice.line_items}

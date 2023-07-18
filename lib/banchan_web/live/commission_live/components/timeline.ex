@@ -25,10 +25,8 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
 
   def render(assigns) do
     event_chunks =
-      Enum.chunk_by(
-        assigns.commission.events,
-        &(&1.type == :comment)
-      )
+      assigns.commission.events
+      |> Enum.chunk_by(&(&1.type == :comment))
 
     ~F"""
     <div class="snap-y">
