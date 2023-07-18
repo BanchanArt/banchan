@@ -1636,12 +1636,20 @@ defmodule Banchan.Payments do
   usually just use `$` as a symbol.
   """
   def print_money(%Money{} = money) do
-    currency = Money.Currency.get(money)
-
-    case currency.symbol do
-      "$" -> "#{dollar_prefix(money.currency)}$#{Money.to_string(money, symbol: false)}"
-      "" -> "#{blank_prefix(money.currency)}#{Money.to_string(money, symbol: false)}"
+    case Money.Currency.symbol(money) do
+      "$" -> currency_symbol(money.currency) <> Money.to_string(money, symbol: false)
+      "" -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
+      " " -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
       _ -> Money.to_string(money)
+    end
+  end
+
+  def currency_symbol(currency) when is_atom(currency) do
+    case Money.Currency.symbol(currency) do
+      "$" -> dollar_prefix(currency) <> "$"
+      "" -> blank_prefix(currency)
+      " " -> blank_prefix(currency)
+      other -> other
     end
   end
 
@@ -1649,6 +1657,7 @@ defmodule Banchan.Payments do
   defp dollar_prefix(:AUD), do: "AU"
   defp dollar_prefix(:ARS), do: "Arg"
   defp dollar_prefix(:BBD), do: "BB"
+  defp dollar_prefix(:BMD), do: "BD"
   defp dollar_prefix(:BND), do: "B"
   defp dollar_prefix(:BSD), do: "B"
   defp dollar_prefix(:CVE), do: "Esc"
@@ -1667,12 +1676,12 @@ defmodule Banchan.Payments do
   defp dollar_prefix(:SRD), do: "Sr"
   defp dollar_prefix(_), do: ""
 
-  defp blank_prefix(:XOF), do: "F.CFA "
-  defp blank_prefix(:XPF), do: "F.CFA "
-  defp blank_prefix(:HTG), do: "G "
-  defp blank_prefix(:LSL), do: "R "
+  defp blank_prefix(:XOF), do: "F.CFA"
+  defp blank_prefix(:XPF), do: "F.CFP"
+  defp blank_prefix(:HTG), do: "G"
+  defp blank_prefix(:LSL), do: "R"
   defp blank_prefix(:RWF), do: "R₣‎"
-  defp blank_prefix(:TJS), do: "SM "
+  defp blank_prefix(:TJS), do: "SM"
   defp blank_prefix(_), do: ""
 
   defp stripe_mod do

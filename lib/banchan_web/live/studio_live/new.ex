@@ -27,10 +27,7 @@ defmodule BanchanWeb.StudioLive.New do
   def mount(_params, _session, socket) do
     currencies =
       Studios.Common.supported_currencies()
-      |> Enum.map(fn currency ->
-        %{name: name, symbol: symbol} = Money.Currency.get(currency)
-        {:"#{name} (#{symbol})", currency}
-      end)
+      |> Enum.map(&{"#{Money.Currency.name(&1)} (#{Payments.currency_symbol(&1)})", &1})
 
     socket =
       socket
