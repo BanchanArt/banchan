@@ -112,17 +112,15 @@ defmodule BanchanWeb.Components.Layout do
                 </LiveRedirect>
               </li>
               <li>
-                <a href="/admin/dashboard" target="_blank" rel="noopener noreferrer"><i class="fas fa-tachometer-alt" />Dashboard</a>
+                <a href={~p"/admin/dashboard"} target="_blank" rel="noopener noreferrer"><i class="fas fa-tachometer-alt" />Dashboard</a>
               </li>
               {#if Application.fetch_env!(:banchan, :env) == :dev}
                 <li>
-                  <a href="/admin/sent_emails" target="_blank" rel="noopener noreferrer"><i class="fas fa-paper-plane" />Sent Emails</a>
+                  <a href={~p"/admin/sent_emails"} target="_blank" rel="noopener noreferrer"><i class="fas fa-paper-plane" />Sent Emails</a>
                 </li>
-                {!--
                 <li>
-                  <a href="/admin/catalogue" target="_blank" rel="noopener noreferrer"><i class="fas fa-book" />Catalogue</a>
+                  <a href="/catalogue" target="_blank" rel="noopener noreferrer"><i class="fas fa-book" />Catalogue</a>
                 </li>
-                --}
               {/if}
             {/if}
             <li class="menu-title">
