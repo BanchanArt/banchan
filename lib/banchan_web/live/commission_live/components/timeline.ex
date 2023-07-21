@@ -25,10 +25,8 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
 
   def render(assigns) do
     event_chunks =
-      Enum.chunk_by(
-        assigns.commission.events,
-        &(&1.type == :comment)
-      )
+      assigns.commission.events
+      |> Enum.chunk_by(&(&1.type == :comment))
 
     ~F"""
     <div class="snap-y">
@@ -58,6 +56,14 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                 {#match :line_item_removed}
                   <TimelineItem icon="✖" actor={Map.get(@users, event.actor_id)} event={event}>
                     removed <strong>{event.text}</strong> ({Payments.print_money(Money.multiply(event.amount, -1))})
+                  </TimelineItem>
+                {#match :line_item_count_increased}
+                  <TimelineItem icon="➕" actor={Map.get(@users, event.actor_id)} event={event}>
+                    line item count for {event.text} ({Payments.print_money(event.amount)})
+                  </TimelineItem>
+                {#match :line_item_count_decreased}
+                  <TimelineItem icon="➖" actor={Map.get(@users, event.actor_id)} event={event}>
+                    line item count for {event.text} ({Payments.print_money(event.amount)})
                   </TimelineItem>
                 {#match :payment_processed}
                   <TimelineItem

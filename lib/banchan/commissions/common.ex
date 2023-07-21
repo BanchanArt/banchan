@@ -28,6 +28,8 @@ defmodule Banchan.Commissions.Common do
     :comment,
     :line_item_added,
     :line_item_removed,
+    :line_item_count_increased,
+    :line_item_count_decreased,
     :payment_processed,
     :refund_processed,
     :status,

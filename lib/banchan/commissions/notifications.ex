@@ -228,6 +228,22 @@ defmodule Banchan.Commissions.Notifications do
     "A line item has been removed from this commission:\n\n#{text}: #{Payments.print_money(amount)}"
   end
 
+  defp new_event_notification_body(%Event{
+         type: :line_item_count_increased,
+         amount: amount,
+         text: text
+       }) do
+    "Line item count for #{text}: #{Payments.print_money(amount)}"
+  end
+
+  defp new_event_notification_body(%Event{
+         type: :line_item_count_decreased,
+         amount: amount,
+         text: text
+       }) do
+    "Line item count for #{text}: #{Payments.print_money(amount)}"
+  end
+
   defp new_event_notification_body(%Event{type: :payment_processed, amount: amount}) do
     "A payment for #{Payments.print_money(amount)} has been successfully processed."
   end

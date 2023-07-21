@@ -67,8 +67,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
             name: "Base Price",
             description: "The commission itself.",
             price: Money.new(10000, :USD),
-            default: true,
-            sticky: true
+            default: true
           },
           %{
             name: "Extra Character",
@@ -104,8 +103,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
             name: "Base Price",
             description: "One chibi character, to order.",
             price: Money.new(5000, :USD),
-            default: true,
-            sticky: true
+            default: true
           },
           %{
             name: "Extra Character",
@@ -149,8 +147,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
             name: "Base Price",
             description: "The commission itself.",
             price: Money.new(10000, :USD),
-            default: true,
-            sticky: true
+            default: true
           },
           %{
             name: "Extra Character",

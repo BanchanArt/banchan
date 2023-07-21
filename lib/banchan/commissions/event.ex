@@ -35,7 +35,7 @@ defmodule Banchan.Commissions.Event do
   def changeset(event, attrs) do
     event
     |> cast(attrs, [:type, :text, :amount, :status])
-    |> validate_money(:amount)
+    |> validate_money(:amount, nil, true)
     |> validate_required([:type])
     |> validate_text()
   end

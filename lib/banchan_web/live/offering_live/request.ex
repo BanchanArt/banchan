@@ -13,7 +13,7 @@ defmodule BanchanWeb.OfferingLive.Request do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.CommissionLive.Components.{BalanceBox, OfferingBox, Summary}
+  alias BanchanWeb.CommissionLive.Components.{AddonList, BalanceBox, OfferingBox, Summary}
   alias BanchanWeb.Components.Form.{Checkbox, QuillInput, Submit, TextInput, UploadInput}
   alias BanchanWeb.Components.{Layout, Markdown}
   alias BanchanWeb.Endpoint
@@ -56,7 +56,8 @@ defmodule BanchanWeb.OfferingLive.Request do
               amount: option.price,
               name: option.name,
               description: option.description,
-              sticky: option.sticky
+              sticky: option.default,
+              multiple: option.multiple
             }
           end)
 
@@ -159,7 +160,8 @@ defmodule BanchanWeb.OfferingLive.Request do
         option: option,
         amount: option.price,
         name: option.name,
-        description: option.description
+        description: option.description,
+        multiple: option.multiple
       }
 
       line_items = socket.assigns.line_items ++ [line_item]
@@ -178,6 +180,14 @@ defmodule BanchanWeb.OfferingLive.Request do
     else
       {:noreply, socket}
     end
+  end
+
+  def handle_event("increase_item", %{"value" => idx}, socket) do
+    update_line_item_count(idx, +1, socket)
+  end
+
+  def handle_event("decrease_item", %{"value" => idx}, socket) do
+    update_line_item_count(idx, -1, socket)
   end
 
   @impl true
@@ -325,6 +335,25 @@ defmodule BanchanWeb.OfferingLive.Request do
     {:noreply, socket |> assign(followers: new_count)}
   end
 
+  defp update_line_item_count(idx, delta, socket) do
+    {idx, ""} = Integer.parse(idx)
+    line_item = Enum.at(socket.assigns.line_items, idx)
+    new_count = line_item.count + delta
+
+    cond do
+      new_count > 0 ->
+        line_item = Map.put(line_item, :count, new_count)
+        line_items = List.replace_at(socket.assigns.line_items, idx, line_item)
+        {:noreply, assign(socket, line_items: line_items)}
+
+      new_count <= 0 && !line_item.sticky ->
+        {:noreply, assign(socket, line_items: List.delete_at(socket.assigns.line_items, idx))}
+
+      true ->
+        {:noreply, socket}
+    end
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -334,19 +363,27 @@ defmodule BanchanWeb.OfferingLive.Request do
       <div class="flex flex-col space-y-2 md:container md:mx-auto p-2">
         <Form for={@changeset} change="change" submit="submit">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="flex flex-col md:order-2">
+            <div class="flex flex-col md:order-2 rounded-lg bg-base-200 p-4 shadow-lg">
               <OfferingBox offering={@offering} class="rounded-box hover:bg-base-200 p-2 transition-all" />
               <div class="divider" />
+              <div class="font-medium text-sm opacity-50">Cart</div>
               <Summary
-                add_item="add_item"
                 allow_edits
                 remove_item="remove_item"
+                increase_item="increase_item"
+                decrease_item="decrease_item"
                 line_items={@line_items}
-                offering={@offering}
               />
-              <div class="pt-6">
-                <BalanceBox id="balance-box" line_items={@line_items} />
-              </div>
+              <div class="divider" />
+              <BalanceBox id="balance-box" line_items={@line_items} />
+              {#if Enum.any?(@offering.options, &(!&1.default))}
+                <div class="flex flex-col gap-2">
+                  <div class="w-full mt-2 border-t-2 border-content opacity-10" />
+                  <div class="w-full mb-2 border-t-2 border-content opacity-10" />
+                </div>
+                <div class="px-2 font-medium text-sm opacity-50">Add-ons</div>
+                <AddonList id="addon-list" offering={@offering} line_items={@line_items} add_item="add_item" />
+              {/if}
             </div>
             <div class="divider md:hidden" />
             <div class="flex flex-col md:col-span-2 md:order-1 gap-4">

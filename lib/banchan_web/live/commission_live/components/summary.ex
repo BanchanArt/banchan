@@ -4,118 +4,67 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   """
   use BanchanWeb, :component
 
-  alias Banchan.Commissions
   alias Banchan.Payments
 
-  alias Surface.Components.Form
+  alias BanchanWeb.Components.Icon
 
-  alias BanchanWeb.Components.Collapse
-  alias BanchanWeb.Components.Form.{Submit, TextArea, TextInput}
-
-  prop commission, :struct, from_context: :commission
-  prop line_items, :list, required: true
-  prop allow_edits, :boolean, default: false
-  prop show_options, :boolean, default: true
-  prop offering, :struct
-  prop add_item, :event
-  prop remove_item, :event
-
-  prop custom_changeset, :struct
-  prop custom_collapse_id, :string
-  prop submit_custom, :event
-  prop change_custom, :event
+  prop(commission, :struct, from_context: :commission)
+  prop(line_items, :list, required: true)
+  prop(allow_edits, :boolean, default: false)
+  prop(remove_item, :event)
+  prop(increase_item, :event)
+  prop(decrease_item, :event)
 
   def render(assigns) do
     ~F"""
-    <div class="flex flex-col">
-      <ul class="flex flex-col">
-        {#for {item, idx} <- Enum.with_index(@line_items)}
-          <li class="flex flex-row p-2 gap-2">
-            {#if @allow_edits && !item.sticky}
-              <button
-                type="button"
-                :on-click={@remove_item}
-                value={idx}
-                class="text-xl w-8 fas fa-times-circle text-error"
-              />
-            {#else}
-              <button
-                type="button"
-                disabled="true"
-                title="This item cannot be removed"
-                class="w-8 place-self-center text-xl fas fa-check"
-              />
-            {/if}
-            <div class="grow w-full flex flex-col">
-              <div class="font-medium text-sm">{item.name}</div>
-              <div class="text-xs">{item.description}</div>
-            </div>
-            <div class="p-2 font-medium text-sm">{Payments.print_money(item.amount)}</div>
-          </li>
-        {/for}
-      </ul>
-      {#if @show_options &&
-          @offering &&
-          Enum.any?(@offering.options, fn option ->
-            option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))
-          end)}
-        <h5 class="px-2 font-medium">Add-ons:</h5>
-        <ul class="flex flex-col">
-          {#for {option, idx} <- Enum.with_index(@offering.options)}
-            {#if option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
-              <li class="flex flex-row gap-2 p-2">
-                {#if @allow_edits}
-                  <button
-                    type="button"
-                    :on-click={@add_item}
-                    value={idx}
-                    class="w-8 text-xl fas fa-plus-circle text-success"
-                  />
-                {#else}
-                  <div class="w-8" />
-                {/if}
-                <div class="grow w-full flex flex-col">
-                  <div class="font-medium text-sm">{option.name}</div>
-                  <div class="text-xs">{option.description}</div>
-                </div>
-                <div class="p-2 text-sm font-medium">{Payments.print_money(option.price)}</div>
-              </li>
-            {/if}
-          {/for}
-          {#if @custom_changeset}
-            <li class="p-2 pr-4">
-              <Collapse id={@custom_collapse_id}>
-                <:header>
-                  <div class="flex flex-row gap-2">
-                    <i type="button" class="w-8 text-xl fas fa-plus-circle text-success" />
-                    <div class="grow flex flex-col">
-                      <div class="font-medium text-sm">Custom Option</div>
-                      <div class="text-xs">Add a customized option to the summary.</div>
-                    </div>
-                  </div>
-                </:header>
-                <Form
-                  class="flex flex-col gap-2"
-                  for={@custom_changeset}
-                  change={@change_custom}
-                  submit={@submit_custom}
-                >
-                  <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
-                  <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
-                  <div class="flex flex-row gap-2 items-center py-2">
-                    <div class="flex flex-basis-1/4">{Money.Currency.symbol(Commissions.commission_currency(@commission))}</div>
-                    <div class="grow">
-                      <TextInput name={:amount} show_label={false} opts={required: true} />
-                    </div>
-                  </div>
-                  <Submit class="w-full" changeset={@custom_changeset} />
-                </Form>
-              </Collapse>
-            </li>
+    <ul class="flex flex-col">
+      {#for {item, idx} <- @line_items |> Enum.with_index()}
+        <li class="flex flex-row py-2 gap-2">
+          {#if @allow_edits && !item.sticky}
+            <button
+              type="button"
+              class="hover:text-error w-8 text-xl opacity-50"
+              :on-click={@remove_item}
+              value={idx}
+            >
+              <Icon name="trash-2" />
+            </button>
+          {#else}
+            <Icon name="check-circle-2" class="w-8 text-xl opacity-50" />
           {/if}
-        </ul>
-      {/if}
-    </div>
+          <div class="grow w-full flex flex-col">
+            <div class="font-medium text-sm">{item.name}</div>
+            <div class="text-xs">{item.description}</div>
+            {#if item.multiple}
+              <span class="isolate inline-flex rounded-md shadow-sm pt-2 w-24">
+                <button
+                  type="button"
+                  :if={@allow_edits}
+                  :on-click={@decrease_item}
+                  value={idx}
+                  class="relative inline-flex items-center rounded-l-md px-2 py-1 ring-1 ring-inset ring-base-300 focus:z-10 bg-base-200 text-content hover:bg-error hover:opacity-75 hover:text-base-100"
+                >
+                  <span class="sr-only">Previous</span>
+                  <Icon name="minus" />
+                </button>
+                <span class="relative inline-flex items-center px-2 py-1 ring-1 ring-inset ring-base-300 focus:z-10 bg-base-100">{item.count}</span>
+                <button
+                  type="button"
+                  :if={@allow_edits}
+                  :on-click={@increase_item}
+                  value={idx}
+                  class="relative -ml-px inline-flex items-center rounded-r-md px-2 py-1 ring-1 ring-inset ring-base-300 focus:z-10 bg-base-200 text-content hover:bg-success hover:opacity-75 hover:text-base-100"
+                >
+                  <span class="sr-only">Next</span>
+                  <Icon name="plus" />
+                </button>
+              </span>
+            {/if}
+          </div>
+          <div class="font-medium text-sm">{Payments.print_money(Money.multiply(item.amount, item.count || 1))}</div>
+        </li>
+      {/for}
+    </ul>
     """
   end
 end

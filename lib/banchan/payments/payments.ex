@@ -353,7 +353,9 @@ defmodule Banchan.Payments do
               "amount" => %{
                 "amount" => &1.amount.amount,
                 "currency" => &1.amount.currency
-              }
+              },
+              "multiple" => &1.multiple,
+              "count" => &1.count
             }
           )
         )
@@ -1640,7 +1642,7 @@ defmodule Banchan.Payments do
       "$" -> currency_symbol(money.currency) <> Money.to_string(money, symbol: false)
       "" -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
       " " -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
-      _ -> Money.to_string(money)
+      _ -> Money.to_string(money, symbol: true)
     end
   end
 

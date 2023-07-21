@@ -76,8 +76,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                       name: "Default Option 1",
                       description: "Base commission.",
                       price: Money.new(0, socket.assigns.studio.default_currency),
-                      default: true,
-                      sticky: true
+                      default: true
                     }
                   ]
                 },
@@ -570,22 +569,15 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                   </div>
                 </div>
                 <Checkbox
+                  name={:default}
+                  info="Whether this option is always included as part of the commission."
+                  label="Always Included"
+                />
+                <Checkbox
                   name={:multiple}
                   info="Allow multiple instances of this option at the same time."
                   label="Allow Multiple"
                 />
-                <Checkbox
-                  name={:default}
-                  info="Whether this option is added by default. Default options are also used to calculate your offering's base price."
-                  label="Default"
-                />
-                {#if Ecto.Changeset.fetch_field!(@changeset, :options) |> Enum.at(0) |> then(& &1.default)}
-                  <Checkbox
-                    name={:sticky}
-                    info="Sticky defaults can't be removed from the cart."
-                    label="Sticky Default"
-                  />
-                {/if}
                 <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
               </Collapse>
             </li>

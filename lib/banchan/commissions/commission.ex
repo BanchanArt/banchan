@@ -21,10 +21,10 @@ defmodule Banchan.Commissions.Commission do
       default: :submitted
 
     has_many :line_items, Banchan.Commissions.LineItem,
-      preload_order: [asc: :inserted_at],
+      preload_order: [asc: :inserted_at, asc: :id],
       on_replace: :delete
 
-    has_many :events, Banchan.Commissions.Event, preload_order: [asc: :inserted_at]
+    has_many :events, Banchan.Commissions.Event, preload_order: [asc: :inserted_at, asc: :id]
 
     belongs_to :offering, Banchan.Offerings.Offering
     belongs_to :studio, Banchan.Studios.Studio

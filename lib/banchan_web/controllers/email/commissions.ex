@@ -28,9 +28,10 @@ defmodule BanchanWeb.Email.Commissions do
       </tr>
       {#for item <- @invoice.line_items}
         <tr>
-          <td>{item.name}</td>
+          <td>{item.name}{#if item.multiple && item.count > 1}
+              x{item.count}{/if}</td>
           <td>{item.description}</td>
-          <td>{Payments.print_money(item.amount)}</td>
+          <td>{Payments.print_money(Money.multiply(item.amount, item.count))}</td>
         </tr>
       {/for}
       <tr>
@@ -64,7 +65,11 @@ defmodule BanchanWeb.Email.Commissions do
     Line Items:
 
     #{assigns.invoice.line_items |> Enum.map_join("\n", fn item -> """
-      * #{item.name} - #{Payments.print_money(item.amount)}
+      * #{item.name}#{if item.multiple && item.count > 1 do
+        " x#{item.count}"
+      else
+        ""
+      end} - #{Payments.print_money(Money.multiply(item.amount, item.count))}
         #{item.description}
       """ end)}
     Total Invoiced: #{Payments.print_money(estimate)}

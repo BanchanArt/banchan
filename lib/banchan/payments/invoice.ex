@@ -72,6 +72,8 @@ defmodule Banchan.Payments.Invoice do
       field(:amount, Money.Ecto.Map.Type)
       field(:name, :string)
       field(:description, :string)
+      field(:multiple, :boolean)
+      field(:count, :integer)
     end
 
     timestamps()
@@ -173,7 +175,7 @@ defmodule Banchan.Payments.Invoice do
 
   defp line_item_changeset(schema, params) do
     schema
-    |> cast(params, [:amount, :name, :description])
+    |> cast(params, [:amount, :name, :description, :multiple, :count])
     |> validate_money(:amount)
     |> validate_required([
       :amount,

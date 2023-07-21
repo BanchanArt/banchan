@@ -13,7 +13,7 @@ defmodule BanchanWeb.OfferingLive.Show do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.CommissionLive.Components.Summary
+  alias BanchanWeb.CommissionLive.Components.{AddonList, Summary}
 
   alias BanchanWeb.Components.{
     Button,
@@ -59,7 +59,7 @@ defmodule BanchanWeb.OfferingLive.Show do
           amount: option.price,
           name: option.name,
           description: option.description,
-          sticky: option.sticky
+          sticky: option.default
         }
       end)
 
@@ -235,47 +235,58 @@ defmodule BanchanWeb.OfferingLive.Show do
             {/if}
           </div>
           <div class="divider" />
-          <Summary line_items={@line_items} offering={@offering} />
-          {#if !Enum.empty?(@offering.tags)}
-            <h3 class="pt-2 text-lg">Tags</h3>
-            <div class="flex flex-row flex-wrap gap-1">
-              {#for tag <- @offering.tags}
-                <Tag tag={tag} />
-              {/for}
-            </div>
-            <div class="divider" />
-          {/if}
-          <div class="flex flex-row justify-end gap-2">
-            {#if @current_user}
-              <div class="dropdown">
-                <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
-                  <i class="fas fa-ellipsis-vertical" />
-                </label>
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
-                  {#if @current_user && (@current_user_member? || Accounts.mod?(@current_user))}
-                    <li>
-                      <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}><i class="fas fa-edit" /> Edit</LiveRedirect>
-                    </li>
-                  {/if}
-                  <li>
-                    <button type="button" :on-click="report">
-                      <i class="fas fa-flag" /> Report
-                    </button>
-                  </li>
-                </ul>
+          <div class="rounded-lg bg-base-200 p-4 shadow-lg flex flex-col">
+            {#if Enum.any?(@offering.options, & &1.default)}
+              <div class="px-2 font-medium text-sm opacity-50">Included</div>
+              <Summary line_items={@line_items} />
+              <div class="divider" />
+            {/if}
+            {#if Enum.any?(@offering.options, &(!&1.default))}
+              <div class="px-2 font-medium text-sm opacity-50">Add-ons</div>
+              <AddonList id="addon-list" offering={@offering} line_items={@line_items} />
+              <div class="divider" />
+            {/if}
+            {#if !Enum.empty?(@offering.tags)}
+              <h3 class="pt-2 text-lg">Tags</h3>
+              <div class="flex flex-row flex-wrap gap-1">
+                {#for tag <- @offering.tags}
+                  <Tag tag={tag} />
+                {/for}
               </div>
+              <div class="divider" />
             {/if}
-            {#if @offering.open}
-              <LiveRedirect
-                to={Routes.offering_request_path(Endpoint, :new, @offering.studio.handle, @offering.type)}
-                class="btn text-center btn-primary grow"
-              >Request</LiveRedirect>
-            {#elseif !@offering.user_subscribed?}
-              <Button class="btn-info grow" click="notify_me">Notify Me</Button>
-            {/if}
-            {#if @offering.user_subscribed?}
-              <Button class="btn-info grow" click="unnotify_me">Unsubscribe</Button>
-            {/if}
+            <div class="pt-4 flex flex-row justify-end gap-2">
+              {#if @current_user}
+                <div class="dropdown">
+                  <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
+                    <i class="fas fa-ellipsis-vertical" />
+                  </label>
+                  <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
+                    {#if @current_user && (@current_user_member? || Accounts.mod?(@current_user))}
+                      <li>
+                        <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}><i class="fas fa-edit" /> Edit</LiveRedirect>
+                      </li>
+                    {/if}
+                    <li>
+                      <button type="button" :on-click="report">
+                        <i class="fas fa-flag" /> Report
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              {/if}
+              {#if @offering.open}
+                <LiveRedirect
+                  to={Routes.offering_request_path(Endpoint, :new, @offering.studio.handle, @offering.type)}
+                  class="btn text-center btn-primary grow"
+                >Request</LiveRedirect>
+              {#elseif !@offering.user_subscribed?}
+                <Button class="btn-info grow" click="notify_me">Notify Me</Button>
+              {/if}
+              {#if @offering.user_subscribed?}
+                <Button class="btn-info grow" click="unnotify_me">Unsubscribe</Button>
+              {/if}
+            </div>
           </div>
           {#if !Enum.empty?(@related)}
             <div class="hidden md:flex md:flex-col">
