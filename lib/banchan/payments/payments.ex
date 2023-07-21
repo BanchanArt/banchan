@@ -353,7 +353,9 @@ defmodule Banchan.Payments do
               "amount" => %{
                 "amount" => &1.amount.amount,
                 "currency" => &1.amount.currency
-              }
+              },
+              "multiple" => &1.multiple,
+              "count" => &1.count
             }
           )
         )

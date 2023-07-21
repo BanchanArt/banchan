@@ -456,7 +456,7 @@ defmodule Banchan.Commissions do
           i in Invoice,
           where:
             i.commission_id == ^commission.id and
-              i.status == :succeeded,
+              i.status in [:succeeded, :released],
           select: i.tip
         )
         |> Repo.all()
@@ -499,7 +499,7 @@ defmodule Banchan.Commissions do
       line_items,
       Money.new(0, currency),
       fn item, acc ->
-        Money.add(acc, item.amount)
+        Money.add(acc, Money.multiply(item.amount, item.count || 1))
       end
     )
   end

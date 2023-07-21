@@ -39,6 +39,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
               <span class="isolate inline-flex rounded-md shadow-sm pt-2 w-24">
                 <button
                   type="button"
+                  :if={@allow_edits}
                   :on-click={@decrease_item}
                   value={idx}
                   class="relative inline-flex items-center rounded-l-md px-2 py-1 ring-1 ring-inset ring-base-300 focus:z-10 bg-base-200 text-content hover:bg-error hover:opacity-75 hover:text-base-100"
@@ -49,6 +50,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                 <span class="relative inline-flex items-center px-2 py-1 ring-1 ring-inset ring-base-300 focus:z-10 bg-base-100">{item.count}</span>
                 <button
                   type="button"
+                  :if={@allow_edits}
                   :on-click={@increase_item}
                   value={idx}
                   class="relative -ml-px inline-flex items-center rounded-r-md px-2 py-1 ring-1 ring-inset ring-base-300 focus:z-10 bg-base-200 text-content hover:bg-success hover:opacity-75 hover:text-base-100"
@@ -59,7 +61,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
               </span>
             {/if}
           </div>
-          <div class="font-medium text-sm">{Payments.print_money(item.amount)}</div>
+          <div class="font-medium text-sm">{Payments.print_money(Money.multiply(item.amount, item.count || 1))}</div>
         </li>
       {/for}
     </ul>
