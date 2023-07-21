@@ -56,7 +56,8 @@ defmodule BanchanWeb.OfferingLive.Request do
               amount: option.price,
               name: option.name,
               description: option.description,
-              sticky: option.default
+              sticky: option.default,
+              multiple: option.multiple
             }
           end)
 
@@ -159,7 +160,8 @@ defmodule BanchanWeb.OfferingLive.Request do
         option: option,
         amount: option.price,
         name: option.name,
-        description: option.description
+        description: option.description,
+        multiple: option.multiple
       }
 
       line_items = socket.assigns.line_items ++ [line_item]
@@ -178,6 +180,14 @@ defmodule BanchanWeb.OfferingLive.Request do
     else
       {:noreply, socket}
     end
+  end
+
+  def handle_event("increase_item", %{"value" => idx}, socket) do
+    update_line_item_count(idx, +1, socket)
+  end
+
+  def handle_event("decrease_item", %{"value" => idx}, socket) do
+    update_line_item_count(idx, -1, socket)
   end
 
   @impl true
@@ -325,6 +335,25 @@ defmodule BanchanWeb.OfferingLive.Request do
     {:noreply, socket |> assign(followers: new_count)}
   end
 
+  defp update_line_item_count(idx, delta, socket) do
+    {idx, ""} = Integer.parse(idx)
+    line_item = Enum.at(socket.assigns.line_items, idx)
+    new_count = line_item.count + delta
+
+    cond do
+      new_count > 0 ->
+        line_item = Map.put(line_item, :count, new_count)
+        line_items = List.replace_at(socket.assigns.line_items, idx, line_item)
+        {:noreply, assign(socket, line_items: line_items)}
+
+      new_count <= 0 && !line_item.sticky ->
+        {:noreply, assign(socket, line_items: List.delete_at(socket.assigns.line_items, idx))}
+
+      true ->
+        {:noreply, socket}
+    end
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
@@ -338,7 +367,13 @@ defmodule BanchanWeb.OfferingLive.Request do
               <OfferingBox offering={@offering} class="rounded-box hover:bg-base-200 p-2 transition-all" />
               <div class="divider" />
               <div class="font-medium text-sm opacity-50">Cart</div>
-              <Summary allow_edits remove_item="remove_item" line_items={@line_items} />
+              <Summary
+                allow_edits
+                remove_item="remove_item"
+                increase_item="increase_item"
+                decrease_item="decrease_item"
+                line_items={@line_items}
+              />
               <div class="divider" />
               <BalanceBox id="balance-box" line_items={@line_items} />
               {#if Enum.any?(@offering.options, &(!&1.default))}

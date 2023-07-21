@@ -12,6 +12,8 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
   prop(line_items, :list, required: true)
   prop(allow_edits, :boolean, default: false)
   prop(remove_item, :event)
+  prop(increase_item, :event)
+  prop(decrease_item, :event)
 
   def render(assigns) do
     ~F"""
@@ -33,6 +35,29 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
           <div class="grow w-full flex flex-col">
             <div class="font-medium text-sm">{item.name}</div>
             <div class="text-xs">{item.description}</div>
+            {#if item.multiple}
+              <span class="isolate inline-flex rounded-md shadow-sm pt-2 w-24">
+                <button
+                  type="button"
+                  :on-click={@decrease_item}
+                  value={idx}
+                  class="relative inline-flex items-center rounded-l-md px-2 py-1 ring-1 ring-inset ring-base-300 focus:z-10 bg-base-200 text-content hover:bg-error hover:opacity-75 hover:text-base-100"
+                >
+                  <span class="sr-only">Previous</span>
+                  <Icon name="minus" />
+                </button>
+                <span class="relative inline-flex items-center px-2 py-1 ring-1 ring-inset ring-base-300 focus:z-10 bg-base-100">{item.count}</span>
+                <button
+                  type="button"
+                  :on-click={@increase_item}
+                  value={idx}
+                  class="relative -ml-px inline-flex items-center rounded-r-md px-2 py-1 ring-1 ring-inset ring-base-300 focus:z-10 bg-base-200 text-content hover:bg-success hover:opacity-75 hover:text-base-100"
+                >
+                  <span class="sr-only">Next</span>
+                  <Icon name="plus" />
+                </button>
+              </span>
+            {/if}
           </div>
           <div class="font-medium text-sm">{Payments.print_money(item.amount)}</div>
         </li>

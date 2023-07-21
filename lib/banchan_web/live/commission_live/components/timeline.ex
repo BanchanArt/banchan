@@ -57,6 +57,14 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                   <TimelineItem icon="✖" actor={Map.get(@users, event.actor_id)} event={event}>
                     removed <strong>{event.text}</strong> ({Payments.print_money(Money.multiply(event.amount, -1))})
                   </TimelineItem>
+                {#match :line_item_count_increased}
+                  <TimelineItem icon="➕" actor={Map.get(@users, event.actor_id)} event={event}>
+                    line item count for {event.text} ({Payments.print_money(event.amount)})
+                  </TimelineItem>
+                {#match :line_item_count_decreased}
+                  <TimelineItem icon="➖" actor={Map.get(@users, event.actor_id)} event={event}>
+                    line item count for {event.text} ({Payments.print_money(event.amount)})
+                  </TimelineItem>
                 {#match :payment_processed}
                   <TimelineItem
                     icon={Money.Currency.symbol(event.amount)}

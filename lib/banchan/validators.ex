@@ -30,9 +30,10 @@ defmodule Banchan.Validators do
     |> unique_constraint(field)
   end
 
-  def validate_money(changeset, field, max \\ nil) do
+  def validate_money(changeset, field, max \\ nil, allow_negative \\ false) do
     validate_change(changeset, field, fn
-      _, %Money{amount: amount} when amount >= 0 and (is_nil(max) or amount <= max.amount) ->
+      _, %Money{amount: amount}
+      when (amount >= 0 or allow_negative) and (is_nil(max) or amount <= max.amount) ->
         []
 
       _, %Money{} when not is_nil(max) ->

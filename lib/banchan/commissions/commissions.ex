@@ -907,7 +907,8 @@ defmodule Banchan.Commissions do
                   option: option,
                   amount: option.price,
                   name: option.name,
-                  description: option.description
+                  description: option.description,
+                  multiple: option.multiple
                 }
 
               %{amount: amount, name: name, description: description} ->
@@ -1050,6 +1051,89 @@ defmodule Banchan.Commissions do
       end)
 
     ret
+  end
+
+  def update_line_item_count(actor, commission, line_item, delta, current_user_member?)
+
+  def update_line_item_count(actor, commission, line_item, delta, false) do
+    if :admin in actor.roles || :mod in actor.roles do
+      update_line_item_count(actor, commission, line_item, delta, true)
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  def update_line_item_count(%User{} = actor, %Commission{} = commission, line_item, delta, true) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        actor = Repo.reload(actor)
+
+        current_count =
+          from(li in LineItem, where: li.id == ^line_item.id, select: li.count, lock: "FOR UPDATE")
+          |> Repo.one!()
+
+        line_item = LineItem.count_changeset(line_item, %{count: current_count + delta})
+
+        if Studios.is_user_in_studio?(actor, %Studio{id: commission.studio_id}) ||
+             :admin in actor.roles ||
+             :mod in actor.roles do
+          with {:ok, line_item} <- Repo.update(line_item, returning: [:count]),
+               {:ok, removed} <-
+                 (if line_item.count <= 0 do
+                    Repo.delete(line_item)
+                  else
+                    {:ok, nil}
+                  end),
+               line_items <-
+                 commission.line_items
+                 |> Enum.filter(fn line_item ->
+                  is_nil(removed) || removed.id != line_item.id
+                 end)
+                 |> Enum.map(fn li ->
+                   if li.id == line_item.id do
+                     line_item
+                   else
+                     li
+                   end
+                 end),
+               %Commission{} = commission <- %{commission | line_items: line_items},
+               {:ok, event} <-
+                 create_line_item_event(actor, commission, line_item, removed, delta) do
+            Notifications.commission_line_items_changed(commission, actor)
+            {:ok, {commission, [event]}}
+          end
+        else
+          {:error, :unauthorized}
+        end
+      end)
+
+    ret
+  end
+
+  defp create_line_item_event(actor, commission, line_item, removed, delta) do
+    cond do
+      !is_nil(removed) ->
+        create_event(:line_item_removed, actor, commission, true, [], %{
+          amount: line_item.amount,
+          text: line_item.name
+        })
+
+      delta > 0 ->
+        create_event(:line_item_count_increased, actor, commission, true, [], %{
+          amount: Money.multiply(line_item.amount, delta),
+          text: line_item.name <> " increased by #{delta}"
+        })
+
+      delta < 0 ->
+        create_event(:line_item_count_decreased, actor, commission, true, [], %{
+          amount: Money.multiply(line_item.amount, delta),
+          text: line_item.name <> " decreased by #{delta}"
+        })
+
+      true ->
+        # Probably shouldn't ever happen, but just in case...
+        {:ok, nil}
+    end
   end
 
   @doc """

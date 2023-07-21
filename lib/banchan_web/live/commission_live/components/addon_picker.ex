@@ -46,8 +46,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonPicker do
       end
 
     if !socket.assigns.allow_edits ||
-         (!option.multiple &&
-            Enum.any?(commission.line_items, &(&1.option && &1.option.id == option.id))) do
+         Enum.any?(commission.line_items, &(&1.option && &1.option.id == option.id)) do
       # Deny the change. This shouldn't happen unless there's a bug, or
       # someone is trying to send us Shenanigans data.
       {:noreply, socket}

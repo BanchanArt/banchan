@@ -32,7 +32,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
     <bc-addon-list>
       <ul class="flex flex-col">
         {#for {option, idx} <- Enum.with_index(@offering.options)}
-          {#if option.multiple || !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
+          {#if !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
             <li class="flex flex-row gap-2 py-2">
               {#if @add_item}
                 <button
