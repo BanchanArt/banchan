@@ -399,7 +399,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           line_items={@commission.line_items}
           tipped={@final_invoice && @final_invoice.tip}
         />
-        <div class="divider" />
+        <div class="w-full mt-2 border-t-2 border-content opacity-10" />
+        <div class="w-full mb-2 border-t-2 border-content opacity-10" />
         {#if @commission.offering}
           <div class="px-2 font-medium text-sm opacity-50">Add-ons</div>
           <AddonPicker

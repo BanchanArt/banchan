@@ -1087,7 +1087,7 @@ defmodule Banchan.Commissions do
                line_items <-
                  commission.line_items
                  |> Enum.filter(fn line_item ->
-                  is_nil(removed) || removed.id != line_item.id
+                   is_nil(removed) || removed.id != line_item.id
                  end)
                  |> Enum.map(fn li ->
                    if li.id == line_item.id do

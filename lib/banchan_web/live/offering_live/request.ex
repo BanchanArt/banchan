@@ -377,7 +377,10 @@ defmodule BanchanWeb.OfferingLive.Request do
               <div class="divider" />
               <BalanceBox id="balance-box" line_items={@line_items} />
               {#if Enum.any?(@offering.options, &(!&1.default))}
-                <div class="divider" />
+                <div class="flex flex-col gap-2">
+                  <div class="w-full mt-2 border-t-2 border-content opacity-10" />
+                  <div class="w-full mb-2 border-t-2 border-content opacity-10" />
+                </div>
                 <div class="px-2 font-medium text-sm opacity-50">Add-ons</div>
                 <AddonList id="addon-list" offering={@offering} line_items={@line_items} add_item="add_item" />
               {/if}
