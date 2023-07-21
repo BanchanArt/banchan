@@ -1039,7 +1039,7 @@ defmodule Banchan.Commissions do
                %Commission{} = commission <- %{commission | line_items: line_items},
                {:ok, event} <-
                  create_event(:line_item_removed, actor, commission, true, [], %{
-                   amount: line_item.amount,
+                   amount: Money.multiply(line_item.amount, line_item.count),
                    text: line_item.name
                  }) do
             Notifications.commission_line_items_changed(commission, actor)
