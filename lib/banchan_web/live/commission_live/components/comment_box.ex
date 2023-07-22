@@ -76,10 +76,8 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
         {:noreply,
          assign(socket,
            changeset:
-             Commissions.change_event(
-               %Event{
-                 type: :comment
-               },
+             Event.comment_changeset(
+               %Event{},
                %{}
              )
          )}

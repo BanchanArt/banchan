@@ -21,6 +21,21 @@ defmodule BanchanWeb.Components.Form.QuillInput do
 
   data(dragging, :boolean, default: false)
 
+  def update(assigns, socket) do
+    socket = assign(socket, assigns)
+
+    if is_nil(assigns.form) do
+      {:ok, socket}
+    else
+      {:ok,
+       socket
+       |> push_event("set_markdown", %{
+         id: assigns.id <> "_hook",
+         value: Map.get(assigns.form.params, "#{assigns.name}", "")
+       })}
+    end
+  end
+
   def handle_event("dragstart", _, socket) do
     {:noreply, assign(socket, dragging: true)}
   end
@@ -98,7 +113,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
             phx-drop-target={@upload && @upload.ref}
             phx-update="ignore"
             :hook="QuillInput"
-            id={@id <> "-hook"}
+            id={@id <> "_hook"}
           >
             <div id={@id <> "-editor"} phx-update="ignore" class="object-cover editor h-full w-full" />
             <TextArea class="hidden input-textarea" opts={@opts} />
