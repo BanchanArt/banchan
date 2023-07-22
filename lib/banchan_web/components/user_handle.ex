@@ -16,7 +16,7 @@ defmodule BanchanWeb.Components.UserHandle do
     {#if Accounts.active_user?(@user) && @link}
       <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @user.handle)}>
         <span>
-          <strong title={@user.name} class="font-semibold hover:underline">@{@user.handle}</strong>
+          <strong title={@user.name} class="font-semibold hover:underline">{@user.handle}</strong>
           {#if :admin in @user.roles}
             <span class="font-medium text-error">
               (admin)</span>
@@ -31,7 +31,7 @@ defmodule BanchanWeb.Components.UserHandle do
       </LiveRedirect>
     {#elseif Accounts.active_user?(@user) && !@link}
       <span class="cursor-default">
-        <strong title={@user.name} class="font-semibold">@{@user.handle}</strong>
+        <strong title={@user.name} class="font-semibold">{@user.handle}</strong>
         {#if :admin in @user.roles}
           <span class="font-medium text-error">
             (admin)</span>
