@@ -10,7 +10,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.{Avatar, Button, Markdown, ReportModal, UserHandle}
+  alias BanchanWeb.Components.{Button, Markdown, ReportModal, UserHandle}
   alias BanchanWeb.Components.Form.{QuillInput, Submit}
   alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox}
 
@@ -148,10 +148,9 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   def render(assigns) do
     ~F"""
-    <div class="shadow-md bg-base-200 rounded-box pb-4">
+    <div class="bg-base-200 rounded-box pb-4 border-base-300 border-2">
       <div class="flex flex-row text-sm pt-2 px-2 -mb-4">
         <div class="inline-flex grow items-center flex-wrap space-x-1">
-          <Avatar class="w-6" user={@actor} />
           <UserHandle user={@actor} />
           <span>
             {#if @event.invoice && @event.invoice.final}

@@ -117,7 +117,7 @@ defmodule BanchanWeb.BetaLive.RequestsTest do
                |> Floki.find("table > tbody > tr > td.email")
                |> Enum.map(&Floki.text(&1))
 
-      admin_handle = "@" <> admin.handle <> "(admin)"
+      admin_handle = admin.handle <> "(admin)"
 
       assert ["-", ^admin_handle, "-"] =
                view
@@ -154,7 +154,7 @@ defmodule BanchanWeb.BetaLive.RequestsTest do
 
       {:ok, view, _html} = live(conn, Routes.beta_requests_path(conn, :index))
 
-      user_handle = "@" <> user.handle
+      user_handle = user.handle
 
       assert ["-", ^user_handle, "-"] =
                view
@@ -238,9 +238,9 @@ defmodule BanchanWeb.BetaLive.RequestsTest do
                |> Floki.find("table > tbody > tr > td.email")
                |> Enum.map(&Floki.text(&1))
 
-      admin_handle = "@" <> admin.handle <> "(admin)"
+      admin_handle = admin.handle <> "(admin)"
 
-      assert ["-", "@tteokbokki(system)", ^admin_handle, "-"] =
+      assert ["-", "tteokbokki(system)", ^admin_handle, "-"] =
                view
                |> element("form.show-sent")
                |> render_change(%{"show_sent" => %{"show_sent" => "true"}})
@@ -294,9 +294,9 @@ defmodule BanchanWeb.BetaLive.RequestsTest do
                |> Floki.find("table > tbody > tr > td.email")
                |> Enum.map(&Floki.text(&1))
 
-      admin_handle = "@" <> admin.handle <> "(admin)"
+      admin_handle = admin.handle <> "(admin)"
 
-      assert [^admin_handle, "@tteokbokki(system)", ^admin_handle, "-"] =
+      assert [^admin_handle, "tteokbokki(system)", ^admin_handle, "-"] =
                view
                |> element("form.show-sent")
                |> render_change(%{"show_sent" => %{"show_sent" => "true"}})
