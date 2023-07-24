@@ -11,16 +11,16 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
     Button,
     Collapse,
     Dropdown,
+    DropdownItem,
     Modal
   }
 
-  alias BanchanWeb.CommissionLive.Components.StatusItem
+  prop(current_user, :struct, from_context: :current_user)
+  prop(current_user_member?, :boolean, from_context: :current_user_member?)
+  prop(commission, :struct, from_context: :commission)
 
-  prop current_user, :struct, from_context: :current_user
-  prop current_user_member?, :boolean, from_context: :current_user_member?
-  prop commission, :struct, from_context: :commission
-
-  data invoices_paid?, :boolean
+  data(invoices_paid?, :boolean)
+  data(statuses, :list)
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
@@ -32,7 +32,22 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
         Enum.all?(invoices, &Payments.invoice_finished?(&1)) &&
         Enum.any?(invoices, &Payments.invoice_paid?(&1))
 
-    {:ok, socket |> assign(invoices_paid?: invoices_paid?)}
+    {:ok,
+     socket
+     |> assign(
+       invoices_paid?: invoices_paid?,
+       statuses:
+         Commissions.Common.status_values()
+         |> Enum.filter(fn status ->
+           status not in [:withdrawn, :ready_for_review, :approved] &&
+             Commissions.status_transition_allowed?(
+               socket.assigns.current_user_member?,
+               socket.assigns.current_user.id == socket.assigns.commission.client_id,
+               socket.assigns.commission.status,
+               status
+             )
+         end)
+     )}
   end
 
   def handle_event("update_status", %{"value" => "rejected"}, socket) do
@@ -72,16 +87,33 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   end
 
   def render(assigns) do
+    has_transitions? = !Enum.empty?(assigns.statuses)
+
     ~F"""
-    <div class="flex flex-col gap-2 w-full">
-      <Dropdown show_caret? class="btn" label={Commissions.Common.humanize_status(@commission.status)}>
-        <StatusItem click="update_status" status={:submitted} />
-        <StatusItem click="update_status" status={:accepted} />
-        <StatusItem click="update_status" status={:rejected} />
-        <StatusItem click="update_status" status={:paused} />
-        <StatusItem click="update_status" status={:in_progress} />
-        <StatusItem click="update_status" status={:waiting} />
-      </Dropdown>
+    <div class="flex flex-col gap-2 w-full bg-base-200 rounded-box p-4 border-base-300 border-2">
+      <h3 class="text-lg font-medium">Commission Status</h3>
+      {#if has_transitions?}
+        <Dropdown
+          show_caret?
+          class="btn btn-primary w-full"
+          label={Commissions.Common.humanize_status(@commission.status)}
+        >
+          {#for status <- @statuses}
+            <DropdownItem class="w-full">
+              <button class="w-full" :on-click="update_status" value={status}>
+                <div class="flex flex-col items-start w-full">
+                  <span>{Commissions.Common.humanize_status(status)}</span>
+                  <span class="text-xs text-base-content text-left opacity-50">
+                    {Commissions.Common.status_description(status)}
+                  </span>
+                </div>
+              </button>
+            </DropdownItem>
+          {/for}
+        </Dropdown>
+      {#else}
+        <Button disabled label={Commissions.Common.humanize_status(@commission.status)} />
+      {/if}
       <div class="text-md">
         {Commissions.Common.status_description(@commission.status)}
       </div>
