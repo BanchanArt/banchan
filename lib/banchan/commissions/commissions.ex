@@ -1069,7 +1069,11 @@ defmodule Banchan.Commissions do
         actor = Repo.reload(actor)
 
         current_count =
-          from(li in LineItem, where: li.id == ^line_item.id, select: li.count, lock: "FOR UPDATE")
+          from(li in LineItem,
+            where: li.id == ^line_item.id,
+            select: li.count,
+            lock: "FOR UPDATE"
+          )
           |> Repo.one!()
 
         line_item = LineItem.count_changeset(line_item, %{count: current_count + delta})
