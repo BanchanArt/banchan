@@ -24,7 +24,7 @@ defmodule BanchanWeb.Components.Icon do
       <i
         id={for _ <- 1..10,
             into: "",
-            do: <<Enum.random('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')>>}
+            do: <<Enum.random(~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")>>}
         :hook="Icon"
         class={"w-#{@size} h-#{@size}"}
         data-lucide={@name}
