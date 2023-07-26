@@ -10,10 +10,10 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   alias BanchanWeb.Components.{
     Button,
     Collapse,
-    Dropdown,
-    DropdownItem,
     Modal
   }
+
+  alias BanchanWeb.Components.Form.FancySelect
 
   prop(current_user, :struct, from_context: :current_user)
   prop(current_user_member?, :boolean, from_context: :current_user_member?)
@@ -93,24 +93,17 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
     <div class="flex flex-col gap-2 w-full bg-base-200 rounded-box p-4 border-base-300 border-2">
       <h3 class="text-lg font-medium">Commission Status</h3>
       {#if has_transitions?}
-        <Dropdown
-          show_caret?
-          class="btn btn-primary w-full"
-          label={Commissions.Common.humanize_status(@commission.status)}
-        >
-          {#for status <- @statuses}
-            <DropdownItem class="w-full">
-              <button class="w-full" :on-click="update_status" value={status}>
-                <div class="flex flex-col items-start w-full">
-                  <span>{Commissions.Common.humanize_status(status)}</span>
-                  <span class="text-xs text-base-content text-left opacity-50">
-                    {Commissions.Common.status_description(status)}
-                  </span>
-                </div>
-              </button>
-            </DropdownItem>
-          {/for}
-        </Dropdown>
+        <FancySelect id={@id <> "-status-selector"} name={:status} show_label={false}>
+          <FancySelect.Item label="foo" value="bar" description="This is the description" />
+          <FancySelect.Item label="argh" value="bleh" description="This is the description" />
+          {!-- #for status <- @statuses}
+            <FancySelect.Item
+              label={Commissions.Common.humanize_status(status)}
+              value={status}
+              description={Commissions.Common.status_description(status)}
+            />
+          {/for --}
+        </FancySelect>
       {#else}
         <Button disabled label={Commissions.Common.humanize_status(@commission.status)} />
       {/if}

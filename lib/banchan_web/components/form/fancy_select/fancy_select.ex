@@ -2,12 +2,11 @@ defmodule BanchanWeb.Components.Form.FancySelect.Item do
   @moduledoc """
   Renderless component for dropdown items.
   """
-  use BanchanWeb, :components, slot: "items"
+  use BanchanWeb, type: :component, slot: "items"
 
   prop label, :string, required: true
   prop description, :string
   prop value, :any, required: true
-  prop selected, :boolean, default: false
 end
 
 defmodule BanchanWeb.Components.Form.FancySelect do
@@ -17,28 +16,43 @@ defmodule BanchanWeb.Components.Form.FancySelect do
   """
   use BanchanWeb, :live_component
 
+  alias Surface.Components.Form
+  # alias Surface.Components.Form.{ErrorTag, Field, HiddenInput, Label}
+
   alias BanchanWeb.Components.Icon
 
-  data selected, :integer, default: 0
-  data highlighted, :integer, default: 0
+  prop name, :any, required: true
+  prop label, :string
+  prop show_label, :boolean, default: true
+  prop form, :form, from_context: {Form, :form}
+
+  data selected, :struct
+  data selected_idx, :integer, default: 0
 
   slot items
 
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
 
-    selected =
-      socket.assigns.items
-      |> Enum.find_index(& &1.selected)
+    {:ok,
+     socket
+     |> assign(
+       max: Enum.count(socket.assigns.items) - 1,
+       selected: Enum.at(socket.assigns.items, socket.assigns.selected_idx)
+     )}
+  end
 
-    {:ok, socket |> assign(selected: selected, max: Enum.count(socket.assigns.items) - 1)}
+  def handle_event("selected", %{"selected" => selected_idx}, socket) do
+    {:noreply,
+     socket
+     |> assign(selected_idx: selected_idx, selected: Enum.at(socket.assigns.items, selected_idx))}
   end
 
   def render(assigns) do
     ~F"""
-    <bc-dropdown id={@id}>
+    <bc-fancy-select id={@id} :hook="FancySelect">
       <label id={@id <> "-label"} class="sr-only">
-        {@label}
+        {@selected.label}
         {#if Enum.count(@items) > 1}
           <Icon name="chevron-down" />
         {/if}
@@ -46,21 +60,17 @@ defmodule BanchanWeb.Components.Form.FancySelect do
       <div class="relative">
         <button
           type="button"
-          class="inline-flex items-center rounded-l-none rounded-r-md bg-primary p-2 hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-ring-primary focus:ring-offset-2 focus:ring-offset-content"
+          class="inline-flex w-full items-center rounded-md bg-primary p-2 hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-ring-primary focus:ring-offset-2 focus:ring-offset-content"
           aria-haspopup="listbox"
           aria-expanded="true"
           aria-labelledby={@id <> "-label"}
-          :on-click={JS.toggle(
-            to: @id <> "-options",
-            out: {"transition ease-in duration-100", "opacity-100", "opacity-0"}
-          )}
           :on-window-keydown={JS.hide(
             to: @id <> "-options",
             transition: {"transition ease-in duration-100", "opacity-100", "opacity-0"}
           )}
           phx-key="Escape"
         >
-          <p class="text-sm font-semibold">{@label}</p>
+          <p class="text-sm font-semibold text-primary-content">{@selected.label}</p>
         </button>
         {!-- # TODO:
       Select popover, show/hide based on select state.
@@ -75,9 +85,10 @@ defmodule BanchanWeb.Components.Form.FancySelect do
         <ul
           class="absolute right-0 z-10 mt-2 w-72 origin-top-right divide-y divide-neutral overflow-hidden rounded-md bg-base-200 shadow-lg ring-1 ring-base-300 ring-opacity-5 focus:outline-none"
           tabindex="-1"
+          style="display: none;"
           role="listbox"
           aria-labelledby={@id <> "-label"}
-          aria-activedescendant={@id <> "-option-" <> "#{elem(selected, 1)}"}
+          aria-activedescendant={@id <> "-option-" <> "#{@selected_idx}"}
           id={@id <> "-options"}
         >
           {#for {item, idx} <- @items |> Enum.with_index()}
@@ -85,23 +96,19 @@ defmodule BanchanWeb.Components.Form.FancySelect do
             Select option, manage highlight styles based on mouseenter/mouseleave and keyboard navigation.
             --}
             <li
-              class={
-                "cursor-default select-none p-4 text-sm",
-                "bg-primary text-primary-content": idx == @highlighted,
-                "bg-base-200 text-base-content": idx != @highlighted
-              }
+              class="cursor-default select-none p-4 text-sm"
               id={@id <> "-option-" <> "#{idx}"}
               role="option"
             >
               <div class="flex flex-col">
                 <div class="flex justify-between">
-                  <p class={"font-semibold": item.selected, "font-normal": !item.selected}>{item.label}</p>
+                  <p class={"font-semibold": idx == @selected_idx, "font-normal": idx != @selected_idx}>{item.label}</p>
                   {!-- # TODO:
                   Checkmark, only display for selected option.
 
                   Highlighted: "text-white", Not Highlighted: "text-indigo-600"
                   --}
-                  <span :if={@selected == idx}>
+                  <span :if={@selected_idx == idx}>
                     <Icon name="check" />
                   </span>
                 </div>
@@ -112,7 +119,7 @@ defmodule BanchanWeb.Components.Form.FancySelect do
           {/for}
         </ul>
       </div>
-    </bc-dropdown>
+    </bc-fancy-select>
     """
   end
 end
