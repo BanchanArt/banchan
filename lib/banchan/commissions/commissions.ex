@@ -911,12 +911,13 @@ defmodule Banchan.Commissions do
                   multiple: option.multiple
                 }
 
-              %{amount: amount, name: name, description: description} ->
+              %{amount: amount, name: name, description: description, multiple: multiple} ->
                 %LineItem{
                   commission_id: commission.id,
                   amount: amount,
                   name: name,
-                  description: description
+                  description: description,
+                  multiple: multiple
                 }
             end
 

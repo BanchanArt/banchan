@@ -115,7 +115,8 @@ defmodule BanchanWeb.CommissionLive.Components.AddonPicker do
         %{
           name: name,
           description: description,
-          amount: Utils.moneyfy(amount, Commissions.commission_currency(commission))
+          amount: Utils.moneyfy(amount, Commissions.commission_currency(commission)),
+          multiple: true
         },
         socket.assigns.current_user_member?
       )
