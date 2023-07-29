@@ -63,10 +63,8 @@ defmodule BanchanWeb.Components.Form.FancySelect do
           <button
             disabled={@disabled}
             type="button"
-            class={
-              # "inline-flex items-center rounded-md bg-primary p-2 hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-ring-primary focus:ring-offset-2 focus:ring-offset-content",
-              @class
-            }
+            class={# "inline-flex items-center rounded-md bg-primary p-2 hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-ring-primary focus:ring-offset-2 focus:ring-offset-content",
+            @class}
             aria-haspopup="listbox"
             aria-expanded="true"
             aria-labelledby={@id <> "-label"}

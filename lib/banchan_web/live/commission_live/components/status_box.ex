@@ -35,23 +35,27 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
         Enum.all?(invoices, &Payments.invoice_finished?(&1)) &&
         Enum.any?(invoices, &Payments.invoice_paid?(&1))
 
-    statuses = Commissions.Common.status_values()
-         |> Enum.filter(fn status ->
-           status == socket.assigns.commission.status ||
-           (status not in [:withdrawn, :ready_for_review, :approved] &&
+    statuses =
+      Commissions.Common.status_values()
+      |> Enum.filter(fn status ->
+        status == socket.assigns.commission.status ||
+          (status not in [:withdrawn, :ready_for_review, :approved] &&
              Commissions.status_transition_allowed?(
                socket.assigns.current_user_member?,
                socket.assigns.current_user.id == socket.assigns.commission.client_id,
                socket.assigns.commission.status,
                status
              ))
-         end)
+      end)
 
     {:ok,
      socket
      |> assign(
        invoices_paid?: invoices_paid?,
-       status_state: to_form(%{"status" => "#{Enum.find_index(statuses, & &1 == socket.assigns.commission.status)}"}),
+       status_state:
+         to_form(%{
+           "status" => "#{Enum.find_index(statuses, &(&1 == socket.assigns.commission.status))}"
+         }),
        statuses: statuses
      )}
   end
