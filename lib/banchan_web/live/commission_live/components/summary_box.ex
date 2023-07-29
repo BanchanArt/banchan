@@ -479,7 +479,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           {#if !Commissions.commission_open?(@commission)}
             <div>This commission is closed. You can't take any further actions on it.</div>
           {#elseif !Commissions.commission_active?(@commission)}
-            <div>Only open and accepted commissions can be invoiced. Accept the commission to continue.</div>
+            <div>Only open and accepted commissions can be invoiced. Accept the commission by changing the status to "Accepted" below to continue.</div>
           {#elseif @existing_open}
             <div>
               You can't take any further invoice actions until the <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> is handled.
