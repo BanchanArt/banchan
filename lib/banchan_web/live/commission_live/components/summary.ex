@@ -36,7 +36,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
             <div class="font-medium text-sm">{item.name}</div>
             <div class="text-xs">{item.description}</div>
             {#if item.multiple}
-              <span class="isolate inline-flex rounded-md shadow-sm pt-2 w-24">
+              <span class="isolate inline-flex items-center rounded-md pt-2 w-24">
                 <button
                   type="button"
                   :if={@allow_edits}
@@ -47,7 +47,7 @@ defmodule BanchanWeb.CommissionLive.Components.Summary do
                   <span class="sr-only">Previous</span>
                   <Icon name="minus" />
                 </button>
-                <span class="relative inline-flex items-center px-2 py-1 ring-1 ring-inset ring-base-300 focus:z-10 bg-base-100">{item.count}</span>
+                <span class="relative inline-flex items-center px-4 py-1 ring-1 ring-inset ring-base-300 focus:z-10 bg-base-100">{item.count}</span>
                 <button
                   type="button"
                   :if={@allow_edits}
