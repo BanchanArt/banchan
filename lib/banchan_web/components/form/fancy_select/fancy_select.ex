@@ -2,11 +2,11 @@ defmodule BanchanWeb.Components.Form.FancySelect.Item do
   @moduledoc """
   Renderless component for dropdown items.
   """
-  use BanchanWeb, type: :component, slot: "items"
+  use BanchanWeb, type: :component, slot: "default"
 
-  prop label, :string, required: true
-  prop description, :string
-  prop value, :any, required: true
+  prop(label, :string, required: true)
+  prop(description, :string)
+  prop(value, :any, required: true)
 end
 
 defmodule BanchanWeb.Components.Form.FancySelect do
@@ -17,108 +17,95 @@ defmodule BanchanWeb.Components.Form.FancySelect do
   use BanchanWeb, :live_component
 
   alias Surface.Components.Form
-  # alias Surface.Components.Form.{ErrorTag, Field, HiddenInput, Label}
+  alias Surface.Components.Form.{ErrorTag, Field, HiddenInput, Label}
 
   alias BanchanWeb.Components.Icon
 
-  prop name, :any, required: true
-  prop label, :string
-  prop show_label, :boolean, default: true
-  prop form, :form, from_context: {Form, :form}
+  prop(name, :any, required: true)
+  prop(label, :string)
+  prop(class, :css_class)
+  prop(show_label, :boolean, default: true)
+  prop(show_chevron, :boolean, default: true)
+  prop(disabled, :boolean, default: false)
+  prop(form, :form, from_context: {Form, :form})
+  prop(items, :list, default: [])
 
-  data selected, :struct
-  data selected_idx, :integer, default: 0
-
-  slot items
+  data(selected, :struct)
+  data(selected_idx, :integer, default: 0)
 
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
 
-    {:ok,
-     socket
-     |> assign(
-       max: Enum.count(socket.assigns.items) - 1,
-       selected: Enum.at(socket.assigns.items, socket.assigns.selected_idx)
-     )}
-  end
+    if is_nil(assigns.form) do
+      {:ok, socket}
+    else
+      {selected_idx, ""} = Map.get(assigns.form.params, "#{assigns.name}", "0") |> Integer.parse()
 
-  def handle_event("selected", %{"selected" => selected_idx}, socket) do
-    {:noreply,
-     socket
-     |> assign(selected_idx: selected_idx, selected: Enum.at(socket.assigns.items, selected_idx))}
+      {:ok,
+       socket
+       |> assign(
+         max: Enum.count(socket.assigns.items) - 1,
+         selected_idx: selected_idx,
+         selected: Enum.at(socket.assigns.items, selected_idx)
+       )}
+    end
   end
 
   def render(assigns) do
     ~F"""
     <bc-fancy-select id={@id} :hook="FancySelect">
-      <label id={@id <> "-label"} class="sr-only">
-        {@selected.label}
-        {#if Enum.count(@items) > 1}
-          <Icon name="chevron-down" />
-        {/if}
-      </label>
-      <div class="relative">
-        <button
-          type="button"
-          class="inline-flex w-full items-center rounded-md bg-primary p-2 hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-ring-primary focus:ring-offset-2 focus:ring-offset-content"
-          aria-haspopup="listbox"
-          aria-expanded="true"
-          aria-labelledby={@id <> "-label"}
-          :on-window-keydown={JS.hide(
-            to: @id <> "-options",
-            transition: {"transition ease-in duration-100", "opacity-100", "opacity-0"}
-          )}
-          phx-key="Escape"
-        >
-          <p class="text-sm font-semibold text-primary-content">{@selected.label}</p>
-        </button>
-        {!-- # TODO:
-      Select popover, show/hide based on select state.
-
-      Entering: ""
-        From: ""
-        To: ""
-      Leaving: "transition ease-in duration-100"
-        From: "opacity-100"
-        To: "opacity-0"
-      --}
-        <ul
-          class="absolute right-0 z-10 mt-2 w-72 origin-top-right divide-y divide-neutral overflow-hidden rounded-md bg-base-200 shadow-lg ring-1 ring-base-300 ring-opacity-5 focus:outline-none"
-          tabindex="-1"
-          style="display: none;"
-          role="listbox"
-          aria-labelledby={@id <> "-label"}
-          aria-activedescendant={@id <> "-option-" <> "#{@selected_idx}"}
-          id={@id <> "-options"}
-        >
-          {#for {item, idx} <- @items |> Enum.with_index()}
-            {!-- # TODO:
-            Select option, manage highlight styles based on mouseenter/mouseleave and keyboard navigation.
-            --}
-            <li
-              class="cursor-default select-none p-4 text-sm"
-              id={@id <> "-option-" <> "#{idx}"}
-              role="option"
-            >
-              <div class="flex flex-col">
-                <div class="flex justify-between">
-                  <p class={"font-semibold": idx == @selected_idx, "font-normal": idx != @selected_idx}>{item.label}</p>
-                  {!-- # TODO:
-                  Checkmark, only display for selected option.
-
-                  Highlighted: "text-white", Not Highlighted: "text-indigo-600"
-                  --}
-                  <span :if={@selected_idx == idx}>
-                    <Icon name="check" />
-                  </span>
+      <Field class="field" name={@name}>
+        <Label class="sr-only" opts={id: @id <> "-label"}>
+          {@selected.label}
+        </Label>
+        <HiddenInput name={@name} />
+        <div class="relative">
+          <button
+            disabled={@disabled}
+            type="button"
+            class={
+              # "inline-flex items-center rounded-md bg-primary p-2 hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-ring-primary focus:ring-offset-2 focus:ring-offset-content",
+              @class
+            }
+            aria-haspopup="listbox"
+            aria-expanded="true"
+            aria-labelledby={@id <> "-label"}
+          >
+            <p class="text-sm font-semibold text-primary-content">{@selected.label}</p>
+            {#if @show_chevron}
+              <Icon name="chevron-down" />
+            {/if}
+          </button>
+          <ul
+            class="absolute left-0 z-30 mt-2 w-72 origin-top-right divide-y divide-neutral divide-opacity-50 overflow-hidden rounded-box bg-base-200 shadow-lg ring-1 ring-base-300 ring-opacity-5 focus:outline-none"
+            tabindex="-1"
+            style="display: none;"
+            role="listbox"
+            aria-labelledby={@id <> "-label"}
+            aria-activedescendant={@id <> "-option-" <> "#{@selected_idx}"}
+            id={@id <> "-options"}
+          >
+            {#for {item, idx} <- @items |> Enum.with_index()}
+              <li
+                class="cursor-pointer select-none p-4 text-sm"
+                id={@id <> "-option-" <> "#{idx}"}
+                role="option"
+              >
+                <div class="flex flex-col">
+                  <div class="flex justify-between">
+                    <p class={"font-semibold": idx == @selected_idx, "font-normal": idx != @selected_idx}>{item.label}</p>
+                    <span :if={@selected_idx == idx}>
+                      <Icon name="check" />
+                    </span>
+                  </div>
+                  <p class="mt-2">{item.description}</p>
                 </div>
-                {!-- # TODO: Highlighted: "text-indigo-200", Not Highlighted: "text-gray-500" --}
-                <p class="mt-2">{item.description}</p>
-              </div>
-            </li>
-          {/for}
-        </ul>
-      </div>
+              </li>
+            {/for}
+          </ul>
+        </div>
+        <ErrorTag class="help text-error" />
+      </Field>
     </bc-fancy-select>
     """
   end
