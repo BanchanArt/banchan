@@ -7,12 +7,12 @@ defmodule Banchan.Commissions.Common do
   @status_values [
     :submitted,
     :accepted,
-    :rejected,
     :in_progress,
     :paused,
     :waiting,
     :ready_for_review,
     :approved,
+    :rejected,
     :withdrawn
   ]
 

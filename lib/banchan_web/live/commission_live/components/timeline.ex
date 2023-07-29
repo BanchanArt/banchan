@@ -98,7 +98,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                 </TimelineItem>
               {#match :status}
                 <TimelineItem>
-                  <:icon><Icon name="corner-down-right" size={4} /></:icon>
+                  <:icon><Icon name="replace" size={4} /></:icon>
                   changed the status to <strong>{Common.humanize_status(event.status)}</strong>
                 </TimelineItem>
               {#match :title_changed}

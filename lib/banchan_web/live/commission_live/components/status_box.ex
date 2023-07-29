@@ -7,20 +7,23 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   alias Banchan.Commissions
   alias Banchan.Payments
 
+  alias Surface.Components.Form
+
   alias BanchanWeb.Components.{
     Button,
     Collapse,
-    Dropdown,
     Modal
   }
 
-  alias BanchanWeb.CommissionLive.Components.StatusItem
+  alias BanchanWeb.Components.Form.FancySelect
 
-  prop current_user, :struct, from_context: :current_user
-  prop current_user_member?, :boolean, from_context: :current_user_member?
-  prop commission, :struct, from_context: :commission
+  prop(current_user, :struct, from_context: :current_user)
+  prop(current_user_member?, :boolean, from_context: :current_user_member?)
+  prop(commission, :struct, from_context: :commission)
 
-  data invoices_paid?, :boolean
+  data(invoices_paid?, :boolean)
+  data(statuses, :list)
+  data(status_state, :map)
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
@@ -32,24 +35,45 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
         Enum.all?(invoices, &Payments.invoice_finished?(&1)) &&
         Enum.any?(invoices, &Payments.invoice_paid?(&1))
 
-    {:ok, socket |> assign(invoices_paid?: invoices_paid?)}
+    statuses =
+      Commissions.Common.status_values()
+      |> Enum.filter(fn status ->
+        status == socket.assigns.commission.status ||
+          (status not in [:withdrawn, :ready_for_review, :approved] &&
+             Commissions.status_transition_allowed?(
+               socket.assigns.current_user_member?,
+               socket.assigns.current_user.id == socket.assigns.commission.client_id,
+               socket.assigns.commission.status,
+               status
+             ))
+      end)
+
+    {:ok,
+     socket
+     |> assign(
+       invoices_paid?: invoices_paid?,
+       status_state:
+         to_form(%{
+           "status" => "#{Enum.find_index(statuses, &(&1 == socket.assigns.commission.status))}"
+         }),
+       statuses: statuses
+     )}
   end
 
-  def handle_event("update_status", %{"value" => "rejected"}, socket) do
-    if Commissions.commission_active?(socket.assigns.commission) do
+  def handle_event("update_status", %{"status" => status}, socket) do
+    {status_idx, ""} = Integer.parse(status)
+    status = Enum.at(socket.assigns.statuses, status_idx)
+
+    if status == :rejected && Commissions.commission_active?(socket.assigns.commission) do
       Modal.show(socket.assigns.id <> "-reject-modal")
       {:noreply, socket}
     else
-      update_status("rejected", socket)
+      update_status(status, socket)
     end
   end
 
-  def handle_event("update_status", %{"value" => status}, socket) do
-    update_status(status, socket)
-  end
-
   def handle_event("confirm_reject", _, socket) do
-    ret = update_status("rejected", socket)
+    ret = update_status(:rejected, socket)
     Modal.hide(socket.assigns.id <> "-reject-modal")
     ret
   end
@@ -72,16 +96,33 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   end
 
   def render(assigns) do
+    has_transitions? = !Enum.empty?(assigns.statuses)
+
     ~F"""
-    <div class="flex flex-col gap-2 w-full">
-      <Dropdown show_caret? class="btn" label={Commissions.Common.humanize_status(@commission.status)}>
-        <StatusItem click="update_status" status={:submitted} />
-        <StatusItem click="update_status" status={:accepted} />
-        <StatusItem click="update_status" status={:rejected} />
-        <StatusItem click="update_status" status={:paused} />
-        <StatusItem click="update_status" status={:in_progress} />
-        <StatusItem click="update_status" status={:waiting} />
-      </Dropdown>
+    <div class="flex flex-col gap-2 w-full bg-base-200 rounded-box p-4 border-base-300 border-2">
+      <h3 class="text-lg font-medium">Commission Status</h3>
+      {#if has_transitions?}
+        <Form for={@status_state} change="update_status">
+          <FancySelect
+            id={@id <> "-status-selector"}
+            class="btn btn-primary"
+            name={:status}
+            show_label={false}
+            show_chevron={Enum.count(@statuses) > 1}
+            disabled={Enum.count(@statuses) == 1}
+            items={@statuses
+            |> Enum.map(
+              &%{
+                label: Commissions.Common.humanize_status(&1),
+                value: &1,
+                description: Commissions.Common.status_description(&1)
+              }
+            )}
+          />
+        </Form>
+      {#else}
+        <Button disabled label={Commissions.Common.humanize_status(@commission.status)} />
+      {/if}
       <div class="text-md">
         {Commissions.Common.status_description(@commission.status)}
       </div>
