@@ -59,150 +59,166 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
     URI.to_string(%{URI.parse(uri) | fragment: "event-#{event.public_id}"})
   end
 
+  defp status_color(status) do
+    case status do
+      :pending -> "bg-warning"
+      :in_transit -> "bg-warning"
+      :canceled -> "bg-error"
+      :paid -> "bg-success"
+      :failed -> "bg-error"
+    end
+  end
+
   def render(assigns) do
     cancel_disabled =
       !assigns.payout || !assigns.payout.stripe_payout_id ||
         Payout.done?(assigns.payout)
 
     ~F"""
-    <div class="flex flex-col">
+    <div class="flex flex-col h-full bg-base-300 md:p-4 rounded-box md:rounded-bl-none overflow-hidden">
       {!-- Header --}
-      <h1 class="text-3xl py-4 px-4 border-b-2 border-neutral-content bg-base-100 border-opacity-10">
-        <LivePatch
-          class="go-back md:hidden p-2"
-          to={Routes.studio_payouts_path(Endpoint, :index, @studio.handle)}
-        >
+      <h1 class="px-4 pt-4 md:pt-0 md:px-0 text-3xl md:hidden border-b-2 border-neutral-content border-opacity-10 flex items-center gap-x-3">
+        <LivePatch class="go-back p-2" to={~p"/studios/#{@studio.handle}/payouts"}>
           <i class="fas fa-arrow-left text-2xl" />
         </LivePatch>
         Payout
         {#if !@data_pending}
-          <div class="badge badge-primary badge-lg cursor-default">{Payout.humanize_status(@payout.status)}</div>
+          <p class={
+            "status bg-opacity-20 rounded-md whitespace-nowrap mt-0.5 px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset",
+            status_color(@payout.status)
+          }>
+            {Payout.humanize_status(@payout.status)}
+          </p>
         {/if}
       </h1>
-      {#if !@data_pending}
-        <div class="flex flex-col pt-4 px-4">
-          {#if @data_pending}
-            <i class="fas fa-spinner animate-spin" />
-          {#else}
-            <div class="text-3xl font-bold">{Payments.print_money(@payout.amount)}</div>
-          {/if}
-          <h3
-            class="text-xl"
-            title={@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}
-          >
-            <div class="inline">
-              <div class="self-center inline">
-                Initiated by
-              </div>
-              <div class="self-center inline">
-                <Avatar user={@payout.actor} class="w-4" />
-              </div>
-              <div class="inline">
-                <UserHandle user={@payout.actor} />
-              </div>
-            </div>
-            {@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}.
-          </h3>
-          <div class="text-xl">
-            <div title={@payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>Expected arrival: {@payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}.</div>
-            {#if @payout.failure_code}
-              <div>Failure: {@payout.failure_message}</div>
-            {/if}
-          </div>
-          {#if !Payout.done?(@payout)}
-            <Button
-              disabled={cancel_disabled}
-              click="open_cancel_modal"
-              class="open-modal open-cancel-modal modal-button btn-error"
-            >Cancel</Button>
-          {/if}
+      {#if @data_pending}
+        <div class="py-20 bg-base-300 w-full h-full flex flex-col items-center">
+          <h2 class="sr-only">Loading...</h2>
+          <i class="fas fa-spinner animate-spin text-3xl" />
         </div>
-        <div class="divider">Invoices</div>
-        <div class="menu md:hidden divide-y-2 divide-neutral-content divide-opacity-10 pb-4">
-          {#for invoice <- @payout.invoices}
-            <a href={replace_fragment(
-              Routes.commission_path(Endpoint, :show, invoice.commission.public_id),
-              invoice.event
-            )}>
-              <div class="stats md:hidden">
-                <div class="stat">
-                  <div class="stat-title">
-                    {invoice.commission.title}
+      {#else}
+        <div class="p-4 bg-base-300">
+          <div class="sm:flex sm:items-center">
+            <div class="sm:flex-auto">
+              <h1 class="text-3xl font-semibold leading-6">
+                Total: <span class="text-success">{Payments.print_money(@payout.amount)}</span>
+              </h1>
+              <p class="mt-2 text-sm text-opacity-75">
+                <div class="inline">
+                  <div class="self-center inline">
+                    Initiated by
                   </div>
-                  <div class="stat-value">
-                    {invoice.amount
-                    |> Money.add(invoice.tip)
-                    |> Money.subtract(invoice.platform_fee)
-                    |> Payments.print_money()}
+                  <div class="self-center inline">
+                    <Avatar user={@payout.actor} class="w-4" />
                   </div>
-                  <div class="stat-desc">
-                    Net Amount
+                  <div class="inline">
+                    <UserHandle user={@payout.actor} />
                   </div>
                 </div>
-              </div>
-            </a>
-          {/for}
-        </div>
-        <table class="text-md pt-4 px-4 hidden md:table w-full">
-          <thead>
-            <th>
-              Commission
-            </th>
-            <th>
-              Paid
-            </th>
-            <th>
-              Net
-            </th>
-            <th>
-              Invoiced
-            </th>
-            <th>
-              Tip
-            </th>
-            <th>
-              Fee
-            </th>
-          </thead>
-          <tbody>
-            {#for invoice <- @payout.invoices}
-              <tr>
-                <td class="text-lg">
-                  <LiveRedirect
-                    class="link"
-                    to={Routes.commission_path(Endpoint, :show, invoice.commission.public_id)}
-                  >{invoice.commission.title}</LiveRedirect>
-                  (<a
-                    class="link"
-                    href={replace_fragment(
-                      Routes.commission_path(Endpoint, :show, invoice.commission.public_id),
-                      invoice.event
-                    )}
-                  >invoice</a>)
-                </td>
-                <td>
-                  {invoice.updated_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
-                </td>
-                <td class="text-success">
-                  {Payments.print_money(invoice.total_transferred)}
-                </td>
-                <td>
-                  {Payments.print_money(invoice.amount)}
-                </td>
-                <td>
-                  {Payments.print_money(invoice.tip)}
-                </td>
-                <td>
-                  {Payments.print_money(invoice.platform_fee)}
-                </td>
-              </tr>
-            {/for}
-          </tbody>
-        </table>
-      {#else}
-        <i class="fas fa-spinner animate-spin text-3xl mx-auto grow" />
-      {/if}
+                <time dateTime={@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>{@payout.inserted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}</time>.
+              </p>
+              <p>
+                Expected to arrive
+                <time dateTime={@payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>{@payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}</time>.
+              </p>
+              {#if @payout.failure_code}
+                <div>Failure: {@payout.failure_message}</div>
+              {/if}
+            </div>
+            <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+              {#if !Payout.done?(@payout)}
+                <Button
+                  disabled={cancel_disabled}
+                  click="open_cancel_modal"
+                  class="open-modal open-cancel-modal modal-button btn-error btn-sm"
+                >Cancel</Button>
+              {/if}
+            </div>
+          </div>
+          <div class="mt-8 flow-root">
+            <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                <div class="overflow-hidden shadow ring-1 ring-base-300 ring-opacity-5 sm:rounded-lg">
+                  <table class="min-w-full divide-y divide-base-200">
+                    <thead class="bg-base-200">
+                      <tr>
+                        <th
+                          scope="col"
+                          class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-base-content sm:pl-6"
+                        >Commission</th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-base-content">Net</th>
+                        <th
+                          scope="col"
+                          class="px-3 py-3.5 text-left text-sm font-semibold text-base-content hidden md:table-cell"
+                        >Invoiced</th>
+                        <th
+                          scope="col"
+                          class="px-3 py-3.5 text-left text-sm font-semibold text-base-content hidden md:table-cell"
+                        >Tip</th>
+                        <th
+                          scope="col"
+                          class="px-3 py-3.5 text-left text-sm font-semibold text-base-content hidden md:table-cell"
+                        >Fee</th>
+                        <th
+                          scope="col"
+                          class="px-3 py-3.5 text-left text-sm font-semibold text-base-content hidden lg:table-cell"
+                        >Invoiced At</th>
+                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                          <span class="sr-only">Invoice</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-base-200 bg-base-100">
+                      {#for invoice <- @payout.invoices}
+                        <tr>
+                          <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium sm:pl-6">
+                            <LiveRedirect
+                              class="text-primary hover:link"
+                              to={Routes.commission_path(Endpoint, :show, invoice.commission.public_id)}
+                            >{invoice.commission.title}</LiveRedirect>
+                          </td>
+                          <td>
+                            <span class="text-success font-semibold">
+                              {Payments.print_money(invoice.total_transferred)}
+                            </span>
+                            <dl class="md:hidden">
+                              <dd class="mt-1 text-xs text-opacity-75 truncate">Fee: {Payments.print_money(invoice.platform_fee)}</dd>
+                            </dl>
+                          </td>
+                          <td class="hidden md:table-cell font-semibold">
+                            {Payments.print_money(invoice.amount)}
+                          </td>
+                          <td class="hidden md:table-cell font-semibold">
+                            {Payments.print_money(invoice.tip)}
+                          </td>
+                          <td class="hidden md:table-cell font-semibold">
+                            {Payments.print_money(invoice.platform_fee)}
+                          </td>
+                          <td class="hidden lg:table-cell">
+                            <time dateTime={invoice.updated_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>{invoice.updated_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}</time>
+                          </td>
+                          <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                            <a
+                              class="text-secondary hover:link"
+                              href={replace_fragment(
+                                Routes.commission_path(Endpoint, :show, invoice.commission.public_id),
+                                invoice.event
+                              )}
+                            >Invoice<span class="sr-only">
+                                for {invoice.commission.title}</span></a>
+                          </td>
+                        </tr>
+                      {/for}
 
+                      <!-- More people... -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {/if}
       {!-- Cancellation modal --}
       <Modal id={@id <> "_cancel_modal"}>
         <:title>Confirm Cancellation</:title>
