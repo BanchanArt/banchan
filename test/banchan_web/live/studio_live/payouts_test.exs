@@ -222,7 +222,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
              |> render() =~ "hidden md:flex"
 
       page_live
-      |> element(".payout-row > *")
+      |> element(".payout-row a")
       |> render_click()
 
       assert_patch(
@@ -264,7 +264,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
 
       assert page_live
              |> element("#available")
-             |> render() =~ "No Balance Available"
+             |> render() =~ "$0.00"
     end
 
     test "Shows available balance", %{
@@ -343,7 +343,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
         live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
 
       assert page_live
-             |> element("#available button")
+             |> element("#fypm")
              |> render() =~ "disabled=\"disabled\""
 
       process_final_payment!(commission)
@@ -353,7 +353,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
         live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
 
       refute page_live
-             |> element("#available button")
+             |> element("#fypm")
              |> render() =~ "disabled=\"disabled\""
     end
 
@@ -413,12 +413,12 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
              |> render() =~ "$391.24"
 
       assert page_live
-             |> element("#available button")
+             |> element("#fypm")
              # disabled immediately
              |> render_click() =~ "disabled=\"disabled\""
 
       assert page_live
-             |> element("#available button")
+             |> element("##fypm")
              |> render() =~ "Pay Out"
 
       Notifications.wait_for_notifications()
@@ -489,7 +489,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       logged_message =
         capture_log([async: true, level: :info], fn ->
           assert page_live
-                 |> element("#available button")
+                 |> element("#fypm")
                  # disabled immediately
                  |> render_click() =~ "disabled=\"disabled\""
 
@@ -508,11 +508,11 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
              |> render() =~ "$378.62"
 
       assert page_live
-             |> element(".payout-row .badge")
+             |> element(".payout-row .status")
              |> render() =~ "Failed"
 
       refute page_live
-             |> element("#available button")
+             |> element("#fypm")
              |> render() =~ "disabled=\"disabled\""
     end
   end
@@ -598,7 +598,7 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       |> render_click()
 
       assert page_live
-             |> element(".payout-row .badge")
+             |> element(".payout-row .status")
              # No change to status yet.
              |> render() =~ "Pending"
 
@@ -616,11 +616,11 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
       Notifications.wait_for_notifications()
 
       assert page_live
-             |> element(".payout-row .badge")
+             |> element(".payout-row .status")
              |> render() =~ "Canceled"
 
       assert page_live
-             |> element(".payout .badge")
+             |> element(".payout .status")
              |> render() =~ "Canceled"
 
       # We remove the modal from the page if cancellation is disabled.

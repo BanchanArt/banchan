@@ -8,8 +8,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   alias Banchan.Payments
 
-  alias BanchanWeb.Components.{Button, InfiniteScroll}
-  alias BanchanWeb.StudioLive.Components.{Payout, PayoutRow, StudioLayout}
+  alias BanchanWeb.Components.{Button, InfiniteScroll, Stats}
+  alias BanchanWeb.StudioLive.Components.{Payout, PayoutList, StudioLayout}
 
   def mount(params, _session, socket) do
     {:ok, assign_studio_defaults(params, socket, true, true)}
@@ -83,7 +83,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
     balance = Task.async(fn -> Payments.get_banchan_balance(socket.assigns.studio) end)
 
-    [payout, results, {:ok, balance}] = Task.await_many([payout, results, balance])
+    [payout, results, {:ok, balance}] = Task.await_many([payout, results, balance], 20_000)
 
     {:noreply,
      socket
@@ -183,34 +183,56 @@ defmodule BanchanWeb.StudioLive.Payouts do
     )
   end
 
+  defp print_money(money, studio) when is_list(money) do
+    if Enum.empty?(money) do
+      Payments.print_money(%Money{amount: 0, currency: studio.default_currency})
+    else
+      money
+      |> Enum.map_join(", ", &Payments.print_money/1)
+    end
+  end
+
+  defp print_money(%Money{} = money, _studio) do
+    Payments.print_money(money)
+  end
+
   @impl true
   def render(assigns) do
     ~F"""
     <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:payouts}>
-      <div class="flex flex-col grow max-h-full">
+      <div class="flex flex-col grow max-h-full p-4">
+        <div class={"bg-base-300 rounded-box max-w-4xl w-full mx-auto", "hidden sm:flex": !is_nil(@payout_id)}>
+          {#if is_nil(@balance)}
+            <div class="py-20 w-full h-full flex flex-col items-center">
+              <h2 class="sr-only">Loading...</h2>
+              <i class="fas fa-spinner animate-spin text-3xl" />
+            </div>
+          {#else}
+            <Stats class="divide-base-200">
+              <Stats.Stat
+                id="available"
+                name="Available Balance"
+                value={print_money(@balance.available, @studio)}
+                subtext={"Pending: #{print_money(@balance.stripe_pending, @studio)}"}
+              />
+              <Stats.Stat
+                name="Unreleased"
+                subtext="(in current commissions)"
+                value={print_money(@balance.held_back, @studio)}
+              />
+              <Stats.Stat name="Paid out to Date" value={print_money(@balance.paid, @studio)} />
+            </Stats>
+          {/if}
+        </div>
+        <div class={"divider", "hidden sm:flex": !is_nil(@payout_id)} />
         <div class="flex flex-row grow md:grow-0">
-          <div class={"flex flex-col basis-full md:basis-1/4 px-4 sidebar", "hidden md:flex": @payout_id}>
-            <div id="available" class="flex flex-col">
-              {#if is_nil(@balance) || !payout_possible?(@balance.available)}
-                <h2 class="text-xl2">No Balance Available</h2>
-              {#else}
-                <div class="stats stats-horizontal">
-                  {#if @balance}
-                    {#for avail <- @balance.available}
-                      {#if avail.amount > 0}
-                        <div class="stat">
-                          <div class="stat-value">{Payments.print_money(avail)}</div>
-                          <div class="stat-desc">Available for Payout</div>
-                        </div>
-                      {/if}
-                    {/for}
-                  {/if}
-                </div>
-              {/if}
+          <div class={"flex flex-col basis-full md:basis-1/4 sidebar", "hidden md:flex": @payout_id}>
+            <div class="flex flex-col">
               <Button
-                class="my-2"
+                class="mr-4 pl-4"
                 click="fypm"
                 disabled={@fypm_pending || is_nil(@balance) || !payout_possible?(@balance.available)}
+                opts={id: "fypm"}
               >
                 {#if @fypm_pending}
                   <i class="px-2 fas fa-spinner animate-spin" />
@@ -218,18 +240,14 @@ defmodule BanchanWeb.StudioLive.Payouts do
                 Pay Out
               </Button>
               <div class="divider">History</div>
-              <ul class="payout-rows menu menu-compact p-2">
-                {#if @results}
-                  {#for payout <- @results.entries}
-                    <PayoutRow studio={@studio} payout={payout} highlight={@payout_id == payout.public_id} />
-                  {/for}
-                {/if}
-              </ul>
+              {#if @results}
+                <PayoutList studio={@studio} payout_id={@payout_id} payouts={@results.entries} />
+              {/if}
               <InfiniteScroll id="payouts-infinite-scroll" page={@page} load_more="load_more" />
             </div>
           </div>
           {#if @payout_id}
-            <div class="px-4 md:container basis-full md:basis-3/4 payout">
+            <div class="md:container basis-full md:basis-3/4 payout">
               <Payout
                 id="payout"
                 current_user={@current_user}
