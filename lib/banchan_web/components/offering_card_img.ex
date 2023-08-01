@@ -15,7 +15,7 @@ defmodule BanchanWeb.Components.OfferingCardImg do
     <div class="relative">
       {#case @image}
         {#match %UploadEntry{}}
-          <div class="absolute z-10 overflow-hidden">
+          <div class="absolute z-10 w-full h-full overflow-hidden">
             <.live_img_preview
               class={
                 "object-contain aspect-video w-full h-full",
@@ -25,9 +25,13 @@ defmodule BanchanWeb.Components.OfferingCardImg do
               entry={@image}
             />
           </div>
-          <.live_img_preview class="w-full h-full aspect-video blur-lg" draggable="false" entry={@image} />
+          <.live_img_preview
+            class="object-contain w-full h-full aspect-video blur-2xl"
+            draggable="false"
+            entry={@image}
+          />
         {#match _}
-          <div class="absolute z-10 overflow-hidden">
+          <div class="absolute z-10 w-full h-full overflow-hidden">
             <img
               class={
                 "object-contain aspect-video w-full h-full",
@@ -42,7 +46,7 @@ defmodule BanchanWeb.Components.OfferingCardImg do
             />
           </div>
           <img
-            class="object-contain aspect-video blur-2xl"
+            class="object-contain w-full h-full aspect-video blur-2xl"
             draggable="false"
             src={if @image do
               ~p"/images/offering_card_img/#{@image}"
