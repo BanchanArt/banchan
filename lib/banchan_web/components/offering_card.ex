@@ -27,13 +27,13 @@ defmodule BanchanWeb.Components.OfferingCard do
       "h-full transition-all relative flex flex-col",
       "opacity-50": @archived?
     }>
-      <figure class="border-1 border-base-content rounded-lg overflow-hidden">
+      <figure class="overflow-hidden border rounded-lg border-base-content border-opacity-10 bg-base-300/25">
         <OfferingCardImg mature?={@mature?} image={@image} />
       </figure>
       <div class="flex flex-row pt-2 align-items-center">
         <div class="flex flex-col grow">
           <div class="flex flex-row">
-            <span class="name text-md font-bold">{@name}</span>
+            <span class="font-bold name text-md">{@name}</span>
             {#if @mature?}
               <span class="bg-error text-error-content">M</span>
             {/if}
@@ -41,7 +41,7 @@ defmodule BanchanWeb.Components.OfferingCard do
               <span class="bg-warning text-warning-content">Hidden</span>
             {/if}
           </div>
-          <div class="availability-status whitespace-nowrap font-semibold text-xs opacity-75">
+          <div class="text-xs font-semibold opacity-75 availability-status whitespace-nowrap">
             {#if @open? && !is_nil(@total_slots) && !is_nil(@available_slots)}
               {@available_slots}/{@total_slots} Slots
             {#elseif !@open? && !is_nil(@total_slots)}
@@ -55,14 +55,14 @@ defmodule BanchanWeb.Components.OfferingCard do
         </div>
         <div
           :if={@show_base_price?}
-          class="text-lg font-bold flex flex-col justify-center whitespace-nowrap"
+          class="flex flex-col justify-center text-lg font-bold whitespace-nowrap"
         >
           <span class="flex items-center gap-2">
             {#if is_nil(@base_price)}
               Inquire
             {#else}
               {#if @has_addons?}
-                <span class="font-semibold opacity-80 text-sm">From
+                <span class="text-sm font-semibold opacity-80">From
                 </span>
               {/if}
               <span class="flex gap-0">
