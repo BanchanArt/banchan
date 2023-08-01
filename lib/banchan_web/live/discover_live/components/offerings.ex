@@ -80,7 +80,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
           <LivePatch class="link" to={Routes.discover_index_path(Endpoint, :index, "studios", params)}>Search Studios instead.</LivePatch>
         {/if}
       {#else}
-        <div class="offering-list grid grid-cols-2 sm:gap-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 auto-rows-fr">
+        <div class="offering-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
           {#for {offering, idx} <- Enum.with_index(@offerings)}
             <OfferingCard id={"offering-#{idx}"} current_user={@current_user} offering={offering} />
           {/for}

@@ -41,7 +41,7 @@ defmodule BanchanWeb.Components.OfferingCardImg do
           />
         </div>
         <img
-          class="aspect-video w-full h-full blur-lg"
+          class="object-contain aspect-video blur-2xl"
           draggable="false"
           src={if @image do
             ~p"/images/offering_card_img/#{@image}"

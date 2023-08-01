@@ -502,10 +502,13 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                 &Money.add/2
               )
             end}
+            has_addons?={!is_nil(Ecto.Changeset.get_field(@changeset, :options)) &&
+              !Enum.empty?(Ecto.Changeset.get_field(@changeset, :options)) &&
+              Ecto.Changeset.get_field(@changeset, :options)
+              |> Enum.any?(&(!&1.default && &1.price))}
             open?={Ecto.Changeset.get_field(@changeset, :open)}
             hidden?={Ecto.Changeset.get_field(@changeset, :hidden)}
             mature?={Ecto.Changeset.get_field(@changeset, :mature)}
-            hover_grow?={false}
             total_slots={Ecto.Changeset.get_field(@changeset, :slots)}
             available_slots={Ecto.Changeset.get_field(@changeset, :slots)}
           />

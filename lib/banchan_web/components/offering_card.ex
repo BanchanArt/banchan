@@ -6,13 +6,13 @@ defmodule BanchanWeb.Components.OfferingCard do
 
   alias Banchan.Payments
 
-  alias BanchanWeb.Components.{Card, OfferingCardImg}
+  alias BanchanWeb.Components.OfferingCardImg
 
   prop current_user, :any, from_context: :current_user
   prop name, :string
   prop image, :any
   prop base_price, :struct
-  prop show_pills?, :boolean, default: true
+  prop has_addons?, :boolean, default: false
   prop show_base_price?, :boolean, default: true
   prop archived?, :boolean, default: false
   prop mature?, :boolean, default: false
@@ -20,58 +20,60 @@ defmodule BanchanWeb.Components.OfferingCard do
   prop hidden?, :boolean, default: false
   prop total_slots, :integer
   prop available_slots, :integer
-  prop hover_grow?, :boolean, default: true
 
   def render(assigns) do
     ~F"""
-    <Card
-      class={
-        "h-full transition-all relative",
-        "opacity-50": @archived?,
-        "sm:hover:scale-105 sm:hover:z-10": @hover_grow?
-      }
-      image_class="overflow-hidden"
-    >
-      <:header>
-        <div class="text-sm sm:text-lg font-bold">{@name}</div>
-      </:header>
-      <:image>
+    <offering-card class={
+      "h-full transition-all relative flex flex-col",
+      "opacity-50": @archived?
+    }>
+      <figure class="border-1 border-base-content rounded-lg overflow-hidden">
         <OfferingCardImg mature?={@mature?} image={@image} />
-      </:image>
-      <div
-        :if={@show_pills?}
-        class="absolute top-4 right-4 flex flex-col flex-wrap gap-2 items-end z-10"
-      >
-        {#if @open? && !is_nil(@total_slots) && !is_nil(@available_slots)}
-          <div class="cursor-default whitespace-nowrap badge badge-primary shadow-md shadow-black">{@available_slots}/{@total_slots} Slots</div>
-        {#elseif !@open? && !is_nil(@total_slots)}
-          <div class="badge badge-error shadow-md shadow-black cursor-default">0/{@total_slots} Slots</div>
-        {#elseif @open?}
-          <div class="badge badge-primary shadow-md shadow-black cursor-default">Open</div>
-        {#else}
-          <div class="badge badge-error shadow-md shadow-black cursor-default">Closed</div>
-        {/if}
-        {#if @mature?}
-          <div class="badge badge-error shadow-md shadow-black cursor-default">Mature</div>
-        {/if}
-        {#if @hidden?}
-          <div class="badge badge-error shadow-md shadow-black cursor-default">Hidden</div>
-        {/if}
-      </div>
-
-      <div :if={@show_base_price?} class="flex flex-col gap-2 grow justify-end">
-        <div class="flex flex-col z-20">
-          <p class="flex flex-row items-end">
-            <span class="font-bold grow cursor-default">Base Price:</span>
-            {#if is_nil(@base_price)}
-              <span class="font-semibold cursor-default">Inquire</span>
-            {#else}
-              <span class="font-semibold cursor-default">{Payments.print_money(@base_price)}</span>
+      </figure>
+      <div class="flex flex-row pt-2 align-items-center">
+        <div class="flex flex-col grow">
+          <div class="flex flex-row">
+            <span class="name text-md font-bold">{@name}</span>
+            {#if @mature?}
+              <span class="bg-error text-error-content">M</span>
             {/if}
-          </p>
+            {#if @hidden?}
+              <span class="bg-warning text-warning-content">Hidden</span>
+            {/if}
+          </div>
+          <div class="availability-status whitespace-nowrap font-semibold text-xs opacity-75">
+            {#if @open? && !is_nil(@total_slots) && !is_nil(@available_slots)}
+              {@available_slots}/{@total_slots} Slots
+            {#elseif !@open? && !is_nil(@total_slots)}
+              0/{@total_slots} Slots
+            {#elseif @open?}
+              Open
+            {#else}
+              Closed
+            {/if}
+          </div>
+        </div>
+        <div
+          :if={@show_base_price?}
+          class="text-lg font-bold flex flex-col justify-center whitespace-nowrap"
+        >
+          <span class="flex items-center gap-2">
+            {#if is_nil(@base_price)}
+              Inquire
+            {#else}
+              {#if @has_addons?}
+                <span class="font-semibold opacity-80 text-sm">From
+                </span>
+              {/if}
+              <span class="flex gap-0">
+                <span class="opacity-80">{Payments.currency_symbol(@base_price)}</span>
+                {Payments.print_money(@base_price, false)}
+              </span>
+            {/if}
+          </span>
         </div>
       </div>
-    </Card>
+    </offering-card>
     """
   end
 end

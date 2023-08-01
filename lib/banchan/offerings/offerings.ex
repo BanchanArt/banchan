@@ -370,13 +370,18 @@ defmodule Banchan.Offerings do
   Calculates the offering's base price. Assumes the offering has been loaded
   through `list_offerings/1`, which populates the relevant virtual field.
   """
-  def offering_base_price(%Offering{} = offering) do
-    if Enum.empty?(offering.option_prices) do
-      nil
-    else
-      offering.option_prices
-      |> Enum.reduce(&Money.add/2)
-    end
+  def offering_base_price(%Offering{base_price: base_price}) do
+    base_price
+  end
+
+  @doc """
+  Does this offering have any optional addons?
+  """
+  def offering_has_addons?(%Offering{} = offering) do
+    !is_nil(offering.options) &&
+      !Enum.empty?(offering.options) &&
+      offering.options
+      |> Enum.any?(&(!&1.default))
   end
 
   @doc """
@@ -571,19 +576,26 @@ defmodule Banchan.Offerings do
       as: :used_slots,
       on: true,
       left_lateral_join:
-        default_prices in subquery(
+        price_info in subquery(
           from oo in OfferingOption,
-            where: oo.offering_id == parent_as(:offering).id and oo.default,
+            where: oo.offering_id == parent_as(:offering).id,
             group_by: [oo.offering_id],
             select: %{
-              prices:
-                type(fragment("array_agg(?)", oo.price), {:array, Money.Ecto.Composite.Type}),
-              # NB(zkat): This is hacky to the point of uselessness if we end up
-              # having a ton of different currencies listed, but it's serviceable for now.
-              sum: fragment("sum((?).amount)", oo.price)
+              has_addons:
+                fragment("max(case when ? = true then 0 else 1 end)::boolean", oo.default),
+              base_price:
+                type(
+                  fragment(
+                    "(sum(case when ? then (?).amount else 0 end), min((?).currency))",
+                    oo.default,
+                    oo.price,
+                    oo.price
+                  ),
+                  Money.Ecto.Composite.Type
+                )
             }
         ),
-      as: :default_prices,
+      as: :price_info,
       on: true,
       left_lateral_join:
         gallery_uploads in subquery(
@@ -607,11 +619,8 @@ defmodule Banchan.Offerings do
               ),
               {:array, Upload}
             ),
-          option_prices:
-            type(
-              coalesce(default_prices.prices, fragment("ARRAY[]::money_with_currency[]")),
-              {:array, Money.Ecto.Composite.Type}
-            )
+          has_addons: price_info.has_addons,
+          base_price: type(price_info.base_price, Money.Ecto.Composite.Type)
         })
     )
     |> filter_query(opts)

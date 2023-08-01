@@ -27,7 +27,6 @@ defmodule BanchanWeb.CommissionLive.Components.OfferingBox do
           <OfferingCard
             image={@offering.card_img_id}
             name={"#{@offering.name} by #{@offering.studio.name}"}
-            show_pills?={false}
             show_base_price?={false}
           />
         {#else}

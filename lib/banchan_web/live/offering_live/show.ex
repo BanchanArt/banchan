@@ -22,6 +22,7 @@ defmodule BanchanWeb.OfferingLive.Show do
     Lightbox,
     Markdown,
     MasonryGallery,
+    OfferingCardImg,
     ReportModal,
     Tag
   }
@@ -197,15 +198,7 @@ defmodule BanchanWeb.OfferingLive.Show do
           >
             {#if @offering.card_img && !@offering.card_img.pending}
               <Lightbox.Item>
-                <img
-                  class="absolute w-full h-full object-contain aspect-video overflow-hidden z-10"
-                  src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
-                />
-                <img
-                  class="aspect-video w-full h-full blur-lg"
-                  draggable="false"
-                  src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
-                />
+                <OfferingCardImg image={@offering.card_img} />
               </Lightbox.Item>
             {#else}
               <div class="w-full h-full aspect-video bg-base-300" />
@@ -307,15 +300,7 @@ defmodule BanchanWeb.OfferingLive.Show do
           >
             {#if @offering.card_img && !@offering.card_img.pending}
               <Lightbox.Item>
-                <img
-                  class="absolute w-full h-full object-contain aspect-video z-10"
-                  src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
-                />
-                <img
-                  class="aspect-video w-full h-full blur-lg"
-                  draggable="false"
-                  src={Routes.public_image_path(Endpoint, :image, :offering_card_img, @offering.card_img_id)}
-                />
+                <OfferingCardImg image={@offering.card_img} />
               </Lightbox.Item>
             {#else}
               <div class="w-full h-full aspect-video bg-base-300" />

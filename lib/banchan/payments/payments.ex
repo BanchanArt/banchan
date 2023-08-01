@@ -1637,13 +1637,21 @@ defmodule Banchan.Payments do
   For example, differentiating between different kinds of dollars that would
   usually just use `$` as a symbol.
   """
-  def print_money(%Money{} = money) do
-    case Money.Currency.symbol(money) do
-      "$" -> currency_symbol(money.currency) <> Money.to_string(money, symbol: false)
-      "" -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
-      " " -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
-      _ -> Money.to_string(money, symbol: true)
+  def print_money(%Money{} = money, symbol \\ true) do
+    if symbol do
+      case Money.Currency.symbol(money) do
+        "$" -> currency_symbol(money.currency) <> Money.to_string(money, symbol: false)
+        "" -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
+        " " -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
+        _ -> Money.to_string(money, symbol: true)
+      end
+    else
+      Money.to_string(money, symbol: false)
     end
+  end
+
+  def currency_symbol(%Money{currency: currency}) do
+    currency_symbol(currency)
   end
 
   def currency_symbol(currency) when is_atom(currency) do
