@@ -73,7 +73,7 @@ defmodule BanchanWeb.Components.Layout do
         class="drawer-side"
       >
         <label for="drawer-toggle" class="drawer-overlay" />
-        <aside class="w-64 shadow bg-base-200">
+        <nav class="w-64 shadow bg-base-200">
           <ul tabindex="0" class="flex flex-col gap-2 p-2 menu menu-compact">
             <li>
               <LiveRedirect to={Routes.home_path(Endpoint, :index)}>
@@ -203,7 +203,7 @@ defmodule BanchanWeb.Components.Layout do
               <li>
                 <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
                   <Icon name="log-out" size="4">
-                    <span>Logout</span>
+                    <span>Log out</span>
                   </Icon>
                 </Link>
               </li>
@@ -211,7 +211,7 @@ defmodule BanchanWeb.Components.Layout do
               <li>
                 <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
                   <Icon name="log-in" size="4">
-                    <span>Login</span>
+                    <span>Log in</span>
                   </Icon>
                 </LiveRedirect>
               </li>
@@ -224,7 +224,7 @@ defmodule BanchanWeb.Components.Layout do
               </li>
             {/if}
           </ul>
-        </aside>
+        </nav>
       </div>
     </div>
     """
