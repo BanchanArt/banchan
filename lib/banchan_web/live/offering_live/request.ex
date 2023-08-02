@@ -29,6 +29,8 @@ defmodule BanchanWeb.OfferingLive.Request do
         offering_type
       )
 
+    available_slots = Offerings.offering_available_slots(offering)
+
     terms = offering.terms || socket.assigns.studio.default_terms
     template = offering.template || socket.assigns.studio.default_template
 
@@ -76,6 +78,7 @@ defmodule BanchanWeb.OfferingLive.Request do
            currency: currency,
            line_items: default_items,
            offering: offering,
+           available_slots: available_slots,
            template: template,
            terms: terms
          )
@@ -364,7 +367,11 @@ defmodule BanchanWeb.OfferingLive.Request do
         <Form for={@changeset} change="change" submit="submit">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="flex flex-col md:order-2 rounded-lg bg-base-200 p-4 shadow-lg">
-              <OfferingBox offering={@offering} class="rounded-box hover:bg-base-200 p-2 transition-all" />
+              <OfferingBox
+                offering={@offering}
+                available_slots={@available_slots}
+                class="rounded-box hover:bg-base-200 p-2 transition-all"
+              />
               <div class="divider" />
               <div class="font-medium text-sm opacity-50">Cart</div>
               <Summary
