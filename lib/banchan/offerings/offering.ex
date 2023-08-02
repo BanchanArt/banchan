@@ -31,7 +31,8 @@ defmodule Banchan.Offerings.Offering do
     field :currency, Ecto.Enum, values: Studios.Common.supported_currencies()
     field :deleted_at, :naive_datetime
 
-    field :option_prices, {:array, Money.Ecto.Composite.Type}, virtual: true
+    field :base_price, Money.Ecto.Composite.Type, virtual: true
+    field :has_addons, :boolean, virtual: true
     field :used_slots, :integer, virtual: true
     field :user_subscribed?, :boolean, virtual: true
     field :gallery_uploads, {:array, Upload}, virtual: true

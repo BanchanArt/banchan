@@ -15,20 +15,14 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   prop current_user_member?, :boolean, default: false
   prop offering, :struct, required: true
 
-  data base_price, :list
   data available_slots, :integer
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
 
-    base_price = Offerings.offering_base_price(socket.assigns.offering)
-
     available_slots = Offerings.offering_available_slots(socket.assigns.offering)
 
-    {:ok,
-     socket
-     |> assign(base_price: base_price)
-     |> assign(available_slots: available_slots)}
+    {:ok, socket |> assign(available_slots: available_slots)}
   end
 
   def render(assigns) do
@@ -38,9 +32,11 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
         <OfferingCard
           name={@offering.name}
           image={@offering.card_img_id}
-          base_price={@base_price}
+          base_price={@offering.base_price}
+          has_addons?={@offering.has_addons}
           archived?={!is_nil(@offering.archived_at)}
           mature?={@offering.mature}
+          uncensored?={@current_user.uncensored_mature}
           open?={@offering.open}
           hidden?={@offering.hidden}
           total_slots={@offering.slots}

@@ -136,7 +136,7 @@ defmodule BanchanWeb.HomeLive do
             </div>
             <div class="divider" />
             <div class="sm:px-2 flex flex-col gap-4">
-              <div class="grid grid-cols-2 sm:gap-2 md:grid-cols-4 auto-rows-fr">
+              <div class="grid grid-cols-1 sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
                 {#for {offering, idx} <- Enum.with_index(@offerings.entries)}
                   <OfferingCard id={"offering-#{idx}"} current_user={@current_user} offering={offering} />
                 {/for}
