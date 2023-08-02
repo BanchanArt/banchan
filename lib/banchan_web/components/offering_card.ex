@@ -8,7 +8,6 @@ defmodule BanchanWeb.Components.OfferingCard do
 
   alias BanchanWeb.Components.OfferingCardImg
 
-  prop current_user, :any, from_context: :current_user
   prop name, :string
   prop image, :any
   prop base_price, :struct
@@ -16,6 +15,7 @@ defmodule BanchanWeb.Components.OfferingCard do
   prop show_base_price?, :boolean, default: true
   prop archived?, :boolean, default: false
   prop mature?, :boolean, default: false
+  prop uncensored?, :boolean, default: false
   prop open?, :boolean, default: false
   prop hidden?, :boolean, default: false
   prop total_slots, :integer
@@ -28,7 +28,7 @@ defmodule BanchanWeb.Components.OfferingCard do
       "opacity-50": @archived?
     }>
       <figure class="overflow-hidden border rounded-lg border-base-content border-opacity-10 bg-base-300/25">
-        <OfferingCardImg mature?={@mature?} image={@image} />
+        <OfferingCardImg blur?={@mature? && !@uncensored?} image={@image} />
       </figure>
       <div class="flex flex-row pt-2 align-items-center">
         <div class="flex flex-col grow">

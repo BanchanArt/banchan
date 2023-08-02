@@ -6,9 +6,8 @@ defmodule BanchanWeb.Components.OfferingCardImg do
 
   alias Phoenix.LiveView.UploadEntry
 
-  prop current_user, :any, from_context: :current_user
   prop image, :any
-  prop mature?, :boolean, default: false
+  prop blur?, :boolean, default: false
 
   def render(assigns) do
     ~F"""
@@ -19,7 +18,7 @@ defmodule BanchanWeb.Components.OfferingCardImg do
             <.live_img_preview
               class={
                 "object-contain aspect-video w-full h-full",
-                "blur-lg": @mature? && !@current_user.uncensored_mature
+                "blur-lg": @blur?
               }
               draggable="false"
               entry={@image}
@@ -35,7 +34,7 @@ defmodule BanchanWeb.Components.OfferingCardImg do
             <img
               class={
                 "object-contain aspect-video w-full h-full",
-                "blur-lg": @mature? && !@current_user.uncensored_mature
+                "blur-lg": @blur?
               }
               draggable="false"
               src={if @image do

@@ -36,6 +36,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           has_addons?={@offering.has_addons}
           archived?={!is_nil(@offering.archived_at)}
           mature?={@offering.mature}
+          uncensored?={@current_user.uncensored_mature}
           open?={@offering.open}
           hidden?={@offering.hidden}
           total_slots={@offering.slots}
