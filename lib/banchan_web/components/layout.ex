@@ -10,7 +10,7 @@ defmodule BanchanWeb.Components.Layout do
 
   alias Surface.Components.{Link, LiveRedirect}
 
-  alias BanchanWeb.Components.{Flash, Nav, Icon}
+  alias BanchanWeb.Components.{Flash, Icon, Nav}
 
   prop current_user, :any, from_context: :current_user
   prop flashes, :any, required: true
