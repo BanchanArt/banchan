@@ -32,24 +32,20 @@ defmodule BanchanWeb.Components.Form.NumberInput do
         </Label>
       {/if}
       <div class="flex flex-col">
-        <div class="flex flex-row gap-2">
+        <div class="flex flex-row w-full gap-2 control input input-bordered focus-within:ring ring-primary">
           {#if @icon}
-            <span class="icon text-2xl my-auto">
+            <span class="my-auto text-2xl icon">
               <i class={"fas fa-#{@icon}"} />
             </span>
           {/if}
-          <div class="control w-full">
-            <NumberInput
-              class={
-                "input",
-                "input-bordered",
-                "w-full",
-                @class,
-                "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
-              }
-              opts={[{:phx_debounce, "200"} | @opts]}
-            />
-          </div>
+          <NumberInput
+            class={
+              "w-full bg-transparent ring-0 outline-none border-none focus:ring-0",
+              @class,
+              "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
+            }
+            opts={[{:phx_debounce, "200"} | @opts]}
+          />
         </div>
         <ErrorTag class="help text-error" />
       </div>
