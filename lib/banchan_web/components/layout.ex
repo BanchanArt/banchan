@@ -10,7 +10,7 @@ defmodule BanchanWeb.Components.Layout do
 
   alias Surface.Components.{Link, LiveRedirect}
 
-  alias BanchanWeb.Components.{Flash, Nav}
+  alias BanchanWeb.Components.{Flash, Icon, Nav}
 
   prop current_user, :any, from_context: :current_user
   prop flashes, :any, required: true
@@ -21,17 +21,17 @@ defmodule BanchanWeb.Components.Layout do
 
   def render(assigns) do
     ~F"""
-    <div class="drawer drawer-mobile h-screen w-full">
+    <div class="w-full h-screen drawer drawer-mobile">
       <input type="checkbox" id="drawer-toggle" class="drawer-toggle">
-      <div class="drawer-content h-screen flex flex-col flex-grow">
-        <div class="top-0 z-50 sticky shadow-sm">
+      <div class="flex flex-col flex-grow h-screen drawer-content">
+        <div class="sticky top-0 z-50 shadow-sm">
           <Nav />
         </div>
         {#if slot_assigned?(:hero)}
           <#slot {@hero} />
         {/if}
         <section class={"flex flex-col flex-grow p-#{@padding} shadow-inner"}>
-          <div class="alert alert-info my-2" :if={@current_user && is_nil(@current_user.confirmed_at)}>
+          <div class="my-2 alert alert-info" :if={@current_user && is_nil(@current_user.confirmed_at)}>
             <div class="block">
               ⚠️You need to verify your email address before you can do certain things on the site, such as submit new commissions. Please check your email or <LiveRedirect class="link" to={Routes.confirmation_path(Endpoint, :show)}>click here to resend your confirmation</LiveRedirect>.⚠️
             </div>
@@ -39,7 +39,7 @@ defmodule BanchanWeb.Components.Layout do
           <Flash flashes={@flashes} />
           <#slot />
         </section>
-        <footer class="footer p-10 shadow-sm">
+        <footer class="p-10 shadow-sm footer">
           <div>
             <span class="footer-title">Co-op</span>
             <LiveRedirect to={Routes.static_about_us_path(Endpoint, :show)} class="link link-hover">About Us</LiveRedirect>
@@ -59,9 +59,9 @@ defmodule BanchanWeb.Components.Layout do
           <div>
             <span class="footer-title">Social</span>
             <div class="grid grid-flow-col gap-4">
-              <a href="https://mastodon.art/@Banchan" target="_blank" rel="noopener noreferrer"><i class="fab fa-mastodon text-xl" /></a>
-              <a href="https://twitter.com/BanchanArt" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter text-xl" /></a>
-              <a href="https://discord.gg/FUkTHjGKJF" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord text-xl" /></a>
+              <a href="https://mastodon.art/@Banchan" target="_blank" rel="noopener noreferrer"><i class="text-xl fab fa-mastodon" /></a>
+              <a href="https://twitter.com/BanchanArt" target="_blank" rel="noopener noreferrer"><i class="text-xl fab fa-twitter" /></a>
+              <a href="https://discord.gg/FUkTHjGKJF" target="_blank" rel="noopener noreferrer"><i class="text-xl fab fa-discord" /></a>
             </div>
           </div>
         </footer>
@@ -73,14 +73,13 @@ defmodule BanchanWeb.Components.Layout do
         class="drawer-side"
       >
         <label for="drawer-toggle" class="drawer-overlay" />
-        <aside class="bg-base-200 w-48 shadow">
-          <ul tabindex="0" class="menu flex flex-col p-2 gap-2">
+        <nav class="w-64 shadow bg-base-200">
+          <ul tabindex="0" class="flex flex-col gap-2 p-2 menu menu-compact">
             <li>
               <LiveRedirect to={Routes.home_path(Endpoint, :index)}>
-                <span>
-                  <i class="fas fa-home" />
-                  Home
-                </span>
+                <Icon name="home" size="4">
+                  <span>Home</span>
+                </Icon>
               </LiveRedirect>
             </li>
             {#if Accounts.active_user?(@current_user) && :admin in @current_user.roles}
@@ -89,37 +88,45 @@ defmodule BanchanWeb.Components.Layout do
               </li>
               <li>
                 <LiveRedirect to={Routes.report_index_path(Endpoint, :index)}>
-                  <span>
-                    <i class="fas fa-flag" />
-                    Reports
-                  </span>
+                  <Icon name="flag" size="4">
+                    <span>Reports</span>
+                  </Icon>
                 </LiveRedirect>
               </li>
               <li>
                 <LiveRedirect to={Routes.denizen_index_path(Endpoint, :index)}>
-                  <span>
-                    <i class="fas fa-user-group" />
-                    Users
-                  </span>
+                  <Icon name="users" size="4">
+                    <span>Users</span>
+                  </Icon>
                 </LiveRedirect>
               </li>
               <li>
                 <LiveRedirect to={Routes.beta_requests_path(Endpoint, :index)}>
-                  <span>
-                    <i class="fas fa-inbox" />
-                    Beta Requests
-                  </span>
+                  <Icon name="inbox" size="4">
+                    <span>Beta Requests</span>
+                  </Icon>
                 </LiveRedirect>
               </li>
               <li>
-                <a href={~p"/admin/dashboard"} target="_blank" rel="noopener noreferrer"><i class="fas fa-tachometer-alt" />Dashboard</a>
+                <a href={~p"/admin/dashboard"} target="_blank" rel="noopener noreferrer">
+                  <Icon name="layout-panel-top" size="4">
+                    <span>Dashboard</span>
+                  </Icon>
+                </a>
               </li>
               {#if Application.fetch_env!(:banchan, :env) == :dev}
                 <li>
-                  <a href={~p"/admin/sent_emails"} target="_blank" rel="noopener noreferrer"><i class="fas fa-paper-plane" />Sent Emails</a>
+                  <a href={~p"/admin/sent_emails"} target="_blank" rel="noopener noreferrer">
+                    <Icon name="mail-open" size="4">
+                      <span>Sent Emails</span>
+                    </Icon>
+                  </a>
                 </li>
                 <li>
-                  <a href="/catalogue" target="_blank" rel="noopener noreferrer"><i class="fas fa-book" />Catalogue</a>
+                  <a href="/catalogue" target="_blank" rel="noopener noreferrer">
+                    <Icon name="component" size="4">
+                      <span>Catalogue</span>
+                    </Icon></a>
                 </li>
               {/if}
             {/if}
@@ -128,34 +135,30 @@ defmodule BanchanWeb.Components.Layout do
             </li>
             <li :if={Accounts.active_user?(@current_user)}>
               <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
-                <span>
-                  <i class="fas fa-palette" />
-                  My Commissions
-                </span>
+                <Icon name="palette" size="4">
+                  <span>My Commissions</span>
+                </Icon>
               </LiveRedirect>
             </li>
             <li>
               <LiveRedirect to={Routes.discover_index_path(Endpoint, :index)}>
-                <span>
-                  <i class="fas fa-search" />
-                  Discover
-                </span>
+                <Icon name="search" size="4">
+                  <span>Discover</span>
+                </Icon>
               </LiveRedirect>
             </li>
             <li>
               <LiveRedirect to={Routes.discover_index_path(Endpoint, :index, "offerings")}>
-                <span>
-                  <i class="fas fa-paint-brush" />
-                  Offerings
-                </span>
+                <Icon name="shopping-bag" size="4">
+                  <span>Offerings</span>
+                </Icon>
               </LiveRedirect>
             </li>
             <li>
               <LiveRedirect to={Routes.discover_index_path(Endpoint, :index, "studios")}>
-                <span>
-                  <i class="fas fa-store" />
-                  Studios
-                </span>
+                <Icon name="store" size="4">
+                  <span>Studios</span>
+                </Icon>
               </LiveRedirect>
             </li>
             <li class="menu-title">
@@ -164,72 +167,64 @@ defmodule BanchanWeb.Components.Layout do
             {#if Accounts.active_user?(@current_user)}
               <li>
                 <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @current_user.handle)}>
-                  <span>
-                    <i class="fas fa-user-circle" />
-                    My Profile
-                  </span>
+                  <Icon name="user" size="4">
+                    <span>My Profile</span>
+                  </Icon>
                 </LiveRedirect>
               </li>
               <li :if={:artist not in @current_user.roles}>
                 <LiveRedirect to={Routes.beta_signup_path(Endpoint, :new)}>
-                  <span>
-                    <i class="fas fa-flask-vial" />
-                    Artist Signup
-                  </span>
+                  <Icon name="clipboard-signature" size="4">
+                    <span>Artist Signup</span>
+                  </Icon>
                 </LiveRedirect>
               </li>
               <li :if={:artist in @current_user.roles}>
                 <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
-                  <span>
-                    <i class="fas fa-palette" />
-                    My Studios
-                  </span>
+                  <Icon name="store" size="4">
+                    <span>My Studios</span>
+                  </Icon>
                 </LiveRedirect>
               </li>
               <li>
                 <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
-                  <span>
-                    <i class="fas fa-cog" />
-                    Settings
-                  </span>
+                  <Icon name="settings" size="4">
+                    <span>Settings</span>
+                  </Icon>
                 </LiveRedirect>
               </li>
               <li>
                 <LiveRedirect to={Routes.report_bug_new_path(Endpoint, :new)}>
-                  <span>
-                    <i class="fas fa-bug" />
-                    Report Bug
-                  </span>
+                  <Icon name="bug" size="4">
+                    <span>Report Bug</span>
+                  </Icon>
                 </LiveRedirect>
               </li>
               <li>
                 <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
-                  <span>
-                    <i class="fa fa-sign-out-alt" />
-                    Log out
-                  </span>
+                  <Icon name="log-out" size="4">
+                    <span>Log out</span>
+                  </Icon>
                 </Link>
               </li>
             {#else}
               <li>
                 <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
-                  <span>
-                    <i class="fas fa-sign-in-alt" />
-                    Log in
-                  </span>
+                  <Icon name="log-in" size="4">
+                    <span>Log in</span>
+                  </Icon>
                 </LiveRedirect>
               </li>
               <li>
                 <LiveRedirect to={Routes.register_path(Endpoint, :new)}>
-                  <span>
-                    <i class="fas fa-user-plus" />
-                    Register
-                  </span>
+                  <Icon name="user-plus" size="4">
+                    <span>Register</span>
+                  </Icon>
                 </LiveRedirect>
               </li>
             {/if}
           </ul>
-        </aside>
+        </nav>
       </div>
     </div>
     """
