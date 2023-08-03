@@ -11,7 +11,7 @@ defmodule BanchanWeb.SettingsLive do
   alias Banchan.Notifications
   alias Banchan.Notifications.UserNotificationSettings
 
-  alias BanchanWeb.AuthLive.Components.AuthLayout
+  alias BanchanWeb.AuthLive.Components.SettingsLayout
   alias BanchanWeb.Components.Collapse
   alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
@@ -389,12 +389,12 @@ defmodule BanchanWeb.SettingsLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <AuthLayout flashes={@flash}>
+    <SettingsLayout flashes={@flash}>
       <h1 class="text-2xl">Account Settings</h1>
       <div class="divider" />
       <h2 class="text-xl">Appearance</h2>
-      <div class="flex flex-row items-center py-6 gap-4">
-        <label class="label cursor-pointer grow">
+      <div class="flex flex-row items-center gap-4 py-6">
+        <label class="cursor-pointer label grow">
           <span>Color Mode</span>
           <label class="swap">
             <input
@@ -405,8 +405,8 @@ defmodule BanchanWeb.SettingsLive do
               type="checkbox"
               class={"hidden", loading: !@theme}
             />
-            <i class="fas fa-sun swap-off text-3xl" />
-            <i class="fas fa-moon swap-on text-3xl" />
+            <i class="text-3xl fas fa-sun swap-off" />
+            <i class="text-3xl fas fa-moon swap-on" />
           </label>
         </label>
       </div>
@@ -466,7 +466,7 @@ defmodule BanchanWeb.SettingsLive do
       {#else}
         <h3 class="text-lg">Two-factor Authentication</h3>
         <p class="py-2">2FA helps secure your account by requiring an additional device to log in. Banchan supports any standard OTP application, such as Google Authenticator, Authy, or 1Password.</p>
-        <LiveRedirect class="btn btn-primary w-full" to={Routes.setup_mfa_path(Endpoint, :edit)}>Manage 2FA</LiveRedirect>
+        <LiveRedirect class="w-full btn btn-primary" to={Routes.setup_mfa_path(Endpoint, :edit)}>Manage 2FA</LiveRedirect>
         <div class="divider" />
         <Form
           class="flex flex-col gap-4"
@@ -597,7 +597,7 @@ defmodule BanchanWeb.SettingsLive do
           <Submit class="w-full btn-error" label="Confirm" />
         </Form>
       </Collapse>
-    </AuthLayout>
+    </SettingsLayout>
     """
   end
 end

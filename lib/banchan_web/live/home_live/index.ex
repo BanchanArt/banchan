@@ -78,11 +78,7 @@ defmodule BanchanWeb.HomeLive do
       <Layout flashes={@flash}>
         <:hero>
           <div id="carousel-handler" class="flex-grow">
-            <Carousel
-              id="studio-carousel"
-              label="Featured Studios"
-              class="rounded-b-xl aspect-header-image h-full w-full"
-            >
+            <Carousel id="studio-carousel" label="Featured Studios" class="aspect-header-image h-full w-full">
               {#for studio <- @featured_studios.entries}
                 <Carousel.Slide class="carousel-item w-full aspect-header-image">
                   <LiveRedirect

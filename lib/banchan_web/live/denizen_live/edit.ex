@@ -153,7 +153,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
             <div class="relative">
               {#if Enum.empty?(@uploads.header.entries) && (@remove_header || !@user.header_img_id)}
                 <HiddenInput name={:header_image_id} value={nil} />
-                <div class="bg-base-300 object-cover aspect-header-image rounded-b-xl w-full" />
+                <div class="bg-base-300 object-cover aspect-header-image w-full" />
               {#elseif !Enum.empty?(@uploads.header.entries)}
                 <button
                   type="button"
@@ -163,7 +163,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
                 >✕</button>
                 <.live_img_preview
                   entry={Enum.at(@uploads.header.entries, 0)}
-                  class="object-cover aspect-header-image rounded-b-xl w-full"
+                  class="object-cover aspect-header-image w-full"
                 />
               {#elseif @user.header_img_id}
                 <button
@@ -173,7 +173,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
                 >✕</button>
                 <HiddenInput name={:header_image_id} value={@user.header_img_id} />
                 <img
-                  class="object-cover aspect-header-image rounded-b-xl w-full"
+                  class="object-cover aspect-header-image w-full"
                   src={Routes.public_image_path(Endpoint, :image, :user_header_img, @user.header_img_id)}
                 />
               {/if}

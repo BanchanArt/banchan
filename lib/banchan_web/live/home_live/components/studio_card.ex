@@ -15,7 +15,10 @@ defmodule BanchanWeb.Components.StudioCard do
     ~F"""
     <studio-card>
       <LiveRedirect to={Routes.studio_shop_path(Endpoint, :show, @studio.handle)}>
-        <Card class={"h-full sm:hover:scale-105 sm:hover:z-10 transition-all", "opacity-50": @studio.archived_at}>
+        <Card class={
+          "h-full sm:hover:scale-105 sm:hover:z-10 transition-all shadow-none border border-base-content border-opacity-10",
+          "opacity-50": @studio.archived_at
+        }>
           <:image>
             {#if @studio.card_img_id}
               <img
@@ -37,7 +40,7 @@ defmodule BanchanWeb.Components.StudioCard do
               <div class="badge badge-warning">Archived</div>
             {/if}
           </:header_aside>
-          <ul class="my-2 flex flex-row flex-wrap gap-1">
+          <ul class="flex flex-row flex-wrap gap-1 my-2">
             {#for tag <- @studio.tags}
               <Tag link={false} tag={tag} />
             {/for}

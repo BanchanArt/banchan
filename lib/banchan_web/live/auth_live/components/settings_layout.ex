@@ -1,6 +1,6 @@
-defmodule BanchanWeb.AuthLive.Components.AuthLayout do
+defmodule BanchanWeb.AuthLive.Components.SettingsLayout do
   @moduledoc """
-  Layout component for auth-related pages for consistent look & feel.
+  Layout component for settings-related pages for consistent look & feel.
   """
   use BanchanWeb, :component
 
@@ -13,8 +13,8 @@ defmodule BanchanWeb.AuthLive.Components.AuthLayout do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flashes} padding={0}>
-      <div class="flex flex-col items-center w-full h-full">
-        <div class="w-full max-w-md p-12 mx-auto my-auto rounded-xl bg-base-200">
+      <div class="flex flex-row items-center justify-center w-full">
+        <div class="max-w-5xl p-12 rounded-xl md:my-12 md:mx-12 bg-base-100">
           <#slot />
         </div>
       </div>

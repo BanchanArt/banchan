@@ -77,23 +77,23 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
         <section>
           {#if @studio.header_img && !@studio.header_img.pending && !@studio.disable_info}
             <img
-              class="object-cover aspect-header-image rounded-b-xl w-full"
+              class="object-cover aspect-header-image max-h-[320px] w-full"
               src={Routes.public_image_path(Endpoint, :image, :studio_header_img, @studio.header_img_id)}
             />
           {#else}
-            <div class="rounded-b-xl aspect-header-image bg-base-300 w-full" />
+            <div class="aspect-header-image max-h-[320px] bg-base-300 w-full" />
           {/if}
           <div class="m-6">
             <div class="flex flex-row gap-2">
-              <div class="font-medium text-2xl md:text-3xl grow">
+              <div class="text-2xl font-medium md:text-3xl grow">
                 {@studio.name}
               </div>
               {#if @current_user && (Accounts.mod?(@current_user) || !@current_user_member?)}
                 <div class="dropdown dropdown-end">
-                  <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
+                  <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
                     <i class="fas fa-ellipsis-vertical" />
                   </label>
-                  <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
+                  <ul tabindex="0" class="p-2 shadow dropdown-content menu bg-base-200 rounded-box">
                     {#if Accounts.mod?(@current_user)}
                       <li>
                         <LiveRedirect to={Routes.studio_moderation_path(Endpoint, :edit, @studio.handle)}>
@@ -115,7 +115,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 </div>
               {/if}
               {#if @current_user && !@current_user_member?}
-                <Button click="toggle_follow" class="ml-auto btn-sm btn-outline rounded-full my-2 px-2 py-0">
+                <Button click="toggle_follow" class="px-2 py-0 my-2 ml-auto rounded-full btn-sm btn-outline">
                   {if @user_following? do
                     "Unfollow"
                   else
@@ -128,11 +128,11 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 <LiveRedirect
                   label="Edit Profile"
                   to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}
-                  class="btn btn-sm btn-primary btn-outline rounded-full my-2 px-2 py-0 grow-0"
+                  class="px-2 py-0 my-2 rounded-full btn btn-sm btn-primary btn-outline grow-0"
                 />
               {/if}
             </div>
-            <div :if={!Enum.empty?(@studio.tags)} class="my-2 flex flex-row flex-wrap gap-1">
+            <div :if={!Enum.empty?(@studio.tags)} class="flex flex-row flex-wrap gap-1 my-2">
               {#for tag <- @studio.tags}
                 <Tag tag={tag} type="studios" />
               {/for}
@@ -140,7 +140,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
             <Socials entity={@studio} class="my-4" />
             <div class="flex flex-row items-center gap-1">
               <span>By</span>
-              <div class="avatar-group transition-all -space-x-6 hover:space-x-0">
+              <div class="-space-x-6 transition-all avatar-group hover:space-x-0">
                 {#for member <- @studio.artists}
                   <Avatar user={member} class="w-8" />
                 {/for}
@@ -150,7 +150,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
               {#if @current_user_member?}
                 <div class="pl-2">|</div>
                 <LiveRedirect class="btn btn-link" to={~p"/commissions?studio=#{@studio.handle}"}>
-                  <i class="fas fa-palette pr-2" />
+                  <i class="pr-2 fas fa-palette" />
                   Studio Commissions
                 </LiveRedirect>
               {/if}
@@ -160,7 +160,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
             </p>
           </div>
           <div class="overflow-auto min-w-screen">
-            <nav class="tabs px-2 flex flex-nowrap">
+            <nav class="flex px-2 tabs flex-nowrap">
               <TabButton
                 label="Shop"
                 tab_name={:shop}
