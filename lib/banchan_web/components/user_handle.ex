@@ -8,6 +8,8 @@ defmodule BanchanWeb.Components.UserHandle do
 
   alias Surface.Components.LiveRedirect
 
+  alias BanchanWeb.Components.Icon
+
   prop user, :struct, required: true
   prop link, :boolean, default: true
 
@@ -15,36 +17,55 @@ defmodule BanchanWeb.Components.UserHandle do
     ~F"""
     {#if Accounts.active_user?(@user) && @link}
       <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @user.handle)}>
-        <span>
+        <span class="inline-flex items-center gap-1">
           <strong title={@user.name} class="font-semibold hover:underline">{@user.handle}</strong>
           {#if :admin in @user.roles}
-            <span class="font-medium text-error">
-              (admin)</span>
+            <div class="tooltip" data-tip="Admin">
+              <Icon name="shield-check" size="4" class="text-error">
+              </Icon>
+            </div>
           {#elseif :mod in @user.roles}
-            <span class="font-medium text-error">
-              (mod)</span>
+            <div class="tooltip" data-tip="Moderator">
+              <Icon name="gavel" size="4" class="text-warning">
+              </Icon>
+            </div>
           {#elseif :system in @user.roles}
-            <span class="font-medium text-error">
-              (system)</span>
+            <div class="tooltip" data-tip="System">
+              <Icon name="bot" size="4" class="text-primary">
+              </Icon>
+            </div>
           {/if}
         </span>
       </LiveRedirect>
     {#elseif Accounts.active_user?(@user) && !@link}
-      <span class="cursor-default">
-        <strong title={@user.name} class="font-semibold">{@user.handle}</strong>
+      <span class="inline-flex items-center gap-1 cursor-default">
+        <strong title={@user.name} class="font-semibold">
+          {@user.handle}
+        </strong>
         {#if :admin in @user.roles}
-          <span class="font-medium text-error">
-            (admin)</span>
+          <div class="tooltip" data-tip="Admin">
+            <Icon name="shield-check" size="4" class="text-error">
+            </Icon>
+          </div>
         {#elseif :mod in @user.roles}
-          <span class="font-medium text-error">
-            (mod)</span>
+          <div class="tooltip" data-tip="Moderator">
+            <Icon name="gavel" size="4" class="text-warning">
+            </Icon>
+          </div>
         {#elseif :system in @user.roles}
-          <span class="font-medium text-error">
-            (system)</span>
+          <div class="tooltip" data-tip="System">
+            <Icon name="bot" size="4" class="text-primary">
+            </Icon>
+          </div>
         {/if}
       </span>
     {#else}
-      <strong title="User deactivated their account" class="font-semibold">(deactivated)</strong>
+      <strong title="User deactivated their account" class="font-semibold">
+        <div class="tooltip" data-tip="Deactivated">
+          <Icon name="circle-slash" size="4" class="text-primary">
+          </Icon>
+        </div>
+      </strong>
     {/if}
     """
   end
