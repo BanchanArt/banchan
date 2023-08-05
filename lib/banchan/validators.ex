@@ -55,7 +55,8 @@ defmodule Banchan.Validators do
 
   def validate_markdown(changeset, field) do
     validate_change(changeset, field, fn _, data ->
-      html = Earmark.as_html!(data)
+      # Earmark likes writing any <br> as <br>, but HtmlSanitizeEx likes to write <br/> instead lol.
+      html = Earmark.as_html!(data) |> String.replace(~r/<br\/?>/, "<br/>")
       # NB(@zkat): We don't care about whitespace changes.
       if html |> String.replace(~r/\s+/, "") ==
            html |> HtmlSanitizeEx.markdown_html() |> String.replace(~r/\s+/, "") do

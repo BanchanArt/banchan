@@ -31,7 +31,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
        socket
        |> push_event("set_markdown", %{
          id: assigns.id <> "_hook",
-         value: Map.get(assigns.form.params, "#{assigns.name}", "")
+         value: assigns.form[assigns.name].value || ""
        })}
     end
   end
@@ -87,6 +87,9 @@ defmodule BanchanWeb.Components.Form.QuillInput do
       .control :global(.ql-picker-label) {
       color: hsl(var(--n));
       }
+      .control :global(.ql-editor) :global(p) {
+      @apply py-2;
+      }
       /*
       .control :global(.ql-picker) :global(.ql-picker-options) {
       @apply menu rounded-box
@@ -116,7 +119,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
             id={@id <> "_hook"}
           >
             <div id={@id <> "-editor"} phx-update="ignore" class="object-cover editor h-full w-full" />
-            <TextArea class="hidden input-textarea" opts={@opts} />
+            <TextArea form={@form} field={@name} class="hidden input-textarea" opts={@opts} />
           </div>
           {#if @upload}
             <LiveFileInput
