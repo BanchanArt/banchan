@@ -12,7 +12,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.Components.{Avatar, Markdown, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Layout, Markdown, UserHandle}
 
   alias BanchanWeb.Components.Form.{
     DateTimeLocalInput,
@@ -22,7 +22,6 @@ defmodule BanchanWeb.StudioLive.Moderation do
   }
 
   alias BanchanWeb.Endpoint
-  alias BanchanWeb.StudioLive.Components.StudioLayout
 
   @impl true
   def mount(params, _session, socket) do
@@ -164,7 +163,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio}>
+    <Layout flashes={@flash} studio={@studio} context={:admin}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <Form as={:studio} for={@changeset} change="change" submit="submit">
@@ -242,7 +241,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
           </div>
         </div>
       </div>
-    </StudioLayout>
+    </Layout>
     """
   end
 end
