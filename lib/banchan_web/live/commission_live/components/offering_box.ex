@@ -11,7 +11,7 @@ defmodule BanchanWeb.CommissionLive.Components.OfferingBox do
 
   prop current_user, :struct, from_context: :current_user
   prop offering, :struct, required: true
-  prop available_slots, :integer, required: true
+  prop available_slots, :integer
   prop class, :css_class
 
   def render(assigns) do
