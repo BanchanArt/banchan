@@ -104,7 +104,10 @@ defmodule BanchanWeb.Components.ViewSwitcher do
             <li class="menu-title">Studios</li>
             {#for studio <- studios}
               <li>
-                <LiveRedirect to={~p"/studios/#{studio.handle}"} class={active: @context == :studio && studio.id == @studio.id}>
+                <LiveRedirect
+                  to={~p"/studios/#{studio.handle}"}
+                  class={active: @context == :studio && studio.id == @studio.id}
+                >
                   {render_studio_view(assigns, studio)}
                 </LiveRedirect>
               </li>
