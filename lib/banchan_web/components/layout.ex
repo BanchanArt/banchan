@@ -148,9 +148,11 @@ defmodule BanchanWeb.Components.Layout do
                 <NavLink to={~p"/discover/offerings"} icon="search" title="Discover" />
                 {#if Accounts.active_user?(@current_user)}
                   <NavLink to={~p"/commissions"} icon="scroll-text" title="My Commissions" />
-                  {#unless Accounts.artist?(@current_user)}
+                  {#if Accounts.artist?(@current_user)}
+                    <NavLink to={~p"/studios/new"} icon="store" title="Create a Studio" />
+                  {#else}
                     <NavLink to={~p"/beta"} icon="clipboard-signature" title="Become an Artist" />
-                  {/unless}
+                  {/if}
                   {!--
                   # TODO: Remove this whole page in favor of dropdown
                   <li :if={:artist in @current_user.roles}>
@@ -172,6 +174,7 @@ defmodule BanchanWeb.Components.Layout do
                   {!-- # TODO: /studios/<studio>/commissions --}
                   <NavLink to="#" icon="scroll-text" title="Commissions" />
                   <NavLink to={~p"/studios/#{@studio.handle}/payouts"} icon="coins" title="Payouts" />
+                  <NavLink to={~p"/studios/new"} icon="store" title="Create a Studio" />
                   <NavLink to={~p"/studios/#{@studio.handle}/settings"} icon="settings" title="Settings" />
                 {/if}
               {#match :admin}
