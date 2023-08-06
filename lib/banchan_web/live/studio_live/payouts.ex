@@ -8,8 +8,8 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   alias Banchan.Payments
 
-  alias BanchanWeb.Components.{Button, InfiniteScroll, Stats}
-  alias BanchanWeb.StudioLive.Components.{Payout, PayoutList, StudioLayout}
+  alias BanchanWeb.Components.{Button, InfiniteScroll, Layout, Stats}
+  alias BanchanWeb.StudioLive.Components.{Payout, PayoutList}
 
   def mount(params, _session, socket) do
     {:ok, assign_studio_defaults(params, socket, true, true)}
@@ -199,7 +199,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:payouts}>
+    <Layout flashes={@flash} studio={@studio} context={:studio}>
       <div class="flex flex-col grow max-h-full p-4">
         <div class={"bg-base-300 rounded-box max-w-4xl w-full mx-auto", "hidden sm:flex": !is_nil(@payout_id)}>
           {#if is_nil(@balance)}
@@ -259,7 +259,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
           {/if}
         </div>
       </div>
-    </StudioLayout>
+    </Layout>
     """
   end
 end

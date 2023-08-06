@@ -8,7 +8,9 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.StudioLive.Components
+  alias BanchanWeb.Components.Layout
+
+  alias BanchanWeb.StudioLive.Components.Offering
 
   @impl true
   def mount(%{"offering_type" => offering_type} = params, _session, socket) do
@@ -33,12 +35,12 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
   @impl true
   def render(assigns) do
     ~F"""
-    <Components.StudioLayout id="studio-layout" flashes={@flash} studio={@studio} tab={:shop}>
+    <Layout flashes={@flash} studio={@studio} context={:studio}>
       <div>
         <div class="p-6 max-w-lg mx-auto">
           <h1 class="text-3xl">Edit Offering</h1>
           <div class="divider" />
-          <Components.Offering
+          <Offering
             id="edit-offering"
             current_user={@current_user}
             current_user_member?={@current_user_member?}
@@ -48,7 +50,7 @@ defmodule BanchanWeb.StudioLive.Offerings.Edit do
           />
         </div>
       </div>
-    </Components.StudioLayout>
+    </Layout>
     """
   end
 end

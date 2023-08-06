@@ -4,12 +4,14 @@ defmodule BanchanWeb.CommissionLive do
   """
   use BanchanWeb, :live_view
 
+  alias Banchan.{Accounts, Commissions, Studios}
+  alias Banchan.Commissions.CommissionFilter
+
+  import BanchanWeb.StudioLive.Helpers
+
   alias Surface.Components.Form
   alias Surface.Components.Form.{Field, Submit}
   alias Surface.Components.Form.TextInput, as: SurfaceTextInput
-
-  alias Banchan.{Accounts, Commissions, Studios}
-  alias Banchan.Commissions.CommissionFilter
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
   alias BanchanWeb.Components.{Collapse, InfiniteScroll, Layout}
@@ -84,17 +86,43 @@ defmodule BanchanWeb.CommissionLive do
 
           assign(socket,
             commission: comm,
-            users: users,
+            users: users
+          )
+
+        _ ->
+          assign(socket, commission: nil, users: %{})
+      end
+
+    comm = socket.assigns.commission
+
+    socket =
+      case params do
+        %{"handle" => _} ->
+          assign_studio_defaults(params, socket, true, true)
+
+        _ ->
+          socket
+          |> assign(
+            studio: nil,
             current_user_member?:
-              !is_nil(comm.studio_id) &&
+              !is_nil(comm) &&
+                !is_nil(comm.studio_id) &&
                 Studios.is_user_in_studio?(socket.assigns.current_user, %Studios.Studio{
                   id: comm.studio_id
                 })
           )
-
-        _ ->
-          assign(socket, commission: nil, users: %{}, current_user_member?: false)
       end
+
+    socket =
+      socket
+      |> assign(
+        :context,
+        if !is_nil(socket.assigns.studio) && socket.assigns.current_user_member? do
+          :studio
+        else
+          :client
+        end
+      )
 
     socket =
       Context.put(socket,
@@ -311,7 +339,8 @@ defmodule BanchanWeb.CommissionLive do
     %CommissionFilter{}
     |> CommissionFilter.changeset(
       Enum.into(params, %{
-        "search" => search
+        "search" => search,
+        "studio" => params["handle"] || params["studio"]
       })
     )
     |> Ecto.Changeset.apply_changes()
@@ -369,9 +398,15 @@ defmodule BanchanWeb.CommissionLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flashes={@flash}>
+    <Layout flashes={@flash} context={@context} studio={@studio}>
       {#if !@commission}
-        <h1 class="text-3xl">My Commissions</h1>
+        <h1 class="text-3xl">
+          {#if @studio}
+            Commissions for {@studio.name}
+          {#else}
+            My Commissions
+          {/if}
+        </h1>
         <div class="divider" />
       {/if}
       <div class="flex flex-row grow xl:grow-0">
@@ -396,8 +431,12 @@ defmodule BanchanWeb.CommissionLive do
                 Additional Filters
               </h2>
               <div class="divider" />
-              <TextInput name={:client} />
-              <TextInput name={:studio} />
+              {#unless is_nil(@studio)}
+                <TextInput name={:client} />
+              {/unless}
+              {#if is_nil(@studio)}
+                <TextInput name={:studio} />
+              {/if}
               <MultipleSelect name={:statuses} options={@status_options} />
               <Select
                 name={:sort_by}

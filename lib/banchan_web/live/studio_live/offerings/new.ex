@@ -4,9 +4,11 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   """
   use BanchanWeb, :live_view
 
-  alias BanchanWeb.StudioLive.Components
-
   import BanchanWeb.StudioLive.Helpers
+
+  alias BanchanWeb.Components.Layout
+
+  alias BanchanWeb.StudioLive.Components.Offering
 
   @impl true
   def mount(params, _session, socket) do
@@ -24,12 +26,12 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
   @impl true
   def render(assigns) do
     ~F"""
-    <Components.StudioLayout id="studio-layout" flashes={@flash} studio={@studio} tab={:shop}>
+    <Layout flashes={@flash} studio={@studio} context={:studio}>
       <div>
         <div class="p-6 max-w-lg mx-auto">
           <h1 class="text-3xl">New Offering</h1>
           <div class="divider" />
-          <Components.Offering
+          <Offering
             id="new-offering"
             current_user={@current_user}
             current_user_member?={@current_user_member?}
@@ -38,7 +40,7 @@ defmodule BanchanWeb.StudioLive.Offerings.New do
           />
         </div>
       </div>
-    </Components.StudioLayout>
+    </Layout>
     """
   end
 end

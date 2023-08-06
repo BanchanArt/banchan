@@ -12,7 +12,7 @@ defmodule BanchanWeb.StudioLive.Edit do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.Components.Collapse
+  alias BanchanWeb.Components.{Collapse, Layout}
 
   alias BanchanWeb.Components.Form.{
     HiddenInput,
@@ -22,8 +22,6 @@ defmodule BanchanWeb.StudioLive.Edit do
     TextInput,
     UploadInput
   }
-
-  alias BanchanWeb.StudioLive.Components.StudioLayout
 
   @impl true
   def mount(params, _session, socket) do
@@ -140,7 +138,7 @@ defmodule BanchanWeb.StudioLive.Edit do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} padding={0}>
+    <Layout flashes={@flash} studio={@studio} padding={0} context={:studio}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <h2 class="text-xl py-6">Edit Studio Profile</h2>
@@ -255,7 +253,7 @@ defmodule BanchanWeb.StudioLive.Edit do
           </Form>
         </div>
       </div>
-    </StudioLayout>
+    </Layout>
     """
   end
 end

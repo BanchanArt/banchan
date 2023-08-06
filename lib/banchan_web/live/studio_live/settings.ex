@@ -11,7 +11,7 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   import BanchanWeb.StudioLive.Helpers
 
-  alias BanchanWeb.Components.{Button, Collapse}
+  alias BanchanWeb.Components.{Button, Collapse, Layout}
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
@@ -22,7 +22,7 @@ defmodule BanchanWeb.StudioLive.Settings do
     TextInput
   }
 
-  alias BanchanWeb.StudioLive.Components.{Blocklist, StudioLayout}
+  alias BanchanWeb.StudioLive.Components.Blocklist
 
   @impl true
   def mount(params, _session, socket) do
@@ -187,7 +187,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   @impl true
   def render(assigns) do
     ~F"""
-    <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:settings} padding={0}>
+    <Layout flashes={@flash} studio={@studio} padding={0} context={:studio}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <h2 class="text-xl py-6">Notifications</h2>
@@ -303,7 +303,7 @@ defmodule BanchanWeb.StudioLive.Settings do
           </Collapse>
         </div>
       </div>
-    </StudioLayout>
+    </Layout>
     """
   end
 end

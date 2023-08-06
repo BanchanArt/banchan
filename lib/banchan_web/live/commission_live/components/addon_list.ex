@@ -50,7 +50,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
                 <div class="font-medium text-sm">{option.name}</div>
                 <div class="text-xs">{option.description}</div>
               </div>
-              <div class="p-2 text-sm font-medium">+{Payments.print_money(option.price)}</div>
+              <div class="p-2 text-sm font-medium whitespace-nowrap">+{Payments.print_money(option.price)}</div>
             </li>
           {/if}
         {/for}

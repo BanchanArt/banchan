@@ -48,7 +48,7 @@ defmodule BanchanWeb.StudioLive.Followers do
     ~F"""
     <StudioLayout flashes={@flash} id="studio-layout" studio={@studio}>
       <h3 class="p-6 text-semibold text-2xl">Followers</h3>
-      <ul class="grid sm:px-2 grid grid-cols-2 sm:gap-2 sm:grid-cols-4 auto-rows-fr">
+      <ul class="grid sm:px-2 grid-cols-2 sm:gap-2 sm:grid-cols-4 auto-rows-fr">
         {#for user <- @followers}
           <li>
             <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, user.handle)}>

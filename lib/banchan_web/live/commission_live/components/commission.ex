@@ -22,6 +22,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
     UploadsBox
   }
 
+  prop studio, :struct, from_context: :studio
   prop(users, :map, required: true)
   prop(current_user, :struct, from_context: :current_user)
   prop(current_user_member?, :boolean, from_context: :current_user_member?)
@@ -182,8 +183,15 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   def render(assigns) do
     ~F"""
     <div class="relative">
-      <h1 class="text-3xl flex flex-row items-center px-4 sticky top-16 bg-base-100 z-30 pb-2 border-b-2 border-base-content border-opacity-10 opacity-100 items-center">
-        <LivePatch class="px-2 pb-4" to={Routes.commission_path(Endpoint, :index)}>
+      <h1 class="text-3xl flex flex-row px-4 sticky top-16 bg-base-100 z-30 pb-2 border-b-2 border-base-content border-opacity-10 opacity-100 items-center">
+        <LivePatch
+          class="px-2 pb-4"
+          to={if is_nil(@studio) do
+            ~p"/commissions"
+          else
+            ~p"/studios/#{@studio.handle}/commissions"
+          end}
+        >
           <i class="fas fa-arrow-left text-2xl" />
         </LivePatch>
         {#if @title_changeset}

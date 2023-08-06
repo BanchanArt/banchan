@@ -121,9 +121,6 @@ defmodule BanchanWeb.DiscoverLive.Index do
       <h1 class="text-3xl">Discover</h1>
       <div class="divider" />
       <div class="tabs tabs-boxed flex flex-nowrap max-w-xl mx-auto">
-        <div class={"tab tab-lg flex-1", "tab-active": @type not in ["studios", "offerings"]}>
-          <LivePatch to={Routes.discover_index_path(Endpoint, :index, params)}>Explore</LivePatch>
-        </div>
         <div class={"tab tab-lg flex-1", "tab-active": @type == "offerings"}>
           <LivePatch to={Routes.discover_index_path(Endpoint, :index, "offerings", params)}>Offerings</LivePatch>
         </div>
@@ -197,33 +194,6 @@ defmodule BanchanWeb.DiscoverLive.Index do
           query={@query}
           order_by={@order_by}
         />
-      {#else}
-        <div class="px-2 flex flex-row items-end">
-          <div class="text-xl grow">
-            Selected Offerings
-          </div>
-          <div class="text-md">
-            <LivePatch
-              class="hover:link text-primary"
-              to={Routes.discover_index_path(Endpoint, :index, "offerings")}
-            >Discover More</LivePatch>
-          </div>
-        </div>
-        <div class="divider" />
-        <Offerings id="offerings" current_user={@current_user} page_size={4} infinite={false} />
-        <div class="pt-10 px-2 flex flex-row items-end">
-          <div class="text-xl grow">
-            Selected Studios
-          </div>
-          <div class="text-md">
-            <LivePatch
-              class="hover:link text-primary"
-              to={Routes.discover_index_path(Endpoint, :index, "studios")}
-            >Discover More</LivePatch>
-          </div>
-        </div>
-        <div class="divider" />
-        <Studios id="studios" current_user={@current_user} page_size={3} infinite={false} />
       {/if}
     </Layout>
     """

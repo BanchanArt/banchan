@@ -72,7 +72,16 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   def render(assigns) do
     ~F"""
-    <Layout flashes={@flashes} padding={@padding}>
+    <Layout
+      flashes={@flashes}
+      padding={@padding}
+      studio={@studio}
+      context={if @current_user_member? do
+        :studio
+      else
+        :client
+      end}
+    >
       <:hero>
         <section>
           {#if @studio.header_img && !@studio.header_img.pending && !@studio.disable_info}
@@ -147,20 +156,13 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
               </div>
               <div class="p-2">|</div>
               <FollowerCountLive id="follower-count" session={%{"handle" => @studio.handle}} />
-              {#if @current_user_member?}
-                <div class="pl-2">|</div>
-                <LiveRedirect class="btn btn-link" to={~p"/commissions?studio=#{@studio.handle}"}>
-                  <i class="fas fa-palette pr-2" />
-                  Studio Commissions
-                </LiveRedirect>
-              {/if}
             </div>
             <p class="pt-4">
               {@studio.about}
             </p>
           </div>
-          <div class="overflow-auto min-w-screen">
-            <nav class="tabs px-2 flex flex-nowrap">
+          <div class="overflow-auto">
+            <nav class="tabs px-2 flex flex-nowrap max-w-md">
               <TabButton
                 label="Shop"
                 tab_name={:shop}
@@ -173,22 +175,6 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 current_tab={@tab}
                 to={Routes.studio_portfolio_path(Endpoint, :show, @studio.handle)}
               />
-              {#if @current_user_member? ||
-                  (@current_user && (:admin in @current_user.roles || :mod in @current_user.roles))}
-                <TabButton
-                  label="Payouts"
-                  tab_name={:payouts}
-                  current_tab={@tab}
-                  to={Routes.studio_payouts_path(Endpoint, :index, @studio.handle)}
-                />
-
-                <TabButton
-                  label="Settings"
-                  tab_name={:settings}
-                  current_tab={@tab}
-                  to={Routes.studio_settings_path(Endpoint, :show, @studio.handle)}
-                />
-              {/if}
             </nav>
           </div>
         </section>

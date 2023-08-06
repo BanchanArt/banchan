@@ -226,11 +226,11 @@ defmodule BanchanWeb.OfferingLive.Request do
         {:noreply,
          redirect(socket,
            to:
-             Routes.commission_path(
-               Endpoint,
-               :show,
-               created_commission.public_id
-             )
+             if socket.assigns.current_user_member? do
+               ~p"/studios/#{socket.assigns.studio.handle}/commissions/#{created_commission.public_id}"
+             else
+               ~p"/commissions/#{created_commission.public_id}"
+             end
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->

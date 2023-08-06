@@ -67,7 +67,8 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :users_only, on_mount: {BanchanWeb.UserLiveAuth, :users_only} do
+    live_session :users_only,
+      on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :users_only}] do
       pipe_through([:basic_authed, :browser, :require_authed, :ensure_enabled])
 
       live("/denizens/:handle/edit", DenizenLive.Edit, :edit)
@@ -108,14 +109,16 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :artists_only, on_mount: {BanchanWeb.UserLiveAuth, :artists_only} do
+    live_session :artists_only,
+      on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :artists_only}] do
       pipe_through([:basic_authed, :browser, :require_authed, :ensure_enabled, :artist])
 
       live("/offerings/:handle/:offering_type/edit", StudioLive.Offerings.Edit, :edit)
 
-      live("/studios", StudioLive.Index, :index)
       live("/studios/new", StudioLive.New, :new)
       live("/studios/:handle/edit", StudioLive.Edit, :edit)
+      live("/studios/:handle/commissions", CommissionLive, :index)
+      live("/studios/:handle/commissions/:commission_id", CommissionLive, :show)
       live("/studios/:handle/settings", StudioLive.Settings, :show)
       live("/studios/:handle/payouts", StudioLive.Payouts, :index)
       live("/studios/:handle/payouts/:payout_id", StudioLive.Payouts, :show)
@@ -126,7 +129,8 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :mods_only, on_mount: {BanchanWeb.UserLiveAuth, :mods_only} do
+    live_session :mods_only,
+      on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :mods_only}] do
       pipe_through([:basic_authed, :browser, :require_authed, :ensure_enabled, :mod])
 
       live("/denizens/:handle/moderation", DenizenLive.Moderation, :edit)
@@ -154,7 +158,8 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :default, on_mount: {BanchanWeb.UserLiveAuth, :default} do
+    live_session :default,
+      on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :default}] do
       pipe_through([:basic_authed, :browser])
 
       live("/account_disabled", AccountDisabledLive, :show)
@@ -162,7 +167,8 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :open_no_basic_auth, on_mount: {BanchanWeb.UserLiveAuth, :open} do
+    live_session :open_no_basic_auth,
+      on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :open}] do
       pipe_through([:browser, :ensure_enabled])
 
       live("/", HomeLive, :index)
@@ -182,13 +188,12 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :open, on_mount: {BanchanWeb.UserLiveAuth, :open} do
+    live_session :open, on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :open}] do
       pipe_through([:basic_authed, :browser, :ensure_enabled])
 
       live("/denizens/:handle", DenizenLive.Show, :show)
       live("/denizens/:handle/following", DenizenLive.Show, :following)
 
-      live("/discover", DiscoverLive.Index, :index)
       live("/discover/:type", DiscoverLive.Index, :index)
 
       live("/offerings/:handle/:offering_type", OfferingLive.Show, :show)
@@ -207,7 +212,8 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :redirect_if_authed, on_mount: {BanchanWeb.UserLiveAuth, :redirect_if_authed} do
+    live_session :redirect_if_authed,
+      on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :redirect_if_authed}] do
       pipe_through([:basic_authed, :browser, :redirect_if_user_is_authenticated])
 
       live("/login", LoginLive, :new)
@@ -219,7 +225,8 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/", BanchanWeb do
-    live_session :deactivated, on_mount: {BanchanWeb.UserLiveAuth, :deactivated} do
+    live_session :deactivated,
+      on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :deactivated}] do
       pipe_through([:basic_authed, :browser, :require_authed])
 
       live("/reactivate", ReactivateLive, :show)
@@ -227,10 +234,10 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/auth", BanchanWeb do
-    pipe_through :browser
+    pipe_through(:browser)
 
-    get "/:provider", UserOAuthController, :request
-    get "/:provider/callback", UserOAuthController, :callback
+    get("/:provider", UserOAuthController, :request)
+    get("/:provider/callback", UserOAuthController, :callback)
   end
 
   scope "/api", BanchanWeb do
@@ -239,7 +246,6 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/admin" do
-    # Enable admin stuff dev/test side but restrict it in prod
     pipe_through([
       :basic_authed,
       :browser
@@ -247,12 +253,26 @@ defmodule BanchanWeb.Router do
     ])
 
     live_dashboard("/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo)
-    forward("/sent_emails", Bamboo.SentEmailViewerPlug)
+  end
 
-    # Moved out of /admin until a Surface Catalogue bug is fixed. See below.
-    # if Application.compile_env!(:banchan, :env) == :dev do
-    #   surface_catalogue("/catalogue")
-    # end
+  scope "/admin" do
+    live_session :dev,
+      on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :mods_only}] do
+      # Enable admin stuff dev/test side but restrict it in prod
+      pipe_through([
+        :basic_authed,
+        :browser
+        | if(Application.compile_env!(:banchan, :env) in [:dev, :test], do: [], else: [:admin])
+      ])
+
+      live("/dev", BanchanWeb.DevLive.Index, :index)
+      forward("/sent_emails", Bamboo.SentEmailViewerPlug)
+
+      # Moved out of /admin until a Surface Catalogue bug is fixed. See below.
+      # if Application.compile_env!(:banchan, :env) == :dev do
+      #   surface_catalogue("/catalogue")
+      # end
+    end
   end
 
   scope "/" do
