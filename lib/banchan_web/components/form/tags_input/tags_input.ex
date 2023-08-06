@@ -159,7 +159,11 @@ defmodule BanchanWeb.Components.Form.TagsInput do
                   value={tag}
                 />
                 <span class="tracking-wide">{tag}</span>
-                <span class="text-xs opacity-50 cursor-pointer hover:opacity-100 active:opacity-100" phx-value-index={index} :on-click="remove">✕</span>
+                <span
+                  class="text-xs opacity-50 cursor-pointer hover:opacity-100 active:opacity-100"
+                  phx-value-index={index}
+                  :on-click="remove"
+                >✕</span>
               </li>
             {#else}
               <li>
