@@ -101,7 +101,7 @@ defmodule BanchanWeb.Components.ViewSwitcher do
             </li>
           {/if}
           {#if Accounts.active_user?(@current_user) && Accounts.artist?(@current_user)}
-            <li class="menu-item">Studios</li>
+            <li class="menu-title">Studios</li>
             {#for studio <- studios}
               <li>
                 <LiveRedirect to={~p"/studios/#{studio.handle}"}>
