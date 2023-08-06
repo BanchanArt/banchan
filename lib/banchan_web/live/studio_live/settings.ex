@@ -187,7 +187,7 @@ defmodule BanchanWeb.StudioLive.Settings do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flashes={@flash} studio={@studio} context={:studio}>
+    <Layout flashes={@flash} studio={@studio} padding={0} context={:studio}>
       <div class="w-full md:bg-base-300">
         <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
           <h2 class="text-xl py-6">Notifications</h2>
