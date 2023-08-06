@@ -70,32 +70,32 @@ defmodule BanchanWeb.Components.ViewSwitcher do
             {#case @context}
               {#match :client}
                 {render_client_view(assigns)}
-              {#match :studio}
-                {render_studio_view(assigns, @studio)}
               {#match :admin}
                 {render_admin_view(assigns)}
               {#match :dev}
                 {render_dev_view(assigns)}
+              {#match :studio}
+                {render_studio_view(assigns, @studio)}
             {/case}
           </span>
           <Icon name="chevron-down" />
         </summary>
         <ul class="p-2 menu absolute left-0 z-[1] bg-base-100 rounded-box w-full bordered border-base-300">
           <li>
-            <LiveRedirect to={~p"/"}>
+            <LiveRedirect to={~p"/"} class={active: @context == :client}>
               {render_client_view(assigns)}
             </LiveRedirect>
           </li>
           {#if Accounts.active_user?(@current_user) && Accounts.mod?(@current_user)}
             <li>
-              <LiveRedirect to={~p"/admin/denizens"}>
+              <LiveRedirect to={~p"/admin/denizens"} class={active: @context == :admin}>
                 {render_admin_view(assigns)}
               </LiveRedirect>
             </li>
           {/if}
           {#if Accounts.active_user?(@current_user) && Accounts.admin?(@current_user)}
             <li>
-              <LiveRedirect to={~p"/admin/dev"}>
+              <LiveRedirect to={~p"/admin/dev"} class={active: @context == :dev}>
                 {render_dev_view(assigns)}
               </LiveRedirect>
             </li>
@@ -104,7 +104,7 @@ defmodule BanchanWeb.Components.ViewSwitcher do
             <li class="menu-title">Studios</li>
             {#for studio <- studios}
               <li>
-                <LiveRedirect to={~p"/studios/#{studio.handle}"}>
+                <LiveRedirect to={~p"/studios/#{studio.handle}"} class={active: @context == :studio && studio.id == @studio.id}>
                   {render_studio_view(assigns, studio)}
                 </LiveRedirect>
               </li>
