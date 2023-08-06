@@ -117,7 +117,7 @@ defmodule BanchanWeb.BetaLive.RequestsTest do
                |> Floki.find("table > tbody > tr > td.email")
                |> Enum.map(&Floki.text(&1))
 
-      admin_handle = admin.handle <> "(admin)"
+      admin_handle = admin.handle
 
       assert ["-", ^admin_handle, "-"] =
                view
@@ -238,9 +238,9 @@ defmodule BanchanWeb.BetaLive.RequestsTest do
                |> Floki.find("table > tbody > tr > td.email")
                |> Enum.map(&Floki.text(&1))
 
-      admin_handle = admin.handle <> "(admin)"
+      admin_handle = admin.handle
 
-      assert ["-", "tteokbokki(system)", ^admin_handle, "-"] =
+      assert ["-", "tteokbokki", ^admin_handle, "-"] =
                view
                |> element("form.show-sent")
                |> render_change(%{"show_sent" => %{"show_sent" => "true"}})
@@ -294,9 +294,9 @@ defmodule BanchanWeb.BetaLive.RequestsTest do
                |> Floki.find("table > tbody > tr > td.email")
                |> Enum.map(&Floki.text(&1))
 
-      admin_handle = admin.handle <> "(admin)"
+      admin_handle = admin.handle
 
-      assert [^admin_handle, "tteokbokki(system)", ^admin_handle, "-"] =
+      assert [^admin_handle, "tteokbokki", ^admin_handle, "-"] =
                view
                |> element("form.show-sent")
                |> render_change(%{"show_sent" => %{"show_sent" => "true"}})
