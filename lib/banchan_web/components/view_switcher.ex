@@ -102,8 +102,7 @@ defmodule BanchanWeb.Components.ViewSwitcher do
           {/if}
           {#if Accounts.active_user?(@current_user) && Accounts.admin?(@current_user)}
             <li>
-              {!-- # TODO: dev landing page --}
-              <LiveRedirect to={~p"/admin/denizens"}>
+              <LiveRedirect to={~p"/admin/dev"}>
                 {render_dev_view(assigns)}
               </LiveRedirect>
             </li>

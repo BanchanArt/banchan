@@ -246,7 +246,6 @@ defmodule BanchanWeb.Router do
   end
 
   scope "/admin" do
-    # Enable admin stuff dev/test side but restrict it in prod
     pipe_through([
       :basic_authed,
       :browser
@@ -254,12 +253,26 @@ defmodule BanchanWeb.Router do
     ])
 
     live_dashboard("/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo)
-    forward("/sent_emails", Bamboo.SentEmailViewerPlug)
+  end
 
-    # Moved out of /admin until a Surface Catalogue bug is fixed. See below.
-    # if Application.compile_env!(:banchan, :env) == :dev do
-    #   surface_catalogue("/catalogue")
-    # end
+  scope "/admin" do
+    live_session :dev,
+      on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :mods_only}] do
+      # Enable admin stuff dev/test side but restrict it in prod
+      pipe_through([
+        :basic_authed,
+        :browser
+        | if(Application.compile_env!(:banchan, :env) in [:dev, :test], do: [], else: [:admin])
+      ])
+
+      live("/dev", BanchanWeb.DevLive.Index, :index)
+      forward("/sent_emails", Bamboo.SentEmailViewerPlug)
+
+      # Moved out of /admin until a Surface Catalogue bug is fixed. See below.
+      # if Application.compile_env!(:banchan, :env) == :dev do
+      #   surface_catalogue("/catalogue")
+      # end
+    end
   end
 
   scope "/" do
