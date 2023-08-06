@@ -93,12 +93,14 @@ defmodule BanchanWeb.Components.ViewSwitcher do
               </LiveRedirect>
             </li>
           {/for}
-          {#if Accounts.active_user?(@current_user) && Accounts.admin?(@current_user)}
+          {#if Accounts.active_user?(@current_user) && Accounts.mod?(@current_user)}
             <li>
               <LiveRedirect to={~p"/admin/denizens"}>
                 {render_admin_view(assigns)}
               </LiveRedirect>
             </li>
+          {/if}
+          {#if Accounts.active_user?(@current_user) && Accounts.admin?(@current_user)}
             <li>
               {!-- # TODO: dev landing page --}
               <LiveRedirect to={~p"/admin/denizens"}>

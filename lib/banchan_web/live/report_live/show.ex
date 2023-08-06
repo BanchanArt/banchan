@@ -107,7 +107,7 @@ defmodule BanchanWeb.ReportLive.Show do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flashes={@flash}>
+    <Layout flashes={@flash} context={:admin}>
       <div class="relative">
         <h1 class="text-3xl flex flex-row items-center px-4 sticky top-16 bg-base-100 z-30 pb-2 border-b-2 border-base-content border-opacity-10 opacity-100 items-center">
           <LiveRedirect class="px-2 pb-4" to={Routes.report_index_path(Endpoint, :index)}>

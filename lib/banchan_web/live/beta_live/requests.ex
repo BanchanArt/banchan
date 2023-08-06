@@ -111,7 +111,7 @@ defmodule BanchanWeb.BetaLive.Requests do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flashes={@flash}>
+    <Layout flashes={@flash} context={:admin}>
       <h1 class="text-3xl">Manage Invite Requests</h1>
       <div class="divider" />
       <div class="flex flex-col md:flex-row md:flex-wrap gap-2">

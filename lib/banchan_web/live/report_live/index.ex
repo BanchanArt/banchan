@@ -205,7 +205,7 @@ defmodule BanchanWeb.ReportLive.Index do
   @impl true
   def render(assigns) do
     ~F"""
-    <Layout flashes={@flash}>
+    <Layout flashes={@flash} context={:admin}>
       <h1 class="text-3xl">Reports</h1>
       <div class="divider" />
       <div class="flex flex-col pt-4">

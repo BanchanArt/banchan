@@ -1,3 +1,37 @@
+defmodule BanchanWeb.Components.Layout.NavLink do
+  @moduledoc """
+  Link inside the side nav bar, including highlights for currently active page.
+  """
+  use BanchanWeb, :component
+
+  alias Surface.Components.LiveRedirect
+
+  alias BanchanWeb.Components.Icon
+
+  prop current_page, :string, from_context: :current_page
+  prop to, :string, required: true
+  prop icon, :string, required: true
+  prop title, :string, required: true
+
+  def render(assigns) do
+    ~F"""
+    <li>
+      <LiveRedirect
+        class={
+          active:
+            @current_page == @to || (@current_page == "/discover/studios" && @to == "/discover/offerings")
+        }
+        to={@to}
+      >
+        <Icon name={@icon} size="4">
+          <span>{@title}</span>
+        </Icon>
+      </LiveRedirect>
+    </li>
+    """
+  end
+end
+
 defmodule BanchanWeb.Components.Layout do
   @moduledoc """
   Standard dynamic part of the layout used for Surface LiveViews.
@@ -11,6 +45,8 @@ defmodule BanchanWeb.Components.Layout do
   alias Surface.Components.{Link, LiveRedirect}
 
   alias BanchanWeb.Components.{Avatar, Flash, Icon, Nav, UserHandle, ViewSwitcher}
+
+  alias BanchanWeb.Components.Layout.NavLink
 
   prop current_user, :any, from_context: :current_user
   prop flashes, :any, required: true
@@ -103,57 +139,18 @@ defmodule BanchanWeb.Components.Layout do
             {/if}
           </div>
           <ul tabindex="0" class="flex flex-col gap-2 p-2 menu menu-compact">
-            <li>
+            <li :if={Accounts.artist?(@current_user) || Accounts.mod?(@current_user)}>
               <ViewSwitcher context={@context} studio={@studio} />
             </li>
             {#case @context}
               {#match :client}
-                <li>
-                  <LiveRedirect to={~p"/"}>
-                    <Icon name="home" size="4">
-                      <span>Home</span>
-                    </Icon>
-                  </LiveRedirect>
-                </li>
-                <li>
-                  <LiveRedirect to={Routes.discover_index_path(Endpoint, :index)}>
-                    <Icon name="search" size="4">
-                      <span>Discover</span>
-                    </Icon>
-                  </LiveRedirect>
-                </li>
-                {!--
-                # TODO: Get rid of these pages
-                <li>
-                  <LiveRedirect to={Routes.discover_index_path(Endpoint, :index, "offerings")}>
-                    <Icon name="shopping-bag" size="4">
-                      <span>Offerings</span>
-                    </Icon>
-                  </LiveRedirect>
-                </li>
-                <li>
-                  <LiveRedirect to={Routes.discover_index_path(Endpoint, :index, "studios")}>
-                    <Icon name="store" size="4">
-                      <span>Studios</span>
-                    </Icon>
-                  </LiveRedirect>
-                </li>
-                --}
+                <NavLink to={~p"/"} icon="home" title="Home" />
+                <NavLink to={~p"/discover/offerings"} icon="search" title="Discover" />
                 {#if Accounts.active_user?(@current_user)}
-                  <li>
-                    <LiveRedirect to={Routes.commission_path(Endpoint, :index)}>
-                      <Icon name="scroll-text" size="4">
-                        <span>My Commissions</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
-                  <li :if={:artist not in @current_user.roles}>
-                    <LiveRedirect to={Routes.beta_signup_path(Endpoint, :new)}>
-                      <Icon name="clipboard-signature" size="4">
-                        <span>Become an Artist</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
+                  <NavLink to={~p"/commissions"} icon="scroll-text" title="My Commissions" />
+                  {#unless Accounts.artist?(@current_user)}
+                    <NavLink to={~p"/beta"} icon="clipboard-signature" title="Become an Artist" />
+                  {/unless}
                   {!--
                   # TODO: Remove this whole page in favor of dropdown
                   <li :if={:artist in @current_user.roles}>
@@ -164,93 +161,33 @@ defmodule BanchanWeb.Components.Layout do
                     </LiveRedirect>
                   </li>
                   --}
-                  <li>
-                    <LiveRedirect to={Routes.settings_path(Endpoint, :edit)}>
-                      <Icon name="settings" size="4">
-                        <span>Settings</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
+                  <NavLink to={~p"/settings"} icon="settings" title="Settings" />
                 {#else}
-                  <li>
-                    <LiveRedirect to={Routes.login_path(Endpoint, :new)}>
-                      <Icon name="log-in" size="4">
-                        <span>Log in</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
-                  <li>
-                    <LiveRedirect to={Routes.register_path(Endpoint, :new)}>
-                      <Icon name="user-plus" size="4">
-                        <span>Register</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
+                  <NavLink to={~p"/login"} icon="log-in" title="Log in" />
+                  <NavLink to={~p"/register"} icon="user-plus" title="Register" />
                 {/if}
               {#match :studio}
                 {#if Accounts.active_user?(@current_user) && Accounts.artist?(@current_user)}
-                  <li>
-                    <LiveRedirect to={~p"/studios/#{@studio.handle}"}>
-                      <Icon name="store" size="4">
-                        <span>Shop</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
-                  <li>
-                    {!-- # TODO: /studios/<studio>/commissions --}
-                    <LiveRedirect to="#">
-                      <Icon name="scroll-text" size="4">
-                        <span>Commissions</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
-                  <li>
-                    <LiveRedirect to={~p"/studios/#{@studio.handle}/payouts"}>
-                      <Icon name="coins" size="4">
-                        <span>Payouts</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
-                  <li>
-                    <LiveRedirect to={~p"/studios/#{@studio.handle}/settings"}>
-                      <Icon name="settings" size="4">
-                        <span>Settings</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
+                  <NavLink to={~p"/studios/#{@studio.handle}"} icon="store" title="Shop" />
+                  {!-- # TODO: /studios/<studio>/commissions --}
+                  <NavLink to="#" icon="scroll-text" title="Commissions" />
+                  <NavLink to={~p"/studios/#{@studio.handle}/payouts"} icon="coins" title="Payouts" />
+                  <NavLink to={~p"/studios/#{@studio.handle}/settings"} icon="settings" title="Settings" />
                 {/if}
               {#match :admin}
                 {#if Accounts.active_user?(@current_user) && :admin in @current_user.roles}
-                  <li>
-                    <LiveRedirect to={Routes.report_index_path(Endpoint, :index)}>
-                      <Icon name="flag" size="4">
-                        <span>Reports</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
-                  <li>
-                    <LiveRedirect to={Routes.denizen_index_path(Endpoint, :index)}>
-                      <Icon name="users" size="4">
-                        <span>Users</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
-                  <li>
-                    <LiveRedirect to={Routes.beta_requests_path(Endpoint, :index)}>
-                      <Icon name="inbox" size="4">
-                        <span>Beta Requests</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
-                  <li>
-                    <a href={~p"/admin/dashboard"} target="_blank" rel="noopener noreferrer">
-                      <Icon name="layout-panel-top" size="4">
-                        <span>Dashboard</span>
-                      </Icon>
-                    </a>
-                  </li>
+                  <NavLink to={~p"/admin/reports"} icon="flag" title="Reports" />
+                  <NavLink to={~p"/admin/denizens"} icon="users" title="Users" />
+                  <NavLink to={~p"/admin/requests"} icon="inbox" title="Beta Requests" />
                 {/if}
               {#match :dev}
+                <li>
+                  <a href={~p"/admin/dashboard"} target="_blank" rel="noopener noreferrer">
+                    <Icon name="layout-panel-top" size="4">
+                      <span>Dashboard</span>
+                    </Icon>
+                  </a>
+                </li>
                 {#if Application.fetch_env!(:banchan, :env) == :dev}
                   <li>
                     <a href={~p"/admin/sent_emails"} target="_blank" rel="noopener noreferrer">
