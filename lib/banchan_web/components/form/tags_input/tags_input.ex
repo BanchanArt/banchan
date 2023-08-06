@@ -148,28 +148,28 @@ defmodule BanchanWeb.Components.Form.TagsInput do
         {/if}
         <div class="flex flex-col">
           <ul class={
-            "tags-list flex flex-row flex-wrap p-1 gap-1 border shadow focus-within:ring border-base-content border-opacity-20 bg-base-100 rounded-btn cursor-text",
+            "tags-list flex flex-row flex-wrap p-2 gap-2 border shadow focus-within:ring ring-primary border-base-content border-opacity-20 bg-base-100 rounded-btn cursor-text",
             "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
           }>
             {#for {tag, index} <- Enum.with_index(@tags)}
-              <li class="badge badge-lg badge-primary gap-2">
+              <li class="flex flex-row items-center max-w-full gap-1 px-2 py-1 text-xs font-semibold text-opacity-75 no-underline uppercase rounded-full cursor-default bg-opacity-10 h-fit w-fit hover:bg-opacity-20 active:bg-opacity-20 border-base-content border-opacity-10 hover:text-opacity-100 active:text-opacity-100 bg-base-content">
                 <HiddenInput
                   id={Phoenix.HTML.Form.input_id(@form, @name) <> "_#{index}"}
                   name={Phoenix.HTML.Form.input_name(@form, @name) <> "[]"}
                   value={tag}
                 />
-                <span class="cursor-pointer text-xs" phx-value-index={index} :on-click="remove">✕</span><span>
-                  {tag}</span>
+                <span class="tracking-wide">{tag}</span>
+                <span class="text-xs opacity-50 cursor-pointer hover:opacity-100 active:opacity-100" phx-value-index={index} :on-click="remove">✕</span>
               </li>
             {#else}
               <li>
                 <HiddenInput name={Phoenix.HTML.Form.input_name(@form, @name)} value="[]" />
               </li>
             {/for}
-            <li class="flex-1 relative min-w-fit w-8">
+            <li class="relative flex-1 w-8 min-w-fit">
               <input
                 id={Phoenix.HTML.Form.input_id(@form, @name) <> "_input"}
-                class="input-field bg-base-100 input-sm w-full h-full focus:outline-none border-none focus:border-none border-transparent focus:border-transparent shadow-none focus:ring-0 focus:ring-transparent overflow-visible"
+                class="w-full h-full px-0 overflow-visible border-transparent border-none shadow-none input-field bg-base-100 input-sm focus:outline-none focus:border-none focus:border-transparent focus:ring-0 focus:ring-transparent"
                 phx-keydown="handle_input"
                 phx-update="ignore"
                 data-event-target={@myself}
@@ -177,7 +177,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
               />
               <ol
                 :if={!Enum.empty?(@results)}
-                class="absolute float-left menu menu-compact rounded-box p-2 bg-base-300"
+                class="absolute float-left p-2 menu menu-compact rounded-box bg-base-300"
               >
                 {#for {result, index} <- Enum.with_index(@results)}
                   <li><button
