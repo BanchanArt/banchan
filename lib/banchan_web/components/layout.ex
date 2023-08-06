@@ -139,11 +139,10 @@ defmodule BanchanWeb.Components.Layout do
             {/if}
           </div>
           <ul tabindex="0" class="flex flex-col gap-2 p-2 menu menu-compact">
-            <li :if={dbg(Accounts.active_user?(@current_user |> dbg())) && (
-              Accounts.mod?(@current_user) ||
-              Accounts.artist?(@current_user) ||
-              Application.fetch_env!(:banchan, :env) == :dev
-             )}>
+            <li :if={dbg(Accounts.active_user?(@current_user |> dbg())) &&
+              (Accounts.mod?(@current_user) ||
+                 Accounts.artist?(@current_user) ||
+                 Application.fetch_env!(:banchan, :env) == :dev)}>
               <ViewSwitcher context={@context} studio={@studio} />
             </li>
             {#case @context}
