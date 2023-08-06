@@ -86,13 +86,6 @@ defmodule BanchanWeb.Components.ViewSwitcher do
               {render_client_view(assigns)}
             </LiveRedirect>
           </li>
-          {#for studio <- studios}
-            <li>
-              <LiveRedirect to={~p"/studios/#{studio.handle}"}>
-                {render_studio_view(assigns, studio)}
-              </LiveRedirect>
-            </li>
-          {/for}
           {#if Accounts.active_user?(@current_user) && Accounts.mod?(@current_user)}
             <li>
               <LiveRedirect to={~p"/admin/denizens"}>
@@ -104,6 +97,23 @@ defmodule BanchanWeb.Components.ViewSwitcher do
             <li>
               <LiveRedirect to={~p"/admin/dev"}>
                 {render_dev_view(assigns)}
+              </LiveRedirect>
+            </li>
+          {/if}
+          {#if Accounts.active_user?(@current_user) && Accounts.artist?(@current_user)}
+            <li class="menu-item">Studios</li>
+            {#for studio <- studios}
+              <li>
+                <LiveRedirect to={~p"/studios/#{studio.handle}"}>
+                  {render_studio_view(assigns, studio)}
+                </LiveRedirect>
+              </li>
+            {/for}
+            <li>
+              <LiveRedirect to={~p"/studios/new"}>
+                <Icon name="plus" class="grow" size="4">
+                  <span class="text-ellipsis">New Studio</span>
+                </Icon>
               </LiveRedirect>
             </li>
           {/if}

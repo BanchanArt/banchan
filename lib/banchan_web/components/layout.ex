@@ -139,10 +139,11 @@ defmodule BanchanWeb.Components.Layout do
             {/if}
           </div>
           <ul tabindex="0" class="flex flex-col gap-2 p-2 menu menu-compact">
-            <li :if={dbg(Accounts.active_user?(@current_user |> dbg())) &&
-              (Accounts.mod?(@current_user) ||
-                 Accounts.artist?(@current_user) ||
-                 Application.fetch_env!(:banchan, :env) == :dev)}>
+            <li :if={dbg(Accounts.active_user?(@current_user |> dbg())) && (
+              Accounts.mod?(@current_user) ||
+              Accounts.artist?(@current_user) ||
+              Application.fetch_env!(:banchan, :env) == :dev
+             )}>
               <ViewSwitcher context={@context} studio={@studio} />
             </li>
             {#case @context}
@@ -151,11 +152,9 @@ defmodule BanchanWeb.Components.Layout do
                 <NavLink to={~p"/discover/offerings"} icon="search" title="Discover" />
                 {#if Accounts.active_user?(@current_user)}
                   <NavLink to={~p"/commissions"} icon="scroll-text" title="My Commissions" />
-                  {#if Accounts.artist?(@current_user)}
-                    <NavLink to={~p"/studios/new"} icon="store" title="Create a Studio" />
-                  {#else}
+                  {#unless Accounts.artist?(@current_user)}
                     <NavLink to={~p"/beta"} icon="clipboard-signature" title="Become an Artist" />
-                  {/if}
+                  {/unless}
                   {!--
                   # TODO: Remove this whole page in favor of dropdown
                   <li :if={:artist in @current_user.roles}>
@@ -174,10 +173,8 @@ defmodule BanchanWeb.Components.Layout do
               {#match :studio}
                 {#if Accounts.active_user?(@current_user) && Accounts.artist?(@current_user)}
                   <NavLink to={~p"/studios/#{@studio.handle}"} icon="store" title="Shop" />
-                  {!-- # TODO: /studios/<studio>/commissions --}
                   <NavLink to={~p"/studios/#{@studio.handle}/commissions"} icon="scroll-text" title="Commissions" />
                   <NavLink to={~p"/studios/#{@studio.handle}/payouts"} icon="coins" title="Payouts" />
-                  <NavLink to={~p"/studios/new"} icon="store" title="Create a Studio" />
                   <NavLink to={~p"/studios/#{@studio.handle}/settings"} icon="settings" title="Settings" />
                 {/if}
               {#match :admin}
