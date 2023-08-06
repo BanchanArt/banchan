@@ -4,14 +4,14 @@ defmodule BanchanWeb.CommissionLive do
   """
   use BanchanWeb, :live_view
 
+  alias Banchan.{Accounts, Commissions, Studios}
+  alias Banchan.Commissions.CommissionFilter
+
   import BanchanWeb.StudioLive.Helpers
 
   alias Surface.Components.Form
   alias Surface.Components.Form.{Field, Submit}
   alias Surface.Components.Form.TextInput, as: SurfaceTextInput
-
-  alias Banchan.{Accounts, Commissions}
-  alias Banchan.Commissions.CommissionFilter
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
   alias BanchanWeb.Components.{Collapse, InfiniteScroll, Layout}
@@ -28,30 +28,6 @@ defmodule BanchanWeb.CommissionLive do
   @impl true
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_params(params, _uri, socket) do
-    socket =
-      case params do
-        %{"handle" => _} ->
-          assign_studio_defaults(params, socket, true, true)
-
-        _ ->
-          socket
-          |> assign(
-            studio: nil,
-            current_user_member?: false
-          )
-      end
-
-    socket =
-      socket
-      |> assign(
-        :context,
-        if socket.assigns.current_user_member? do
-          :studio
-        else
-          :client
-        end
-      )
-
     socket =
       socket
       |> assign(
@@ -116,6 +92,36 @@ defmodule BanchanWeb.CommissionLive do
         _ ->
           assign(socket, commission: nil, users: %{})
       end
+
+    comm = socket.assigns.commission
+
+    socket =
+      case params do
+        %{"handle" => _} ->
+          assign_studio_defaults(params, socket, true, true)
+
+        _ ->
+          socket
+          |> assign(
+            studio: nil,
+            current_user_member?:
+              !is_nil(comm.studio_id) &&
+                Studios.is_user_in_studio?(socket.assigns.current_user, %Studios.Studio{
+                  id: comm.studio_id
+                })
+          )
+      end
+
+    socket =
+      socket
+      |> assign(
+        :context,
+        if !is_nil(socket.assigns.studio) && socket.assigns.current_user_member? do
+          :studio
+        else
+          :client
+        end
+      )
 
     socket =
       Context.put(socket,

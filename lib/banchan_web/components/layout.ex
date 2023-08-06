@@ -139,7 +139,7 @@ defmodule BanchanWeb.Components.Layout do
             {/if}
           </div>
           <ul tabindex="0" class="flex flex-col gap-2 p-2 menu menu-compact">
-            <li :if={Accounts.artist?(@current_user) || Accounts.mod?(@current_user)}>
+            <li :if={Accounts.active_user?(@current_user) && Accounts.mod?(@current_user)}>
               <ViewSwitcher context={@context} studio={@studio} />
             </li>
             {#case @context}

@@ -35,7 +35,7 @@ defmodule BanchanWeb.UserRegistrationControllerTest do
       conn = get(conn, "/")
       response = html_response(conn, 200)
       assert response =~ "Settings"
-      assert response =~ "Log out"
+      assert response =~ "log-out"
     end
 
     # Skip this for now because I can't figure out how tf to get LiveView

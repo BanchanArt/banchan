@@ -25,7 +25,7 @@ defmodule BanchanWeb.Components.ViewSwitcher do
   def render_studio_view(assigns, studio) do
     ~F"""
     <Icon name="palette" class="grow" size="4">
-      <span>{studio.name}</span>
+      <span class="text-ellipsis">{studio.name}</span>
     </Icon>
     """
   end

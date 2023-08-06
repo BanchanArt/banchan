@@ -45,7 +45,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
       response = html_response(conn, 200)
       assert response =~ user.handle
       assert response =~ "Settings"
-      assert response =~ "Log out"
+      assert response =~ "log-out"
     end
 
     test "logs the user in using their handle", %{conn: conn, user: user} do
@@ -66,7 +66,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
       response = html_response(conn, 200)
       assert response =~ user.handle
       assert response =~ "Settings"
-      assert response =~ "Log out"
+      assert response =~ "log-out"
     end
 
     test "logs the user in with MFA", %{conn: conn, user_mfa: user} do
@@ -87,7 +87,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
       response = html_response(conn, 200)
       assert response =~ user.handle
       assert response =~ "Settings"
-      assert response =~ "Log out"
+      assert response =~ "log-out"
     end
 
     test "logs the user in with remember me", %{conn: conn, user: user} do

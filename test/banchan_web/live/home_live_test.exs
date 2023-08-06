@@ -19,9 +19,9 @@ defmodule BanchanWeb.HomeLiveTest do
 
   test "render when logged in", %{conn: conn, user: user} do
     {:ok, page_live, disconnected_html} = conn |> log_in_user(user) |> live("/")
-    assert disconnected_html =~ "Log out"
+    assert disconnected_html =~ "log-out"
     assert disconnected_html =~ "Settings"
-    assert render(page_live) =~ "Log out"
+    assert render(page_live) =~ "log-out"
     assert render(page_live) =~ "Settings"
   end
 
@@ -31,8 +31,8 @@ defmodule BanchanWeb.HomeLiveTest do
     user = user_fixture()
     conn = conn |> log_in_user(user)
     {:ok, page_live, disconnected_html} = live(conn, "/")
-    assert disconnected_html =~ "Log out"
-    assert render(page_live) =~ "Log out"
+    assert disconnected_html =~ "log-out"
+    assert render(page_live) =~ "log-out"
     Banchan.Accounts.logout_user(user)
 
     # Assert our LiveView process is down
@@ -62,8 +62,8 @@ defmodule BanchanWeb.HomeLiveTest do
     conn = conn |> log_in_user(user2)
 
     {:ok, page_live, disconnected_html} = live(conn, "/")
-    assert disconnected_html =~ "Log out"
-    assert render(page_live) =~ "Log out"
+    assert disconnected_html =~ "log-out"
+    assert render(page_live) =~ "log-out"
     Banchan.Accounts.logout_user(user1)
 
     # Assert our LiveView is alive
@@ -72,6 +72,6 @@ defmodule BanchanWeb.HomeLiveTest do
     assert Process.alive?(page_live.pid)
 
     # If we are able to rerender the page it means nothing happened
-    assert render(page_live) =~ "Log out"
+    assert render(page_live) =~ "log-out"
   end
 end
