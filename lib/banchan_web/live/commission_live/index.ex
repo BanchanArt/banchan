@@ -105,7 +105,8 @@ defmodule BanchanWeb.CommissionLive do
           |> assign(
             studio: nil,
             current_user_member?:
-              !is_nil(comm.studio_id) &&
+              !is_nil(comm) &&
+                !is_nil(comm.studio_id) &&
                 Studios.is_user_in_studio?(socket.assigns.current_user, %Studios.Studio{
                   id: comm.studio_id
                 })
