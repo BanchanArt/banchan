@@ -155,16 +155,6 @@ defmodule BanchanWeb.Components.Layout do
                   {#unless Accounts.artist?(@current_user)}
                     <NavLink to={~p"/beta"} icon="clipboard-signature" title="Become an Artist" />
                   {/unless}
-                  {!--
-                  # TODO: Remove this whole page in favor of dropdown
-                  <li :if={:artist in @current_user.roles}>
-                    <LiveRedirect to={Routes.studio_index_path(Endpoint, :index)}>
-                      <Icon name="store" size="4">
-                        <span>My Studios</span>
-                      </Icon>
-                    </LiveRedirect>
-                  </li>
-                  --}
                   <NavLink to={~p"/settings"} icon="settings" title="Settings" />
                 {#else}
                   <NavLink to={~p"/login"} icon="log-in" title="Log in" />
