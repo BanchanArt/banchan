@@ -10,16 +10,17 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
 
   alias BanchanWeb.Components.{Avatar, UserHandle}
 
+  prop studio, :struct, from_context: :studio
   prop result, :struct, required: true
   prop highlight, :boolean, default: false
 
   def render(assigns) do
     commission_url =
-      Routes.commission_path(
-        Endpoint,
-        :show,
-        assigns.result.commission.public_id
-      )
+      if is_nil(assigns.studio) do
+        ~p"/commissions/#{assigns.result.commission.public_id}"
+      else
+        ~p"/studios/#{assigns.studio.handle}/commissions/#{assigns.result.commission.public_id}"
+      end
 
     ~F"""
     <li class={bordered: @highlight}>

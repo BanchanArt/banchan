@@ -172,7 +172,7 @@ defmodule BanchanWeb.Components.Layout do
                 {#if Accounts.active_user?(@current_user) && Accounts.artist?(@current_user)}
                   <NavLink to={~p"/studios/#{@studio.handle}"} icon="store" title="Shop" />
                   {!-- # TODO: /studios/<studio>/commissions --}
-                  <NavLink to="#" icon="scroll-text" title="Commissions" />
+                  <NavLink to={~p"/studios/#{@studio.handle}/commissions"} icon="scroll-text" title="Commissions" />
                   <NavLink to={~p"/studios/#{@studio.handle}/payouts"} icon="coins" title="Payouts" />
                   <NavLink to={~p"/studios/new"} icon="store" title="Create a Studio" />
                   <NavLink to={~p"/studios/#{@studio.handle}/settings"} icon="settings" title="Settings" />

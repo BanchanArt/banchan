@@ -117,6 +117,8 @@ defmodule BanchanWeb.Router do
 
       live("/studios/new", StudioLive.New, :new)
       live("/studios/:handle/edit", StudioLive.Edit, :edit)
+      live("/studios/:handle/commissions", CommissionLive, :index)
+      live("/studios/:handle/commissions/:commission_id", CommissionLive, :show)
       live("/studios/:handle/settings", StudioLive.Settings, :show)
       live("/studios/:handle/payouts", StudioLive.Payouts, :index)
       live("/studios/:handle/payouts/:payout_id", StudioLive.Payouts, :show)
