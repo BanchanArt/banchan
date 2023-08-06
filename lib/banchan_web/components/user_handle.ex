@@ -39,7 +39,7 @@ defmodule BanchanWeb.Components.UserHandle do
         </span>
       </LiveRedirect>
     {#elseif Accounts.active_user?(@user) && !@link}
-      <span class="inline-flex items-center gap-1 cursor-default">
+      <span class={"inline-flex items-center gap-1", @class}>
         <strong title={@user.name} class="font-semibold">
           {@user.handle}
         </strong>
