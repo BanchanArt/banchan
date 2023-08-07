@@ -27,15 +27,15 @@ defmodule BanchanWeb.Components.Card do
 
   def render(assigns) do
     ~F"""
-    <div class={"shadow-xl bg-base-200 card card-compact flex flex-col flex-grow", @class}>
+    <div class={"bg-base-200 card card-compact flex flex-col flex-grow rounded-none", @class}>
       {#if slot_assigned?(:image)}
-        <figure class={@image_class}>
+        <figure class={@image_class, "rounded-none"}>
           <#slot {@image} />
         </figure>
       {/if}
-      <div class="card-body flex flex-col flex-grow">
+      <div class="flex flex-col flex-grow py-4">
         {#if slot_assigned?(:header)}
-          <header class="card-title flex flex-row items-center">
+          <header class="flex flex-row items-center card-title">
             <div class="grow">
               <#slot {@header} />
             </div>
@@ -48,7 +48,7 @@ defmodule BanchanWeb.Components.Card do
           <#slot />
         </div>
         {#if slot_assigned?(:footer)}
-          <footer class="card-actions justify-end">
+          <footer class="justify-end card-actions">
             <#slot {@footer} />
           </footer>
         {/if}
