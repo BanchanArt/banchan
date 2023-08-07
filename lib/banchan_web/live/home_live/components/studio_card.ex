@@ -19,11 +19,16 @@ defmodule BanchanWeb.Components.StudioCard do
       <LiveRedirect to={~p"/studios/#{@studio.handle}"}>
         <Card class={"h-full", "opacity-50": @studio.archived_at}>
           <:image>
-            {#if @studio.card_img_id}
-              <img class="object-cover aspect-video" src={~p"/images/studio_card_img/#{@studio.card_img_id}"}>
-            {#else}
-              <div class="aspect-video bg-base-300" />
-            {/if}
+            <div class="relative border rounded-lg border-base-content border-opacity-10">
+              {#if @studio.card_img_id}
+                <img
+                  class="object-cover rounded-lg aspect-video"
+                  src={~p"/images/studio_card_img/#{@studio.card_img_id}"}
+                />
+              {#else}
+                <div class="rounded-lg aspect-video bg-base-300" />
+              {/if}
+            </div>
           </:image>
           <:header>
             <div class="text-lg font-bold">{@studio.name}</div>
@@ -36,14 +41,14 @@ defmodule BanchanWeb.Components.StudioCard do
               <div class="badge badge-warning">Archived</div>
             {/if}
           </:header_aside>
-          <ul class="my-2 flex flex-row flex-wrap gap-1 items-center">
+          <ul class="flex flex-row flex-wrap items-center gap-1 my-2">
             {#for tag <- tags}
               <li>
                 <Tag link={false} tag={tag} />
               </li>
             {/for}
             {#if extra_tags > 0}
-              <li class="text-sm text-base-content-300">+{extra_tags} more</li>
+              <li class="px-1 text-sm text-base-content-300">+{extra_tags} more</li>
             {/if}
           </ul>
         </Card>
