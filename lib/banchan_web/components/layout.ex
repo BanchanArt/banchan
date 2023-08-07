@@ -106,9 +106,24 @@ defmodule BanchanWeb.Components.Layout do
           <div>
             <span class="footer-title">Social</span>
             <div class="grid grid-flow-col gap-4">
-              <a href="https://mastodon.art/@Banchan" target="_blank" rel="noopener noreferrer"><i class="text-xl fab fa-mastodon" /></a>
-              <a href="https://twitter.com/BanchanArt" target="_blank" rel="noopener noreferrer"><i class="text-xl fab fa-twitter" /></a>
-              <a href="https://discord.gg/FUkTHjGKJF" target="_blank" rel="noopener noreferrer"><i class="text-xl fab fa-discord" /></a>
+              <a
+                href="https://mastodon.art/@Banchan"
+                aria-label="Banchan Art on Mastodon (opens in new tab)"
+                target="_blank"
+                rel="noopener noreferrer"
+              ><i class="text-xl fab fa-mastodon" /></a>
+              <a
+                href="https://twitter.com/BanchanArt"
+                aria-label="Banchan Art on Twitter (opens in new tab)"
+                target="_blank"
+                rel="noopener noreferrer"
+              ><i class="text-xl fab fa-twitter" /></a>
+              <a
+                href="https://discord.gg/FUkTHjGKJF"
+                aria-label="Banchan Art Discord server (opens in new tab)"
+                target="_blank"
+                rel="noopener noreferrer"
+              ><i class="text-xl fab fa-discord" /></a>
             </div>
           </div>
         </footer>

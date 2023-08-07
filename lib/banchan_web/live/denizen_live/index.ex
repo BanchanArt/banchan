@@ -128,9 +128,10 @@ defmodule BanchanWeb.DenizenLive.Index do
           for={@filter}
           submit="submit"
           class="form-control px-4 mx-auto max-w-3xl pb-6 w-full md:w-content"
+          opts={role: "search"}
         >
           <Field class="w-full input-group grow" name={:query}>
-            <SurfaceTextInput class="input input-bordered w-full" />
+            <SurfaceTextInput class="input input-bordered w-full" opts={"aria-label": "Filter users"} />
             <Submit class="btn btn-square">
               <i class="fas fa-search" />
             </Submit>

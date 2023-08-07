@@ -103,16 +103,16 @@ defmodule BanchanWeb.HomeLive do
           </div>
         </:hero>
         <div class="flex flex-col gap-2">
-          <Form for={%{}} as={:search} submit="search" class="w-full">
+          <Form for={%{}} as={:search} submit="search" class="w-full" opts={role: "search"}>
             <div class="flex flex-row flex-nowrap w-full md:w-content max-w-xl mx-auto">
               <Field name={:query} class="w-full">
                 <TextInput
                   name={:query}
                   class="w-full input input-bordered"
-                  opts={placeholder: "Search for offerings..."}
+                  opts={placeholder: "Search for offerings...", "aria-label": "Search for offerings"}
                 />
               </Field>
-              <Submit class="btn btn-round">
+              <Submit class="btn btn-round" opts={"aria-label": "Search"}>
                 <i class="fas fa-search" />
               </Submit>
             </div>
