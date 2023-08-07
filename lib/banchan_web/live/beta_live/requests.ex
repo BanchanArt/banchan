@@ -117,8 +117,12 @@ defmodule BanchanWeb.BetaLive.Requests do
       <div class="flex flex-col md:flex-row md:flex-wrap gap-2">
         <Form class="send-invites" for={%{}} as={:send_invites} submit="submit_invites">
           <div class="input-group">
-            <NumberInput class="input input-bordered" name={:count} opts={placeholder: "Invites to send"} />
-            <Submit class="btn btn-primary rounded-lg">Send Invites</Submit>
+            <NumberInput
+              class="input input-bordered"
+              name={:count}
+              opts={placeholder: "Invites to send", "aria-label": "Number of invites to send"}
+            />
+            <Submit class="btn btn-primary rounded-lg" opts={"aria-label": "Send Invites"}>Send Invites</Submit>
           </div>
         </Form>
         <Form
@@ -127,10 +131,15 @@ defmodule BanchanWeb.BetaLive.Requests do
           as={:email_filter}
           change="change_email_filter"
           submit="change_email_filter"
+          opts={role: "search"}
         >
           <div class="input-group">
-            <TextInput class="input input-bordered" name={:filter} opts={placeholder: "Filter email"} />
-            <Submit class="btn btn-primary rounded-lg">Filter</Submit>
+            <TextInput
+              class="input input-bordered"
+              name={:filter}
+              opts={placeholder: "Filter by email", "aria-label": "Filter by email"}
+            />
+            <Submit class="btn btn-primary rounded-lg" opts={"aria-label": "Filter"}>Filter</Submit>
           </div>
         </Form>
         <Form
@@ -139,8 +148,14 @@ defmodule BanchanWeb.BetaLive.Requests do
           as={:show_sent}
           change="change_show_sent"
           submit="change_show_sent"
+          opts={role: "search"}
         >
-          <Checkbox name={:show_sent} label="Show sent invites" value={@show_sent} />
+          <Checkbox
+            name={:show_sent}
+            label="Show sent invites"
+            value={@show_sent}
+            opts={"aria-label": "Show sent invites"}
+          />
         </Form>
       </div>
       <div class="divider" />

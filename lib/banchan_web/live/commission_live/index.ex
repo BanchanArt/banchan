@@ -428,13 +428,22 @@ defmodule BanchanWeb.CommissionLive do
             change="change"
             submit="filter"
             class="form-control px-4 mx-auto max-w-3xl pb-6 w-full md:w-content"
+            opts={role: "search"}
           >
             <Field class="w-full input-group grow" name={:search}>
-              <button :on-click="toggle_filter" type="button" class="btn btn-square">
+              <button
+                aria-label="Apply commission search filters"
+                :on-click="toggle_filter"
+                type="button"
+                class="btn btn-square"
+              >
                 <i class="fas fa-filter" />
               </button>
-              <SurfaceTextInput class="input input-bordered w-full" />
-              <Submit class="btn btn-square">
+              <SurfaceTextInput
+                class="input input-bordered w-full"
+                opts={"aria-label": "Search for commissions"}
+              />
+              <Submit class="btn btn-square" opts={"aria-label": "Search"}>
                 <i class="fas fa-search" />
               </Submit>
             </Field>
