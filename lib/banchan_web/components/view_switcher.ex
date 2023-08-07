@@ -64,7 +64,7 @@ defmodule BanchanWeb.Components.ViewSwitcher do
     ~F"""
     <bc-view-switcher>
       {!-- # TODO: do this with JS to avoid weird padding issue with <details> --}
-      <details class="flex grow p-0" :on-click-away={JS.remove_attribute("open")}>
+      <details class="flex p-0 grow" :on-click-away={JS.remove_attribute("open")}>
         <summary class="flex flex-row items-center">
           <span class="flex grow">
             {#case @context}
@@ -80,7 +80,7 @@ defmodule BanchanWeb.Components.ViewSwitcher do
           </span>
           <Icon name="chevron-down" />
         </summary>
-        <ul class="p-2 menu absolute left-0 z-[1] bg-base-100 rounded-box w-full bordered border-base-300">
+        <ul class="p-2 menu absolute left-0 mt-4 z-[1] bg-base-100 rounded-box w-full bordered border-base-300">
           <li>
             <LiveRedirect to={~p"/"} class={active: @context == :client}>
               {render_client_view(assigns)}
