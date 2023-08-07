@@ -7,21 +7,20 @@ defmodule BanchanWeb.Components.StudioCard do
   alias Surface.Components.LiveRedirect
 
   alias BanchanWeb.Components.{Card, Tag}
-  alias BanchanWeb.Endpoint
 
   prop studio, :struct, required: true
 
   def render(assigns) do
+    tags = Enum.take(assigns.studio.tags, 3)
+    extra_tags = Enum.count(assigns.studio.tags) - 3
+
     ~F"""
     <studio-card>
-      <LiveRedirect to={Routes.studio_shop_path(Endpoint, :show, @studio.handle)}>
-        <Card class={"h-full sm:hover:scale-105 sm:hover:z-10 transition-all", "opacity-50": @studio.archived_at}>
+      <LiveRedirect to={~p"/studios/#{@studio.handle}"}>
+        <Card class={"h-full", "opacity-50": @studio.archived_at}>
           <:image>
             {#if @studio.card_img_id}
-              <img
-                class="object-cover aspect-video"
-                src={Routes.public_image_path(Endpoint, :image, :studio_card_img, @studio.card_img_id)}
-              />
+              <img class="object-cover aspect-video" src={~p"/images/studio_card_img/#{@studio.card_img_id}"}>
             {#else}
               <div class="aspect-video bg-base-300" />
             {/if}
@@ -37,10 +36,15 @@ defmodule BanchanWeb.Components.StudioCard do
               <div class="badge badge-warning">Archived</div>
             {/if}
           </:header_aside>
-          <ul class="my-2 flex flex-row flex-wrap gap-1">
-            {#for tag <- @studio.tags}
-              <Tag link={false} tag={tag} />
+          <ul class="my-2 flex flex-row flex-wrap gap-1 items-center">
+            {#for tag <- tags}
+              <li>
+                <Tag link={false} tag={tag} />
+              </li>
             {/for}
+            {#if extra_tags > 0}
+              <li class="text-sm text-base-content-300">+{extra_tags} more</li>
+            {/if}
           </ul>
         </Card>
       </LiveRedirect>
