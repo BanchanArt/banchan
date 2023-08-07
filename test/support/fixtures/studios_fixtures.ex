@@ -7,6 +7,7 @@ defmodule Banchan.StudiosFixtures do
 
   import Mox
 
+  alias Banchan.Studios
   alias Banchan.Studios.Studio
 
   def unique_stripe_id, do: "stripe-id#{System.unique_integer()}"
@@ -44,5 +45,12 @@ defmodule Banchan.StudiosFixtures do
       )
 
     studio
+  end
+
+  def enable_studio_charges!(studio) do
+    Studios.update_stripe_state!(studio.stripe_id, %{
+      charges_enabled: true,
+      details_submitted: true
+    })
   end
 end

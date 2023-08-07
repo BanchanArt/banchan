@@ -26,6 +26,9 @@ defmodule Banchan.CommissionsFixtures do
     offering = Map.get(attrs, :offering) || offering_fixture(studio)
     offering = Repo.preload(offering, :options)
 
+    enable_studio_charges!(studio)
+    studio = Repo.reload(studio)
+
     line_items =
       Map.get(attrs, :line_items) ||
         if Enum.empty?(offering.options) do

@@ -118,6 +118,11 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
     test "redirects if stripe not enabled", %{conn: conn, studio: studio, artist: artist} do
       conn = log_in_user(conn, artist)
 
+      Studios.update_stripe_state!(studio.stripe_id, %Stripe.Account{
+        charges_enabled: false,
+        details_submitted: true
+      })
+
       {:error, {:redirect, info}} =
         result = live(conn, Routes.studio_payouts_path(conn, :index, studio.handle))
 

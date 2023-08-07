@@ -130,7 +130,19 @@ defmodule BanchanWeb.CommissionLive do
         current_user_member?: socket.assigns.current_user_member?
       )
 
-    {:noreply, socket}
+    if !is_nil(comm) && is_nil(socket.assigns.studio) && socket.assigns.current_user_member? do
+      studio = Studios.get_studio_by_id!(comm.studio_id)
+
+      # NB(@zkat): This is a less-than-ideal hack and might be confusing to
+      # users who decide to commission their own studios, but that's honestly
+      # a big corner case, and 99% of the time, if you get linked to a
+      # `/commission/<foo>`, you want to be redirected to your studio's
+      # context.
+      {:noreply,
+       socket |> push_navigate(to: ~p"/studios/#{studio.handle}/commissions/#{comm.public_id}")}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true

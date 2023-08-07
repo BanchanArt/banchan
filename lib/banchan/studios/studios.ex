@@ -219,6 +219,16 @@ defmodule Banchan.Studios do
   ## Getting/Listing
 
   @doc """
+  Gets a studio by its id.
+  """
+  def get_studio_by_id!(id) when is_integer(id) do
+    from(s in Studio,
+      where: s.id == ^id and is_nil(s.deleted_at)
+    )
+    |> Repo.one!()
+  end
+
+  @doc """
   Gets a studio by its handle.
 
   ## Examples

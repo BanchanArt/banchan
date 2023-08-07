@@ -94,6 +94,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
+      studio: studio,
       commission: commission
     } do
       artist_conn = log_in_user(conn, artist)
@@ -104,7 +105,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       })
 
       {:ok, page_live, _html} =
-        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+        live(artist_conn, ~p"/studios/#{studio.handle}/commissions/#{commission.public_id}")
 
       page_live
       |> element(".invoice-box .cancel-payment-request")
@@ -161,7 +162,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
 
       {:ok, artist_page_live, _html} =
-        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+        live(artist_conn, ~p"/studios/#{studio.handle}/commissions/#{commission.public_id}")
 
       line_items = [
         %{
@@ -327,6 +328,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
+      studio: studio,
       commission: commission
     } do
       amount = Money.new(42_000, :USD)
@@ -342,7 +344,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
 
       {:ok, artist_page_live, _html} =
-        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+        live(artist_conn, ~p"/studios/#{studio.handle}/commissions/#{commission.public_id}")
 
       refute artist_page_live
              |> has_element?(".invoice-box .modal.modal-open")
@@ -438,6 +440,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
+      studio: studio,
       commission: commission
     } do
       amount = Money.new(42_000, :USD)
@@ -452,7 +455,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
 
       {:ok, artist_page_live, _html} =
-        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+        live(artist_conn, ~p"/studios/#{studio.handle}/commissions/#{commission.public_id}")
 
       artist_page_live
       |> element(".invoice-box .open-refund-modal")
@@ -526,6 +529,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       artist: artist,
       client: client,
       commission: commission,
+      studio: studio,
       system: system
     } do
       amount = Money.new(42_000, :USD)
@@ -541,7 +545,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
 
       {:ok, artist_page_live, _html} =
-        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+        live(artist_conn, ~p"/studios/#{studio.handle}/commissions/#{commission.public_id}")
 
       artist_page_live
       |> element(".invoice-box .open-refund-modal")
@@ -617,6 +621,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       artist: artist,
       client: client,
       commission: commission,
+      studio: studio,
       system: system
     } do
       amount = Money.new(42_000, :USD)
@@ -631,7 +636,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
 
       {:ok, artist_page_live, _html} =
-        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+        live(artist_conn, ~p"/studios/#{studio.handle}/commissions/#{commission.public_id}")
 
       artist_page_live
       |> element(".invoice-box .open-refund-modal")
@@ -680,6 +685,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       artist: artist,
       client: client,
       commission: commission,
+      studio: studio,
       system: system
     } do
       amount = Money.new(42_000, :USD)
@@ -694,7 +700,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
 
       {:ok, artist_page_live, _html} =
-        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+        live(artist_conn, ~p"/studios/#{studio.handle}/commissions/#{commission.public_id}")
 
       artist_page_live
       |> element(".invoice-box .open-refund-modal")
@@ -745,6 +751,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       artist: artist,
       client: client,
       commission: commission,
+      studio: studio,
       system: system
     } do
       amount = Money.new(42_000, :USD)
@@ -759,7 +766,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
 
       {:ok, artist_page_live, _html} =
-        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+        live(artist_conn, ~p"/studios/#{studio.handle}/commissions/#{commission.public_id}")
 
       artist_page_live
       |> element(".invoice-box .open-refund-modal")
@@ -819,6 +826,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       conn: conn,
       artist: artist,
       client: client,
+      studio: studio,
       commission: commission
     } do
       amount = Money.new(42_000, :USD)
@@ -833,7 +841,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         live(client_conn, Routes.commission_path(client_conn, :show, commission.public_id))
 
       {:ok, artist_page_live, _html} =
-        live(artist_conn, Routes.commission_path(artist_conn, :show, commission.public_id))
+        live(artist_conn, ~p"/studios/#{studio.handle}/commissions/#{commission.public_id}")
 
       refute artist_page_live
              |> has_element?(".invoice-box .open-release-modal")
