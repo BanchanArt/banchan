@@ -81,7 +81,7 @@ defmodule BanchanWeb.HomeLive do
             <Carousel
               id="studio-carousel"
               label="Featured Studios"
-              class="rounded-b-xl aspect-header-image h-full w-full"
+              class="aspect-header-image h-full w-full"
             >
               {#for studio <- @featured_studios.entries}
                 <Carousel.Slide class="carousel-item w-full aspect-header-image">

@@ -156,11 +156,11 @@ defmodule BanchanWeb.DenizenLive.Show do
         <section>
           {#if @user.header_img && !@user.header_img.pending && !@user.disable_info}
             <img
-              class="object-cover aspect-header-image rounded-b-xl w-full"
+              class="object-cover aspect-header-image max-h-80 w-full"
               src={Routes.public_image_path(Endpoint, :image, :user_header_img, @user.header_img_id)}
             />
           {#else}
-            <div class="rounded-b-xl aspect-header-image bg-base-300 w-full" />
+            <div class="max-h-80 aspect-header-image bg-base-300 w-full" />
           {/if}
           <div class="flex flex-row flex-wrap">
             <div class="relative w-32 h-20">
