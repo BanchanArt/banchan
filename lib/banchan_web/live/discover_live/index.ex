@@ -118,83 +118,95 @@ defmodule BanchanWeb.DiscoverLive.Index do
 
     ~F"""
     <Layout flashes={@flash}>
-      <h1 class="text-3xl">Discover</h1>
-      <div class="divider" />
-      <div class="tabs tabs-boxed flex flex-nowrap max-w-xl mx-auto">
-        <div class={"tab tab-lg flex-1", "tab-active": @type == "offerings"}>
-          <LivePatch to={Routes.discover_index_path(Endpoint, :index, "offerings", params)}>Offerings</LivePatch>
-        </div>
-        <div class={"tab tab-lg flex-1", "tab-active": @type == "studios"}>
-          <LivePatch to={Routes.discover_index_path(Endpoint, :index, "studios", params)}>Studios</LivePatch>
-        </div>
-      </div>
-      <div class="form-control mx-auto max-w-3xl py-4 w-full md:w-content">
-        <Form for={%{}} as={:search} change="change" submit="submit" class="w-full">
-          <div class="flex flex-row flex-nowrap grow w-full">
-            {#if @type == "studios"}
-              <Select
-                name={:sort_by}
-                class="select select-bordered md:select-lg"
-                selected={@order_by}
-                options={
-                  "For You": :homepage,
-                  Newest: :newest,
-                  Earliest: :oldest,
-                  Followers: :followers
-                }
-              />
-            {#elseif @type == "offerings"}
-              <Select
-                name={:sort_by}
-                class="select select-bordered md:select-lg"
-                selected={@order_by}
-                options={
-                  "For You": :featured,
-                  Newest: :newest,
-                  Earliest: :oldest,
-                  Cheapest: :price_low,
-                  Fanciest: :price_high
-                }
-              />
-            {/if}
-            <Field name={:query} class="w-full">
-              <TextInput
-                name={:query}
-                value={@query}
-                class="grow w-full input input-bordered md:input-lg"
-                opts={
-                  placeholder:
-                    case @type do
-                      "studios" -> "Search for studios..."
-                      "offerings" -> "Search for offerings..."
-                      _ -> "Search for offerings..."
-                    end
-                }
-              />
-            </Field>
-            <Submit class="btn btn-round md:btn-lg">
-              <i class="fas fa-search" />
-            </Submit>
+      <div class="flex flex-col items-start w-full gap-0 mx-auto max-w-7xl">
+        <div class="flex flex-col items-start w-full gap-4">
+          <div class="flex flex-col items-start justify-between w-full gap-4 md:items-center md:flex-row">
+            <h1 class="text-3xl">Discover</h1>
+            <div class="flex w-full font-semibold border rounded-xl md:w-fit tabs tabs-boxed border-base-content border-opacity-10 flex-nowrap">
+              <LivePatch
+                class={"tab tab-lg h-fit flex-1 grow md:grow-0", "tab-active": @type == "offerings"}
+                to={Routes.discover_index_path(Endpoint, :index, "offerings", params)}
+              >
+                Offerings
+              </LivePatch>
+              <LivePatch
+                class={"tab tab-lg h-fit flex-1 grow md:grow-0", "tab-active": @type == "studios"}
+                to={Routes.discover_index_path(Endpoint, :index, "studios", params)}
+              >
+                Studios
+              </LivePatch>
+            </div>
           </div>
-        </Form>
+          <div class="w-full mx-auto form-control md:w-content">
+            <Form for={%{}} as={:search} change="change" submit="submit" class="w-full">
+              <div class="flex flex-row w-full gap-4 flex-nowrap grow">
+                {#if @type == "studios"}
+                  <Select
+                    name={:sort_by}
+                    class="select select-bordered"
+                    selected={@order_by}
+                    options={
+                      "For You": :homepage,
+                      Newest: :newest,
+                      Earliest: :oldest,
+                      Followers: :followers
+                    }
+                  />
+                {#elseif @type == "offerings"}
+                  <Select
+                    name={:sort_by}
+                    class="select select-bordered"
+                    selected={@order_by}
+                    options={
+                      "For You": :featured,
+                      Newest: :newest,
+                      Earliest: :oldest,
+                      Cheapest: :price_low,
+                      Fanciest: :price_high
+                    }
+                  />
+                {/if}
+                <Field name={:query} class="w-full">
+                  <TextInput
+                    name={:query}
+                    value={@query}
+                    class="w-full grow input input-bordered"
+                    opts={
+                      placeholder:
+                        case @type do
+                          "studios" -> "Search for studios..."
+                          "offerings" -> "Search for offerings..."
+                          _ -> "Search for offerings..."
+                        end
+                    }
+                  />
+                </Field>
+                <Submit class="btn btn-round">
+                  <i class="fas fa-search" />
+                </Submit>
+              </div>
+            </Form>
+          </div>
+        </div>
+        <div class="divider" />
+        {#if @type == "studios"}
+          <Studios
+            id="studios"
+            suggest_offerings
+            current_user={@current_user}
+            query={@query}
+            order_by={@order_by}
+          />
+        {#elseif @type == "offerings"}
+          <Offerings
+            id="offerings"
+            suggest_studios
+            current_user={@current_user}
+            query={@query}
+            order_by={@order_by}
+          />
+        {/if}
       </div>
-      {#if @type == "studios"}
-        <Studios
-          id="studios"
-          suggest_offerings
-          current_user={@current_user}
-          query={@query}
-          order_by={@order_by}
-        />
-      {#elseif @type == "offerings"}
-        <Offerings
-          id="offerings"
-          suggest_studios
-          current_user={@current_user}
-          query={@query}
-          order_by={@order_by}
-        />
-      {/if}
     </Layout>
     """
   end
