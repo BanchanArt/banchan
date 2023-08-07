@@ -70,7 +70,7 @@ defmodule BanchanWeb.Components.Layout do
     <div class="w-full h-screen drawer drawer-mobile">
       <input type="checkbox" id="drawer-toggle" class="drawer-toggle">
       <div class="flex flex-col flex-grow h-screen drawer-content">
-        <div class="sticky top-0 z-50 shadow-sm">
+        <div class="sticky top-0 z-50">
           <Nav />
         </div>
         {#if slot_assigned?(:hero)}
@@ -85,7 +85,7 @@ defmodule BanchanWeb.Components.Layout do
           <Flash flashes={@flashes} />
           <#slot />
         </section>
-        <footer class="p-10 shadow-sm footer">
+        <footer class="p-10 border-t footer border-base-content border-opacity-10">
           <div>
             <span class="footer-title">Co-op</span>
             <LiveRedirect to={Routes.static_about_us_path(Endpoint, :show)} class="link link-hover">About Us</LiveRedirect>
@@ -120,13 +120,13 @@ defmodule BanchanWeb.Components.Layout do
         class="drawer-side"
       >
         <label for="drawer-toggle" class="drawer-overlay" />
-        <nav class="w-64 shadow bg-base-200 relative">
-          <div class="absolute bottom-0 left-0 px-4 pb-6 w-full flex flex-col">
+        <nav class="relative w-64 border-r shadow bg-base-200 border-base-content border-opacity-10">
+          <div class="absolute bottom-0 left-0 flex flex-col w-full px-4 pb-6">
             {#if Accounts.active_user?(@current_user)}
               <div class="divider" />
               <div class="flex flex-row items-center">
                 <Link
-                  class="grow flex flex-row gap-2 items-center hover:cursor-pointer"
+                  class="flex flex-row items-center gap-2 grow hover:cursor-pointer"
                   to={~p"/denizens/#{@current_user.handle}"}
                 >
                   <Avatar class="w-4 h-4" link={false} user={@current_user} />
@@ -144,6 +144,9 @@ defmodule BanchanWeb.Components.Layout do
                  Accounts.artist?(@current_user) ||
                  Application.fetch_env!(:banchan, :env) == :dev)}>
               <ViewSwitcher context={@context} studio={@studio} />
+            </li>
+            <li class="bg-transparent rounded-none pointer-events-none select-none h-fit">
+              <div class="w-full gap-0 px-2 py-0 m-0 rounded-none divider" />
             </li>
             {#case @context}
               {#match :client}

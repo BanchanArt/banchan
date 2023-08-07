@@ -61,11 +61,11 @@ module.exports = {
         'light': {
           'primary': colors.emerald[500],
           'primary-focus': colors.emerald[600],
-          'primary-content': colors.emerald[50],
+          'primary-content': colors.emerald[950],
 
           'secondary': colors.cyan[500],
           'secondary-focus': colors.cyan[600],
-          'secondary-content': colors.cyan[50],
+          'secondary-content': colors.cyan[950],
 
           'accent': colors.purple[500],
           'accent-focus': colors.purple[600],
@@ -101,11 +101,11 @@ module.exports = {
         'dark': {
           'primary': colors.emerald[500],
           'primary-focus': colors.emerald[600],
-          'primary-content': colors.emerald[50],
+          'primary-content': colors.emerald[950],
 
           'secondary': colors.cyan[500],
           'secondary-focus': colors.cyan[600],
-          'secondary-content': colors.cyan[50],
+          'secondary-content': colors.cyan[950],
 
           'accent': colors.purple[500],
           'accent-focus': colors.purple[600],

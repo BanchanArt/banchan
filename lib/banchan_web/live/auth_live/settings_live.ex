@@ -11,7 +11,7 @@ defmodule BanchanWeb.SettingsLive do
   alias Banchan.Notifications
   alias Banchan.Notifications.UserNotificationSettings
 
-  alias BanchanWeb.AuthLive.Components.AuthLayout
+  alias BanchanWeb.AuthLive.Components.SettingsLayout
   alias BanchanWeb.Components.Collapse
   alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
@@ -389,12 +389,12 @@ defmodule BanchanWeb.SettingsLive do
   @impl true
   def render(assigns) do
     ~F"""
-    <AuthLayout flashes={@flash}>
-      <h1 class="text-2xl">Account Settings</h1>
+    <SettingsLayout flashes={@flash}>
+      <h1 class="mb-2 text-xl font-semibold">Account Settings</h1>
       <div class="divider" />
-      <h2 class="text-xl">Appearance</h2>
-      <div class="flex flex-row items-center py-6 gap-4">
-        <label class="label cursor-pointer grow">
+      <h2 class="mb-2 text-xl font-semibold">Appearance</h2>
+      <div class="flex flex-row items-center gap-4 py-2">
+        <label class="cursor-pointer label grow">
           <span>Color Mode</span>
           <label class="swap">
             <input
@@ -405,36 +405,36 @@ defmodule BanchanWeb.SettingsLive do
               type="checkbox"
               class={"hidden", loading: !@theme}
             />
-            <i class="fas fa-sun swap-off text-3xl" />
-            <i class="fas fa-moon swap-on text-3xl" />
+            <i class="text-3xl fas fa-sun swap-off" />
+            <i class="text-3xl fas fa-moon swap-on" />
           </label>
         </label>
       </div>
       <div class="divider" />
-      <h2 class="text-xl">
+      <h2 class="mb-2 text-xl font-semibold">
         Notifications
       </h2>
       <Form
-        class="flex flex-col gap-4"
+        class="flex flex-col max-w-xl gap-4"
         for={@notification_settings_changeset}
         change="change_notification_settings"
         submit="submit_notification_settings"
       >
-        <h3 class="text-lg">Commissions</h3>
+        <h3 class="mb-2 text-lg">Commissions</h3>
         <Checkbox name={:commission_email} label="Email" />
         <Checkbox name={:commission_web} label="Web" />
-        <Submit class="w-full" changeset={@notification_settings_changeset} label="Save" />
+        <Submit class="w-fit" changeset={@notification_settings_changeset} label="Save" />
       </Form>
       <div class="divider" />
       <Form
-        class="flex flex-col gap-4"
+        class="flex flex-col max-w-xl gap-4"
         as={:change_handle}
         for={@handle_changeset}
         change="change_handle"
         submit="submit_handle"
         opts={autocomplete: "off"}
       >
-        <h3 class="text-lg font-medium">
+        <h3 class="mb-2 text-xl font-semibold">
           Update Handle
         </h3>
         <TextInput name={:handle} icon="at" opts={required: true} />
@@ -444,39 +444,41 @@ defmodule BanchanWeb.SettingsLive do
             Forgot your password?
           </LiveRedirect>
         {/if}
-        <Submit class="w-full" changeset={@handle_changeset} label="Save" />
+        <Submit class="w-fit" changeset={@handle_changeset} label="Save" />
       </Form>
       <div class="divider" />
       {#if is_nil(@current_user.email)}
         <Form
-          class="flex flex-col gap-4"
+          class="flex flex-col max-w-xl gap-4"
           as={:new_email}
           for={@new_email_changeset}
           change="change_new_email"
           submit="submit_new_email"
           opts={autocomplete: "off"}
         >
-          <h3 class="text-lg">Set Your Email</h3>
+          <h3 class="mb-2 text-lg">Set Your Email</h3>
           <div>
             You created this account through third-party authentication that did not provide an email address. If you want to be able to log in with an email and password, or change your <code>@handle</code>, please provide an email and we will send you a password reset.
           </div>
           <EmailInput name={:email} icon="envelope" opts={required: true} />
-          <Submit class="w-full" changeset={@new_email_changeset} label="Save" />
+          <Submit class="w-fit" changeset={@new_email_changeset} label="Save" />
         </Form>
       {#else}
-        <h3 class="text-lg">Two-factor Authentication</h3>
-        <p class="py-2">2FA helps secure your account by requiring an additional device to log in. Banchan supports any standard OTP application, such as Google Authenticator, Authy, or 1Password.</p>
-        <LiveRedirect class="btn btn-primary w-full" to={Routes.setup_mfa_path(Endpoint, :edit)}>Manage 2FA</LiveRedirect>
+        <div class="flex flex-col max-w-xl gap-4">
+          <h3 class="mb-2 text-xl font-semibold">Two-factor Authentication</h3>
+          <p class="py-2">2FA helps secure your account by requiring an additional device to log in. Banchan supports any standard OTP application, such as Google Authenticator, Authy, or 1Password.</p>
+          <LiveRedirect class="w-fit btn btn-primary" to={Routes.setup_mfa_path(Endpoint, :edit)}>Manage 2FA</LiveRedirect>
+        </div>
         <div class="divider" />
         <Form
-          class="flex flex-col gap-4"
+          class="flex flex-col max-w-xl gap-4"
           as={:change_email}
           for={@email_changeset}
           change="change_email"
           submit="submit_email"
           opts={autocomplete: "off"}
         >
-          <h3 class="text-lg font-medium">
+          <h3 class="mb-2 text-lg">
             Update Email
           </h3>
           <EmailInput name={:email} icon="envelope" opts={required: true} />
@@ -484,18 +486,18 @@ defmodule BanchanWeb.SettingsLive do
           <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
             Forgot your password?
           </LiveRedirect>
-          <Submit class="w-full" changeset={@email_changeset} label="Save" />
+          <Submit class="w-fit" changeset={@email_changeset} label="Save" />
         </Form>
         <div class="divider" />
         <Form
-          class="flex flex-col gap-4"
+          class="flex flex-col max-w-xl gap-4"
           as={:change_password}
           for={@password_changeset}
           change="change_password"
           submit="submit_password"
           opts={autocomplete: "off"}
         >
-          <h3 class="text-lg">
+          <h3 class="mb-2 text-lg">
             Update Password
           </h3>
           <TextInput
@@ -519,47 +521,47 @@ defmodule BanchanWeb.SettingsLive do
           <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
             Forgot your password?
           </LiveRedirect>
-          <Submit class="w-full" changeset={@password_changeset} label="Save" />
+          <Submit class="w-fit" changeset={@password_changeset} label="Save" />
         </Form>
       {/if}
       {#if Accounts.mod?(@current_user) || @current_user.available_invites > 0}
         <div class="divider" />
         <Form
-          class="flex flex-col gap-4"
+          class="flex flex-col max-w-xl gap-4"
           for={@invite_request_changeset}
           as={:change_invite_request}
           change="change_invite_request"
           submit="submit_invite_request"
         >
-          <h3 class="text-lg">Send an Artist Invite</h3>
+          <h3 class="mb-2 text-xl font-semibold">Send an Artist Invite</h3>
           <p :if={!Accounts.mod?(@current_user)}>You have {@current_user.available_invites} invite(s) available.</p>
           <EmailInput name={:email} icon="envelope" opts={required: true} />
-          <Submit class="w-full" changeset={@invite_request_changeset} label="Send" />
+          <Submit class="w-fit" changeset={@invite_request_changeset} label="Send" />
         </Form>
       {/if}
       <div class="divider" />
       <Form
-        class="flex flex-col gap-4"
+        class="flex flex-col max-w-xl gap-4"
         for={@muted_changeset}
         as={:change_muted}
         change="change_muted"
         submit="submit_muted"
       >
-        <h3 class="text-lg">Muted Words</h3>
+        <h3 class="mb-2 text-xl font-semibold">Muted Words</h3>
         <p>Words here will be used to filter out content that appears in the homepage and in discovery searches.</p>
         <TextArea name={:muted} info="Enter your desired muted words" label="Muted Words" />
-        <Submit class="w-full" changeset={@muted_changeset} label="Save" />
+        <Submit class="w-fit" changeset={@muted_changeset} label="Save" />
       </Form>
       <div class="divider" />
       {#if Application.get_env(:banchan, :mature_content_enabled?)}
         <Form
-          class="flex flex-col gap-4"
+          class="flex flex-col max-w-xl gap-4"
           for={@maturity_changeset}
           as={:change_maturity}
           change="change_maturity"
           submit="submit_maturity"
         >
-          <h3 class="text-lg">Mature Content</h3>
+          <h3 class="mb-2 text-xl font-semibold">Mature Content</h3>
           <p>By choosing to display mature content on the site, you assert that you are legally an adult in your country and able to view this content.</p>
           <Checkbox
             name={:mature_ok}
@@ -571,11 +573,11 @@ defmodule BanchanWeb.SettingsLive do
             info="Whether to show mature content uncensored. By default, you need to click through to view mature content you come aross."
             label="Uncensor Mature Content by Default"
           />
-          <Submit class="w-full" changeset={@maturity_changeset} label="Save" />
+          <Submit class="w-fit" changeset={@maturity_changeset} label="Save" />
         </Form>
         <div class="divider" />
       {/if}
-      <h3 class="text-lg">⚠️Deactivate Account⚠️</h3>
+      <h3 class="mb-2 text-xl font-semibold">Deactivate Account ⚠️</h3>
       <div class="prose">
         <p>You can deactivate your account. Existing commissions (and their comments), uploads, studios, etc. will be retained, but with your account anonymized, and your user profile will be disabled.</p>
         <p>If you want your studios to be deleted as well, <strong>you must do that before  deactivating</strong>.  Otherwise, they'll just stick around forever.</p>
@@ -583,21 +585,21 @@ defmodule BanchanWeb.SettingsLive do
       </div>
       <Collapse id="deactivate-account-collapse" class="w-full pt-4">
         <:header>
-          <div class="font-semibold text-error">Deactivate</div>
+          <div class="py-4 text-error">Deactivate</div>
         </:header>
-        <Form class="flex flex-col gap-4" for={%{}} as={:deactivate} submit="submit_deactivate">
+        <Form class="flex flex-col max-w-xl gap-4" for={%{}} as={:deactivate} submit="submit_deactivate">
           <p>
             You will have 30 days to change your mind.
           </p>
-          <p class="py-2 font-semibold">Are you sure?</p>
+          <p class="py-2">Are you sure?</p>
 
           {#if !Accounts.oauth_user?(@current_user)}
             <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
           {/if}
-          <Submit class="w-full btn-error" label="Confirm" />
+          <Submit class="w-fit btn-error" label="Confirm" />
         </Form>
       </Collapse>
-    </AuthLayout>
+    </SettingsLayout>
     """
   end
 end
