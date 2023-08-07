@@ -85,48 +85,50 @@ defmodule BanchanWeb.Components.Layout do
           <Flash flashes={@flashes} />
           <#slot />
         </section>
-        <footer class="p-10 border-t footer border-base-content border-opacity-10">
-          <div>
-            <span class="footer-title">Co-op</span>
-            <LiveRedirect to={Routes.static_about_us_path(Endpoint, :show)} class="link link-hover">About Us</LiveRedirect>
-            <LiveRedirect to={Routes.static_contact_path(Endpoint, :show)} class="link link-hover">Contact</LiveRedirect>
-            <LiveRedirect to={Routes.static_membership_path(Endpoint, :show)} class="link link-hover">Membership</LiveRedirect>
-            <LiveRedirect to={Routes.report_bug_new_path(Endpoint, :new)}>Report Bug</LiveRedirect>
-          </div>
-          <div>
-            <span class="footer-title">Legal</span>
-            <LiveRedirect
-              to={Routes.static_terms_and_conditions_path(Endpoint, :show)}
-              class="link link-hover"
-            >Terms and Conditions</LiveRedirect>
-            <LiveRedirect to={Routes.static_privacy_policy_path(Endpoint, :show)} class="link link-hover">Privacy policy</LiveRedirect>
-            <LiveRedirect to={Routes.static_cookies_policy_path(Endpoint, :show)} class="link link-hover">Cookies policy</LiveRedirect>
-            <LiveRedirect to={Routes.static_disputes_policy_path(Endpoint, :show)} class="link link-hover">Disputes Policy</LiveRedirect>
-          </div>
-          <div>
-            <span class="footer-title">Social</span>
-            <div class="grid grid-flow-col gap-4">
-              <a
-                href="https://mastodon.art/@Banchan"
-                aria-label="Banchan Art on Mastodon (opens in new tab)"
-                target="_blank"
-                rel="noopener noreferrer"
-              ><i class="text-xl fab fa-mastodon" /></a>
-              <a
-                href="https://twitter.com/BanchanArt"
-                aria-label="Banchan Art on Twitter (opens in new tab)"
-                target="_blank"
-                rel="noopener noreferrer"
-              ><i class="text-xl fab fa-twitter" /></a>
-              <a
-                href="https://discord.gg/FUkTHjGKJF"
-                aria-label="Banchan Art Discord server (opens in new tab)"
-                target="_blank"
-                rel="noopener noreferrer"
-              ><i class="text-xl fab fa-discord" /></a>
+        <div class="w-full border-t border-base-content border-opacity-10">
+          <footer class="px-4 py-8 mx-auto border-none footer max-w-7xl">
+            <div>
+              <span class="footer-title">Co-op</span>
+              <LiveRedirect to={Routes.static_about_us_path(Endpoint, :show)} class="link link-hover">About Us</LiveRedirect>
+              <LiveRedirect to={Routes.static_contact_path(Endpoint, :show)} class="link link-hover">Contact</LiveRedirect>
+              <LiveRedirect to={Routes.static_membership_path(Endpoint, :show)} class="link link-hover">Membership</LiveRedirect>
+              <LiveRedirect to={Routes.report_bug_new_path(Endpoint, :new)}>Report Bug</LiveRedirect>
             </div>
-          </div>
-        </footer>
+            <div>
+              <span class="footer-title">Legal</span>
+              <LiveRedirect
+                to={Routes.static_terms_and_conditions_path(Endpoint, :show)}
+                class="link link-hover"
+              >Terms and Conditions</LiveRedirect>
+              <LiveRedirect to={Routes.static_privacy_policy_path(Endpoint, :show)} class="link link-hover">Privacy policy</LiveRedirect>
+              <LiveRedirect to={Routes.static_cookies_policy_path(Endpoint, :show)} class="link link-hover">Cookies policy</LiveRedirect>
+              <LiveRedirect to={Routes.static_disputes_policy_path(Endpoint, :show)} class="link link-hover">Disputes Policy</LiveRedirect>
+            </div>
+            <div>
+              <span class="footer-title">Social</span>
+              <div class="grid grid-flow-col gap-4">
+                <a
+                  href="https://mastodon.art/@Banchan"
+                  aria-label="Banchan Art on Mastodon (opens in new tab)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                ><i class="text-xl fab fa-mastodon" /></a>
+                <a
+                  href="https://twitter.com/BanchanArt"
+                  aria-label="Banchan Art on Twitter (opens in new tab)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                ><i class="text-xl fab fa-twitter" /></a>
+                <a
+                  href="https://discord.gg/FUkTHjGKJF"
+                  aria-label="Banchan Art Discord server (opens in new tab)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                ><i class="text-xl fab fa-discord" /></a>
+              </div>
+            </div>
+          </footer>
+        </div>
       </div>
 
       {!-- # TODO: remove this basic auth check on launch --}
