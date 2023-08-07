@@ -162,7 +162,13 @@ defmodule BanchanWeb.Components.Layout do
                  Application.fetch_env!(:banchan, :env) == :dev)}>
               <ViewSwitcher context={@context} studio={@studio} />
             </li>
-            <li class="bg-transparent rounded-none pointer-events-none select-none h-fit">
+            <li
+              class="bg-transparent rounded-none pointer-events-none select-none h-fit"
+              :if={Accounts.active_user?(@current_user) &&
+                (Accounts.mod?(@current_user) ||
+                   Accounts.artist?(@current_user) ||
+                   Application.fetch_env!(:banchan, :env) == :dev)}
+            >
               <div class="w-full gap-0 px-2 py-0 m-0 rounded-none divider" />
             </li>
             {#case @context}
