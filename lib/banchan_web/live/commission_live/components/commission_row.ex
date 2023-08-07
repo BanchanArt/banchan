@@ -8,11 +8,25 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
 
   alias Surface.Components.LivePatch
 
-  alias BanchanWeb.Components.{Avatar, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Icon, StatusBadge, UserHandle}
 
   prop studio, :struct, from_context: :studio
   prop result, :struct, required: true
-  prop highlight, :boolean, default: false
+
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  defp status_map(status) do
+    case status do
+      :submitted -> :neutral
+      :accepted -> :info
+      :in_progress -> :info
+      :paused -> :info
+      :waiting -> :warning
+      :ready_for_review -> :warning
+      :approved -> :success
+      :rejected -> :error
+      :withdrawn -> :error
+    end
+  end
 
   def render(assigns) do
     commission_url =
@@ -23,42 +37,49 @@ defmodule BanchanWeb.CommissionLive.Components.CommissionRow do
       end
 
     ~F"""
-    <li class={bordered: @highlight}>
-      <LivePatch to={commission_url}>
-        <div>
-          <div class="text-2xl flex flex-row gap-2 flex-wrap items-center">
-            <span>{@result.commission.title}</span>
-            <div class="badge badge-primary badge-sm cursor-default">{Common.humanize_status(@result.commission.status)}</div>
-            {#if @result.archived}
-              <div class="badge badge-warning badge-sm cursor-default">Archived</div>
-            {/if}
-          </div>
-          <div class="text-sm text-left">
-            <div class="inline">
-              <div class="self-center inline">
-                Submitted to
-                <div class="inline font-bold">
-                  {#if @result.studio && is_nil(@result.studio.deleted_at)}
-                    {@result.studio.name}
-                  {#else}
-                    (Deleted Studio)
-                  {/if}
-                </div>
-                by
-              </div>
-              <div class="self-center inline">
-                <Avatar link={false} user={@result.client} class="w-2.5" />
-              </div>
-              <div class="inline">
-                <UserHandle link={false} user={@result.client} />
-              </div>
-              <div>
-                Updated {Timex.format!(@result.updated_at, "{relative}", :relative)}.
+    <li class="relative flex items-center justify-between gap-x-6 p-4 cursor-pointer rounded-box transition-all hover:bg-base-200">
+      <div class="min-w-0">
+        <div class="flex items-start gap-x-3">
+          <LivePatch to={commission_url}>
+            <span class="absolute inset-x-0 -top-px bottom-0" />
+            <p class="text-md font-semibold leading-6">{@result.commission.title}</p>
+          </LivePatch>
+          <StatusBadge
+            class="status"
+            label={Common.humanize_status(@result.commission.status)}
+            status={status_map(@result.commission.status)}
+          />
+        </div>
+        <div class="mt-1 flex flex-wrap items-center gap-x-2 text-xs leading-5">
+          <p class="whitespace-nowrap">Updated <time datetime={@result.updated_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>{@result.updated_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}</time></p>
+          <svg viewBox="0 0 2 2" class="h-0.5 w-0.5 fill-current">
+            <circle cx="1" cy="1" r="1" />
+          </svg>
+          {#if is_nil(@studio)}
+            <div class="self-center inline truncate whitespace-nowrap">
+              By
+              <div class="inline font-bold">
+                {#if @result.studio && is_nil(@result.studio.deleted_at)}
+                  {@result.studio.name}
+                {#else}
+                  (Deleted Studio)
+                {/if}
               </div>
             </div>
-          </div>
+          {#else}
+            From
+            <div class="self-center inline">
+              <Avatar link={false} user={@result.client} class="w-2.5" />
+            </div>
+            <div class="inline">
+              <UserHandle link={false} user={@result.client} />
+            </div>
+          {/if}
         </div>
-      </LivePatch>
+      </div>
+      <div class="shrink-0">
+        <Icon name="chevron-right" class="h-5 w-5 opacity-75" />
+      </div>
     </li>
     """
   end

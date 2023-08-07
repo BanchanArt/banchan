@@ -479,12 +479,9 @@ defmodule BanchanWeb.CommissionLive do
               No Results
             </div>
           {#else}
-            <ul class="menu menu-compact gap-2 p-2">
+            <ul role="list" class="divide-y divide-base-200">
               {#for result <- @results}
-                <CommissionRow
-                  result={result}
-                  highlight={@commission && @commission.public_id == result.commission.public_id}
-                />
+                <CommissionRow result={result} />
               {/for}
             </ul>
             <InfiniteScroll id="commissions-infinite-scroll" page={@page} load_more="load_more" />
