@@ -70,7 +70,7 @@ defmodule BanchanWeb.Components.Layout do
     <div class="w-full h-screen drawer drawer-mobile">
       <input type="checkbox" id="drawer-toggle" class="drawer-toggle">
       <div class="flex flex-col flex-grow h-screen drawer-content">
-        <div class="sticky top-0 z-50 shadow-sm">
+        <div class="sticky top-0 z-50">
           <Nav />
         </div>
         {#if slot_assigned?(:hero)}
@@ -85,7 +85,7 @@ defmodule BanchanWeb.Components.Layout do
           <Flash flashes={@flashes} />
           <#slot />
         </section>
-        <footer class="p-10 shadow-sm footer">
+        <footer class="p-10 border-t footer border-base-content border-opacity-10">
           <div>
             <span class="footer-title">Co-op</span>
             <LiveRedirect to={Routes.static_about_us_path(Endpoint, :show)} class="link link-hover">About Us</LiveRedirect>
