@@ -202,7 +202,7 @@ defmodule BanchanWeb.StudioLive.Moderation do
           {/if}
           <div :if={!Enum.empty?(@studio.disable_history)} class="divider" />
           <div class="overflow-x-auto">
-            <table class="table table-zebra w-full">
+            <table class="table border table-zebra border-base-content border-opacity-10 rounded w-full">
               <thead>
                 <tr>
                   <th>Disabled At</th>

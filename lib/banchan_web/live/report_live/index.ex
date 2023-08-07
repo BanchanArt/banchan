@@ -248,7 +248,7 @@ defmodule BanchanWeb.ReportLive.Index do
           </Collapse>
         </Form>
         <div class="overflow-x-auto">
-          <table class="table table-zebra w-full">
+          <table class="table border table-zebra border-base-content border-opacity-10 rounded w-full">
             <thead>
               <tr>
                 <th />

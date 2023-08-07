@@ -35,7 +35,7 @@ defmodule BanchanWeb.StudioLive.Components.Blocklist do
 
   def render(assigns) do
     ~F"""
-    <table class="table table-zebra w-full">
+    <table class="table w-full border rounded table-zebra border-base-content border-opacity-10">
       <thead>
         <tr>
           <th>User</th>
@@ -44,7 +44,7 @@ defmodule BanchanWeb.StudioLive.Components.Blocklist do
       </thead>
       {#for block <- @studio.blocklist}
         <tr>
-          <td class="flex flex-row gap-2 items-center">
+          <td class="flex flex-row items-center gap-2">
             <button
               type="button"
               :on-click="unblock"
