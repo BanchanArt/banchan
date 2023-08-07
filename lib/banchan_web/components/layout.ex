@@ -68,8 +68,13 @@ defmodule BanchanWeb.Components.Layout do
       }
     </style>
     <div class="w-full h-screen drawer drawer-mobile">
-      <input type="checkbox" id="drawer-toggle" class="drawer-toggle">
-      <div class="flex flex-col flex-grow h-screen drawer-content">
+      <input
+        type="checkbox"
+        id="drawer-toggle"
+        aria-label="Banchan Art menu"
+        class="hidden drawer-toggle"
+      />
+      <main class="flex flex-col flex-grow h-screen drawer-content">
         <div class="sticky top-0 z-50">
           <Nav />
         </div>
@@ -88,14 +93,14 @@ defmodule BanchanWeb.Components.Layout do
         <div class="w-full border-t border-base-content border-opacity-10">
           <footer class="px-4 py-8 mx-auto border-none footer max-w-7xl">
             <div>
-              <span class="footer-title">Co-op</span>
+              <span class="opacity-100 footer-title text-primary">Co-op</span>
               <LiveRedirect to={Routes.static_about_us_path(Endpoint, :show)} class="link link-hover">About Us</LiveRedirect>
               <LiveRedirect to={Routes.static_contact_path(Endpoint, :show)} class="link link-hover">Contact</LiveRedirect>
               <LiveRedirect to={Routes.static_membership_path(Endpoint, :show)} class="link link-hover">Membership</LiveRedirect>
               <LiveRedirect to={Routes.report_bug_new_path(Endpoint, :new)}>Report Bug</LiveRedirect>
             </div>
             <div>
-              <span class="footer-title">Legal</span>
+              <span class="opacity-100 footer-title text-primary">Legal</span>
               <LiveRedirect
                 to={Routes.static_terms_and_conditions_path(Endpoint, :show)}
                 class="link link-hover"
@@ -105,7 +110,7 @@ defmodule BanchanWeb.Components.Layout do
               <LiveRedirect to={Routes.static_disputes_policy_path(Endpoint, :show)} class="link link-hover">Disputes Policy</LiveRedirect>
             </div>
             <div>
-              <span class="footer-title">Social</span>
+              <span class="opacity-100 footer-title text-primary">Social</span>
               <div class="grid grid-flow-col gap-4">
                 <a
                   href="https://mastodon.art/@Banchan"
@@ -129,7 +134,7 @@ defmodule BanchanWeb.Components.Layout do
             </div>
           </footer>
         </div>
-      </div>
+      </main>
 
       {!-- # TODO: remove this basic auth check on launch --}
       <div
@@ -150,7 +155,7 @@ defmodule BanchanWeb.Components.Layout do
                   <UserHandle class="text-sm" link={false} user={@current_user} />
                 </Link>
                 <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
-                  <Icon name="log-out" size="4" />
+                  <Icon name="log-out" size="4" label="logout" />
                 </Link>
               </div>
             {/if}

@@ -219,7 +219,12 @@ defmodule BanchanWeb.Components.Notifications do
             {/if}
           </span>
         {/if}
-        <button type="button" :on-click="toggle_menu" class="btn btn-circle btn-ghost">
+        <button
+          type="button"
+          :on-click="toggle_menu"
+          class="btn btn-circle btn-ghost"
+          aria-label="Notifications"
+        >
           <Icon name="bell" size="4" />
         </button>
       </div>
