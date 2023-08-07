@@ -75,7 +75,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
         Payout.done?(assigns.payout)
 
     ~F"""
-    <div class="flex flex-col h-full bg-base-300 md:p-4 rounded-box md:rounded-bl-none overflow-hidden">
+    <div class="flex flex-col h-full bg-base-100 md:p-4 rounded-box md:rounded-bl-none overflow-hidden">
       {!-- Header --}
       <h1 class="px-4 pt-4 md:pt-0 md:px-0 text-3xl md:hidden border-b-2 border-neutral-content border-opacity-10 flex items-center gap-x-3">
         <LivePatch class="go-back p-2" to={~p"/studios/#{@studio.handle}/payouts"}>
@@ -92,12 +92,12 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
         {/if}
       </h1>
       {#if @data_pending}
-        <div class="py-20 bg-base-300 w-full h-full flex flex-col items-center">
+        <div class="py-20 bg-base-100 w-full h-full flex flex-col items-center">
           <h2 class="sr-only">Loading...</h2>
           <i class="fas fa-spinner animate-spin text-3xl" />
         </div>
       {#else}
-        <div class="p-4 bg-base-300">
+        <div class="p-4 bg-base-100">
           <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
               <h1 class="text-3xl font-semibold leading-6">
@@ -140,7 +140,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
               <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden shadow ring-1 ring-base-300 ring-opacity-5 sm:rounded-lg">
                   <table class="min-w-full divide-y divide-base-200">
-                    <thead class="bg-base-200">
+                    <thead class="bg-base-300">
                       <tr>
                         <th
                           scope="col"
@@ -168,7 +168,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
                         </th>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-base-200 bg-base-100">
+                    <tbody class="divide-y divide-base-100 bg-base-200">
                       {#for invoice <- @payout.invoices}
                         <tr>
                           <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium sm:pl-6">

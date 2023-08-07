@@ -201,7 +201,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
     ~F"""
     <Layout flashes={@flash} studio={@studio} context={:studio}>
       <div class="flex flex-col grow max-h-full p-4">
-        <div class={"bg-base-300 rounded-box max-w-4xl w-full mx-auto", "hidden sm:flex": !is_nil(@payout_id)}>
+        <div class={"bg-base-100 rounded-box max-w-4xl w-full mx-auto", "hidden sm:flex": !is_nil(@payout_id)}>
           {#if is_nil(@balance)}
             <div class="py-20 w-full h-full flex flex-col items-center">
               <h2 class="sr-only">Loading...</h2>

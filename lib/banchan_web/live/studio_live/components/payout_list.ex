@@ -33,8 +33,8 @@ defmodule BanchanWeb.StudioLive.Components.PayoutList do
     >
       {#for payout <- @payouts}
         <li class={
-          "payout-row relative flex justify-between items-center gap-x-6 py-5 hover:bg-base-300 px-5",
-          "bg-base-300": @payout_id == payout.public_id
+          "payout-row relative flex justify-between items-center gap-x-6 py-5 hover:bg-base-100 px-5",
+          "bg-base-100": @payout_id == payout.public_id
         }>
           <div class="min-w-0">
             <div class="flex items-start gap-x-3">
