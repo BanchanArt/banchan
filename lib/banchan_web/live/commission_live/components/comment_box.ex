@@ -36,7 +36,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
      socket
      |> assign(assigns)
      |> assign(studio: studio)
-     |> assign(changeset: Event.comment_changeset(%Event{}, %{}))
+     |> assign(changeset: socket.assigns[:changeset] || Event.comment_changeset(%Event{}, %{}))
      |> allow_upload(:attachment,
        accept: :any,
        max_entries: 10,
