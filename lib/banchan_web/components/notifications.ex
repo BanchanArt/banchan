@@ -9,6 +9,8 @@ defmodule BanchanWeb.Components.Notifications do
   alias Banchan.Notifications
   alias Banchan.Notifications.UserNotification
 
+  alias BanchanWeb.Components.Icon
+
   prop current_user, :any, from_context: :current_user
   prop uri, :string, from_context: :uri
 
@@ -217,12 +219,12 @@ defmodule BanchanWeb.Components.Notifications do
             {/if}
           </span>
         {/if}
-        <button type="button" :on-click="toggle_menu" class="btn btn-circle">
-          <i class="fas fa-bell" />
+        <button type="button" :on-click="toggle_menu" class="btn btn-circle btn-ghost">
+          <Icon name="bell" size="4" />
         </button>
       </div>
       {#if @open}
-        <div class="translate-x-px translate-y-px origin-top right-0 absolute menu rounded-box shadow-2xl bg-base-200 p-2 w-80 z-30 divide-y-2 divide-neutral-content divide-opacity-10 text-base-content">
+        <div class="absolute right-0 z-30 p-2 origin-top translate-x-px translate-y-px border divide-y-2 shadow border-base-content border-opacity-10 menu rounded-box bg-base-300 w-80 divide-neutral-content divide-opacity-10 text-base-content">
           {#if !@notifications || Enum.empty?(@notifications.entries)}
             <div class="px-8 m-2">No notifications</div>
           {#else}
@@ -240,9 +242,9 @@ defmodule BanchanWeb.Components.Notifications do
                   <LiveRedirect to={annotated_url(notification)}>
                     <div class="indicator">
                       {#if !notification.read}
-                        <span class="indicator-item indicator-middle indicator-start badge badge-xs badge-primary cursor-default" />
+                        <span class="cursor-default indicator-item indicator-middle indicator-start badge badge-xs badge-primary" />
                       {/if}
-                      <div class="pl-6 flex flex-col">
+                      <div class="flex flex-col pl-6">
                         <div class="text-lg">{notification.title}</div>
                         <div class="text-xs">{notification.short_body}</div>
                       </div>
