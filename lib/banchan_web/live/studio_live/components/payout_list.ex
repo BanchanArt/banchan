@@ -9,19 +9,19 @@ defmodule BanchanWeb.StudioLive.Components.PayoutList do
 
   alias Surface.Components.LivePatch
 
-  alias BanchanWeb.Components.Icon
+  alias BanchanWeb.Components.{Icon, StatusBadge}
 
   prop studio, :struct, required: true
   prop payouts, :list, required: true
   prop payout_id, :string, required: true
 
-  defp status_color(status) do
+  defp status_map(status) do
     case status do
-      :pending -> "bg-warning"
-      :in_transit -> "bg-warning"
-      :canceled -> "bg-error"
-      :paid -> "bg-success"
-      :failed -> "bg-error"
+      :pending -> :warning
+      :in_transit -> :warning
+      :canceled -> :error
+      :paid -> :success
+      :failed -> :error
     end
   end
 
@@ -51,12 +51,11 @@ defmodule BanchanWeb.StudioLive.Components.PayoutList do
                   {Payments.print_money(payout.amount)}
                 </LivePatch>
               </p>
-              <p class={
-                "status bg-opacity-20 rounded-md whitespace-nowrap mt-0.5 px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset",
-                status_color(payout.status)
-              }>
-                {Payout.humanize_status(payout.status)}
-              </p>
+              <StatusBadge
+                class="status"
+                label={Payout.humanize_status(payout.status)}
+                status={status_map(payout.status)}
+              />
             </div>
             <div class="mt-1 flex items-center gap-x-2 text-xs leading-6">
               <p class="whitespace-nowrap">
