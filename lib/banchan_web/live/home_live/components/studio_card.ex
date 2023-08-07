@@ -23,6 +23,7 @@ defmodule BanchanWeb.Components.StudioCard do
               {#if @studio.card_img_id}
                 <img
                   class="object-cover rounded-lg aspect-video"
+                  alt={"studio card image for #{@studio.name}"}
                   src={~p"/images/studio_card_img/#{@studio.card_img_id}"}
                 />
               {#else}
