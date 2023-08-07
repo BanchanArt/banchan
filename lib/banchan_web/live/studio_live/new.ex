@@ -14,9 +14,9 @@ defmodule BanchanWeb.StudioLive.New do
   alias BanchanWeb.Components.Form.{
     Checkbox,
     MultipleSelect,
-    QuillInput,
     Select,
     Submit,
+    TextArea,
     TextInput
   }
 
@@ -116,8 +116,7 @@ defmodule BanchanWeb.StudioLive.New do
               info="Unique studio handle, as it will appear in the URL."
               opts={required: true}
             />
-            <QuillInput
-              id="about"
+            <TextArea
               info="Tell us about your studio, what kind of art it's for, and what makes it different!"
               name={:about}
             />
