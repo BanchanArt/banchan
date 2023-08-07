@@ -140,40 +140,35 @@ defmodule BanchanWeb.StudioLive.Edit do
     ~F"""
     <Layout flashes={@flash} studio={@studio} padding={0} context={:studio}>
       <div class="w-full md:bg-base-300">
-        <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
-          <h2 class="text-xl py-6">Edit Studio Profile</h2>
+        <div class="w-full max-w-xl p-10 mx-auto rounded-xl md:my-10 bg-base-100">
+          <h2 class="py-6 text-xl">Edit Studio Profile</h2>
           <Form class="flex flex-col gap-2" for={@changeset} change="change" submit="submit">
-            <TagsInput
-              id="studio_tags"
-              info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
-              name={:tags}
-            />
             <TextInput name={:name} info="Display name for studio" icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at" opts={required: true} />
             <div class="relative">
               {#if Enum.empty?(@uploads.card_image.entries) && (@remove_card || !(@studio && @studio.card_img_id))}
                 <HiddenInput name={:card_image_id} value={nil} />
-                <div class="aspect-video bg-base-300 w-full" />
+                <div class="w-full aspect-video bg-base-300" />
               {#elseif !Enum.empty?(@uploads.card_image.entries)}
                 <button
                   type="button"
                   phx-value-ref={(@uploads.card_image.entries |> Enum.at(0)).ref}
-                  class="btn btn-xs btn-circle absolute right-2 top-2"
+                  class="absolute btn btn-xs btn-circle right-2 top-2"
                   :on-click="cancel_card_upload"
                 >✕</button>
                 <.live_img_preview
                   entry={Enum.at(@uploads.card_image.entries, 0)}
-                  class="object-cover aspect-video rounded-xl w-full"
+                  class="object-cover w-full aspect-video rounded-xl"
                 />
               {#else}
                 <button
                   type="button"
-                  class="btn btn-xs btn-circle absolute right-2 top-2"
+                  class="absolute btn btn-xs btn-circle right-2 top-2"
                   :on-click="remove_card"
                 >✕</button>
                 <HiddenInput name={:card_image_id} value={@studio.card_img_id} />
                 <img
-                  class="object-cover aspect-video rounded-xl w-full"
+                  class="object-cover w-full aspect-video rounded-xl"
                   src={Routes.public_image_path(Endpoint, :image, :studio_card_img, @studio.card_img_id)}
                 />
               {/if}
@@ -190,27 +185,27 @@ defmodule BanchanWeb.StudioLive.Edit do
               {#if Enum.empty?(@uploads.header_image.entries) &&
                   (@remove_header || !(@studio && @studio.header_img_id))}
                 <HiddenInput name={:header_image_id} value={nil} />
-                <div class="aspect-header-image bg-base-300 w-full" />
+                <div class="w-full aspect-header-image bg-base-300" />
               {#elseif !Enum.empty?(@uploads.header_image.entries)}
                 <button
                   type="button"
                   phx-value-ref={(@uploads.header_image.entries |> Enum.at(0)).ref}
-                  class="btn btn-xs btn-circle absolute right-2 top-2"
+                  class="absolute btn btn-xs btn-circle right-2 top-2"
                   :on-click="cancel_header_upload"
                 >✕</button>
                 <.live_img_preview
                   entry={Enum.at(@uploads.header_image.entries, 0)}
-                  class="object-cover aspect-header-image rounded-xl w-full"
+                  class="object-cover w-full aspect-header-image rounded-xl"
                 />
               {#else}
                 <button
                   type="button"
-                  class="btn btn-xs btn-circle absolute right-2 top-2"
+                  class="absolute btn btn-xs btn-circle right-2 top-2"
                   :on-click="remove_header"
                 >✕</button>
                 <HiddenInput name={:header_image_id} value={@studio.header_img_id} />
                 <img
-                  class="object-cover aspect-header-image rounded-xl w-full"
+                  class="object-cover w-full aspect-header-image rounded-xl"
                   src={Routes.public_image_path(Endpoint, :image, :studio_header_img, @studio.header_img_id)}
                 />
               {/if}
@@ -227,6 +222,11 @@ defmodule BanchanWeb.StudioLive.Edit do
               id="about"
               info="Displayed in the 'About' page. The first few dozen characters will also be displayed as the description in studio cards."
               name={:about}
+            />
+            <TagsInput
+              id="studio_tags"
+              info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
+              name={:tags}
             />
             <Collapse id="socials" class="my-4 border-b-2">
               <:header>
