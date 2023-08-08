@@ -149,8 +149,8 @@ defmodule BanchanWeb.DenizenLive.Moderation do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash} padding={0} context={:admin}>
-      <div class="w-full md:bg-base-300">
-        <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+      <div class="w-full md:bg-base-200">
+        <div class="w-full max-w-xl p-10 mx-auto rounded-xl md:my-10 bg-base-200">
           <Form as={:user} for={@changeset} change="change" submit="submit">
             <div class="text-xl">
               Manage User @{@user.handle}
@@ -188,7 +188,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
           {/if}
           <div :if={!Enum.empty?(@user.disable_history)} class="divider" />
           <div class="overflow-x-auto">
-            <table class="table border table-zebra border-base-content border-opacity-10 rounded w-full">
+            <table class="table w-full border rounded table-zebra border-base-content border-opacity-10">
               <thead>
                 <tr>
                   <th>Disabled At</th>

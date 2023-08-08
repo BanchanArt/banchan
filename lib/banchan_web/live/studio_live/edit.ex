@@ -139,8 +139,8 @@ defmodule BanchanWeb.StudioLive.Edit do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash} studio={@studio} padding={0} context={:studio}>
-      <div class="w-full md:bg-base-300">
-        <div class="w-full max-w-xl p-10 mx-auto rounded-xl md:my-10 bg-base-100">
+      <div class="w-full md:bg-base-200">
+        <div class="w-full max-w-xl p-10 mx-auto rounded-xl md:my-10 bg-base-200">
           <h2 class="py-6 text-xl">Edit Studio Profile</h2>
           <Form class="flex flex-col gap-2" for={@changeset} change="change" submit="submit">
             <TextInput name={:name} info="Display name for studio" icon="user" opts={required: true} />
