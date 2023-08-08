@@ -200,7 +200,7 @@ defmodule BanchanWeb.StudioLive.Shop do
           <InfiniteScroll id="shop-infinite-scroll" page={@offerings.page_number} load_more="load_more" />
         </div>
       {#elseif @studio.archived_at}
-        <div class="w-full mx-auto md:bg-base-200">
+        <div class="w-full mx-auto bg-base-200">
           <div class="w-full p-10 mx-auto max-w-prose rounded-xl md:my-10 bg-base-200">
             <h1 class="text-2xl">
               Studio Archived
@@ -214,7 +214,7 @@ defmodule BanchanWeb.StudioLive.Shop do
           </div>
         </div>
       {#else}
-        <div class="w-full mx-auto md:bg-base-200">
+        <div class="w-full mx-auto bg-base-200">
           <div class="w-full p-10 mx-auto max-w-prose rounded-xl md:my-10 bg-base-200">
             <h1 class="text-2xl">
               Coming Soon

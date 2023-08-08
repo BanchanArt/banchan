@@ -24,7 +24,7 @@ defmodule BanchanWeb.AccountDisabledLive do
     ~F"""
     <Layout flashes={@flash} padding={0}>
       <div class="w-full h-full bg-base-200">
-        <div class="w-full max-w-xl p-10 mx-auto rounded-xl md:my-10 bg-base-200">
+        <div class="w-full max-w-5xl p-10 mx-auto">
           <div class="text-xl">
             Account Disabled
           </div>

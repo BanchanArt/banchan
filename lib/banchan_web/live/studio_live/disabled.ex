@@ -18,7 +18,7 @@ defmodule BanchanWeb.StudioLive.Disabled do
   def render(assigns) do
     ~F"""
     <StudioLayout flashes={@flash} id="studio-layout" studio={@studio}>
-      <div class="w-full mx-auto md:bg-base-200">
+      <div class="w-full mx-auto bg-base-200">
         <div class="w-full p-10 mx-auto max-w-prose rounded-xl md:my-10 bg-base-200">
           This studio has been disabled by site administrators.
         </div>

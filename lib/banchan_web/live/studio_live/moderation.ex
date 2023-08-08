@@ -164,8 +164,8 @@ defmodule BanchanWeb.StudioLive.Moderation do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash} studio={@studio} padding={0} context={:admin}>
-      <div class="w-full md:bg-base-200">
-        <div class="w-full max-w-xl p-10 mx-auto rounded-xl md:my-10 bg-base-200">
+      <div class="w-full bg-base-200">
+        <div class="w-full max-w-5xl p-10 mx-auto">
           <Form as={:studio} for={@changeset} change="change" submit="submit">
             <div class="text-xl">
               Manage {@studio.name}

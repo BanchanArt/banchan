@@ -45,7 +45,7 @@ defmodule BanchanWeb.ReportBugLive.New do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash} padding={0}>
-      <div class="w-full md:bg-base-200">
+      <div class="w-full bg-base-200">
         <div class="w-full max-w-lg p-10 mx-auto rounded-xl md:my-10 bg-base-200">
           {#if @report_url}
             <p>Thanks for your bug report! You can view the issue and sign up for updates <a href={@report_url} class="link link-primary">here</a>.</p>
