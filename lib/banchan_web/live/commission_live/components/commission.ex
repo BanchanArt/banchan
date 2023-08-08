@@ -184,13 +184,11 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
     ~F"""
     <div class="relative">
       <h1 class="sticky z-30 flex flex-row items-center p-4 text-3xl border-b-2 opacity-100 bg-base-200 top-16 border-base-content border-opacity-10">
-        <LivePatch
-          to={if is_nil(@studio) do
-            ~p"/commissions"
-          else
-            ~p"/studios/#{@studio.handle}/commissions"
-          end}
-        >
+        <LivePatch to={if is_nil(@studio) do
+          ~p"/commissions"
+        else
+          ~p"/studios/#{@studio.handle}/commissions"
+        end}>
           <Icon name="arrow-left" size="6" label="back" />
         </LivePatch>
         {#if @title_changeset}
