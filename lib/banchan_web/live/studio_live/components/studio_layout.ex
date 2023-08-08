@@ -93,7 +93,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
           {#else}
             <div class="w-full max-h-80 aspect-header-image bg-base-300" />
           {/if}
-          <div class="mx-auto my-4 max-w-7xl">
+          <div class="px-4 mx-auto my-4 max-w-7xl">
             <div class="flex flex-row gap-2">
               <div class="text-2xl font-medium md:text-3xl grow">
                 {@studio.name}

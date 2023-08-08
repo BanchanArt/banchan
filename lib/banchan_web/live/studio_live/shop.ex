@@ -159,7 +159,7 @@ defmodule BanchanWeb.StudioLive.Shop do
         <div
           id="offering-cards"
           :hook="DragDropCards"
-          class="sm:px-2 grid grid-cols-2 sm:gap-2 sm:grid-cols-3 auto-rows-fr pt-4"
+          class="grid grid-cols-1 gap-4 px-4 pt-4 mx-auto mb-16 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr max-w-7xl"
         >
           {#for offering <- @offerings.entries}
             <div
@@ -189,7 +189,7 @@ defmodule BanchanWeb.StudioLive.Shop do
           {/for}
           {#if @current_user_member?}
             <LiveRedirect to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}>
-              <Card class="border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200 h-full transition-all">
+              <Card class="h-full transition-all border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200">
                 <div class="flex flex-col items-center m-auto">
                   <span class="text-4xl">New Offering</span>
                   <span class="text-sm">Offerings are what users can select when they want a commission. For example, "Illustration", or "Chibi". Click here to make one.</span>
@@ -201,7 +201,7 @@ defmodule BanchanWeb.StudioLive.Shop do
         </div>
       {#elseif @studio.archived_at}
         <div class="w-full mx-auto md:bg-base-300">
-          <div class="max-w-prose w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+          <div class="w-full p-10 mx-auto max-w-prose rounded-xl md:my-10 bg-base-100">
             <h1 class="text-2xl">
               Studio Archived
             </h1>
@@ -215,7 +215,7 @@ defmodule BanchanWeb.StudioLive.Shop do
         </div>
       {#else}
         <div class="w-full mx-auto md:bg-base-300">
-          <div class="max-w-prose w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+          <div class="w-full p-10 mx-auto max-w-prose rounded-xl md:my-10 bg-base-100">
             <h1 class="text-2xl">
               Coming Soon
             </h1>
@@ -224,7 +224,7 @@ defmodule BanchanWeb.StudioLive.Shop do
               <p>You need to onboard your studio on Stripe before it opens its doors.</p>
               <p>Note: If you've completed onboarding and still see this, try refreshing the page.</p>
               <div class="flex flex-row-reverse">
-                <Link label="Onboard" to={@stripe_onboarding_url} class="btn btn-primary py-1 px-5 m-1" />
+                <Link label="Onboard" to={@stripe_onboarding_url} class="px-5 py-1 m-1 btn btn-primary" />
                 <Button click="recheck_stripe" label="Recheck" class="btn-link" />
               </div>
             {#elseif @current_user_member? && !@studio.stripe_charges_enabled}
