@@ -171,7 +171,10 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
               <label :on-click="load_history" tabindex="0" class="text-xs italic hover:link">
                 edited {fmt_time(@event.updated_at)}
               </label>
-              <ol tabindex="0" class="p-2 shadow dropdown-content menu bg-base-100 rounded-box">
+              <ol
+                tabindex="0"
+                class="p-1 border dropdown-content menu bg-base-300 border-base-content border-opacity-10 rounded-xl"
+              >
                 {#if Ecto.assoc_loaded?(@event.history)}
                   {#for history <- @event.history}
                     <li class="block">
@@ -197,9 +200,12 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
         </div>
         <div class="dropdown dropdown-end">
           <label tabindex="0" class="py-0 btn btn-circle btn-ghost btn-xs">
-            <Icon name="more-vertical" size="4" label="tooltip" />
+            <Icon name="more-vertical" size="4" />
           </label>
-          <ul tabindex="0" class="p-2 shadow dropdown-content menu bg-base-200 rounded-box">
+          <ul
+            tabindex="0"
+            class="p-1 border dropdown-content menu bg-base-300 border-base-content border-opacity-10 rounded-xl"
+          >
             {#if !@changeset &&
                 (@current_user_member? || @current_user.id == @actor.id || :admin in @current_user.roles ||
                    :mod in @current_user.roles)}

@@ -241,7 +241,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             {bottom_buttons(assigns, false)}
             {#if @commission.terms}
               <div class="divider" />
-              <div class="p-4 rounded-lg shadow-lg bg-base-200">
+              <div class="p-4 rounded-lg bg-base-200">
                 <Collapse id="terms-collapse">
                   <:header>Commission Terms</:header>
                   <Markdown content={@commission.terms} />

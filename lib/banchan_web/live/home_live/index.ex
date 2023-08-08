@@ -89,7 +89,7 @@ defmodule BanchanWeb.HomeLive do
                       class="object-cover w-full aspect-header-image"
                       src={Routes.public_image_path(Endpoint, :image, :studio_header_img, studio.header_img_id)}
                     />
-                    <div class="absolute text-3xl font-bold text-white top-2 left-2 md:top-6 md:left-6 sm:text-3xl md:text-6xl text-shadow-lg shadow-black">
+                    <div class="absolute text-3xl font-bold text-white top-2 left-2 md:top-6 md:left-6 sm:text-3xl md:text-6xl text-shadow-black">
                       {studio.name}
                     </div>
                   </LiveRedirect>

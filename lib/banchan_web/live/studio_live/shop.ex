@@ -189,7 +189,7 @@ defmodule BanchanWeb.StudioLive.Shop do
           {/for}
           {#if @current_user_member?}
             <LiveRedirect to={Routes.studio_offerings_new_path(Endpoint, :new, @studio.handle)}>
-              <Card class="h-full transition-all border-2 border-dashed shadow-xs opacity-50 hover:opacity-100 hover:bg-base-200">
+              <Card class="h-full transition-all border-2 border-dashed opacity-50 hover:opacity-100 hover:bg-base-200">
                 <div class="flex flex-col items-center m-auto">
                   <span class="text-4xl">New Offering</span>
                   <span class="text-sm">Offerings are what users can select when they want a commission. For example, "Illustration", or "Chibi". Click here to make one.</span>

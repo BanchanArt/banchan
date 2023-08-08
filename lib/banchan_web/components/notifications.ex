@@ -229,7 +229,7 @@ defmodule BanchanWeb.Components.Notifications do
         </button>
       </div>
       {#if @open}
-        <div class="absolute right-0 z-30 p-2 origin-top translate-x-px translate-y-px border divide-y-2 shadow border-base-content border-opacity-10 menu rounded-box bg-base-300 w-80 divide-neutral-content divide-opacity-10 text-base-content">
+        <div class="absolute right-0 z-30 p-2 origin-top translate-x-px translate-y-px border divide-y-2 border-base-content border-opacity-10 menu rounded-box bg-base-300 w-80 divide-neutral-content divide-opacity-10 text-base-content">
           {#if !@notifications || Enum.empty?(@notifications.entries)}
             <div class="px-8 m-2">No notifications</div>
           {#else}

@@ -13,7 +13,7 @@ defmodule BanchanWeb.Components.Flash do
     <div class="flash-container">
       {#if live_flash(@flashes, :success)}
         <div
-          class="p-2 shadow-lg alert alert-success hover:cursor-pointer"
+          class="p-2 alert alert-success hover:cursor-pointer"
           role="alert"
           :on-click="lv:clear-flash"
           :values={key: "success"}
@@ -27,7 +27,7 @@ defmodule BanchanWeb.Components.Flash do
 
       {#if live_flash(@flashes, :info)}
         <div
-          class="p-2 shadow-lg alert alert-info hover:cursor-pointer"
+          class="p-2 alert alert-info hover:cursor-pointer"
           role="alert"
           :on-click="lv:clear-flash"
           :values={key: "info"}
@@ -41,7 +41,7 @@ defmodule BanchanWeb.Components.Flash do
 
       {#if live_flash(@flashes, :warning)}
         <div
-          class="p-2 shadow-lg alert alert-warning hover:cursor-pointer"
+          class="p-2 alert alert-warning hover:cursor-pointer"
           role="alert"
           :on-click="lv:clear-flash"
           :values={key: "warning"}
@@ -55,7 +55,7 @@ defmodule BanchanWeb.Components.Flash do
 
       {#if live_flash(@flashes, :error)}
         <div
-          class="p-2 shadow-lg alert alert-error hover:cursor-pointer"
+          class="p-2 alert alert-error hover:cursor-pointer"
           role="alert"
           :on-click="lv:clear-flash"
           :values={key: "error"}

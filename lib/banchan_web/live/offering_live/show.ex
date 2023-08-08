@@ -229,7 +229,7 @@ defmodule BanchanWeb.OfferingLive.Show do
             {/if}
           </div>
           <div class="divider" />
-          <div class="flex flex-col p-4 rounded-lg shadow-lg bg-base-200">
+          <div class="flex flex-col p-4 rounded-lg bg-base-200">
             {#if Enum.any?(@offering.options, & &1.default)}
               <div class="px-2 text-sm font-medium opacity-50">Included</div>
               <Summary line_items={@line_items} />
@@ -255,7 +255,10 @@ defmodule BanchanWeb.OfferingLive.Show do
                   <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
                     <Icon name="more-vertical" size="4" />
                   </label>
-                  <ul tabindex="0" class="p-2 shadow dropdown-content menu bg-base-200 rounded-box">
+                  <ul
+                    tabindex="0"
+                    class="border p-x dropdown-content menu bg-base-300 border-base-content border-opacity-10 rounded-xl"
+                  >
                     {#if @current_user && (@current_user_member? || Accounts.mod?(@current_user))}
                       <li>
                         <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}>
@@ -309,14 +312,14 @@ defmodule BanchanWeb.OfferingLive.Show do
               <div class="w-full h-full aspect-video bg-base-300" />
             {/if}
           </Lightbox>
-          <div class="p-4 rounded-lg shadow-lg bg-base-200">
+          <div class="p-4 rounded-lg bg-base-200">
             <div class="text-2xl">Description</div>
             <div class="divider" />
             <Markdown class="pb-4" content={@offering.description} />
           </div>
           {#if @offering.terms}
             <div class="divider md:hidden" />
-            <div class="p-4 rounded-lg shadow-lg bg-base-200">
+            <div class="p-4 rounded-lg bg-base-200">
               <Collapse id="terms-collapse">
                 <:header>Commission Terms</:header>
                 <Markdown content={@offering.terms} />
@@ -324,7 +327,7 @@ defmodule BanchanWeb.OfferingLive.Show do
             </div>
           {/if}
           {#if !Enum.empty?(@gallery_images)}
-            <div class="p-4 rounded-lg shadow-lg bg-base-200">
+            <div class="p-4 rounded-lg bg-base-200">
               <div class="text-2xl">Gallery</div>
               <div class="divider" />
               <MasonryGallery

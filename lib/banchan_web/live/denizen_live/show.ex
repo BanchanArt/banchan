@@ -191,7 +191,10 @@ defmodule BanchanWeb.DenizenLive.Show do
                   <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
                     <Icon name="more-vertical" size="4" />
                   </label>
-                  <ul tabindex="0" class="p-2 shadow dropdown-content menu bg-base-200 rounded-box">
+                  <ul
+                    tabindex="0"
+                    class="p-2 border bg-base-300 border-base-content border-opacity-10 menu rounded-box"
+                  >
                     {#if :admin in @current_user.roles || :mod in @current_user.roles}
                       <li>
                         <LiveRedirect to={Routes.denizen_moderation_path(Endpoint, :edit, @user.handle)}>

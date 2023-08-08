@@ -100,10 +100,13 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
               </div>
               {#if @current_user && (Accounts.mod?(@current_user) || !@current_user_member?)}
                 <div class="dropdown dropdown-end">
-                  <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
-                    <Icon name="more-vertical" size="6" />
+                  <label tabindex="0" class="py-0 my-2 btn btn-circle btn-ghost btn-sm grow-0">
+                    <Icon name="more-vertical" size="4" />
                   </label>
-                  <ul tabindex="0" class="p-2 shadow dropdown-content menu bg-base-200 rounded-box">
+                  <ul
+                    tabindex="0"
+                    class="p-1 border rounded-xl dropdown-content bg-base-300 border-base-content border-opacity-10 menu menu-compact"
+                  >
                     {#if Accounts.mod?(@current_user)}
                       <li>
                         <LiveRedirect to={Routes.studio_moderation_path(Endpoint, :edit, @studio.handle)}>
@@ -125,7 +128,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 </div>
               {/if}
               {#if @current_user && !@current_user_member?}
-                <Button click="toggle_follow" class="px-2 py-0 my-2 ml-auto rounded-full btn-sm btn-outline">
+                <Button click="toggle_follow" class="px-2 py-0 my-2 ml-auto rounded-full btn-sm btn-primary">
                   {if @user_following? do
                     "Unfollow"
                   else
@@ -138,7 +141,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                 <LiveRedirect
                   label="Edit Profile"
                   to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}
-                  class="px-2 py-0 my-2 rounded-full btn btn-sm btn-primary btn-outline grow-0"
+                  class="px-2 py-0 my-2 rounded-full btn btn-sm btn-primary grow-0"
                 />
               {/if}
             </div>

@@ -142,7 +142,7 @@ defmodule BanchanWeb.Components.Layout do
         class="drawer-side"
       >
         <label for="drawer-toggle" class="drawer-overlay" />
-        <nav class="relative w-64 border-r shadow bg-base-200 border-base-content border-opacity-10">
+        <nav class="relative w-64 border-r bg-base-200 border-base-content border-opacity-10">
           <div class="absolute bottom-0 left-0 flex flex-col w-full px-4 pb-6">
             {#if Accounts.active_user?(@current_user)}
               <div class="divider" />
