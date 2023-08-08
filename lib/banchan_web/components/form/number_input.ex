@@ -23,7 +23,7 @@ defmodule BanchanWeb.Components.Form.NumberInput do
     <Field class="field" name={@name}>
       {#if @show_label}
         <Label class="label">
-          <span class="label-text flex flex-row items-center gap-1">
+          <span class="flex flex-row items-center gap-1 label-text">
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
               <div class="tooltip" data-tip={@info}>
@@ -36,9 +36,7 @@ defmodule BanchanWeb.Components.Form.NumberInput do
       <div class="flex flex-col">
         <div class="flex flex-row w-full gap-2 control input input-bordered focus-within:ring ring-primary">
           {#if @icon}
-            <span class="my-auto text-2xl icon">
-              <i class={"fas fa-#{@icon}"} />
-            </span>
+            <Icon name={"#{@icon}"} size="4" />
           {/if}
           <NumberInput
             class={

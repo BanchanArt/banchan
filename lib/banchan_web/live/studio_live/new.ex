@@ -95,7 +95,7 @@ defmodule BanchanWeb.StudioLive.New do
     ~F"""
     <Layout flashes={@flash} padding={0}>
       <div class="w-full md:bg-base-300">
-        <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+        <div class="w-full max-w-xl p-10 mx-auto rounded-xl md:my-10 bg-base-100">
           <Form
             class="col-span-1"
             for={@changeset}
@@ -112,7 +112,7 @@ defmodule BanchanWeb.StudioLive.New do
             />
             <TextInput
               name={:handle}
-              icon="at"
+              icon="at-sign"
               info="Unique studio handle, as it will appear in the URL."
               opts={required: true}
             />

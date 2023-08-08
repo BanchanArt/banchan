@@ -25,7 +25,7 @@ defmodule BanchanWeb.Components.Form.MultipleSelect do
     <Field class="field" name={@name}>
       {#if @show_label}
         <Label class="label">
-          <span class="label-text flex flex-row items-center gap-1">
+          <span class="flex flex-row items-center gap-1 label-text">
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
               <div class="tooltip" data-tip={@info}>
@@ -38,9 +38,7 @@ defmodule BanchanWeb.Components.Form.MultipleSelect do
       <div class="flex flex-col">
         <div class="flex flex-row gap-2">
           {#if @icon}
-            <span class="my-auto text-2xl icon">
-              <i class={"fas fa-#{@icon}"} />
-            </span>
+            <Icon name={"#{@icon}"} size="4" />
           {/if}
           <div class="w-full control">
             <MultipleSelect

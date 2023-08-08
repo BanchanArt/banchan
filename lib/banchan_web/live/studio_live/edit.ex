@@ -144,7 +144,7 @@ defmodule BanchanWeb.StudioLive.Edit do
           <h2 class="py-6 text-xl">Edit Studio Profile</h2>
           <Form class="flex flex-col gap-2" for={@changeset} change="change" submit="submit">
             <TextInput name={:name} info="Display name for studio" icon="user" opts={required: true} />
-            <TextInput name={:handle} icon="at" opts={required: true} />
+            <TextInput name={:handle} icon="at-sign" opts={required: true} />
             <div class="relative">
               {#if Enum.empty?(@uploads.card_image.entries) && (@remove_card || !(@studio && @studio.card_img_id))}
                 <HiddenInput name={:card_image_id} value={nil} />
