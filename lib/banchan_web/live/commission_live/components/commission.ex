@@ -183,16 +183,15 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   def render(assigns) do
     ~F"""
     <div class="relative">
-      <h1 class="sticky z-30 flex flex-row items-center px-4 pb-2 text-3xl border-b-2 opacity-100 top-16 bg-base-100 border-base-content border-opacity-10">
+      <h1 class="sticky z-30 flex flex-row items-center p-4 text-3xl border-b-2 opacity-100 bg-base-200 top-16 border-base-content border-opacity-10">
         <LivePatch
-          class="px-2 pb-4"
           to={if is_nil(@studio) do
             ~p"/commissions"
           else
             ~p"/studios/#{@studio.handle}/commissions"
           end}
         >
-          <Icon name="arrow-left" size="4" />
+          <Icon name="arrow-left" size="6" label="back" />
         </LivePatch>
         {#if @title_changeset}
           <Form for={@title_changeset} class="w-full" change="change_title" submit="submit_title">

@@ -304,7 +304,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
 
   def render(assigns) do
     ~F"""
-    <div id={@id} class="bg-base-200 rounded-box p-4 border-base-300 border-2 flex flex-col gap-2">
+    <div id={@id} class="bg-base-200 rounded-box p-4 border-base-content border-opacity-10 border-2 flex flex-col gap-2">
       {#if @open_final_invoice}
         <div class="text-lg font-medium pb-2">Final Invoice</div>
         <div class="text-sm">Attachments will be released on payment. All deposits will be immediately released, along with this payment, and the commission will be closed.</div>

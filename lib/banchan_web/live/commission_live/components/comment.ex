@@ -148,7 +148,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   def render(assigns) do
     ~F"""
-    <div class="pb-4 border-2 bg-base-200 rounded-box border-base-300">
+    <div class="pb-4 border-2 bg-base-200 rounded-box border-base-content border-opacity-10">
       <div class="flex flex-row px-2 pt-2 -mb-4 text-sm">
         <div class="inline-flex flex-wrap items-center space-x-1 grow">
           <UserHandle user={@actor} />
