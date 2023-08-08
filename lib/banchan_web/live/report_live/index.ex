@@ -11,7 +11,7 @@ defmodule BanchanWeb.ReportLive.Index do
   alias Surface.Components.Form.{Field, Submit}
   alias Surface.Components.Form.TextInput, as: SurfaceTextInput
 
-  alias BanchanWeb.Components.{Avatar, Collapse, InfiniteScroll, Layout, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Collapse, Icon, InfiniteScroll, Layout, UserHandle}
   alias BanchanWeb.Components.Form.{MultipleSelect, Select, TextInput}
 
   @status_options [
@@ -213,19 +213,19 @@ defmodule BanchanWeb.ReportLive.Index do
           for={@filter}
           change="change"
           submit="filter"
-          class="form-control px-4 mx-auto max-w-3xl pb-6 w-full md:w-content"
+          class="w-full max-w-3xl px-4 pb-6 mx-auto form-control md:w-content"
         >
           <Field class="w-full input-group grow" name={:query}>
             <button :on-click="toggle_filter" type="button" class="btn btn-square">
-              <i class="fas fa-filter" />
+              <Icon name="filter" size="4" />
             </button>
-            <SurfaceTextInput class="input input-bordered w-full" />
+            <SurfaceTextInput class="w-full input input-bordered" />
             <Submit class="btn btn-square">
-              <i class="fas fa-search" />
+              <Icon name="search" size="4" />
             </Submit>
           </Field>
           <Collapse id="filter-options" class="rounded-box">
-            <h2 class="text-xl pt-4">
+            <h2 class="pt-4 text-xl">
               Additional Filters
             </h2>
             <div class="divider" />
@@ -242,13 +242,13 @@ defmodule BanchanWeb.ReportLive.Index do
               }
             />
             <div class="grid grid-cols-3 gap-2 pt-2">
-              <Submit label="Apply" class="btn btn-square btn-primary col-span-2 w-full" />
-              <button type="button" :on-click="reset" class="btn-btn-square btn-link w-full">Reset</button>
+              <Submit label="Apply" class="w-full col-span-2 btn btn-square btn-primary" />
+              <button type="button" :on-click="reset" class="w-full btn-btn-square btn-link">Reset</button>
             </div>
           </Collapse>
         </Form>
         <div class="overflow-x-auto">
-          <table class="table table-zebra w-full">
+          <table class="table w-full border rounded table-zebra border-base-content border-opacity-10">
             <thead>
               <tr>
                 <th />

@@ -19,7 +19,11 @@ defmodule BanchanWeb.ForgotPasswordLive do
       <Form class="flex flex-col gap-4" for={%{}} as={:user} submit="submit">
         <h1 class="text-2xl">Forgot your password?</h1>
         <p>If you have an account, instructions for password reset will be sent to it.</p>
-        <EmailInput name={:email} icon="envelope" opts={required: true} />
+        <EmailInput
+          name={:email}
+          icon="mail"
+          opts={required: true, placeholder: "youremail@example.com"}
+        />
         <Submit class="w-full" label="Send Instructions" />
       </Form>
     </AuthLayout>

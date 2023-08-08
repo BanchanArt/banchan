@@ -33,12 +33,21 @@ defmodule BanchanWeb.LoginLive do
         trigger_action={@trigger_submit}
       >
         <h1 class="text-2xl">Log in</h1>
-        <TextInput name={:identifier} icon="at" label="Email or Handle" opts={required: true} />
-        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+        <TextInput
+          name={:identifier}
+          icon="at-sign"
+          label="Email or Handle"
+          opts={required: true, placeholder: "youremail@example.com"}
+        />
+        <TextInput
+          name={:password}
+          icon="lock"
+          opts={required: true, type: :password, placeholder: "your_secure_password"}
+        />
         <TextInput
           label="MFA Token"
           name={:mfa_token}
-          icon="mobile-alt"
+          icon="smartphone"
           opts={maxlength: 6, placeholder: "optional"}
         />
         <Checkbox name={:remember_me} label="Keep me logged in for 60 days." />
@@ -49,18 +58,18 @@ defmodule BanchanWeb.LoginLive do
       </Form>
       <div class="divider">OR</div>
       <div class="flex flex-col gap-4">
-        <div class="text-xl mx-auto">
+        <div class="mx-auto text-xl">
           Sign in with...
         </div>
-        <div class="flex flex-row gap-2 justify-center">
+        <div class="flex flex-row justify-center gap-2">
           <Link
-            class="btn bg-discord flex-1 text-xl"
+            class="flex-1 text-xl btn bg-discord"
             to={Routes.user_o_auth_path(Endpoint, :request, "discord")}
           ><i class="px-2 fa-brands fa-discord" /></Link>
           {!--
           # TODO: Re-enable when Google has approved our app (post-launch)
           <Link
-            class="btn bg-google flex-1 text-xl"
+            class="flex-1 text-xl btn bg-google"
             to={Routes.user_o_auth_path(Endpoint, :request, "google")}
           ><i class="px-2 fa-brands fa-google" /></Link>
           --}
@@ -68,7 +77,7 @@ defmodule BanchanWeb.LoginLive do
       </div>
       <div class="divider">OR</div>
       <div class="mx-auto">
-        <LiveRedirect class="btn btn-link btn-sm w-full" to={Routes.register_path(Endpoint, :new)}>
+        <LiveRedirect class="w-full btn btn-link btn-sm" to={Routes.register_path(Endpoint, :new)}>
           Register
         </LiveRedirect>
       </div>

@@ -10,7 +10,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.{Button, Markdown, ReportModal, UserHandle}
+  alias BanchanWeb.Components.{Button, Icon, Markdown, ReportModal, UserHandle}
   alias BanchanWeb.Components.Form.{QuillInput, Submit}
   alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox}
 
@@ -148,9 +148,9 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   def render(assigns) do
     ~F"""
-    <div class="bg-base-200 rounded-box pb-4 border-base-300 border-2">
-      <div class="flex flex-row text-sm pt-2 px-2 -mb-4">
-        <div class="inline-flex grow items-center flex-wrap space-x-1">
+    <div class="pb-4 border-2 bg-base-200 rounded-box border-base-300">
+      <div class="flex flex-row px-2 pt-2 -mb-4 text-sm">
+        <div class="inline-flex flex-wrap items-center space-x-1 grow">
           <UserHandle user={@actor} />
           <span>
             {#if @event.invoice && @event.invoice.final}
@@ -171,7 +171,10 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
               <label :on-click="load_history" tabindex="0" class="text-xs italic hover:link">
                 edited {fmt_time(@event.updated_at)}
               </label>
-              <ol tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box">
+              <ol
+                tabindex="0"
+                class="p-1 border dropdown-content menu bg-base-300 border-base-content border-opacity-10 rounded-xl"
+              >
                 {#if Ecto.assoc_loaded?(@event.history)}
                   {#for history <- @event.history}
                     <li class="block">
@@ -196,22 +199,25 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
           {/if}
         </div>
         <div class="dropdown dropdown-end">
-          <label tabindex="0" class="btn btn-circle btn-ghost btn-xs py-0">
-            <i class="fas fa-ellipsis-vertical" />
+          <label tabindex="0" class="py-0 btn btn-circle btn-ghost btn-xs">
+            <Icon name="more-vertical" size="4" />
           </label>
-          <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
+          <ul
+            tabindex="0"
+            class="p-1 border dropdown-content menu bg-base-300 border-base-content border-opacity-10 rounded-xl"
+          >
             {#if !@changeset &&
                 (@current_user_member? || @current_user.id == @actor.id || :admin in @current_user.roles ||
                    :mod in @current_user.roles)}
               <li>
                 <button type="button" :on-click="edit">
-                  <i class="fas fa-edit" /> Edit
+                  <Icon name="pencil" size="4" label="edit" /> Edit
                 </button>
               </li>
             {/if}
             <li>
               <button type="button" :on-click="report">
-                <i class="fas fa-flag" /> Report
+                <Icon name="flag" size="4" label="report" /> Report
               </button>
             </li>
           </ul>
@@ -220,7 +226,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
       <div class="divider" />
 
-      <div class="content px-4 user-markdown">
+      <div class="px-4 content user-markdown">
         {#if @changeset}
           <Form
             for={@changeset}

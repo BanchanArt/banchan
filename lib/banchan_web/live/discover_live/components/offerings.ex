@@ -67,14 +67,16 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
       end
 
     ~F"""
-    <discover-offerings class="flex flex-col items-center">
+    <discover-offerings class="flex flex-col items-center w-full">
       {#if Enum.empty?(@offerings)}
-        <div class="text-2xl">No Results</div>
-        {#if @suggest_studios}
-          <LivePatch class="link" to={Routes.discover_index_path(Endpoint, :index, "studios", params)}>Search Studios instead.</LivePatch>
-        {/if}
+        <div class="flex flex-col items-center w-full gap-2 py-16">
+          <div class="text-2xl">No Results</div>
+          {#if @suggest_studios}
+            <LivePatch class="link" to={Routes.discover_index_path(Endpoint, :index, "studios", params)}>Search Studios instead.</LivePatch>
+          {/if}
+        </div>
       {#else}
-        <div class="offering-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+        <div class="grid grid-cols-1 offering-list sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
           {#for {offering, idx} <- Enum.with_index(@offerings)}
             <OfferingCard id={"offering-#{idx}"} current_user={@current_user} offering={offering} />
           {/for}

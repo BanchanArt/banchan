@@ -6,6 +6,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
 
   alias Banchan.Uploads
 
+  alias BanchanWeb.Components.Icon
   alias BanchanWeb.Components.Lightbox
 
   prop base_id, :string, required: true
@@ -26,25 +27,25 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
     ~F"""
     <div>
       {#if @pending_payment}
-        <div class="italic text-sm">
+        <div class="text-sm italic">
           These files will be available after payment is processed.
         </div>
       {/if}
       <Lightbox id={@base_id <> "-attachment-box-lightbox"} class="flex flex-row flex-wrap gap-4 p-2">
         {#for attachment <- Enum.filter(@attachments, &(&1.thumbnail_id && !Uploads.video?(&1.upload)))}
-          <div class="h-32 w-32">
+          <div class="w-32 h-32">
             {#if @pending_payment}
               <div
-                class="w-full h-full rounded-box bg-base-content flex justify-center items-center"
+                class="flex items-center justify-center w-full h-full rounded-box bg-base-content"
                 title={attachment.upload.name}
               >
-                <div class="text-base-100 text-3xl">
-                  <i class="fas fa-lock" />
+                <div class="text-3xl text-base-100">
+                  <Icon name="lock" size="4" />
                 </div>
               </div>
             {#elseif attachment.thumbnail.pending || attachment.preview.pending}
               <div
-                class="w-full h-full rounded-box bg-base-content flex justify-center items-center animate-pulse"
+                class="flex items-center justify-center w-full h-full rounded-box bg-base-content animate-pulse"
                 title={attachment.upload.name}
               />
             {#elseif @editing}
@@ -54,9 +55,9 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                     type="button"
                     :on-click={@remove_attachment}
                     phx-value-attachment-idx={get_attachment_index(@attachments, attachment)}
-                    class="-top-2 -right-2 absolute"
+                    class="absolute -top-2 -right-2"
                   >
-                    <i class="fas fa-times-circle text-2xl" />
+                    <Icon name="x-circle" size="4" />
                   </button>
                 {/if}
                 <img
@@ -97,9 +98,9 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                     type="button"
                     :on-click={@remove_attachment}
                     phx-value-attachment-idx={get_attachment_index(@attachments, attachment)}
-                    class="-top-2 -right-2 absolute"
+                    class="absolute -top-2 -right-2"
                   >
-                    <i class="fas fa-times-circle text-2xl" />
+                    <Icon name="x-circle" size="4" />
                   </button>
                 {/if}
                 <img
@@ -121,8 +122,8 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
       <div class="flex flex-col p-2">
         {#for attachment <- Enum.filter(@attachments, &(!&1.thumbnail_id || Uploads.video?(&1.upload)))}
           {#if @pending_payment}
-            <div title={attachment.upload.name} class="border-2 p-4 m-1">
-              <i class="float-right fas fa-lock" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
+            <div title={attachment.upload.name} class="p-4 m-1 border-2">
+              <Icon name="lock" size="4" class="float-right" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
             </div>
           {#else}
             <div class="relative">
@@ -145,7 +146,7 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                     <img
                       alt={attachment.upload.name}
                       title={attachment.upload.name}
-                      class="rounded-box absolute z-10"
+                      class="absolute z-10 rounded-box"
                       src={Routes.commission_attachment_path(
                         Endpoint,
                         :thumbnail,
@@ -153,11 +154,14 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                         attachment.upload_id
                       )}
                     />
-                    <i class="fas fa-play text-4xl absolute pt-[44px] z-20" />
+                    <div class="absolute z-20 pt-11">
+                      <Icon name="play" size="4" />
+                    </div>
                   </div>
                 {#else}
-                  <div title={attachment.upload.name} class="border-2 p-4 m-1 basis-full">
-                    <i class="float-right fas fa-file-download" /> <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
+                  <div title={attachment.upload.name} class="p-4 m-1 border-2 basis-full">
+                    <Icon name="file-down" size="4" class="float-right" />
+                    <p class="truncate">{attachment.upload.name} ({attachment.upload.type})</p>
                   </div>
                 {/if}
               </a>
@@ -166,9 +170,9 @@ defmodule BanchanWeb.CommissionLive.Components.AttachmentBox do
                   type="button"
                   :on-click={@remove_attachment}
                   phx-value-attachment-idx={get_attachment_index(@attachments, attachment)}
-                  class="-top-2 -right-2 absolute"
+                  class="absolute -top-2 -right-2"
                 >
-                  <i class="fas fa-times-circle text-2xl" />
+                  <Icon name="x-circle" size="4" />
                 </button>
               {/if}
             </div>

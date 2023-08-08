@@ -11,7 +11,7 @@ defmodule BanchanWeb.DenizenLive.Index do
   alias Surface.Components.Form.{Field, Submit}
   alias Surface.Components.Form.TextInput, as: SurfaceTextInput
 
-  alias BanchanWeb.Components.{Avatar, InfiniteScroll, Layout, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Icon, InfiniteScroll, Layout, UserHandle}
 
   @impl true
   def handle_params(params, _uri, socket) do
@@ -127,18 +127,18 @@ defmodule BanchanWeb.DenizenLive.Index do
         <Form
           for={@filter}
           submit="submit"
-          class="form-control px-4 mx-auto max-w-3xl pb-6 w-full md:w-content"
+          class="w-full max-w-3xl px-4 pb-6 mx-auto form-control md:w-content"
           opts={role: "search"}
         >
           <Field class="w-full input-group grow" name={:query}>
-            <SurfaceTextInput class="input input-bordered w-full" opts={"aria-label": "Filter users"} />
+            <SurfaceTextInput class="w-full input input-bordered" opts={"aria-label": "Filter users"} />
             <Submit class="btn btn-square">
-              <i class="fas fa-search" />
+              <Icon name="search" size="4" />
             </Submit>
           </Field>
         </Form>
         <div class="overflow-x-auto">
-          <table class="table table-zebra w-full">
+          <table class="table w-full border rounded table-zebra border-base-content border-opacity-10">
             <thead>
               <tr>
                 <th>User</th>

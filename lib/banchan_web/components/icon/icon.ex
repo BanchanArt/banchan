@@ -10,6 +10,7 @@ defmodule BanchanWeb.Components.Icon do
   prop class, :css_class
   prop gap, :number, default: 2
   prop size, :number, default: 6
+  prop label, :string, required: false
 
   slot default
 
@@ -28,6 +29,7 @@ defmodule BanchanWeb.Components.Icon do
         :hook="Icon"
         class={"w-#{@size} h-#{@size}"}
         data-lucide={@name}
+        aria-label={@label}
       /><#slot />
     </bc-icon>
     """

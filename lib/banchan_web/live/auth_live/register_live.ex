@@ -63,44 +63,44 @@ defmodule BanchanWeb.RegisterLive do
         <TextInput
           name={:handle}
           info="Your unique @handle that can be used to refer to you."
-          icon="at"
-          opts={required: true}
+          icon="at-sign"
+          opts={required: true, placeholder: "example123"}
         />
         <EmailInput
           name={:email}
           info="A valid email address. You'll need to confirm this."
-          icon="envelope"
-          opts={required: true}
+          icon="mail"
+          opts={required: true, placeholder: "youremail@example.com"}
         />
         <TextInput
           name={:password}
           info="Your new password. Must be between 12 and 80 characters."
           icon="lock"
-          opts={required: true, type: :password}
+          opts={required: true, type: :password, placeholder: "your_new_secure_password"}
         />
         <TextInput
           name={:password_confirmation}
           label="Confirm Password"
           info="Must match your password above!"
           icon="lock"
-          opts={required: true, type: :password}
+          opts={required: true, type: :password, placeholder: "your_new_secure_password"}
         />
         <Submit class="w-full" changeset={@changeset} label="Register" />
       </Form>
       <div class="divider">OR</div>
       <div class="flex flex-col gap-4">
-        <div class="text-xl mx-auto">
+        <div class="mx-auto text-xl">
           Register with...
         </div>
-        <div class="flex flex-row gap-2 justify-center">
+        <div class="flex flex-row justify-center gap-2">
           <Link
-            class="btn bg-discord flex-1 text-xl"
+            class="flex-1 text-xl btn bg-discord"
             to={Routes.user_o_auth_path(Endpoint, :request, "discord")}
           ><i class="px-2 fa-brands fa-discord" /></Link>
           {!--
           # TODO: Re-enable when Google has approved our app (post-launch)
           <Link
-            class="btn bg-google flex-1 text-xl"
+            class="flex-1 text-xl btn bg-google"
             to={Routes.user_o_auth_path(Endpoint, :request, "google")}
           ><i class="px-2 fa-brands fa-google" /></Link>
           --}
@@ -108,7 +108,7 @@ defmodule BanchanWeb.RegisterLive do
       </div>
       <div class="divider">OR</div>
       <div class="mx-auto">
-        <LiveRedirect class="btn btn-link btn-sm w-full" to={Routes.login_path(Endpoint, :new)}>
+        <LiveRedirect class="w-full btn btn-link btn-sm" to={Routes.login_path(Endpoint, :new)}>
           Log In
         </LiveRedirect>
       </div>

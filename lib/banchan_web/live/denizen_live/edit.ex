@@ -17,7 +17,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
     TextInput
   }
 
-  alias BanchanWeb.Components.{Collapse, Layout}
+  alias BanchanWeb.Components.{Collapse, Icon, Layout}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -144,8 +144,8 @@ defmodule BanchanWeb.DenizenLive.Edit do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash} padding={0}>
-      <div class="w-full md:bg-base-300">
-        <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+      <div class="w-full bg-base-200">
+        <div class="w-full max-w-5xl p-10 mx-auto">
           <Form class="profile-info" for={@changeset} change="change" submit="submit">
             <div :if={@current_user.id != @user.id} class="alert alert-warning">
               You are editing @{@user.handle}'s profile as @{@current_user.handle}.
@@ -153,40 +153,42 @@ defmodule BanchanWeb.DenizenLive.Edit do
             <div class="relative">
               {#if Enum.empty?(@uploads.header.entries) && (@remove_header || !@user.header_img_id)}
                 <HiddenInput name={:header_image_id} value={nil} />
-                <div class="bg-base-300 object-cover aspect-header-image rounded-b-xl w-full" />
+                <div class="object-cover w-full bg-base-300 aspect-header-image max-h-96" />
               {#elseif !Enum.empty?(@uploads.header.entries)}
                 <button
                   type="button"
                   phx-value-ref={(@uploads.header.entries |> Enum.at(0)).ref}
-                  class="btn btn-xs btn-circle absolute right-2 top-2 z-20"
+                  class="absolute z-20 btn btn-xs btn-circle right-2 top-2"
                   :on-click="cancel_header_upload"
                 >✕</button>
                 <.live_img_preview
                   entry={Enum.at(@uploads.header.entries, 0)}
-                  class="object-cover aspect-header-image rounded-b-xl w-full"
+                  class="object-cover w-full aspect-header-image max-h-96"
                 />
               {#elseif @user.header_img_id}
                 <button
                   type="button"
-                  class="btn btn-xs btn-circle absolute right-2 top-2 z-20"
+                  class="absolute z-20 btn btn-xs btn-circle right-2 top-2"
                   :on-click="remove_header"
                 >✕</button>
                 <HiddenInput name={:header_image_id} value={@user.header_img_id} />
                 <img
-                  class="object-cover aspect-header-image rounded-b-xl w-full"
+                  class="object-cover w-full aspect-header-image max-h-96"
                   src={Routes.public_image_path(Endpoint, :image, :user_header_img, @user.header_img_id)}
                 />
               {/if}
               <div class="absolute top-0 left-0 w-full h-full">
-                <div class="mx-auto w-full h-full flex justify-center items-center">
+                <div class="flex items-center justify-center w-full h-full mx-auto">
                   <div class="relative">
-                    <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70"><i class="fas fa-camera" /></button>
+                    <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70">
+                      <Icon name="camera" size="4" />
+                    </button>
                     <CropUploadInput
                       id="header-cropper"
                       aspect_ratio={3.5 / 1}
                       title="Crop Header Image"
                       upload={@uploads.header}
-                      class="h-8 w-8 opacity-0 hover:cursor-pointer z-40"
+                      class="z-40 w-8 h-8 opacity-0 hover:cursor-pointer"
                     />
                   </div>
                 </div>
@@ -194,9 +196,9 @@ defmodule BanchanWeb.DenizenLive.Edit do
             </div>
             <div class="relative w-24 h-20">
               <div class="absolute -top-4 left-6">
-                <div class="relative flex justify-center items-center w-24">
+                <div class="relative flex items-center justify-center w-24">
                   <div class="avatar">
-                    <div class="rounded-full w-24">
+                    <div class="w-24 rounded-full">
                       {#if Enum.empty?(@uploads.pfp.entries) && (@remove_pfp || !(@user.pfp_img_id && @user.pfp_thumb_id))}
                         <HiddenInput name={:pfp_image_id} value={nil} />
                         <HiddenInput name={:pfp_thumbnail_id} value={nil} />
@@ -205,27 +207,29 @@ defmodule BanchanWeb.DenizenLive.Edit do
                         <button
                           type="button"
                           phx-value-ref={(@uploads.pfp.entries |> Enum.at(0)).ref}
-                          class="btn btn-xs btn-circle absolute right-2 top-2"
+                          class="absolute btn btn-xs btn-circle right-2 top-2"
                           :on-click="cancel_pfp_upload"
                         >✕</button>
                         <.live_img_preview entry={Enum.at(@uploads.pfp.entries, 0)} />
                       {#else}
-                        <button type="button" class="btn btn-xs btn-circle absolute right-2 top-2" :on-click="remove_pfp">✕</button>
+                        <button type="button" class="absolute btn btn-xs btn-circle right-2 top-2" :on-click="remove_pfp">✕</button>
                         <HiddenInput name={:pfp_image_id} value={@user.pfp_img_id} />
                         <HiddenInput name={:pfp_thumb_id} value={@user.pfp_thumb_id} />
                         <img src={Routes.public_image_path(Endpoint, :image, :user_pfp_img, @user.pfp_img_id)}>
                       {/if}
                     </div>
                   </div>
-                  <div class="absolute top-8 left-8 w-8">
+                  <div class="absolute w-8 top-8 left-8">
                     <div class="relative">
-                      <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70"><i class="fas fa-camera" /></button>
+                      <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70">
+                        <Icon name="camera" size="4" />
+                      </button>
                       <CropUploadInput
                         id="pfp-cropper"
                         aspect_ratio={1}
                         title="Crop Profile Picture"
                         upload={@uploads.pfp}
-                        class="h-8 w-8 opacity-0 hover:cursor-pointer z-40"
+                        class="z-40 w-8 h-8 opacity-0 hover:cursor-pointer"
                       />
                     </div>
                   </div>

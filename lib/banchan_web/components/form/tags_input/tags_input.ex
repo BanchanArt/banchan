@@ -8,6 +8,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
   alias Surface.Components.Form.{ErrorTag, Field, HiddenInput}
 
   alias Banchan.Tags
+  alias BanchanWeb.Components.Icon
 
   prop name, :any, required: true
   prop opts, :keyword, default: []
@@ -136,11 +137,11 @@ defmodule BanchanWeb.Components.Form.TagsInput do
       <Field class="field" name={@name}>
         {#if @show_label}
           <label for={Phoenix.HTML.Form.input_id(@form, @name) <> "_input"} class="label">
-            <span class="label-text">
+            <span class="flex flex-row items-center gap-1 label-text">
               {@label || Phoenix.Naming.humanize(@name)}
               {#if @info}
                 <div class="tooltip" data-tip={@info}>
-                  <i class="fas fa-info-circle" />
+                  <Icon name="info" size="4" label="tooltip" />
                 </div>
               {/if}
             </span>
@@ -148,7 +149,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
         {/if}
         <div class="flex flex-col">
           <ul class={
-            "tags-list flex flex-row flex-wrap p-2 gap-2 border shadow focus-within:ring ring-primary border-base-content border-opacity-20 bg-base-100 rounded-btn cursor-text",
+            "tags-list flex flex-row flex-wrap p-2 gap-2 border focus-within:ring ring-primary border-base-content border-opacity-20 bg-base-100 rounded-btn cursor-text",
             "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
           }>
             {#for {tag, index} <- Enum.with_index(@tags)}

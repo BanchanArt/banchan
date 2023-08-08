@@ -4,6 +4,8 @@ defmodule BanchanWeb.Components.Form.Select do
   """
   use BanchanWeb, :component
 
+  alias BanchanWeb.Components.Icon
+
   alias Surface.Components.Form
   alias Surface.Components.Form.{ErrorTag, Field, Label, Select}
 
@@ -21,14 +23,14 @@ defmodule BanchanWeb.Components.Form.Select do
 
   def render(assigns) do
     ~F"""
-    <Field class="field w-full" name={@name}>
+    <Field class="w-full field" name={@name}>
       {#if @show_label}
         <Label class="label">
-          <span class="label-text">
+          <span class="flex flex-row items-center gap-1 label-text">
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
               <div class="tooltip" data-tip={@info}>
-                <i class="fas fa-info-circle" />
+                <Icon name="info" size="4" label="tooltip" />
               </div>
             {/if}
           </span>
@@ -37,11 +39,9 @@ defmodule BanchanWeb.Components.Form.Select do
       <div class="flex flex-col">
         <div class="flex flex-row gap-2">
           {#if @icon}
-            <span class="icon text-2xl my-auto">
-              <i class={"fas fa-#{@icon}"} />
-            </span>
+            <Icon name={"#{@icon}"} size="4" />
           {/if}
-          <div class="control w-full">
+          <div class="w-full control">
             <Select
               class={
                 "select",

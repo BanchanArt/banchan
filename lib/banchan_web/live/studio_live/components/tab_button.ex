@@ -16,9 +16,7 @@ defmodule BanchanWeb.StudioLive.Components.TabButton do
     <LiveRedirect
       label={@label}
       class={
-        "tab",
-        "tab-bordered",
-        "flex-1",
+        "tab tab-bordered py-4 flex-1 h-fit text-base",
         "tab-active": @current_tab == @tab_name
       }
       to={@to}

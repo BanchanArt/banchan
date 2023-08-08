@@ -8,7 +8,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
 
   alias Banchan.Payments
 
-  alias BanchanWeb.Components.{Button, InfiniteScroll, Layout, Stats}
+  alias BanchanWeb.Components.{Button, Icon, InfiniteScroll, Layout, Stats}
   alias BanchanWeb.StudioLive.Components.{Payout, PayoutList}
 
   def mount(params, _session, socket) do
@@ -200,12 +200,12 @@ defmodule BanchanWeb.StudioLive.Payouts do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash} studio={@studio} context={:studio}>
-      <div class="flex flex-col grow max-h-full p-4">
+      <div class="flex flex-col max-h-full p-4 grow">
         <div class={"bg-base-100 rounded-box max-w-4xl w-full mx-auto", "hidden sm:flex": !is_nil(@payout_id)}>
           {#if is_nil(@balance)}
-            <div class="py-20 w-full h-full flex flex-col items-center">
+            <div class="flex flex-col items-center w-full h-full py-20">
               <h2 class="sr-only">Loading...</h2>
-              <i class="fas fa-spinner animate-spin text-3xl" />
+              <Icon name="loader-2" size="6" class="animate-spin" />
             </div>
           {#else}
             <Stats class="divide-base-200">
@@ -229,13 +229,13 @@ defmodule BanchanWeb.StudioLive.Payouts do
           <div class={"flex flex-col basis-full md:basis-1/4 sidebar", "hidden md:flex": @payout_id}>
             <div class="flex flex-col">
               <Button
-                class="mr-4 pl-4"
+                class="pl-4 mr-4"
                 click="fypm"
                 disabled={@fypm_pending || is_nil(@balance) || !payout_possible?(@balance.available)}
                 opts={id: "fypm"}
               >
                 {#if @fypm_pending}
-                  <i class="px-2 fas fa-spinner animate-spin" />
+                  <Icon name="loader-2" size="4" class="animate-spin" />
                 {/if}
                 Pay Out
               </Button>

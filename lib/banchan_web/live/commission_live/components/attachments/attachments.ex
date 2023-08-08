@@ -9,7 +9,7 @@ defmodule BanchanWeb.CommissionLive.Components.Attachments do
   alias Surface.Components.LiveFileInput
 
   alias BanchanWeb.CommissionLive.Components.Attachments
-  alias BanchanWeb.Components.Lightbox
+  alias BanchanWeb.Components.{Icon, Lightbox}
 
   prop id, :string, required: true
   prop upload, :struct
@@ -27,9 +27,9 @@ defmodule BanchanWeb.CommissionLive.Components.Attachments do
             <Attachments.LiveImgPreview cancel={@cancel_upload} upload={@upload} entry={entry} />
           {/for}
           <Attachments.ImageAttachment>
-            <label class="w-full h-full rounded-box bg-base-content flex justify-center items-center cursor-pointer">
-              <div class="text-base-100 text-xl">
-                <i class="fas fa-plus" />
+            <label class="flex items-center justify-center w-full h-full cursor-pointer rounded-box bg-base-content">
+              <div class="text-xl text-base-100">
+                <Icon name="plus" size="4" />
               </div>
               <LiveFileInput class="absolute hidden overflow-hidden" upload={@upload} />
             </label>

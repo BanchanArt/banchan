@@ -188,9 +188,9 @@ defmodule BanchanWeb.StudioLive.Settings do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash} studio={@studio} padding={0} context={:studio}>
-      <div class="w-full md:bg-base-300">
-        <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
-          <h2 class="text-xl py-6">Notifications</h2>
+      <div class="w-full bg-base-200">
+        <div class="w-full max-w-5xl p-10 mx-auto">
+          <h2 class="py-6 text-xl">Notifications</h2>
           <div class="pb-6">Manage default notification settings for this studio. For example, whether to receive notifications for new commission requests.</div>
           <Button click="toggle_subscribed">
             {#if @subscribed?}
@@ -202,7 +202,7 @@ defmodule BanchanWeb.StudioLive.Settings do
 
           <div class="divider" />
 
-          <h2 class="text-xl py-6">Stripe Dashboard</h2>
+          <h2 class="py-6 text-xl">Stripe Dashboard</h2>
           <div class="pb-6">
             You can manage your Stripe account details, such as your bank account, and see stats on previous payouts, over on your Stripe Express Dashboard.
           </div>
@@ -215,7 +215,7 @@ defmodule BanchanWeb.StudioLive.Settings do
 
           <div class="divider" />
 
-          <h2 class="text-xl py-6">Edit Studio Settings</h2>
+          <h2 class="py-6 text-xl">Edit Studio Settings</h2>
           <Form class="flex flex-col gap-2" for={@changeset} change="change" submit="submit">
             {#if Application.get_env(:banchan, :mature_content_enabled?)}
               <Checkbox
@@ -252,7 +252,7 @@ defmodule BanchanWeb.StudioLive.Settings do
           <div class="divider" />
 
           <div class="h-40 overflow-auto">
-            <div class="text-xl py-4">Blocklist</div>
+            <div class="py-4 text-xl">Blocklist</div>
             <Blocklist id="studio-blocklist" studio={@studio} />
           </div>
 

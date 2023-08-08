@@ -23,8 +23,8 @@ defmodule BanchanWeb.AccountDisabledLive do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash} padding={0}>
-      <div class="w-full h-full md:bg-base-300">
-        <div class="max-w-xl w-full rounded-xl p-10 mx-auto md:my-10 bg-base-100">
+      <div class="w-full h-full bg-base-200">
+        <div class="w-full max-w-5xl p-10 mx-auto">
           <div class="text-xl">
             Account Disabled
           </div>

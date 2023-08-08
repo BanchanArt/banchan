@@ -26,18 +26,18 @@ defmodule BanchanWeb.Components.Avatar do
         {#elseif @link}
           <LiveRedirect to={~p"/denizens/#{@user.handle}"}>
             {#if @thumb && @user.pfp_thumb_id}
-              <img src={~p"/images/user_pfp_thumb/#{@user.pfp_thumb_id}"}>
+              <img src={~p"/images/user_pfp_thumb/#{@user.pfp_thumb_id}"} alt={"#{@user.handle}'s avatar"}>
             {#elseif !@thumb && @user.pfp_img_id}
-              <img src={~p"/images/user_pfp_img/#{@user.pfp_img_id}"}>
+              <img src={~p"/images/user_pfp_img/#{@user.pfp_img_id}"} alt={"#{@user.handle}'s avatar"}>
             {#else}
-              <img src={~p"/images/denizen_default_icon.png"}>
+              <img src={~p"/images/denizen_default_icon.png"} alt={"#{@user.handle}'s avatar"}>
             {/if}
           </LiveRedirect>
         {#else}
           {#if @user.pfp_thumb_id}
-            <img src={~p"/images/user_pfp_thumb/#{@user.pfp_thumb_id}"}>
+            <img src={~p"/images/user_pfp_thumb/#{@user.pfp_thumb_id}"} alt={"#{@user.handle}'s avatar"}>
           {#else}
-            <img src={~p"/images/denizen_default_icon.png"}>
+            <img src={~p"/images/denizen_default_icon.png"} alt={"#{@user.handle}'s avatar"}>
           {/if}
         {/if}
       </div>

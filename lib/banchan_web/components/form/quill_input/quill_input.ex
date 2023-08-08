@@ -4,6 +4,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
   """
   use BanchanWeb, :live_component
 
+  alias BanchanWeb.Components.Icon
   alias Surface.Components.Form.{ErrorTag, Field, Label, TextArea}
   alias Surface.Components.LiveFileInput
 
@@ -99,11 +100,11 @@ defmodule BanchanWeb.Components.Form.QuillInput do
     <Field class="field" name={@name}>
       {#if @show_label}
         <Label class="label">
-          <span class="label-text">
+          <span class="flex flex-row items-center gap-1 label-text">
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
               <div class="tooltip" data-tip={@info}>
-                <i class="fas fa-info-circle" />
+                <Icon name="info" size="4" label="tooltip" />
               </div>
             {/if}
           </span>
@@ -118,18 +119,18 @@ defmodule BanchanWeb.Components.Form.QuillInput do
             :hook="QuillInput"
             id={@id <> "_hook"}
           >
-            <div id={@id <> "-editor"} phx-update="ignore" class="object-cover editor h-full w-full" />
+            <div id={@id <> "-editor"} phx-update="ignore" class="object-cover w-full h-full editor" />
             <TextArea form={@form} field={@name} class="hidden input-textarea" opts={@opts} />
           </div>
           {#if @upload}
             <LiveFileInput
-              class="file-input file-input-xs w-full file-input-bordered rounded-t-none"
+              class="w-full rounded-t-none file-input file-input-xs file-input-bordered"
               upload={@upload}
             />
             {#if @dragging}
-              <div class="absolute h-full w-full opacity-25 bg-neutral border-dashed border-2" />
-              <div class="absolute h-full w-full text-center my-auto">
-                Drop Files Here <i class="fas fa-file-upload" />
+              <div class="absolute w-full h-full border-2 border-dashed opacity-25 bg-neutral" />
+              <div class="absolute w-full h-full my-auto text-center">
+                Drop Files Here <Icon name="file-up" size="4" label="upload file" />
               </div>
             {/if}
           {/if}

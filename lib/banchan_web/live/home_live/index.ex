@@ -11,7 +11,7 @@ defmodule BanchanWeb.HomeLive do
   alias Surface.Components.Form.{Field, Submit}
   alias Surface.Components.Form.TextInput
 
-  alias BanchanWeb.Components.{Carousel, Layout, StudioCard, Tag}
+  alias BanchanWeb.Components.{Carousel, Icon, Layout, StudioCard, Tag}
   alias BanchanWeb.StudioLive.Components.OfferingCard
 
   @impl true
@@ -78,22 +78,18 @@ defmodule BanchanWeb.HomeLive do
       <Layout flashes={@flash}>
         <:hero>
           <div id="carousel-handler" class="flex-grow">
-            <Carousel
-              id="studio-carousel"
-              label="Featured Studios"
-              class="rounded-b-xl aspect-header-image h-full w-full"
-            >
+            <Carousel id="studio-carousel" label="Featured Studios" class="w-full h-full aspect-header-image">
               {#for studio <- @featured_studios.entries}
-                <Carousel.Slide class="carousel-item w-full aspect-header-image">
+                <Carousel.Slide class="w-full carousel-item aspect-header-image">
                   <LiveRedirect
-                    class="w-full h-full aspect-header-image relative"
+                    class="relative w-full h-full aspect-header-image"
                     to={Routes.studio_shop_path(Endpoint, :show, studio.handle)}
                   >
                     <img
-                      class="object-cover aspect-header-image w-full"
+                      class="object-cover w-full aspect-header-image"
                       src={Routes.public_image_path(Endpoint, :image, :studio_header_img, studio.header_img_id)}
                     />
-                    <div class="absolute top-2 left-2 md:top-6 md:left-6 text-3xl sm:text-3xl md:text-6xl font-bold text-white text-shadow-lg shadow-black">
+                    <div class="absolute text-3xl font-bold text-white top-2 left-2 md:top-6 md:left-6 sm:text-3xl md:text-6xl text-shadow-black">
                       {studio.name}
                     </div>
                   </LiveRedirect>
@@ -104,7 +100,7 @@ defmodule BanchanWeb.HomeLive do
         </:hero>
         <div class="flex flex-col gap-2">
           <Form for={%{}} as={:search} submit="search" class="w-full" opts={role: "search"}>
-            <div class="flex flex-row flex-nowrap w-full md:w-content max-w-xl mx-auto">
+            <div class="flex flex-row w-full max-w-xl mx-auto flex-nowrap md:w-content">
               <Field name={:query} class="w-full">
                 <TextInput
                   name={:query}
@@ -113,17 +109,17 @@ defmodule BanchanWeb.HomeLive do
                 />
               </Field>
               <Submit class="btn btn-round" opts={"aria-label": "Search"}>
-                <i class="fas fa-search" />
+                <Icon name="search" size="4" />
               </Submit>
             </div>
           </Form>
-          <div class="flex flex-row flex-wrap gap-2 mx-auto justify-center">
+          <div class="flex flex-row flex-wrap justify-center gap-2 mx-auto">
             {#for cat <- @categories}
               <Tag tag={cat} />
             {/for}
           </div>
           <div class="homepage-offerings">
-            <div class="pt-6 px-2 flex flex-row items-end">
+            <div class="flex flex-row items-end px-2 pt-6">
               <div class="text-xl grow">
                 Selected Offerings
               </div>
@@ -135,7 +131,7 @@ defmodule BanchanWeb.HomeLive do
               </div>
             </div>
             <div class="divider" />
-            <div class="sm:px-2 flex flex-col gap-4">
+            <div class="flex flex-col gap-4 sm:px-2">
               <div class="grid grid-cols-1 sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
                 {#for {offering, idx} <- Enum.with_index(@offerings.entries)}
                   <OfferingCard id={"offering-#{idx}"} current_user={@current_user} offering={offering} />
@@ -143,8 +139,8 @@ defmodule BanchanWeb.HomeLive do
               </div>
             </div>
           </div>
-          <div class="featured-studios pt-10">
-            <div class="px-2 flex flex-row items-end">
+          <div class="pt-10 featured-studios">
+            <div class="flex flex-row items-end px-2">
               <div class="text-xl grow">
                 Selected Studios
               </div>
@@ -156,8 +152,8 @@ defmodule BanchanWeb.HomeLive do
               </div>
             </div>
             <div class="divider" />
-            <div class="sm:px-2 flex flex-col gap-4">
-              <div class="studio-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+            <div class="flex flex-col gap-4 sm:px-2">
+              <div class="grid grid-cols-1 studio-list sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
                 {#for studio <- @studios.entries}
                   <StudioCard studio={studio} />
                 {/for}
@@ -170,10 +166,10 @@ defmodule BanchanWeb.HomeLive do
       <Layout flashes={@flash}>
         <div id="above-fold" class="md:px-4">
           <div class="min-h-screen hero">
-            <div class="hero-content flex flex-col md:flex-row">
-              <div class="flex flex-col gap-4 items-center max-w-2xl">
+            <div class="flex flex-col hero-content md:flex-row">
+              <div class="flex flex-col items-center max-w-2xl gap-4">
                 <div class="text-5xl font-bold">
-                  Coming <span class="text-primary font-bold">Soon</span>
+                  Coming <span class="font-bold text-primary">Soon</span>
                 </div>
                 <div class="text-lg">
                   <LiveRedirect to={Routes.beta_signup_path(Endpoint, :new)}>Learn More →</LiveRedirect>

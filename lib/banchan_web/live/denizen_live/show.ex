@@ -12,6 +12,7 @@ defmodule BanchanWeb.DenizenLive.Show do
 
   alias BanchanWeb.Components.{
     Avatar,
+    Icon,
     InfiniteScroll,
     Layout,
     Modal,
@@ -156,11 +157,11 @@ defmodule BanchanWeb.DenizenLive.Show do
         <section>
           {#if @user.header_img && !@user.header_img.pending && !@user.disable_info}
             <img
-              class="object-cover aspect-header-image rounded-b-xl w-full"
+              class="object-cover w-full aspect-header-image max-h-80"
               src={Routes.public_image_path(Endpoint, :image, :user_header_img, @user.header_img_id)}
             />
           {#else}
-            <div class="rounded-b-xl aspect-header-image bg-base-300 w-full" />
+            <div class="w-full max-h-80 aspect-header-image bg-base-300" />
           {/if}
           <div class="flex flex-row flex-wrap">
             <div class="relative w-32 h-20">
@@ -168,7 +169,7 @@ defmodule BanchanWeb.DenizenLive.Show do
                 {#if @user.disable_info}
                   <div class="avatar">
                     <div class="rounded-full">
-                      <div class="bg-base-300 w-24 h-24" />
+                      <div class="w-24 h-24 bg-base-300" />
                     </div>
                   </div>
                 {#else}
@@ -176,7 +177,7 @@ defmodule BanchanWeb.DenizenLive.Show do
                 {/if}
               </div>
             </div>
-            <div class="m-4 hidden md:flex md:flex-col">
+            <div class="hidden m-4 md:flex md:flex-col">
               <h1 class="text-xl font-bold">
                 {#if !@user.disable_info}
                   {@user.name}
@@ -184,33 +185,36 @@ defmodule BanchanWeb.DenizenLive.Show do
               </h1>
               <UserHandle link={false} user={@user} />
             </div>
-            <div class="flex flex-row gap-2 place-content-end ml-auto m-4">
+            <div class="flex flex-row gap-2 m-4 ml-auto place-content-end">
               {#if @current_user && @current_user.id != @user.id}
                 <div class="dropdown dropdown-end">
-                  <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
-                    <i class="fas fa-ellipsis-vertical" />
+                  <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
+                    <Icon name="more-vertical" size="4" />
                   </label>
-                  <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
+                  <ul
+                    tabindex="0"
+                    class="p-2 border bg-base-300 border-base-content border-opacity-10 menu rounded-box"
+                  >
                     {#if :admin in @current_user.roles || :mod in @current_user.roles}
                       <li>
                         <LiveRedirect to={Routes.denizen_moderation_path(Endpoint, :edit, @user.handle)}>
-                          <i class="fas fa-gavel" /> Moderation
+                          <Icon name="gavel" size="4" /> Moderation
                         </LiveRedirect>
                       </li>
                     {/if}
                     <li>
                       <button type="button" :on-click="open_block_modal">
-                        <i class="fas fa-ban" /> Block
+                        <Icon name="circle-slash" size="4" /> Block
                       </button>
                     </li>
                     <li>
                       <button type="button" :on-click="open_unblock_modal">
-                        <i class="fa-solid fa-handshake" /> Unblock
+                        <Icon name="user-plus" size="4" /> Unblock
                       </button>
                     </li>
                     <li>
                       <button type="button" :on-click="report">
-                        <i class="fas fa-flag" /> Report
+                        <Icon name="flag" size="4" /> Report
                       </button>
                     </li>
                   </ul>
@@ -221,12 +225,12 @@ defmodule BanchanWeb.DenizenLive.Show do
                 <LiveRedirect
                   label="Edit Profile"
                   to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)}
-                  class="btn btn-sm btn-primary btn-outline rounded-full m-2 px-2 py-0 grow-0"
+                  class="px-2 py-0 m-2 rounded-full btn btn-sm btn-primary btn-outline grow-0"
                 />
               {/if}
             </div>
           </div>
-          <div class="m-4 mx-8 flex flex-col md:hidden">
+          <div class="flex flex-col m-4 mx-8 md:hidden">
             <h1 class="text-xl font-bold">
               {#if !@user.disable_info}
                 {@user.name}
@@ -241,14 +245,14 @@ defmodule BanchanWeb.DenizenLive.Show do
           </div>
           <div
             :if={!@user.disable_info && !Enum.empty?(@user.tags)}
-            class="mx-6 my-4 flex flex-row flex-wrap gap-1"
+            class="flex flex-row flex-wrap gap-1 mx-6 my-4"
           >
             {#for tag <- @user.tags}
               <Tag tag={tag} />
             {/for}
           </div>
           <Socials entity={@user} class="mx-6 my-4" />
-          <div class="mx-6 flex flex-row my-4 gap-4">
+          <div class="flex flex-row gap-4 mx-6 my-4">
             <LivePatch class="hover:link" to={Routes.denizen_show_path(Endpoint, :following, @user.handle)}>
               <span class="font-bold">
                 {#if @following > 9999}
@@ -269,11 +273,11 @@ defmodule BanchanWeb.DenizenLive.Show do
       {#else}
         {#if !Enum.empty?(@studios)}
           {#if @live_action == :show}
-            <div class="text-2xl pb-6">Artist for:</div>
+            <div class="pb-6 text-2xl">Artist for:</div>
           {#elseif @live_action == :following}
-            <div class="text-2xl pb-6">Following:</div>
+            <div class="pb-6 text-2xl">Following:</div>
           {/if}
-          <div class="studio-list grid grid-cols-1 sm:gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+          <div class="grid grid-cols-1 studio-list sm:gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
             {#for studio <- @studios}
               <StudioCard studio={studio} />
             {/for}
@@ -284,7 +288,7 @@ defmodule BanchanWeb.DenizenLive.Show do
 
       <Modal id="block-modal">
         <:title>Block From...</:title>
-        <ul class="overflow-auto menu p-2">
+        <ul class="p-2 overflow-auto menu">
           {#for studio <- @blockable_studios}
             <li>
               <button type="button" :on-click="block_user" phx-value-from={studio.id}>
@@ -296,7 +300,7 @@ defmodule BanchanWeb.DenizenLive.Show do
       </Modal>
       <Modal id="unblock-modal">
         <:title>Unblock From...</:title>
-        <ul class="overflow-auto menu p-2">
+        <ul class="p-2 overflow-auto menu">
           {#for studio <- @unblockable_studios}
             <li>
               <button type="button" :on-click="unblock_user" phx-value-from={studio.id}>

@@ -68,15 +68,20 @@ defmodule BanchanWeb.Components.Layout do
       }
     </style>
     <div class="w-full h-screen drawer drawer-mobile">
-      <input type="checkbox" id="drawer-toggle" class="drawer-toggle">
-      <div class="flex flex-col flex-grow h-screen drawer-content">
+      <input
+        type="checkbox"
+        id="drawer-toggle"
+        aria-label="Banchan Art menu"
+        class="hidden drawer-toggle"
+      />
+      <main class="flex flex-col flex-grow h-screen drawer-content">
         <div class="sticky top-0 z-50">
           <Nav />
         </div>
         {#if slot_assigned?(:hero)}
           <#slot {@hero} />
         {/if}
-        <section class={"flex flex-col flex-grow p-#{@padding} shadow-inner"}>
+        <section class={"flex flex-col flex-grow p-#{@padding}"}>
           <div class="my-2 alert alert-info" :if={@current_user && is_nil(@current_user.confirmed_at)}>
             <div class="block">
               ⚠️You need to verify your email address before you can do certain things on the site, such as submit new commissions. Please check your email or <LiveRedirect class="link" to={Routes.confirmation_path(Endpoint, :show)}>click here to resend your confirmation</LiveRedirect>.⚠️
@@ -85,49 +90,51 @@ defmodule BanchanWeb.Components.Layout do
           <Flash flashes={@flashes} />
           <#slot />
         </section>
-        <footer class="p-10 border-t footer border-base-content border-opacity-10">
-          <div>
-            <span class="footer-title">Co-op</span>
-            <LiveRedirect to={Routes.static_about_us_path(Endpoint, :show)} class="link link-hover">About Us</LiveRedirect>
-            <LiveRedirect to={Routes.static_contact_path(Endpoint, :show)} class="link link-hover">Contact</LiveRedirect>
-            <LiveRedirect to={Routes.static_membership_path(Endpoint, :show)} class="link link-hover">Membership</LiveRedirect>
-            <LiveRedirect to={Routes.report_bug_new_path(Endpoint, :new)}>Report Bug</LiveRedirect>
-          </div>
-          <div>
-            <span class="footer-title">Legal</span>
-            <LiveRedirect
-              to={Routes.static_terms_and_conditions_path(Endpoint, :show)}
-              class="link link-hover"
-            >Terms and Conditions</LiveRedirect>
-            <LiveRedirect to={Routes.static_privacy_policy_path(Endpoint, :show)} class="link link-hover">Privacy policy</LiveRedirect>
-            <LiveRedirect to={Routes.static_cookies_policy_path(Endpoint, :show)} class="link link-hover">Cookies policy</LiveRedirect>
-            <LiveRedirect to={Routes.static_disputes_policy_path(Endpoint, :show)} class="link link-hover">Disputes Policy</LiveRedirect>
-          </div>
-          <div>
-            <span class="footer-title">Social</span>
-            <div class="grid grid-flow-col gap-4">
-              <a
-                href="https://mastodon.art/@Banchan"
-                aria-label="Banchan Art on Mastodon (opens in new tab)"
-                target="_blank"
-                rel="noopener noreferrer"
-              ><i class="text-xl fab fa-mastodon" /></a>
-              <a
-                href="https://twitter.com/BanchanArt"
-                aria-label="Banchan Art on Twitter (opens in new tab)"
-                target="_blank"
-                rel="noopener noreferrer"
-              ><i class="text-xl fab fa-twitter" /></a>
-              <a
-                href="https://discord.gg/FUkTHjGKJF"
-                aria-label="Banchan Art Discord server (opens in new tab)"
-                target="_blank"
-                rel="noopener noreferrer"
-              ><i class="text-xl fab fa-discord" /></a>
+        <div class="w-full border-t border-base-content border-opacity-10">
+          <footer class="px-4 py-8 mx-auto border-none footer max-w-7xl">
+            <div>
+              <span class="opacity-100 footer-title text-primary">Co-op</span>
+              <LiveRedirect to={Routes.static_about_us_path(Endpoint, :show)} class="link link-hover">About Us</LiveRedirect>
+              <LiveRedirect to={Routes.static_contact_path(Endpoint, :show)} class="link link-hover">Contact</LiveRedirect>
+              <LiveRedirect to={Routes.static_membership_path(Endpoint, :show)} class="link link-hover">Membership</LiveRedirect>
+              <LiveRedirect to={Routes.report_bug_new_path(Endpoint, :new)}>Report Bug</LiveRedirect>
             </div>
-          </div>
-        </footer>
-      </div>
+            <div>
+              <span class="opacity-100 footer-title text-primary">Legal</span>
+              <LiveRedirect
+                to={Routes.static_terms_and_conditions_path(Endpoint, :show)}
+                class="link link-hover"
+              >Terms and Conditions</LiveRedirect>
+              <LiveRedirect to={Routes.static_privacy_policy_path(Endpoint, :show)} class="link link-hover">Privacy policy</LiveRedirect>
+              <LiveRedirect to={Routes.static_cookies_policy_path(Endpoint, :show)} class="link link-hover">Cookies policy</LiveRedirect>
+              <LiveRedirect to={Routes.static_disputes_policy_path(Endpoint, :show)} class="link link-hover">Disputes Policy</LiveRedirect>
+            </div>
+            <div>
+              <span class="opacity-100 footer-title text-primary">Social</span>
+              <div class="grid grid-flow-col gap-4">
+                <a
+                  href="https://mastodon.art/@Banchan"
+                  aria-label="Banchan Art on Mastodon (opens in new tab)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                ><i class="text-xl fab fa-mastodon" /></a>
+                <a
+                  href="https://twitter.com/BanchanArt"
+                  aria-label="Banchan Art on Twitter (opens in new tab)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                ><i class="text-xl fab fa-twitter" /></a>
+                <a
+                  href="https://discord.gg/FUkTHjGKJF"
+                  aria-label="Banchan Art Discord server (opens in new tab)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                ><i class="text-xl fab fa-discord" /></a>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </main>
 
       {!-- # TODO: remove this basic auth check on launch --}
       <div
@@ -135,7 +142,7 @@ defmodule BanchanWeb.Components.Layout do
         class="drawer-side"
       >
         <label for="drawer-toggle" class="drawer-overlay" />
-        <nav class="relative w-64 border-r shadow bg-base-200 border-base-content border-opacity-10">
+        <nav class="relative w-64 border-r bg-base-200 border-base-content border-opacity-10">
           <div class="absolute bottom-0 left-0 flex flex-col w-full px-4 pb-6">
             {#if Accounts.active_user?(@current_user)}
               <div class="divider" />
@@ -148,7 +155,7 @@ defmodule BanchanWeb.Components.Layout do
                   <UserHandle class="text-sm" link={false} user={@current_user} />
                 </Link>
                 <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
-                  <Icon name="log-out" size="4" />
+                  <Icon name="log-out" size="4" label="logout" />
                 </Link>
               </div>
             {/if}
@@ -160,7 +167,13 @@ defmodule BanchanWeb.Components.Layout do
                  Application.fetch_env!(:banchan, :env) == :dev)}>
               <ViewSwitcher context={@context} studio={@studio} />
             </li>
-            <li class="bg-transparent rounded-none pointer-events-none select-none h-fit">
+            <li
+              class="bg-transparent rounded-none pointer-events-none select-none h-fit"
+              :if={Accounts.active_user?(@current_user) &&
+                (Accounts.mod?(@current_user) ||
+                   Accounts.artist?(@current_user) ||
+                   Application.fetch_env!(:banchan, :env) == :dev)}
+            >
               <div class="w-full gap-0 px-2 py-0 m-0 rounded-none divider" />
             </li>
             {#case @context}

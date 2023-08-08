@@ -75,7 +75,7 @@ defmodule BanchanWeb.Components.Form.FancySelect do
             {/if}
           </button>
           <ul
-            class="absolute left-0 z-30 mt-2 w-72 origin-top-right divide-y divide-neutral divide-opacity-50 overflow-hidden rounded-box bg-base-200 shadow-lg ring-1 ring-base-300 ring-opacity-5 focus:outline-none"
+            class="absolute left-0 z-30 mt-2 w-72 origin-top-right divide-y divide-neutral divide-opacity-50 overflow-hidden rounded-box bg-base-200 ring-1 ring-base-300 ring-opacity-5 focus:outline-none"
             tabindex="-1"
             style="display: none;"
             role="listbox"

@@ -4,6 +4,8 @@ defmodule BanchanWeb.Components.Collapse do
   """
   use BanchanWeb, :live_component
 
+  alias BanchanWeb.Components.Icon
+
   prop class, :css_class
   prop show_arrow, :boolean, default: true
 
@@ -30,7 +32,7 @@ defmodule BanchanWeb.Components.Collapse do
             <#slot {@header} />
           </div>
           {#if @show_arrow}
-            <i class={"fas", "fa-chevron-up": @open, "fa-chevron-down": !@open} />
+            <Icon name={(@open && "chevron-up") || "chevron-down"} size="4" />
           {/if}
         </div>
       {/if}

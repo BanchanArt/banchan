@@ -22,4 +22,24 @@ defmodule Banchan.Utils do
         amount
     end
   end
+
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def has_socials?(entity) do
+    !(is_nil(entity.website_url) &&
+        is_nil(entity.twitter_handle) &&
+        is_nil(entity.instagram_handle) &&
+        is_nil(entity.facebook_url) &&
+        is_nil(entity.furaffinity_handle) &&
+        is_nil(entity.discord_handle) &&
+        is_nil(entity.artstation_handle) &&
+        is_nil(entity.deviantart_handle) &&
+        is_nil(entity.tumblr_handle) &&
+        is_nil(entity.mastodon_handle) &&
+        is_nil(entity.twitch_channel) &&
+        is_nil(entity.picarto_channel) &&
+        is_nil(entity.pixiv_url) &&
+        is_nil(entity.pixiv_handle) &&
+        is_nil(entity.tiktok_handle) &&
+        is_nil(entity.artfight_handle))
+  end
 end
