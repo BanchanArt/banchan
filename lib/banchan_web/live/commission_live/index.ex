@@ -14,7 +14,7 @@ defmodule BanchanWeb.CommissionLive do
   alias Surface.Components.Form.TextInput, as: SurfaceTextInput
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
-  alias BanchanWeb.Components.{Collapse, InfiniteScroll, Layout}
+  alias BanchanWeb.Components.{Collapse, Icon, InfiniteScroll, Layout}
   alias BanchanWeb.Components.Form.{Checkbox, MultipleSelect, Select, TextInput}
 
   alias BanchanWeb.CommissionLive.Components.Commission
@@ -427,7 +427,7 @@ defmodule BanchanWeb.CommissionLive do
             for={@filter}
             change="change"
             submit="filter"
-            class="form-control px-4 mx-auto max-w-3xl pb-6 w-full md:w-content"
+            class="w-full max-w-3xl px-4 pb-6 mx-auto form-control md:w-content"
             opts={role: "search"}
           >
             <Field class="w-full input-group grow" name={:search}>
@@ -437,18 +437,18 @@ defmodule BanchanWeb.CommissionLive do
                 type="button"
                 class="btn btn-square"
               >
-                <i class="fas fa-filter" />
+                <Icon name="filter" size="4" label="filter" />
               </button>
               <SurfaceTextInput
-                class="input input-bordered w-full"
+                class="w-full input input-bordered"
                 opts={"aria-label": "Search for commissions"}
               />
               <Submit class="btn btn-square" opts={"aria-label": "Search"}>
-                <i class="fas fa-search" />
+                <Icon name="search" size="4" label="search" />
               </Submit>
             </Field>
             <Collapse id="filter-options" class="rounded-box">
-              <h2 class="text-xl pt-4">
+              <h2 class="pt-4 text-xl">
                 Additional Filters
               </h2>
               <div class="divider" />
@@ -478,13 +478,13 @@ defmodule BanchanWeb.CommissionLive do
                 </div>
               {/if}
               <div class="grid grid-cols-3 gap-2">
-                <Submit label="Apply" class="btn btn-square btn-primary col-span-2 w-full" />
-                <button type="button" :on-click="reset" class="btn-btn-square btn-link w-full">Reset</button>
+                <Submit label="Apply" class="w-full col-span-2 btn btn-square btn-primary" />
+                <button type="button" :on-click="reset" class="w-full btn-btn-square btn-link">Reset</button>
               </div>
             </Collapse>
           </Form>
           {#if Enum.empty?(@results)}
-            <div class="py-2 px-4 text-xl">
+            <div class="px-4 py-2 text-xl">
               No Results
             </div>
           {#else}

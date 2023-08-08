@@ -10,7 +10,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
 
   alias Surface.Components.LiveRedirect
 
-  alias BanchanWeb.Components.{Avatar, Button, Layout, ReportModal, Socials, Tag}
+  alias BanchanWeb.Components.{Avatar, Button, Icon, Layout, ReportModal, Socials, Tag}
   alias BanchanWeb.Endpoint
   alias BanchanWeb.StudioLive.Components.{FeaturedToggle, FollowerCountLive, TabButton}
 
@@ -101,13 +101,13 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
               {#if @current_user && (Accounts.mod?(@current_user) || !@current_user_member?)}
                 <div class="dropdown dropdown-end">
                   <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
-                    <i class="fas fa-ellipsis-vertical" />
+                    <Icon name="more-vertical" size="6" />
                   </label>
                   <ul tabindex="0" class="p-2 shadow dropdown-content menu bg-base-200 rounded-box">
                     {#if Accounts.mod?(@current_user)}
                       <li>
                         <LiveRedirect to={Routes.studio_moderation_path(Endpoint, :edit, @studio.handle)}>
-                          <i class="fas fa-gavel" /> Moderation
+                          <Icon name="gavel" size="4" /> Moderation
                         </LiveRedirect>
                       </li>
                     {/if}
@@ -118,7 +118,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                     {/if}
                     <li>
                       <button type="button" :on-click="report">
-                        <i class="fas fa-flag" /> Report
+                        <Icon name="flag" size="4" /> Report
                       </button>
                     </li>
                   </ul>

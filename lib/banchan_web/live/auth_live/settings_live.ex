@@ -12,7 +12,7 @@ defmodule BanchanWeb.SettingsLive do
   alias Banchan.Notifications.UserNotificationSettings
 
   alias BanchanWeb.AuthLive.Components.SettingsLayout
-  alias BanchanWeb.Components.Collapse
+  alias BanchanWeb.Components.{Collapse, Icon}
   alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
 
@@ -405,8 +405,12 @@ defmodule BanchanWeb.SettingsLive do
               type="checkbox"
               class={"hidden", loading: !@theme}
             />
-            <i class="text-3xl fas fa-sun swap-off" />
-            <i class="text-3xl fas fa-moon swap-on" />
+            <div class="swap-off">
+              <Icon name="sun" size="6" label="light-mode" />
+            </div>
+            <div class="swap-on">
+              <Icon name="moon-star" size="6" label="dark-mode" />
+            </div>
           </label>
         </label>
       </div>

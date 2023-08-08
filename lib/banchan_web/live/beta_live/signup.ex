@@ -9,7 +9,7 @@ defmodule BanchanWeb.BetaLive.Signup do
   alias Surface.Components.Form
   alias Surface.Components.Form.{EmailInput, Submit}
 
-  alias BanchanWeb.Components.Layout
+  alias BanchanWeb.Components.{Icon, Layout}
 
   @impl true
   def handle_event("submit", %{"email" => email}, socket) do
@@ -31,35 +31,35 @@ defmodule BanchanWeb.BetaLive.Signup do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash}>
-      <div id="above-fold" class="md:px-4 mt-20">
+      <div id="above-fold" class="mt-20 md:px-4">
         <div class="min-h-screen hero">
-          <div class="hero-content flex flex-col md:flex-row">
-            <div class="flex flex-col gap-4 md:gap-10 p-4 items-center max-w-2xl">
+          <div class="flex flex-col hero-content md:flex-row">
+            <div class="flex flex-col items-center max-w-2xl gap-4 p-4 md:gap-10">
               <div class="text-5xl font-bold">
                 A Platform for
                 <span class="md:whitespace-nowrap">Online Art Commissions</span>
               </div>
-              <div class="text-2xl font-semibold pt-2 w-full">
-                <span class="text-primary font-bold">Owned by the Artists</span>
+              <div class="w-full pt-2 text-2xl font-semibold">
+                <span class="font-bold text-primary">Owned by the Artists</span>
               </div>
-              <div class="text-2xl font-semibold pt-2">
+              <div class="pt-2 text-2xl font-semibold">
                 Banchan is a
                 <a
                   href="https://en.wikipedia.org/wiki/Platform_cooperative"
-                  class="text-primary link font-bold"
+                  class="font-bold text-primary link"
                   target="_blank"
                   rel="noopener noreferrer"
                 >co-op</a>: Artists and workers make the
-                <span class="text-primary font-bold">decisions</span> and split
-                the <span class="text-primary font-bold">profits</span>, not
+                <span class="font-bold text-primary">decisions</span> and split
+                the <span class="font-bold text-primary">profits</span>, not
                 executives and shareholders. One person, one vote. One
-                <span class="text-primary font-bold">community</span>.
+                <span class="font-bold text-primary">community</span>.
               </div>
-              <div id="top-cta" class="w-full flex flex-col gap-2 py-4 rounded-lg items-start">
-                <div class="flex flex-col md:flex-row gap-2">
+              <div id="top-cta" class="flex flex-col items-start w-full gap-2 py-4 rounded-lg">
+                <div class="flex flex-col gap-2 md:flex-row">
                   <div class="text-xl font-medium">
                     Join the
-                    <span class="text-primary font-bold">Revolution</span>!
+                    <span class="font-bold text-primary">Revolution</span>!
                   </div>
                   <div>(or at least the Closed Beta)</div>
                 </div>
@@ -67,17 +67,17 @@ defmodule BanchanWeb.BetaLive.Signup do
                   <div class="input-group">
                     <EmailInput
                       name={:email}
-                      class="input input-bordered grow rounded-lg"
+                      class="rounded-lg input input-bordered grow"
                       opts={placeholder: "E-mail", required: true}
                     />
-                    <Submit class="btn btn-primary rounded-lg">
+                    <Submit class="rounded-lg btn btn-primary">
                       Sign Up
                     </Submit>
                   </div>
                 </Form>
               </div>
               <div id="scroll-down-please">
-                <i class="fas fa-chevron-down animate-bounce text-3xl" />
+                <Icon name="arrow-down" size="6" label="scroll-down" />
               </div>
             </div>
           </div>
@@ -85,11 +85,11 @@ defmodule BanchanWeb.BetaLive.Signup do
       </div>
       <div id="comms" class="px-2 md:px-4">
         <div class="min-h-screen hero">
-          <div class="hero-content grid grid-cols-1 md:grid-cols-2">
+          <div class="grid grid-cols-1 hero-content md:grid-cols-2">
             <div class="flex flex-col gap-4">
               <div class="text-4xl font-semibold">
                 A
-                <span class="text-primary font-bold whitespace-nowrap">Complete</span>
+                <span class="font-bold text-primary whitespace-nowrap">Complete</span>
                 Commissions Experience
               </div>
               <div class="text-2xl font-semibold">
@@ -116,7 +116,7 @@ defmodule BanchanWeb.BetaLive.Signup do
       </div>
       <div id="payment" class="px-2 md:px-4">
         <div class="min-h-screen hero">
-          <div class="hero-content grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 gap-4 hero-content md:grid-cols-2">
             <div class="flex flex-col gap-4 md:order-2">
               <div class="text-4xl font-semibold">
                 Pay or get paid. <span class="text-primary">Securely</span>.
@@ -162,7 +162,7 @@ defmodule BanchanWeb.BetaLive.Signup do
       </div>
       <div id="shop" class="px-2 md:px-4">
         <div class="min-h-screen hero">
-          <div class="hero-content grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div class="grid grid-cols-1 gap-10 hero-content md:grid-cols-2">
             <div class="flex flex-col gap-4">
               <div class="text-5xl font-semibold">
                 <span class="text-primary">Curate</span> Your Profile
@@ -197,10 +197,10 @@ defmodule BanchanWeb.BetaLive.Signup do
         </div>
       </div>
       <div id="bottom-cta" class="px-2 md:px-4">
-        <div class="hero py-8">
-          <div class="hero-content flex flex-col items-center gap-10">
-            <div class="card shadow-xl bg-base-200 shadow-secondary">
-              <div class="card-body flex flex-col gap-4 p-4 items-center max-w-4xl">
+        <div class="py-8 hero">
+          <div class="flex flex-col items-center gap-10 hero-content">
+            <div class="shadow-xl card bg-base-200 shadow-secondary">
+              <div class="flex flex-col items-center max-w-4xl gap-4 p-4 card-body">
                 <div class="text-5xl font-bold">
                   Sign Up for Updates and
                   <span class="text-primary">Beta Access</span>
@@ -210,15 +210,15 @@ defmodule BanchanWeb.BetaLive.Signup do
                     <EmailInput
                       id="bottom-cta-input"
                       name={:email}
-                      class="input input-bordered grow rounded-lg"
+                      class="rounded-lg input input-bordered grow"
                       opts={placeholder: "E-mail", required: true}
                     />
-                    <Submit class="btn btn-primary rounded-lg">
+                    <Submit class="rounded-lg btn btn-primary">
                       Sign Up
                     </Submit>
                   </div>
                   <label for="bottom-cta-input" class="label">
-                    <span class="label-text">Beta access invites are
+                    <span class="flex flex-row items-center label-text">Beta access invites are
                       <span class="text-primary">first-come, first-serve</span>
                     </span>
                   </label>
@@ -231,7 +231,7 @@ defmodule BanchanWeb.BetaLive.Signup do
                 target="_blank"
                 rel="noopener noreferrer"
                 class="btn bg-[#5865F2] btn-md rounded-full"
-              >Join Us On Discord <i class="pl-2 fab fa-discord text-xl" />
+              >Join Us On Discord <i class="pl-2 text-xl fab fa-discord" />
               </a>
             </div>
           </div>

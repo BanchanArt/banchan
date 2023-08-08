@@ -7,7 +7,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
   alias Surface.Components.{Form, LivePatch}
   alias Surface.Components.Form.{Field, Select, Submit, TextInput}
 
-  alias BanchanWeb.Components.Layout
+  alias BanchanWeb.Components.{Icon, Layout}
   alias BanchanWeb.DiscoverLive.Components.{Offerings, Studios}
 
   @impl true
@@ -182,7 +182,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
                   />
                 </Field>
                 <Submit class="btn btn-round">
-                  <i class="fas fa-search" />
+                  <Icon name="search" size="4" />
                 </Submit>
               </div>
             </Form>

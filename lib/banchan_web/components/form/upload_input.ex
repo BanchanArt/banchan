@@ -7,6 +7,7 @@ defmodule BanchanWeb.Components.Form.UploadInput do
   alias Surface.Components.LiveFileInput
 
   alias BanchanWeb.Components.Form.CropUploadInput
+  alias BanchanWeb.Components.Icon
 
   prop upload, :struct, required: true
   prop label, :string, default: "Upload attachments"
@@ -40,11 +41,11 @@ defmodule BanchanWeb.Components.Form.UploadInput do
       <p class="text-error">{error_to_string(err)}</p>
     {/for}
     <div
-      class="relative h-15 rounded-lg border-dashed border-2 border-primary flex justify-center items-center cursor-pointer"
+      class="relative flex items-center justify-center border-2 border-dashed rounded-lg cursor-pointer h-15 border-primary"
       phx-drop-target={@upload.ref}
     >
       <div class="absolute cursor-pointer">
-        <span class="block font-normal cursor-pointer">{@label} <i class="fas fa-file-upload" /></span>
+        <span class="block font-normal cursor-pointer">{@label} <Icon name="file-up" size="4" label="upload file" /></span>
       </div>
       {#if @crop}
         <CropUploadInput
@@ -53,10 +54,10 @@ defmodule BanchanWeb.Components.Form.UploadInput do
           upload={@upload}
           target={@cancel.target}
           title={"Crop " <> @label}
-          class="h-full w-full opacity-0 cursor-pointer"
+          class="w-full h-full opacity-0 cursor-pointer"
         />
       {#else}
-        <LiveFileInput class="h-full w-full opacity-0 cursor-pointer" upload={@upload} />
+        <LiveFileInput class="w-full h-full opacity-0 cursor-pointer" upload={@upload} />
       {/if}
     </div>
     """

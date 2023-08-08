@@ -18,6 +18,7 @@ defmodule BanchanWeb.OfferingLive.Show do
   alias BanchanWeb.Components.{
     Button,
     Collapse,
+    Icon,
     Layout,
     Lightbox,
     Markdown,
@@ -190,11 +191,11 @@ defmodule BanchanWeb.OfferingLive.Show do
         {@offering.name}
       </h1>
       <div class="divider" />
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="flex flex-col md:order-2 gap-2">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="flex flex-col gap-2 md:order-2">
           <Lightbox
             id="card-lightbox-mobile"
-            class="relative md:hidden w-full rounded-lg aspect-video mb-4 overflow-hidden"
+            class="relative w-full mb-4 overflow-hidden rounded-lg md:hidden aspect-video"
           >
             {#if @offering.card_img && !@offering.card_img.pending}
               <Lightbox.Item>
@@ -208,7 +209,7 @@ defmodule BanchanWeb.OfferingLive.Show do
             <div class="md:text-xl grow">
               By
               <LiveRedirect
-                class="hover:link font-bold"
+                class="font-bold hover:link"
                 to={Routes.studio_shop_path(Endpoint, :show, @offering.studio.handle)}
               >{@offering.studio.name}</LiveRedirect>
             </div>
@@ -228,14 +229,14 @@ defmodule BanchanWeb.OfferingLive.Show do
             {/if}
           </div>
           <div class="divider" />
-          <div class="rounded-lg bg-base-200 p-4 shadow-lg flex flex-col">
+          <div class="flex flex-col p-4 rounded-lg shadow-lg bg-base-200">
             {#if Enum.any?(@offering.options, & &1.default)}
-              <div class="px-2 font-medium text-sm opacity-50">Included</div>
+              <div class="px-2 text-sm font-medium opacity-50">Included</div>
               <Summary line_items={@line_items} />
               <div class="divider" />
             {/if}
             {#if Enum.any?(@offering.options, &(!&1.default))}
-              <div class="px-2 font-medium text-sm opacity-50">Add-ons</div>
+              <div class="px-2 text-sm font-medium opacity-50">Add-ons</div>
               <AddonList id="addon-list" offering={@offering} line_items={@line_items} />
               <div class="divider" />
             {/if}
@@ -248,21 +249,23 @@ defmodule BanchanWeb.OfferingLive.Show do
               </div>
               <div class="divider" />
             {/if}
-            <div class="pt-4 flex flex-row justify-end gap-2">
+            <div class="flex flex-row justify-end gap-2 pt-4">
               {#if @current_user}
                 <div class="dropdown">
-                  <label tabindex="0" class="btn btn-circle btn-outline btn-sm my-2 py-0 grow-0">
-                    <i class="fas fa-ellipsis-vertical" />
+                  <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
+                    <Icon name="more-vertical" size="4" />
                   </label>
-                  <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box">
+                  <ul tabindex="0" class="p-2 shadow dropdown-content menu bg-base-200 rounded-box">
                     {#if @current_user && (@current_user_member? || Accounts.mod?(@current_user))}
                       <li>
-                        <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}><i class="fas fa-edit" /> Edit</LiveRedirect>
+                        <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}>
+                          <Icon name="pencil" size="4" label="edit" /> Edit
+                        </LiveRedirect>
                       </li>
                     {/if}
                     <li>
                       <button type="button" :on-click="report">
-                        <i class="fas fa-flag" /> Report
+                        <Icon name="flag" size="4" label="report" /> Report
                       </button>
                     </li>
                   </ul>
@@ -271,7 +274,7 @@ defmodule BanchanWeb.OfferingLive.Show do
               {#if @offering.open}
                 <LiveRedirect
                   to={Routes.offering_request_path(Endpoint, :new, @offering.studio.handle, @offering.type)}
-                  class="btn text-center btn-primary grow"
+                  class="text-center btn btn-primary grow"
                 >Request</LiveRedirect>
               {#elseif !@offering.user_subscribed?}
                 <Button class="btn-info grow" click="notify_me">Notify Me</Button>
@@ -284,7 +287,7 @@ defmodule BanchanWeb.OfferingLive.Show do
           {#if !Enum.empty?(@related)}
             <div class="hidden md:flex md:flex-col">
               <div class="pt-4 text-2xl">Discover More</div>
-              <div class="p-2 flex flex-col">
+              <div class="flex flex-col p-2">
                 {#for {rel, idx} <- Enum.with_index(@related)}
                   <OfferingCard id={"related-desktop-#{idx}"} current_user={@current_user} offering={rel} />
                 {/for}
@@ -293,10 +296,10 @@ defmodule BanchanWeb.OfferingLive.Show do
           {/if}
         </div>
         <div class="divider md:hidden" />
-        <div class="flex flex-col md:col-span-2 md:order-1 gap-4">
+        <div class="flex flex-col gap-4 md:col-span-2 md:order-1">
           <Lightbox
             id="card-lightbox-md"
-            class="relative hidden bg-base-300 md:block w-full rounded-lg aspect-video overflow-hidden"
+            class="relative hidden w-full overflow-hidden rounded-lg bg-base-300 md:block aspect-video"
           >
             {#if @offering.card_img && !@offering.card_img.pending}
               <Lightbox.Item>
@@ -306,14 +309,14 @@ defmodule BanchanWeb.OfferingLive.Show do
               <div class="w-full h-full aspect-video bg-base-300" />
             {/if}
           </Lightbox>
-          <div class="rounded-lg shadow-lg bg-base-200 p-4">
+          <div class="p-4 rounded-lg shadow-lg bg-base-200">
             <div class="text-2xl">Description</div>
             <div class="divider" />
             <Markdown class="pb-4" content={@offering.description} />
           </div>
           {#if @offering.terms}
             <div class="divider md:hidden" />
-            <div class="rounded-lg shadow-lg bg-base-200 p-4">
+            <div class="p-4 rounded-lg shadow-lg bg-base-200">
               <Collapse id="terms-collapse">
                 <:header>Commission Terms</:header>
                 <Markdown content={@offering.terms} />
@@ -321,7 +324,7 @@ defmodule BanchanWeb.OfferingLive.Show do
             </div>
           {/if}
           {#if !Enum.empty?(@gallery_images)}
-            <div class="rounded-lg shadow-lg bg-base-200 p-4">
+            <div class="p-4 rounded-lg shadow-lg bg-base-200">
               <div class="text-2xl">Gallery</div>
               <div class="divider" />
               <MasonryGallery
@@ -334,7 +337,7 @@ defmodule BanchanWeb.OfferingLive.Show do
           {#if !Enum.empty?(@related)}
             <div class="flex flex-col md:hidden">
               <div class="pt-4 text-2xl">Discover More</div>
-              <div class="p-2 flex flex-col">
+              <div class="flex flex-col p-2">
                 {#for {rel, idx} <- Enum.with_index(@related)}
                   <OfferingCard id={"related-mobile-#{idx}"} current_user={@current_user} offering={rel} />
                 {/for}

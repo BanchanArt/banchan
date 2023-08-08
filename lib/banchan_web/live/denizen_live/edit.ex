@@ -17,7 +17,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
     TextInput
   }
 
-  alias BanchanWeb.Components.{Collapse, Layout}
+  alias BanchanWeb.Components.{Collapse, Icon, Layout}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -180,7 +180,9 @@ defmodule BanchanWeb.DenizenLive.Edit do
               <div class="absolute top-0 left-0 w-full h-full">
                 <div class="flex items-center justify-center w-full h-full mx-auto">
                   <div class="relative">
-                    <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70"><i class="fas fa-camera" /></button>
+                    <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70">
+                      <Icon name="camera" size="4" />
+                    </button>
                     <CropUploadInput
                       id="header-cropper"
                       aspect_ratio={3.5 / 1}
@@ -219,7 +221,9 @@ defmodule BanchanWeb.DenizenLive.Edit do
                   </div>
                   <div class="absolute w-8 top-8 left-8">
                     <div class="relative">
-                      <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70"><i class="fas fa-camera" /></button>
+                      <button type="button" class="absolute top-0 left-0 btn btn-sm btn-circle opacity-70">
+                        <Icon name="camera" size="4" />
+                      </button>
                       <CropUploadInput
                         id="pfp-cropper"
                         aspect_ratio={1}

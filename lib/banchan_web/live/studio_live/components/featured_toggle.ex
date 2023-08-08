@@ -8,6 +8,8 @@ defmodule BanchanWeb.StudioLive.Components.FeaturedToggle do
   alias Banchan.Studios
   alias Banchan.Studios.Studio
 
+  alias BanchanWeb.Components.Icon
+
   prop current_user, :struct, required: true
   prop studio, :struct, required: true
 
@@ -33,9 +35,9 @@ defmodule BanchanWeb.StudioLive.Components.FeaturedToggle do
     ~F"""
     <button type="button" :on-click="toggle">
       {#if @studio.featured}
-        <i class="fa-solid fa-star" /> Unfeature
+        <Icon name="star-off" size="4" /> Unfeature
       {#else}
-        <i class="fa-regular fa-star" /> Feature
+        <Icon name="star" size="4" /> Feature
       {/if}
     </button>
     """

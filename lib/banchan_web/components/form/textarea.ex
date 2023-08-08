@@ -4,6 +4,8 @@ defmodule BanchanWeb.Components.Form.TextArea do
   """
   use BanchanWeb, :component
 
+  alias BanchanWeb.Components.Icon
+
   alias Surface.Components.Form
   alias Surface.Components.Form.{ErrorTag, Field, Label, TextArea}
 
@@ -26,11 +28,11 @@ defmodule BanchanWeb.Components.Form.TextArea do
     <Field class="field" name={@name}>
       {#if @show_label}
         <Label class="label">
-          <span class="label-text">
+          <span class="flex flex-row items-center gap-1 label-text">
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
               <div class="tooltip" data-tip={@info}>
-                <i class="fas fa-info-circle" />
+                <Icon name="info" size="4" label="tooltip" />
               </div>
             {/if}
           </span>

@@ -10,7 +10,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
   alias Banchan.Payments
   alias Banchan.Payments.Payout
 
-  alias BanchanWeb.Components.{Avatar, Button, Modal, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Button, Icon, Modal, UserHandle}
 
   prop current_user, :struct, required: true
   prop studio, :struct, required: true
@@ -75,11 +75,11 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
         Payout.done?(assigns.payout)
 
     ~F"""
-    <div class="flex flex-col h-full bg-base-100 md:p-4 rounded-box md:rounded-bl-none overflow-hidden">
+    <div class="flex flex-col h-full overflow-hidden bg-base-100 md:p-4 rounded-box md:rounded-bl-none">
       {!-- Header --}
-      <h1 class="px-4 pt-4 md:pt-0 md:px-0 text-3xl md:hidden border-b-2 border-neutral-content border-opacity-10 flex items-center gap-x-3">
-        <LivePatch class="go-back p-2" to={~p"/studios/#{@studio.handle}/payouts"}>
-          <i class="fas fa-arrow-left text-2xl" />
+      <h1 class="flex items-center px-4 pt-4 text-3xl border-b-2 md:pt-0 md:px-0 md:hidden border-neutral-content border-opacity-10 gap-x-3">
+        <LivePatch class="p-2 go-back" to={~p"/studios/#{@studio.handle}/payouts"}>
+          <Icon name="arrow-left" size="6" />
         </LivePatch>
         Payout
         {#if !@data_pending}
@@ -92,9 +92,9 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
         {/if}
       </h1>
       {#if @data_pending}
-        <div class="py-20 bg-base-100 w-full h-full flex flex-col items-center">
+        <div class="flex flex-col items-center w-full h-full py-20 bg-base-100">
           <h2 class="sr-only">Loading...</h2>
-          <i class="fas fa-spinner animate-spin text-3xl" />
+          <Icon name="loader-2" size="6" class="animate-spin" />
         </div>
       {#else}
         <div class="p-4 bg-base-100">
@@ -135,7 +135,7 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
               {/if}
             </div>
           </div>
-          <div class="mt-8 flow-root">
+          <div class="flow-root mt-8">
             <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden shadow ring-1 ring-base-300 ring-opacity-5 sm:rounded-lg">
@@ -171,33 +171,33 @@ defmodule BanchanWeb.StudioLive.Components.Payout do
                     <tbody class="divide-y divide-base-100 bg-base-200">
                       {#for invoice <- @payout.invoices}
                         <tr>
-                          <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium sm:pl-6">
+                          <td class="py-4 pl-4 pr-3 text-sm font-medium whitespace-nowrap sm:pl-6">
                             <LiveRedirect
                               class="text-primary hover:link"
                               to={Routes.commission_path(Endpoint, :show, invoice.commission.public_id)}
                             >{invoice.commission.title}</LiveRedirect>
                           </td>
                           <td>
-                            <span class="text-success font-semibold">
+                            <span class="font-semibold text-success">
                               {Payments.print_money(invoice.total_transferred)}
                             </span>
                             <dl class="md:hidden">
                               <dd class="mt-1 text-xs text-opacity-75 truncate">Fee: {Payments.print_money(invoice.platform_fee)}</dd>
                             </dl>
                           </td>
-                          <td class="hidden md:table-cell font-semibold">
+                          <td class="hidden font-semibold md:table-cell">
                             {Payments.print_money(invoice.amount)}
                           </td>
-                          <td class="hidden md:table-cell font-semibold">
+                          <td class="hidden font-semibold md:table-cell">
                             {Payments.print_money(invoice.tip)}
                           </td>
-                          <td class="hidden md:table-cell font-semibold">
+                          <td class="hidden font-semibold md:table-cell">
                             {Payments.print_money(invoice.platform_fee)}
                           </td>
                           <td class="hidden lg:table-cell">
                             <time dateTime={invoice.updated_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>{invoice.updated_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}</time>
                           </td>
-                          <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                          <td class="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6">
                             <a
                               class="text-secondary hover:link"
                               href={replace_fragment(

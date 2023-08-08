@@ -10,7 +10,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   alias Banchan.Commissions.{Commission, Notifications}
   alias Banchan.Payments
 
-  alias BanchanWeb.Components.{Button, Collapse, Markdown, ReportModal}
+  alias BanchanWeb.Components.{Button, Collapse, Icon, Markdown, ReportModal}
   alias BanchanWeb.Components.Form.{Submit, TextInput}
 
   alias BanchanWeb.CommissionLive.Components.{
@@ -183,7 +183,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   def render(assigns) do
     ~F"""
     <div class="relative">
-      <h1 class="text-3xl flex flex-row px-4 sticky top-16 bg-base-100 z-30 pb-2 border-b-2 border-base-content border-opacity-10 opacity-100 items-center">
+      <h1 class="sticky z-30 flex flex-row items-center px-4 pb-2 text-3xl border-b-2 opacity-100 top-16 bg-base-100 border-base-content border-opacity-10">
         <LivePatch
           class="px-2 pb-4"
           to={if is_nil(@studio) do
@@ -192,11 +192,11 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             ~p"/studios/#{@studio.handle}/commissions"
           end}
         >
-          <i class="fas fa-arrow-left text-2xl" />
+          <Icon name="arrow-left" size="4" />
         </LivePatch>
         {#if @title_changeset}
           <Form for={@title_changeset} class="w-full" change="change_title" submit="submit_title">
-            <div class="flex flex-row w-full items-center">
+            <div class="flex flex-row items-center w-full">
               <div class="grow">
                 <TextInput class="w-full text-3xl" show_label={false} name={:title} />
               </div>
@@ -205,11 +205,11 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             </div>
           </Form>
         {#else}
-          <div class="px-2 pb-2 flex flex-row w-full items-center">
-            <div class="grow w-full flex flex-row items-center gap-2">
+          <div class="flex flex-row items-center w-full px-2 pb-2">
+            <div class="flex flex-row items-center w-full gap-2 grow">
               {@commission.title}
               {#if @archived?}
-                <div class="badge badge-warning badge-lg cursor-default">Archived</div>
+                <div class="cursor-default badge badge-warning badge-lg">Archived</div>
               {/if}
             </div>
             <Button label="Edit Title" class="hidden md:flex btn-sm btn-link" click="edit_title" />
@@ -217,7 +217,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
         {/if}
       </h1>
       <div class="p-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div class="flex flex-col md:order-2">
             <SummaryBox id={@id <> "-summary-box"} />
             <div class="divider" />
@@ -227,7 +227,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             <div class="divider" />
             <OfferingBox
               offering={@commission.offering}
-              class="rounded-box hover:bg-base-200 transition-all"
+              class="transition-all rounded-box hover:bg-base-200"
             />
             {bottom_buttons(assigns, true)}
           </div>
@@ -241,7 +241,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             {bottom_buttons(assigns, false)}
             {#if @commission.terms}
               <div class="divider" />
-              <div class="rounded-lg shadow-lg bg-base-200 p-4">
+              <div class="p-4 rounded-lg shadow-lg bg-base-200">
                 <Collapse id="terms-collapse">
                   <:header>Commission Terms</:header>
                   <Markdown content={@commission.terms} />
@@ -261,11 +261,11 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
     <div class={"md:hidden": !desktop?, "hidden md:block": desktop?}>
       <div class={"divider md:hidden": !desktop?, "hidden md:divider md:flex": desktop?} />
       <div class="w-full">
-        <div class="text-sm font-medium pb-2">Notifications</div>
+        <div class="pb-2 text-sm font-medium">Notifications</div>
         <button
           type="button"
           :on-click="toggle_subscribed"
-          class="btn btn-sm w-full"
+          class="w-full btn btn-sm"
           phx-target={@myself}
         >
           {#if @subscribed?}
@@ -279,7 +279,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
       <button
         type="button"
         :on-click="toggle_archived"
-        class="btn btn-sm my-2 w-full"
+        class="w-full my-2 btn btn-sm"
         phx-target={@myself}
       >
         {#if @archived?}
@@ -298,10 +298,10 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
         <Collapse
           id={@id <> "-withdraw-confirmation" <> if desktop?, do: "-desktop", else: "-mobile"}
           show_arrow={false}
-          class="w-full rounded-lg my-2 bg-base-200"
+          class="w-full my-2 rounded-lg bg-base-200"
         >
           <:header>
-            <button type="button" class="btn btn-sm w-full">
+            <button type="button" class="w-full btn btn-sm">
               Withdraw
             </button>
           </:header>
@@ -314,7 +314,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             type="button"
             :on-click="withdraw"
             phx-target={@myself}
-            class="btn btn-sm btn-error my-2 w-full"
+            class="w-full my-2 btn btn-sm btn-error"
           >
             Confirm
           </button>
