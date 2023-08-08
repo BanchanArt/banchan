@@ -37,13 +37,13 @@ defmodule BanchanWeb.ResetPasswordLive do
           name={:password}
           label="New Password"
           icon="lock"
-          opts={required: true, type: :password}
+          opts={required: true, type: :password, placeholder: "your_new_secure_password"}
         />
         <TextInput
           name={:password_confirmation}
           icon="lock"
           label="Confirm New Password"
-          opts={required: true, type: :password}
+          opts={required: true, type: :password, placeholder: "your_new_secure_password"}
         />
         <Submit class="w-full" changeset={@changeset} label="Reset Password" />
       </Form>

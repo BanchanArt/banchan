@@ -64,26 +64,26 @@ defmodule BanchanWeb.RegisterLive do
           name={:handle}
           info="Your unique @handle that can be used to refer to you."
           icon="at-sign"
-          opts={required: true}
+          opts={required: true, placeholder: "example123"}
         />
         <EmailInput
           name={:email}
           info="A valid email address. You'll need to confirm this."
           icon="mail"
-          opts={required: true}
+          opts={required: true, placeholder: "youremail@example.com"}
         />
         <TextInput
           name={:password}
           info="Your new password. Must be between 12 and 80 characters."
           icon="lock"
-          opts={required: true, type: :password}
+          opts={required: true, type: :password, placeholder: "your_new_secure_password"}
         />
         <TextInput
           name={:password_confirmation}
           label="Confirm Password"
           info="Must match your password above!"
           icon="lock"
-          opts={required: true, type: :password}
+          opts={required: true, type: :password, placeholder: "your_new_secure_password"}
         />
         <Submit class="w-full" changeset={@changeset} label="Register" />
       </Form>

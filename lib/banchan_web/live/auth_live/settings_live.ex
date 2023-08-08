@@ -441,9 +441,13 @@ defmodule BanchanWeb.SettingsLive do
         <h3 class="mb-2 text-xl font-semibold">
           Update Handle
         </h3>
-        <TextInput name={:handle} icon="at-sign" opts={required: true} />
+        <TextInput name={:handle} icon="at-sign" opts={required: true, placeholder: "example123"} />
         {#if @current_user.email}
-          <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+          <TextInput
+            name={:password}
+            icon="lock"
+            opts={required: true, type: :password, placeholder: "your_password"}
+          />
           <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
             Forgot your password?
           </LiveRedirect>
@@ -464,7 +468,11 @@ defmodule BanchanWeb.SettingsLive do
           <div>
             You created this account through third-party authentication that did not provide an email address. If you want to be able to log in with an email and password, or change your <code>@handle</code>, please provide an email and we will send you a password reset.
           </div>
-          <EmailInput name={:email} icon="mail" opts={required: true} />
+          <EmailInput
+            name={:email}
+            icon="mail"
+            opts={required: true, placeholder: "youremail@example.com"}
+          />
           <Submit class="w-fit" changeset={@new_email_changeset} label="Save" />
         </Form>
       {#else}
@@ -485,8 +493,16 @@ defmodule BanchanWeb.SettingsLive do
           <h3 class="mb-2 text-lg">
             Update Email
           </h3>
-          <EmailInput name={:email} icon="mail" opts={required: true} />
-          <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+          <EmailInput
+            name={:email}
+            icon="mail"
+            opts={required: true, placeholder: "youremail@example.com"}
+          />
+          <TextInput
+            name={:password}
+            icon="lock"
+            opts={required: true, type: :password, placeholder: "your_password"}
+          />
           <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
             Forgot your password?
           </LiveRedirect>
@@ -508,19 +524,19 @@ defmodule BanchanWeb.SettingsLive do
             name={:current_password}
             icon="lock"
             label="Current Password"
-            opts={required: true, type: :password}
+            opts={required: true, type: :password, placeholder: "your_old_password"}
           />
           <TextInput
             name={:password}
             label="New Password"
             icon="lock"
-            opts={required: true, type: :password}
+            opts={required: true, type: :password, placeholder: "your_new_secure_password"}
           />
           <TextInput
             name={:password_confirmation}
             icon="lock"
             label="New Password Confirmation"
-            opts={required: true, type: :password}
+            opts={required: true, type: :password, placeholder: "your_new_secure_password"}
           />
           <LiveRedirect class="link link-primary" to={Routes.forgot_password_path(Endpoint, :edit)}>
             Forgot your password?
@@ -539,7 +555,11 @@ defmodule BanchanWeb.SettingsLive do
         >
           <h3 class="mb-2 text-xl font-semibold">Send an Artist Invite</h3>
           <p :if={!Accounts.mod?(@current_user)}>You have {@current_user.available_invites} invite(s) available.</p>
-          <EmailInput name={:email} icon="mail" opts={required: true} />
+          <EmailInput
+            name={:email}
+            icon="mail"
+            opts={required: true, placeholder: "youremail@example.com"}
+          />
           <Submit class="w-fit" changeset={@invite_request_changeset} label="Send" />
         </Form>
       {/if}

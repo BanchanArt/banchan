@@ -33,8 +33,17 @@ defmodule BanchanWeb.LoginLive do
         trigger_action={@trigger_submit}
       >
         <h1 class="text-2xl">Log in</h1>
-        <TextInput name={:identifier} icon="at-sign" label="Email or Handle" opts={required: true} />
-        <TextInput name={:password} icon="lock" opts={required: true, type: :password} />
+        <TextInput
+          name={:identifier}
+          icon="at-sign"
+          label="Email or Handle"
+          opts={required: true, placeholder: "youremail@example.com"}
+        />
+        <TextInput
+          name={:password}
+          icon="lock"
+          opts={required: true, type: :password, placeholder: "your_secure_password"}
+        />
         <TextInput
           label="MFA Token"
           name={:mfa_token}

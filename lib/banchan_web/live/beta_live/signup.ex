@@ -68,7 +68,7 @@ defmodule BanchanWeb.BetaLive.Signup do
                     <EmailInput
                       name={:email}
                       class="rounded-lg input input-bordered grow"
-                      opts={placeholder: "E-mail", required: true}
+                      opts={placeholder: "youremail@example.com", required: true}
                     />
                     <Submit class="rounded-lg btn btn-primary">
                       Sign Up
@@ -211,7 +211,7 @@ defmodule BanchanWeb.BetaLive.Signup do
                       id="bottom-cta-input"
                       name={:email}
                       class="rounded-lg input input-bordered grow"
-                      opts={placeholder: "E-mail", required: true}
+                      opts={placeholder: "youremail@example.com", required: true}
                     />
                     <Submit class="rounded-lg btn btn-primary">
                       Sign Up

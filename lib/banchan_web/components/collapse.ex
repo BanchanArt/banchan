@@ -32,7 +32,7 @@ defmodule BanchanWeb.Components.Collapse do
             <#slot {@header} />
           </div>
           {#if @show_arrow}
-            <Icon name={"chevron-up": @open, "chevron-down": !@open} size="4" />
+            <Icon name={(@open && "chevron-up") || "chevron-down"} size="4" />
           {/if}
         </div>
       {/if}
