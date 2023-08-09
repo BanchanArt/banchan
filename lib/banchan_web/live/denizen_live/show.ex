@@ -193,7 +193,7 @@ defmodule BanchanWeb.DenizenLive.Show do
                   </label>
                   <ul
                     tabindex="0"
-                    class="p-2 border bg-base-300 border-base-content border-opacity-10 menu rounded-box"
+                    class="p-2 border menu-compact dropdown-content bg-base-300 border-base-content border-opacity-10 menu rounded-box"
                   >
                     {#if :admin in @current_user.roles || :mod in @current_user.roles}
                       <li>
