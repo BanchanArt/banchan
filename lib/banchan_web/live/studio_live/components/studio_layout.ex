@@ -105,7 +105,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                   </label>
                   <ul
                     tabindex="0"
-                    class="p-1 border rounded-xl dropdown-content bg-base-300 border-base-content border-opacity-10 menu menu-compact"
+                    class="p-1 border rounded-xl dropdown-content bg-base-300 border-base-content border-opacity-10 menu md:menu-compact"
                   >
                     {#if Accounts.mod?(@current_user)}
                       <li>
