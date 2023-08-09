@@ -50,7 +50,7 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                     <div class="relative flex items-start md:space-x-3">
                       <div class="hidden md:flex">
                         <Avatar
-                          class="h-10 w-10 items-center justify-center border border-base-300"
+                          class="h-10 w-10 items-center justify-center border border-base-content border-opacity-10"
                           user={Map.get(@users, event.actor_id)}
                           link={false}
                         />

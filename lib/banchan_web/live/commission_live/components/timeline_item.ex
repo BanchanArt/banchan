@@ -39,7 +39,7 @@ defmodule BanchanWeb.CommissionLive.Components.TimelineItem do
         <div class="relative flex items-start space-x-3">
           <div>
             <div class="relative px-1">
-              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-base-200 ring-base-100 border-2 border-base-300">
+              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-base-200 ring-base-100 border-2 border-base-content border-opacity-10">
                 <span class="text-base-content opacity-50 text-center align-middle" aria-hidden="true">
                   <#slot {@icon} />
                 </span>
