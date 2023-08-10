@@ -173,7 +173,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
               </label>
               <ol
                 tabindex="0"
-                class="p-1 border dropdown-content menu bg-base-300 border-base-content border-opacity-10 rounded-xl"
+                class="p-1 border dropdown-content menu md:menu-compact bg-base-300 border-base-content border-opacity-10 rounded-xl"
               >
                 {#if Ecto.assoc_loaded?(@event.history)}
                   {#for history <- @event.history}
@@ -204,7 +204,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
           </label>
           <ul
             tabindex="0"
-            class="p-1 border dropdown-content menu bg-base-300 border-base-content border-opacity-10 rounded-xl"
+            class="p-1 border dropdown-content menu md:menu-compact bg-base-300 border-base-content border-opacity-10 rounded-xl"
           >
             {#if !@changeset &&
                 (@current_user_member? || @current_user.id == @actor.id || :admin in @current_user.roles ||

@@ -257,7 +257,7 @@ defmodule BanchanWeb.OfferingLive.Show do
                   </label>
                   <ul
                     tabindex="0"
-                    class="p-1 border dropdown-content menu bg-base-100 border-base-content border-opacity-10 rounded-xl"
+                    class="p-1 border dropdown-content menu md:menu-compact bg-base-100 border-base-content border-opacity-10 rounded-xl"
                   >
                     {#if @current_user && (@current_user_member? || Accounts.mod?(@current_user))}
                       <li>

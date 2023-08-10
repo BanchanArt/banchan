@@ -19,7 +19,11 @@ defmodule BanchanWeb.Components.Nav do
       role="navigation"
       aria-label="main navigation"
     >
-      <div class="items-center flex-none gap-4 lg:hidden">
+      {!-- # TODO: remove this basic auth check on launch --}
+      <div
+        :if={@current_user || is_nil(Application.get_env(:banchan, :basic_auth))}
+        class="items-center flex-none gap-4 lg:hidden"
+      >
         <label for="drawer-toggle" class="btn btn-square btn-ghost">
           <Icon name="menu" size="6" />
         </label>
