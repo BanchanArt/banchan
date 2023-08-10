@@ -7,6 +7,10 @@
 # General application configuration
 import Config
 
+{hash, 0} = System.cmd("git", ["rev-parse", "HEAD"])
+
+hash = String.trim(hash)
+
 config :banchan,
   env: config_env(),
   deploy_env: config_env(),
@@ -19,7 +23,8 @@ config :banchan,
   minimum_release_amount: {2000, :USD},
   default_platform_fee: System.get_env("BANCHAN_PLATFORM_FEE") || 0.1,
   max_attachment_size: 25_000_000,
-  mature_content_enabled?: true
+  mature_content_enabled?: true,
+  git_rev: hash
 
 # Configures the endpoint
 config :banchan, BanchanWeb.Endpoint,
