@@ -130,6 +130,12 @@ defmodule BanchanWeb.Components.Layout do
                   target="_blank"
                   rel="noopener noreferrer"
                 ><i class="text-xl fab fa-discord" /></a>
+                <a
+                  href="https://github.com/BanchanArt/banchan"
+                  aria-label="Banchan Art on Github (opens in new tab)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                ><i class="text-xl fab fa-github" /></a>
               </div>
             </div>
           </footer>
