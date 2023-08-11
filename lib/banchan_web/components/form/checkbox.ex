@@ -37,8 +37,8 @@ defmodule BanchanWeb.Components.Form.Checkbox do
         <div class="flex flex-row items-center gap-1 px-2 label-text">
           <#slot>{@label}</#slot>
           {#if @info}
-            <div class="tooltip" data-tip={@info}>
-              <Icon name="info" size="4" label="tooltip" />
+            <div class="tooltip tooltip-right" data-tip={@info}>
+              <Icon name="info" size="4" label="tooltip tooltip-right" />
             </div>
           {/if}
         </div>
