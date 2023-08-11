@@ -17,7 +17,11 @@ defmodule BanchanWeb.ReportBugLive.New do
   end
 
   @impl true
-  def handle_event("submit", %{"bug_report" => %{"title" => title, "body" => body, "bug?"=> bug?}}, socket) do
+  def handle_event(
+        "submit",
+        %{"bug_report" => %{"title" => title, "body" => body, "bug?" => bug?}},
+        socket
+      ) do
     case Reports.report_bug(
            socket.assigns.current_user,
            title,
@@ -66,7 +70,7 @@ defmodule BanchanWeb.ReportBugLive.New do
                 opts={required: true, maxlength: "2000", minlength: "30"}
               />
               <h2 class="text-med">Feedback Type</h2>
-              <Checkbox name={:bug?} label="Bug Report" opts={"aria-label": "Bug Report"}/>
+              <Checkbox name={:bug?} label="Bug Report" opts={"aria-label": "Bug Report"} />
               <Submit />
             </Form>
           {/if}
