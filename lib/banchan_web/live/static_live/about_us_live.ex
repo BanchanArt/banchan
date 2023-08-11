@@ -33,7 +33,7 @@ defmodule BanchanWeb.StaticLive.AboutUs do
 
         ## Behind the Name
 
-        Banchan Art is named for the Korean culinary tradition of shared side dishes known as banchan.
+        Banchan Art is named for the Korean culinary tradition of shared side dishes known as [banchan](https://en.wikipedia.org/wiki/Banchan).
 
         Banchan includes a variety of dishes with different flavors and meanings. Each meal is a unique experience due to the constantly rotating selection of dishes and your ability to cater your meal by how much of each dish you select for yourself. You are able to satiate your palate for different tastes as you please.
 
