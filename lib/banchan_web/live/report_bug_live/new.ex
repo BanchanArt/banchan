@@ -9,7 +9,7 @@ defmodule BanchanWeb.ReportBugLive.New do
   alias Surface.Components.Form
 
   alias BanchanWeb.Components.{Button, Layout}
-  alias BanchanWeb.Components.Form.{QuillInput, Checkbox, Submit, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, QuillInput, Submit, TextInput}
 
   @impl true
   def handle_params(_params, _uri, socket) do
