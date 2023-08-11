@@ -256,7 +256,7 @@ defmodule Banchan.Reports do
     |> Tentacat.Issues.create("BanchanArt", "banchan", %{
       title: title,
       body: "reported by [@#{actor.handle}](#{actor_url_fn.(actor)}):\n\n#{body}",
-      labels: ["feedback", "from-site" | if(bug?, do: ["bug"], else: [])]
+      labels: ["feedback", "from-site" | if(bug? == "true", do: ["bug"], else: [])]
     })
     |> case do
       {201, %{"html_url" => url}, _} ->
