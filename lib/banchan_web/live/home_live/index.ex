@@ -139,7 +139,7 @@ defmodule BanchanWeb.HomeLive do
               </div>
             </div>
           </div>
-          <div class="px-4 pt-10 mx-auto featured-studios max-w-7xl">
+          <div class="w-full px-4 pt-10 mx-auto featured-studios max-w-7xl">
             <div class="flex flex-row items-end">
               <div class="text-xl grow">
                 Selected Studios
