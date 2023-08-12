@@ -218,16 +218,19 @@ defmodule BanchanWeb.CommissionLive do
 
   @impl true
   def handle_event("reset", _, socket) do
+    params =
+      %CommissionFilter{}
+      |> filter_to_params()
+
     {:noreply,
      socket
      |> push_patch(
        to:
-         Routes.commission_path(
-           Endpoint,
-           :index,
-           %CommissionFilter{}
-           |> filter_to_params()
-         )
+         if socket.assigns.studio do
+           ~p"/studios/#{socket.assigns.studio.handle}/commissions?#{params}"
+         else
+           ~p"/commissions?#{params}"
+         end
      )}
   end
 
@@ -255,11 +258,11 @@ defmodule BanchanWeb.CommissionLive do
        socket
        |> push_patch(
          to:
-           Routes.commission_path(
-             Endpoint,
-             :index,
-             params
-           )
+           if socket.assigns.studio do
+             ~p"/studios/#{socket.assigns.studio.handle}/commissions?#{params}"
+           else
+             ~p"/commissions?#{params}"
+           end
        )}
     else
       {:noreply, socket}
@@ -293,11 +296,11 @@ defmodule BanchanWeb.CommissionLive do
        socket
        |> push_patch(
          to:
-           Routes.commission_path(
-             Endpoint,
-             :index,
-             params
-           )
+           if socket.assigns.studio do
+             ~p"/studios/#{socket.assigns.studio.handle}/commissions?#{params}"
+           else
+             ~p"/commissions?#{params}"
+           end
        )}
     else
       {:noreply, assign(socket, filter: changeset)}
@@ -494,8 +497,8 @@ defmodule BanchanWeb.CommissionLive do
                 <CommissionRow result={result} />
               {/for}
             </ul>
-            <InfiniteScroll id="commissions-infinite-scroll" page={@page} load_more="load_more" />
           {/if}
+          <InfiniteScroll id="commissions-infinite-scroll" page={@page} load_more="load_more" />
         </div>
         {#if @commission}
           <div class="basis-full">
