@@ -7,6 +7,7 @@ defmodule BanchanWeb.DenizenLive.Show do
   alias Banchan.Accounts
   alias Banchan.Studios
   alias Banchan.Studios.Studio
+  alias Banchan.Utils
 
   alias Surface.Components.{LivePatch, LiveRedirect}
 
@@ -163,128 +164,134 @@ defmodule BanchanWeb.DenizenLive.Show do
           {#else}
             <div class="w-full max-h-80 aspect-header-image bg-base-300" />
           {/if}
-          <div class="flex flex-row flex-wrap">
-            <div class="relative w-32 h-20">
-              <div class="absolute -top-4 left-6">
-                {#if @user.disable_info}
-                  <div class="avatar">
-                    <div class="rounded-full">
-                      <div class="w-24 h-24 bg-base-300" />
+          <div class="flex flex-col items-start w-full gap-0 mx-auto max-w-7xl">
+            <div class="flex flex-row flex-wrap w-full">
+              <div class="relative w-32 h-20">
+                <div class="absolute -top-4 left-6">
+                  {#if @user.disable_info}
+                    <div class="avatar">
+                      <div class="rounded-full">
+                        <div class="w-24 h-24 bg-base-300" />
+                      </div>
                     </div>
+                  {#else}
+                    <Avatar thumb={false} class="w-24 h-24" user={@user} />
+                  {/if}
+                </div>
+              </div>
+              <div class="hidden m-4 md:flex md:flex-col">
+                <h1 class="text-xl font-bold">
+                  {#if !@user.disable_info}
+                    {@user.name}
+                  {/if}
+                </h1>
+                <UserHandle link={false} user={@user} />
+              </div>
+              <div class="flex flex-row gap-2 m-4 ml-auto place-content-end">
+                {#if @current_user && @current_user.id != @user.id}
+                  <div class="dropdown dropdown-end">
+                    <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
+                      <Icon name="more-vertical" size="4" />
+                    </label>
+                    <ul
+                      tabindex="0"
+                      class="p-2 border menu md:menu-compact dropdown-content bg-base-300 border-base-content border-opacity-10 rounded-box"
+                    >
+                      {#if :admin in @current_user.roles || :mod in @current_user.roles}
+                        <li>
+                          <LiveRedirect to={Routes.denizen_moderation_path(Endpoint, :edit, @user.handle)}>
+                            <Icon name="gavel" size="4" /> Moderation
+                          </LiveRedirect>
+                        </li>
+                      {/if}
+                      <li>
+                        <button type="button" :on-click="open_block_modal">
+                          <Icon name="circle-slash" size="4" /> Block
+                        </button>
+                      </li>
+                      <li>
+                        <button type="button" :on-click="open_unblock_modal">
+                          <Icon name="user-plus" size="4" /> Unblock
+                        </button>
+                      </li>
+                      <li>
+                        <button type="button" :on-click="report">
+                          <Icon name="flag" size="4" /> Report
+                        </button>
+                      </li>
+                    </ul>
                   </div>
-                {#else}
-                  <Avatar thumb={false} class="w-24 h-24" user={@user} />
+                {/if}
+                {#if @current_user &&
+                    (@current_user.id == @user.id || :admin in @current_user.roles || :mod in @current_user.roles)}
+                  <LiveRedirect
+                    label="Edit Profile"
+                    to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)}
+                    class="px-2 py-0 m-2 rounded-full btn btn-sm btn-primary grow-0"
+                  />
                 {/if}
               </div>
             </div>
-            <div class="hidden m-4 md:flex md:flex-col">
-              <h1 class="text-xl font-bold">
-                {#if !@user.disable_info}
+            <div class="flex flex-col w-full m-4 mx-8 md:hidden">
+              {#if !@user.disable_info}
+                <h1 class="text-xl font-bold">
                   {@user.name}
-                {/if}
-              </h1>
+                </h1>
+              {/if}
               <UserHandle link={false} user={@user} />
             </div>
-            <div class="flex flex-row gap-2 m-4 ml-auto place-content-end">
-              {#if @current_user && @current_user.id != @user.id}
-                <div class="dropdown dropdown-end">
-                  <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
-                    <Icon name="more-vertical" size="4" />
-                  </label>
-                  <ul
-                    tabindex="0"
-                    class="p-2 border menu md:menu-compact dropdown-content bg-base-300 border-base-content border-opacity-10 rounded-box"
-                  >
-                    {#if :admin in @current_user.roles || :mod in @current_user.roles}
-                      <li>
-                        <LiveRedirect to={Routes.denizen_moderation_path(Endpoint, :edit, @user.handle)}>
-                          <Icon name="gavel" size="4" /> Moderation
-                        </LiveRedirect>
-                      </li>
-                    {/if}
-                    <li>
-                      <button type="button" :on-click="open_block_modal">
-                        <Icon name="circle-slash" size="4" /> Block
-                      </button>
-                    </li>
-                    <li>
-                      <button type="button" :on-click="open_unblock_modal">
-                        <Icon name="user-plus" size="4" /> Unblock
-                      </button>
-                    </li>
-                    <li>
-                      <button type="button" :on-click="report">
-                        <Icon name="flag" size="4" /> Report
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              {/if}
-              {#if @current_user &&
-                  (@current_user.id == @user.id || :admin in @current_user.roles || :mod in @current_user.roles)}
-                <LiveRedirect
-                  label="Edit Profile"
-                  to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)}
-                  class="px-2 py-0 m-2 rounded-full btn btn-sm btn-primary btn-outline grow-0"
-                />
-              {/if}
+            {#if !@user.disable_info && @user.bio}
+              <div class="w-full mx-6 my-4">
+                {@user.bio}
+              </div>
+            {/if}
+            {#if !@user.disable_info && !Enum.empty?(@user.tags)}
+              <div class="flex flex-row flex-wrap w-full gap-1 mx-6 my-4">
+                {#for tag <- @user.tags}
+                  <Tag tag={tag} />
+                {/for}
+              </div>
+            {/if}
+            {#if Utils.has_socials?(@user)}
+              <Socials entity={@user} class="my-4" />
+            {/if}
+            <div class="flex flex-row gap-4 mx-6 my-4">
+              <LivePatch class="hover:link" to={Routes.denizen_show_path(Endpoint, :following, @user.handle)}>
+                <span class="font-bold">
+                  {#if @following > 9999}
+                    {Number.SI.number_to_si(@following)}
+                  {#else}
+                    {Number.Delimit.number_to_delimited(@following, precision: 0)}
+                  {/if}
+                </span>
+                <span>
+                  Following
+                </span>
+              </LivePatch>
             </div>
           </div>
-          <div class="flex flex-col m-4 mx-8 md:hidden">
-            <h1 class="text-xl font-bold">
-              {#if !@user.disable_info}
-                {@user.name}
-              {/if}
-            </h1>
-            <UserHandle link={false} user={@user} />
-          </div>
-          <div class="mx-6 my-4">
-            {#if !@user.disable_info}
-              {@user.bio}
-            {/if}
-          </div>
-          <div
-            :if={!@user.disable_info && !Enum.empty?(@user.tags)}
-            class="flex flex-row flex-wrap gap-1 mx-6 my-4"
-          >
-            {#for tag <- @user.tags}
-              <Tag tag={tag} />
-            {/for}
-          </div>
-          <Socials entity={@user} class="mx-6 my-4" />
-          <div class="flex flex-row gap-4 mx-6 my-4">
-            <LivePatch class="hover:link" to={Routes.denizen_show_path(Endpoint, :following, @user.handle)}>
-              <span class="font-bold">
-                {#if @following > 9999}
-                  {Number.SI.number_to_si(@following)}
-                {#else}
-                  {Number.Delimit.number_to_delimited(@following, precision: 0)}
-                {/if}
-              </span>
-              <span>
-                Following
-              </span>
-            </LivePatch>
-          </div>
+          <div class="w-full border-t h-fit border-base-content border-opacity-10" />
         </section>
       </:hero>
-      {#if @user.disable_info}
-        <div class="font-semibold">This account has been disabled.</div>
-      {#else}
-        {#if !Enum.empty?(@studios)}
-          {#if @live_action == :show}
-            <div class="pb-6 text-2xl">Artist for:</div>
-          {#elseif @live_action == :following}
-            <div class="pb-6 text-2xl">Following:</div>
+      <div class="flex flex-col items-start w-full gap-4 px-4 mx-auto max-w-7xl">
+        {#if @user.disable_info}
+          <div class="font-semibold">This account has been disabled.</div>
+        {#else}
+          {#if !Enum.empty?(@studios)}
+            {#if @live_action == :show}
+              <div class="pb-2 text-2xl">Artist for:</div>
+            {#elseif @live_action == :following}
+              <div class="pb-2 text-2xl">Following:</div>
+            {/if}
+            <div class="grid grid-cols-1 gap-4 studio-list sm:grid-cols-2 md:grid-cols-3 auto-rows-fr">
+              {#for studio <- @studios}
+                <StudioCard studio={studio} />
+              {/for}
+            </div>
+            <InfiniteScroll id="studios-infinite-scroll" page={@studios.page_number} load_more="load_more" />
           {/if}
-          <div class="grid grid-cols-1 studio-list sm:gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
-            {#for studio <- @studios}
-              <StudioCard studio={studio} />
-            {/for}
-          </div>
-          <InfiniteScroll id="studios-infinite-scroll" page={@studios.page_number} load_more="load_more" />
         {/if}
-      {/if}
+      </div>
 
       <Modal id="block-modal">
         <:title>Block From...</:title>
