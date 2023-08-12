@@ -220,8 +220,6 @@ defmodule BanchanWeb.OfferingLive.Show do
               <div class="badge badge-error">Hidden</div>
             {#elseif @offering.open && !is_nil(@offering.slots)}
               <div class="whitespace-nowrap badge badge-primary">{@available_slots}/{@offering.slots} Slots</div>
-            {#elseif !@offering.open && !is_nil(@offering.slots)}
-              <div class="badge badge-error">0/{@offering.slots} Slots</div>
             {#elseif @offering.open}
               <div class="badge badge-primary">Open</div>
             {#else}

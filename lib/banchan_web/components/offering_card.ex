@@ -44,8 +44,6 @@ defmodule BanchanWeb.Components.OfferingCard do
           <div class="text-xs font-semibold opacity-75 availability-status whitespace-nowrap">
             {#if @open? && !is_nil(@total_slots) && !is_nil(@available_slots)}
               {@available_slots}/{@total_slots} Slots
-            {#elseif !@open? && !is_nil(@total_slots)}
-              0/{@total_slots} Slots
             {#elseif @open?}
               Open
             {#else}
