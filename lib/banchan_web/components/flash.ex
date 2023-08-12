@@ -10,7 +10,7 @@ defmodule BanchanWeb.Components.Flash do
 
   def render(assigns) do
     ~F"""
-    <div class="flash-container">
+    <div class="fixed bottom-auto z-20 w-auto w-3/5 translate-y-0 toast toast-center top-20 flash-container">
       {#if live_flash(@flashes, :success)}
         <div
           class="p-2 alert alert-success hover:cursor-pointer"

@@ -26,8 +26,8 @@ defmodule BanchanWeb.Components.Form.TextInput do
           <span class="flex flex-row items-center gap-1 label-text">
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
-              <div class="tooltip" data-tip={@info}>
-                <Icon name="info" size="4" label="tooltip" />
+              <div class="tooltip tooltip-right" data-tip={@info}>
+                <Icon name="info" size="4" label="tooltip tooltip-right" />
               </div>
             {/if}
           </span>

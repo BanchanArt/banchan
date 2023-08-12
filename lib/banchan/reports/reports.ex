@@ -250,13 +250,13 @@ defmodule Banchan.Reports do
   @doc """
   File a bug on GitHub
   """
-  def report_bug(%User{} = actor, title, body, actor_url_fn) do
+  def report_bug(%User{} = actor, title, body, bug?, actor_url_fn) do
     %{access_token: Application.fetch_env!(:banchan, :github_access_token)}
     |> Tentacat.Client.new()
     |> Tentacat.Issues.create("BanchanArt", "banchan", %{
       title: title,
       body: "reported by [@#{actor.handle}](#{actor_url_fn.(actor)}):\n\n#{body}",
-      labels: ["bug", "from-site"]
+      labels: ["feedback", "from-site" | if(bug? == "true", do: ["bug"], else: [])]
     })
     |> case do
       {201, %{"html_url" => url}, _} ->
