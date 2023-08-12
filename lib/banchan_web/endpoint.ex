@@ -3,8 +3,6 @@ defmodule BanchanWeb.Endpoint do
   use Sentry.PlugCapture
   use Phoenix.Endpoint, otp_app: :banchan
 
-  alias BanchanWeb.CacheBodyReader
-
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
@@ -25,7 +23,9 @@ defmodule BanchanWeb.Endpoint do
     at: "/",
     from: :banchan,
     gzip: false,
-    only: BanchanWeb.static_paths()
+    only: BanchanWeb.static_paths(),
+    # Fuck AI
+    headers: [{"x-robots-tag", "noai"}]
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
@@ -46,7 +46,7 @@ defmodule BanchanWeb.Endpoint do
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
-    body_reader: {CacheBodyReader, :read_body, []},
+    body_reader: {BanchanWeb.CacheBodyReader, :read_body, []},
     json_decoder: Phoenix.json_library()
 
   # Adds contextual information to errors captured by Sentry, should be under Plug.Parsers
@@ -55,6 +55,9 @@ defmodule BanchanWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+
+  # Reject AI as much as possible
+  plug BanchanWeb.FuckAiPlug
 
   plug BanchanWeb.Router
 end

@@ -95,9 +95,9 @@ defmodule BanchanWeb.Components.Layout do
             <div>
               <span class="opacity-100 footer-title text-primary">Co-op</span>
               <LiveRedirect to={Routes.static_about_us_path(Endpoint, :show)} class="link link-hover">About Us</LiveRedirect>
-              <LiveRedirect to={Routes.static_contact_path(Endpoint, :show)} class="link link-hover">Contact</LiveRedirect>
               <LiveRedirect to={Routes.static_membership_path(Endpoint, :show)} class="link link-hover">Membership</LiveRedirect>
-              <LiveRedirect to={Routes.report_bug_new_path(Endpoint, :new)}>Report Bug</LiveRedirect>
+              <LiveRedirect to={Routes.static_contact_path(Endpoint, :show)} class="link link-hover">Contact</LiveRedirect>
+              <LiveRedirect to={Routes.report_bug_new_path(Endpoint, :new)}>Feedback</LiveRedirect>
             </div>
             <div>
               <span class="opacity-100 footer-title text-primary">Legal</span>
@@ -130,6 +130,12 @@ defmodule BanchanWeb.Components.Layout do
                   target="_blank"
                   rel="noopener noreferrer"
                 ><i class="text-xl fab fa-discord" /></a>
+                <a
+                  href="https://github.com/BanchanArt/banchan"
+                  aria-label="Banchan Art on Github (opens in new tab)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                ><i class="text-xl fab fa-github" /></a>
               </div>
             </div>
           </footer>

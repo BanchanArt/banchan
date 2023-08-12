@@ -140,7 +140,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
             <span class="flex flex-row items-center gap-1 label-text">
               {@label || Phoenix.Naming.humanize(@name)}
               {#if @info}
-                <div class="tooltip" data-tip={@info}>
+                <div class="tooltip tooltip-right" data-tip={@info}>
                   <Icon
                     name="info"
                     size="4"
