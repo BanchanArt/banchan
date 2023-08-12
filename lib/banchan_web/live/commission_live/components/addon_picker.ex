@@ -23,7 +23,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonPicker do
     socket = socket |> assign(assigns)
 
     custom_changeset =
-      if socket.assigns.allow_custom do
+      if socket.assigns.allow_custom && socket.assigns.allow_edits do
         %LineItem{} |> LineItem.custom_changeset(%{})
       else
         nil
@@ -152,6 +152,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonPicker do
         offering={@commission.offering}
         line_items={@commission.line_items}
         custom_changeset={@custom_changeset}
+        allow_edits={@allow_edits}
         add_item="add_item"
         change_custom="change_custom"
         submit_custom="submit_custom"

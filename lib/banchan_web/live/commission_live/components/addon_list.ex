@@ -22,6 +22,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
   prop id, :string, required: true
   prop submit_custom, :event
   prop change_custom, :event
+  prop allow_edits, :boolean, default: false
 
   def set_open_custom(id, open?) do
     Collapse.set_open(id <> "-custom-collapse", open?)
@@ -34,7 +35,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
         {#for {option, idx} <- Enum.with_index(@offering.options)}
           {#if !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
             <li class="flex flex-row gap-2 py-2">
-              {#if @add_item}
+              {#if @allow_edits && @add_item}
                 <button
                   type="button"
                   class="w-8 text-xl opacity-50 hover:text-success"
@@ -54,7 +55,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
             </li>
           {/if}
         {/for}
-        {#if @custom_changeset}
+        {#if @custom_changeset && @allow_edits}
           <li class="py-2 pr-4">
             <Collapse id={@id <> "-custom-collapse"}>
               <:header>
