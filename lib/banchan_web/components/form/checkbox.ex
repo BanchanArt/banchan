@@ -34,11 +34,16 @@ defmodule BanchanWeb.Components.Form.Checkbox do
           }
           opts={@opts}
         />
-        <div class="px-2 label-text flex flex-row items-center gap-1">
+        <div class="flex flex-row items-center gap-1 px-2 label-text">
           <#slot>{@label}</#slot>
           {#if @info}
             <div class="tooltip" data-tip={@info}>
-              <Icon name="info" size="4" label="tooltip" />
+              <Icon
+                name="info"
+                size="4"
+                label="tooltip"
+                class="opacity-50 hover:opacity-100 active:opacity-100"
+              />
             </div>
           {/if}
         </div>

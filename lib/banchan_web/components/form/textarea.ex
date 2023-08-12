@@ -32,7 +32,12 @@ defmodule BanchanWeb.Components.Form.TextArea do
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
               <div class="tooltip" data-tip={@info}>
-                <Icon name="info" size="4" label="tooltip" />
+                <Icon
+                  name="info"
+                  size="4"
+                  label="tooltip"
+                  class="opacity-50 hover:opacity-100 active:opacity-100"
+                />
               </div>
             {/if}
           </span>

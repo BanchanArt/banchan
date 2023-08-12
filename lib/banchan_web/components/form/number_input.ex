@@ -27,22 +27,29 @@ defmodule BanchanWeb.Components.Form.NumberInput do
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
               <div class="tooltip" data-tip={@info}>
-                <Icon name="info" size="4" label="tooltip" />
+                <Icon
+                  name="info"
+                  size="4"
+                  label="tooltip"
+                  class="opacity-50 hover:opacity-100 active:opacity-100"
+                />
               </div>
             {/if}
           </span>
         </Label>
       {/if}
       <div class="flex flex-col">
-        <div class="flex flex-row w-full gap-2 control input input-bordered focus-within:ring ring-primary">
+        <div class={
+          "flex flex-row w-full gap-2 control input input-bordered focus-within:ring ring-primary",
+          "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
+        }>
           {#if @icon}
             <Icon name={"#{@icon}"} size="4" />
           {/if}
           <NumberInput
             class={
               "w-full bg-transparent ring-0 outline-none border-none focus:ring-0",
-              @class,
-              "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
+              @class
             }
             opts={[{:phx_debounce, "200"} | @opts]}
           />

@@ -28,7 +28,12 @@ defmodule BanchanWeb.Components.Form.EmailInput do
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
               <div class="tooltip" data-tip={@info}>
-                <Icon name="info" size="4" label="tooltip" />
+                <Icon
+                  name="info"
+                  size="4"
+                  label="tooltip"
+                  class="opacity-50 hover:opacity-100 active:opacity-100"
+                />
               </div>
             {/if}
           </span>
@@ -37,7 +42,8 @@ defmodule BanchanWeb.Components.Form.EmailInput do
       <div class="flex flex-col">
         <div class={
           "flex flex-row gap-2 w-full control input input-bordered focus-within:ring ring-primary",
-          @wrapper_class
+          @wrapper_class,
+          "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
         }>
           {#if @icon}
             <Icon name={"#{@icon}"} size="4" />
@@ -45,8 +51,7 @@ defmodule BanchanWeb.Components.Form.EmailInput do
           <EmailInput
             class={
               "w-full bg-transparent ring-0 outline-none border-none focus:ring-0",
-              @class,
-              "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
+              @class
             }
             opts={[{:phx_debounce, "200"} | @opts]}
           />

@@ -466,13 +466,13 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             <button
               type="button"
               phx-value-ref={(@uploads.card_image.entries |> Enum.at(0)).ref}
-              class="btn btn-md btn-circle absolute left-2 top-2 z-20"
+              class="absolute z-20 btn btn-md btn-circle left-2 top-2"
               :on-click="cancel_card_upload"
             >✕</button>
           {#else}
             <button
               type="button"
-              class="btn btn-md btn-circle absolute left-2 top-2 z-20"
+              class="absolute z-20 btn btn-md btn-circle left-2 top-2"
               :on-click="remove_card"
             >✕</button>
             <HiddenInput name={:card_image_id} value={@offering.card_img_id} />
@@ -548,7 +548,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <ul class="flex flex-col gap-4 pt-4">
           <Inputs form={@form} for={:options} :let={index: index}>
             <li>
-              <Collapse id={@id <> "-option-" <> "#{index}"} class="border-b-2">
+              <Collapse id={@id <> "-option-" <> "#{index}"}>
                 <:header>
                   <h3 class="text-xl">
                     {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
@@ -563,7 +563,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                 </:header>
                 <TextInput name={:name} info="Name of the option." opts={required: true} />
                 <TextArea name={:description} info="Description for the option." opts={required: true} />
-                <div class="flex flex-row gap-2 items-center py-2">
+                <div class="flex flex-row items-center gap-2 py-2">
                   <div class="flex flex-basis-1/4">
                     {Money.Currency.symbol(Ecto.Changeset.fetch_field!(@changeset, :currency))}
                   </div>
@@ -609,7 +609,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           </p>
         {/if}
         <div class="divider" />
-        <Collapse class="border-b-2 pb-2" id={@id <> "-terms-collapse"}>
+        <Collapse class="pb-2" id={@id <> "-terms-collapse"}>
           <:header>
             <h3 class="text-2xl">Terms and Template</h3>
           </:header>
@@ -624,7 +624,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
           />
         </Collapse>
-        <div class="pt-4 flex flex-row">
+        <div class="flex flex-row pt-4">
           <Submit changeset={@changeset} label="Save" />
           {#if @changeset.data.id && is_nil(@changeset.data.archived_at)}
             <Button class="btn-error" click="archive" label="Archive" />

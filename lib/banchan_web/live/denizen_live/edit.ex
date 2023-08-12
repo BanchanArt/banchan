@@ -236,42 +236,44 @@ defmodule BanchanWeb.DenizenLive.Edit do
                 </div>
               </div>
             </div>
-            <TextInput
-              name={:handle}
-              icon="at"
-              info="For security reasons, you can only change this on your Account Settings page."
-              opts={disabled: true}
-            />
-            <TextInput name={:name} icon="user" info="Your display name." opts={required: true} />
-            <TextArea name={:bio} info="Tell us a little bit about yourself!" />
-            <TagsInput
-              id="user_tags"
-              label="Interests"
-              info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
-              name={:tags}
-            />
-            <Collapse id="socials" class="my-4 border-b-2">
-              <:header>
-                Links
-              </:header>
-              <TextInput name={:website_url} />
-              <TextInput name={:twitter_handle} />
-              <TextInput name={:instagram_handle} />
-              <TextInput name={:facebook_url} />
-              <TextInput name={:furaffinity_handle} />
-              <TextInput name={:discord_handle} />
-              <TextInput name={:artstation_handle} />
-              <TextInput name={:deviantart_handle} />
-              <TextInput name={:tumblr_handle} />
-              <TextInput name={:mastodon_handle} />
-              <TextInput name={:twitch_channel} />
-              <TextInput name={:picarto_channel} />
-              <TextInput name={:pixiv_url} />
-              <TextInput name={:pixiv_handle} />
-              <TextInput name={:tiktok_handle} />
-              <TextInput name={:artfight_handle} />
-            </Collapse>
-            <Submit label="Save" />
+            <div class="grid w-full grid-cols-1 gap-4">
+              <TextInput
+                name={:handle}
+                icon="at-sign"
+                info="For security reasons, you can only change this on your Account Settings page."
+                opts={disabled: true}
+              />
+              <TextInput name={:name} icon="user" info="Your display name." opts={required: true} />
+              <TextArea name={:bio} info="Tell us a little bit about yourself!" />
+              <TagsInput
+                id="user_tags"
+                label="Interests"
+                info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
+                name={:tags}
+              />
+              <Collapse id="socials" class="my-4">
+                <:header>
+                  Links
+                </:header>
+                <TextInput name={:website_url} />
+                <TextInput name={:twitter_handle} />
+                <TextInput name={:instagram_handle} />
+                <TextInput name={:facebook_url} />
+                <TextInput name={:furaffinity_handle} />
+                <TextInput name={:discord_handle} />
+                <TextInput name={:artstation_handle} />
+                <TextInput name={:deviantart_handle} />
+                <TextInput name={:tumblr_handle} />
+                <TextInput name={:mastodon_handle} />
+                <TextInput name={:twitch_channel} />
+                <TextInput name={:picarto_channel} />
+                <TextInput name={:pixiv_url} />
+                <TextInput name={:pixiv_handle} />
+                <TextInput name={:tiktok_handle} />
+                <TextInput name={:artfight_handle} />
+              </Collapse>
+              <Submit label="Save" />
+            </div>
           </Form>
         </div>
       </div>
