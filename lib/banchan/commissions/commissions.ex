@@ -88,6 +88,8 @@ defmodule Banchan.Commissions do
 
     * `page` - The page number to return. Defaults to 1.
     * `page_size` - The number of items to return per page. Defaults to 24.
+    * `exclude_member` - Exclude commissions where the current user is a
+      member of the studio.
     * `order_by` - Sort order, and in some cases, filters. Defaults to
       `:recently_updated`. Supports the following values:
       * `:recently_updated` - List by most recently updated commissions (with
@@ -102,6 +104,7 @@ defmodule Banchan.Commissions do
         opts \\ []
       ) do
     main_dashboard_query(user)
+    |> dashboard_exclude_member(opts)
     |> dashboard_query_filter(filter)
     |> dashboard_order_by(opts)
     |> Repo.paginate(
@@ -150,6 +153,22 @@ defmodule Banchan.Commissions do
 
     quote do
       fragment(unquote("CASE ? #{cases} ELSE NULL END"), unquote(arg))
+    end
+  end
+
+  defp dashboard_exclude_member(q, opts) do
+    if Keyword.get(opts, :exclude_member, false) do
+      q
+      |> join(
+        :left,
+        [current_user: u, studio: s],
+        current_member in assoc(s, :artists),
+        on: current_member.id == u.id,
+        as: :current_member
+      )
+      |> where([current_member: current_member], is_nil(current_member.id))
+    else
+      q
     end
   end
 

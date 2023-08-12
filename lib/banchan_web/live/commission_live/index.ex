@@ -43,13 +43,6 @@ defmodule BanchanWeb.CommissionLive do
       |> assign(filter_open: Map.get(socket.assigns, :filter_open, false))
 
     socket =
-      socket
-      |> assign(
-        :results,
-        list_comms(socket)
-      )
-
-    socket =
       case params do
         %{"commission_id" => commission_id} ->
           # NOTE: Phoenix LiveView's push_patch has an obnoxious bug with fragments, so
@@ -122,6 +115,13 @@ defmodule BanchanWeb.CommissionLive do
         else
           :client
         end
+      )
+
+    socket =
+      socket
+      |> assign(
+        :results,
+        list_comms(socket)
       )
 
     socket =
@@ -335,6 +335,7 @@ defmodule BanchanWeb.CommissionLive do
     Commissions.list_commissions(
       socket.assigns.current_user,
       Ecto.Changeset.apply_changes(socket.assigns.filter),
+      exclude_member: is_nil(socket.assigns.studio),
       page: page,
       page_size: 10,
       order_by: socket.assigns.order_by
