@@ -13,7 +13,6 @@ defmodule BanchanWeb.Components.InfiniteScroll do
     <div
       id={@id}
       :hook="InfiniteScroll"
-      class="hidden"
       data-page={@page}
       data-event-name={@load_more.name}
       data-event-target={@load_more.target}
