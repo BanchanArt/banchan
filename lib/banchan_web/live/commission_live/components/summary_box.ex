@@ -419,8 +419,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
         {/if}
         <div class="pb-4 flex flex-col gap-2">
           {#if Commissions.commission_open?(@commission) && Commissions.commission_active?(@commission)}
-            <div class="input-group">
-              {#if @current_user_member?}
+            {#if @current_user_member?}
+              <div class="input-group">
                 <Button
                   disabled={@existing_open || !Commissions.commission_active?(@commission) || @remaining.amount <= 0}
                   click="request_deposit"
@@ -434,19 +434,19 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
                   class="btn-sm grow final-invoice"
                   label="Final Invoice"
                 />
+              </div>
+              {#if !@can_finalize}
+                <p>You can't send a final invoice for this commission unless the subtotal is at least Banchan's commission minimum of {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))}. Add more options (or custom options) under "Options" until the threshold is reached.</p>
               {/if}
-            </div>
-            {#if !@can_finalize}
-              <p>You can't send a final invoice for this commission unless the subtotal is at least Banchan's commission minimum of {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))}. Add more options (or custom options) under "Options" until the threshold is reached.</p>
-            {/if}
-            {#if @remaining.amount < 0}
-              <p class="text-lg font-semibold text-error">
-                Your commission's balance is negative.
-              </p>
-              <p>
-                You likely removed options since the last deposit was made. You must add new options to the commission
-                or reimburse one or more deposits to make the balance positive before you can invoice again.
-              </p>
+              {#if @remaining.amount < 0}
+                <p class="text-lg font-semibold text-error">
+                  Your commission's balance is negative.
+                </p>
+                <p>
+                  You likely removed options since the last deposit was made. You must add new options to the commission
+                  or reimburse one or more deposits to make the balance positive before you can invoice again.
+                </p>
+              {/if}
             {/if}
             {#if @current_user.id == @commission.client_id}
               {#if @existing_open || !Commissions.commission_active?(@commission) || !@can_release ||
@@ -479,14 +479,16 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
               {/if}
             {/if}
           {/if}
-          {#if !Commissions.commission_open?(@commission)}
-            <div>This commission is closed. You can't take any further actions on it.</div>
-          {#elseif !Commissions.commission_active?(@commission)}
-            <div>Only open and accepted commissions can be invoiced. Accept the commission by changing the status to "Accepted" below to continue.</div>
-          {#elseif @existing_open}
-            <div>
-              You can't take any further invoice actions until the <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> is handled.
-            </div>
+          {#if @current_user_member?}
+            {#if !Commissions.commission_open?(@commission)}
+              <div>This commission is closed. You can't take any further actions on it.</div>
+            {#elseif !Commissions.commission_active?(@commission)}
+              <div>Only open and accepted commissions can be invoiced. Accept the commission by changing the status to "Accepted" below to continue.</div>
+            {#elseif @existing_open}
+              <div>
+                You can't take any further invoice actions until the <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> is handled.
+              </div>
+            {/if}
           {/if}
         </div>
       {/if}
