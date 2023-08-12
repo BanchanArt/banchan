@@ -74,7 +74,7 @@ defmodule BanchanWeb.Components.Layout do
         aria-label="Banchan Art menu"
         class="hidden drawer-toggle"
       />
-      <main class="flex flex-col grow h-screen drawer-content">
+      <main class="flex flex-col h-screen grow drawer-content">
         <div class="sticky top-0 z-50">
           <Nav />
         </div>
@@ -155,7 +155,9 @@ defmodule BanchanWeb.Components.Layout do
                   <UserHandle class="text-sm" link={false} user={@current_user} />
                 </Link>
                 <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
-                  <Icon name="log-out" size="4" label="logout" />
+                  <div class="tooltip" data-tip="Log out">
+                    <Icon name="log-out" size="4" label="log out" class="z-50" />
+                  </div>
                 </Link>
               </div>
             {/if}
