@@ -47,8 +47,8 @@ defmodule BanchanWeb.StudioLive.Followers do
   def render(assigns) do
     ~F"""
     <StudioLayout flashes={@flash} id="studio-layout" studio={@studio}>
-      <h3 class="p-6 text-semibold text-2xl">Followers</h3>
-      <ul class="grid sm:px-2 grid-cols-2 sm:gap-2 sm:grid-cols-4 auto-rows-fr">
+      <h3 class="p-6 text-2xl text-semibold">Followers</h3>
+      <ul class="grid grid-cols-2 sm:gap-2 sm:grid-cols-4 auto-rows-fr">
         {#for user <- @followers}
           <li>
             <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, user.handle)}>
@@ -56,11 +56,11 @@ defmodule BanchanWeb.StudioLive.Followers do
                 <:image>
                   {#if user.header_img && !user.header_img.pending}
                     <img
-                      class="object-cover aspect-header-image w-full"
+                      class="object-cover w-full aspect-header-image"
                       src={Routes.public_image_path(Endpoint, :image, :user_header_img, user.header_img_id)}
                     />
                   {#else}
-                    <div class="aspect-header-image bg-base-300 w-full" />
+                    <div class="w-full aspect-header-image bg-base-300" />
                   {/if}
                 </:image>
                 <div class="flex flex-row flex-wrap">

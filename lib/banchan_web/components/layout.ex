@@ -74,14 +74,14 @@ defmodule BanchanWeb.Components.Layout do
         aria-label="Banchan Art menu"
         class="hidden drawer-toggle"
       />
-      <main class="flex flex-col flex-grow h-screen drawer-content">
+      <main class="flex flex-col h-screen grow drawer-content">
         <div class="sticky top-0 z-50">
           <Nav />
         </div>
         {#if slot_assigned?(:hero)}
           <#slot {@hero} />
         {/if}
-        <section class={"flex flex-col flex-grow p-#{@padding}"}>
+        <section class={"flex flex-col grow p-#{@padding}"}>
           <div class="my-2 alert alert-info" :if={@current_user && is_nil(@current_user.confirmed_at)}>
             <div class="block">
               ⚠️You need to verify your email address before you can do certain things on the site, such as submit new commissions. Please check your email or <LiveRedirect class="link" to={Routes.confirmation_path(Endpoint, :show)}>click here to resend your confirmation</LiveRedirect>.⚠️
@@ -161,7 +161,9 @@ defmodule BanchanWeb.Components.Layout do
                   <UserHandle class="text-sm" link={false} user={@current_user} />
                 </Link>
                 <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
-                  <Icon name="log-out" size="4" label="logout" />
+                  <div class="tooltip" data-tip="Log out">
+                    <Icon name="log-out" size="4" label="log out" class="z-50" />
+                  </div>
                 </Link>
               </div>
             {/if}

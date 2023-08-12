@@ -41,11 +41,14 @@ defmodule BanchanWeb.Components.Form.UploadInput do
       <p class="text-error">{error_to_string(err)}</p>
     {/for}
     <div
-      class="relative flex items-center justify-center border-2 border-dashed rounded-lg cursor-pointer h-15 border-primary"
+      class="relative flex items-center justify-center p-4 border-2 border-dashed rounded-lg cursor-pointer aspect-video border-primary"
       phx-drop-target={@upload.ref}
     >
       <div class="absolute cursor-pointer">
-        <span class="block font-normal cursor-pointer">{@label} <Icon name="file-up" size="4" label="upload file" /></span>
+        <span class="flex flex-row items-center gap-2 font-normal cursor-pointer">
+          {@label}
+          <Icon name="file-up" size="4" label="upload file" />
+        </span>
       </div>
       {#if @crop}
         <CropUploadInput

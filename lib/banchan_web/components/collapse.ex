@@ -28,7 +28,7 @@ defmodule BanchanWeb.Components.Collapse do
     <div class={"flex flex-col", @class}>
       {#if slot_assigned?(:header)}
         <div class="flex flex-row items-center cursor-pointer" :on-click="toggle">
-          <div class="grow">
+          <div class="py-2 grow">
             <#slot {@header} />
           </div>
           {#if @show_arrow}

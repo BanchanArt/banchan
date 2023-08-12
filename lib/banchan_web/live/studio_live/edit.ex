@@ -227,7 +227,7 @@ defmodule BanchanWeb.StudioLive.Edit do
               info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
               name={:tags}
             />
-            <Collapse id="socials" class="my-4 border-b-2">
+            <Collapse id="socials" class="my-4">
               <:header>
                 Links
               </:header>

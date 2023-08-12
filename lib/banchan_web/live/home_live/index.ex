@@ -77,7 +77,7 @@ defmodule BanchanWeb.HomeLive do
     {#if @current_user || is_nil(Application.get_env(:banchan, :basic_auth))}
       <Layout flashes={@flash}>
         <:hero>
-          <div id="carousel-handler" class="flex-grow">
+          <div id="carousel-handler" class="grow">
             <Carousel id="studio-carousel" label="Featured Studios" class="w-full h-full aspect-header-image">
               {#for studio <- @featured_studios.entries}
                 <Carousel.Slide class="w-full carousel-item aspect-header-image">
@@ -98,9 +98,9 @@ defmodule BanchanWeb.HomeLive do
             </Carousel>
           </div>
         </:hero>
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-4">
           <Form for={%{}} as={:search} submit="search" class="w-full" opts={role: "search"}>
-            <div class="flex flex-row w-full max-w-xl mx-auto flex-nowrap md:w-content">
+            <div class="flex flex-row w-full max-w-xl gap-2 mx-auto flex-nowrap md:w-content">
               <Field name={:query} class="w-full">
                 <TextInput
                   name={:query}
@@ -113,13 +113,13 @@ defmodule BanchanWeb.HomeLive do
               </Submit>
             </div>
           </Form>
-          <div class="flex flex-row flex-wrap justify-center gap-2 mx-auto">
+          <div class="flex flex-row flex-wrap items-center justify-center gap-2 mx-auto max-w-7xl">
             {#for cat <- @categories}
               <Tag tag={cat} />
             {/for}
           </div>
-          <div class="homepage-offerings">
-            <div class="flex flex-row items-end px-2 pt-6">
+          <div class="w-full px-4 mx-auto homepage-offerings max-w-7xl">
+            <div class="flex flex-row items-end pt-6">
               <div class="text-xl grow">
                 Selected Offerings
               </div>
@@ -131,16 +131,16 @@ defmodule BanchanWeb.HomeLive do
               </div>
             </div>
             <div class="divider" />
-            <div class="flex flex-col gap-4 sm:px-2">
-              <div class="grid grid-cols-1 sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+            <div class="flex flex-col gap-4">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
                 {#for {offering, idx} <- Enum.with_index(@offerings.entries)}
                   <OfferingCard id={"offering-#{idx}"} current_user={@current_user} offering={offering} />
                 {/for}
               </div>
             </div>
           </div>
-          <div class="pt-10 featured-studios">
-            <div class="flex flex-row items-end px-2">
+          <div class="w-full px-4 pt-10 mx-auto featured-studios max-w-7xl">
+            <div class="flex flex-row items-end">
               <div class="text-xl grow">
                 Selected Studios
               </div>
@@ -152,8 +152,8 @@ defmodule BanchanWeb.HomeLive do
               </div>
             </div>
             <div class="divider" />
-            <div class="flex flex-col gap-4 sm:px-2">
-              <div class="grid grid-cols-1 studio-list sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+            <div class="flex flex-col gap-4">
+              <div class="grid grid-cols-1 gap-4 studio-list sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
                 {#for studio <- @studios.entries}
                   <StudioCard studio={studio} />
                 {/for}
