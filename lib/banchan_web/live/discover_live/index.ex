@@ -124,13 +124,13 @@ defmodule BanchanWeb.DiscoverLive.Index do
             <h1 class="text-3xl">Discover</h1>
             <div class="flex w-full font-semibold border rounded-xl md:w-fit tabs tabs-boxed border-base-content border-opacity-10 flex-nowrap">
               <LivePatch
-                class={"tab tab-lg h-fit flex-1 grow md:grow-0", "tab-active": @type == "offerings"}
+                class={"tab py-1 px-4 h-fit flex-1 grow md:grow-0", "tab-active": @type == "offerings"}
                 to={Routes.discover_index_path(Endpoint, :index, "offerings", params)}
               >
                 Offerings
               </LivePatch>
               <LivePatch
-                class={"tab tab-lg h-fit flex-1 grow md:grow-0", "tab-active": @type == "studios"}
+                class={"tab py-1 px-4 h-fit flex-1 grow md:grow-0", "tab-active": @type == "studios"}
                 to={Routes.discover_index_path(Endpoint, :index, "studios", params)}
               >
                 Studios
