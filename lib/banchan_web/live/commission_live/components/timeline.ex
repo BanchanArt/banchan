@@ -88,12 +88,12 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                 </TimelineItem>
               {#match :payment_processed}
                 <TimelineItem>
-                  <:icon>{Money.Currency.symbol(event.amount)}</:icon>
+                  <:icon>{Payments.currency_symbol(event.amount)}</:icon>
                   paid {Payments.print_money(event.amount)}
                 </TimelineItem>
               {#match :refund_processed}
                 <TimelineItem>
-                  <:icon>{Money.Currency.symbol(event.amount)}</:icon>
+                  <:icon>{Payments.currency_symbol(event.amount)}</:icon>
                   refunded {Payments.print_money(event.amount)}
                 </TimelineItem>
               {#match :status}
@@ -108,13 +108,13 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
                 </TimelineItem>
               {#match :invoice_released}
                 <TimelineItem>
-                  <:icon>{Money.Currency.symbol(event.amount)}</:icon>
+                  <:icon>{Payments.currency_symbol(event.amount)}</:icon>
                   released a deposit for {Payments.print_money(event.amount)}
                 </TimelineItem>
               {#match :all_invoices_released}
                 {#unless is_nil(event.amount)}
                   <TimelineItem>
-                    <:icon>{Money.Currency.symbol(event.amount)}</:icon>
+                    <:icon>{Payments.currency_symbol(event.amount)}</:icon>
                     released all deposits, totaling {Payments.print_money(event.amount)}
                   </TimelineItem>
                 {/unless}

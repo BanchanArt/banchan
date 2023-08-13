@@ -77,9 +77,9 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
                 <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
                 <div class="flex flex-row gap-2 items-center py-2">
                   <div class="flex flex-basis-1/4">{if is_nil(@offering) do
-                      Money.Currency.symbol(Commissions.commission_currency(@commission))
+                      Payments.currency_symbol(Commissions.commission_currency(@commission))
                     else
-                      Money.Currency.symbol(Offerings.offering_currency(@offering))
+                      Payments.currency_symbol(Offerings.offering_currency(@offering))
                     end}</div>
                   <div class="grow">
                     <TextInput name={:amount} show_label={false} opts={required: true} />

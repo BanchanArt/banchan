@@ -6,6 +6,7 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   alias Surface.Components.{Form, Link}
 
+  alias Banchan.Payments
   alias Banchan.Studios
   alias Banchan.Studios.{Notifications, Studio}
 
@@ -31,8 +32,7 @@ defmodule BanchanWeb.StudioLive.Settings do
     currencies =
       Studios.Common.supported_currencies()
       |> Enum.map(fn currency ->
-        %{name: name, symbol: symbol} = Money.Currency.get(currency)
-        {:"#{name} (#{symbol})", currency}
+        {:"#{Money.Currency.name(currency)} (#{Payments.currency_symbol(currency)})", currency}
       end)
 
     {:ok,

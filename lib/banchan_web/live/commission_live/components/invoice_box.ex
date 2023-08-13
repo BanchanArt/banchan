@@ -288,7 +288,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
                   {#if @event.invoice.final}
                     <div class="flex flex-row items-center gap-2">
                       Tip:
-                      {Money.Currency.symbol(@event.invoice.amount)}
+                      {Payments.currency_symbol(@event.invoice.amount)}
                       <TextInput name={:tip} show_label={false} opts={placeholder: "optional"} />
                       <span>({estimate = Commissions.line_item_estimate(@commission.line_items)
 

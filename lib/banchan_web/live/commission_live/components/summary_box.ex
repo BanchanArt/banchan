@@ -365,7 +365,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
         >
           <div class="flex flex-row gap-2 items-center">
             <div class="text-md font-medium">Deposit:</div>
-            {Money.Currency.symbol(Commissions.commission_currency(@commission))}
+            {Payments.currency_symbol(Commissions.commission_currency(@commission))}
             <TextInput name={:amount} show_label={false} />
           </div>
           <div class="divider" />

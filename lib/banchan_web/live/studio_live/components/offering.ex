@@ -565,7 +565,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                 <TextArea name={:description} info="Description for the option." opts={required: true} />
                 <div class="flex flex-row items-center gap-2 py-2">
                   <div class="flex flex-basis-1/4">
-                    {Money.Currency.symbol(Ecto.Changeset.fetch_field!(@changeset, :currency))}
+                    {Payments.currency_symbol(Ecto.Changeset.fetch_field!(@changeset, :currency))}
                   </div>
                   <div class="grow">
                     <TextInput name={:price} info="Quoted price for adding this option." show_label={false} />
