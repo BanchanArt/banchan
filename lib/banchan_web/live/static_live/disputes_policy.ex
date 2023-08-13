@@ -15,7 +15,7 @@ defmodule BanchanWeb.StaticLive.DisputesPolicy do
       <#Markdown class="prose">
         # Disputes Policy
 
-        Last updated: September 21, 2022
+        Last updated: August 13, 2023
 
         Thank you for shopping at Banchan Art.
 
@@ -35,7 +35,7 @@ defmodule BanchanWeb.StaticLive.DisputesPolicy do
 
         **Commissions** refer to the items offered for sale on the Service.
 
-        **Company** (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to Banchan Art LLC, 340 S Lemon Ave #8687, Walnut, CA 91789.
+        **Company** (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to Banchan Art LLC, 440 N Barranca Ave #8687 Covina, CA 91723.
 
         **Orders** mean a request by You to purchase Commissions through the Service.
 

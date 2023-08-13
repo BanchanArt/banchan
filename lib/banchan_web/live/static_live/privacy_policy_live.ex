@@ -15,7 +15,7 @@ defmodule BanchanWeb.StaticLive.PrivacyPolicy do
       <#Markdown class="prose">
         # Privacy Policy
 
-        Last updated: August 3, 2022
+        Last updated: August 13, 2023
 
         This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.
 
@@ -35,7 +35,7 @@ defmodule BanchanWeb.StaticLive.PrivacyPolicy do
 
         **Business** , for the purpose of the CCPA (California Consumer Privacy Act), refers to the Company as the legal entity that collects Consumers' personal information and determines the purposes and means of the processing of Consumers' personal information, or on behalf of which such information is collected and that alone, or jointly with others, determines the purposes and means of the processing of consumers' personal information, that does business in the State of California.
 
-        **Company** (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to Digital Workers Guild LLC, 340 S Lemon Ave #8687, Walnut, CA 91789.
+        **Company** (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to Digital Workers Guild LLC, 440 N Barranca Ave #8687 Covina, CA 91723.
 
         **Consumer** , for the purpose of the CCPA (California Consumer Privacy Act), means a natural person who is a California resident. A resident, as defined in the law, includes (1) every individual who is in the USA for other than a temporary or transitory purpose, and (2) every individual who is domiciled in the USA who is outside the USA for a temporary or transitory purpose.
 

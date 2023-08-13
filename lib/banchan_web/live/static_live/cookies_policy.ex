@@ -15,7 +15,7 @@ defmodule BanchanWeb.StaticLive.CookiesPolicy do
       <#Markdown class="prose">
         # Cookies Policy
 
-        Last updated: September 21, 2022
+        Last updated: August 13, 2023
 
         This Cookies Policy explains what Cookies are and how We use them. You should read this policy so You can understand what type of cookies We use, or the information We collect using Cookies and how that information is used.
 
@@ -33,7 +33,7 @@ defmodule BanchanWeb.StaticLive.CookiesPolicy do
 
         For the purposes of this Cookies Policy:
 
-        - **Company** (referred to as either "the Company", "We", "Us" or "Our" in this Cookies Policy) refers to Banchan Art LLC, 340 S Lemon Ave #8687, Walnut, CA 91789.
+        - **Company** (referred to as either "the Company", "We", "Us" or "Our" in this Cookies Policy) refers to Banchan Art LLC, 440 N Barranca Ave #8687 Covina, CA 91723.
         - **Cookies** means small files that are placed on Your computer, mobile device or any other device by a website, containing details of Your browsing history on that website among its many uses.
         - **Website** refers to Banchan Art, accessible from https://banchan.art.
         - **You** means the individual accessing or using the Website, or a company, or any legal entity on behalf of which such individual is accessing or using the Website, as applicable.

@@ -15,7 +15,7 @@ defmodule BanchanWeb.StaticLive.TermsAndConditions do
       <#Markdown class="prose">
         # Terms and Conditions
 
-        Last updated: September 21, 2022
+        Last updated: August 13, 2023
 
         Please read these terms and conditions carefully before using Our Service.
 
@@ -35,7 +35,7 @@ defmodule BanchanWeb.StaticLive.TermsAndConditions do
 
         **Commissions** refer to the items offered for sale on the Service.
 
-        **Company** (referred to as either "the Company", "We", "Us" or "Our" in these Terms) refers to Banchan Art LLC, 340 S Lemon Ave #8687, Walnut, CA 91789.
+        **Company** (referred to as either "the Company", "We", "Us" or "Our" in these Terms) refers to Banchan Art LLC, 440 N Barranca Ave #8687 Covina, CA 91723.
 
         **Content** refers to content such as text, images, or other information that can be posted, uploaded, linked to or otherwise made available by You, regardless of the form of that content.
 
