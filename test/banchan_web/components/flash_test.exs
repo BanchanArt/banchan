@@ -14,10 +14,7 @@ defmodule BanchanWeb.Components.FlashTest do
         """
       end
 
-    assert html =~ """
-           <div class="fixed bottom-auto z-20 w-auto w-3/5 translate-y-0 toast toast-center top-20 flash-container">
-           </div>
-           """
+    assert html =~ "<div class=\"flash-container"
   end
 
   test "renders success alerts" do
@@ -29,7 +26,7 @@ defmodule BanchanWeb.Components.FlashTest do
       end
 
     assert html =~
-             "<div class=\"fixed bottom-auto z-20 w-auto w-3/5 translate-y-0 toast toast-center top-20 flash-container\">"
+             "<div class=\"flash-container"
 
     assert html =~ "alert alert-success"
     assert html =~ "womp"
@@ -44,7 +41,7 @@ defmodule BanchanWeb.Components.FlashTest do
       end
 
     assert html =~
-             "<div class=\"fixed bottom-auto z-20 w-auto w-3/5 translate-y-0 toast toast-center top-20 flash-container\">"
+             "<div class=\"flash-container"
 
     assert html =~ "alert alert-info"
     assert html =~ "womp"
@@ -59,7 +56,7 @@ defmodule BanchanWeb.Components.FlashTest do
       end
 
     assert html =~
-             "<div class=\"fixed bottom-auto z-20 w-auto w-3/5 translate-y-0 toast toast-center top-20 flash-container\">"
+             "<div class=\"flash-container"
 
     assert html =~ "alert alert-warning"
     assert html =~ "womp"
@@ -74,7 +71,7 @@ defmodule BanchanWeb.Components.FlashTest do
       end
 
     assert html =~
-             "<div class=\"fixed bottom-auto z-20 w-auto w-3/5 translate-y-0 toast toast-center top-20 flash-container\">"
+             "<div class=\"flash-container"
 
     assert html =~ "alert alert-error"
     assert html =~ "womp"

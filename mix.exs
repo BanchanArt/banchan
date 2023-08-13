@@ -70,8 +70,11 @@ defmodule Banchan.MixProject do
       # TODO: Can't bump this one to ~>2 because of tentacat
       {:httpoison, "~> 1.8.1"},
       {:jason, "~> 1.4.0"},
+      {:makeup_elixir, ">= 0.0.0"},
+      {:makeup_erlang, ">= 0.0.0"},
       {:mogrify, "~> 0.9.3"},
       {:money, "~> 1.12.2"},
+      {:nimble_publisher, "~> 1.0.0"},
       {:nimble_totp, "~> 1.0.0"},
       {:number, "~> 1.0.4"},
       {:oban, "~> 2.15.1"},

@@ -176,6 +176,10 @@ defmodule BanchanWeb.Router do
       live("/beta", BetaLive.Signup, :new)
       live("/beta/confirmation", BetaLive.Confirmation, :show)
 
+      live("/blog", BlogLive, :index)
+      live("/blog/tag/:tag", BlogLive, :index)
+      live("/blog/:year/:month/:day/:id", BlogLive, :index)
+
       live("/about-us", StaticLive.AboutUs, :show)
       live("/contact", StaticLive.Contact, :show)
       live("/membership", StaticLive.Membership, :show)

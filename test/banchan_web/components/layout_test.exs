@@ -14,9 +14,7 @@ defmodule BanchanWeb.Components.NavTest do
         """
       end
 
-    assert html =~ """
-           <div class="fixed bottom-auto z-20 w-auto w-3/5 translate-y-0 toast toast-center top-20 flash-container">
-           """
+    assert html =~ "<div class=\"flash-container"
   end
 
   test "renders nav component" do

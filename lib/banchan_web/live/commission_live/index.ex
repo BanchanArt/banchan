@@ -416,7 +416,7 @@ defmodule BanchanWeb.CommissionLive do
     ~F"""
     <Layout flashes={@flash} context={@context} studio={@studio}>
       {#if !@commission}
-        <h1 class="text-3xl">
+        <h1 class="text-3xl font-bold">
           {#if @studio}
             Commissions for {@studio.name}
           {#else}

@@ -111,6 +111,7 @@ defmodule BanchanWeb.Components.Layout do
             </div>
             <div>
               <span class="opacity-100 footer-title text-primary">Social</span>
+              <LiveRedirect to={~p"/blog"} class="link link-hover">Blog</LiveRedirect>
               <div class="grid grid-flow-col gap-4">
                 <a
                   href="https://mastodon.art/@Banchan"
