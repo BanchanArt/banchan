@@ -111,8 +111,9 @@ defmodule Banchan.Offerings do
         max_proposals = Ecto.Changeset.get_field(changeset, :max_proposals)
 
         changeset =
-          if (!is_nil(slots) && slots < used_slots) ||
-               (!is_nil(max_proposals) && max_proposals < proposal_count) do
+          if (!is_nil(slots) && !is_nil(used_slots) && slots < used_slots) ||
+               (!is_nil(max_proposals) && !is_nil(proposal_count) &&
+                  max_proposals < proposal_count) do
             changeset
             |> Ecto.Changeset.put_change(:open, false)
           else
@@ -147,6 +148,10 @@ defmodule Banchan.Offerings do
              {:ok, _jobs} <- drop_uploads do
           if !open_before? && changed.open do
             Notifications.offering_opened(changed)
+          end
+
+          if open_before? && !changed.open do
+            Notifications.offering_closed(changed)
           end
 
           {:ok, changed}

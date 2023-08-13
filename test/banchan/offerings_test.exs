@@ -42,16 +42,19 @@ defmodule Banchan.OfferingsTest do
 
       Notifications.wait_for_notifications()
 
-      # Artist does not follow the studio, so no notifs.
-      assert [] = Notifications.unread_notifications(artist).entries
+      assert [%{title: "Offering has closed!"}] =
+               Notifications.unread_notifications(artist).entries
 
       # User is specifically-subscribed
-      assert [%{short_body: "Commission slots are now available for " <> _}] =
-               Notifications.unread_notifications(client).entries
+      assert [
+               %{title: "Offering has closed!"},
+               %{short_body: "Commission slots are now available for " <> _}
+             ] = Notifications.unread_notifications(client).entries
 
       # User follows studio
-      assert [%{short_body: "Commission slots are now available for " <> _}] =
-               Notifications.unread_notifications(client2).entries
+      assert [
+               %{short_body: "Commission slots are now available for " <> _}
+             ] = Notifications.unread_notifications(client2).entries
 
       # And this rando isn't at all
       assert [] = Notifications.unread_notifications(client3).entries
@@ -427,7 +430,7 @@ defmodule Banchan.OfferingsTest do
                Offerings.update_offering(
                  artist,
                  offering |> Repo.reload(),
-                 %{open: true},
+                 %{open: true, max_proposals: 4},
                  nil
                )
 
