@@ -20,7 +20,7 @@ defmodule BanchanWeb.StaticLive.Contact do
         For general support issues, we can be reached at [support@banchan.art](mailto:support@banchan.art).
         We're a very small team, so please give us some time to respond.
 
-        You can provide Feedback via [Github](https://github.com/BanchanArt/banchan/issues/new/choose) or via [our feedback form](report_bug). The latter allows you to submit issues to Github without a Github account, but you will need to be logged into our site.
+        You can provide Feedback via [Github](https://github.com/BanchanArt/banchan/issues/new/choose) or via [our feedback form](/feedback). The latter allows you to submit issues to Github without a Github account, but you will need to be logged into our site.
 
         We're also available [on our Discord](https://discord.gg/FUkTHjGKJF), where
         most of the project discussion happens. Come chat with us! We're all stronger together.
