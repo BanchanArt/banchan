@@ -3,7 +3,7 @@
   author: "Banchan.Art Technical Committee",
   tags: ~w(beta release tech),
   description: "We're celebrating our initial Beta launch! Join us!",
-  published: true
+  published: false
 }
 ---
 
