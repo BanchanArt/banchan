@@ -1657,6 +1657,9 @@ defmodule Banchan.Payments do
   def currency_symbol(currency) when is_atom(currency) do
     case Money.Currency.symbol(currency) do
       "$" -> dollar_prefix(currency) <> "$"
+      "¥" when currency == :CNY -> "RMB"
+      "kr" when currency == :NOK -> "NKr"
+      _ when currency == :KMF -> "FC"
       "" -> blank_prefix(currency)
       " " -> blank_prefix(currency)
       other -> other
