@@ -82,7 +82,9 @@ defmodule Banchan.Offerings do
       with {:ok, _actor} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor) do
         offering = Repo.reload(offering) |> Repo.preload([:options, :gallery_imgs])
 
-        open_before? = Repo.one(from o in Offering, where: o.id == ^offering.id, select: o.open)
+        open_before? = Repo.one(from(o in Offering, where: o.id == ^offering.id, select: o.open))
+        proposal_count = offering_proposal_count(offering)
+        used_slots = offering_used_slots(offering, true)
 
         changeset =
           offering
@@ -103,6 +105,18 @@ defmodule Banchan.Offerings do
               end)
 
             changeset |> Ecto.Changeset.put_assoc(:gallery_imgs, gallery_images)
+          end
+
+        slots = Ecto.Changeset.get_field(changeset, :slots)
+        max_proposals = Ecto.Changeset.get_field(changeset, :max_proposals)
+
+        changeset =
+          if (!is_nil(slots) && slots < used_slots) ||
+               (!is_nil(max_proposals) && max_proposals < proposal_count) do
+            changeset
+            |> Ecto.Changeset.put_change(:open, false)
+          else
+            changeset
           end
 
         old_uploads = offering.gallery_imgs |> Enum.map(& &1.upload_id)
@@ -400,6 +414,32 @@ defmodule Banchan.Offerings do
         select: s.default_currency
       )
       |> Repo.one!()
+  end
+
+  def offering_used_slots(%Offering{} = offering, reload \\ false) do
+    if reload do
+      from(c in Commission,
+        where:
+          c.offering_id == ^offering.id and
+            c.status not in [:withdrawn, :approved, :submitted, :rejected],
+        group_by: [c.offering_id],
+        select: count(c.id)
+      )
+      |> Repo.one()
+    else
+      offering.used_slots
+    end
+  end
+
+  def offering_proposal_count(%Offering{} = offering) do
+    from(c in Commission,
+      where:
+        c.offering_id == ^offering.id and
+          c.status == :submitted,
+      group_by: [c.offering_id],
+      select: count(c.id)
+    )
+    |> Repo.one()
   end
 
   @doc """
