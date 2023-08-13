@@ -35,10 +35,16 @@ defmodule BanchanWeb.Components.OfferingCard do
           <div class="flex flex-row gap-2 align-items-center">
             <span class="font-bold name text-md">{@name}</span>
             {#if @mature?}
-              <span class="px-2 bg-error text-xs text-error-content rounded-md border border-opacity-10 align-middle bg-opacity-75 flex flex-row align-items-center">M</span>
+              <span
+                title="Mature"
+                class="px-2 bg-error text-xs text-error-content rounded-md border border-base-content border-opacity-10 bg-opacity-75 flex flex-row items-center font-bold"
+              >M</span>
             {/if}
             {#if @hidden?}
-              <span class="px-2 bg-warning text-xs text-warning-content rounded-md border border-opacity-10 bg-opacity-75 flex flex-row align-items-center">Hidden</span>
+              <span
+                title="Hidden"
+                class="px-2 bg-warning text-xs text-warning-content rounded-md border border-base-content border-opacity-10 bg-opacity-75 flex flex-row items-center font-bold"
+              >Hidden</span>
             {/if}
           </div>
           <div class="text-xs font-semibold opacity-75 availability-status whitespace-nowrap">
