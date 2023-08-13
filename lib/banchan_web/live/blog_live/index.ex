@@ -11,14 +11,38 @@ defmodule BanchanWeb.BlogLive do
   def handle_params(params, _uri, socket) do
     case params do
       %{"tag" => tag} ->
-        {:noreply, assign(socket, post: nil, tag: tag, posts: Blog.get_posts_by_tag!(tag))}
+        {:noreply,
+         assign(
+           socket,
+           post: nil,
+           tag: tag,
+           posts: Blog.get_posts_by_tag!(tag),
+           page_title: "Blog",
+           page_description: "Blog posts by tag: #{tag}"
+         )}
 
       %{"year" => year, "month" => month, "day" => day, "id" => id} ->
+        post = Blog.get_post!(year, month, day, id)
+
         {:noreply,
-         assign(socket, tag: socket.assigns[:tag], post: Blog.get_post!(year, month, day, id))}
+         assign(
+           socket,
+           tag: socket.assigns[:tag],
+           post: post,
+           page_title: "Blog Post: #{post.title}",
+           page_description: post.description
+         )}
 
       _ ->
-        {:noreply, assign(socket, post: nil, tag: nil, posts: Blog.published_posts())}
+        {:noreply,
+         assign(
+           socket,
+           post: nil,
+           tag: nil,
+           posts: Blog.published_posts(),
+           page_title: "Blog",
+           page_description: "Banchan.Art blog posts"
+         )}
     end
   end
 
