@@ -127,6 +127,26 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  Gets a user by handle. nil if user does not exist or is deactivated.
+
+  ## Examples
+
+      iex> get_user_by_handle("foo")
+      %User{}
+
+      iex> get_user_by_handle!("unknown")
+      nil
+
+  """
+  def get_user_by_handle(handle) when is_binary(handle) do
+    Repo.one(
+      from u in User,
+        where: u.handle == ^handle and is_nil(u.deactivated_at),
+        preload: [:pfp_img, :pfp_thumb, :header_img, :disable_info]
+    )
+  end
+
+  @doc """
   Gets a user by identifier (email or handle) and password.
 
   ## Examples
