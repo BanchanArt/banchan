@@ -8,6 +8,8 @@ defmodule Banchan.Commissions.Commission do
   alias Banchan.Commissions.Common
   alias Banchan.Studios
 
+  @description_max_length 1500
+
   schema "commissions" do
     field :public_id, :string, autogenerate: {Common, :gen_public_id, []}
     field :title, :string
@@ -46,7 +48,7 @@ defmodule Banchan.Commissions.Commission do
     |> cast(attrs, [:title, :description, :tos_ok, :currency])
     |> validate_required([:title, :description, :tos_ok, :currency])
     |> validate_length(:title, max: 50)
-    |> validate_length(:description, max: 160)
+    |> validate_length(:description, max: @description_max_length)
     |> cast_assoc(:line_items)
     |> cast_assoc(:events)
     |> validate_change(:tos_ok, fn field, tos_ok ->
@@ -63,7 +65,7 @@ defmodule Banchan.Commissions.Commission do
     commission
     |> cast(attrs, [:title, :description])
     |> validate_length(:title, max: 50)
-    |> validate_length(:description, max: 160)
+    |> validate_length(:description, max: @description_max_length)
     |> cast_assoc(:line_items)
     |> cast_assoc(:events)
   end
