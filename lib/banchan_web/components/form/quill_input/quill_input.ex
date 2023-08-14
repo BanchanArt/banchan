@@ -25,16 +25,11 @@ defmodule BanchanWeb.Components.Form.QuillInput do
   def update(assigns, socket) do
     socket = assign(socket, assigns)
 
-    if is_nil(assigns.form) do
-      {:ok, socket}
-    else
-      {:ok,
-       socket
-       |> push_event("set_markdown", %{
-         id: assigns.id <> "_hook",
-         value: assigns.form[assigns.name].value || ""
-       })}
-    end
+    {:ok,
+     socket
+     |> push_event("update_markdown", %{
+       id: assigns.id <> "_hook"
+     })}
   end
 
   def handle_event("dragstart", _, socket) do
