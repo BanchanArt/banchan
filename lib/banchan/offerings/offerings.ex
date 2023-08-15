@@ -829,11 +829,11 @@ defmodule Banchan.Offerings do
 
       {:ok, :price_high} ->
         q
-        |> order_by([default_prices: default_prices], desc: default_prices.sum)
+        |> order_by([price_info: price_info], desc: price_info.base_price)
 
       {:ok, :price_low} ->
         q
-        |> order_by([default_prices: default_prices], asc: default_prices.sum)
+        |> order_by([price_info: price_info], asc: price_info.base_price)
 
       :error ->
         q
