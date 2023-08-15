@@ -20,6 +20,7 @@ defmodule BanchanWeb.Components.OfferingCard do
   prop hidden?, :boolean, default: false
   prop total_slots, :integer
   prop available_slots, :integer
+  prop studio_name, :string
 
   def render(assigns) do
     ~F"""
@@ -47,7 +48,10 @@ defmodule BanchanWeb.Components.OfferingCard do
               >Hidden</span>
             {/if}
           </div>
-          <div class="text-xs font-semibold opacity-75 availability-status whitespace-nowrap">
+          <div :if={@studio_name} class="text-xs opacity-75">
+            By <span class="font-semibold">{@studio_name}</span>
+          </div>
+          <div class="text-sm font-semibold opacity-75 availability-status whitespace-nowrap">
             {#if @open? && !is_nil(@total_slots) && !is_nil(@available_slots)}
               {@available_slots}/{@total_slots} Slots
             {#elseif @open?}

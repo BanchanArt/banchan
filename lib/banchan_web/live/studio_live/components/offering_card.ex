@@ -13,6 +13,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, default: false
   prop offering, :struct, required: true
+  prop display_studio?, :boolean, default: false
 
   data available_slots, :integer
 
@@ -40,6 +41,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
           hidden?={@offering.hidden}
           total_slots={@offering.slots}
           available_slots={@available_slots}
+          studio_name={if @display_studio?, do: @offering.studio.name, else: nil}
         />
       </LiveRedirect>
     </offering-card>
