@@ -94,56 +94,58 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
             <div class="w-full max-h-80 aspect-header-image bg-base-300" />
           {/if}
           <div class="px-4 mx-auto my-4 max-w-7xl">
-            <div class="flex flex-row gap-2">
-              <div class="text-2xl font-medium md:text-3xl grow">
+            <div class="flex flex-row flex-wrap gap-2">
+              <div class="text-2xl font-medium md:text-3xl">
                 {@studio.name}
               </div>
-              {#if @current_user && (Accounts.mod?(@current_user) || !@current_user_member?)}
-                <div class="dropdown dropdown-end">
-                  <label tabindex="0" class="py-0 my-2 btn btn-circle btn-ghost btn-sm grow-0">
-                    <Icon name="more-vertical" size="4" />
-                  </label>
-                  <ul
-                    tabindex="0"
-                    class="p-1 border rounded-xl dropdown-content bg-base-300 border-base-content border-opacity-10 menu md:menu-compact"
-                  >
-                    {#if Accounts.mod?(@current_user)}
+              <div class="ml-auto shrink-0 flex flex-row">
+                {#if @current_user && (Accounts.mod?(@current_user) || !@current_user_member?)}
+                  <div class="dropdown dropdown-end">
+                    <label tabindex="0" class="py-0 my-2 btn btn-circle btn-ghost btn-sm grow-0">
+                      <Icon name="more-vertical" size="4" />
+                    </label>
+                    <ul
+                      tabindex="0"
+                      class="p-1 border rounded-xl dropdown-content bg-base-300 border-base-content border-opacity-10 menu md:menu-compact"
+                    >
+                      {#if Accounts.mod?(@current_user)}
+                        <li>
+                          <LiveRedirect to={Routes.studio_moderation_path(Endpoint, :edit, @studio.handle)}>
+                            <Icon name="gavel" size="4" /> Moderation
+                          </LiveRedirect>
+                        </li>
+                      {/if}
+                      {#if Accounts.admin?(@current_user)}
+                        <li>
+                          <FeaturedToggle id="featured-toggle" current_user={@current_user} studio={@studio} />
+                        </li>
+                      {/if}
                       <li>
-                        <LiveRedirect to={Routes.studio_moderation_path(Endpoint, :edit, @studio.handle)}>
-                          <Icon name="gavel" size="4" /> Moderation
-                        </LiveRedirect>
+                        <button type="button" :on-click="report">
+                          <Icon name="flag" size="4" /> Report
+                        </button>
                       </li>
-                    {/if}
-                    {#if Accounts.admin?(@current_user)}
-                      <li>
-                        <FeaturedToggle id="featured-toggle" current_user={@current_user} studio={@studio} />
-                      </li>
-                    {/if}
-                    <li>
-                      <button type="button" :on-click="report">
-                        <Icon name="flag" size="4" /> Report
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              {/if}
-              {#if @current_user && !@current_user_member?}
-                <Button click="toggle_follow" class="px-2 py-0 my-2 ml-auto rounded-full btn-sm btn-primary">
-                  {if @user_following? do
-                    "Unfollow"
-                  else
-                    "Follow"
-                  end}
-                </Button>
-              {/if}
-              {#if @current_user_member? ||
-                  (@current_user && (:admin in @current_user.roles || :mod in @current_user.roles))}
-                <LiveRedirect
-                  label="Edit Profile"
-                  to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}
-                  class="px-2 py-0 my-2 rounded-full btn btn-sm btn-primary grow-0"
-                />
-              {/if}
+                    </ul>
+                  </div>
+                {/if}
+                {#if @current_user && !@current_user_member?}
+                  <Button click="toggle_follow" class="px-2 py-0 my-2 ml-auto rounded-full btn-sm btn-primary">
+                    {if @user_following? do
+                      "Unfollow"
+                    else
+                      "Follow"
+                    end}
+                  </Button>
+                {/if}
+                {#if @current_user_member? ||
+                    (@current_user && (:admin in @current_user.roles || :mod in @current_user.roles))}
+                  <LiveRedirect
+                    label="Edit Profile"
+                    to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}
+                    class="px-2 py-0 my-2 rounded-full btn btn-sm btn-primary grow-0"
+                  />
+                {/if}
+              </div>
             </div>
             {#if Utils.has_socials?(@studio)}
               <Socials entity={@studio} class="my-4" />
