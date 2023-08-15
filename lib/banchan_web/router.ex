@@ -71,7 +71,7 @@ defmodule BanchanWeb.Router do
       on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :users_only}] do
       pipe_through([:basic_authed, :browser, :require_authed, :ensure_enabled])
 
-      live("/denizens/:handle/edit", DenizenLive.Edit, :edit)
+      live("/people/:handle/edit", PeopleLive.Edit, :edit)
 
       live("/studios/:handle/offerings/:offering_type/request", OfferingLive.Request, :new)
 
@@ -133,10 +133,10 @@ defmodule BanchanWeb.Router do
       on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :mods_only}] do
       pipe_through([:basic_authed, :browser, :require_authed, :ensure_enabled, :mod])
 
-      live("/denizens/:handle/moderation", DenizenLive.Moderation, :edit)
+      live("/people/:handle/moderation", PeopleLive.Moderation, :edit)
       live("/studios/:handle/moderation", StudioLive.Moderation, :edit)
       live("/admin/requests", BetaLive.Requests, :index)
-      live("/admin/denizens", DenizenLive.Index, :index)
+      live("/admin/people", PeopleLive.Index, :index)
       live("/admin/reports", ReportLive.Index, :index)
       live("/admin/reports/:id", ReportLive.Show, :show)
     end
@@ -195,8 +195,8 @@ defmodule BanchanWeb.Router do
     live_session :open, on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :open}] do
       pipe_through([:basic_authed, :browser, :ensure_enabled])
 
-      live("/denizens/:handle", DenizenLive.Show, :show)
-      live("/denizens/:handle/following", DenizenLive.Show, :following)
+      live("/people/:handle", PeopleLive.Show, :show)
+      live("/people/:handle/following", PeopleLive.Show, :following)
 
       live("/discover/:type", DiscoverLive.Index, :index)
 

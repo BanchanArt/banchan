@@ -1,6 +1,6 @@
-defmodule BanchanWeb.DenizenLive.Show do
+defmodule BanchanWeb.PeopleLive.Show do
   @moduledoc """
-  Banchan denizen profile pages
+  Banchan user profile pages
   """
   use BanchanWeb, :live_view
 
@@ -41,7 +41,7 @@ defmodule BanchanWeb.DenizenLive.Show do
          if user.pfp_img_id do
            Routes.public_image_url(Endpoint, :image, :user_pfp_img, user.pfp_img_id)
          else
-           Routes.static_url(Endpoint, "/images/denizen_default_icon.png")
+           Routes.static_url(Endpoint, "/images/user_default_icon.png")
          end
      )}
   end
@@ -112,7 +112,7 @@ defmodule BanchanWeb.DenizenLive.Show do
   def handle_event("report", _, socket) do
     ReportModal.show(
       "report-modal",
-      Routes.denizen_show_url(Endpoint, :show, socket.assigns.user.handle)
+      ~p"/people/#{socket.assigns.user.handle}"
     )
 
     {:noreply, socket}
@@ -199,7 +199,7 @@ defmodule BanchanWeb.DenizenLive.Show do
                     >
                       {#if :admin in @current_user.roles || :mod in @current_user.roles}
                         <li>
-                          <LiveRedirect to={Routes.denizen_moderation_path(Endpoint, :edit, @user.handle)}>
+                          <LiveRedirect to={~p"/people/#{@user.handle}/moderation"}>
                             <Icon name="gavel" size="4" /> Moderation
                           </LiveRedirect>
                         </li>
@@ -226,7 +226,7 @@ defmodule BanchanWeb.DenizenLive.Show do
                     (@current_user.id == @user.id || :admin in @current_user.roles || :mod in @current_user.roles)}
                   <LiveRedirect
                     label="Edit Profile"
-                    to={Routes.denizen_edit_path(Endpoint, :edit, @user.handle)}
+                    to={~p"/people/#{@user.handle}/edit"}
                     class="px-2 py-0 m-2 rounded-full btn btn-sm btn-primary grow-0"
                   />
                 {/if}
@@ -256,7 +256,7 @@ defmodule BanchanWeb.DenizenLive.Show do
               <Socials entity={@user} class="my-4" />
             {/if}
             <div class="flex flex-row gap-4 mx-6 my-4">
-              <LivePatch class="hover:link" to={Routes.denizen_show_path(Endpoint, :following, @user.handle)}>
+              <LivePatch class="hover:link" to={~p"/people/#{@user.handle}/following"}>
                 <span class="font-bold">
                   {#if @following > 9999}
                     {Number.SI.number_to_si(@following)}

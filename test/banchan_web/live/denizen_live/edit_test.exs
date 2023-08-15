@@ -18,7 +18,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
   describe "edit profile page" do
     test "redirects if logged out", %{conn: conn, user: user} do
-      {:error, {:redirect, info}} = live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
+      {:error, {:redirect, info}} = live(conn, ~p"/people/#{user.handle}/edit")
 
       assert info.to =~ Routes.login_path(conn, :new)
     end
@@ -26,10 +26,9 @@ defmodule BanchanWeb.DenizenLive.EditTest do
     test "redirects if logged in as a different non-admin user", %{conn: conn, user: user} do
       conn = log_in_user(conn, user_fixture())
 
-      {:error, {:live_redirect, info}} =
-        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
+      {:error, {:live_redirect, info}} = live(conn, ~p"/people/#{user.handle}/edit")
 
-      assert info.to =~ Routes.denizen_show_path(conn, :show, user.handle)
+      assert info.to =~ ~p"/people/#{user.handle}"
     end
 
     test "preloads current profile values", %{conn: conn, user: user} do
@@ -45,8 +44,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
 
       conn = log_in_user(conn, user)
 
-      {:ok, page_live, disconnected_html} =
-        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
+      {:ok, page_live, disconnected_html} = live(conn, ~p"/people/#{user.handle}/edit")
 
       rendered_html = render(page_live)
 
@@ -65,8 +63,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
     } do
       conn = conn |> log_in_user(user)
 
-      {:ok, page_live, _disconnected_html} =
-        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
+      {:ok, page_live, _disconnected_html} = live(conn, ~p"/people/#{user.handle}/edit")
 
       rendered =
         page_live
@@ -91,8 +88,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
     test "validates profile values on change", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user)
 
-      {:ok, page_live, _disconnected_html} =
-        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
+      {:ok, page_live, _disconnected_html} = live(conn, ~p"/people/#{user.handle}/edit")
 
       rendered =
         page_live
@@ -114,8 +110,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
     test "updates profile values on submit, updates user in db", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user)
 
-      {:ok, page_live, _disconnected_html} =
-        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
+      {:ok, page_live, _disconnected_html} = live(conn, ~p"/people/#{user.handle}/edit")
 
       page_live
       |> element(".profile-info")
@@ -123,7 +118,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
         user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
       })
 
-      assert_redirected(page_live, Routes.denizen_show_path(conn, :show, user.handle))
+      assert_redirected(page_live, ~p"/people/#{user.handle}")
 
       db_user = Accounts.get_user(user.id)
 
@@ -138,8 +133,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
     test "admins can edit profiles", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user_fixture(%{roles: [:admin]}))
 
-      {:ok, page_live, _disconnected_html} =
-        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
+      {:ok, page_live, _disconnected_html} = live(conn, ~p"/people/#{user.handle}/edit")
 
       page_live
       |> element(".profile-info")
@@ -147,7 +141,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
         user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
       })
 
-      assert_redirected(page_live, Routes.denizen_show_path(conn, :show, user.handle))
+      assert_redirected(page_live, ~p"/people/#{user.handle}")
 
       db_user = Accounts.get_user(user.id)
 
@@ -162,8 +156,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
     test "mods can edit profiles", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user_fixture(%{roles: [:mod]}))
 
-      {:ok, page_live, _disconnected_html} =
-        live(conn, Routes.denizen_edit_path(conn, :edit, user.handle))
+      {:ok, page_live, _disconnected_html} = live(conn, ~p"/people/#{user.handle}/edit")
 
       page_live
       |> element(".profile-info")
@@ -171,7 +164,7 @@ defmodule BanchanWeb.DenizenLive.EditTest do
         user: %{handle: "newhandle", bio: "new bio", name: "new name", email: "new@email"}
       })
 
-      assert_redirected(page_live, Routes.denizen_show_path(conn, :show, user.handle))
+      assert_redirected(page_live, ~p"/people/#{user.handle}")
 
       db_user = Accounts.get_user(user.id)
 

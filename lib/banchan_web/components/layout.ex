@@ -51,7 +51,7 @@ defmodule BanchanWeb.Components.Layout do
   prop current_user, :any, from_context: :current_user
   prop flashes, :any, required: true
   prop padding, :integer, default: 4
-  prop context, :atom, values: [:client, :studio, :admin, :dev], default: :client
+  prop context, :atom, values: [:personal, :studio, :admin, :dev], default: :personal
   prop studio, :struct
 
   slot hero
@@ -156,7 +156,7 @@ defmodule BanchanWeb.Components.Layout do
               <div class="flex flex-row items-center">
                 <Link
                   class="flex flex-row items-center gap-2 grow hover:cursor-pointer"
-                  to={~p"/denizens/#{@current_user.handle}"}
+                  to={~p"/people/#{@current_user.handle}"}
                 >
                   <Avatar class="w-4 h-4" link={false} user={@current_user} />
                   <UserHandle class="text-sm" link={false} user={@current_user} />
@@ -186,7 +186,7 @@ defmodule BanchanWeb.Components.Layout do
               <div class="w-full gap-0 px-2 py-0 m-0 rounded-none divider" />
             </li>
             {#case @context}
-              {#match :client}
+              {#match :personal}
                 <NavLink to={~p"/"} icon="home" title="Home" />
                 <NavLink to={~p"/discover/offerings"} icon="search" title="Discover" />
                 {#if Accounts.active_user?(@current_user)}
@@ -209,7 +209,7 @@ defmodule BanchanWeb.Components.Layout do
               {#match :admin}
                 {#if Accounts.active_user?(@current_user) && :admin in @current_user.roles}
                   <NavLink to={~p"/admin/reports"} icon="flag" title="Reports" />
-                  <NavLink to={~p"/admin/denizens"} icon="users" title="Users" />
+                  <NavLink to={~p"/admin/people"} icon="users" title="Users" />
                   <NavLink to={~p"/admin/requests"} icon="inbox" title="Beta Requests" />
                 {/if}
               {#match :dev}

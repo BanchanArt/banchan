@@ -80,7 +80,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
       context={if @current_user_member? do
         :studio
       else
-        :client
+        :personal
       end}
     >
       <:hero>

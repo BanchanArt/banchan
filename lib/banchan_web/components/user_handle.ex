@@ -17,7 +17,7 @@ defmodule BanchanWeb.Components.UserHandle do
   def render(assigns) do
     ~F"""
     {#if Accounts.active_user?(@user) && @link}
-      <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, @user.handle)}>
+      <LiveRedirect to={~p"/people/#{@user.handle}"}>
         <span class={"inline-flex items-center gap-1", @class}>
           <strong title={@user.name} class="font-semibold hover:underline">{@user.handle}</strong>
           {#if :admin in @user.roles}

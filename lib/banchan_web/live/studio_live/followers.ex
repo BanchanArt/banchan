@@ -51,7 +51,7 @@ defmodule BanchanWeb.StudioLive.Followers do
       <ul class="grid grid-cols-2 sm:gap-2 sm:grid-cols-4 auto-rows-fr">
         {#for user <- @followers}
           <li>
-            <LiveRedirect to={Routes.denizen_show_path(Endpoint, :show, user.handle)}>
+            <LiveRedirect to={~p"/people/#{user.handle}"}>
               <Card image_class="aspect-header-image">
                 <:image>
                   {#if user.header_img && !user.header_img.pending}
