@@ -10,10 +10,10 @@ defmodule BanchanWeb.Components.Flash do
 
   def render(assigns) do
     ~F"""
-    <div class="flash-container fixed bottom-auto z-20 w-auto max-w-3/5 translate-y-0 toast toast-center top-20">
+    <div class="fixed bottom-auto z-20 w-full mx-auto translate-y-0 flash-container md:max-w-sm lg:max-w-md xl:max-w-lg 2xl:max-w-xl toast toast-center top-20">
       {#if live_flash(@flashes, :success)}
         <div
-          class="p-2 alert alert-success hover:cursor-pointer"
+          class="px-4 py-2 rounded-lg alert alert-success hover:cursor-pointer"
           role="alert"
           :on-click="lv:clear-flash"
           :values={key: "success"}
@@ -27,7 +27,7 @@ defmodule BanchanWeb.Components.Flash do
 
       {#if live_flash(@flashes, :info)}
         <div
-          class="p-2 alert alert-info hover:cursor-pointer"
+          class="px-4 py-2 rounded-lg alert alert-info hover:cursor-pointer"
           role="alert"
           :on-click="lv:clear-flash"
           :values={key: "info"}
@@ -41,7 +41,7 @@ defmodule BanchanWeb.Components.Flash do
 
       {#if live_flash(@flashes, :warning)}
         <div
-          class="p-2 alert alert-warning hover:cursor-pointer"
+          class="px-4 py-2 rounded-lg alert alert-warning hover:cursor-pointer"
           role="alert"
           :on-click="lv:clear-flash"
           :values={key: "warning"}
@@ -55,7 +55,7 @@ defmodule BanchanWeb.Components.Flash do
 
       {#if live_flash(@flashes, :error)}
         <div
-          class="p-2 alert alert-error hover:cursor-pointer"
+          class="px-4 py-2 rounded-lg alert alert-error hover:cursor-pointer"
           role="alert"
           :on-click="lv:clear-flash"
           :values={key: "error"}
