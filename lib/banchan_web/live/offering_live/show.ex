@@ -187,169 +187,165 @@ defmodule BanchanWeb.OfferingLive.Show do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash}>
-      <h1 class="text-3xl">
-        {@offering.name}
-      </h1>
-      <div class="divider" />
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div class="flex flex-col gap-2 md:order-2">
-          <Lightbox
-            id="card-lightbox-mobile"
-            class="relative w-full mb-4 overflow-hidden rounded-lg md:hidden aspect-video"
-          >
-            {#if @offering.card_img && !@offering.card_img.pending}
-              <Lightbox.Item>
-                <OfferingCardImg image={@offering.card_img} />
-              </Lightbox.Item>
-            {#else}
-              <div class="w-full h-full aspect-video bg-base-300" />
-            {/if}
-          </Lightbox>
-          <div class="flex flex-col flex-wrap items-end gap-2">
-            <div class="md:text-xl grow">
-              By
-              <LiveRedirect
-                class="font-bold hover:link"
-                to={Routes.studio_shop_path(Endpoint, :show, @offering.studio.handle)}
-              >{@offering.studio.name}</LiveRedirect>
-            </div>
-            {#if @offering.mature}
-              <div class="badge badge-error">Mature</div>
-            {/if}
-            {#if @offering.hidden}
-              <div class="badge badge-error">Hidden</div>
-            {#elseif @offering.open && !is_nil(@offering.slots)}
-              <div class="whitespace-nowrap badge badge-primary">{@available_slots}/{@offering.slots} Slots</div>
-            {#elseif @offering.open}
-              <div class="badge badge-primary">Open</div>
-            {#else}
-              <div class="badge badge-error">Closed</div>
-            {/if}
-          </div>
-          <div class="divider" />
-          <div class="flex flex-col p-4 rounded-lg bg-base-200">
-            {#if Enum.any?(@offering.options, & &1.default)}
-              <div class="px-2 text-sm font-medium opacity-50">Included</div>
-              <Summary line_items={@line_items} />
-              <div class="divider" />
-            {/if}
-            {#if Enum.any?(@offering.options, &(!&1.default))}
-              <div class="px-2 text-sm font-medium opacity-50">Add-ons</div>
-              <AddonList id="addon-list" offering={@offering} line_items={@line_items} />
-              <div class="divider" />
-            {/if}
-            {#if !Enum.empty?(@offering.tags)}
-              <h3 class="pt-2 text-lg">Tags</h3>
-              <div class="flex flex-row flex-wrap gap-1">
-                {#for tag <- @offering.tags}
-                  <Tag tag={tag} />
-                {/for}
-              </div>
-              <div class="divider" />
-            {/if}
-            <div class="flex flex-row justify-end gap-2 pt-4">
-              {#if @current_user}
-                <div class="dropdown">
-                  <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
-                    <Icon name="more-vertical" size="4" />
-                  </label>
-                  <ul
-                    tabindex="0"
-                    class="p-1 border dropdown-content menu md:menu-compact bg-base-100 border-base-content border-opacity-10 rounded-xl"
-                  >
-                    {#if @current_user && (@current_user_member? || Accounts.mod?(@current_user))}
-                      <li>
-                        <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}>
-                          <Icon name="pencil" size="4" label="edit" /> Edit
-                        </LiveRedirect>
-                      </li>
-                    {/if}
-                    <li>
-                      <button type="button" :on-click="report">
-                        <Icon name="flag" size="4" label="report" /> Report
-                      </button>
-                    </li>
-                  </ul>
-                </div>
+      <div class="w-full mx-auto max-w-7xl">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div class="flex flex-col gap-4 md:order-2">
+            <Lightbox
+              id="card-lightbox-mobile"
+              class="relative w-full mb-4 overflow-hidden rounded-lg md:hidden aspect-video"
+            >
+              {#if @offering.card_img && !@offering.card_img.pending}
+                <Lightbox.Item>
+                  <OfferingCardImg image={@offering.card_img} />
+                </Lightbox.Item>
+              {#else}
+                <div class="w-full h-full aspect-video bg-base-300" />
               {/if}
-              {#if @offering.open}
+            </Lightbox>
+            <div class="flex flex-col flex-wrap items-start gap-2">
+              <h1 class="text-3xl">
+                {@offering.name}
+              </h1>
+              <div class="md:text-xl grow">
+                By
                 <LiveRedirect
-                  to={Routes.offering_request_path(Endpoint, :new, @offering.studio.handle, @offering.type)}
-                  class="text-center btn btn-primary grow"
-                >Request</LiveRedirect>
-              {#elseif !@offering.user_subscribed?}
-                <Button class="btn-info grow" click="notify_me">Notify Me</Button>
+                  class="font-bold hover:link"
+                  to={Routes.studio_shop_path(Endpoint, :show, @offering.studio.handle)}
+                >{@offering.studio.name}</LiveRedirect>
+              </div>
+              {#if @offering.mature}
+                <div class="badge badge-error">Mature</div>
               {/if}
-              {#if @offering.user_subscribed?}
-                <Button class="btn-info grow" click="unnotify_me">Unsubscribe</Button>
+              {#if @offering.hidden}
+                <div class="badge badge-error">Hidden</div>
+              {#elseif @offering.open && !is_nil(@offering.slots)}
+                <div class="whitespace-nowrap badge badge-primary">{@available_slots}/{@offering.slots} Slots</div>
+              {#elseif @offering.open}
+                <div class="badge badge-primary">Open</div>
+              {#else}
+                <div class="badge badge-error">Closed</div>
               {/if}
             </div>
-          </div>
-          {#if !Enum.empty?(@related)}
-            <div class="hidden md:flex md:flex-col">
-              <div class="pt-4 text-2xl">Discover More</div>
-              <div class="flex flex-col p-2">
-                {#for {rel, idx} <- Enum.with_index(@related)}
-                  <OfferingCard id={"related-desktop-#{idx}"} current_user={@current_user} offering={rel} />
-                {/for}
+            <Markdown content={@offering.description} />
+            <div class="flex flex-col gap-2">
+              {#if Enum.any?(@offering.options, & &1.default)}
+                <div class="px-2 text-sm font-medium opacity-50">Included</div>
+                <Summary line_items={@line_items} />
+                <div class="m-0 divider" />
+              {/if}
+              {#if Enum.any?(@offering.options, &(!&1.default))}
+                <div class="px-2 text-sm font-medium opacity-50">Add-ons</div>
+                <AddonList id="addon-list" offering={@offering} line_items={@line_items} />
+                <div class="m-0 divider" />
+              {/if}
+              {#if !Enum.empty?(@offering.tags)}
+                <h3 class="pt-2 text-lg">Tags</h3>
+                <div class="flex flex-row flex-wrap gap-1">
+                  {#for tag <- @offering.tags}
+                    <Tag tag={tag} />
+                  {/for}
+                </div>
+                <div class="m-0 divider" />
+              {/if}
+              <div class="flex flex-row justify-end gap-2 pt-4">
+                {#if @current_user}
+                  <div class="dropdown">
+                    <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
+                      <Icon name="more-vertical" size="4" />
+                    </label>
+                    <ul
+                      tabindex="0"
+                      class="p-1 border dropdown-content menu md:menu-compact bg-base-100 border-base-content border-opacity-10 rounded-xl"
+                    >
+                      {#if @current_user && (@current_user_member? || Accounts.mod?(@current_user))}
+                        <li>
+                          <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}>
+                            <Icon name="pencil" size="4" label="edit" /> Edit
+                          </LiveRedirect>
+                        </li>
+                      {/if}
+                      <li>
+                        <button type="button" :on-click="report">
+                          <Icon name="flag" size="4" label="report" /> Report
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                {/if}
+                {#if @offering.open}
+                  <LiveRedirect
+                    to={Routes.offering_request_path(Endpoint, :new, @offering.studio.handle, @offering.type)}
+                    class="text-center btn btn-primary grow"
+                  >Request</LiveRedirect>
+                {#elseif !@offering.user_subscribed?}
+                  <Button class="btn-info grow" click="notify_me">Notify Me</Button>
+                {/if}
+                {#if @offering.user_subscribed?}
+                  <Button class="btn-info grow" click="unnotify_me">Unsubscribe</Button>
+                {/if}
               </div>
             </div>
-          {/if}
-        </div>
-        <div class="divider md:hidden" />
-        <div class="flex flex-col gap-4 md:col-span-2 md:order-1">
-          <Lightbox
-            id="card-lightbox-md"
-            class="relative hidden w-full overflow-hidden rounded-lg bg-base-300 md:block aspect-video"
-          >
-            {#if @offering.card_img && !@offering.card_img.pending}
-              <Lightbox.Item>
-                <OfferingCardImg image={@offering.card_img} />
-              </Lightbox.Item>
-            {#else}
-              <div class="w-full h-full aspect-video bg-base-300" />
+            {#if !Enum.empty?(@related)}
+              <div class="hidden md:flex md:flex-col">
+                <div class="pt-4 text-2xl">Discover More</div>
+                <div class="flex flex-col p-2">
+                  {#for {rel, idx} <- Enum.with_index(@related)}
+                    <OfferingCard id={"related-desktop-#{idx}"} current_user={@current_user} offering={rel} />
+                  {/for}
+                </div>
+              </div>
             {/if}
-          </Lightbox>
-          <div class="p-4 rounded-lg bg-base-200">
-            <div class="text-2xl">Description</div>
-            <div class="divider" />
-            <Markdown class="pb-4" content={@offering.description} />
           </div>
-          {#if @offering.terms}
-            <div class="divider md:hidden" />
-            <div class="p-4 rounded-lg bg-base-200">
-              <Collapse id="terms-collapse">
-                <:header>Commission Terms</:header>
-                <Markdown content={@offering.terms} />
-              </Collapse>
-            </div>
-          {/if}
-          {#if !Enum.empty?(@gallery_images)}
-            <div class="p-4 rounded-lg bg-base-200">
-              <div class="text-2xl">Gallery</div>
-              <div class="divider" />
-              <MasonryGallery
-                id="masonry-gallery"
-                upload_type={:offering_gallery_img}
-                images={@gallery_images}
-              />
-            </div>
-          {/if}
-          {#if !Enum.empty?(@related)}
-            <div class="flex flex-col md:hidden">
-              <div class="pt-4 text-2xl">Discover More</div>
-              <div class="flex flex-col p-2">
-                {#for {rel, idx} <- Enum.with_index(@related)}
-                  <OfferingCard id={"related-mobile-#{idx}"} current_user={@current_user} offering={rel} />
-                {/for}
+          <div class="divider md:hidden" />
+          <div class="flex flex-col gap-4 md:col-span-2 md:order-1">
+            <Lightbox
+              id="card-lightbox-md"
+              class="relative hidden w-full overflow-hidden rounded-lg bg-base-300 md:block aspect-video"
+            >
+              {#if @offering.card_img && !@offering.card_img.pending}
+                <Lightbox.Item>
+                  <OfferingCardImg image={@offering.card_img} />
+                </Lightbox.Item>
+              {#else}
+                <div class="w-full h-full aspect-video bg-base-300" />
+              {/if}
+            </Lightbox>
+            {#if @offering.terms}
+              <div class="divider md:hidden" />
+              <div class="p-4 rounded-lg bg-base-200">
+                <Collapse id="terms-collapse">
+                  <:header>Commission Terms</:header>
+                  <Markdown content={@offering.terms} />
+                </Collapse>
               </div>
-            </div>
-          {/if}
+            {/if}
+            {#if !Enum.empty?(@gallery_images)}
+              <div class="p-4 rounded-lg bg-base-200">
+                <div class="text-2xl">Gallery</div>
+                <div class="m-0 divider" />
+                <MasonryGallery
+                  id="masonry-gallery"
+                  upload_type={:offering_gallery_img}
+                  images={@gallery_images}
+                />
+              </div>
+            {/if}
+            {#if !Enum.empty?(@related)}
+              <div class="flex flex-col md:hidden">
+                <div class="pt-4 text-2xl">Discover More</div>
+                <div class="flex flex-col p-2">
+                  {#for {rel, idx} <- Enum.with_index(@related)}
+                    <OfferingCard id={"related-mobile-#{idx}"} current_user={@current_user} offering={rel} />
+                  {/for}
+                </div>
+              </div>
+            {/if}
+          </div>
         </div>
+        {#if @current_user}
+          <ReportModal id="report-modal" current_user={@current_user} />
+        {/if}
       </div>
-      {#if @current_user}
-        <ReportModal id="report-modal" current_user={@current_user} />
-      {/if}
     </Layout>
     """
   end

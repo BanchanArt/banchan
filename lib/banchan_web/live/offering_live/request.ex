@@ -357,17 +357,17 @@ defmodule BanchanWeb.OfferingLive.Request do
     <Layout flashes={@flash}>
       <h1 class="text-2xl font-bold">Request a Commission</h1>
       <div class="divider" />
-      <div class="flex flex-col space-y-2 md:container md:mx-auto p-2">
+      <div class="flex flex-col p-2 space-y-2 md:container md:mx-auto">
         <Form for={@changeset} change="change" submit="submit">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="flex flex-col md:order-2 rounded-lg bg-base-200 p-4 shadow-lg">
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="flex flex-col p-4 rounded-lg shadow-lg md:order-2 bg-base-200">
               <OfferingBox
                 offering={@offering}
                 available_slots={@available_slots}
-                class="rounded-box hover:bg-base-200 p-2 transition-all"
+                class="p-2 transition-all rounded-box hover:bg-base-200"
               />
               <div class="divider" />
-              <div class="font-medium text-sm opacity-50">Cart</div>
+              <div class="text-sm font-medium opacity-50">Cart</div>
               <Summary
                 allow_edits
                 remove_item="remove_item"
@@ -382,7 +382,7 @@ defmodule BanchanWeb.OfferingLive.Request do
                   <div class="w-full mt-2 border-t-2 border-content opacity-10" />
                   <div class="w-full mb-2 border-t-2 border-content opacity-10" />
                 </div>
-                <div class="px-2 font-medium text-sm opacity-50">Add-ons</div>
+                <div class="px-2 text-sm font-medium opacity-50">Add-ons</div>
                 <AddonList
                   id="addon-list"
                   offering={@offering}
@@ -393,7 +393,7 @@ defmodule BanchanWeb.OfferingLive.Request do
               {/if}
             </div>
             <div class="divider md:hidden" />
-            <div class="flex flex-col md:col-span-2 md:order-1 gap-4">
+            <div class="flex flex-col gap-4 md:col-span-2 md:order-1">
               <TextInput
                 name={:title}
                 show_label={false}
@@ -414,8 +414,8 @@ defmodule BanchanWeb.OfferingLive.Request do
               />
               {#if !is_nil(@terms)}
                 <div class="pt-2">
-                  <h3 class="py-4 font-bold text-xl">Commission Terms and Conditions</h3>
-                  <div class="p-2 max-h-60 overflow-auto">
+                  <h3 class="py-4 text-xl font-bold">Commission Terms and Conditions</h3>
+                  <div class="p-2 overflow-auto max-h-60">
                     <div class="p-2">
                       <Markdown content={@terms} />
                     </div>
