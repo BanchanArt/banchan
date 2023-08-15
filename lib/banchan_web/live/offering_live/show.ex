@@ -172,12 +172,7 @@ defmodule BanchanWeb.OfferingLive.Show do
   def handle_event("report", _, socket) do
     ReportModal.show(
       "report-modal",
-      Routes.offering_show_url(
-        Endpoint,
-        :show,
-        socket.assigns.studio.handle,
-        socket.assigns.offering.type
-      )
+      ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}"
     )
 
     {:noreply, socket}
@@ -259,7 +254,7 @@ defmodule BanchanWeb.OfferingLive.Show do
                   >
                     {#if @current_user && (@current_user_member? || Accounts.mod?(@current_user))}
                       <li>
-                        <LiveRedirect to={Routes.studio_offerings_edit_path(Endpoint, :edit, @offering.studio.handle, @offering.type)}>
+                        <LiveRedirect to={~p"/studios/#{@offering.studio.handle}/offerings/#{@offering.type}/edit"}>
                           <Icon name="pencil" size="4" label="edit" /> Edit
                         </LiveRedirect>
                       </li>
@@ -274,7 +269,7 @@ defmodule BanchanWeb.OfferingLive.Show do
               {/if}
               {#if @offering.open}
                 <LiveRedirect
-                  to={Routes.offering_request_path(Endpoint, :new, @offering.studio.handle, @offering.type)}
+                  to={~p"/studios/#{@offering.studio.handle}/offerings/#{@offering.type}/request"}
                   class="text-center btn btn-primary grow"
                 >Request</LiveRedirect>
               {#elseif !@offering.user_subscribed?}

@@ -12,7 +12,7 @@ defmodule Banchan.Validators do
     |> validate_format(field, ~r/^[a-zA-Z0-9_-]+$/,
       message: "only letters, numbers, and underscores are allowed"
     )
-    |> validate_length(field, min: 3, max: 24)
+    |> validate_length(field, min: 4, max: 24)
     |> unsafe_validate_unique(field, Banchan.Repo)
     |> unique_constraint(field)
   end

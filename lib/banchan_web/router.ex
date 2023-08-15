@@ -73,7 +73,7 @@ defmodule BanchanWeb.Router do
 
       live("/denizens/:handle/edit", DenizenLive.Edit, :edit)
 
-      live("/offerings/:handle/:offering_type/request", OfferingLive.Request, :new)
+      live("/studios/:handle/offerings/:offering_type/request", OfferingLive.Request, :new)
 
       live("/commissions", CommissionLive, :index)
       live("/commissions/:commission_id", CommissionLive, :show)
@@ -113,7 +113,7 @@ defmodule BanchanWeb.Router do
       on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :artists_only}] do
       pipe_through([:basic_authed, :browser, :require_authed, :ensure_enabled, :artist])
 
-      live("/offerings/:handle/:offering_type/edit", StudioLive.Offerings.Edit, :edit)
+      live("/studios/:handle/offerings/:offering_type/edit", StudioLive.Offerings.Edit, :edit)
 
       live("/studios/new", StudioLive.New, :new)
       live("/studios/:handle/edit", StudioLive.Edit, :edit)
@@ -200,7 +200,7 @@ defmodule BanchanWeb.Router do
 
       live("/discover/:type", DiscoverLive.Index, :index)
 
-      live("/offerings/:handle/:offering_type", OfferingLive.Show, :show)
+      live("/studios/:handle/offerings/:offering_type", OfferingLive.Show, :show)
 
       live("/studios/:handle", StudioLive.Shop, :show)
       live("/studios/:handle/followers", StudioLive.Followers, :index)

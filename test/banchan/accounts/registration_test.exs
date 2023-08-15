@@ -28,7 +28,7 @@ defmodule Banchan.AccountsTest.Registration do
 
       assert %{
                handle: [
-                 "should be at least 3 character(s)",
+                 "should be at least 4 character(s)",
                  "only letters, numbers, and underscores are allowed"
                ],
                email: ["must have the @ sign and no spaces"],

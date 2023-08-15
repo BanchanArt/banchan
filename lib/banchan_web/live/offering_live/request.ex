@@ -289,7 +289,8 @@ defmodule BanchanWeb.OfferingLive.Request do
 
         {:noreply,
          redirect(socket,
-           to: ~p"/offerings/#{socket.assigns.studio.handle}/#{socket.assigns.offering.type}"
+           to:
+             ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}"
          )}
 
       {:error, :not_confirmed} ->
@@ -302,7 +303,8 @@ defmodule BanchanWeb.OfferingLive.Request do
 
         {:noreply,
          redirect(socket,
-           to: ~p"/offerings/#{socket.assigns.studio.handle}/#{socket.assigns.offering.type}"
+           to:
+             ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}"
          )}
 
       {:error, :no_slots_available} ->
@@ -310,7 +312,8 @@ defmodule BanchanWeb.OfferingLive.Request do
 
         {:noreply,
          redirect(socket,
-           to: ~p"/offerings/#{socket.assigns.studio.handle}/#{socket.assigns.offering.type}"
+           to:
+             ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}"
          )}
 
       {:error, :no_proposals_available} ->
@@ -323,7 +326,8 @@ defmodule BanchanWeb.OfferingLive.Request do
 
         {:noreply,
          redirect(socket,
-           to: ~p"/offerings/#{socket.assigns.studio.handle}/#{socket.assigns.offering.type}"
+           to:
+             ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}"
          )}
     end
   end

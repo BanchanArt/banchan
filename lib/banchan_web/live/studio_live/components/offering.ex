@@ -254,12 +254,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
          )
          |> push_navigate(
            to:
-             Routes.studio_offerings_edit_path(
-               Endpoint,
-               :edit,
-               socket.assigns.studio.handle,
-               socket.assigns.offering.type
-             )
+             ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}/edit"
          )}
     end
   end
@@ -321,13 +316,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
       {:ok, offering} ->
         {:noreply,
          redirect(socket,
-           to:
-             Routes.offering_show_path(
-               Endpoint,
-               :show,
-               socket.assigns.studio.handle,
-               offering.type
-             )
+           to: ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{offering.type}"
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->

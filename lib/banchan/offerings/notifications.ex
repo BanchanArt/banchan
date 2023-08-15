@@ -68,7 +68,7 @@ defmodule Banchan.Offerings.Notifications do
 
           studio = Repo.preload(offering, :studio).studio
 
-          url = url(~p"/offerings/#{studio.handle}/#{offering.type}")
+          url = url(~p"/studios/#{studio.handle}/offerings/#{offering.type}")
 
           {:safe, safe_url} = Phoenix.HTML.html_escape(url)
 
@@ -100,7 +100,7 @@ defmodule Banchan.Offerings.Notifications do
 
           studio = Repo.preload(offering, :studio).studio
 
-          url = url(~p"/offerings/#{studio.handle}/#{offering.type}")
+          url = url(~p"/studios/#{studio.handle}/offerings/#{offering.type}")
 
           {:safe, safe_url} = Phoenix.HTML.html_escape(url)
 
