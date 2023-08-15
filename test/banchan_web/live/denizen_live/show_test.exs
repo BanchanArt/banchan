@@ -9,8 +9,6 @@ defmodule BanchanWeb.DenizenLive.ShowTest do
 
   alias Banchan.Notifications
 
-  alias BanchanWeb.Router.Helpers, as: Routes
-
   setup do
     on_exit(fn -> Notifications.wait_for_notifications() end)
     %{user: user_fixture()}
@@ -27,8 +25,7 @@ defmodule BanchanWeb.DenizenLive.ShowTest do
 
       conn = Plug.Conn.assign(conn, :user, user)
 
-      {:ok, page_live, disconnected_html} =
-        live(conn, Routes.denizen_show_path(conn, :show, user.handle))
+      {:ok, page_live, disconnected_html} = live(conn, ~p"/people/#{user.handle}")
 
       rendered_html = render(page_live)
 
@@ -46,19 +43,19 @@ defmodule BanchanWeb.DenizenLive.ShowTest do
       mod_conn = log_in_user(conn, user_fixture(%{roles: [:mod]}))
       self_conn = log_in_user(conn, user)
 
-      {:ok, _, html} = live(conn, Routes.denizen_show_path(conn, :show, user.handle))
+      {:ok, _, html} = live(conn, ~p"/people/#{user.handle}")
       refute html =~ "Edit Profile"
 
-      {:ok, _, html} = live(stranger_conn, Routes.denizen_show_path(conn, :show, user.handle))
+      {:ok, _, html} = live(stranger_conn, ~p"/people/#{user.handle}")
       refute html =~ "Edit Profile"
 
-      {:ok, _, html} = live(self_conn, Routes.denizen_show_path(conn, :show, user.handle))
+      {:ok, _, html} = live(self_conn, ~p"/people/#{user.handle}")
       assert html =~ "Edit Profile"
 
-      {:ok, _, html} = live(mod_conn, Routes.denizen_show_path(conn, :show, user.handle))
+      {:ok, _, html} = live(mod_conn, ~p"/people/#{user.handle}")
       assert html =~ "Edit Profile"
 
-      {:ok, _, html} = live(admin_conn, Routes.denizen_show_path(conn, :show, user.handle))
+      {:ok, _, html} = live(admin_conn, ~p"/people/#{user.handle}")
       assert html =~ "Edit Profile"
     end
 
@@ -68,19 +65,19 @@ defmodule BanchanWeb.DenizenLive.ShowTest do
       mod_conn = log_in_user(conn, user_fixture(%{roles: [:mod]}))
       self_conn = log_in_user(conn, user)
 
-      {:ok, _, html} = live(conn, Routes.denizen_show_path(conn, :show, user.handle))
+      {:ok, _, html} = live(conn, ~p"/people/#{user.handle}")
       refute html =~ "Moderation"
 
-      {:ok, _, html} = live(stranger_conn, Routes.denizen_show_path(conn, :show, user.handle))
+      {:ok, _, html} = live(stranger_conn, ~p"/people/#{user.handle}")
       refute html =~ "Moderation"
 
-      {:ok, _, html} = live(self_conn, Routes.denizen_show_path(conn, :show, user.handle))
+      {:ok, _, html} = live(self_conn, ~p"/people/#{user.handle}")
       refute html =~ "Moderation"
 
-      {:ok, _, html} = live(mod_conn, Routes.denizen_show_path(conn, :show, user.handle))
+      {:ok, _, html} = live(mod_conn, ~p"/people/#{user.handle}")
       assert html =~ "Moderation"
 
-      {:ok, _, html} = live(admin_conn, Routes.denizen_show_path(conn, :show, user.handle))
+      {:ok, _, html} = live(admin_conn, ~p"/people/#{user.handle}")
       assert html =~ "Moderation"
     end
   end

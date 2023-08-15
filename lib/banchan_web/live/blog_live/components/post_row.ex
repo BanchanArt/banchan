@@ -34,7 +34,7 @@ defmodule BanchanWeb.BlogLive.Components.PostRow do
           </svg>
           By
           {#if @post.user}
-            <LiveRedirect to={~p"/denizens/#{@post.user.handle}"}>
+            <LiveRedirect to={~p"/people/#{@post.user.handle}"}>
               <div class="self-center inline">
                 <Avatar link={false} user={@post.user} class="w-2.5" />
               </div>

@@ -1,4 +1,4 @@
-defmodule BanchanWeb.DenizenLive.Moderation do
+defmodule BanchanWeb.PeopleLive.Moderation do
   @moduledoc """
   Admin-level user editing, such as changing roles, disabling, and such.
   """
@@ -18,7 +18,6 @@ defmodule BanchanWeb.DenizenLive.Moderation do
   }
 
   alias BanchanWeb.Components.{Avatar, Layout, Markdown, UserHandle}
-  alias BanchanWeb.Endpoint
 
   @impl true
   def mount(%{"handle" => handle}, _session, socket) do
@@ -50,7 +49,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
       {:ok,
        socket
        |> put_flash(:error, "You are not authorized to access this page.")
-       |> push_navigate(to: Routes.denizen_show_path(Endpoint, :show, handle))}
+       |> push_navigate(to: ~p"/people/#{handle}")}
     end
   end
 
@@ -81,7 +80,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
         {:noreply,
          socket
          |> put_flash(:info, "User updated.")
-         |> push_navigate(to: Routes.denizen_show_path(Endpoint, :show, user.handle))}
+         |> push_navigate(to: ~p"/people/#{user.handle}")}
     end
   end
 
@@ -106,9 +105,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
         {:noreply,
          socket
          |> put_flash(:info, "User disabled.")
-         |> push_navigate(
-           to: Routes.denizen_show_path(Endpoint, :show, socket.assigns.user.handle)
-         )}
+         |> push_navigate(to: ~p"/people/#{socket.assigns.user.handle}")}
 
       {:error, changeset} ->
         {:noreply, socket |> assign(disable_changeset: changeset)}
@@ -136,9 +133,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
         {:noreply,
          socket
          |> put_flash(:info, "User enabled.")
-         |> push_navigate(
-           to: Routes.denizen_show_path(Endpoint, :show, socket.assigns.user.handle)
-         )}
+         |> push_navigate(to: ~p"/people/#{socket.assigns.user.handle}")}
 
       {:error, changeset} ->
         {:noreply, socket |> assign(enable_changeset: changeset)}

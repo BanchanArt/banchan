@@ -27,7 +27,7 @@ defmodule BanchanWeb.ReportBugLive.New do
            title,
            body,
            bug?,
-           &Routes.denizen_show_url(Endpoint, :show, &1.handle)
+           &~p"/people/#{&1.handle}"
          ) do
       {:ok, url} ->
         {:noreply, socket |> assign(report_url: url)}
