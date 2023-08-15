@@ -34,7 +34,7 @@ defmodule BanchanWeb.Components.Nav do
           <div class="flex flex-row items-center gap-2">
             <img
               alt="Banchan Art logo"
-              src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}
+              src={~p"/images/user_default_icon.png"}
               class="inline-block object-scale-down h-10 p-1 rounded-full"
             />
             <h1>Banchan Art</h1>

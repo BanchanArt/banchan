@@ -113,7 +113,7 @@ defmodule BanchanWeb.CommissionLive do
         if !is_nil(socket.assigns.studio) && socket.assigns.current_user_member? do
           :studio
         else
-          :client
+          :personal
         end
       )
 

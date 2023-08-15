@@ -9,7 +9,6 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   alias Banchan.Offerings
 
   alias BanchanWeb.Components.OfferingCard
-  alias BanchanWeb.Endpoint
 
   prop current_user, :struct, required: true
   prop current_user_member?, :boolean, default: false
@@ -28,7 +27,7 @@ defmodule BanchanWeb.StudioLive.Components.OfferingCard do
   def render(assigns) do
     ~F"""
     <offering-card class="w-full relative cursor-pointer">
-      <LiveRedirect to={Routes.offering_show_path(Endpoint, :show, @offering.studio.handle, @offering.type)}>
+      <LiveRedirect to={~p"/studios/#{@offering.studio.handle}/offerings/#{@offering.type}"}>
         <OfferingCard
           name={@offering.name}
           image={@offering.card_img_id}

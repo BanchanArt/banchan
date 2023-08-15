@@ -1,4 +1,4 @@
-defmodule BanchanWeb.DenizenLive.Edit do
+defmodule BanchanWeb.PeopleLive.Edit do
   @moduledoc """
   Banchan user profile pages
   """
@@ -30,7 +30,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
       {:ok,
        socket
        |> put_flash(:error, "You are not authorized to access this page.")
-       |> push_navigate(to: Routes.denizen_show_path(Endpoint, :show, handle))}
+       |> push_navigate(to: ~p"/people/#{handle}")}
     else
       {:ok,
        socket
@@ -114,8 +114,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
         socket = assign(socket, changeset: User.profile_changeset(user), user: user)
         socket = put_flash(socket, :info, "Profile updated")
 
-        {:noreply,
-         push_navigate(socket, to: Routes.denizen_show_path(Endpoint, :show, user.handle))}
+        {:noreply, push_navigate(socket, to: ~p"/people/#{user.handle}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
@@ -202,7 +201,7 @@ defmodule BanchanWeb.DenizenLive.Edit do
                       {#if Enum.empty?(@uploads.pfp.entries) && (@remove_pfp || !(@user.pfp_img_id && @user.pfp_thumb_id))}
                         <HiddenInput name={:pfp_image_id} value={nil} />
                         <HiddenInput name={:pfp_thumbnail_id} value={nil} />
-                        <img src={Routes.static_path(Endpoint, "/images/denizen_default_icon.png")}>
+                        <img src={Routes.static_path(Endpoint, "/images/user_default_icon.png")}>
                       {#elseif !Enum.empty?(@uploads.pfp.entries)}
                         <button
                           type="button"

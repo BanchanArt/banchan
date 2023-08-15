@@ -11,22 +11,22 @@ defmodule BanchanWeb.ArtistTokenController do
           :info,
           "Artist invite token applied successfully. You can now create studios."
         )
-        |> redirect(to: ~p"/denizens/#{conn.assigns.current_user.handle}")
+        |> redirect(to: ~p"/people/#{conn.assigns.current_user.handle}")
 
       {:error, :already_artist} ->
         conn
         |> put_flash(:error, "You are already an artist, so you can't use this token.")
-        |> redirect(to: ~p"/denizens/#{conn.assigns.current_user.handle}")
+        |> redirect(to: ~p"/people/#{conn.assigns.current_user.handle}")
 
       {:error, :invalid_token} ->
         conn
         |> put_flash(:error, "Artist invite token is invalid.")
-        |> redirect(to: ~p"/denizens/#{conn.assigns.current_user.handle}")
+        |> redirect(to: ~p"/people/#{conn.assigns.current_user.handle}")
 
       {:error, :token_used} ->
         conn
         |> put_flash(:error, "Artist invite token has already been used.")
-        |> redirect(to: ~p"/denizens/#{conn.assigns.current_user.handle}")
+        |> redirect(to: ~p"/people/#{conn.assigns.current_user.handle}")
     end
   end
 end

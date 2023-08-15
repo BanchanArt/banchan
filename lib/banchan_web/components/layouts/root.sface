@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     <meta name="banchan-git-rev" content={Application.get_env(:banchan, :git_rev)}>
     <meta name="robots" content="noai">
-    <.live_title prefix="Banchan Art |">
+    <.live_title prefix={"Banchan Art |" <> " "}>
       {assigns[:page_title] || "The Co-operative Commissions Platform"}
     </.live_title>
     {Phoenix.HTML.Tag.csrf_meta_tag()}

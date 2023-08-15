@@ -14,10 +14,10 @@ defmodule BanchanWeb.Components.ViewSwitcher do
   prop context, :atom, required: true
   prop studio, :struct
 
-  def render_client_view(assigns) do
+  def render_personal_view(assigns) do
     ~F"""
     <Icon name="user" class="grow" size="4">
-      <span class="grow">Client</span>
+      <span class="grow">Personal</span>
     </Icon>
     """
   end
@@ -68,8 +68,8 @@ defmodule BanchanWeb.Components.ViewSwitcher do
         <summary class="flex flex-row items-center">
           <span class="flex grow">
             {#case @context}
-              {#match :client}
-                {render_client_view(assigns)}
+              {#match :personal}
+                {render_personal_view(assigns)}
               {#match :admin}
                 {render_admin_view(assigns)}
               {#match :dev}
@@ -82,13 +82,13 @@ defmodule BanchanWeb.Components.ViewSwitcher do
         </summary>
         <ul class="p-2 menu absolute left-0 mt-4 z-[1] bg-base-100 rounded-box w-full bordered border-base-content border-opacity-10">
           <li>
-            <LiveRedirect to={~p"/"} class={active: @context == :client}>
-              {render_client_view(assigns)}
+            <LiveRedirect to={~p"/"} class={active: @context == :personal}>
+              {render_personal_view(assigns)}
             </LiveRedirect>
           </li>
           {#if Accounts.active_user?(@current_user) && Accounts.mod?(@current_user)}
             <li>
-              <LiveRedirect to={~p"/admin/denizens"} class={active: @context == :admin}>
+              <LiveRedirect to={~p"/admin/people"} class={active: @context == :admin}>
                 {render_admin_view(assigns)}
               </LiveRedirect>
             </li>

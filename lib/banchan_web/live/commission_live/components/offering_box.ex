@@ -23,7 +23,7 @@ defmodule BanchanWeb.CommissionLive.Components.OfferingBox do
     {#else}
       <LiveRedirect
         class={@class}
-        to={Routes.offering_show_path(Endpoint, :show, @offering.studio.handle, @offering.type)}
+        to={~p"/studios/#{@offering.studio.handle}/offerings/#{@offering.type}"}
       >
         {#if !is_nil(@offering.card_img_id)}
           <OfferingCard

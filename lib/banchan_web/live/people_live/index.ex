@@ -1,4 +1,4 @@
-defmodule BanchanWeb.DenizenLive.Index do
+defmodule BanchanWeb.PeopleLive.Index do
   @moduledoc """
   Global listing of users.
   """
@@ -57,14 +57,7 @@ defmodule BanchanWeb.DenizenLive.Index do
 
       {:noreply,
        socket
-       |> push_patch(
-         to:
-           Routes.denizen_index_path(
-             Endpoint,
-             :index,
-             params
-           )
-       )}
+       |> push_patch(to: ~p"/admin/people?#{params}")}
     else
       {:noreply, assign(socket, filter: changeset)}
     end

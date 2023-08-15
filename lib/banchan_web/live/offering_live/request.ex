@@ -9,7 +9,7 @@ defmodule BanchanWeb.OfferingLive.Request do
   alias Banchan.Offerings
   alias Banchan.Uploads
 
-  alias Surface.Components.Form
+  alias Surface.Components.{Form, LiveRedirect}
 
   import BanchanWeb.StudioLive.Helpers
 
@@ -289,7 +289,8 @@ defmodule BanchanWeb.OfferingLive.Request do
 
         {:noreply,
          redirect(socket,
-           to: ~p"/offerings/#{socket.assigns.studio.handle}/#{socket.assigns.offering.type}"
+           to:
+             ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}"
          )}
 
       {:error, :not_confirmed} ->
@@ -302,7 +303,8 @@ defmodule BanchanWeb.OfferingLive.Request do
 
         {:noreply,
          redirect(socket,
-           to: ~p"/offerings/#{socket.assigns.studio.handle}/#{socket.assigns.offering.type}"
+           to:
+             ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}"
          )}
 
       {:error, :no_slots_available} ->
@@ -310,7 +312,8 @@ defmodule BanchanWeb.OfferingLive.Request do
 
         {:noreply,
          redirect(socket,
-           to: ~p"/offerings/#{socket.assigns.studio.handle}/#{socket.assigns.offering.type}"
+           to:
+             ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}"
          )}
 
       {:error, :no_proposals_available} ->
@@ -323,7 +326,8 @@ defmodule BanchanWeb.OfferingLive.Request do
 
         {:noreply,
          redirect(socket,
-           to: ~p"/offerings/#{socket.assigns.studio.handle}/#{socket.assigns.offering.type}"
+           to:
+             ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}"
          )}
     end
   end
@@ -366,6 +370,7 @@ defmodule BanchanWeb.OfferingLive.Request do
                 available_slots={@available_slots}
                 class="p-2 transition-all rounded-box hover:bg-base-200"
               />
+              <div class="px-2 pt-2">By <LiveRedirect class="font-bold" to={~p"/studios/#{@studio.handle}"}>{@studio.name}</LiveRedirect></div>
               <div class="divider" />
               <div class="text-sm font-medium opacity-50">Cart</div>
               <Summary
