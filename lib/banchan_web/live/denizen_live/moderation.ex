@@ -150,7 +150,7 @@ defmodule BanchanWeb.DenizenLive.Moderation do
     ~F"""
     <Layout flashes={@flash} padding={0} context={:admin}>
       <div class="w-full bg-base-200">
-        <div class="w-full max-w-5xl p-10 mx-auto">
+        <div class="w-full max-w-7xl p-4 mx-auto">
           <Form as={:user} for={@changeset} change="change" submit="submit">
             <div class="text-xl">
               Manage User @{@user.handle}

@@ -51,7 +51,7 @@ defmodule BanchanWeb.ReportBugLive.New do
     ~F"""
     <Layout flashes={@flash} padding={0}>
       <div class="w-full bg-base-200">
-        <div class="w-full max-w-lg p-10 mx-auto rounded-xl md:my-10 bg-base-200">
+        <div class="w-full max-w-lg p-4 mx-auto rounded-xl md:my-10 bg-base-200">
           {#if @report_url}
             <p>Thanks for your feedback! You can view the issue and sign up for updates <a href={@report_url} class="link link-primary">here</a>.</p>
             <Button label="Report Another" click="reset" />
