@@ -216,10 +216,19 @@ defmodule BanchanWeb.Components.Layout do
                 <li>
                   <a href={~p"/admin/dashboard"} target="_blank" rel="noopener noreferrer">
                     <Icon name="layout-panel-top" size="4">
-                      <span>Dashboard</span>
+                      <span>LiveDashboard</span>
                     </Icon>
                   </a>
                 </li>
+                {#if Application.fetch_env!(:banchan, :env) == :prod}
+                  <li>
+                    <a href="/admin/oban" target="_blank" rel="noopener noreferrer">
+                      <Icon name="list-todo" size="4">
+                        <span>Oban Web</span>
+                      </Icon>
+                    </a>
+                  </li>
+                {/if}
                 {#if Application.fetch_env!(:banchan, :env) == :dev}
                   <li>
                     <a href={~p"/admin/sent_emails"} target="_blank" rel="noopener noreferrer">

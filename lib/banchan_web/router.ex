@@ -1,6 +1,8 @@
 defmodule BanchanWeb.Router do
   use BanchanWeb, :router
 
+  require Banchan.CompileEnv
+
   import BanchanWeb.UserAuth
   import Phoenix.LiveDashboard.Router
   import Surface.Catalogue.Router
@@ -257,6 +259,15 @@ defmodule BanchanWeb.Router do
     ])
 
     live_dashboard("/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo)
+  end
+
+  Banchan.CompileEnv.only_in :prod do
+    import Oban.Web.Router
+
+    scope "/admin" do
+      pipe_through([:basic_authed, :browser, :admin])
+      oban_dashboard("/oban")
+    end
   end
 
   scope "/admin" do

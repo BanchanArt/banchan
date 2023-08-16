@@ -7,6 +7,7 @@ processes = []
 
 [env]
   PORT = "8080"
+  RELEASE_COOKIE = "0NLyA7kQXfwfhlJIdyTIAGKn7MQGHjzpJJkQ5GVhph9CLR68N_v8tQ=="
 
 [experimental]
   allowed_public_ports = []
