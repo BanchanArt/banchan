@@ -253,7 +253,7 @@ defmodule BanchanWeb.PeopleLive.Show do
               </div>
             {/if}
             {#if Utils.has_socials?(@user)}
-              <Socials entity={@user} class="my-4" />
+              <Socials entity={@user} class="my-4 mx-6" />
             {/if}
             <div class="flex flex-row gap-4 mx-6 my-4">
               <LivePatch class="hover:link" to={~p"/people/#{@user.handle}/following"}>
