@@ -34,7 +34,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
       <ul class="flex flex-col">
         {#for {option, idx} <- Enum.with_index(@offering.options)}
           {#if !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
-            <li class="flex flex-row gap-2 py-2">
+            <li class="flex flex-row gap-4 py-2">
               {#if @allow_edits && @add_item}
                 <button
                   type="button"
@@ -47,23 +47,23 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
               {#else}
                 <div class="w-8" />
               {/if}
-              <div class="grow w-full flex flex-col">
-                <div class="font-medium text-sm">{option.name}</div>
-                <div class="text-xs">{option.description}</div>
+              <div class="flex flex-col w-full grow">
+                <div class="text-sm font-medium">{option.name}</div>
+                <div class="text-xs opacity-75">{option.description}</div>
               </div>
-              <div class="p-2 text-sm font-medium whitespace-nowrap">+{Payments.print_money(option.price)}</div>
+              <div class="text-sm font-medium whitespace-nowrap">+{Payments.print_money(option.price)}</div>
             </li>
           {/if}
         {/for}
         {#if @custom_changeset && @allow_edits}
-          <li class="py-2 pr-4">
+          <li class="py-2">
             <Collapse id={@id <> "-custom-collapse"}>
               <:header>
-                <div class="flex flex-row gap-2 py-2 items-center">
-                  <Icon name="plus-circle" class="w-8 text-xl hover:text-success opacity-50" />
-                  <div class="grow w-full flex flex-col">
-                    <div class="font-medium text-sm">Custom Option</div>
-                    <div class="text-xs">Add a customized option to the summary.</div>
+                <div class="flex flex-row items-center gap-4 py-2">
+                  <Icon name="plus-circle" class="text-xl opacity-50 hover:text-success" />
+                  <div class="flex flex-col w-full grow">
+                    <div class="text-sm font-medium">Custom Option</div>
+                    <div class="text-xs opacity-75">Add a customized option to the summary.</div>
                   </div>
                 </div>
               </:header>
@@ -75,7 +75,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
               >
                 <TextInput name={:name} opts={required: true, placeholder: "Some Name"} />
                 <TextArea name={:description} opts={required: true, placeholder: "A custom item just for you!"} />
-                <div class="flex flex-row gap-2 items-center py-2">
+                <div class="flex flex-row items-center gap-2 py-2">
                   <div class="flex flex-basis-1/4">{if is_nil(@offering) do
                       Payments.currency_symbol(Commissions.commission_currency(@commission))
                     else

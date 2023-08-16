@@ -229,7 +229,7 @@ defmodule BanchanWeb.OfferingLive.Show do
                 <div class="m-0 divider" />
               {/if}
               {#if Enum.any?(@offering.options, &(!&1.default))}
-                <div class="px-2 text-sm font-medium opacity-50">Add-ons</div>
+                <div class="text-sm font-medium opacity-50">Add-ons</div>
                 <AddonList id="addon-list" offering={@offering} line_items={@line_items} />
                 <div class="m-0 divider" />
               {/if}

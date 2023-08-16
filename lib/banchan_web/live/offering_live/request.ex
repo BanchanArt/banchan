@@ -387,7 +387,7 @@ defmodule BanchanWeb.OfferingLive.Request do
                   <div class="w-full mt-2 border-t-2 border-content opacity-10" />
                   <div class="w-full mb-2 border-t-2 border-content opacity-10" />
                 </div>
-                <div class="px-2 text-sm font-medium opacity-50">Add-ons</div>
+                <div class="text-sm font-medium opacity-50">Add-ons</div>
                 <AddonList
                   id="addon-list"
                   offering={@offering}
