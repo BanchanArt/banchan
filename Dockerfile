@@ -43,6 +43,11 @@ ARG BANCHAN_DEPLOY_ENV
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
+RUN --mount=type=secret,id=OBAN_KEY_FINGERPRINT \
+    --mount=type=secret,id=OBAN_LICENSE_KEY \
+    mix hex.repo add oban https://getoban.pro/repo \
+      --fetch-public-key "$(cat /run/secrets/OBAN_KEY_FINGERPRINT)" \
+      --auth-key "$(cat /run/secrets/OBAN_LICENSE_KEY)"
 RUN mix deps.get --only $MIX_ENV
 RUN mkdir config
 
