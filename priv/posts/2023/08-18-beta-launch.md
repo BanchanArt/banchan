@@ -7,31 +7,30 @@
 }
 ---
 
-Today, we're pleased to announce the Beta for Banchan.Art, a co-operative
+We're pleased to announce the Beta for Banchan.Art, a co-operative
 commissions platform that's creating a new space for artists to sell their art
-with minimal risk, and without being exploited by the platform they rely on.
+with minimal risk and without being exploited by the platform they rely on.
 You can read more about who we are and what we want to do in our [About
 Us](/about-us) page.
 
-With this release, we're looking to start testing and proving out our platform
+With this release, we're looking to start testing and proving our platform
 with real commissions for the first time since we started working on it over a
 year and a half ago.
 
 ### Who can Join? 🤔
 
-Anyone can create an account on Banchan.Art as of today, but if you want to be
-an artist and sell commissions, you'll need to [sign up for the beta](/beta),
+Anyone can create an account on Banchan.Art as of today. However, if you want to be
+an artist and sell commissions, you will need to [sign up for the beta](/beta),
 which will put you on a first-come-first-serve waiting list. We'll be making
 our way through this list and sending artist invites over the course of the
-next few days (and weeks).
+next few weeks.
 
-If you're particularly ready to get started, you can also probably poke us on
-[our Discord](https://discord.gg/FUkTHjGKJF) and jump the line a bit--the main
-reason we're limiting invites is to make sure we can handle the load and don't
-have any horrible bugs we missed.
+If you're especially eager to get started as an artist, you can also reach out to us on
+[our Discord](https://discord.gg/FUkTHjGKJF) and jump the line a bit by becoming a part of our group of testers who help with bug bashes, ie intentionally trying to find bugs in the site by testing new features. The main
+reasons that we're limiting invites is to make sure we can handle the load with our current resources and to hopefully limit impact of any major site-breaking bugs, ie ideally we find bugs quickly and efficiently remove them before adding the next batch of artists.
 
-We'll be staying in beta as long as it takes to feel confident that our
-platform is stable and working how we want it to.
+We'll be staying in beta for as long as it takes to feel confident that our
+platform is stable and working well.
 
 ### How much does it cost? 💸
 
@@ -49,25 +48,22 @@ experience Banchan is meant to be, including:
   filing/remitting them for you).
 * 1099 forms for US artists, when tax time comes along.
 
-All our income will be directed towards paying Stripe/tax fees (roughly 60-70%
-of the collected fee), hosting, and other business expenses to keep the lights
-on. Until Banchan grows enough, we won't have any paid staff, so we'll be
-running very light. Every commission helps!
+All of our income will be directed towards paying Stripe + tax fees (roughly 60-70%
+of the collected fee), hosting, and other business expenses to keep the site functional. Until Banchan grows enough to be self sufficient, we won't have any paid staff, which means we'll be running very light. Every commission helps!
 
-We may change these fees in the future depending on our needs and, once [we've
+We may change these fees in the future depending on our needs, and once [we've
 established our Membership system](/membership), Artist Members themselves
 will be able to vote on a fee structure that they believe balances their own
 income with the need to build out and maintain a quality platform.
 
 If you're curious to know more details about where the money goes, please drop
-by the Discord, and we're more than happy to discuss it! There's
+by the Discord, and we're more than happy to discuss it! We have
 _spreadsheets_ 🙈.
 
 ### How do I sell art? 🖼️
 
-Art in Banchan is sold through something we call **Studios**: You can make as
-many of these as you want once you're accepted as an artist, and can have them
-each following different themes.
+Art in Banchan is sold through **Studios**: once your account receives artist permissions, you can make as
+many studios as you need. Multiple studios allows you to set up different branding for your different offerings. For instance, you could have one studio that focuses on adoptables and another on illustration commissions. You can also have those in one studio. It is your choice how you would like display and organize your offerings. 
 
 You can access your studios--and create new ones--by opening up your context
 dropdown on the top of your side navigation:
@@ -80,7 +76,7 @@ Once you've created a studio, you can visit its Shop page and create a new
 #### Setting up your Offerings
 
 Offerings describe what kinds of commissions you'll take. For example, an
-Offering could be **"Illustration"**, or **"Chibi"**. Offerings are fairly
+Offering could be an **"Illustration"**, an **"Emote"**, or a **"Chibi"**. Offerings are fairly
 flexible in how they can be set up: they can have a limited number of slots, a
 maximum number of (not-yet-accepted) proposals, optional add-ons that a client
 can select while requesting the commission, and a gallery of example images.
@@ -92,11 +88,11 @@ showing up on the site, like so:
 
 #### Commission Proposals
 
-Once your offerings are set up: you wait! You can link people to your studio,
-or to individual offerings, and announce that you have open slots on your
+Once your offerings are set up: you are ready for proposals! You can link people to your studio
+or to individual offerings and announce that you have open slots on your
 preferred social media. Your clients will then be able to request a
-commission, with a description of what they want, and you'll be notified once
-they submit. You can see a list of your Studio's commissions in its
+commission with a description of what they want, and you'll be notified once
+they submit. You can see a list of your Studio's commissions on its
 **Commissions** page (this is different from your **My Commissions** page,
 which is only for commissions you're a client of).
 
@@ -120,29 +116,28 @@ commission proposal altogether.
 From here on out, the commission becomes a conversation between you and your
 client. You can ask for more details or clarifications, you can post drafts or
 request more references, change the line items for the commission, and
-otherwise have your professional discussion there. Any major changes are
-permanently logged in the commission timeline, so you'll be able to keep track
-of anything that's changed over time.
+otherwise manage your commission interactions all in one place. Any major changes are
+permanently logged in the commission timeline, which allows you to keep track
+of anything that changes over time.
 
-As far as money goes, there's two ways to invoice your client: You can **request
+As far as money goes, there's two ways to invoice your client: you can **request
 a deposit**, or you can **submit a final invoice**.
 
-When you request a deposit, the money the client pays doesn't go directly to
-you: Banchan holds onto it until either the commission ends, or the client
-decides to do an "early release". By doing a deposit, you can be sure that a
+When you request a deposit, the money the client pays does not go immediately to
+you: Banchan holds onto it until either the commission ends or the client
+decides to do an *early release*. With a deposit, you can be sure that a
 client has paid some amount towards a commission and that the payment has gone
-through, but the client knows their money isn't finally disbursed yet. This
-"escrow" system is core to building trust in Banchan: clients know an artist
-can't run away with their money, and artists know that clients can run away
-with their art. Attachments to invoices won't be available to clients until
+through, but the client knows their money is not disbursed yet. This
+**escrow** system is core to building trust in Banchan: clients know an artist
+cannot take their money without providing art, and artists know that clients can not require work without compensation. Attachments to invoices are not available to clients until
 payment is complete.
 
 ![Example released payment](/images/blog/2023/08-18-released-payment.png)
 
 When you have a final draft ready, you can submit a **Final Invoice**, which
-will be for whatever the remaining amount is on the commission, after counting
+will be for whatever the remaining amount is on the commission, after consideration of
 deposits. As soon as the client pays the final invoice, all deposits and the
-final payment will be released to your studio, and become available for payout
+final payment will be released to your studio and become available for payout
 on your studio's **Payouts** page.
 
 Please note: Brand new studios will have a longer payout wait time before
@@ -153,13 +148,13 @@ payouts for an additional fee.
 ### Where do I go from here? 🔜
 
 Explore the site! We hope Banchan.Art becomes your go-to platform for managing
-commissions, and, if you're a client, that you find the right artist for the
-art you've always dreamed of through us.
+commissions, and if you're a client, that you find the right artist for the
+art you've always dreamed of through our platform.
 
 Join [our Discord](https://discord.gg/FUkTHjGKJF) and tell
 us what you think (or use our [Feedback form](/feedback)). If you're on
 GitHub, you can also file issues or just check out [our GitHub
 repo](https://github.com/BanchanArt/banchan). Banchan is more than just a
-platform: We're a community, and your participation will help us be better at
+platform: we're a community, and your participation will help us be better at
 what we do.
 
