@@ -46,6 +46,8 @@ defmodule BanchanWeb.OfferingLive.Show do
         offering_type
       )
 
+    terms = offering.terms || socket.assigns.studio.default_terms
+
     Notifications.subscribe_to_offering_updates(offering)
 
     gallery_images =
@@ -115,7 +117,8 @@ defmodule BanchanWeb.OfferingLive.Show do
            gallery_images: gallery_images,
            line_items: line_items,
            available_slots: available_slots,
-           related: related
+           related: related,
+           terms: terms
          )}
 
       true ->
@@ -310,12 +313,12 @@ defmodule BanchanWeb.OfferingLive.Show do
             <div class="divider" />
             <Markdown class="pb-4" content={@offering.description} />
           </div>
-          {#if @offering.terms}
+          {#if @terms}
             <div class="divider md:hidden" />
             <div class="p-4 rounded-lg bg-base-200">
               <Collapse id="terms-collapse">
                 <:header>Commission Terms</:header>
-                <Markdown content={@offering.terms} />
+                <Markdown content={@terms} />
               </Collapse>
             </div>
           {/if}
