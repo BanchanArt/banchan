@@ -92,7 +92,8 @@ defmodule Banchan.Payments do
   """
   def open_invoice(%Commission{} = commission) do
     from(i in Invoice,
-      where: i.commission_id == ^commission.id and i.status in [:pending, :submitted]
+      where: i.commission_id == ^commission.id and i.status in [:pending, :submitted],
+      limit: 1
     )
     |> Repo.one()
   end
