@@ -49,9 +49,7 @@ defmodule Banchan.Payments.Forex do
           # If we still don't have anything in the DB, or the DB stuff is also
           # out of date, we go ahead and update.
           new_rates =
-            if is_nil(db_rates) ||
-                 is_nil(forex) ||
-                 (db_forex && forex_old?(db_forex)) do
+            if is_nil(forex) || (db_forex && forex_old?(db_forex)) do
               latest_rates(from, db_rates, from_rates)
             else
               db_rates

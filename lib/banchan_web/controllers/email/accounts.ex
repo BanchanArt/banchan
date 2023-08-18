@@ -97,6 +97,7 @@ defmodule BanchanWeb.Email.Accounts do
     <p>Accepting this invite will allow you to create studios and start accepting commissions right away, as well as getting your studios and offerings listed across the site.</p>
     <p>To accept the invite, <a href={@url}>click here</a> or visit the following URL:</p>
     <p>{@url}</p>
+    <p>Once that's done, you can check out <a href="https://help.banchan.art/support/solutions/articles/153000007897-creating-your-first-studio">our guide on setting up your first Studio</a> for next steps.</p>
     <p>If you didn't sign up for this, or aren't expecting someone else to invite you, please ignore this.</p>
     <p>- The Banchan Art Team</p>
     """
@@ -113,6 +114,10 @@ defmodule BanchanWeb.Email.Accounts do
     To accept the invite, visit the following URL:
 
     #{assigns.url}
+
+    Once that's done, you can check out our guide on setting up your first Studio for next steps:
+
+    https://help.banchan.art/support/solutions/articles/153000007897-creating-your-first-studio
 
     If you didn't sign up for this, or aren't expecting someone else to invite you, please ignore this.
 

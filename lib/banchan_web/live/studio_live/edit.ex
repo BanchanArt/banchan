@@ -229,7 +229,7 @@ defmodule BanchanWeb.StudioLive.Edit do
             />
             <Collapse id="socials" class="my-4">
               <:header>
-                Links
+                Links and Social Media
               </:header>
               <TextInput name={:website_url} />
               <TextInput name={:twitter_handle} />

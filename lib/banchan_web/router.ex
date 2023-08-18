@@ -1,6 +1,8 @@
 defmodule BanchanWeb.Router do
   use BanchanWeb, :router
 
+  require Banchan.CompileEnv
+
   import BanchanWeb.UserAuth
   import Phoenix.LiveDashboard.Router
   import Surface.Catalogue.Router
@@ -80,8 +82,6 @@ defmodule BanchanWeb.Router do
 
       live("/settings", SettingsLive, :edit)
       live("/mfa_setup", SetupMfaLive, :edit)
-
-      live("/feedback", ReportBugLive.New, :new)
 
       get(
         "/commissions/:commission_id/attachment/:upload_id",
@@ -195,6 +195,8 @@ defmodule BanchanWeb.Router do
     live_session :open, on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :open}] do
       pipe_through([:basic_authed, :browser, :ensure_enabled])
 
+      get("/feedback", Redirect, external: "https://help.banchan.art")
+
       live("/people/:handle", PeopleLive.Show, :show)
       live("/people/:handle/following", PeopleLive.Show, :following)
 
@@ -257,6 +259,15 @@ defmodule BanchanWeb.Router do
     ])
 
     live_dashboard("/dashboard", metrics: BanchanWeb.Telemetry, ecto_repos: Banchan.Repo)
+  end
+
+  Banchan.CompileEnv.only_in :prod do
+    import Oban.Web.Router
+
+    scope "/admin" do
+      pipe_through([:basic_authed, :browser, :admin])
+      oban_dashboard("/oban")
+    end
   end
 
   scope "/admin" do

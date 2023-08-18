@@ -20,41 +20,47 @@ defmodule BanchanWeb.Components.OfferingCard do
   prop hidden?, :boolean, default: false
   prop total_slots, :integer
   prop available_slots, :integer
+  prop studio_name, :string
 
   def render(assigns) do
     ~F"""
     <offering-card class={
-      "h-full transition-all relative flex flex-col",
+      " group h-full transition-all relative flex flex-col border rounded-lg border-base-content border-opacity-10 p-0 m-0",
       "opacity-50": @archived?
     }>
-      <figure class="overflow-hidden border rounded-lg border-base-content border-opacity-10 bg-base-300/25">
-        <OfferingCardImg blur?={@mature? && !@uncensored?} image={@image} />
-      </figure>
-      <div class="flex flex-row pt-2 align-items-center">
+      <div class="stack-custom">
+        <div class="px-2 py-1 text-sm text-right rounded-tl-lg h-fit w-fit availability-status whitespace-nowrap bg-base-300">
+          {#if @open? && !is_nil(@total_slots) && !is_nil(@available_slots)}
+            {@available_slots}/{@total_slots} Slots
+          {#elseif @open?}
+            Open
+          {#else}
+            Closed
+          {/if}
+        </div>
+        <figure class="overflow-hidden bg-base-300/25">
+          <OfferingCardImg blur?={@mature? && !@uncensored?} image={@image} />
+        </figure>
+      </div>
+      <div class="flex flex-row px-4 py-2 bg-base-100 align-items-center">
         <div class="flex flex-col grow">
           <div class="flex flex-row gap-2 align-items-center">
             <span class="font-bold name text-md">{@name}</span>
             {#if @mature?}
               <span
                 title="Mature"
-                class="px-2 bg-error text-xs text-error-content rounded-md border border-base-content border-opacity-10 bg-opacity-75 flex flex-row items-center font-bold"
+                class="flex flex-row items-center px-2 text-xs font-bold bg-opacity-75 border rounded-md bg-error text-error-content border-base-content border-opacity-10"
               >M</span>
             {/if}
             {#if @hidden?}
               <span
                 title="Hidden"
-                class="px-2 bg-warning text-xs text-warning-content rounded-md border border-base-content border-opacity-10 bg-opacity-75 flex flex-row items-center font-bold"
+                class="flex flex-row items-center px-2 text-xs font-bold bg-opacity-75 border rounded-md bg-warning text-warning-content border-base-content border-opacity-10"
               >Hidden</span>
             {/if}
           </div>
-          <div class="text-xs font-semibold opacity-75 availability-status whitespace-nowrap">
-            {#if @open? && !is_nil(@total_slots) && !is_nil(@available_slots)}
-              {@available_slots}/{@total_slots} Slots
-            {#elseif @open?}
-              Open
-            {#else}
-              Closed
-            {/if}
+          <div :if={@studio_name} class="text-xs opacity-75">
+            By <span class="font-semibold">{@studio_name}</span>
           </div>
         </div>
         <div

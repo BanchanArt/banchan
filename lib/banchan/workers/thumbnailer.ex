@@ -70,99 +70,103 @@ defmodule Banchan.Workers.Thumbnailer do
     end
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp process(src_id, dest_id, opts) do
-    {:ok, ret} =
-      Repo.transaction(fn ->
-        src = Uploads.get_by_id!(src_id)
-        dest = Uploads.get_by_id!(dest_id)
+    Repo.transaction(fn ->
+      src = Uploads.get_by_id!(src_id)
+      dest = Uploads.get_by_id!(dest_id)
 
-        tmp_src =
-          Path.join([
-            System.tmp_dir!(),
-            src.key <> "#{System.unique_integer()}" <> Path.extname(src.name)
-          ])
+      tmp_src =
+        Path.join([
+          System.tmp_dir!(),
+          src.key <> "#{System.unique_integer()}" <> Path.extname(src.name)
+        ])
 
-        File.mkdir_p!(Path.dirname(tmp_src))
-        Uploads.write_data!(src, tmp_src)
+      File.mkdir_p!(Path.dirname(tmp_src))
+      Uploads.write_data!(src, tmp_src)
 
-        if Uploads.video?(src) do
-          duration = FFprobe.duration(tmp_src)
+      if Uploads.video?(src) do
+        duration = FFprobe.duration(tmp_src)
 
-          output_src = Path.join([System.tmp_dir!(), src.key <> ".jpeg"])
+        output_src = Path.join([System.tmp_dir!(), src.key <> ".jpeg"])
 
-          command =
-            FFmpex.new_command()
-            |> add_global_option(option_y())
-            |> add_input_file(tmp_src)
-            |> add_output_file(output_src)
-            |> add_file_option(option_f("image2"))
-            |> add_file_option(option_filter("scale=128:128"))
-            |> add_file_option(option_ss(round(duration / 2)))
-            |> add_file_option(option_vframes(1))
+        command =
+          FFmpex.new_command()
+          |> add_global_option(option_y())
+          |> add_input_file(tmp_src)
+          |> add_output_file(output_src)
+          |> add_file_option(option_f("image2"))
+          |> add_file_option(option_filter("scale=128:128"))
+          |> add_file_option(option_ss(round(duration / 2)))
+          |> add_file_option(option_vframes(1))
 
-          {:ok, _} = execute(command)
+        {:ok, _} = execute(command)
 
-          File.copy!(output_src, tmp_src)
+        File.copy!(output_src, tmp_src)
+      end
+
+      tmp_dest =
+        Path.join([
+          System.tmp_dir!(),
+          dest.key <> "#{System.unique_integer()}" <> Path.extname(dest.name)
+        ])
+
+      File.mkdir_p!(Path.dirname(tmp_dest))
+
+      # https://www.smashingmagazine.com/2015/06/efficient-image-resizing-with-imagemagick/
+      Mogrify.open(tmp_src)
+      |> Mogrify.custom("flatten")
+      |> Mogrify.format(opts["format"])
+      |> Mogrify.limit("area", "128MB")
+      |> Mogrify.limit("disk", "1GB")
+      |> Mogrify.custom("filter", "Triangle")
+      |> Mogrify.custom("define", "filter:support=2")
+      |> Mogrify.custom("unsharp", "0.25x0.25+8+0.065")
+      |> Mogrify.custom("dither", "None")
+      |> Mogrify.custom("posterize", "136")
+      |> Mogrify.custom("quality", "82")
+      |> Mogrify.custom("define", "jpeg:fancy-upsampling=off")
+      |> Mogrify.custom("define", "png:compression-filter=5")
+      |> Mogrify.custom("define", "png:compression-level=9")
+      |> Mogrify.custom("define", "png:compression-strategy=1")
+      |> Mogrify.custom("define", "png:exclude-chunk=all")
+      |> Mogrify.custom("interlace", "none")
+      |> Mogrify.custom("colorspace", "sRGB")
+      |> Mogrify.custom("strip")
+      |> then(fn mog ->
+        if opts["target_size"] do
+          mog
+          |> Mogrify.custom("define", "#{opts["format"]}:extent=#{opts["target_size"]}")
+        else
+          mog
         end
+      end)
+      |> then(fn mog ->
+        if opts["dimensions"] do
+          mog
+          |> Mogrify.gravity("Center")
+          |> Mogrify.custom("thumbnail", opts["dimensions"])
+          |> Mogrify.custom("extent", opts["dimensions"])
+        else
+          mog
+        end
+      end)
+      |> Mogrify.save(path: tmp_dest)
 
-        tmp_dest =
-          Path.join([
-            System.tmp_dir!(),
-            dest.key <> "#{System.unique_integer()}" <> Path.extname(dest.name)
-          ])
+      Uploads.upload_file!(dest, tmp_dest)
 
-        File.mkdir_p!(Path.dirname(tmp_dest))
+      Uploads.update_upload!(dest, %{
+        size: File.stat!(tmp_dest).size,
+        pending: false
+      })
 
-        # https://www.smashingmagazine.com/2015/06/efficient-image-resizing-with-imagemagick/
-        Mogrify.open(tmp_src)
-        |> Mogrify.custom("flatten")
-        |> Mogrify.format(opts["format"])
-        |> Mogrify.limit("area", "128MB")
-        |> Mogrify.limit("disk", "1GB")
-        |> Mogrify.custom("filter", "Triangle")
-        |> Mogrify.custom("define", "filter:support=2")
-        |> Mogrify.custom("unsharp", "0.25x0.25+8+0.065")
-        |> Mogrify.custom("dither", "None")
-        |> Mogrify.custom("posterize", "136")
-        |> Mogrify.custom("quality", "82")
-        |> Mogrify.custom("define", "jpeg:fancy-upsampling=off")
-        |> Mogrify.custom("define", "png:compression-filter=5")
-        |> Mogrify.custom("define", "png:compression-level=9")
-        |> Mogrify.custom("define", "png:compression-strategy=1")
-        |> Mogrify.custom("define", "png:exclude-chunk=all")
-        |> Mogrify.custom("interlace", "none")
-        |> Mogrify.custom("colorspace", "sRGB")
-        |> Mogrify.custom("strip")
-        |> then(fn mog ->
-          if opts["target_size"] do
-            mog
-            |> Mogrify.custom("define", "#{opts["format"]}:extent=#{opts["target_size"]}")
-          else
-            mog
-          end
-        end)
-        |> then(fn mog ->
-          if opts["dimensions"] do
-            mog
-            |> Mogrify.gravity("Center")
-            |> Mogrify.custom("thumbnail", opts["dimensions"])
-            |> Mogrify.custom("extent", opts["dimensions"])
-          else
-            mog
-          end
-        end)
-        |> Mogrify.save(path: tmp_dest)
+      File.rm!(tmp_src)
+      File.rm!(tmp_dest)
 
-        Uploads.upload_file!(dest, tmp_dest)
-
-        Uploads.update_upload!(dest, %{
-          size: File.stat!(tmp_dest).size,
-          pending: false
-        })
-
-        File.rm!(tmp_src)
-        File.rm!(tmp_dest)
-
+      {:ok, dest}
+    end)
+    |> case do
+      {:ok, {:ok, dest}} ->
         case opts["callback"] do
           [module, name, args] ->
             apply(
@@ -182,9 +186,13 @@ defmodule Banchan.Workers.Thumbnailer do
             nil
         end
 
-        :ok
-      end)
+        {:ok, dest_id}
 
-    ret
+      {:ok, {:error, error}} ->
+        {:error, error}
+
+      {:error, _} ->
+        {:error, :processing_failed}
+    end
   end
 end

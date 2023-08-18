@@ -8,6 +8,8 @@ defmodule Banchan.Application do
   alias Banchan.Workers.Utils
 
   def start(_type, _args) do
+    topologies = Application.get_env(:libcluster, :topologies) || []
+
     children = [
       # Start the Ecto repository
       Banchan.Repo,
@@ -15,6 +17,8 @@ defmodule Banchan.Application do
       BanchanWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Banchan.PubSub},
+      # Cluster time
+      {Cluster.Supervisor, [topologies, [name: Banchan.ClusterSupervisor]]},
       # Start the Endpoint (http/https)
       BanchanWeb.Endpoint,
       # Start the Task supervisor for handling notifications

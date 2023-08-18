@@ -61,6 +61,7 @@ defmodule Banchan.MixProject do
       {:earmark, "~> 1.4.32"},
       {:ecto_psql_extras, "~> 0.7.11"},
       {:ecto_sql, "~> 3.10.1"},
+      {:eqrcode, "~> 0.1.10"},
       {:ex_aws, "~> 2.4.2"},
       {:ex_aws_s3, "~> 2.4.0"},
       {:ffmpex, "~> 0.10.0"},
@@ -70,6 +71,7 @@ defmodule Banchan.MixProject do
       # TODO: Can't bump this one to ~>2 because of tentacat
       {:httpoison, "~> 1.8.1"},
       {:jason, "~> 1.4.0"},
+      {:libcluster, "~> 3.3"},
       {:makeup_elixir, ">= 0.0.0"},
       {:makeup_erlang, ">= 0.0.0"},
       {:mogrify, "~> 0.9.3"},
@@ -93,7 +95,6 @@ defmodule Banchan.MixProject do
       {:phoenix_view, "~> 2.0"},
       {:plug_cowboy, "~> 2.6.1"},
       {:postgrex, "~> 0.17.1"},
-      {:qr_code, "~> 3.0.0"},
       {:scrivener_ecto, "~> 2.7.0"},
       {:sentry, "~> 8.0.6"},
       {:slugify, "~> 1.3.1"},
@@ -123,6 +124,11 @@ defmodule Banchan.MixProject do
       {:phoenix_live_reload, "~> 1.4.1", only: :dev},
       {:sobelow, "~> 0.12.2", only: [:dev, :test], runtime: false},
       {:surface_formatter, "~> 0.7.5", only: :dev}
+      | if System.get_env("MIX_ENV") == "prod" do
+          [{:oban_web, "~> 2.9", repo: "oban", only: :prod}]
+        else
+          []
+        end
     ]
   end
 
@@ -135,12 +141,8 @@ defmodule Banchan.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup", "cmd --cd assets npm install"],
-      "deploy.dev": [
-        "cmd flyctl deploy -a banchan-dev --build-arg BANCHAN_HOST=dev.banchan.art --build-arg BANCHAN_DEPLOY_ENV=dev"
-      ],
-      "deploy.prod": [
-        "cmd flyctl deploy -a banchan-prod --build-arg BANCHAN_HOST=banchan.art --build-arg BANCHAN_DEPLOY_ENV=prod"
-      ],
+      "deploy.dev": [fn _ -> deploy("dev.banchan.art", "dev") end],
+      "deploy.prod": [fn _ -> deploy("banchan.art", "prod") end],
       "stripe.local": [
         "cmd stripe listen --forward-to localhost:4000/api/stripe_webhook"
       ],
@@ -177,5 +179,13 @@ defmodule Banchan.MixProject do
         # "dialyzer --ignore-exit-status"
       ]
     ]
+  end
+
+  def deploy(host, env) do
+    Mix.Task.run("app.config")
+
+    Mix.Shell.IO.cmd(
+      "flyctl deploy -a banchan-#{env} --build-arg BANCHAN_HOST=#{host} --build-arg BANCHAN_DEPLOY_ENV=#{env} --build-secret OBAN_KEY_FINGERPRINT=#{Application.get_env(:banchan, :oban_key_fingerprint)} --build-secret OBAN_LICENSE_KEY=#{Application.get_env(:banchan, :oban_license_key)}"
+    )
   end
 end
