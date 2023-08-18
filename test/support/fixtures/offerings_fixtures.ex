@@ -6,6 +6,7 @@ defmodule Banchan.OfferingsFixtures do
 
   alias Banchan.Accounts
   alias Banchan.Offerings
+  alias Banchan.Payments
 
   def offering_fixture(studio, attrs \\ %{}) do
     type = "offering-type#{System.unique_integer()}"
@@ -22,6 +23,7 @@ defmodule Banchan.OfferingsFixtures do
             index: 0,
             name: name,
             description: description,
+            currency: Payments.platform_currency(),
             open: true
           },
           attrs

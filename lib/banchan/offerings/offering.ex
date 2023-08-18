@@ -82,6 +82,7 @@ defmodule Banchan.Offerings.Offering do
       :gallery_imgs_changed
     ])
     |> cast_assoc(:options)
+    |> validate_required([:type, :name, :description, :currency])
     |> validate_format(:type, ~r/^[0-9a-z-]+$/,
       message: "Only lowercase alphanumerics and - are allowed."
     )
@@ -101,7 +102,6 @@ defmodule Banchan.Offerings.Offering do
     |> unsafe_validate_unique([:type, :studio_id], Repo)
     |> validate_length(:tags, max: 5)
     |> foreign_key_constraint(:card_img_id)
-    |> validate_required([:type, :name, :description])
     |> unique_constraint([:type, :studio_id])
   end
 
