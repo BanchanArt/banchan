@@ -39,27 +39,25 @@ defmodule BanchanWeb.CommissionLive.Components.TimelineItem do
         <div class="relative flex items-start space-x-3">
           <div>
             <div class="relative px-1">
-              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-base-200 ring-base-100 border-2 border-base-content border-opacity-10">
-                <span class="text-base-content opacity-50 text-center align-middle" aria-hidden="true">
+              <div class="flex items-center justify-center w-8 h-8 my-0.5 border-2 rounded-full bg-base-200 ring-base-100 border-base-content border-opacity-10">
+                <span class="text-center align-middle opacity-50 text-base-content" aria-hidden="true">
                   <#slot {@icon} />
                 </span>
               </div>
             </div>
           </div>
-          <div class="min-w-0 flex-1 py-1.5">
-            <div class="text-xs text-base-content">
-              <div class="inline-flex items-baseline space-x-1">
-                <div class="self-center">
-                  <Avatar class="w-4" user={@actor} />
-                </div>
+          <div class="flex-1 min-w-0 py-2">
+            <div class="flex flex-row flex-wrap items-center gap-1 text-sm text-base-content">
+              <div class="inline-flex items-center gap-2">
+                <Avatar class="w-4" user={@actor} />
                 <UserHandle user={@actor} />
               </div>
               <#slot />
               <a
                 title={fmt_abs_time(@event.inserted_at)}
-                class="hover:underline whitespace-nowrap"
+                class="opacity-75 hover:underline whitespace-nowrap hover:opacity-100"
                 href={replace_fragment(@uri, @event)}
-              >{fmt_time(@event.inserted_at)}</a>.
+              >{fmt_time(@event.inserted_at)}</a>
             </div>
           </div>
         </div>

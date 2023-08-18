@@ -126,7 +126,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
             cancel_upload="cancel_upload"
           />
           <div class="flex flex-row-reverse">
-            <Submit changeset={@changeset} class="w-full md:w-fit ml-auto" label="Post" />
+            <Submit changeset={@changeset} class="w-full ml-auto md:w-fit" label="Post" />
           </div>
         </div>
       </Form>
