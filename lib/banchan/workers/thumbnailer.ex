@@ -70,6 +70,7 @@ defmodule Banchan.Workers.Thumbnailer do
     end
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp process(src_id, dest_id, opts) do
     Repo.transaction(fn ->
       src = Uploads.get_by_id!(src_id)
