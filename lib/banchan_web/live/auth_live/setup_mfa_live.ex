@@ -24,7 +24,7 @@ defmodule BanchanWeb.SetupMfaLive do
         |> QRCode.render(:svg)
         |> QRCode.to_base64()
 
-      totp_svg = "data:image/svg+xml;base64,#{svg_base64}"
+      totp_svg = "data:image/svg+xml;base64,#{svg_base64.encoded}"
 
       {:ok,
        socket |> assign(qrcode_svg: totp_svg, secret: secret, totp_activated: user.totp_activated)}
