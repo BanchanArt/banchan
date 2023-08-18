@@ -39,6 +39,12 @@ defmodule BanchanWeb.StaticLive.AboutUs do
 
         The idea behind Banchan Art is to build a platform that provides a meeting point for artists and their supporters. This is a place where both artists and their patrons can customize their experience in a mutually beneficial and harmonious way. Our ideal for the platform is to make it easy and enjoyable to commission a custom piece of art for both sides. Similar to choosing different amounts of banchan to cater a meal to your taste, supporters can choose from different options set up by artists to commission the art piece that they will treasure.
 
+        ## Behind the Platform
+
+        The founders of this project are [Kat](https://github.com/zkat) and [Atrian](https://github.com/skullbunnygalaxy). We're both artists and web developers, and we saw a need in this area after being a part of the social media discourse and how it adversely impacted artists.
+
+        We're more interested in helping our community than in only helping ourselves, which is why we're committed towards sharing management of this platform using cooperative principles. Our hope is that in the future this will grow bigger and allow us to be just two members out of many benefitting and guiding this platform.
+
       </#Markdown>
     </Layout>
     """
