@@ -304,19 +304,19 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
 
   def render(assigns) do
     ~F"""
-    <div id={@id} class="flex flex-col gap-2">
+    <div id={@id} class="flex flex-col gap-4">
       {#if @open_final_invoice}
         <div class="pb-2 text-base font-medium">Final Invoice</div>
         <div class="text-sm">Attachments will be released on payment. All deposits will be immediately released, along with this payment, and the commission will be closed.</div>
         <Summary line_items={@commission.line_items} />
-        <div class="m-0 divider" />
+        <div class="m-0 divider h-fit" />
         <BalanceBox
           id={@id <> "-balance-box"}
           deposited={@deposited}
           line_items={@commission.line_items}
           invoiced={@remaining}
         />
-        <div class="m-0 divider" />
+        <div class="m-0 divider h-fit" />
         <Form
           for={@changeset}
           change="change_final"
@@ -330,7 +330,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
             upload={@uploads.attachments}
             cancel_upload="cancel_upload"
           />
-          <div class="m-0 divider" />
+          <div class="m-0 divider h-fit" />
           <QuillInput
             id={@id <> "-markdown-input"}
             name={:text}
@@ -347,7 +347,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
         <div class="pb-2 text-base font-medium">Partial Deposit</div>
         <div class="text-sm">Attachments will be released on payment. Deposit will be held until final invoice is submitted, or deposit is released early. by client.</div>
         <Summary line_items={@commission.line_items} />
-        <div class="m-0 divider" />
+        <div class="m-0 divider h-fit" />
         <BalanceBox
           id={@id <> "-balance-box"}
           deposited={@deposited}
@@ -365,14 +365,14 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
             {Payments.currency_symbol(Commissions.commission_currency(@commission))}
             <TextInput name={:amount} show_label={false} />
           </div>
-          <div class="m-0 divider" />
+          <div class="m-0 divider h-fit" />
           <div class="text-base font-medium">Attachments</div>
           <Attachments
             id={@id <> "-attachments"}
             upload={@uploads.attachments}
             cancel_upload="cancel_upload"
           />
-          <div class="m-0 divider" />
+          <div class="m-0 divider h-fit" />
           <QuillInput
             id={@id <> "-markdown-input"}
             name={:text}
@@ -386,40 +386,37 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           </div>
         </Form>
       {#else}
-        <div class="pb-2 text-base font-medium">Summary</div>
-        <Collapse id={@id <> "-summary-options"}>
-          <:header><div class="text-sm font-medium opacity-50">Cart</div></:header>
-          <div class="pt-2">
-            <SummaryEditor
-              id={@id <> "-summary-editor"}
+        <div class="text-sm font-medium opacity-75">Order</div>
+        <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
+          <SummaryEditor
+            id={@id <> "-summary-editor"}
+            allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
+          />
+          <div class="m-0 divider h-fit" />
+          <BalanceBox
+            id={@id <> "-balance-box"}
+            deposited={@deposited}
+            line_items={@commission.line_items}
+            tipped={@final_invoice && @final_invoice.tip}
+          />
+        </div>
+        <div class="m-0 divider h-fit" />
+        {#if @commission.offering}
+          <div class="text-sm font-medium opacity-75">Add-ons</div>
+          <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
+            <AddonPicker
+              id={@id <> "-addon-picker"}
               allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
+              allow_custom
             />
           </div>
-        </Collapse>
-        <div class="m-0 divider" />
-        <BalanceBox
-          id={@id <> "-balance-box"}
-          deposited={@deposited}
-          line_items={@commission.line_items}
-          tipped={@final_invoice && @final_invoice.tip}
-        />
-        <div class="grid grid-cols-1 gap-0">
-          <div class="w-full my-0.5 border-b-2 border-content opacity-10" />
-          <div class="w-full my-0.5 border-t-2 border-content opacity-10" />
-        </div>
-        {#if @commission.offering}
-          <div class="text-sm font-medium opacity-50">Add-ons</div>
-          <AddonPicker
-            id={@id <> "-addon-picker"}
-            allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
-            allow_custom
-          />
-          <div class="m-0 divider" />
+          <div class="m-0 divider h-fit" />
         {/if}
-        <div class="flex flex-col gap-2 pb-4">
+        <div class="flex flex-col gap-4">
+          <div class="text-sm font-medium opacity-75">Actions</div>
           {#if Commissions.commission_open?(@commission) && Commissions.commission_active?(@commission)}
             {#if @current_user_member?}
-              <div class="input-group">
+              <div class="flex flex-row items-center w-full gap-4">
                 <Button
                   disabled={@existing_open || !Commissions.commission_active?(@commission) || @remaining.amount <= 0}
                   click="request_deposit"
@@ -430,7 +427,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
                   disabled={@existing_open || !Commissions.commission_active?(@commission) || !@can_finalize ||
                     @remaining.amount < 0}
                   click="final_invoice"
-                  class="btn-sm grow final-invoice"
+                  class="btn-sm btn-secondary grow final-invoice"
                   label="Final Invoice"
                 />
               </div>

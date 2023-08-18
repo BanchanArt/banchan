@@ -31,10 +31,10 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
   def render(assigns) do
     ~F"""
     <bc-addon-list>
-      <ul class="flex flex-col items-start w-full">
+      <ul class="flex flex-col items-start w-full gap-4">
         {#for {option, idx} <- Enum.with_index(@offering.options)}
           {#if !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
-            <li class="flex flex-row items-center w-full gap-4 py-2">
+            <li class="flex flex-row items-center w-full gap-4">
               {#if @allow_edits && @add_item}
                 <button
                   type="button"
@@ -56,10 +56,10 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
           {/if}
         {/for}
         {#if @custom_changeset && @allow_edits}
-          <li class="py-2">
+          <li class="w-full">
             <Collapse id={@id <> "-custom-collapse"}>
               <:header>
-                <div class="flex flex-row items-center gap-4 py-2">
+                <div class="flex flex-row items-center w-full gap-4">
                   <Icon name="plus-circle" class="text-xl opacity-50 hover:text-success" />
                   <div class="flex flex-col w-full grow">
                     <div class="text-sm font-medium">Custom Option</div>
@@ -68,7 +68,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
                 </div>
               </:header>
               <Form
-                class="flex flex-col gap-2"
+                class="flex flex-col w-full gap-2"
                 for={@custom_changeset}
                 change={@change_custom}
                 submit={@submit_custom}

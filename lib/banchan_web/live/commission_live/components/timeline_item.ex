@@ -29,14 +29,14 @@ defmodule BanchanWeb.CommissionLive.Components.TimelineItem do
   def render(assigns) do
     ~F"""
     <li id={"event-#{@event.public_id}"} class="scroll-mt-36 snap-start">
-      <div class="relative pb-8">
+      <div class="relative pb-4">
         {#if !@last?}
           <span
             class="absolute left-5 top-5 -ml-px h-full w-0.5 bg-base-content opacity-10"
             aria-hidden="true"
           />
         {/if}
-        <div class="relative flex items-start space-x-3">
+        <div class="relative flex items-start space-x-4">
           <div>
             <div class="relative px-1">
               <div class="flex items-center justify-center w-8 h-8 my-0.5 border-2 rounded-full bg-base-200 ring-base-100 border-base-content border-opacity-10">

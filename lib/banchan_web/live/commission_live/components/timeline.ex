@@ -40,20 +40,16 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
             {#case event.type}
               {#match :comment}
                 <li id={"event-#{event.public_id}"} class="scroll-mt-36 snap-start">
-                  <div class="relative pb-8">
+                  <div class="relative pb-4">
                     {#if idx != Enum.count(@commission.events) - 1}
                       <span
                         class="absolute left-5 top-5 -ml-px h-full w-0.5 bg-base-content opacity-10"
                         aria-hidden="true"
                       />
                     {/if}
-                    <div class="relative flex items-start md:space-x-3">
+                    <div class="relative flex items-start md:space-x-4">
                       <div class="hidden md:flex">
-                        <Avatar
-                          class="items-center justify-center w-10 h-10 border border-base-content border-opacity-10"
-                          user={Map.get(@users, event.actor_id)}
-                          link={false}
-                        />
+                        <Avatar class="w-10 h-10" user={Map.get(@users, event.actor_id)} link={false} />
                       </div>
                       <article class="relative flex-1 min-w-0 scroll-mt-36 snap-start">
                         <Comment
