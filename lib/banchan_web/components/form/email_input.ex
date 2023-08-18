@@ -50,7 +50,7 @@ defmodule BanchanWeb.Components.Form.EmailInput do
           {/if}
           <EmailInput
             class={
-              "w-full bg-transparent ring-0 outline-none border-none focus:ring-0",
+              "w-full bg-transparent p-0 ring-0 outline-none border-none focus:ring-0",
               @class
             }
             opts={[{:phx_debounce, "200"} | @opts]}

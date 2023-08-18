@@ -359,85 +359,98 @@ defmodule BanchanWeb.OfferingLive.Request do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash}>
-      <h1 class="text-2xl font-bold">Request a Commission</h1>
-      <div class="divider" />
-      <div class="flex flex-col p-2 space-y-2 md:container md:mx-auto">
-        <Form for={@changeset} change="change" submit="submit">
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div class="flex flex-col p-4 rounded-lg shadow-lg md:order-2 bg-base-200">
-              <OfferingBox
-                offering={@offering}
-                available_slots={@available_slots}
-                class="p-2 transition-all rounded-box hover:bg-base-200"
-              />
-              <div class="px-2 pt-2">By <LiveRedirect class="font-bold" to={~p"/studios/#{@studio.handle}"}>{@studio.name}</LiveRedirect></div>
-              <div class="divider" />
-              <div class="text-sm font-medium opacity-50">Cart</div>
-              <Summary
-                allow_edits
-                remove_item="remove_item"
-                increase_item="increase_item"
-                decrease_item="decrease_item"
-                line_items={@line_items}
-              />
-              <div class="divider" />
-              <BalanceBox id="balance-box" line_items={@line_items} />
-              {#if Enum.any?(@offering.options, &(!&1.default))}
-                <div class="flex flex-col gap-2">
-                  <div class="w-full mt-2 border-t-2 border-content opacity-10" />
-                  <div class="w-full mb-2 border-t-2 border-content opacity-10" />
+      <div class="w-full mx-auto max-w-7xl">
+        <div class="grid grid-cols-1 gap-4 px-4 py-2">
+          <h1 class="text-2xl font-bold">Request a Commission</h1>
+          <div class="m-0 divider h-fit" />
+        </div>
+        <div class="flex flex-col px-4 py-2 space-y-2 md:container md:mx-auto">
+          <Form for={@changeset} change="change" submit="submit">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div class="flex flex-col gap-4 rounded-lg md:order-1 bg-base-200">
+                <div class="grid grid-cols-1 gap-2">
+                  <OfferingBox
+                    offering={@offering}
+                    available_slots={@available_slots}
+                    class="transition-all rounded-box hover:bg-base-200"
+                  />
+                  <span class="text-sm"><span class="opacity-75">By
+                    </span><LiveRedirect
+                      class="font-semibold opacity-75 hover:opacity-100 hover:underline"
+                      to={~p"/studios/#{@studio.handle}"}
+                    >{@studio.name}</LiveRedirect>
+                  </span>
                 </div>
-                <div class="text-sm font-medium opacity-50">Add-ons</div>
-                <AddonList
-                  id="addon-list"
-                  offering={@offering}
-                  line_items={@line_items}
-                  allow_edits
-                  add_item="add_item"
-                />
-              {/if}
-            </div>
-            <div class="divider md:hidden" />
-            <div class="flex flex-col gap-4 md:col-span-2 md:order-1">
-              <TextInput
-                name={:title}
-                show_label={false}
-                class="w-full"
-                opts={required: true, placeholder: "A Brief Title"}
-              />
-              <QuillInput
-                id="initial-message"
-                name={:description}
-                show_label={false}
-                class="w-full"
-                upload={@uploads.attachment}
-                cancel_upload="cancel_upload"
-                opts={
-                  required: true,
-                  value: Map.get(@changeset.changes, :description, @template)
-                }
-              />
-              {#if !is_nil(@terms)}
-                <div class="pt-2">
-                  <h3 class="py-4 text-xl font-bold">Commission Terms and Conditions</h3>
-                  <div class="p-2 overflow-auto max-h-60">
-                    <div class="p-2">
-                      <Markdown content={@terms} />
-                    </div>
+                <div class="grid grid-cols-1 gap-2">
+                  <div class="text-sm font-medium opacity-50">Cart</div>
+                  <div class="grid w-full grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
+                    <Summary
+                      allow_edits
+                      remove_item="remove_item"
+                      increase_item="increase_item"
+                      decrease_item="decrease_item"
+                      line_items={@line_items}
+                    />
+                    <div class="m-0 divider h-fit" />
+                    <BalanceBox id="balance-box" line_items={@line_items} />
                   </div>
                 </div>
-                <div class="p-2">
-                  <Checkbox name={:tos_ok} opts={required: true}>
-                    I have read and agree to these Terms.
-                  </Checkbox>
+                <div class="m-0 divider h-fit" />
+                {#if Enum.any?(@offering.options, &(!&1.default))}
+                  <div class="grid grid-cols-1 gap-2">
+                    <div class="text-sm font-medium opacity-50">Add-ons</div>
+                    <AddonList
+                      id="addon-list"
+                      offering={@offering}
+                      line_items={@line_items}
+                      allow_edits
+                      add_item="add_item"
+                    />
+                  </div>
+                {/if}
+              </div>
+              <div class="divider md:hidden" />
+              <div class="flex flex-col gap-4 md:col-span-2 md:order-2">
+                <TextInput
+                  name={:title}
+                  show_label={false}
+                  class="w-full"
+                  opts={required: true, placeholder: "A Brief Title"}
+                />
+                <QuillInput
+                  id="initial-message"
+                  name={:description}
+                  show_label={false}
+                  class="w-full"
+                  upload={@uploads.attachment}
+                  cancel_upload="cancel_upload"
+                  opts={
+                    required: true,
+                    value: Map.get(@changeset.changes, :description, @template)
+                  }
+                />
+                {#if !is_nil(@terms)}
+                  <div class="pt-2">
+                    <h3 class="py-4 text-xl font-bold">Commission Terms and Conditions</h3>
+                    <div class="p-2 overflow-auto max-h-60">
+                      <div class="p-2">
+                        <Markdown content={@terms} />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="p-2">
+                    <Checkbox name={:tos_ok} opts={required: true}>
+                      I have read and agree to these Terms.
+                    </Checkbox>
+                  </div>
+                {/if}
+                <div class="py-2">
+                  <Submit changeset={@changeset} />
                 </div>
-              {/if}
-              <div class="p-2">
-                <Submit changeset={@changeset} />
               </div>
             </div>
-          </div>
-        </Form>
+          </Form>
+        </div>
       </div>
     </Layout>
     """

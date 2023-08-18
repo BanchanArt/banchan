@@ -31,21 +31,21 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
   def render(assigns) do
     ~F"""
     <bc-addon-list>
-      <ul class="flex flex-col">
+      <ul class="flex flex-col items-start w-full">
         {#for {option, idx} <- Enum.with_index(@offering.options)}
           {#if !Enum.any?(@line_items, &(&1.option && &1.option.id == option.id))}
-            <li class="flex flex-row gap-4 py-2">
+            <li class="flex flex-row items-center w-full gap-4 py-2">
               {#if @allow_edits && @add_item}
                 <button
                   type="button"
-                  class="w-8 text-xl opacity-50 hover:text-success"
+                  class="w-8 text-xl opacity-50 hover:text-success hover:opacity-100"
                   :on-click={@add_item}
                   value={idx}
                 >
                   <Icon name="plus-circle" />
                 </button>
               {#else}
-                <div class="w-8" />
+                <Icon name="check-circle-2" class="w-8 text-xl opacity-50" />
               {/if}
               <div class="flex flex-col w-full grow">
                 <div class="text-sm font-medium">{option.name}</div>

@@ -34,7 +34,7 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
 
   def render(assigns) do
     ~F"""
-    <div>
+    <div class="text-sm">
       {#if @deposited}
         <div class="flex flex-col gap-2">
           <div class="flex flex-row items-center">
@@ -75,9 +75,9 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
           </div>
         </div>
       {#else}
-        <div class="flex flex-row px-2">
+        <div class="flex flex-row">
           <div class="font-medium grow">Subtotal:</div>
-          <div class="text-sm font-medium">
+          <div class="font-medium">
             {Payments.print_money(@estimate_amt)}
           </div>
         </div>
