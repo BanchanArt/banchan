@@ -9,6 +9,7 @@ defmodule Banchan.Offerings.Offering do
 
   alias Banchan.Commissions.Commission
   alias Banchan.Offerings.{GalleryImage, OfferingOption}
+  alias Banchan.Payments
   alias Banchan.Repo
   alias Banchan.Studios
   alias Banchan.Studios.Studio
@@ -95,6 +96,7 @@ defmodule Banchan.Offerings.Offering do
     |> validate_length(:terms, max: 1500)
     |> validate_length(:template, max: 1500)
     |> validate_option_currencies()
+    |> validate_minimum_total()
     |> validate_tags()
     |> unsafe_validate_unique([:type, :studio_id], Repo)
     |> validate_length(:tags, max: 5)
@@ -115,7 +117,35 @@ defmodule Banchan.Offerings.Offering do
          end) do
         []
       else
-        [{:currency, "All options must use the configured currency on the offering."}]
+        [{:options, "All options must use the configured currency on the offering."}]
+      end
+    end)
+  end
+
+  def validate_minimum_total(changeset) do
+    curr = fetch_field!(changeset, :currency)
+    min = Payments.minimum_release_amount() |> Payments.convert_money(curr)
+
+    changeset
+    |> validate_change(:options, fn _, opts ->
+      total =
+        opts
+        |> Enum.filter(&(&1.action in [:update, :insert]))
+        |> Enum.reduce(Money.new(0, curr), fn opt, acc ->
+          if opt.valid? && get_field(opt, :price) do
+            Money.add(acc, fetch_field!(opt, :price))
+          else
+            acc
+          end
+        end)
+
+      if Payments.cmp_money(total, min) in [:gt, :eq] do
+        []
+      else
+        [
+          {:options,
+           "You must have enough 'Always Included' options to add up to at least #{Payments.print_money(min)}."}
+        ]
       end
     end)
   end

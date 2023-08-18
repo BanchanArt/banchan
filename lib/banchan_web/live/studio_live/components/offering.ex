@@ -6,8 +6,8 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   import Slug
 
-  alias Surface.Components.Form
-  alias Surface.Components.Form.Inputs
+  alias Surface.Components.{Context, Form}
+  alias Surface.Components.Form.{ErrorTag, Inputs}
 
   alias Banchan.Offerings
   alias Banchan.Offerings.{Offering, OfferingOption}
@@ -39,7 +39,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   data(changeset, :struct)
   data(uploads, :map)
   data(remove_card, :boolean, default: false)
-  data(minimum_release_amount, :struct, default: Payments.minimum_release_amount())
 
   def mount(socket) do
     {:ok,
@@ -368,22 +367,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     end)
   end
 
-  defp options_estimate(changeset) do
-    currency = Ecto.Changeset.fetch_field!(changeset, :currency)
-
-    Ecto.Changeset.fetch_field!(changeset, :options)
-    |> Enum.reduce(
-      Money.new(0, currency),
-      fn item, acc ->
-        if is_nil(item.price) do
-          acc
-        else
-          Money.add(acc, item.price)
-        end
-      end
-    )
-  end
-
   def render(assigns) do
     ~F"""
     <Form
@@ -534,52 +517,58 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <div>
           If you do not define any options, the Base Price will be displayed as "Inquire", and you will need to add custom options during the commission.
         </div>
-        <ul class="flex flex-col gap-4 pt-4">
-          <Inputs form={@form} for={:options} :let={index: index}>
-            <li>
-              <Collapse id={@id <> "-option-" <> "#{index}"}>
-                <:header>
-                  <h3 class="text-xl">
-                    {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
+        <Context get={Form, form: form}>
+          <ul class={
+            "flex flex-col gap-4 pt-4",
+            "border border-error rounded-md": Keyword.get(form.errors, :options)
+          }>
+            <Inputs form={@form} for={:options} :let={index: index}>
+              <li>
+                <Collapse id={@id <> "-option-" <> "#{index}"}>
+                  <:header>
+                    <h3 class="text-xl">
+                      {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
 
-                    (opt.name || "New Option") <>
-                      if opt.price do
-                        " - " <> Payments.print_money(opt.price)
-                      else
-                        ""
-                      end}
-                  </h3>
-                </:header>
-                <TextInput name={:name} info="Name of the option." opts={required: true} />
-                <TextArea name={:description} info="Description for the option." opts={required: true} />
-                <div class="flex flex-row items-center gap-2 py-2">
-                  <div class="flex flex-basis-1/4">
-                    {Payments.currency_symbol(Ecto.Changeset.fetch_field!(@changeset, :currency))}
+                      (opt.name || "New Option") <>
+                        if opt.price do
+                          " - " <> Payments.print_money(opt.price)
+                        else
+                          ""
+                        end}
+                    </h3>
+                  </:header>
+                  <TextInput name={:name} info="Name of the option." opts={required: true} />
+                  <TextArea name={:description} info="Description for the option." opts={required: true} />
+                  <div class="flex flex-row items-center gap-2 py-2">
+                    <div class="flex flex-basis-1/4">
+                      {Payments.currency_symbol(Ecto.Changeset.fetch_field!(@changeset, :currency))}
+                    </div>
+                    <div class="grow">
+                      <TextInput name={:price} info="Quoted price for adding this option." show_label={false} />
+                    </div>
                   </div>
-                  <div class="grow">
-                    <TextInput name={:price} info="Quoted price for adding this option." show_label={false} />
-                  </div>
-                </div>
-                <Checkbox
-                  name={:default}
-                  info="Whether this option is always included as part of the commission."
-                  label="Always Included"
-                />
-                <Checkbox
-                  name={:multiple}
-                  info="Allow multiple instances of this option at the same time."
-                  label="Allow Multiple"
-                />
-                <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
-              </Collapse>
+                  <Checkbox
+                    name={:default}
+                    info="Whether this option is always included as part of the commission."
+                    label="Always Included"
+                  />
+                  <Checkbox
+                    name={:multiple}
+                    info="Allow multiple instances of this option at the same time."
+                    label="Allow Multiple"
+                  />
+                  <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
+                </Collapse>
+              </li>
+            </Inputs>
+            <li class="field">
+              <div class="control">
+                <Button class="w-full" click="add_option" label="Add Option" />
+              </div>
             </li>
-          </Inputs>
-          <li class="field">
-            <div class="control">
-              <Button class="w-full" click="add_option" label="Add Option" />
-            </div>
-          </li>
-        </ul>
+          </ul>
+        </Context>
+        <ErrorTag class="help text-error" field={:options} />
         <Select
           name={:currency}
           label="Option Currency"
@@ -588,15 +577,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           |> Enum.map(&{"#{Money.Currency.name(&1)} (#{Payments.currency_symbol(&1)})", &1})}
           opts={required: true}
         />
-        {#if Payments.cmp_money(@minimum_release_amount, options_estimate(@changeset)) == :gt}
-          <p class="text-warning">
-            Warning: Your line items add up to less than {Payments.convert_money(
-              @minimum_release_amount,
-              Ecto.Changeset.fetch_field!(@changeset, :currency)
-            )
-            |> Payments.print_money()}. You can still create this offering, but you will have to add custom options during the commission itself in order to be able to invoice your clients.
-          </p>
-        {/if}
         <div class="divider" />
         <Collapse class="pb-2" id={@id <> "-terms-collapse"}>
           <:header>
