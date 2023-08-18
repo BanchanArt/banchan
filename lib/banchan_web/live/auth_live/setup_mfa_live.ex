@@ -18,13 +18,10 @@ defmodule BanchanWeb.SetupMfaLive do
     if user.totp_secret do
       secret = Base.encode32(user.totp_secret, padding: false)
 
-      svg_base64 =
+      totp_svg =
         NimbleTOTP.otpauth_uri("Banchan:#{user.email}", user.totp_secret, issuer: "Banchan")
-        |> QRCode.create!()
-        |> QRCode.render(:svg)
-        |> QRCode.to_base64()
-
-      totp_svg = "data:image/svg+xml;base64,#{svg_base64.encoded}"
+        |> EQRCode.encode()
+        |> EQRCode.svg(width: 200, padding: "10px", background_color: "white")
 
       {:ok,
        socket |> assign(qrcode_svg: totp_svg, secret: secret, totp_activated: user.totp_activated)}
@@ -131,7 +128,7 @@ defmodule BanchanWeb.SetupMfaLive do
       {#if @qrcode_svg && !@totp_activated}
         <h1 class="text-2xl">Your QR Code</h1>
         <br>
-        <img src={@qrcode_svg} style="width: 200px; padding: 10px; background-color: white;">
+        {raw(@qrcode_svg)}
         <br>
         No QR code reader? Input the following value in your MFA app:
         <br>
