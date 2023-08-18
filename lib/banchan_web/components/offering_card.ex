@@ -30,17 +30,17 @@ defmodule BanchanWeb.Components.OfferingCard do
     }>
       <div class="stack-custom">
         <div class="px-2 py-1 text-sm text-right rounded-tl-lg h-fit w-fit availability-status whitespace-nowrap bg-base-300">
-            {#if @open? && !is_nil(@total_slots) && !is_nil(@available_slots)}
-              {@available_slots}/{@total_slots} Slots
-            {#elseif @open?}
-              Open
-            {#else}
-              Closed
-            {/if}
-          </div>
-          <figure class="overflow-hidden bg-base-300/25">
-            <OfferingCardImg blur?={@mature? && !@uncensored?} image={@image} />
-          </figure>
+          {#if @open? && !is_nil(@total_slots) && !is_nil(@available_slots)}
+            {@available_slots}/{@total_slots} Slots
+          {#elseif @open?}
+            Open
+          {#else}
+            Closed
+          {/if}
+        </div>
+        <figure class="overflow-hidden bg-base-300/25">
+          <OfferingCardImg blur?={@mature? && !@uncensored?} image={@image} />
+        </figure>
       </div>
       <div class="flex flex-row px-4 py-2 bg-base-100 align-items-center">
         <div class="flex flex-col grow">
