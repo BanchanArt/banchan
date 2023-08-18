@@ -83,8 +83,6 @@ defmodule BanchanWeb.Router do
       live("/settings", SettingsLive, :edit)
       live("/mfa_setup", SetupMfaLive, :edit)
 
-      live("/feedback", ReportBugLive.New, :new)
-
       get(
         "/commissions/:commission_id/attachment/:upload_id",
         CommissionAttachmentController,
@@ -196,6 +194,8 @@ defmodule BanchanWeb.Router do
   scope "/", BanchanWeb do
     live_session :open, on_mount: [BanchanWeb.CurrentPageHook, {BanchanWeb.UserLiveAuth, :open}] do
       pipe_through([:basic_authed, :browser, :ensure_enabled])
+
+      get("/feedback", Redirect, external: "https://help.banchan.art")
 
       live("/people/:handle", PeopleLive.Show, :show)
       live("/people/:handle/following", PeopleLive.Show, :following)
