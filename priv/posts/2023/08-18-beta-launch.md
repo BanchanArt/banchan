@@ -3,7 +3,7 @@
   author: "Banchan.Art Technical Committee",
   tags: ~w(beta release tech),
   description: "We're celebrating our initial Beta launch! Join us!",
-  published: false
+  published: true
 }
 ---
 
@@ -63,7 +63,7 @@ _spreadsheets_ 🙈.
 ### How do I sell art? 🖼️
 
 Art in Banchan is sold through **Studios**: once your account receives artist permissions, you can make as
-many studios as you need. Multiple studios allows you to set up different branding for your different offerings. For instance, you could have one studio that focuses on adoptables and another on illustration commissions. You can also have those in one studio. It is your choice how you would like display and organize your offerings. 
+many studios as you need. Multiple studios allows you to set up different branding for your different offerings. For instance, you could have one studio that focuses on adoptables and another on illustration commissions. You can also have those in one studio. It is your choice how you would like display and organize your offerings.
 
 You can access your studios--and create new ones--by opening up your context
 dropdown on the top of your side navigation:
