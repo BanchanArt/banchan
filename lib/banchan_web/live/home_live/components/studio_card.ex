@@ -17,7 +17,15 @@ defmodule BanchanWeb.Components.StudioCard do
     ~F"""
     <studio-card>
       <LiveRedirect to={~p"/studios/#{@studio.handle}"}>
-        <Card class={"h-full", "border", "rounded-lg", "border-base-content", "border-opacity-10", "bg-base-100", "opacity-50": @studio.archived_at}>
+        <Card class={
+          "h-full",
+          "border",
+          "rounded-lg",
+          "border-base-content",
+          "border-opacity-10",
+          "bg-base-100",
+          "opacity-50": @studio.archived_at
+        }>
           <:image>
             <div class="relative w-full h-full">
               {#if @studio.card_img_id}
