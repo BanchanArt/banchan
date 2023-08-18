@@ -196,7 +196,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
         </LivePatch>
         {#if @title_changeset}
           <Form for={@title_changeset} class="w-full" change="change_title" submit="submit_title">
-            <div class="flex flex-row items-center w-full">
+            <div class="flex flex-row items-center w-full gap-2">
               <div class="grow">
                 <TextInput class="w-full text-2xl" show_label={false} name={:title} />
               </div>
@@ -212,7 +212,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
                 <div class="cursor-default badge badge-warning badge-lg">Archived</div>
               {/if}
             </div>
-            <Button label="Edit Title" class="hidden md:flex btn-sm btn-link" click="edit_title" />
+            <Button label="Edit Title" class="hidden md:flex btn-sm" primary={false} click="edit_title" />
           </div>
         {/if}
       </h1>

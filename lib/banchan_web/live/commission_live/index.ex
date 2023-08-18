@@ -415,7 +415,7 @@ defmodule BanchanWeb.CommissionLive do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash} context={@context} studio={@studio}>
-      <div class="flex flex-col w-full p-4 mx-auto max-w-7xl">
+      <div class="flex flex-col w-full gap-4 p-4 mx-auto max-w-7xl">
         {#if !@commission}
           <h1 class="text-3xl font-bold">
             {#if @studio}
@@ -424,15 +424,14 @@ defmodule BanchanWeb.CommissionLive do
               My Commissions
             {/if}
           </h1>
-          <div class="divider" />
         {/if}
         <div class="flex flex-row grow xl:grow-0">
-          <div class={"flex flex-col pt-4 sidebar basis-full", hidden: @commission}>
+          <div class={"flex flex-col sidebar basis-full", hidden: @commission}>
             <Form
               for={@filter}
               change="change"
               submit="filter"
-              class="w-full max-w-3xl px-4 pb-6 mx-auto form-control md:w-content"
+              class="w-full mx-auto form-control md:w-content"
               opts={role: "search"}
             >
               <Field class="w-full input-group grow" name={:search}>
@@ -456,7 +455,6 @@ defmodule BanchanWeb.CommissionLive do
                 <h2 class="pt-4 text-xl">
                   Additional Filters
                 </h2>
-                <div class="divider" />
                 {#unless is_nil(@studio)}
                   <TextInput name={:client} />
                 {/unless}
@@ -488,12 +486,13 @@ defmodule BanchanWeb.CommissionLive do
                 </div>
               </Collapse>
             </Form>
+            <div class="divider" />
             {#if Enum.empty?(@results)}
               <div class="px-4 py-2 text-xl">
                 No Results
               </div>
             {#else}
-              <ul role="list" class="grid grid-cols-1 gap-2">
+              <ul role="list" class="grid grid-cols-1 gap-4">
                 {#for result <- @results}
                   <CommissionRow result={result} />
                 {/for}
