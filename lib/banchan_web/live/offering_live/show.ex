@@ -186,7 +186,7 @@ defmodule BanchanWeb.OfferingLive.Show do
     ~F"""
     <Layout flashes={@flash}>
       <div class="w-full mx-auto max-w-7xl">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div class="flex flex-col gap-4 md:order-2">
             <Lightbox
               id="card-lightbox-mobile"
@@ -225,7 +225,7 @@ defmodule BanchanWeb.OfferingLive.Show do
               {/if}
             </div>
             <Markdown content={@offering.description} />
-            <div class="flex flex-col gap-2">
+            <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-base-100 border-base-content border-opacity-10">
               {#if Enum.any?(@offering.options, & &1.default)}
                 <div class="text-sm font-medium opacity-50">Included</div>
                 <Summary line_items={@line_items} />
@@ -234,54 +234,54 @@ defmodule BanchanWeb.OfferingLive.Show do
               {#if Enum.any?(@offering.options, &(!&1.default))}
                 <div class="text-sm font-medium opacity-50">Add-ons</div>
                 <AddonList id="addon-list" offering={@offering} line_items={@line_items} />
-                <div class="m-0 divider" />
               {/if}
-              {#if !Enum.empty?(@offering.tags)}
-                <h3 class="pt-2 text-lg">Tags</h3>
-                <div class="flex flex-row flex-wrap gap-1">
-                  {#for tag <- @offering.tags}
-                    <Tag tag={tag} />
-                  {/for}
-                </div>
-                <div class="m-0 divider" />
-              {/if}
-              <div class="flex flex-row justify-end gap-2 pt-4">
-                {#if @current_user}
-                  <div class="dropdown">
-                    <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
-                      <Icon name="more-vertical" size="4" />
-                    </label>
-                    <ul
-                      tabindex="0"
-                      class="p-1 border dropdown-content menu md:menu-compact bg-base-100 border-base-content border-opacity-10 rounded-xl"
-                    >
-                      {#if @current_user && (@current_user_member? || Accounts.mod?(@current_user))}
-                        <li>
-                          <LiveRedirect to={~p"/studios/#{@offering.studio.handle}/offerings/#{@offering.type}/edit"}>
-                            <Icon name="pencil" size="4" label="edit" /> Edit
-                          </LiveRedirect>
-                        </li>
-                      {/if}
-                      <li>
-                        <button type="button" :on-click="report">
-                          <Icon name="flag" size="4" label="report" /> Report
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                {/if}
-                {#if @offering.open}
-                  <LiveRedirect
-                    to={~p"/studios/#{@offering.studio.handle}/offerings/#{@offering.type}/request"}
-                    class="text-center btn btn-primary grow"
-                  >Request</LiveRedirect>
-                {#elseif !@offering.user_subscribed?}
-                  <Button class="btn-info grow" click="notify_me">Notify Me</Button>
-                {/if}
-                {#if @offering.user_subscribed?}
-                  <Button class="btn-info grow" click="unnotify_me">Unsubscribe</Button>
-                {/if}
+            </div>
+            <div class="m-0 divider" />
+            {#if !Enum.empty?(@offering.tags)}
+              <h3 class="pt-2 text-lg">Tags</h3>
+              <div class="flex flex-row flex-wrap gap-1">
+                {#for tag <- @offering.tags}
+                  <Tag tag={tag} />
+                {/for}
               </div>
+              <div class="m-0 divider" />
+            {/if}
+            <div class="flex flex-row justify-end gap-2 pt-4">
+              {#if @current_user}
+                <div class="dropdown">
+                  <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
+                    <Icon name="more-vertical" size="4" />
+                  </label>
+                  <ul
+                    tabindex="0"
+                    class="p-1 border dropdown-content menu md:menu-compact bg-base-100 border-base-content border-opacity-10 rounded-xl"
+                  >
+                    {#if @current_user && (@current_user_member? || Accounts.mod?(@current_user))}
+                      <li>
+                        <LiveRedirect to={~p"/studios/#{@offering.studio.handle}/offerings/#{@offering.type}/edit"}>
+                          <Icon name="pencil" size="4" label="edit" /> Edit
+                        </LiveRedirect>
+                      </li>
+                    {/if}
+                    <li>
+                      <button type="button" :on-click="report">
+                        <Icon name="flag" size="4" label="report" /> Report
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              {/if}
+              {#if @offering.open}
+                <LiveRedirect
+                  to={~p"/studios/#{@offering.studio.handle}/offerings/#{@offering.type}/request"}
+                  class="text-center btn btn-primary grow"
+                >Request</LiveRedirect>
+              {#elseif !@offering.user_subscribed?}
+                <Button class="btn-info grow" click="notify_me">Notify Me</Button>
+              {/if}
+              {#if @offering.user_subscribed?}
+                <Button class="btn-info grow" click="unnotify_me">Unsubscribe</Button>
+              {/if}
             </div>
             {#if !Enum.empty?(@related)}
               <div class="hidden md:flex md:flex-col">

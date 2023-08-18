@@ -57,7 +57,7 @@ defmodule BanchanWeb.CommissionLive.Components.UploadsBox do
     <div>
       <div class="text-sm font-medium opacity-75">Uploads</div>
       {#if Enum.empty?(@attachments)}
-        <div class="py-4 text-sm">No uploads yet.</div>
+        <div class="pt-4 text-sm">No uploads yet.</div>
       {#else}
         <AttachmentBox base_id={@id <> "-attachments"} attachments={@attachments} />
       {/if}

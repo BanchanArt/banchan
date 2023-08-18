@@ -306,16 +306,18 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     ~F"""
     <div id={@id} class="flex flex-col gap-4">
       {#if @open_final_invoice}
-        <div class="pb-2 text-base font-medium">Final Invoice</div>
+        <div class="pb-2 text-lg font-medium opacity-100">Final Invoice</div>
         <div class="text-sm">Attachments will be released on payment. All deposits will be immediately released, along with this payment, and the commission will be closed.</div>
-        <Summary line_items={@commission.line_items} />
-        <div class="m-0 divider h-fit" />
-        <BalanceBox
-          id={@id <> "-balance-box"}
-          deposited={@deposited}
-          line_items={@commission.line_items}
-          invoiced={@remaining}
-        />
+        <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
+          <Summary line_items={@commission.line_items} />
+          <div class="m-0 divider h-fit" />
+          <BalanceBox
+            id={@id <> "-balance-box"}
+            deposited={@deposited}
+            line_items={@commission.line_items}
+            invoiced={@remaining}
+          />
+        </div>
         <div class="m-0 divider h-fit" />
         <Form
           for={@changeset}
@@ -324,35 +326,40 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           id={"#{@id}-form"}
           opts={"phx-target": @myself}
         >
-          <div class="text-base font-medium">Attachments</div>
-          <Attachments
-            id={@id <> "-attachments"}
-            upload={@uploads.attachments}
-            cancel_upload="cancel_upload"
-          />
-          <div class="m-0 divider h-fit" />
-          <QuillInput
-            id={@id <> "-markdown-input"}
-            name={:text}
-            label="Invoice Text"
-            info="Brief summary of what this invoice is meant to cover, for the record."
-            class="w-full"
-          />
-          <div class="flex flex-row justify-end gap-2 pt-2">
-            <Button click="cancel" class="btn-error" label="Cancel" />
-            <Submit changeset={@changeset} class="grow" label="Send Invoice" />
+          <div class="grid grid-cols-1 gap-4">
+            <div class="text-base font-medium">Attachments</div>
+            <Attachments
+              id={@id <> "-attachments"}
+              upload={@uploads.attachments}
+              cancel_upload="cancel_upload"
+            />
+            <div class="m-0 divider h-fit" />
+            <QuillInput
+              id={@id <> "-markdown-input"}
+              name={:text}
+              label="Invoice Text"
+              info="Brief summary of what this invoice is meant to cover, for the record."
+              class="w-full"
+            />
+            <div class="flex flex-row justify-end gap-2 pt-2">
+              <Button click="cancel" class="btn-error" label="Cancel" />
+              <Submit changeset={@changeset} class="grow" label="Send Invoice" />
+            </div>
           </div>
         </Form>
       {#elseif @open_deposit_requested}
-        <div class="pb-2 text-base font-medium">Partial Deposit</div>
+        <div class="pb-2 text-lg font-medium opacity-100">Partial Deposit</div>
         <div class="text-sm">Attachments will be released on payment. Deposit will be held until final invoice is submitted, or deposit is released early. by client.</div>
-        <Summary line_items={@commission.line_items} />
+        <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
+          <Summary line_items={@commission.line_items} />
+          <div class="m-0 divider h-fit" />
+          <BalanceBox
+            id={@id <> "-balance-box"}
+            deposited={@deposited}
+            line_items={@commission.line_items}
+          />
+        </div>
         <div class="m-0 divider h-fit" />
-        <BalanceBox
-          id={@id <> "-balance-box"}
-          deposited={@deposited}
-          line_items={@commission.line_items}
-        />
         <Form
           for={@changeset}
           change="change_deposit"
@@ -360,29 +367,34 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           id={"#{@id}-form"}
           opts={"phx-target": @myself}
         >
-          <div class="flex flex-row items-center gap-2">
-            <div class="text-base font-medium">Deposit:</div>
-            {Payments.currency_symbol(Commissions.commission_currency(@commission))}
-            <TextInput name={:amount} show_label={false} />
-          </div>
-          <div class="m-0 divider h-fit" />
-          <div class="text-base font-medium">Attachments</div>
-          <Attachments
-            id={@id <> "-attachments"}
-            upload={@uploads.attachments}
-            cancel_upload="cancel_upload"
-          />
-          <div class="m-0 divider h-fit" />
-          <QuillInput
-            id={@id <> "-markdown-input"}
-            name={:text}
-            label="Invoice Text"
-            info="Brief summary of what this invoice is meant to cover, for the record."
-            class="w-full"
-          />
-          <div class="flex flex-row justify-end gap-2 pt-2">
-            <Button click="cancel" class="btn-error" label="Cancel" />
-            <Submit changeset={@changeset} class="grow" label="Send Invoice" />
+          <div class="grid grid-cols-1 gap-4">
+            <div class="text-sm font-medium opacity-75">Request Amount</div>
+            <div class="flex flex-row items-center gap-2">
+              {Payments.currency_symbol(Commissions.commission_currency(@commission))}
+              <div class="grow">
+                <TextInput name={:amount} show_label={false} />
+              </div>
+            </div>
+            <div class="text-xs opacity-75">Deposits will be held until final invoice is submitted, or unless they are released early by the client.</div>
+            <div class="m-0 divider h-fit" />
+            <div class="text-base font-medium">Attachments</div>
+            <Attachments
+              id={@id <> "-attachments"}
+              upload={@uploads.attachments}
+              cancel_upload="cancel_upload"
+            />
+            <div class="m-0 divider h-fit" />
+            <QuillInput
+              id={@id <> "-markdown-input"}
+              name={:text}
+              label="Invoice Text"
+              info="Brief summary of what this invoice is meant to cover, for the record."
+              class="w-full"
+            />
+            <div class="flex flex-row justify-end gap-2 pt-2">
+              <Button click="cancel" class="btn-error" label="Cancel" />
+              <Submit changeset={@changeset} class="grow" label="Send Invoice" />
+            </div>
           </div>
         </Form>
       {#else}

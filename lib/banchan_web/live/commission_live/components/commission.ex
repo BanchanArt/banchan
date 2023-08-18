@@ -216,8 +216,8 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           </div>
         {/if}
       </h1>
-      <div class="py-4">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div class="py-6">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div class="flex flex-col gap-4 md:order-2">
             <SummaryBox id={@id <> "-summary-box"} />
             <div class="m-0 divider h-fit" />
@@ -231,7 +231,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
             />
             {bottom_buttons(assigns, true)}
           </div>
-          <div class="divider md:hidden" />
+          <div class="m-0 divider h-fit md:hidden" />
           <div class="flex flex-col md:col-span-2 md:order-1">
             <Timeline users={@users} report_modal_id={@id <> "-report-modal"} />
             <div class="mt-8 divider" />
@@ -259,9 +259,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   def bottom_buttons(assigns, desktop?) do
     ~F"""
     <div class={"md:hidden": !desktop?, "hidden md:block": desktop?}>
-      <div class={"divider md:hidden": !desktop?, "hidden md:divider md:flex": desktop?} />
-      <div class="w-full">
-        <div class="pb-2 text-sm font-medium">Notifications</div>
+      <div class={
+        "divider md:h-fit md:m-0 md:hidden": !desktop?,
+        "hidden md:h-fit md:m-0 md:divider md:flex": desktop?
+      } />
+      <div class="flex flex-col w-full gap-4 mt-4">
+        <div class="text-sm font-medium opacity-75">Notifications</div>
         <button
           type="button"
           :on-click="toggle_subscribed"
