@@ -17,12 +17,20 @@ defmodule BanchanWeb.Components.StudioCard do
     ~F"""
     <studio-card>
       <LiveRedirect to={~p"/studios/#{@studio.handle}"}>
-        <Card class={"h-full", "opacity-50": @studio.archived_at}>
+        <Card class={
+          "h-full",
+          "border",
+          "rounded-lg",
+          "border-base-content",
+          "border-opacity-10",
+          "bg-base-100",
+          "opacity-50": @studio.archived_at
+        }>
           <:image>
-            <div class="relative w-full h-full border rounded-lg border-base-content border-opacity-10">
+            <div class="relative w-full h-full">
               {#if @studio.card_img_id}
                 <img
-                  class="object-cover rounded-lg aspect-video"
+                  class="object-cover rounded-t-lg aspect-video"
                   alt={"studio card image for #{@studio.name}"}
                   src={~p"/images/studio_card_img/#{@studio.card_img_id}"}
                 />
@@ -42,7 +50,7 @@ defmodule BanchanWeb.Components.StudioCard do
               <div class="badge badge-warning">Archived</div>
             {/if}
           </:header_aside>
-          <ul class="flex flex-row flex-wrap items-center gap-1 my-2">
+          <ul class="flex flex-row flex-wrap items-center gap-1 px-4 my-2">
             {#for tag <- tags}
               <li>
                 <Tag link={false} tag={tag} />

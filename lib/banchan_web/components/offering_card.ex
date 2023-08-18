@@ -28,7 +28,7 @@ defmodule BanchanWeb.Components.OfferingCard do
       " group h-full transition-all relative flex flex-col border rounded-lg border-base-content border-opacity-10 p-0 m-0",
       "opacity-50": @archived?
     }>
-      <div class="stack-custom">
+      <div class="rounded-t-lg stack-custom">
         <div class="px-2 py-1 text-sm text-right rounded-tl-lg h-fit w-fit availability-status whitespace-nowrap bg-base-300">
           {#if @open? && !is_nil(@total_slots) && !is_nil(@available_slots)}
             {@available_slots}/{@total_slots} Slots
@@ -38,14 +38,14 @@ defmodule BanchanWeb.Components.OfferingCard do
             Closed
           {/if}
         </div>
-        <figure class="overflow-hidden bg-base-300/25">
+        <figure class="overflow-hidden rounded-t-lg bg-base-300/25">
           <OfferingCardImg blur?={@mature? && !@uncensored?} image={@image} />
         </figure>
       </div>
-      <div class="flex flex-row px-4 py-2 bg-base-100 align-items-center">
-        <div class="flex flex-col grow">
-          <div class="flex flex-row gap-2 align-items-center">
-            <span class="font-bold name text-md">{@name}</span>
+      <div class="flex flex-col px-4 py-2 rounded-b-lg bg-base-100 align-items-center">
+        <div class="flex flex-col">
+          <div class="flex flex-row max-w-full gap-2">
+            <span class="font-bold truncate name text-md">{@name}</span>
             {#if @mature?}
               <span
                 title="Mature"
@@ -59,28 +59,30 @@ defmodule BanchanWeb.Components.OfferingCard do
               >Hidden</span>
             {/if}
           </div>
-          <div :if={@studio_name} class="text-xs opacity-75">
-            By <span class="font-semibold">{@studio_name}</span>
-          </div>
-        </div>
-        <div
-          :if={@show_base_price?}
-          class="flex flex-col justify-center text-lg font-bold whitespace-nowrap"
-        >
-          <span class="flex items-center gap-2">
-            {#if is_nil(@base_price)}
-              Inquire
-            {#else}
-              {#if @has_addons?}
-                <span class="text-sm font-semibold opacity-80">From
-                </span>
-              {/if}
-              <span class="flex gap-0">
-                <span class="opacity-80">{Payments.currency_symbol(@base_price)}</span>
-                {Payments.print_money(@base_price, false)}
+          <div class="flex flex-row items-end gap-2">
+            <div :if={@studio_name} class="text-xs opacity-75 grow">
+              By <span class="font-semibold">{@studio_name}</span>
+            </div>
+            <div
+              :if={@show_base_price?}
+              class="flex flex-col justify-center text-sm font-bold whitespace-nowrap"
+            >
+              <span class="flex items-center gap-2">
+                {#if is_nil(@base_price)}
+                  Inquire
+                {#else}
+                  {#if @has_addons?}
+                    <span class="text-sm font-semibold opacity-80">From
+                    </span>
+                  {/if}
+                  <span class="flex gap-0">
+                    <span class="opacity-80">{Payments.currency_symbol(@base_price)}</span>
+                    {Payments.print_money(@base_price, false)}
+                  </span>
+                {/if}
               </span>
-            {/if}
-          </span>
+            </div>
+          </div>
         </div>
       </div>
     </offering-card>
