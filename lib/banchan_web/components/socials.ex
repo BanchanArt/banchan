@@ -67,7 +67,7 @@ defmodule BanchanWeb.Components.Socials do
         rel="noopener noreferrer"
         href={@entity.facebook_url}
       >
-        <i class="fa-brands fa-facebook" />
+        <i class="fa-brands fa-facebook" /><div class="font-medium text-sm hover:link">{@entity.facebook_url}</div>
       </a>
       <a
         :if={@entity.furaffinity_handle}
