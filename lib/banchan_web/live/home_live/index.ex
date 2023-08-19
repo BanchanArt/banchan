@@ -85,12 +85,15 @@ defmodule BanchanWeb.HomeLive do
                     class="relative w-full h-full aspect-header-image"
                     to={Routes.studio_shop_path(Endpoint, :show, studio.handle)}
                   >
-                    <img
-                      class="object-cover w-full aspect-header-image"
-                      src={Routes.public_image_path(Endpoint, :image, :studio_header_img, studio.header_img_id)}
-                    />
-                    <div class="absolute text-3xl font-bold text-white top-2 left-2 md:top-6 md:left-6 sm:text-3xl md:text-6xl text-shadow-black">
-                      {studio.name}
+                    <div class="relative mix-blend-multiply">
+                      <div class="absolute text-3xl font-bold text-white top-2 left-2 drop-shadow-[0_3px_3px_rgba(0,0,0,0.75)] md:top-6 md:left-6 sm:text-3xl md:text-6xl">
+                        {studio.name}
+                      </div>
+                      <div class="absolute z-10 w-full h-full opacity-50 bg-gradient-to-b from-zinc-900" />
+                      <img
+                        class="object-cover w-full aspect-header-image"
+                        src={Routes.public_image_path(Endpoint, :image, :studio_header_img, studio.header_img_id)}
+                      />
                     </div>
                   </LiveRedirect>
                 </Carousel.Slide>
