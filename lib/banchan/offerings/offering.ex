@@ -132,7 +132,7 @@ defmodule Banchan.Offerings.Offering do
         opts
         |> Enum.filter(&(&1.action in [:update, :insert]))
         |> Enum.reduce(Money.new(0, curr), fn opt, acc ->
-          if opt.valid? && get_field(opt, :price) do
+          if opt.valid? && get_field(opt, :default) && get_field(opt, :price) do
             Money.add(acc, fetch_field!(opt, :price))
           else
             acc
