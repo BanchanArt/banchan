@@ -14,7 +14,7 @@ defmodule BanchanWeb.Router do
   @content_security_policy (case Application.compile_env!(:banchan, :env) do
                               :prod ->
                                 "default-src 'self' 'unsafe-eval' 'unsafe-inline' https://plausible.io/js/plausible.outbound-links.js;" <>
-                                  "connect-src wss://#{@host} blob:;" <>
+                                  "connect-src wss://#{@host} blob: https://plausible.io/api/event;" <>
                                   "img-src 'self' blob: data:;" <>
                                   "font-src data:;"
 
