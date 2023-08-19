@@ -95,7 +95,7 @@ defmodule BanchanWeb.StudioLive.New do
     ~F"""
     <Layout flashes={@flash} padding={0}>
       <div class="w-full bg-base-200">
-        <div class="w-full max-w-5xl p-10 mx-auto">
+        <div class="w-full max-w-7xl p-4 mx-auto">
           <Form
             class="col-span-1"
             for={@changeset}

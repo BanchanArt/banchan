@@ -11,6 +11,8 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
 
   alias Surface.Components.Form
 
+  alias BanchanWeb.Components.Avatar
+
   alias BanchanWeb.Components.Form.{
     QuillInput,
     Submit
@@ -116,17 +118,20 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
         submit="add_comment"
         opts={id: @id <> "_form", "phx-target": @myself}
       >
-        <div class="block space-y-4">
-          <QuillInput
-            id={@id <> "_markdown_input"}
-            name={:text}
-            show_label={false}
-            class="w-full"
-            upload={@uploads.attachment}
-            cancel_upload="cancel_upload"
-          />
-          <div class="flex flex-row-reverse">
-            <Submit changeset={@changeset} class="w-full md:w-fit ml-auto" label="Post" />
+        <div class="flex flex-row items-start w-full gap-4">
+          <Avatar class="w-10 h-10" user={@current_user} />
+          <div class="grid w-full grid-cols-1 gap-4 grow">
+            <QuillInput
+              id={@id <> "_markdown_input"}
+              name={:text}
+              show_label={false}
+              class="w-full"
+              upload={@uploads.attachment}
+              cancel_upload="cancel_upload"
+            />
+            <div class="flex flex-row">
+              <Submit changeset={@changeset} class="w-full ml-auto md:w-fit" label="Post" />
+            </div>
           </div>
         </div>
       </Form>

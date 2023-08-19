@@ -189,7 +189,7 @@ defmodule BanchanWeb.StudioLive.Settings do
     ~F"""
     <Layout flashes={@flash} studio={@studio} padding={0} context={:studio}>
       <div class="w-full bg-base-200">
-        <div class="w-full max-w-5xl p-10 mx-auto">
+        <div class="w-full max-w-7xl p-4 mx-auto">
           <h2 class="py-6 text-xl">Notifications</h2>
           <div class="pb-6">Manage default notification settings for this studio. For example, whether to receive notifications for new commission requests.</div>
           <Button click="toggle_subscribed">

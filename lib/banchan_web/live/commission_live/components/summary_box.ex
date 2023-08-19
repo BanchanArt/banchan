@@ -304,22 +304,21 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
 
   def render(assigns) do
     ~F"""
-    <div
-      id={@id}
-      class="bg-base-200 rounded-box p-4 border-base-content border-opacity-10 border-2 flex flex-col gap-2"
-    >
+    <div id={@id} class="flex flex-col gap-4">
       {#if @open_final_invoice}
-        <div class="text-lg font-medium pb-2">Final Invoice</div>
+        <div class="pb-2 text-lg font-medium opacity-100">Final Invoice</div>
         <div class="text-sm">Attachments will be released on payment. All deposits will be immediately released, along with this payment, and the commission will be closed.</div>
-        <Summary line_items={@commission.line_items} />
-        <div class="divider" />
-        <BalanceBox
-          id={@id <> "-balance-box"}
-          deposited={@deposited}
-          line_items={@commission.line_items}
-          invoiced={@remaining}
-        />
-        <div class="divider" />
+        <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
+          <Summary line_items={@commission.line_items} />
+          <div class="m-0 divider h-fit" />
+          <BalanceBox
+            id={@id <> "-balance-box"}
+            deposited={@deposited}
+            line_items={@commission.line_items}
+            invoiced={@remaining}
+          />
+        </div>
+        <div class="m-0 divider h-fit" />
         <Form
           for={@changeset}
           change="change_final"
@@ -327,35 +326,40 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           id={"#{@id}-form"}
           opts={"phx-target": @myself}
         >
-          <div class="text-md font-medium">Attachments</div>
-          <Attachments
-            id={@id <> "-attachments"}
-            upload={@uploads.attachments}
-            cancel_upload="cancel_upload"
-          />
-          <div class="divider" />
-          <QuillInput
-            id={@id <> "-markdown-input"}
-            name={:text}
-            label="Invoice Text"
-            info="Brief summary of what this invoice is meant to cover, for the record."
-            class="w-full"
-          />
-          <div class="flex flex-row justify-end gap-2 pt-2">
-            <Button click="cancel" class="btn-error" label="Cancel" />
-            <Submit changeset={@changeset} class="grow" label="Send Invoice" />
+          <div class="grid grid-cols-1 gap-4">
+            <div class="text-base font-medium">Attachments</div>
+            <Attachments
+              id={@id <> "-attachments"}
+              upload={@uploads.attachments}
+              cancel_upload="cancel_upload"
+            />
+            <div class="m-0 divider h-fit" />
+            <QuillInput
+              id={@id <> "-markdown-input"}
+              name={:text}
+              label="Invoice Text"
+              info="Brief summary of what this invoice is meant to cover, for the record."
+              class="w-full"
+            />
+            <div class="flex flex-row justify-end gap-2 pt-2">
+              <Button click="cancel" class="btn-error" label="Cancel" />
+              <Submit changeset={@changeset} class="grow" label="Send Invoice" />
+            </div>
           </div>
         </Form>
       {#elseif @open_deposit_requested}
-        <div class="text-lg font-medium pb-2">Partial Deposit</div>
+        <div class="pb-2 text-lg font-medium opacity-100">Partial Deposit</div>
         <div class="text-sm">Attachments will be released on payment. Deposit will be held until final invoice is submitted, or deposit is released early. by client.</div>
-        <Summary line_items={@commission.line_items} />
-        <div class="divider" />
-        <BalanceBox
-          id={@id <> "-balance-box"}
-          deposited={@deposited}
-          line_items={@commission.line_items}
-        />
+        <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
+          <Summary line_items={@commission.line_items} />
+          <div class="m-0 divider h-fit" />
+          <BalanceBox
+            id={@id <> "-balance-box"}
+            deposited={@deposited}
+            line_items={@commission.line_items}
+          />
+        </div>
+        <div class="m-0 divider h-fit" />
         <Form
           for={@changeset}
           change="change_deposit"
@@ -363,64 +367,68 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           id={"#{@id}-form"}
           opts={"phx-target": @myself}
         >
-          <div class="flex flex-row gap-2 items-center">
-            <div class="text-md font-medium">Deposit:</div>
-            {Payments.currency_symbol(Commissions.commission_currency(@commission))}
-            <TextInput name={:amount} show_label={false} />
-          </div>
-          <div class="divider" />
-          <div class="text-md font-medium">Attachments</div>
-          <Attachments
-            id={@id <> "-attachments"}
-            upload={@uploads.attachments}
-            cancel_upload="cancel_upload"
-          />
-          <div class="divider" />
-          <QuillInput
-            id={@id <> "-markdown-input"}
-            name={:text}
-            label="Invoice Text"
-            info="Brief summary of what this invoice is meant to cover, for the record."
-            class="w-full"
-          />
-          <div class="flex flex-row justify-end gap-2 pt-2">
-            <Button click="cancel" class="btn-error" label="Cancel" />
-            <Submit changeset={@changeset} class="grow" label="Send Invoice" />
+          <div class="grid grid-cols-1 gap-4">
+            <div class="text-sm font-medium opacity-75">Request Amount</div>
+            <div class="flex flex-row items-center gap-2">
+              {Payments.currency_symbol(Commissions.commission_currency(@commission))}
+              <div class="grow">
+                <TextInput name={:amount} show_label={false} />
+              </div>
+            </div>
+            <div class="text-xs opacity-75">Deposits will be held until final invoice is submitted, or unless they are released early by the client.</div>
+            <div class="m-0 divider h-fit" />
+            <div class="text-base font-medium">Attachments</div>
+            <Attachments
+              id={@id <> "-attachments"}
+              upload={@uploads.attachments}
+              cancel_upload="cancel_upload"
+            />
+            <div class="m-0 divider h-fit" />
+            <QuillInput
+              id={@id <> "-markdown-input"}
+              name={:text}
+              label="Invoice Text"
+              info="Brief summary of what this invoice is meant to cover, for the record."
+              class="w-full"
+            />
+            <div class="flex flex-row justify-end gap-2 pt-2">
+              <Button click="cancel" class="btn-error" label="Cancel" />
+              <Submit changeset={@changeset} class="grow" label="Send Invoice" />
+            </div>
           </div>
         </Form>
       {#else}
-        <div class="text-lg font-medium pb-2">Summary</div>
-        <Collapse id={@id <> "-summary-options"}>
-          <:header><div class="font-medium text-sm opacity-50">Cart</div></:header>
-          <div class="pt-2">
-            <SummaryEditor
-              id={@id <> "-summary-editor"}
+        <div class="text-sm font-medium opacity-75">Order</div>
+        <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
+          <SummaryEditor
+            id={@id <> "-summary-editor"}
+            allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
+          />
+          <div class="m-0 divider h-fit" />
+          <BalanceBox
+            id={@id <> "-balance-box"}
+            deposited={@deposited}
+            line_items={@commission.line_items}
+            tipped={@final_invoice && @final_invoice.tip}
+          />
+        </div>
+        <div class="m-0 divider h-fit" />
+        {#if @commission.offering}
+          <div class="text-sm font-medium opacity-75">Add-ons</div>
+          <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
+            <AddonPicker
+              id={@id <> "-addon-picker"}
               allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
+              allow_custom
             />
           </div>
-        </Collapse>
-        <div class="divider" />
-        <BalanceBox
-          id={@id <> "-balance-box"}
-          deposited={@deposited}
-          line_items={@commission.line_items}
-          tipped={@final_invoice && @final_invoice.tip}
-        />
-        <div class="w-full mt-2 border-t-2 border-content opacity-10" />
-        <div class="w-full mb-2 border-t-2 border-content opacity-10" />
-        {#if @commission.offering}
-          <div class="px-2 font-medium text-sm opacity-50">Add-ons</div>
-          <AddonPicker
-            id={@id <> "-addon-picker"}
-            allow_edits={@current_user_member? && Commissions.commission_open?(@commission)}
-            allow_custom
-          />
-          <div class="divider" />
+          <div class="m-0 divider h-fit" />
         {/if}
-        <div class="pb-4 flex flex-col gap-2">
+        <div class="flex flex-col gap-4">
+          <div class="text-sm font-medium opacity-75">Actions</div>
           {#if Commissions.commission_open?(@commission) && Commissions.commission_active?(@commission)}
             {#if @current_user_member?}
-              <div class="input-group">
+              <div class="flex flex-row items-center w-full gap-4">
                 <Button
                   disabled={@existing_open || !Commissions.commission_active?(@commission) || @remaining.amount <= 0}
                   click="request_deposit"
@@ -431,7 +439,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
                   disabled={@existing_open || !Commissions.commission_active?(@commission) || !@can_finalize ||
                     @remaining.amount < 0}
                   click="final_invoice"
-                  class="btn-sm grow final-invoice"
+                  class="btn-sm btn-secondary grow final-invoice"
                   label="Final Invoice"
                 />
               </div>
@@ -439,7 +447,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
                 <p>You can't send a final invoice for this commission unless the subtotal is at least Banchan's commission minimum of {Payments.convert_money(@minimum_release_amount, Commissions.commission_currency(@commission))}. Add more options (or custom options) under "Options" until the threshold is reached.</p>
               {/if}
               {#if @remaining.amount < 0}
-                <p class="text-lg font-semibold text-error">
+                <p class="text-base font-semibold text-error">
                   Your commission's balance is negative.
                 </p>
                 <p>
@@ -451,20 +459,20 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
             {#if @current_user.id == @commission.client_id}
               {#if @existing_open || !Commissions.commission_active?(@commission) || !@can_release ||
                   @deposited.amount == 0}
-                <Button disabled class="btn-sm w-full" label="Release Deposits" />
+                <Button disabled class="w-full btn-sm" label="Release Deposits" />
               {#else}
                 <Collapse
                   id={@id <> "-release-confirmation"}
                   show_arrow={false}
-                  class="grow rounded-lg my-2 bg-base-200"
+                  class="my-2 rounded-lg grow bg-base-200"
                 >
                   <:header>
-                    <button type="button" class="btn btn-primary btn-sm w-full">
+                    <button type="button" class="w-full btn btn-primary btn-sm">
                       Release Deposits
                     </button>
                   </:header>
                   <p class="py-2">Are you sure?</p>
-                  <Button click="release_deposits" class="btn-sm w-full" label="Confirm" />
+                  <Button click="release_deposits" class="w-full btn-sm" label="Confirm" />
                 </Collapse>
                 <p>
                   Upon release, all completed deposits will be <b class="font-bold">taken out of escrow</b> and sent to the studio. You won't be able to ask for a refund from the studio afterwards.

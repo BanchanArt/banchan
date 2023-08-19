@@ -183,61 +183,64 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   def render(assigns) do
     ~F"""
     <div class="relative">
-      <h1 class="sticky z-30 flex flex-row items-center p-4 text-3xl border-b-2 opacity-100 bg-base-200 top-16 border-base-content border-opacity-10">
-        <LivePatch to={if is_nil(@studio) do
-          ~p"/commissions"
-        else
-          ~p"/studios/#{@studio.handle}/commissions"
-        end}>
+      <h1 class="sticky z-30 flex flex-row items-center py-4 text-2xl border-b-2 opacity-100 bg-base-200 top-16 border-base-content border-opacity-10">
+        <LivePatch
+          class="p-2 mr-4"
+          to={if is_nil(@studio) do
+            ~p"/commissions"
+          else
+            ~p"/studios/#{@studio.handle}/commissions"
+          end}
+        >
           <Icon name="arrow-left" size="6" label="back" />
         </LivePatch>
         {#if @title_changeset}
           <Form for={@title_changeset} class="w-full" change="change_title" submit="submit_title">
-            <div class="flex flex-row items-center w-full">
+            <div class="flex flex-row items-center w-full gap-2">
               <div class="grow">
-                <TextInput class="w-full text-3xl" show_label={false} name={:title} />
+                <TextInput class="w-full text-2xl" show_label={false} name={:title} />
               </div>
               <Submit changeset={@title_changeset} label="Save" />
               <Button class="btn-error" label="Cancel" click="cancel_edit_title" />
             </div>
           </Form>
         {#else}
-          <div class="flex flex-row items-center w-full px-2 pb-2">
+          <div class="flex flex-row items-center w-full">
             <div class="flex flex-row items-center w-full gap-2 grow">
               {@commission.title}
               {#if @archived?}
                 <div class="cursor-default badge badge-warning badge-lg">Archived</div>
               {/if}
             </div>
-            <Button label="Edit Title" class="hidden md:flex btn-sm btn-link" click="edit_title" />
+            <Button label="Edit Title" class="hidden md:flex btn-sm" primary={false} click="edit_title" />
           </div>
         {/if}
       </h1>
-      <div class="p-4">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div class="flex flex-col md:order-2">
+      <div class="py-6">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div class="flex flex-col gap-4 md:order-2">
             <SummaryBox id={@id <> "-summary-box"} />
-            <div class="divider" />
+            <div class="m-0 divider h-fit" />
             <StatusBox id={@id <> "-status-box"} />
-            <div class="divider" />
+            <div class="m-0 divider h-fit" />
             <UploadsBox id={@id <> "-uploads-box"} />
-            <div class="divider" />
+            <div class="m-0 divider h-fit" />
             <OfferingBox
               offering={@commission.offering}
               class="transition-all rounded-box hover:bg-base-200"
             />
             {bottom_buttons(assigns, true)}
           </div>
-          <div class="divider md:hidden" />
+          <div class="m-0 divider h-fit md:hidden" />
           <div class="flex flex-col md:col-span-2 md:order-1">
             <Timeline users={@users} report_modal_id={@id <> "-report-modal"} />
-            <div class="divider" />
+            <div class="mt-8 divider" />
             <div class="flex flex-col gap-4">
               <CommentBox id={@id <> "-comment-box"} />
             </div>
             {bottom_buttons(assigns, false)}
             {#if @commission.terms}
-              <div class="divider" />
+              <div class="m-0 divider h-fit" />
               <div class="p-4 rounded-lg bg-base-200">
                 <Collapse id="terms-collapse">
                   <:header>Commission Terms</:header>
@@ -256,9 +259,12 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   def bottom_buttons(assigns, desktop?) do
     ~F"""
     <div class={"md:hidden": !desktop?, "hidden md:block": desktop?}>
-      <div class={"divider md:hidden": !desktop?, "hidden md:divider md:flex": desktop?} />
-      <div class="w-full">
-        <div class="pb-2 text-sm font-medium">Notifications</div>
+      <div class={
+        "divider md:h-fit md:m-0 md:hidden": !desktop?,
+        "hidden md:h-fit md:m-0 md:divider md:flex": desktop?
+      } />
+      <div class="flex flex-col w-full gap-4 mt-4">
+        <div class="text-sm font-medium opacity-75">Notifications</div>
         <button
           type="button"
           :on-click="toggle_subscribed"
@@ -272,7 +278,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
           {/if}
         </button>
       </div>
-      <div class="divider" />
+      <div class="m-0 divider h-fit" />
       <button
         type="button"
         :on-click="toggle_archived"

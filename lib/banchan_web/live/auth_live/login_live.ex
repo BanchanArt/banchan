@@ -63,9 +63,12 @@ defmodule BanchanWeb.LoginLive do
         </div>
         <div class="flex flex-row justify-center gap-2">
           <Link
-            class="flex-1 text-xl btn bg-discord"
+            class="flex-1 text-xl btn bg-discord border-discord hover:bg-discord hover:border-discord focus:ring-primary focus:outline-none focus:ring"
             to={Routes.user_o_auth_path(Endpoint, :request, "discord")}
-          ><i class="px-2 fa-brands fa-discord" /></Link>
+          >
+            <i class="px-2 fa-brands fa-discord" />
+            <span class="text-base font-semibold normal-case">Discord</span>
+          </Link>
           {!--
           # TODO: Re-enable when Google has approved our app (post-launch)
           <Link

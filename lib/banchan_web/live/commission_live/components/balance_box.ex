@@ -34,25 +34,25 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
 
   def render(assigns) do
     ~F"""
-    <div>
+    <div class="text-sm">
       {#if @deposited}
         <div class="flex flex-col gap-2">
           <div class="flex flex-row items-center">
             <div class="font-medium grow">Subtotal:</div>
-            <div class="text-sm font-medium">
+            <div class="font-medium">
               {Payments.print_money(@estimate_amt)}
             </div>
           </div>
           <div class="flex flex-row items-center">
             <div class="font-medium grow">Deposited:</div>
-            <div class="text-sm font-medium">
+            <div class="font-medium">
               {Payments.print_money(@deposited_amt)}
             </div>
           </div>
           {#if @tipped}
             <div class="flex flex-row items-center">
               <div class="font-medium grow">Tipped:</div>
-              <div class="text-sm font-medium">
+              <div class="font-medium">
                 {Payments.print_money(@tipped)}
               </div>
             </div>
@@ -66,7 +66,7 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
               {/if}
             </div>
             <div class={
-              "text-md font-bold",
+              "font-bold",
               "text-primary": @remaining_amt.amount > 0,
               "text-error": @remaining_amt.amount < 0
             }>
@@ -75,9 +75,9 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
           </div>
         </div>
       {#else}
-        <div class="px-2 flex flex-row">
+        <div class="flex flex-row">
           <div class="font-medium grow">Subtotal:</div>
-          <div class="text-sm font-medium">
+          <div class="font-medium">
             {Payments.print_money(@estimate_amt)}
           </div>
         </div>

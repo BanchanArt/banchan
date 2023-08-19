@@ -75,7 +75,7 @@ defmodule BanchanWeb.Components.Form.FancySelect do
             {/if}
           </button>
           <ul
-            class="absolute left-0 z-30 mt-2 w-72 origin-top-right divide-y divide-neutral divide-opacity-50 overflow-hidden rounded-box bg-base-200 ring-1 ring-base-300 ring-opacity-5 focus:outline-none"
+            class="absolute left-0 z-30 mt-2 overflow-hidden origin-top-right border divide-y w-72 divide-neutral divide-opacity-50 rounded-box bg-base-200 border-base-content border-opacity-10 focus:outline-none"
             tabindex="-1"
             style="display: none;"
             role="listbox"
@@ -85,7 +85,7 @@ defmodule BanchanWeb.Components.Form.FancySelect do
           >
             {#for {item, idx} <- @items |> Enum.with_index()}
               <li
-                class="cursor-pointer select-none p-4 text-sm"
+                class="p-4 text-sm cursor-pointer select-none"
                 id={@id <> "-option-" <> "#{idx}"}
                 role="option"
               >
@@ -93,10 +93,10 @@ defmodule BanchanWeb.Components.Form.FancySelect do
                   <div class="flex justify-between">
                     <p class={"font-semibold": idx == @selected_idx, "font-normal": idx != @selected_idx}>{item.label}</p>
                     <span :if={@selected_idx == idx}>
-                      <Icon name="check" />
+                      <Icon name="check" class="text-primary" />
                     </span>
                   </div>
-                  <p class="mt-2">{item.description}</p>
+                  <p class="mt-2 opacity-75">{item.description}</p>
                 </div>
               </li>
             {/for}

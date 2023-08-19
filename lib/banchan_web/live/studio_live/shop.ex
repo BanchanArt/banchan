@@ -201,7 +201,7 @@ defmodule BanchanWeb.StudioLive.Shop do
         </div>
       {#elseif @studio.archived_at}
         <div class="w-full mx-auto bg-base-200">
-          <div class="w-full p-10 mx-auto max-w-prose rounded-xl md:my-10 bg-base-200">
+          <div class="w-full p-4 mx-auto max-w-prose rounded-xl md:my-10 bg-base-200">
             <h1 class="text-2xl">
               Studio Archived
             </h1>
@@ -215,7 +215,7 @@ defmodule BanchanWeb.StudioLive.Shop do
         </div>
       {#else}
         <div class="w-full mx-auto bg-base-200">
-          <div class="w-full p-10 mx-auto max-w-prose rounded-xl md:my-10 bg-base-200">
+          <div class="w-full p-4 mx-auto max-w-prose rounded-xl md:my-10 bg-base-200">
             <h1 class="text-2xl">
               Coming Soon
             </h1>

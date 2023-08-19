@@ -99,13 +99,13 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
     has_transitions? = !Enum.empty?(assigns.statuses)
 
     ~F"""
-    <div class="flex flex-col gap-2 w-full bg-base-200 rounded-box p-4 border-base-content border-opacity-10 border-2">
-      <h3 class="text-lg font-medium">Commission Status</h3>
+    <div class="flex flex-col w-full gap-4">
+      <h3 class="text-sm font-medium opacity-75">Commission Status</h3>
       {#if has_transitions?}
         <Form for={@status_state} change="update_status">
           <FancySelect
             id={@id <> "-status-selector"}
-            class="btn btn-primary"
+            class="flex flex-row items-center gap-4 btn btn-primary"
             name={:status}
             show_label={false}
             show_chevron={Enum.count(@statuses) > 1}
@@ -123,7 +123,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
       {#else}
         <Button disabled label={Commissions.Common.humanize_status(@commission.status)} />
       {/if}
-      <div class="text-md">
+      <div class="text-sm">
         {Commissions.Common.status_description(@commission.status)}
       </div>
 

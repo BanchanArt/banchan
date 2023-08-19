@@ -17,7 +17,7 @@ defmodule BanchanWeb.CommissionLive.Components.OfferingBox do
   def render(assigns) do
     ~F"""
     {#if is_nil(@offering) || @offering.deleted_at || @offering.studio.deleted_at}
-      <div class="px-2 text-lg font-medium">
+      <div class="px-2 text-sm font-medium opacity-75">
         (Deleted Offering)
       </div>
     {#else}
@@ -39,8 +39,9 @@ defmodule BanchanWeb.CommissionLive.Components.OfferingBox do
             show_base_price?={false}
           />
         {#else}
-          <div class="px-2 text-lg">
-            <span class="font-medium">{@offering.name}</span> by {@offering.studio.name}
+          <div class="text-sm">
+            <span class="font-medium">{@offering.name}</span><span class="opacity-75">
+              by {@offering.studio.name}</span>
           </div>
         {/if}
       </LiveRedirect>

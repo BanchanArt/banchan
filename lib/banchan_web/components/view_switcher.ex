@@ -80,7 +80,7 @@ defmodule BanchanWeb.Components.ViewSwitcher do
           </span>
           <Icon name="chevron-down" />
         </summary>
-        <ul class="p-2 menu absolute left-0 mt-4 z-[1] bg-base-100 rounded-box w-full bordered border-base-content border-opacity-10">
+        <ul class="p-2 menu absolute left-0 mt-4 z-[1] bg-base-100 rounded-box w-full border border-base-content border-opacity-10">
           <li>
             <LiveRedirect to={~p"/"} class={active: @context == :personal}>
               {render_personal_view(assigns)}

@@ -144,7 +144,7 @@ defmodule BanchanWeb.PeopleLive.Edit do
     ~F"""
     <Layout flashes={@flash} padding={0}>
       <div class="w-full bg-base-200">
-        <div class="w-full max-w-5xl p-10 mx-auto">
+        <div class="w-full max-w-7xl p-4 mx-auto">
           <Form class="profile-info" for={@changeset} change="change" submit="submit">
             <div :if={@current_user.id != @user.id} class="alert alert-warning">
               You are editing @{@user.handle}'s profile as @{@current_user.handle}.

@@ -415,96 +415,97 @@ defmodule BanchanWeb.CommissionLive do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash} context={@context} studio={@studio}>
-      {#if !@commission}
-        <h1 class="text-3xl font-bold">
-          {#if @studio}
-            Commissions for {@studio.name}
-          {#else}
-            My Commissions
-          {/if}
-        </h1>
-        <div class="divider" />
-      {/if}
-      <div class="flex flex-row grow xl:grow-0">
-        <div class={"flex flex-col pt-4 sidebar basis-full", hidden: @commission}>
-          <Form
-            for={@filter}
-            change="change"
-            submit="filter"
-            class="w-full max-w-3xl px-4 pb-6 mx-auto form-control md:w-content"
-            opts={role: "search"}
-          >
-            <Field class="w-full input-group grow" name={:search}>
-              <button
-                aria-label="Apply commission search filters"
-                :on-click="toggle_filter"
-                type="button"
-                class="btn btn-square"
-              >
-                <Icon name="filter" size="4" label="filter" />
-              </button>
-              <SurfaceTextInput
-                class="w-full input input-bordered"
-                opts={"aria-label": "Search for commissions"}
-              />
-              <Submit class="btn btn-square" opts={"aria-label": "Search"}>
-                <Icon name="search" size="4" label="search" />
-              </Submit>
-            </Field>
-            <Collapse id="filter-options" class="rounded-box">
-              <h2 class="pt-4 text-xl">
-                Additional Filters
-              </h2>
-              <div class="divider" />
-              {#unless is_nil(@studio)}
-                <TextInput name={:client} />
-              {/unless}
-              {#if is_nil(@studio)}
-                <TextInput name={:studio} />
-              {/if}
-              <MultipleSelect name={:statuses} options={@status_options} />
-              <Select
-                name={:sort_by}
-                class="select select-bordered shrink"
-                selected={@order_by}
-                options={
-                  "Recently Updated": :recently_updated,
-                  "Earliest Updated": :oldest_updated,
-                  Status: :status
-                }
-              />
-              <div class="py-2">
-                <Checkbox label="Show Archived" name={:show_archived} />
-              </div>
-              {#if :admin in @current_user.roles || :mod in @current_user.roles}
-                <div class="py-2">
-                  <Checkbox label="Admin: Show All" name={:admin_show_all} />
-                </div>
-              {/if}
-              <div class="grid grid-cols-3 gap-2">
-                <Submit label="Apply" class="w-full col-span-2 btn btn-square btn-primary" />
-                <button type="button" :on-click="reset" class="w-full btn-btn-square btn-link">Reset</button>
-              </div>
-            </Collapse>
-          </Form>
-          {#if Enum.empty?(@results)}
-            <div class="px-4 py-2 text-xl">
-              No Results
-            </div>
-          {#else}
-            <ul role="list" class="divide-y divide-base-200">
-              {#for result <- @results}
-                <CommissionRow result={result} />
-              {/for}
-            </ul>
-          {/if}
-          <InfiniteScroll id="commissions-infinite-scroll" page={@page} load_more="load_more" />
-        </div>
-        {#if @commission}
-          <div class="basis-full">
-            <Commission id="commission" users={@users} commission={@commission} />
-          </div>
+      <div class="flex flex-col w-full gap-4 p-4 mx-auto max-w-7xl">
+        {#if !@commission}
+          <h1 class="text-3xl font-bold">
+            {#if @studio}
+              Commissions for {@studio.name}
+            {#else}
+              My Commissions
+            {/if}
+          </h1>
         {/if}
+        <div class="flex flex-row grow xl:grow-0">
+          <div class={"flex flex-col sidebar basis-full", hidden: @commission}>
+            <Form
+              for={@filter}
+              change="change"
+              submit="filter"
+              class="w-full mx-auto form-control md:w-content"
+              opts={role: "search"}
+            >
+              <Field class="w-full input-group grow" name={:search}>
+                <button
+                  aria-label="Apply commission search filters"
+                  :on-click="toggle_filter"
+                  type="button"
+                  class="btn btn-square"
+                >
+                  <Icon name="filter" size="4" label="filter" />
+                </button>
+                <SurfaceTextInput
+                  class="w-full input input-bordered"
+                  opts={"aria-label": "Search for commissions"}
+                />
+                <Submit class="btn btn-square" opts={"aria-label": "Search"}>
+                  <Icon name="search" size="4" label="search" />
+                </Submit>
+              </Field>
+              <Collapse id="filter-options" class="rounded-box">
+                <h2 class="pt-4 text-xl">
+                  Additional Filters
+                </h2>
+                {#unless is_nil(@studio)}
+                  <TextInput name={:client} />
+                {/unless}
+                {#if is_nil(@studio)}
+                  <TextInput name={:studio} />
+                {/if}
+                <MultipleSelect name={:statuses} options={@status_options} />
+                <Select
+                  name={:sort_by}
+                  class="select select-bordered shrink"
+                  selected={@order_by}
+                  options={
+                    "Recently Updated": :recently_updated,
+                    "Earliest Updated": :oldest_updated,
+                    Status: :status
+                  }
+                />
+                <div class="py-2">
+                  <Checkbox label="Show Archived" name={:show_archived} />
+                </div>
+                {#if :admin in @current_user.roles || :mod in @current_user.roles}
+                  <div class="py-2">
+                    <Checkbox label="Admin: Show All" name={:admin_show_all} />
+                  </div>
+                {/if}
+                <div class="grid grid-cols-3 gap-2">
+                  <Submit label="Apply" class="w-full col-span-2 btn btn-square btn-primary" />
+                  <button type="button" :on-click="reset" class="w-full btn-btn-square btn-link">Reset</button>
+                </div>
+              </Collapse>
+            </Form>
+            <div class="divider" />
+            {#if Enum.empty?(@results)}
+              <div class="px-4 py-2 text-xl">
+                No Results
+              </div>
+            {#else}
+              <ul role="list" class="grid grid-cols-1 gap-4">
+                {#for result <- @results}
+                  <CommissionRow result={result} />
+                {/for}
+              </ul>
+            {/if}
+            <InfiniteScroll id="commissions-infinite-scroll" page={@page} load_more="load_more" />
+          </div>
+          {#if @commission}
+            <div class="basis-full">
+              <Commission id="commission" users={@users} commission={@commission} />
+            </div>
+          {/if}
+        </div>
       </div>
     </Layout>
     """

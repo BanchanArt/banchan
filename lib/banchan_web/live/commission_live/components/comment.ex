@@ -148,23 +148,25 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   def render(assigns) do
     ~F"""
-    <div class="pb-4 border-2 bg-base-200 rounded-box border-base-content border-opacity-10">
-      <div class="flex flex-row px-2 pt-2 -mb-4 text-sm">
-        <div class="inline-flex flex-wrap items-center space-x-1 grow">
+    <div class="overflow-hidden border rounded-lg bg-base-100 border-base-content border-opacity-10">
+      <div class="flex flex-row items-center justify-between p-2 text-sm bg-opacity-75 border-b border-base-content border-opacity-10 bg-base-100">
+        <div class="flex flex-row flex-wrap items-center gap-1 px-2 grow">
           <UserHandle user={@actor} />
           <span>
-            {#if @event.invoice && @event.invoice.final}
-              posted a final invoice
-            {#elseif @event.invoice}
-              posted a deposit invoice
-            {#else}
-              commented
-            {/if}
+            <span class="opacity-75">
+              {#if @event.invoice && @event.invoice.final}
+                posted a final invoice
+              {#elseif @event.invoice}
+                posted a deposit invoice
+              {#else}
+                commented
+              {/if}
+            </span>
             <a
               title={"#{fmt_abs_time(@event.inserted_at)}"}
-              class="hover:underline"
+              class="opacity-75 hover:underline hover:opacity-100"
               href={replace_fragment(@uri, @event)}
-            >{fmt_time(@event.inserted_at)}</a>.
+            >{fmt_time(@event.inserted_at)}</a>
           </span>
           {#if @event.inserted_at != @event.updated_at}
             <div class="dropdown">
@@ -187,7 +189,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
                             Original Text:
                           </div>
                           <div>
-                            <Markdown content={history.text} />
+                            <Markdown content={history.text} class="text-sm max-w-none" />
                           </div>
                         {/if}
                       </div>
@@ -199,7 +201,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
           {/if}
         </div>
         <div class="dropdown dropdown-end">
-          <label tabindex="0" class="py-0 btn btn-circle btn-ghost btn-xs">
+          <label tabindex="0" class="btn btn-circle btn-ghost btn-xs">
             <Icon name="more-vertical" size="4" />
           </label>
           <ul
@@ -224,9 +226,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
         </div>
       </div>
 
-      <div class="divider" />
-
-      <div class="px-4 content user-markdown">
+      <div class="px-4 py-3 content user-markdown">
         {#if @changeset}
           <Form
             for={@changeset}
@@ -246,7 +246,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             </div>
           </Form>
         {#else}
-          <Markdown content={@event.text} />
+          <Markdown content={@event.text} class="text-sm max-w-none" />
         {/if}
       </div>
 

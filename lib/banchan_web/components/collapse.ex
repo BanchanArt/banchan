@@ -25,14 +25,16 @@ defmodule BanchanWeb.Components.Collapse do
 
   def render(assigns) do
     ~F"""
-    <div class={"flex flex-col", @class}>
+    <div class={"flex flex-col gap-2", @class}>
       {#if slot_assigned?(:header)}
         <div class="flex flex-row items-center cursor-pointer" :on-click="toggle">
           <div class="py-2 grow">
             <#slot {@header} />
           </div>
           {#if @show_arrow}
-            <Icon name={(@open && "chevron-up") || "chevron-down"} size="4" />
+            <div class="p-2 opacity-50">
+              <Icon name={(@open && "chevron-up") || "chevron-down"} size="4" />
+            </div>
           {/if}
         </div>
       {/if}
