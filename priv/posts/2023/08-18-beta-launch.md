@@ -42,8 +42,8 @@ experience Banchan is meant to be, including:
 * 80+ countries that artists can reside in.
 * An escrow system for trustworthy deposits.
 * A platform for advertising your commissions and managing client communication.
-* Dispute and chargeback protection (we'll take care of this for you! See our
-  [Disputes policy](https://dev.banchan.art/disputes-policy)).
+* Help with disputes and chargebacks. See our [Disputes
+  policy](https://banchan.art/disputes-policy).
 * Automatic, international VAT and Sales Tax collection (we take care of
   filing/remitting them for you).
 * 1099 forms for US artists, when tax time comes along.
