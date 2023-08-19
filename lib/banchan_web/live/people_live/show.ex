@@ -131,7 +131,7 @@ defmodule BanchanWeb.PeopleLive.Show do
       :following ->
         Studios.list_studios(
           current_user: socket.assigns.current_user,
-          with_follower: socket.assigns.current_user,
+          with_follower: socket.assigns.user,
           page_size: 24,
           page: page
         )
