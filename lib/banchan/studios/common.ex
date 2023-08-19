@@ -210,7 +210,6 @@ defmodule Banchan.Studios.Common do
     Namibia: :NA,
     Netherlands: :NL,
     "New Zealand": :NZ,
-    Niger: :NE,
     Norway: :NO,
     Paraguay: :PY,
     Peru: :PE,
@@ -238,7 +237,8 @@ defmodule Banchan.Studios.Common do
     "United Arab Emirates": :AE,
     "United Kingdom": :UK,
     "United States": :US,
-    Uruguay: :UY
+    Uruguay: :UY,
+    Vietnam: :VN
   ]
 
   @doc """
