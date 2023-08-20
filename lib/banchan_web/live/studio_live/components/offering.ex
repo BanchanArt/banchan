@@ -574,7 +574,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           label="Option Currency"
           info="Currency to use for all options. Only one currency is allowed per offering."
           options={@studio.payment_currencies
-          |> Enum.map(&{"#{Money.Currency.name(&1)} (#{Payments.currency_symbol(&1)})", &1})}
+          |> Enum.map(&{"#{Payments.currency_name(&1)} (#{Payments.currency_symbol(&1)})", &1})}
           opts={required: true}
         />
         <div class="divider" />

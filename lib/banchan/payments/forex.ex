@@ -7,11 +7,11 @@ defmodule Banchan.Payments.Forex do
   use Agent
 
   alias Banchan.Payments
-  alias Banchan.Studios
+  alias Banchan.Payments.Currency
 
   schema "foreign_exchange_rates" do
-    field(:from, Ecto.Enum, values: Studios.Common.supported_currencies())
-    field(:to, Ecto.Enum, values: Studios.Common.supported_currencies())
+    field(:from, Ecto.Enum, values: Currency.supported_currencies())
+    field(:to, Ecto.Enum, values: Currency.supported_currencies())
     field(:rate, :float)
     timestamps()
   end
@@ -23,7 +23,7 @@ defmodule Banchan.Payments.Forex do
   end
 
   def start_link(opts) do
-    {base_currency, opts} = Keyword.pop(opts, :base_currency, Payments.platform_currency())
+    {base_currency, opts} = Keyword.pop(opts, :base_currency, Currency.platform_currency())
 
     Agent.start_link(
       fn -> %{base_currency => Payments.load_exchange_rates(base_currency)} end,

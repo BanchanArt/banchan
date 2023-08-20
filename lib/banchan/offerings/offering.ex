@@ -10,8 +10,8 @@ defmodule Banchan.Offerings.Offering do
   alias Banchan.Commissions.Commission
   alias Banchan.Offerings.{GalleryImage, OfferingOption}
   alias Banchan.Payments
+  alias Banchan.Payments.Currency
   alias Banchan.Repo
-  alias Banchan.Studios
   alias Banchan.Studios.Studio
   alias Banchan.Uploads.Upload
 
@@ -29,7 +29,7 @@ defmodule Banchan.Offerings.Offering do
     field :archived_at, :naive_datetime
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
-    field :currency, Ecto.Enum, values: Studios.Common.supported_currencies()
+    field :currency, Ecto.Enum, values: Currency.supported_currencies()
     field :deleted_at, :naive_datetime
 
     field :base_price, Money.Ecto.Composite.Type, virtual: true
