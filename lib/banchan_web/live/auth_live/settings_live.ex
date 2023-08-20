@@ -101,8 +101,8 @@ defmodule BanchanWeb.SettingsLive do
 
         {:noreply, socket}
 
-      other ->
-        other
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, handle_changeset: changeset)}
     end
   end
 
@@ -138,8 +138,18 @@ defmodule BanchanWeb.SettingsLive do
 
         {:noreply, socket}
 
-      other ->
-        other
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, new_email_changeset: changeset)}
+
+      {:error, :has_email} ->
+        socket =
+          socket
+          |> put_flash(
+            :error,
+            "You already have an email address associated with your account."
+          )
+
+        {:noreply, socket}
     end
   end
 
@@ -176,8 +186,8 @@ defmodule BanchanWeb.SettingsLive do
 
         {:noreply, socket}
 
-      other ->
-        other
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, email_changeset: changeset)}
     end
   end
 
@@ -280,8 +290,8 @@ defmodule BanchanWeb.SettingsLive do
            maturity_changeset: User.maturity_changeset(updated_user, %{})
          )}
 
-      other ->
-        other
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, maturity_changeset: changeset)}
     end
   end
 
@@ -309,8 +319,8 @@ defmodule BanchanWeb.SettingsLive do
            muted_changeset: User.muted_changeset(updated_user, %{})
          )}
 
-      other ->
-        other
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, muted_changeset: changeset)}
     end
   end
 
