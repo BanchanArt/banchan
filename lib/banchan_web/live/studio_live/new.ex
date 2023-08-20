@@ -85,8 +85,8 @@ defmodule BanchanWeb.StudioLive.New do
          |> put_flash(:info, "Studio created")
          |> redirect(to: Routes.studio_shop_path(Endpoint, :show, studio.handle))}
 
-      other ->
-        other
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
     end
   end
 
