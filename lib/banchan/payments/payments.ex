@@ -11,8 +11,7 @@ defmodule Banchan.Payments do
   alias Banchan.Accounts.User
   alias Banchan.Commissions
   alias Banchan.Commissions.{Commission, Event}
-  alias Banchan.Payments
-  alias Banchan.Payments.{Forex, Invoice, Notifications, Payout}
+  alias Banchan.Payments.{Currency, Forex, Invoice, Notifications, Payout}
   alias Banchan.Repo
   alias Banchan.Studios
   alias Banchan.Studios.Studio
@@ -518,7 +517,7 @@ defmodule Banchan.Payments do
               # NB(@zkat): This should _generally_ not happen, but may as well
               # check for it.
               Logger.error(
-                "Invoice #{invoice.id} has a total of at least #{Money.add(invoice_total, total) |> Payments.print_money()}, but the available balance is only #{Payments.print_money(avail)}"
+                "Invoice #{invoice.id} has a total of at least #{Money.add(invoice_total, total) |> print_money()}, but the available balance is only #{print_money(avail)}"
               )
 
               {:halt, acc}
@@ -1527,7 +1526,7 @@ defmodule Banchan.Payments do
   @doc """
   Returns the atom for the configured platform currency.
   """
-  def platform_currency, do: Application.fetch_env!(:banchan, :platform_currency)
+  def platform_currency, do: Currency.platform_currency()
 
   @doc """
   Compares two Money structs, converting the second to the first's currency
@@ -1583,7 +1582,7 @@ defmodule Banchan.Payments do
     # This is a nice, free API and we don't really hit it very often at all.
     case http_mod().get("https://api.exchangerate.host/latest?base=#{base_currency}") do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        currency_names = Studios.Common.supported_currencies() |> Enum.map(&to_string/1)
+        currency_names = supported_currencies() |> Enum.map(&to_string/1)
 
         Repo.transaction(fn ->
           body
@@ -1631,72 +1630,24 @@ defmodule Banchan.Payments do
     Forex.forget_rates(Forex, base_currency)
   end
 
-  ## Misc utilities
+  ## Other Currency stuff
 
   @doc """
   Formats money with improved semantics over the default Money.to_string/2.
   For example, differentiating between different kinds of dollars that would
   usually just use `$` as a symbol.
   """
-  def print_money(%Money{} = money, symbol \\ true) do
-    if symbol do
-      case Money.Currency.symbol(money) do
-        "$" -> currency_symbol(money.currency) <> Money.to_string(money, symbol: false)
-        "" -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
-        " " -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
-        _ -> Money.to_string(money, symbol: true)
-      end
-    else
-      Money.to_string(money, symbol: false)
-    end
-  end
+  def print_money(%Money{} = money, symbol \\ true), do: Currency.print_money(money, symbol)
 
-  def currency_symbol(%Money{currency: currency}) do
-    currency_symbol(currency)
-  end
+  def currency_symbol(money), do: Currency.currency_symbol(money)
 
-  def currency_symbol(currency) when is_atom(currency) do
-    case Money.Currency.symbol(currency) do
-      "$" -> dollar_prefix(currency) <> "$"
-      "¥" when currency == :CNY -> "RMB"
-      "kr" when currency == :NOK -> "NKr"
-      _ when currency == :KMF -> "FC"
-      "" -> blank_prefix(currency)
-      " " -> blank_prefix(currency)
-      other -> other
-    end
-  end
+  def currency_name(money), do: Currency.currency_name(money)
 
-  defp dollar_prefix(:USD), do: ""
-  defp dollar_prefix(:AUD), do: "AU"
-  defp dollar_prefix(:ARS), do: "Arg"
-  defp dollar_prefix(:BBD), do: "BB"
-  defp dollar_prefix(:BMD), do: "BD"
-  defp dollar_prefix(:BND), do: "B"
-  defp dollar_prefix(:BSD), do: "B"
-  defp dollar_prefix(:CVE), do: "Esc"
-  defp dollar_prefix(:KYD), do: "KY"
-  defp dollar_prefix(:CLP), do: "CLP"
-  defp dollar_prefix(:COP), do: "COP"
-  defp dollar_prefix(:XCD), do: "EC"
-  defp dollar_prefix(:FJD), do: "FJ"
-  defp dollar_prefix(:GYD), do: "GY"
-  defp dollar_prefix(:HKD), do: "HK"
-  defp dollar_prefix(:LRD), do: "LD"
-  defp dollar_prefix(:MXN), do: "Mex"
-  defp dollar_prefix(:NZD), do: "NZ"
-  defp dollar_prefix(:NAD), do: "N"
-  defp dollar_prefix(:SBD), do: "SI"
-  defp dollar_prefix(:SRD), do: "Sr"
-  defp dollar_prefix(_), do: ""
+  def supported_currencies, do: Currency.supported_currencies()
 
-  defp blank_prefix(:XOF), do: "F.CFA"
-  defp blank_prefix(:XPF), do: "F.CFP"
-  defp blank_prefix(:HTG), do: "G"
-  defp blank_prefix(:LSL), do: "R"
-  defp blank_prefix(:RWF), do: "R₣‎"
-  defp blank_prefix(:TJS), do: "SM"
-  defp blank_prefix(_), do: ""
+  def supported_countries, do: Currency.supported_countries()
+
+  ## Misc utilities
 
   defp stripe_mod do
     Application.get_env(:banchan, :stripe_mod)

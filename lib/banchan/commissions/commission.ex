@@ -6,7 +6,7 @@ defmodule Banchan.Commissions.Commission do
   import Ecto.Changeset
 
   alias Banchan.Commissions.Common
-  alias Banchan.Studios
+  alias Banchan.Payments.Currency
 
   @description_max_length 1500
 
@@ -16,7 +16,7 @@ defmodule Banchan.Commissions.Commission do
     field :description, :string
     field :tos_ok, :boolean, virtual: true
     field :terms, :string
-    field :currency, Ecto.Enum, values: Studios.Common.supported_currencies()
+    field :currency, Ecto.Enum, values: Currency.supported_currencies()
 
     field :status, Ecto.Enum,
       values: Common.status_values(),
