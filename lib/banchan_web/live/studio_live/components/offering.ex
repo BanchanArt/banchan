@@ -367,6 +367,14 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     end)
   end
 
+  defp option_valid?(changeset, index) do
+    opt =
+      Enum.at(Ecto.Changeset.fetch_field!(changeset, :options), index)
+      |> OfferingOption.changeset(%{})
+
+    opt.valid?
+  end
+
   def render(assigns) do
     ~F"""
     <Form
@@ -524,7 +532,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           }>
             <Inputs form={@form} for={:options} :let={index: index}>
               <li>
-                <Collapse id={@id <> "-option-" <> "#{index}"}>
+                <Collapse id={@id <> "-option-" <> "#{index}"} initial_open={!option_valid?(@changeset, index)}>
                   <:header>
                     <h3 class="text-xl">
                       {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)

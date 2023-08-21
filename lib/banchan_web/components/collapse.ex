@@ -8,12 +8,23 @@ defmodule BanchanWeb.Components.Collapse do
 
   prop class, :css_class
   prop show_arrow, :boolean, default: true
+  prop initial_open, :boolean, default: false
 
-  data open, :boolean, default: false
+  data open, :boolean
 
   slot header
 
   slot default
+
+  def update(assigns, socket) do
+    socket = assign(socket, assigns)
+
+    if is_nil(socket.assigns[:open]) do
+      {:ok, assign(socket, open: socket.assigns.initial_open)}
+    else
+      {:ok, socket}
+    end
+  end
 
   def set_open(collapse_id, open) do
     send_update(__MODULE__, id: collapse_id, open: open)
