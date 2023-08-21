@@ -254,6 +254,14 @@ defmodule Banchan.Payments do
   end
 
   @doc """
+  Gets the maximum amount that can be released from a commission.
+  """
+  def maximum_release_amount do
+    {amt, curr} = Application.fetch_env!(:banchan, :maximum_release_amount)
+    Money.new(amt, curr)
+  end
+
+  @doc """
   Stripe's minimum transaction amount.
   """
   def minimum_transaction_amount do
