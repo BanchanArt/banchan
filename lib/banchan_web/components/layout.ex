@@ -77,6 +77,7 @@ defmodule BanchanWeb.Components.Layout do
       <main class="flex flex-col h-screen grow drawer-content">
         <div class="sticky top-0 z-50">
           <Nav />
+          <Flash flashes={@flashes} />
         </div>
         {#if slot_assigned?(:hero)}
           <#slot {@hero} />
@@ -87,7 +88,6 @@ defmodule BanchanWeb.Components.Layout do
               ⚠️You need to verify your email address before you can do certain things on the site, such as submit new commissions. Please check your email or <LiveRedirect class="link" to={Routes.confirmation_path(Endpoint, :show)}>click here to resend your confirmation</LiveRedirect>.⚠️
             </div>
           </div>
-          <Flash flashes={@flashes} />
           <#slot />
         </section>
         <div class="w-full border-t border-base-content border-opacity-10">
