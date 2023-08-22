@@ -125,7 +125,7 @@ defmodule Banchan.MixProject do
       {:sobelow, "~> 0.12.2", only: [:dev, :test], runtime: false},
       {:surface_formatter, "~> 0.7.5", only: :dev}
       | if System.get_env("MIX_ENV") == "prod" do
-          [{:oban_web, "~> 2.9", repo: "oban", only: :prod}]
+          [{:oban_web, "~> 2.10.0-rc.1", repo: "oban", only: :prod}]
         else
           []
         end
