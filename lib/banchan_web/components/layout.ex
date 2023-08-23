@@ -74,7 +74,7 @@ defmodule BanchanWeb.Components.Layout do
         aria-label="Banchan Art menu"
         class="hidden drawer-toggle"
       />
-      <main class="flex flex-col h-screen grow drawer-content">
+      <main class="!z-auto flex flex-col h-screen grow drawer-content">
         <div class="sticky top-0 z-50">
           <Nav />
           <Flash flashes={@flashes} />
@@ -83,9 +83,16 @@ defmodule BanchanWeb.Components.Layout do
           <#slot {@hero} />
         {/if}
         <section class={"flex flex-col grow p-#{@padding}"}>
-          <div class="my-2 alert alert-info" :if={@current_user && is_nil(@current_user.confirmed_at)}>
-            <div class="block">
-              ⚠️You need to verify your email address before you can do certain things on the site, such as submit new commissions. Please check your email or <LiveRedirect class="link" to={Routes.confirmation_path(Endpoint, :show)}>click here to resend your confirmation</LiveRedirect>.⚠️
+          <div
+            class="w-full p-4 mx-auto max-w-7xl"
+            :if={@current_user && is_nil(@current_user.confirmed_at)}
+          >
+            <div class="flex flex-row items-center justify-start gap-4 rounded-lg alert alert-info">
+              <Icon name="alert-triangle" size="6" label="log out" />
+              <span class="block">
+                You need to verify your email address before you can do certain things on the site, such as submit new commissions.
+                <br>Please check your email or <LiveRedirect class="link" to={Routes.confirmation_path(Endpoint, :show)}>click here to resend your confirmation.</LiveRedirect>
+              </span>
             </div>
           </div>
           <#slot />
