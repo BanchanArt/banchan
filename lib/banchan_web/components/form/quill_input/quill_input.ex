@@ -55,12 +55,15 @@ defmodule BanchanWeb.Components.Form.QuillInput do
       /* TODO: Try and get this to work? idk why the variable isn't getting defined.
       min-height: s-bind("@height")
       */
+      @apply prose max-w-none p-0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
       min-height: 224px;
       }
       .control :global(.ql-toolbar):global(.ql-snow) {
       @apply rounded-t-xl;
       --tw-border-opacity: 0.2;
       border: 1px solid hsl(var(--bc) / var(--tw-border-opacity));
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
       }
       .control :global(.ql-container) {
       @apply rounded-t-none textarea textarea-bordered;
@@ -84,9 +87,11 @@ defmodule BanchanWeb.Components.Form.QuillInput do
       .control :global(.ql-picker-label) {
       color: hsl(var(--n));
       }
+      /*
       .control :global(.ql-editor) :global(p) {
       @apply py-2;
       }
+      */
       /*
       .control :global(.ql-picker) :global(.ql-picker-options) {
       @apply menu rounded-box
@@ -125,7 +130,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
           </div>
           {#if @upload}
             <LiveFileInput
-              class="w-full rounded-t-none file-input file-input-xs file-input-bordered"
+              class="w-full text-sm rounded-t-none file-input file-input-bordered"
               upload={@upload}
             />
             {#if @dragging}
