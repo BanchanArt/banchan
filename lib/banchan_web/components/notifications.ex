@@ -240,12 +240,13 @@ defmodule BanchanWeb.Components.Notifications do
               </p>
             </div>
           {#else}
-            <div class="flex flex-row items-center justify-between w-full gap-2 pt-4 pl-6 pr-2">
+            <div class="flex flex-row items-center justify-between w-full gap-2 pt-4 pb-2 pl-6 pr-2">
               <span class="text-sm font-medium select-none">Notifications</span>
               <button :on-click="mark_all_as_read" type="button" class="text-sm btn btn-sm btn-ghost group">
                 <span class="opacity-75 group-hover:opacity-100">Mark all as read</span>
               </button>
             </div>
+            <div class="m-0 mx-4 divider h-fit" />
             <ul class="w-full p-2 menu">
               {#for notification <- @notifications.entries}
                 <li class="relative rounded">
