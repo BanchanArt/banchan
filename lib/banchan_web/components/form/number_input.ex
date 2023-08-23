@@ -15,14 +15,15 @@ defmodule BanchanWeb.Components.Form.NumberInput do
   prop label, :string
   prop show_label, :boolean, default: true
   prop info, :string
+  prop caption, :string
   prop icon, :string
   prop form, :form, from_context: {Form, :form}
 
   def render(assigns) do
     ~F"""
-    <Field class="field" name={@name}>
+    <Field class="grid grid-cols-1 gap-2 field" name={@name}>
       {#if @show_label}
-        <Label class="label">
+        <Label class="p-0 label">
           <span class="flex flex-row items-center gap-1 label-text">
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
@@ -38,7 +39,7 @@ defmodule BanchanWeb.Components.Form.NumberInput do
           </span>
         </Label>
       {/if}
-      <div class="flex flex-col">
+      <div class="grid grid-cols-1 gap-2">
         <div class={
           "flex flex-row w-full gap-2 control input input-bordered focus-within:ring ring-primary",
           "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
@@ -55,6 +56,11 @@ defmodule BanchanWeb.Components.Form.NumberInput do
           />
         </div>
         <ErrorTag class="help text-error" />
+        {#if @caption}
+          <div class="text-sm text-opacity-50 help text-base-content">
+            {@caption}
+          </div>
+        {/if}
       </div>
     </Field>
     """

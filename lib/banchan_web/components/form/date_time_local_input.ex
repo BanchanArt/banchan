@@ -20,9 +20,9 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
 
   def render(assigns) do
     ~F"""
-    <Field class="field" name={@name}>
+    <Field class="grid grid-cols-1 gap-2 field" name={@name}>
       {#if @show_label}
-        <Label class="label">
+        <Label class="p-0 label">
           <span class="flex flex-row items-center gap-1 label-text">
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
@@ -38,7 +38,7 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
           </span>
         </Label>
       {/if}
-      <div class="flex flex-col">
+      <div class="grid grid-cols-1 gap-2">
         <div class="flex flex-row gap-2">
           {#if @icon}
             <Icon name={"#{@icon}"} size="4" />

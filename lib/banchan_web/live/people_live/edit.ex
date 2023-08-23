@@ -144,7 +144,7 @@ defmodule BanchanWeb.PeopleLive.Edit do
     ~F"""
     <Layout flashes={@flash} padding={0}>
       <div class="w-full bg-base-200">
-        <div class="w-full max-w-7xl p-4 mx-auto">
+        <div class="w-full p-4 mx-auto max-w-7xl">
           <Form class="profile-info" for={@changeset} change="change" submit="submit">
             <div :if={@current_user.id != @user.id} class="alert alert-warning">
               You are editing @{@user.handle}'s profile as @{@current_user.handle}.
@@ -235,15 +235,15 @@ defmodule BanchanWeb.PeopleLive.Edit do
                 </div>
               </div>
             </div>
-            <div class="grid w-full grid-cols-1 gap-4">
+            <div class="grid w-full grid-cols-1 gap-4 py-4">
               <TextInput
                 name={:handle}
                 icon="at-sign"
-                info="For security reasons, you can only change this on your Account Settings page."
+                caption="For security reasons, you can only change this on your Account Settings page."
                 opts={disabled: true}
               />
-              <TextInput name={:name} icon="user" info="Your display name." opts={required: true} />
-              <TextArea name={:bio} info="Tell us a little bit about yourself!" />
+              <TextInput name={:name} icon="user" opts={required: true, placeholder: "My Cool Name"} />
+              <TextArea name={:bio} opts={placeholder: "Tell us a little bit about yourself!"} />
               <TagsInput
                 id="user_tags"
                 label="Interests"

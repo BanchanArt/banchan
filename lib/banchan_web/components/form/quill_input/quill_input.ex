@@ -93,9 +93,9 @@ defmodule BanchanWeb.Components.Form.QuillInput do
       }
       */
     </style>
-    <Field class="field" name={@name}>
+    <Field class="grid grid-cols-1 gap-2 field" name={@name}>
       {#if @show_label}
-        <Label class="label">
+        <Label class="p-0 label">
           <span class="flex flex-row items-center gap-1 label-text">
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
