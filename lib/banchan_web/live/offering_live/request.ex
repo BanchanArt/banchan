@@ -382,7 +382,7 @@ defmodule BanchanWeb.OfferingLive.Request do
                   </span>
                 </div>
                 <div class="grid grid-cols-1 gap-2">
-                  <div class="text-sm font-medium opacity-50">Cart</div>
+                  <div class="text-sm font-medium opacity-75">Cart</div>
                   <div class="grid w-full grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
                     <Summary
                       allow_edits
@@ -397,7 +397,7 @@ defmodule BanchanWeb.OfferingLive.Request do
                 </div>
                 <div class="m-0 divider h-fit" />
                 {#if Enum.any?(@offering.options, &(!&1.default))}
-                  <div class="text-sm font-medium opacity-50">Add-ons</div>
+                  <div class="text-sm font-medium opacity-75">Add-ons</div>
                   <div class="grid w-full grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
                     <AddonList
                       id="addon-list"
@@ -432,12 +432,14 @@ defmodule BanchanWeb.OfferingLive.Request do
                 {#if !is_nil(@terms)}
                   <div class="pt-2">
                     <h3 class="py-4 text-sm font-medium opacity-75">Commission Terms and Conditions</h3>
-                    <div class="grid grid-cols-1 gap-4 p-4 overflow-auto border rounded-lg bg-base-100 border-base-content border-opacity-10 max-h-60">
-                      <Markdown content={@terms} />
-                      <div class="m-0 divider h-fit" />
+                    <div class="grid grid-cols-1 gap-4">
+                      <div class="p-4 overflow-auto border rounded-lg bg-base-100 border-base-content border-opacity-10 max-h-60">
+                        <Markdown content={@terms} />
+                      </div>
                       <Checkbox name={:tos_ok} opts={required: true}>
-                        I have read and agree to these Terms.
+                        I have read and agreed to these Terms.
                       </Checkbox>
+                      <div class="m-0 divider h-fit" />
                     </div>
                   </div>
                 {/if}
