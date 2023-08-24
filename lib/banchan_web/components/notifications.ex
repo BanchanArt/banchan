@@ -229,9 +229,9 @@ defmodule BanchanWeb.Components.Notifications do
         </button>
       </div>
       {#if @open}
-        <div class="absolute right-0 z-30 grid max-w-full grid-cols-1 origin-top translate-x-px translate-y-2 border rounded-lg w-96 sm:max-w-sm border-base-content border-opacity-10 bg-base-100 text-base-content">
+        <div class="absolute right-0 z-30 grid max-w-sm grid-cols-1 origin-top translate-x-px translate-y-px border rounded-lg shadow-md w-96 border-base-content border-opacity-10 bg-base-100 text-base-content">
           {#if !@notifications || Enum.empty?(@notifications.entries)}
-            <div class="flex flex-col items-center gap-2 px-4 py-8 mx-auto">
+            <div class="flex flex-col items-center gap-2 px-4 py-10 mx-auto">
               <span class="text-base font-medium text-center text-base-content">
                 No notifications
               </span>
