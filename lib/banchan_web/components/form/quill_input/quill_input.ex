@@ -103,7 +103,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
       {/if}
       <div class="control">
         <div class={"relative", "has-upload": !is_nil(@upload)}>
-          <TextArea form={@form} field={@name} class="input-textarea" opts={@opts} />
+          <TextArea form={@form} field={@name} class="hidden input-textarea" opts={@opts} />
           <div
             class={@class}
             phx-drop-target={@upload && @upload.ref}
