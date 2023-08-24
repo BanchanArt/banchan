@@ -12,7 +12,7 @@ defmodule BanchanWeb.StaticLive.AboutUs do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash}>
-      <#Markdown class="prose">
+      <#Markdown class="w-full px-4 py-2 mx-auto prose max-w-7xl">
         # About Banchan Art
 
         Banchan Art is a website focused on providing a user-friendly space for artists for managing their clients, commissions, and invoices, and for patrons to discover new and existing artists to follow and to commission art.
