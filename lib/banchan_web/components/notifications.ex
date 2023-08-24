@@ -210,49 +210,57 @@ defmodule BanchanWeb.Components.Notifications do
     ~F"""
     <div class="relative" :on-click-away="close_menu">
       <div class="indicator">
-        {#if @notifications && @notifications.total_entries > 0}
-          <span class="indicator-item indicator-bottom indicator-start badge badge-primary">
-            {#if @notifications.total_entries > 99}
-              99+
-            {#else}
-              {@notifications.total_entries}
-            {/if}
-          </span>
-        {/if}
         <button
           type="button"
           :on-click="toggle_menu"
-          class="btn btn-circle btn-ghost"
+          class={"btn btn-ghost gap-2", "btn-active": @open}
           aria-label="Notifications"
         >
           <Icon name="bell" size="4" />
+          {#if @notifications && @notifications.total_entries > 0}
+            <span class="badge badge-primary">
+              {#if @notifications.total_entries > 99}
+                99+
+              {#else}
+                {@notifications.total_entries}
+              {/if}
+            </span>
+          {/if}
         </button>
       </div>
       {#if @open}
-        <div class="absolute right-0 z-30 p-2 origin-top translate-x-px translate-y-px border divide-y-2 border-base-content border-opacity-10 menu rounded-box bg-base-100 divide-neutral-content divide-opacity-10 text-base-content">
+        <div class="absolute right-0 z-30 grid max-w-full grid-cols-1 origin-top translate-x-px translate-y-2 border rounded-lg w-96 sm:max-w-sm border-base-content border-opacity-10 bg-base-100 text-base-content">
           {#if !@notifications || Enum.empty?(@notifications.entries)}
-            <div class="px-8 m-2">No notifications</div>
+            <div class="flex flex-col items-center gap-2 px-4 py-8 mx-auto">
+              <span class="text-base font-medium text-center text-base-content">
+                No notifications
+              </span>
+              <p class="text-sm text-center opacity-75 text-base-content">
+                You'll see notifications for new commissions, replies, status updates and more here.
+              </p>
+            </div>
           {#else}
-            <ul>
-              <li>
-                <button :on-click="mark_all_as_read" class="pl-10" type="button">
-                  Mark All as Read
-                </button>
-              </li>
-              <li class="menu-title">
-                <hr>
-              </li>
+            <div class="flex flex-row items-center justify-between w-full gap-2 pt-4 pb-2 pl-6 pr-2">
+              <span class="text-sm font-medium select-none">Notifications</span>
+              <button :on-click="mark_all_as_read" type="button" class="text-sm btn btn-sm btn-ghost group">
+                <span class="opacity-75 group-hover:opacity-100">Mark all as read</span>
+              </button>
+            </div>
+            <div class="m-0 mx-4 divider h-fit" />
+            <ul class="w-full p-2 menu">
               {#for notification <- @notifications.entries}
-                <li class="relative">
+                <li class="relative rounded">
                   <LiveRedirect to={annotated_url(notification)}>
-                    <div class="indicator">
-                      {#if !notification.read}
-                        <span class="cursor-default indicator-item indicator-middle indicator-start badge badge-xs badge-primary" />
-                      {/if}
-                      <div class="flex flex-col pl-6">
-                        <div class="text-lg">{notification.title}</div>
-                        <div class="text-xs">{notification.short_body}</div>
+                    <div class="flex flex-col items-start w-full gap-1">
+                      <div class="flex flex-row items-center w-full gap-2">
+                        {#if !notification.read}
+                          <div class="inline-block w-2 h-2 mr-1 rounded-full bg-primary" />
+                        {/if}
+                        <span class="text-sm truncate grow">
+                          {notification.title}
+                        </span>
                       </div>
+                      <p class="w-full text-xs truncate opacity-75">{notification.short_body}</p>
                     </div>
                   </LiveRedirect>
                 </li>
