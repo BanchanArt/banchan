@@ -25,7 +25,7 @@ defmodule BanchanWeb.Components.OfferingCard do
   def render(assigns) do
     ~F"""
     <offering-card class={
-      " group h-full transition-all relative flex flex-col border rounded-lg border-base-content border-opacity-10 p-0 m-0",
+      "group h-full transition-all relative flex flex-col border rounded-lg border-base-content border-opacity-10 p-0 m-0 hover:outline hover:outline-primary-focus hover:outline-3 hover:outline-offset-0 hover:border-primary-focus",
       "opacity-50": @archived?
     }>
       <div class="rounded-t-lg stack-custom">

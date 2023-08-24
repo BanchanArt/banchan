@@ -24,6 +24,12 @@ defmodule BanchanWeb.Components.StudioCard do
           "border-base-content",
           "border-opacity-10",
           "bg-base-100",
+          "hover:outline",
+          "hover:outline-primary-focus",
+          "hover:outline-3",
+          "hover:outline-offset-0",
+          "hover:border-primary-focus",
+          "transition-all",
           "opacity-50": @studio.archived_at
         }>
           <:image>
