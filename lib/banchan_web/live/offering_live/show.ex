@@ -237,13 +237,13 @@ defmodule BanchanWeb.OfferingLive.Show do
               {/if}
             </div>
             {#if Enum.any?(@offering.options, & &1.default)}
-              <div class="text-sm font-medium opacity-50">Included</div>
+              <div class="text-sm font-medium opacity-75">Included</div>
               <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-base-100 border-base-content border-opacity-10">
                 <Summary line_items={@line_items} />
               </div>
             {/if}
             {#if Enum.any?(@offering.options, &(!&1.default))}
-              <div class="text-sm font-medium opacity-50">Add-ons</div>
+              <div class="text-sm font-medium opacity-75">Add-ons</div>
               <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-base-100 border-base-content border-opacity-10">
                 <AddonList id="addon-list" offering={@offering} line_items={@line_items} />
               </div>
@@ -318,18 +318,18 @@ defmodule BanchanWeb.OfferingLive.Show do
                 />
               </div>
             {/if}
-            {#if !Enum.empty?(@related)}
-              <div class="flex flex-col">
-                <div class="pt-4 text-2xl">Discover More</div>
-                <div class="flex flex-col p-2">
-                  {#for {rel, idx} <- Enum.with_index(@related)}
-                    <OfferingCard id={"related-mobile-#{idx}"} current_user={@current_user} offering={rel} />
-                  {/for}
-                </div>
-              </div>
-            {/if}
           </div>
         </div>
+        {#if !Enum.empty?(@related)}
+          <div class="flex flex-col gap-4">
+            <div class="text-2xl">Discover More</div>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
+              {#for {rel, idx} <- Enum.with_index(@related)}
+                <OfferingCard id={"related-mobile-#{idx}"} current_user={@current_user} offering={rel} />
+              {/for}
+            </div>
+          </div>
+        {/if}
         {#if @current_user}
           <ReportModal id="report-modal" current_user={@current_user} />
         {/if}
