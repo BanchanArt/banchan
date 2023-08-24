@@ -26,13 +26,13 @@ defmodule BanchanWeb.StudioLive.New do
   @impl true
   def mount(_params, _session, socket) do
     currencies =
-      Studios.Common.supported_currencies()
-      |> Enum.map(&{"#{Money.Currency.name(&1)} (#{Payments.currency_symbol(&1)})", &1})
+      Payments.supported_currencies()
+      |> Enum.map(&{"#{Payments.currency_name(&1)} (#{Payments.currency_symbol(&1)})", &1})
 
     socket =
       socket
       |> assign(
-        countries: Studios.Common.supported_countries(),
+        countries: Payments.supported_countries(),
         currencies: currencies,
         platform_currency: Payments.platform_currency()
       )
@@ -85,8 +85,8 @@ defmodule BanchanWeb.StudioLive.New do
          |> put_flash(:info, "Studio created")
          |> redirect(to: Routes.studio_shop_path(Endpoint, :show, studio.handle))}
 
-      other ->
-        other
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
     end
   end
 

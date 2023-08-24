@@ -18,14 +18,6 @@ defmodule BanchanWeb.CommissionLive.Components.Timeline do
   prop commission, :any, from_context: :commission
   prop report_modal_id, :string, required: true
 
-  def fmt_time(time) do
-    Timex.format!(time, "{relative}", :relative)
-  end
-
-  def fmt_md(md) do
-    HtmlSanitizeEx.markdown_html(Earmark.as_html!(md || ""))
-  end
-
   def render(assigns) do
     ~F"""
     <div class="flow-root snap-y">

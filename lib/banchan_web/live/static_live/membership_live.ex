@@ -12,7 +12,7 @@ defmodule BanchanWeb.StaticLive.Membership do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash}>
-      <#Markdown class="prose">
+      <#Markdown class="w-full px-4 py-2 mx-auto prose max-w-7xl">
         # Joining Banchan
 
         What sets co-operatives apart from other kinds of companies is that they are owned

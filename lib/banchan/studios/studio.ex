@@ -6,7 +6,8 @@ defmodule Banchan.Studios.Studio do
 
   import Banchan.Validators
 
-  alias Banchan.Studios.{Common, PortfolioImage, StudioBlock, StudioDisableHistory}
+  alias Banchan.Payments.Currency
+  alias Banchan.Studios.{PortfolioImage, StudioBlock, StudioDisableHistory}
   alias Banchan.Uploads.Upload
 
   schema "studios" do
@@ -15,9 +16,9 @@ defmodule Banchan.Studios.Studio do
     field :about, :string
     field :default_terms, :string
     field :default_template, :string
-    field :country, Ecto.Enum, values: Common.supported_countries() |> Keyword.values()
-    field :default_currency, Ecto.Enum, values: Common.supported_currencies()
-    field :payment_currencies, {:array, Ecto.Enum}, values: Common.supported_currencies()
+    field :country, Ecto.Enum, values: Currency.supported_countries() |> Keyword.values()
+    field :default_currency, Ecto.Enum, values: Currency.supported_currencies()
+    field :payment_currencies, {:array, Ecto.Enum}, values: Currency.supported_currencies()
     field :featured, :boolean, default: false
     field :tags, {:array, :string}
     field :mature, :boolean, default: false

@@ -70,12 +70,6 @@ config :banchan, Banchan.Mailer,
     recv_timeout: :timer.minutes(1)
   ]
 
-config :banchan, Oban,
-  plugins: [
-    Oban.Plugins.Gossip,
-    Oban.Web.Plugins.Stats
-  ]
-
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key

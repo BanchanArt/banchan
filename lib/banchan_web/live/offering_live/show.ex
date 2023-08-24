@@ -250,7 +250,7 @@ defmodule BanchanWeb.OfferingLive.Show do
             {/if}
             <div class="flex flex-row-reverse justify-end gap-2">
               {#if @current_user}
-                <div class="dropdown">
+                <div class="dropdown dropdown-end">
                   <label tabindex="0" class="py-0 my-2 btn btn-circle btn-ghost btn-sm grow-0">
                     <Icon name="more-vertical" size="4" />
                   </label>

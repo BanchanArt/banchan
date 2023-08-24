@@ -143,7 +143,7 @@ defmodule Banchan.Validators do
     |> validate_format(:deviantart_handle, ~r/^[a-zA-Z0-9_]+$/,
       message: "must be a valid Deviantart handle."
     )
-    |> validate_format(:tumblr_handle, ~r/^[a-zA-Z0-9_]+$/,
+    |> validate_format(:tumblr_handle, ~r/^[a-zA-Z0-9_-]+$/,
       message: "must be a valid Tumblr handle."
     )
     |> validate_format(:mastodon_handle, ~r/^[a-zA-Z0-9_-]+@.+$/,

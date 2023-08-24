@@ -5,12 +5,13 @@ defmodule BanchanWeb.Components.Form.QuillInput do
   use BanchanWeb, :live_component
 
   alias BanchanWeb.Components.Icon
+  alias Surface.Components.Form
   alias Surface.Components.Form.{ErrorTag, Field, Label, TextArea}
   alias Surface.Components.LiveFileInput
 
   prop(name, :any, required: true)
-  prop(form, :form, from_context: {Surface.Components.Form, :form})
   prop(opts, :keyword, default: [])
+  prop(form, :form, from_context: {Form, :form})
   # TODO: couldn't get this to work, for some reason.
   # prop height, :string, default: "224px"
   prop(label, :string)
@@ -21,16 +22,6 @@ defmodule BanchanWeb.Components.Form.QuillInput do
   prop(cancel_upload, :event)
 
   data(dragging, :boolean, default: false)
-
-  def update(assigns, socket) do
-    socket = assign(socket, assigns)
-
-    {:ok,
-     socket
-     |> push_event("update_markdown", %{
-       id: assigns.id <> "_hook"
-     })}
-  end
 
   def handle_event("dragstart", _, socket) do
     {:noreply, assign(socket, dragging: true)}
@@ -112,6 +103,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
       {/if}
       <div class="control">
         <div class={"relative", "has-upload": !is_nil(@upload)}>
+          <TextArea form={@form} field={@name} class="hidden input-textarea" opts={@opts} />
           <div
             class={@class}
             phx-drop-target={@upload && @upload.ref}
@@ -120,7 +112,6 @@ defmodule BanchanWeb.Components.Form.QuillInput do
             id={@id <> "_hook"}
           >
             <div id={@id <> "-editor"} phx-update="ignore" class="object-cover w-full h-full editor" />
-            <TextArea form={@form} field={@name} class="hidden input-textarea" opts={@opts} />
           </div>
           {#if @upload}
             <LiveFileInput

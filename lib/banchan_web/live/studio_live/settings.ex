@@ -30,9 +30,9 @@ defmodule BanchanWeb.StudioLive.Settings do
     socket = assign_studio_defaults(params, socket, true, false)
 
     currencies =
-      Studios.Common.supported_currencies()
+      Payments.supported_currencies()
       |> Enum.map(fn currency ->
-        {:"#{Money.Currency.name(currency)} (#{Payments.currency_symbol(currency)})", currency}
+        {:"#{Payments.currency_name(currency)} (#{Payments.currency_symbol(currency)})", currency}
       end)
 
     {:ok,

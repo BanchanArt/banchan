@@ -367,6 +367,14 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     end)
   end
 
+  defp option_valid?(changeset, index) do
+    opt =
+      Enum.at(Ecto.Changeset.fetch_field!(changeset, :options), index)
+      |> OfferingOption.changeset(%{})
+
+    opt.valid?
+  end
+
   def render(assigns) do
     ~F"""
     <Form
@@ -524,7 +532,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           }>
             <Inputs form={@form} for={:options} :let={index: index}>
               <li>
-                <Collapse id={@id <> "-option-" <> "#{index}"}>
+                <Collapse id={@id <> "-option-" <> "#{index}"} initial_open={!option_valid?(@changeset, index)}>
                   <:header>
                     <h3 class="text-xl">
                       {opt = Enum.at(Ecto.Changeset.fetch_field!(@changeset, :options), index)
@@ -574,7 +582,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           label="Option Currency"
           info="Currency to use for all options. Only one currency is allowed per offering."
           options={@studio.payment_currencies
-          |> Enum.map(&{"#{Money.Currency.name(&1)} (#{Payments.currency_symbol(&1)})", &1})}
+          |> Enum.map(&{"#{Payments.currency_name(&1)} (#{Payments.currency_symbol(&1)})", &1})}
           opts={required: true}
         />
         <div class="divider" />
