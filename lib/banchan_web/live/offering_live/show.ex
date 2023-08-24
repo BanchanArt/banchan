@@ -213,18 +213,28 @@ defmodule BanchanWeb.OfferingLive.Show do
                   to={Routes.studio_shop_path(Endpoint, :show, @offering.studio.handle)}
                 >{@offering.studio.name}</LiveRedirect>
               </div>
-              {#if @offering.mature}
-                <div class="badge badge-error">Mature</div>
-              {/if}
-              {#if @offering.hidden}
-                <div class="badge badge-error">Hidden</div>
-              {#elseif @offering.open && !is_nil(@offering.slots)}
-                <div class="whitespace-nowrap badge badge-primary">{@available_slots}/{@offering.slots} Slots</div>
-              {#elseif @offering.open}
-                <div class="badge badge-primary">Open</div>
-              {#else}
-                <div class="badge badge-error">Closed</div>
-              {/if}
+              <div class="flex flex-row items-center gap-2">
+                {#if @offering.mature}
+                  <span
+                    title="Mature"
+                    class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-error text-error-content border-base-content border-opacity-10"
+                  >M</span>
+                {/if}
+                {#if @offering.hidden}
+                  <span
+                    title="Hidden"
+                    class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-warning text-warning-content border-base-content border-opacity-10"
+                  >Hidden</span>
+                {#elseif @offering.open && !is_nil(@offering.slots)}
+                  <div class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md whitespace-nowrap bg-primary text-primary-content border-base-content border-opacity-10">
+                    <span>{@available_slots}/{@offering.slots} slots</span>
+                  </div>
+                {#elseif @offering.open}
+                  <div class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-primary text-primary-content border-base-content border-opacity-10">Open</div>
+                {#else}
+                  <div class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-error text-error-content border-base-content border-opacity-10">Closed</div>
+                {/if}
+              </div>
             </div>
             <div class="grid grid-cols-1 gap-4">
               <Markdown content={@offering.description} />

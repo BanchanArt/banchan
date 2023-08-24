@@ -49,13 +49,13 @@ defmodule BanchanWeb.Components.OfferingCard do
             {#if @mature?}
               <span
                 title="Mature"
-                class="flex flex-row items-center px-2 text-xs font-bold bg-opacity-75 border rounded-md bg-error text-error-content border-base-content border-opacity-10"
+                class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-error text-error-content border-base-content border-opacity-10"
               >M</span>
             {/if}
             {#if @hidden?}
               <span
                 title="Hidden"
-                class="flex flex-row items-center px-2 text-xs font-bold bg-opacity-75 border rounded-md bg-warning text-warning-content border-base-content border-opacity-10"
+                class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-warning text-warning-content border-base-content border-opacity-10"
               >Hidden</span>
             {/if}
           </div>
