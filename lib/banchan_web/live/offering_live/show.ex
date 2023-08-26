@@ -141,7 +141,7 @@ defmodule BanchanWeb.OfferingLive.Show do
     |> assign(
       page_image:
         offering.card_img_id &&
-          ~p"/images/offering_card_img/#{offering.card_img_id}"
+          url(~p"/images/offering_card_img/#{offering.card_img_id}")
     )
   end
 

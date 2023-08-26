@@ -105,6 +105,20 @@ defmodule BanchanWeb.OfferingLive.Request do
     end
   end
 
+  defp assign_offering_card_props(socket, offering) do
+    socket
+    |> assign(page_title: offering.name)
+    |> assign(
+      page_description:
+        offering.description && HtmlSanitizeEx.strip_tags(Earmark.as_html!(offering.description))
+    )
+    |> assign(
+      page_image:
+        offering.card_img_id &&
+          url(~p"/images/offering_card_img/#{offering.card_img_id}")
+    )
+  end
+
   @impl true
   def handle_event("cancel_upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :attachment, ref)}
@@ -332,20 +346,6 @@ defmodule BanchanWeb.OfferingLive.Request do
              ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}"
          )}
     end
-  end
-
-  defp assign_offering_card_props(socket, offering) do
-    socket
-    |> assign(page_title: offering.name)
-    |> assign(
-      page_description:
-        offering.description && HtmlSanitizeEx.strip_tags(Earmark.as_html!(offering.description))
-    )
-    |> assign(
-      page_image:
-        offering.card_img_id &&
-          ~p"/images/offering_card_img/#{offering.card_img_id}"
-    )
   end
 
   def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do
