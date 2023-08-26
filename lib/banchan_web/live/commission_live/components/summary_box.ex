@@ -414,7 +414,8 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
         </div>
         <div class="m-0 divider h-fit" />
         {#if @commission.offering}
-          <div class="text-sm font-medium opacity-75">Add-ons</div>
+          <div class="text-sm font-medium opacity-75">Available Add-ons</div>
+          <div class="text-xs">Only the studio can add these to the commission.</div>
           <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
             <AddonPicker
               id={@id <> "-addon-picker"}
