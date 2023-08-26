@@ -74,7 +74,7 @@ defmodule BanchanWeb.Components.Layout do
         aria-label="Banchan Art menu"
         class="hidden drawer-toggle"
       />
-      <main class="!z-auto flex flex-col h-screen grow drawer-content">
+      <main class="flex flex-col h-screen grow drawer-content">
         <div class="sticky top-0 z-50">
           <Nav />
           <Flash flashes={@flashes} />
