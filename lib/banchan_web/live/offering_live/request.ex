@@ -176,6 +176,7 @@ defmodule BanchanWeb.OfferingLive.Request do
       {:noreply, socket}
     else
       line_item = %LineItem{
+        offering_option_id: option.id,
         option: option,
         amount: option.price,
         name: option.name,
