@@ -14,9 +14,12 @@ const liveSocket = new LiveSocket('/live', Socket, {
 })
 
 // liveSocket.socket.onError((_error, transport, establishedConnections) => {
-//   if (transport === WebSocket && establishedConnections === 0) {
-//     liveSocket.socket.replaceTransport(LongPoll);
-//     liveSocket.socket.connect();
+//   liveSocket.socket.connect();
+//   if (transport === WebSocket) {
+//     liveSocket.socket.disconnect(() => {
+//       liveSocket.socket.replaceTransport(LongPoll);
+//       liveSocket.socket.connect();
+//     })
 //   }
 // });
 
