@@ -29,6 +29,8 @@ defmodule BanchanWeb.OfferingLive.Request do
         offering_type
       )
 
+    socket = assign_offering_card_props(socket, offering)
+
     available_slots = Offerings.offering_available_slots(offering)
 
     terms = offering.terms || socket.assigns.studio.default_terms
@@ -330,6 +332,20 @@ defmodule BanchanWeb.OfferingLive.Request do
              ~p"/studios/#{socket.assigns.studio.handle}/offerings/#{socket.assigns.offering.type}"
          )}
     end
+  end
+
+  defp assign_offering_card_props(socket, offering) do
+    socket
+    |> assign(page_title: offering.name)
+    |> assign(
+      page_description:
+        offering.description && HtmlSanitizeEx.strip_tags(Earmark.as_html!(offering.description))
+    )
+    |> assign(
+      page_image:
+        offering.card_img_id &&
+          ~p"/images/offering_card_img/#{offering.card_img_id}"
+    )
   end
 
   def handle_info(%{event: "follower_count_changed", payload: new_count}, socket) do

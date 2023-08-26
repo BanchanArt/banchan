@@ -14,7 +14,7 @@
     <meta property="og:site_name" content="Banchan Art">
     <meta
       property="og:title"
-      content={"Banchan Art | #{assigns[:page_title] || "The Co-operative Commissions Platform"}"}
+      content={assigns[:page_title] || "The Co-operative Commissions Platform"}
     />
     <meta
       property="og:description"
