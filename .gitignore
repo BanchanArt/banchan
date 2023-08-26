@@ -33,9 +33,7 @@ npm-debug.log
 /assets/css/_components.css
 
 # Ignore assets that are produced by build tools.
-/priv/static/assets
-# And the cache manifest
-/priv/static/cache_manifest.json
+/priv/static
 
 # Ignore the Mnesia cache
 /Mnesia.*
