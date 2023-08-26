@@ -85,12 +85,12 @@ defmodule Banchan.MixProject do
       {:phoenix_ecto, "~> 4.4.2"},
       {:phoenix_html, "~> 3.3.1"},
       {:phoenix_live_dashboard, "~> 0.8.0"},
-      # TODO: set this to a proper LiveView release when
-      # https://github.com/phoenixframework/phoenix_live_view/commit/7daaf5ccb5a631f448eea5f8538508feb175c6f5
-      # get included in a release (likely ~> 0.19.3)
+      # TODO: We have to keep a patched LiveView do to unmerged/unreleased fixes:
+      # * https://github.com/phoenixframework/phoenix_live_view/commit/7daaf5ccb5a631f448eea5f8538508feb175c6f5
+      # * https://github.com/phoenixframework/phoenix_live_view/pull/2528
       {:phoenix_live_view,
-       github: "phoenixframework/phoenix_live_view",
-       ref: "7aa516ff8107196a27cc11982415d86958fc8b98",
+       github: "BanchanArt/phoenix_live_view",
+       ref: "e9d31749431f28867fc16262dac5fc9c1df5558a",
        override: true},
       {:phoenix_view, "~> 2.0"},
       {:plug_cowboy, "~> 2.6.1"},
