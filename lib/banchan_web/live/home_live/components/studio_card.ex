@@ -24,6 +24,12 @@ defmodule BanchanWeb.Components.StudioCard do
           "border-base-content",
           "border-opacity-10",
           "bg-base-100",
+          "hover:outline",
+          "hover:outline-primary-focus",
+          "hover:outline-3",
+          "hover:outline-offset-0",
+          "hover:border-primary-focus",
+          "transition-all",
           "opacity-50": @studio.archived_at
         }>
           <:image>
@@ -35,7 +41,11 @@ defmodule BanchanWeb.Components.StudioCard do
                   src={~p"/images/studio_card_img/#{@studio.card_img_id}"}
                 />
               {#else}
-                <div class="rounded-lg aspect-video bg-base-300" />
+                <img
+                  class="object-cover rounded-t-lg aspect-video"
+                  alt={"studio card image for #{@studio.name}"}
+                  src={~p"/images/640x360.png"}
+                />
               {/if}
             </div>
           </:image>
