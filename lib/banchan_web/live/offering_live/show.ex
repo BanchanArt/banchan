@@ -46,6 +46,8 @@ defmodule BanchanWeb.OfferingLive.Show do
         offering_type
       )
 
+    socket = assign_offering_card_props(socket, offering)
+
     terms = offering.terms || socket.assigns.studio.default_terms
 
     Notifications.subscribe_to_offering_updates(offering)
@@ -127,6 +129,20 @@ defmodule BanchanWeb.OfferingLive.Show do
          |> put_flash(:error, "This offering is unavailable.")
          |> push_navigate(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
     end
+  end
+
+  defp assign_offering_card_props(socket, offering) do
+    socket
+    |> assign(page_title: offering.name)
+    |> assign(
+      page_description:
+        offering.description && HtmlSanitizeEx.strip_tags(Earmark.as_html!(offering.description))
+    )
+    |> assign(
+      page_image:
+        offering.card_img_id &&
+          ~p"/images/offering_card_img/#{offering.card_img_id}"
+    )
   end
 
   def handle_info(%{event: "images_updated"}, socket) do
