@@ -119,7 +119,9 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
         opts={id: @id <> "_form", "phx-target": @myself}
       >
         <div class="flex flex-row items-start w-full gap-4">
-          <Avatar class="w-10 h-10" user={@current_user} />
+          <div class="hidden md:flex">
+            <Avatar class="w-10 h-10" user={@current_user} />
+          </div>
           <div class="grid w-full grid-cols-1 gap-4 grow">
             <QuillInput
               id={@id <> "_markdown_input"}
