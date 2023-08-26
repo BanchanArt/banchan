@@ -112,12 +112,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
   def render(assigns) do
     ~F"""
     <div id={@id} class="message-box">
-      <Form
-        for={@changeset}
-        change="change"
-        submit="add_comment"
-        opts={id: @id <> "_form", "phx-target": @myself}
-      >
+      <Form for={@changeset} change="change" submit="add_comment" opts={"phx-target": @myself}>
         <div class="flex flex-row items-start w-full gap-4">
           <div class="hidden md:flex">
             <Avatar class="w-10 h-10" user={@current_user} />
