@@ -188,7 +188,7 @@ defmodule BanchanWeb.PeopleLive.Show do
                 <UserHandle link={false} user={@user} />
               </div>
               <div class="flex flex-row gap-2 m-4 ml-auto place-content-end">
-                {#if @current_user && @current_user.id != @user.id}
+                {#if @current_user && (@current_user.id != @user.id || Accounts.mod?(@current_user))}
                   <div class="dropdown dropdown-end">
                     <label tabindex="0" class="py-0 my-2 btn btn-circle btn-outline btn-sm grow-0">
                       <Icon name="more-vertical" size="4" />
@@ -197,7 +197,7 @@ defmodule BanchanWeb.PeopleLive.Show do
                       tabindex="0"
                       class="p-2 border menu md:menu-compact dropdown-content bg-base-300 border-base-content border-opacity-10 rounded-box"
                     >
-                      {#if :admin in @current_user.roles || :mod in @current_user.roles}
+                      {#if Accounts.mod?(@current_user)}
                         <li>
                           <LiveRedirect to={~p"/people/#{@user.handle}/moderation"}>
                             <Icon name="gavel" size="4" /> Moderation
@@ -223,7 +223,7 @@ defmodule BanchanWeb.PeopleLive.Show do
                   </div>
                 {/if}
                 {#if @current_user &&
-                    (@current_user.id == @user.id || :admin in @current_user.roles || :mod in @current_user.roles)}
+                    (@current_user.id == @user.id || Accounts.mod?(@current_user))}
                   <LiveRedirect
                     label="Edit Profile"
                     to={~p"/people/#{@user.handle}/edit"}
