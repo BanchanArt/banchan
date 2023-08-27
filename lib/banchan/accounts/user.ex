@@ -35,7 +35,8 @@ defmodule Banchan.Accounts.User do
     has_one :disable_info, DisableHistory, where: [lifted_at: nil]
     has_many :disable_history, DisableHistory, preload_order: [desc: :disabled_at]
 
-    # OAuth UIDs
+    # OAuth
+    field :oauth_only, :boolean, default: false
     field :twitter_uid, :string
     field :google_uid, :string
     field :discord_uid, :string
@@ -127,7 +128,7 @@ defmodule Banchan.Accounts.User do
   end
 
   def registration_oauth_changeset(user, attrs, opts \\ []) do
-    user
+    %{user | oauth_only: true}
     |> cast(attrs, [
       :handle,
       :email,
@@ -284,6 +285,8 @@ defmodule Banchan.Accounts.User do
   def password_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:password])
+    # If we're actually setting a password, let's stop treating them as oauth_only
+    |> put_change(:oauth_only, false)
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
   end

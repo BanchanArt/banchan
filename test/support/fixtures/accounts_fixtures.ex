@@ -43,6 +43,15 @@ defmodule Banchan.AccountsFixtures do
     user
   end
 
+  def oauth_user_fixture(attrs \\ %{}) do
+    {:ok, user} =
+      attrs
+      |> valid_user_attributes()
+      |> Banchan.Accounts.register_oauth_user_test()
+
+    user
+  end
+
   def extractable_user_token(token) do
     "[TOKEN]#{token}[TOKEN]"
   end

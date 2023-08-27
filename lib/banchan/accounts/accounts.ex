@@ -333,6 +333,18 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
+  The same as above, but used for testing purposes only!
+
+  This is used for testing oauth_only users.
+  """
+  def register_oauth_user_test(attrs) do
+    %User{}
+    |> User.registration_test_changeset(attrs)
+    |> Ecto.Changeset.put_change(:oauth_only, true)
+    |> Repo.insert()
+  end
+
+  @doc """
   Register an admin.
   """
   def register_admin(attrs) do
@@ -381,6 +393,7 @@ defmodule Banchan.Accounts do
         nil ->
           create_user_from_discord(auth)
           |> add_oauth_pfp(auth)
+          |> add_discord_oauth_banner(auth)
       end
     end)
     |> Repo.transaction()
@@ -428,6 +441,7 @@ defmodule Banchan.Accounts do
     username = auth.extra.raw_info.user["username"]
     discriminator = auth.extra.raw_info.user["discriminator"]
     legacy? = discriminator not in ["0", "0000"]
+    name = auth.extra.raw_info.user["global_name"] || auth.extra.raw_info.user["username"]
 
     attrs = %{
       discord_uid: auth.uid,
@@ -440,7 +454,7 @@ defmodule Banchan.Accounts do
             ""
           end,
       name:
-        username <>
+        name <>
           if legacy? do
             "#" <> discriminator
           else
@@ -490,13 +504,58 @@ defmodule Banchan.Accounts do
     end
   end
 
+  defp add_discord_oauth_banner(
+         {:ok, %User{} = user},
+         %Auth{
+           uid: uid,
+           extra: %{
+             raw_info: %{
+               user: %{
+                 "banner" => banner
+               }
+             }
+           }
+         }
+       ) do
+    if is_nil(banner) do
+      {:ok, user}
+    else
+      url = "https://cdn.discordapp.com/banners/#{uid}/#{banner}.png"
+
+      tmp_file =
+        Path.join([
+          System.tmp_dir!(),
+          "oauth-banner-#{:rand.uniform(100_000_000)}" <> Path.extname(url)
+        ])
+
+      resp = HTTPoison.get!(url <> "?size=1024")
+      File.write!(tmp_file, resp.body)
+      %{format: format} = Mogrify.identify(tmp_file)
+
+      header =
+        make_header_image!(user, user, tmp_file, "image/#{format}", Path.basename(tmp_file))
+
+      File.rm!(tmp_file)
+
+      update_user_profile(user, user, %{
+        "header_img_id" => header.id
+      })
+    end
+  end
+
+  defp add_discord_oauth_banner(other, %Auth{}) do
+    other
+  end
+
   defp create_user_from_google(%Auth{} = auth) do
     pw = random_password()
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    name = auth.info.nickname || auth.info.first_name || auth.info.name
 
     attrs = %{
       google_uid: auth.uid,
       email: auth.info.email,
+      name: name,
       handle: "user#{:rand.uniform(100_000_000)}",
       password: pw,
       password_confirmation: pw,
@@ -532,7 +591,7 @@ defmodule Banchan.Accounts do
         "oauth-pfp-#{:rand.uniform(100_000_000)}" <> Path.extname(url)
       ])
 
-    resp = HTTPoison.get!(url)
+    resp = HTTPoison.get!(url <> "?size=160")
     File.write!(tmp_file, resp.body)
     %{format: format} = Mogrify.identify(tmp_file)
 
@@ -869,10 +928,10 @@ defmodule Banchan.Accounts do
       fn _ ->
         changeset = user |> User.handle_changeset(attrs)
 
-        if user.email do
-          changeset |> User.validate_current_password(password)
-        else
+        if user.oauth_only do
           changeset
+        else
+          changeset |> User.validate_current_password(password)
         end
       end,
       returning: true
@@ -905,8 +964,8 @@ defmodule Banchan.Accounts do
 
   @doc """
   Emulates that the email will change without actually changing it in the
-  database. Used exclusively for OAuth accounts that didn't have an email to
-  begin with, so password is not checked.
+  database. Used exclusively for OAuth accounts that don't have a password, so
+  password is not checked.
 
   ## Examples
 
@@ -916,12 +975,12 @@ defmodule Banchan.Accounts do
   def apply_new_user_email(user, attrs) do
     user = user |> Repo.reload()
 
-    if is_nil(user.email) do
+    if user.oauth_only do
       user
       |> User.email_changeset(attrs)
       |> Ecto.Changeset.apply_action(:update)
     else
-      {:error, :has_email}
+      {:error, :has_login}
     end
   end
 

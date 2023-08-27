@@ -328,7 +328,7 @@ defmodule Banchan.AccountsTest.Registration do
       auth = %Auth{
         provider: :google,
         uid: gen_random_string(),
-        info: %{
+        info: %Auth.Info{
           email: unique_user_email()
         }
       }
@@ -352,7 +352,7 @@ defmodule Banchan.AccountsTest.Registration do
       auth = %Auth{
         provider: :google,
         uid: gen_random_string(),
-        info: %{
+        info: %Auth.Info{
           email: "not an email"
         }
       }
@@ -373,7 +373,7 @@ defmodule Banchan.AccountsTest.Registration do
       auth = %Auth{
         provider: :google,
         uid: gen_random_string(),
-        info: %{
+        info: %Auth.Info{
           email: unique_user_email()
         }
       }
