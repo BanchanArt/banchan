@@ -9,6 +9,7 @@ defmodule BanchanWeb.Components.Form.Submit do
   prop changeset, :any
   prop label, :string, default: "Submit"
   prop class, :css_class
+  prop ignore_empty_changes, :boolean, default: false
 
   def render(assigns) do
     ~F"""
@@ -18,7 +19,9 @@ defmodule BanchanWeb.Components.Form.Submit do
           class={"btn btn-loadable text-center btn-primary", @class}
           label={@label}
           opts={
-            disabled: @changeset && (Enum.empty?(@changeset.changes) || !@changeset.valid?)
+            disabled:
+              @changeset &&
+                ((!@ignore_empty_changes && Enum.empty?(@changeset.changes)) || !@changeset.valid?)
           }
         />
       </div>

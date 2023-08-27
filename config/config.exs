@@ -70,7 +70,7 @@ config :ueberauth, Ueberauth,
        [
          default_scope: "identify email"
        ]},
-    google: {Ueberauth.Strategy.Google, []}
+    google: {Ueberauth.Strategy.Google, [default_scope: "email profile"]}
   ]
 
 config :banchan, Oban,

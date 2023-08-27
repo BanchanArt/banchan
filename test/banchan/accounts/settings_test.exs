@@ -429,7 +429,7 @@ defmodule Banchan.AccountsTest.Settings do
 
   describe "apply_new_user_email/3" do
     setup do
-      user = unconfirmed_user_fixture()
+      user = oauth_user_fixture()
 
       Ecto.Query.from(u in User, where: u.id == ^user.id)
       |> Repo.update_all(set: [email: nil])
@@ -459,10 +459,10 @@ defmodule Banchan.AccountsTest.Settings do
       assert "has already been taken" in errors_on(changeset).email
     end
 
-    test "fails if user already has an email" do
+    test "fails if user already has login set up." do
       user = unconfirmed_user_fixture()
 
-      assert {:error, :has_email} =
+      assert {:error, :has_login} =
                Accounts.apply_new_user_email(user, %{email: unique_user_email()})
     end
 

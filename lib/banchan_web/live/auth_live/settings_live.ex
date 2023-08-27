@@ -12,7 +12,7 @@ defmodule BanchanWeb.SettingsLive do
   alias Banchan.Notifications.UserNotificationSettings
 
   alias BanchanWeb.AuthLive.Components.SettingsLayout
-  alias BanchanWeb.Components.{Collapse, Icon}
+  alias BanchanWeb.Components.{Button, Collapse, Icon}
   alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
 
@@ -23,7 +23,7 @@ defmodule BanchanWeb.SettingsLive do
         Notifications.get_notification_settings(socket.assigns.current_user) ||
           %UserNotificationSettings{commission_email: true, commission_web: true}
 
-      if is_nil(socket.assigns.current_user.email) do
+      if socket.assigns.current_user.oauth_only do
         {:ok,
          assign(socket,
            theme: nil,
@@ -97,7 +97,7 @@ defmodule BanchanWeb.SettingsLive do
             :info,
             "Your handle has been updated. Please log in again."
           )
-          |> push_navigate(to: Routes.login_path(Endpoint, :new))
+          |> redirect(to: ~p"/login")
 
         {:noreply, socket}
 
@@ -110,7 +110,7 @@ defmodule BanchanWeb.SettingsLive do
     changeset =
       socket.assigns.current_user
       |> User.email_changeset(val["new_email"])
-      |> Map.put(:action, :update)
+      |> Map.put(:action, :insert)
 
     socket = assign(socket, new_email_changeset: changeset)
     {:noreply, socket}
@@ -133,24 +133,39 @@ defmodule BanchanWeb.SettingsLive do
           socket
           |> put_flash(
             :info,
-            "A link to confirm your email change has been sent to the new address."
+            "A link to confirm your email and set a password has been sent."
           )
 
-        {:noreply, socket}
+        {:noreply, socket |> redirect(to: ~p"/settings")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, new_email_changeset: changeset)}
 
-      {:error, :has_email} ->
+      {:error, :has_login} ->
         socket =
           socket
           |> put_flash(
             :error,
-            "You already have an email address associated with your account."
+            "You already have regular login credentials."
           )
 
-        {:noreply, socket}
+        {:noreply, socket |> redirect(to: ~p"/settings")}
     end
+  end
+
+  def handle_event("send_password_reset", _, socket) do
+    Accounts.deliver_user_reset_password_instructions(
+      socket.assigns.current_user,
+      &~p"/reset_password/#{&1}"
+    )
+
+    {:noreply,
+     socket
+     |> put_flash(
+       :info,
+       "Password reset instructions have been sent to #{socket.assigns.current_user.email}"
+     )
+     |> redirect(to: ~p"/settings")}
   end
 
   def handle_event("change_email", val, socket) do
@@ -184,7 +199,7 @@ defmodule BanchanWeb.SettingsLive do
             "A link to confirm your email change has been sent to the new address."
           )
 
-        {:noreply, socket}
+        {:noreply, socket |> redirect(to: ~p"/settings")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, email_changeset: changeset)}
@@ -218,7 +233,7 @@ defmodule BanchanWeb.SettingsLive do
           )
 
         {:noreply,
-         push_navigate(socket,
+         redirect(socket,
            to:
              Routes.user_session_path(
                Endpoint,
@@ -452,7 +467,7 @@ defmodule BanchanWeb.SettingsLive do
           Update Handle
         </h3>
         <TextInput name={:handle} icon="at-sign" opts={required: true, placeholder: "example123"} />
-        {#if @current_user.email}
+        {#if !@current_user.oauth_only}
           <TextInput
             name={:password}
             icon="lock"
@@ -465,7 +480,7 @@ defmodule BanchanWeb.SettingsLive do
         <Submit class="w-fit" changeset={@handle_changeset} label="Save" />
       </Form>
       <div class="divider" />
-      {#if is_nil(@current_user.email)}
+      {#if @current_user.oauth_only}
         <Form
           class="flex flex-col max-w-xl gap-4"
           as={:new_email}
@@ -475,16 +490,25 @@ defmodule BanchanWeb.SettingsLive do
           opts={autocomplete: "off"}
         >
           <h3 class="mb-2 text-lg">Set Your Email</h3>
-          <div>
-            You created this account through third-party authentication that did not provide an email address. If you want to be able to log in with an email and password, or change your <code>@handle</code>, please provide an email and we will send you a password reset.
-          </div>
           <EmailInput
             name={:email}
             icon="mail"
             opts={required: true, placeholder: "youremail@example.com"}
           />
-          <Submit class="w-fit" changeset={@new_email_changeset} label="Save" />
+          <Submit class="w-fit" ignore_empty_changes changeset={@new_email_changeset} label="Save" />
         </Form>
+        <div class="divider" />
+        <h3 class="mb-2 text-lg">Set a password</h3>
+        {#if is_nil(@current_user.email)}
+          <p class="py-2">You need to set an email address before you can set a password.</p>
+        {/if}
+        <p class="py-2">Setting a password will allow you to log in with your email and password, in addition to your third-party auth provider.</p>
+        <Button
+          disabled={is_nil(@current_user.email)}
+          class="w-fit"
+          click="send_password_reset"
+          label="Reset Password."
+        />
       {#else}
         <div class="flex flex-col max-w-xl gap-4">
           <h3 class="mb-2 text-xl font-semibold">Two-factor Authentication</h3>
