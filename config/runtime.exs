@@ -161,23 +161,24 @@ if config_env() == :prod do
     client_secret: discord_client_secret
 
   # TODO: Re-enable when we're ready to do google oauth again
-  # google_client_id =
-  #   System.get_env("GOOGLE_CLIENT_ID") ||
-  #     raise """
-  #     environment variable GOOGLE_CLIENT_ID is missing.
-  #     You can find your Google Client ID at https://console.developers.google.com/apis/credentials.
-  #     """
+  google_client_id =
+    System.get_env("GOOGLE_CLIENT_ID") ||
+      raise """
+      environment variable GOOGLE_CLIENT_ID is missing.
+      You can find your Google Client ID at https://console.developers.google.com/apis/credentials.
+      """
 
-  # google_client_secret =
-  #   System.get_env("GOOGLE_CLIENT_SECRET") ||
-  #     raise """
-  #     environment variable GOOGLE_CLIENT_SECRET is missing.
-  #     You can find your Google Client Secret at https://console.developers.google.com/apis/credentials.
-  #     """
+  google_client_secret =
+    System.get_env("GOOGLE_CLIENT_SECRET") ||
+      raise """
+      environment variable GOOGLE_CLIENT_SECRET is missing.
+      You can find your Google Client Secret at https://console.developers.google.com/apis/credentials.
+      """
 
-  # config :ueberauth, Ueberauth.Strategy.Google.OAuth,
-  #   client_id: google_client_id,
-  #   client_secret: google_client_secret
+  config :ueberauth, Ueberauth.Strategy.Google.OAuth,
+    client_id: google_client_id,
+    client_secret: google_client_secret
+
   app_name =
     System.get_env("FLY_APP_NAME") ||
       raise "FLY_APP_NAME not available"

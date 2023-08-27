@@ -12,7 +12,7 @@ defmodule BanchanWeb.StaticLive.DisputesPolicy do
   def render(assigns) do
     ~F"""
     <Layout flashes={@flash}>
-      <#Markdown class="prose">
+      <#Markdown class="w-full px-4 py-2 mx-auto prose max-w-7xl">
         # Disputes Policy
 
         Last updated: August 13, 2023

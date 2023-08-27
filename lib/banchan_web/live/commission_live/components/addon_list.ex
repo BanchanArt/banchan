@@ -44,6 +44,8 @@ defmodule BanchanWeb.CommissionLive.Components.AddonList do
                 >
                   <Icon name="plus-circle" />
                 </button>
+              {#elseif @add_item}
+                <div class="w-8 px-2" />
               {#else}
                 <Icon name="check-circle-2" class="w-8 text-xl opacity-50" />
               {/if}

@@ -183,7 +183,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   def render(assigns) do
     ~F"""
     <div class="relative">
-      <h1 class="sticky z-30 flex flex-row items-center py-4 text-2xl border-b-2 opacity-100 bg-base-200 top-16 border-base-content border-opacity-10">
+      <h1 class="sticky z-10 flex flex-row items-center py-4 text-2xl border-b-2 opacity-100 bg-base-200 top-16 border-base-content border-opacity-10">
         <LivePatch
           class="p-2 mr-4"
           to={if is_nil(@studio) do

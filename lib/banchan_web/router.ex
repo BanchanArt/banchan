@@ -14,14 +14,14 @@ defmodule BanchanWeb.Router do
   @content_security_policy (case Application.compile_env!(:banchan, :env) do
                               :prod ->
                                 "default-src 'self' 'unsafe-eval' 'unsafe-inline' https://plausible.io/js/plausible.outbound-links.js;" <>
-                                  "connect-src wss://#{@host} blob: https://plausible.io/api/event;" <>
+                                  "connect-src wss://#{@host} https://#{@host} blob: https://plausible.io/api/event;" <>
                                   "img-src 'self' blob: data:;" <>
                                   "font-src data:;"
 
                               # The cloudflare URLs are to get the Surface catalogue displaying right.
                               _ ->
                                 "default-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdnjs.cloudflare.com;" <>
-                                  "connect-src ws://#{@host}:* blob:;" <>
+                                  "connect-src ws://#{@host}:* http://#{@host}:* blob:;" <>
                                   "img-src 'self' blob: data:;" <>
                                   "font-src data: https://cdnjs.cloudflare.com;"
                             end)

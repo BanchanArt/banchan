@@ -46,6 +46,8 @@ defmodule BanchanWeb.OfferingLive.Show do
         offering_type
       )
 
+    socket = assign_offering_card_props(socket, offering)
+
     terms = offering.terms || socket.assigns.studio.default_terms
 
     Notifications.subscribe_to_offering_updates(offering)
@@ -127,6 +129,20 @@ defmodule BanchanWeb.OfferingLive.Show do
          |> put_flash(:error, "This offering is unavailable.")
          |> push_navigate(to: Routes.discover_index_path(Endpoint, :index, "offerings"))}
     end
+  end
+
+  defp assign_offering_card_props(socket, offering) do
+    socket
+    |> assign(page_title: offering.name)
+    |> assign(
+      page_description:
+        offering.description && HtmlSanitizeEx.strip_tags(Earmark.as_html!(offering.description))
+    )
+    |> assign(
+      page_image:
+        offering.card_img_id &&
+          url(~p"/images/offering_card_img/#{offering.card_img_id}")
+    )
   end
 
   def handle_info(%{event: "images_updated"}, socket) do
@@ -213,18 +229,28 @@ defmodule BanchanWeb.OfferingLive.Show do
                   to={Routes.studio_shop_path(Endpoint, :show, @offering.studio.handle)}
                 >{@offering.studio.name}</LiveRedirect>
               </div>
-              {#if @offering.mature}
-                <div class="badge badge-error">Mature</div>
-              {/if}
-              {#if @offering.hidden}
-                <div class="badge badge-error">Hidden</div>
-              {#elseif @offering.open && !is_nil(@offering.slots)}
-                <div class="whitespace-nowrap badge badge-primary">{@available_slots}/{@offering.slots} Slots</div>
-              {#elseif @offering.open}
-                <div class="badge badge-primary">Open</div>
-              {#else}
-                <div class="badge badge-error">Closed</div>
-              {/if}
+              <div class="flex flex-row items-center gap-2">
+                {#if @offering.mature}
+                  <span
+                    title="Mature"
+                    class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-error text-error-content border-base-content border-opacity-10"
+                  >M</span>
+                {/if}
+                {#if @offering.hidden}
+                  <span
+                    title="Hidden"
+                    class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-warning text-warning-content border-base-content border-opacity-10"
+                  >Hidden</span>
+                {#elseif @offering.open && !is_nil(@offering.slots)}
+                  <div class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md whitespace-nowrap bg-primary text-primary-content border-base-content border-opacity-10">
+                    <span>{@available_slots}/{@offering.slots} slots</span>
+                  </div>
+                {#elseif @offering.open}
+                  <div class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-primary text-primary-content border-base-content border-opacity-10">Open</div>
+                {#else}
+                  <div class="flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-error text-error-content border-base-content border-opacity-10">Closed</div>
+                {/if}
+              </div>
             </div>
             <div class="grid grid-cols-1 gap-4">
               <Markdown content={@offering.description} />
@@ -237,13 +263,13 @@ defmodule BanchanWeb.OfferingLive.Show do
               {/if}
             </div>
             {#if Enum.any?(@offering.options, & &1.default)}
-              <div class="text-sm font-medium opacity-50">Included</div>
+              <div class="text-sm font-medium opacity-75">Included</div>
               <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-base-100 border-base-content border-opacity-10">
                 <Summary line_items={@line_items} />
               </div>
             {/if}
             {#if Enum.any?(@offering.options, &(!&1.default))}
-              <div class="text-sm font-medium opacity-50">Add-ons</div>
+              <div class="text-sm font-medium opacity-75">Add-ons</div>
               <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-base-100 border-base-content border-opacity-10">
                 <AddonList id="addon-list" offering={@offering} line_items={@line_items} />
               </div>
@@ -318,18 +344,18 @@ defmodule BanchanWeb.OfferingLive.Show do
                 />
               </div>
             {/if}
-            {#if !Enum.empty?(@related)}
-              <div class="flex flex-col">
-                <div class="pt-4 text-2xl">Discover More</div>
-                <div class="flex flex-col p-2">
-                  {#for {rel, idx} <- Enum.with_index(@related)}
-                    <OfferingCard id={"related-mobile-#{idx}"} current_user={@current_user} offering={rel} />
-                  {/for}
-                </div>
-              </div>
-            {/if}
           </div>
         </div>
+        {#if !Enum.empty?(@related)}
+          <div class="flex flex-col gap-4">
+            <div class="text-2xl">Discover More</div>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
+              {#for {rel, idx} <- Enum.with_index(@related)}
+                <OfferingCard id={"related-mobile-#{idx}"} current_user={@current_user} offering={rel} />
+              {/for}
+            </div>
+          </div>
+        {/if}
         {#if @current_user}
           <ReportModal id="report-modal" current_user={@current_user} />
         {/if}

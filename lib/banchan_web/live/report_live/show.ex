@@ -109,7 +109,7 @@ defmodule BanchanWeb.ReportLive.Show do
     ~F"""
     <Layout flashes={@flash} context={:admin}>
       <div class="relative">
-        <h1 class="sticky z-30 flex flex-row items-center px-4 pb-2 text-3xl border-b-2 opacity-100 top-16 bg-base-100 border-base-content border-opacity-10">
+        <h1 class="sticky z-10 flex flex-row items-center px-4 pb-2 text-3xl border-b-2 opacity-100 top-16 bg-base-100 border-base-content border-opacity-10">
           <LiveRedirect class="px-2 pb-4" to={Routes.report_index_path(Endpoint, :index)}>
             <Icon name="arrow-left" size="4" />
           </LiveRedirect>
