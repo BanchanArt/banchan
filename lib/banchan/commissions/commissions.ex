@@ -943,7 +943,15 @@ defmodule Banchan.Commissions do
                 }
             end
 
-          with {:ok, line_item} <- Repo.insert(line_item),
+          max = Payments.maximum_release_amount()
+          estimate = line_item_estimate(commission.line_items) |> Money.add(line_item.amount)
+
+          with :ok <-
+                 if(Payments.cmp_money(max, estimate) == :lt,
+                   do: {:error, :too_expensive},
+                   else: :ok
+                 ),
+               {:ok, line_item} <- Repo.insert(line_item),
                %LineItem{} = line_item <- line_item |> Repo.preload(:option),
                line_items <- commission.line_items ++ [line_item],
                %Commission{} = commission <- %{commission | line_items: line_items},
