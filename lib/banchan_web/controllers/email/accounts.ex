@@ -98,6 +98,8 @@ defmodule BanchanWeb.Email.Accounts do
     <p>To accept the invite, <a href={@url}>click here</a> or visit the following URL:</p>
     <p>{@url}</p>
     <p>Once that's done, you can check out <a href="https://help.banchan.art/support/solutions/articles/153000007897-creating-your-first-studio">our guide on setting up your first Studio</a> for next steps.</p>
+    <p>You're receiving this email because you signed up for the Banchan Art beta at <a href="https://banchan.art/beta">https://banchan.art/beta</a>. No further emails associated
+    with that signup will be sent.</p>
     <p>If you didn't sign up for this, or aren't expecting someone else to invite you, please ignore this.</p>
     <p>- The Banchan Art Team</p>
     """
@@ -118,6 +120,9 @@ defmodule BanchanWeb.Email.Accounts do
     Once that's done, you can check out our guide on setting up your first Studio for next steps:
 
     https://help.banchan.art/support/solutions/articles/153000007897-creating-your-first-studio
+
+    You're receiving this because you signed up on https://banchan.art/beta. No further emails associated
+    with that signup will be sent.
 
     If you didn't sign up for this, or aren't expecting someone else to invite you, please ignore this.
 
