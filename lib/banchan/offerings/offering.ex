@@ -94,7 +94,7 @@ defmodule Banchan.Offerings.Offering do
     |> validate_length(:type, min: 4, max: 32)
     |> validate_length(:name, min: 4, max: 50)
     |> validate_length(:description, max: 500)
-    |> validate_length(:terms, max: 1500)
+    |> validate_length(:terms, max: 10_000)
     |> validate_length(:template, max: 1500)
     |> validate_option_currencies()
     |> validate_total()
