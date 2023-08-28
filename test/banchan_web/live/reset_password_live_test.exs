@@ -40,7 +40,7 @@ defmodule BanchanWeb.ResetPasswordLiveTest do
 
     {:ok, _view, html} =
       view
-      |> form("form",
+      |> form("form.reset",
         user: %{password: "new valid password", password_confirmation: "new valid password"}
       )
       |> render_submit()
@@ -57,7 +57,7 @@ defmodule BanchanWeb.ResetPasswordLiveTest do
 
     html =
       view
-      |> form("form",
+      |> form("form.reset",
         user: %{password: "too short", password_confirmation: "does not match"}
       )
       |> render_submit()
