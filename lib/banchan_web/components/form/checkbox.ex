@@ -16,6 +16,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   prop label, :string
   prop value, :any
   prop info, :string
+  prop caption, :string
   prop form, :form, from_context: {Form, :form}
 
   slot default
@@ -29,7 +30,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
           class={
             @class,
             "checkbox",
-            "checkbox-primary",
+            "checkbox-primary ring-primary focus:ring-primary",
             "checkbox-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
           }
           opts={@opts}
@@ -49,6 +50,11 @@ defmodule BanchanWeb.Components.Form.Checkbox do
         </div>
       </Label>
       <ErrorTag class="help text-error" />
+      {#if @caption}
+        <div class="text-sm text-opacity-50 help text-base-content">
+          {@caption}
+        </div>
+      {/if}
     </Field>
     """
   end

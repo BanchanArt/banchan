@@ -11,53 +11,80 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
 
   prop name, :any, required: true
   prop opts, :keyword, default: []
+  prop wrapper_class, :css_class
   prop class, :css_class
   prop label, :string
   prop show_label, :boolean, default: true
   prop info, :string
   prop icon, :string
+  prop caption, :string
   prop form, :form, from_context: {Form, :form}
+
+  slot label_end
+  slot left
+  slot right
+  slot caption_end
 
   def render(assigns) do
     ~F"""
-    <Field class="grid grid-cols-1 gap-2 field" name={@name}>
+    <Field class="relative grid grid-cols-1 gap-2 field" name={@name}>
       {#if @show_label}
-        <Label class="p-0 label">
-          <span class="flex flex-row items-center gap-1 label-text">
-            {@label || Phoenix.Naming.humanize(@name)}
-            {#if @info}
-              <div class="tooltip tooltip-right" data-tip={@info}>
-                <Icon
-                  name="info"
-                  size="4"
-                  label="tooltip"
-                  class="opacity-50 hover:opacity-100 active:opacity-100"
-                />
-              </div>
-            {/if}
-          </span>
-        </Label>
+        <div class={"flex flex-row items-center gap-4", "justify-between": slot_assigned?(:label_end)}>
+          <Label class="p-0 label">
+            <span class="flex flex-row items-center gap-1 label-text">
+              {@label || Phoenix.Naming.humanize(@name)}
+              {#if @info}
+                <div class="tooltip tooltip-right" data-tip={@info}>
+                  <Icon
+                    name="info"
+                    size="4"
+                    label="tooltip"
+                    class="opacity-50 hover:opacity-100 active:opacity-100"
+                  />
+                </div>
+              {/if}
+            </span>
+          </Label>
+        </div>
       {/if}
       <div class="grid grid-cols-1 gap-2">
-        <div class="flex flex-row gap-2">
+        <div class={
+          "flex flex-row gap-4 w-full control input input-bordered focus-within:ring ring-primary",
+          @wrapper_class,
+          "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
+        }>
+          {#if slot_assigned?(:left)}
+            <#slot {@left} />
+          {/if}
           {#if @icon}
             <Icon name={"#{@icon}"} size="4" />
           {/if}
-          <div class="w-full control">
-            <DateTimeLocalInput
-              class={
-                "input",
-                "input-bordered",
-                "w-full",
-                @class,
-                "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
-              }
-              opts={@opts}
-            />
-          </div>
+          <DateTimeLocalInput
+            class={
+              "w-full bg-transparent p-0 ring-0 outline-none border-none focus:ring-0",
+              @class
+            }
+            opts={@opts}
+          />
+          {#if slot_assigned?(:right)}
+            <#slot {@right} />
+          {/if}
         </div>
         <ErrorTag class="help text-error" />
+        {#if @caption}
+          <div class="text-sm text-opacity-50 help text-base-content">
+            {@caption}
+          </div>
+        {/if}
+        {#if slot_assigned?(:caption_end)}
+          <#slot {@caption_end} />
+        {/if}
       </div>
+      {#if slot_assigned?(:label_end)}
+        <div class="absolute top-0 right-0 h-fit">
+          <#slot {@label_end} />
+        </div>
+      {/if}
     </Field>
     """
   end
