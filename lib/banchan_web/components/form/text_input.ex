@@ -12,6 +12,7 @@ defmodule BanchanWeb.Components.Form.TextInput do
   prop name, :any, required: true
   prop opts, :keyword, default: []
   prop class, :css_class
+  prop wrapper_class, :css_class
   prop label, :string
   prop show_label, :boolean, default: true
   prop info, :string
@@ -26,7 +27,7 @@ defmodule BanchanWeb.Components.Form.TextInput do
 
   def render(assigns) do
     ~F"""
-    <Field class="relative grid grid-cols-1 gap-2 field" name={@name}>
+    <Field class={"relative grid grid-cols-1 gap-2 field", @wrapper_class} name={@name}>
       {#if @show_label}
         <div class={"flex flex-row items-center gap-4", "justify-between": slot_assigned?(:label_end)}>
           <Label class="p-0 label">
