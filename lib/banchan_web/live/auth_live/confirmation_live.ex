@@ -16,7 +16,7 @@ defmodule BanchanWeb.ConfirmationLive do
   def render(assigns) do
     ~F"""
     <AuthLayout flashes={@flash}>
-      <Form class="flex flex-col gap-4" for={%{}} as={:user} submit="submit">
+      <Form class="confirmation flex flex-col gap-4" for={%{}} as={:user} submit="submit">
         <h1 class="mx-auto text-2xl">Resend Confirmation</h1>
         <p>Email confirmation will be sent again to this address.</p>
         <EmailInput

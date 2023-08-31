@@ -15,7 +15,7 @@ defmodule BanchanWeb.ConfirmationLiveTest do
 
     {:ok, _view, html} =
       view
-      |> form("form", user: %{email: user.email})
+      |> form("form.confirmation", user: %{email: user.email})
       |> render_submit()
       |> follow_redirect(conn, Routes.home_path(conn, :index))
 
@@ -30,7 +30,7 @@ defmodule BanchanWeb.ConfirmationLiveTest do
 
     {:ok, _view, html} =
       view
-      |> form("form", user: %{email: user.email})
+      |> form("form.confirmation", user: %{email: user.email})
       |> render_submit()
       |> follow_redirect(conn, Routes.home_path(conn, :index))
 
@@ -43,7 +43,7 @@ defmodule BanchanWeb.ConfirmationLiveTest do
 
     {:ok, _view, html} =
       view
-      |> form("form", user: %{email: "unknown@example.com"})
+      |> form("form.confirmation", user: %{email: "unknown@example.com"})
       |> render_submit()
       |> follow_redirect(conn, Routes.home_path(conn, :index))
 
