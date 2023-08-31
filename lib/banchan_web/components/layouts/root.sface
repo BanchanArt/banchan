@@ -72,7 +72,7 @@
       </script>
     {/if}
   </head>
-  <body class="h-full bg-base-200">
+  <body class="h-full overflow-hidden bg-base-200">
     {@inner_content}
   </body>
 </html>
