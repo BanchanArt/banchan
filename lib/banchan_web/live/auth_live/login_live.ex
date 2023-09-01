@@ -44,6 +44,7 @@ defmodule BanchanWeb.LoginLive do
             name={:password}
             icon="lock"
             opts={required: true, type: :password, placeholder: "your_secure_password"}
+            focus_label_first={false}
           >
             <:label_end>
               <LiveRedirect

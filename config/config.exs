@@ -111,6 +111,8 @@ config :surface, :components, [
   {BanchanWeb.Components.Form.TextArea, propagate_context_to_slots: true},
   {BanchanWeb.Components.Form.TextInput, propagate_context_to_slots: true},
   {BanchanWeb.Components.Form.EmailInput, propagate_context_to_slots: true},
+  {BanchanWeb.Components.Form.NumberInput, propagate_context_to_slots: true},
+  {BanchanWeb.Components.Form.Select, propagate_context_to_slots: true},
   {BanchanWeb.Components.Form.DateTimeLocalInput, propagate_context_to_slots: true}
 ]
 

@@ -13,6 +13,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
   prop opts, :keyword, default: []
   prop label, :string
   prop show_label, :boolean, default: true
+  prop focus_label_first, :boolean, default: true
   prop info, :string
   prop caption, :string
   prop wrapper_class, :css_class
@@ -21,28 +22,38 @@ defmodule BanchanWeb.Components.Form.TextArea do
   prop change, :event
   prop form, :form, from_context: {Form, :form}
 
+  slot label_end
   slot left
   slot right
+  slot caption_end
 
   def render(assigns) do
     ~F"""
-    <Field class="grid grid-cols-1 gap-2 field" name={@name}>
+    <Field class="relative grid grid-cols-1 gap-2 field" name={@name}>
       {#if @show_label}
-        <Label class="p-0 label">
-          <span class="flex flex-row items-center gap-1 label-text">
-            {@label || Phoenix.Naming.humanize(@name)}
-            {#if @info}
-              <div class="tooltip tooltip-right" data-tip={@info}>
-                <Icon
-                  name="info"
-                  size="4"
-                  label="tooltip"
-                  class="opacity-50 hover:opacity-100 active:opacity-100"
-                />
-              </div>
+        <div class={
+          "flex flex-row items-center gap-4",
+          "justify-between": slot_assigned?(:label_end) && @focus_label_first
+        }>
+          <Label class="p-0 label">
+            <span class="flex flex-row items-center gap-1 label-text">
+              {@label || Phoenix.Naming.humanize(@name)}
+              {#if @info}
+                <div class="tooltip tooltip-right" data-tip={@info}>
+                  <Icon
+                    name="info"
+                    size="4"
+                    label="tooltip"
+                    class="opacity-50 hover:opacity-100 active:opacity-100"
+                  />
+                </div>
+              {/if}
+            </span>
+            {#if slot_assigned?(:label_end) && @focus_label_first}
+              <#slot {@label_end} />
             {/if}
-          </span>
-        </Label>
+          </Label>
+        </div>
       {/if}
       <div class="grid grid-cols-1 gap-2">
         <div class="flex flex-row gap-2">
@@ -69,7 +80,13 @@ defmodule BanchanWeb.Components.Form.TextArea do
             {@caption}
           </div>
         {/if}
+        <#slot {@caption_end} />
       </div>
+      {#if slot_assigned?(:label_end) && !@focus_label_first}
+        <div class="absolute top-0 right-0 h-fit">
+          <#slot {@label_end} />
+        </div>
+      {/if}
     </Field>
     """
   end

@@ -15,6 +15,7 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
   prop class, :css_class
   prop label, :string
   prop show_label, :boolean, default: true
+  prop focus_label_first, :boolean, default: true
   prop info, :string
   prop icon, :string
   prop caption, :string
@@ -29,7 +30,10 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
     ~F"""
     <Field class="relative grid grid-cols-1 gap-2 field" name={@name}>
       {#if @show_label}
-        <div class={"flex flex-row items-center gap-4", "justify-between": slot_assigned?(:label_end)}>
+        <div class={
+          "flex flex-row items-center gap-4",
+          "justify-between": slot_assigned?(:label_end) && @focus_label_first
+        }>
           <Label class="p-0 label">
             <span class="flex flex-row items-center gap-1 label-text">
               {@label || Phoenix.Naming.humanize(@name)}
@@ -45,6 +49,9 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
               {/if}
             </span>
           </Label>
+          {#if slot_assigned?(:label_end) && @focus_label_first}
+            <#slot {@label_end} />
+          {/if}
         </div>
       {/if}
       <div class="grid grid-cols-1 gap-2">
@@ -53,9 +60,7 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
           @wrapper_class,
           "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
         }>
-          {#if slot_assigned?(:left)}
-            <#slot {@left} />
-          {/if}
+          <#slot {@left} />
           {#if @icon}
             <Icon name={"#{@icon}"} size="4" />
           {/if}
@@ -66,9 +71,7 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
             }
             opts={@opts}
           />
-          {#if slot_assigned?(:right)}
-            <#slot {@right} />
-          {/if}
+          <#slot {@right} />
         </div>
         <ErrorTag class="help text-error" />
         {#if @caption}
@@ -76,11 +79,9 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
             {@caption}
           </div>
         {/if}
-        {#if slot_assigned?(:caption_end)}
-          <#slot {@caption_end} />
-        {/if}
+        <#slot {@caption_end} />
       </div>
-      {#if slot_assigned?(:label_end)}
+      {#if slot_assigned?(:label_end) && !@focus_label_first}
         <div class="absolute top-0 right-0 h-fit">
           <#slot {@label_end} />
         </div>
