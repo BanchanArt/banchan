@@ -57,3 +57,6 @@ priv/cert/
 
 # Ignore asdf settings
 .tool-versions
+
+# Ignore logs
+logs/

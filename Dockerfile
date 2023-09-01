@@ -113,6 +113,7 @@ RUN curl -L https://fly.io/install.sh | sh
 ENV FLYCTL_INSTALL "/home/tteokbokki/.fly"
 ENV PATH "$FLYCTL_INSTALL/bin:$PATH"
 
+RUN chmod +x /app/bin/*
 CMD ["/app/bin/server"]
 # Appended by flyctl
 ENV ECTO_IPV6 true
