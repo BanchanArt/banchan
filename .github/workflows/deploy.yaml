@@ -7,7 +7,6 @@ on:
       - completed
 
 env:
-  MIX_ENV: prod
   BANCHAN_DEPLOY_ENV: staging
   BANCHAN_HOST: dev.banchan.art
 

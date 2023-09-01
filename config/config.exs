@@ -25,7 +25,9 @@ config :banchan,
   default_platform_fee: System.get_env("BANCHAN_PLATFORM_FEE") || 0.1,
   max_attachment_size: 25_000_000,
   mature_content_enabled?: true,
-  git_rev: hash
+  git_rev: hash,
+  oban_key_fingerprint: System.get_env("OBAN_KEY_FINGERPRINT"),
+  oban_license_key: System.get_env("OBAN_LICENSE_KEY")
 
 # Configures the endpoint
 config :banchan, BanchanWeb.Endpoint,

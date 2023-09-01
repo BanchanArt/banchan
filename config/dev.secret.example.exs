@@ -11,12 +11,12 @@ config :banchan, Banchan.Repo,
   hostname: "localhost",
   pool_size: 10
 
-config :banchan,
-  # You only need to set this if you want bug reports to work. Otherwise, leave blank.
-  github_access_token: "",
-  # You only need these if you plan on deploying
-  oban_key_fingerprint: "",
-  oban_license_key: ""
+# config :banchan,
+#   You only need to set this if you want bug reports to work. Otherwise, leave blank.
+#   github_access_token: "",
+#   You only need these if you plan on deploying
+#   oban_key_fingerprint: "",
+#   oban_license_key: ""
 
 # Sentry configuration
 # config :logger,
