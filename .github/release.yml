@@ -1,0 +1,20 @@
+changelog:
+  categories:
+    - title: New Features ✨
+      labels:
+        - feature
+    - title: Bug Fixes 🐛
+      labels:
+        - bug
+    - title: General Polish 🦾
+      labels:
+        - polish
+    - title: Technical Improvement 🛠
+      labels:
+        - technical improvement
+    - title: Documentation 📚
+      labels:
+        - documentation
+    - title: Other Changes
+      labels:
+        - "*"
