@@ -48,6 +48,16 @@ jobs:
             priv/plts
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
 
+      - name: Install Dependencies
+        if: steps.mix-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p priv/plts
+          mix local.rebar --force
+          mix local.hex --force
+          mix deps.get
+          mix deps.compile
+          mix dialyzer --plt
+
       - run: mix deploy.prod --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_DEV_DEPLOY_API_TOKEN }}
