@@ -18,3 +18,5 @@ jobs:
           ref: refs/tags/${{ github.event.inputs.tag }}
       - name: Publish release
         uses: ghalactic/github-release-from-tag@v5
+        with:
+          token: ${{ secrets.RELEASE_PAT }}
