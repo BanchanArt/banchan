@@ -1,19 +1,19 @@
-name: Deploy to Staging
+name: Deploy to Production
 on:
-  workflow_run:
-    workflows: ["Build and Test"]
-    branches: [main]
-    types:
-      - completed
+  release:
+    types: [released]
 
 env:
-  BANCHAN_DEPLOY_ENV: staging
-  BANCHAN_HOST: dev.banchan.art
+  BANCHAN_DEPLOY_ENV: prod
+  BANCHAN_HOST: banchan.art
 
 jobs:
   deploy:
-    name: Deploy Banchan to Staging Server
+    name: Deploy Banchan to Production Server
     runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: https://banchan.art
     strategy:
       matrix:
         elixir: [1.14.5]
@@ -47,6 +47,7 @@ jobs:
             priv/plts
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
 
-      - run: mix deploy.dev --remote-only
+      - run: mix deploy.prod --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_DEV_DEPLOY_API_TOKEN }}
+

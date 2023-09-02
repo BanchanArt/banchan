@@ -123,7 +123,8 @@ defmodule Banchan.MixProject do
       {:mox, "~> 1.0.2", only: :test},
       {:phoenix_live_reload, "~> 1.4.1", only: :dev},
       {:sobelow, "~> 0.12.2", only: [:dev, :test], runtime: false},
-      {:surface_formatter, "~> 0.7.5", only: :dev}
+      {:surface_formatter, "~> 0.7.5", only: :dev},
+      {:versioce, "~> 2.0.0"}
       | if System.get_env("MIX_ENV") == "prod" do
           [{:oban_web, "~> 2.10.0-rc.1", repo: "oban", only: :prod}]
         else
@@ -177,7 +178,9 @@ defmodule Banchan.MixProject do
         # "sobelow --verbose"
         # ,
         # "dialyzer --ignore-exit-status"
-      ]
+      ],
+      # Tag a new release.
+      bump: ["bump"]
     ]
   end
 
