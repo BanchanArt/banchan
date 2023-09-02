@@ -181,7 +181,7 @@ defmodule Banchan.MixProject do
         # "dialyzer --ignore-exit-status"
       ],
       # Tag a new release.
-      bump: ["bump"]
+      bump: ["bump", "cmd git push --follow-tags"]
     ]
   end
 
