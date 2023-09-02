@@ -234,7 +234,7 @@ defmodule Banchan.Payments.Currency do
     Tunisia: :TN,
     Turkey: :TR,
     "United Arab Emirates": :AE,
-    "United Kingdom": :UK,
+    "United Kingdom": :GB,
     "United States": :US,
     Uruguay: :UY,
     Vietnam: :VN
