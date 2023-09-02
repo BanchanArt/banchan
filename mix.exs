@@ -120,11 +120,12 @@ defmodule Banchan.MixProject do
       {:esbuild, "~> 0.7.0", runtime: Mix.env() == :dev},
       {:excoveralls, "~> 0.16.1", only: :test},
       {:floki, "~> 0.34.3", only: :test},
+      {:git_cli, "~> 0.3.0", only: :dev},
       {:mox, "~> 1.0.2", only: :test},
       {:phoenix_live_reload, "~> 1.4.1", only: :dev},
       {:sobelow, "~> 0.12.2", only: [:dev, :test], runtime: false},
       {:surface_formatter, "~> 0.7.5", only: :dev},
-      {:versioce, "~> 2.0.0"}
+      {:versioce, "~> 2.0.0", only: :dev}
       | if System.get_env("MIX_ENV") == "prod" do
           [{:oban_web, "~> 2.10.0-rc.1", repo: "oban", only: :prod}]
         else
