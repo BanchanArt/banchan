@@ -358,6 +358,7 @@ defmodule Banchan.Commissions do
   @doc """
   Gets an attachment with preloaded uploads data.
   """
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def get_attachment_if_allowed!(commission_id, upload_id, user) do
     Repo.one!(
       from ea in EventAttachment,
@@ -368,6 +369,8 @@ defmodule Banchan.Commissions do
         join: c in assoc(e, :commission),
         join: s in assoc(c, :studio),
         join: artist in assoc(s, :artists),
+        join: current_user in User,
+        on: current_user.id == ^user.id,
         left_join: i in assoc(e, :invoice),
         # Either the user is a studio member
         # Or the user is the client
@@ -376,7 +379,9 @@ defmodule Banchan.Commissions do
         where:
           c.public_id == ^commission_id and
             ul.id == ^upload_id and
-            (artist.id == ^user.id or
+            (artist.id == current_user.id or
+               :admin in current_user.roles or
+               :mod in current_user.roles or
                (c.client_id == ^user.id and
                   ((i.required and i.status in [:succeeded, :released]) or not i.required or
                      is_nil(i.required)))),
