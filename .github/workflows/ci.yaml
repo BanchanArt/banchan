@@ -172,7 +172,7 @@ jobs:
     name: Publish release
     runs-on: ubuntu-latest
     needs: [unit_tests, static_code_analysis, get_current_tag]
-    if: get_current_tag.outputs.tag != ''
+    if: needs.get_current_tag.outputs.tag != ''
     permissions:
       contents: write
     steps:
