@@ -60,4 +60,4 @@ jobs:
 
       - run: mix deploy.prod --remote-only
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_DEV_DEPLOY_API_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_PROD_DEPLOY_API_TOKEN }}
