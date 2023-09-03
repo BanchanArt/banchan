@@ -170,7 +170,7 @@ jobs:
           fetch-depth: 0
       - name: Get Tag
         id: get_tag
-        run: git tag --points-at HEAD >> "$GITHUB_OUTPUT"
+        run: echo "tag=$(git tag --points-at HEAD)" >> "$GITHUB_OUTPUT"
 
   publish:
     name: Publish release
