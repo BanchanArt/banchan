@@ -164,6 +164,10 @@ jobs:
     outputs:
       tag: ${{ steps.get_tag.outputs.tag }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Get Tag
         id: get_tag
         run: git tag --points-at HEAD >> "$GITHUB_OUTPUT"
