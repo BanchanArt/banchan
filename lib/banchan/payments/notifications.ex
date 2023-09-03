@@ -88,7 +88,7 @@ defmodule Banchan.Payments.Notifications do
           |> Repo.preload([:event, commission: [studio: [artists: [:notification_settings]]]])
 
         body =
-          "An invoice payment for #{invoice.total_transferred} is expiring in 72 hours. Unreleased expired payments will be reimbursed to the client automatically."
+          "An invoice payment for #{invoice.total_transferred} is expiring in 72 hours. If the payment is not released and paid out before then, it will be reimbursed to the client automatically."
 
         url =
           url(~p"/commissions/#{invoice.commission.public_id}")

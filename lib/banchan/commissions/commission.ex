@@ -5,7 +5,9 @@ defmodule Banchan.Commissions.Commission do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Banchan.Commissions
   alias Banchan.Commissions.Common
+  alias Banchan.Payments
   alias Banchan.Payments.Currency
 
   @description_max_length 1500
@@ -51,6 +53,7 @@ defmodule Banchan.Commissions.Commission do
     |> validate_length(:description, max: @description_max_length)
     |> cast_assoc(:line_items)
     |> cast_assoc(:events)
+    |> validate_line_items()
     |> validate_change(:tos_ok, fn field, tos_ok ->
       if tos_ok do
         []
@@ -68,6 +71,7 @@ defmodule Banchan.Commissions.Commission do
     |> validate_length(:description, max: @description_max_length)
     |> cast_assoc(:line_items)
     |> cast_assoc(:events)
+    |> validate_line_items()
   end
 
   @doc false
@@ -75,5 +79,23 @@ defmodule Banchan.Commissions.Commission do
     commission
     |> cast(attrs, [:title])
     |> validate_length(:title, max: 50)
+  end
+
+  defp validate_line_items(changeset) do
+    max = Payments.maximum_release_amount()
+
+    changeset
+    |> validate_change(:line_items, fn _, line_items ->
+      estimate = Commissions.line_item_estimate(line_items)
+
+      if Payments.cmp_money(max, estimate) in [:gt, :eq] do
+        []
+      else
+        [
+          {:line_items,
+           "The maximum billable amount for commissions is #{Payments.print_money(max)}."}
+        ]
+      end
+    end)
   end
 end

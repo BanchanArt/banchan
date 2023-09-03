@@ -80,4 +80,9 @@ config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
 
 # Import local development config
-import_config "dev.secret.exs"
+try do
+  import_config "dev.secret.exs"
+rescue
+  # The file is optional.
+  File.Error -> :ok
+end

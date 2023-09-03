@@ -11,6 +11,14 @@ import Config
 
 hash = String.trim(hash)
 
+{tags, 0} = System.cmd("git", ["tag", "--points-at", "HEAD"])
+
+tag =
+  tags
+  |> String.trim()
+  |> String.split()
+  |> Enum.at(0)
+
 config :banchan,
   env: config_env(),
   deploy_env: config_env(),
@@ -21,10 +29,14 @@ config :banchan,
   upload_dir: Path.expand("../priv/uploads", __DIR__),
   platform_currency: :USD,
   minimum_release_amount: {2000, :USD},
+  maximum_release_amount: {200_000, :USD},
   default_platform_fee: System.get_env("BANCHAN_PLATFORM_FEE") || 0.1,
   max_attachment_size: 25_000_000,
   mature_content_enabled?: true,
-  git_rev: hash
+  git_rev: hash,
+  git_tag: tag,
+  oban_key_fingerprint: System.get_env("OBAN_KEY_FINGERPRINT"),
+  oban_license_key: System.get_env("OBAN_LICENSE_KEY")
 
 # Configures the endpoint
 config :banchan, BanchanWeb.Endpoint,
@@ -120,6 +132,14 @@ config :stripity_stripe, api_version: "2020-08-27"
 
 config :money,
   symbol: false
+
+config :versioce,
+  post_hooks: [Versioce.PostHooks.Git.Release]
+
+config :versioce, :git,
+  commit_message_template: "Bump version to {version}",
+  tag_template: "v{version}",
+  tag_message_template: "Release v{version}"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

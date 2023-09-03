@@ -44,7 +44,7 @@ defmodule BanchanWeb.Components.Layout do
 
   alias Surface.Components.{Link, LiveRedirect}
 
-  alias BanchanWeb.Components.{Avatar, Flash, Icon, Nav, UserHandle, ViewSwitcher}
+  alias BanchanWeb.Components.{Avatar, Flash, Icon, Nav, PickTheme, UserHandle, ViewSwitcher}
 
   alias BanchanWeb.Components.Layout.NavLink
 
@@ -189,6 +189,10 @@ defmodule BanchanWeb.Components.Layout do
                 </svg>
                 <span class="group-hover:underline">GitHub</span>
               </a>
+            </div>
+            <div class="flex flex-col">
+              <span class="opacity-100 footer-title text-primary">Theme</span>
+              <PickTheme id="theme-picker" />
             </div>
           </footer>
         </div>

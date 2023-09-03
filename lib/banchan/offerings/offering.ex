@@ -94,10 +94,10 @@ defmodule Banchan.Offerings.Offering do
     |> validate_length(:type, min: 4, max: 32)
     |> validate_length(:name, min: 4, max: 50)
     |> validate_length(:description, max: 500)
-    |> validate_length(:terms, max: 1500)
+    |> validate_length(:terms, max: 10_000)
     |> validate_length(:template, max: 1500)
     |> validate_option_currencies()
-    |> validate_minimum_total()
+    |> validate_total()
     |> validate_tags()
     |> unsafe_validate_unique([:type, :studio_id], Repo)
     |> validate_length(:tags, max: 5)
@@ -122,15 +122,18 @@ defmodule Banchan.Offerings.Offering do
     end)
   end
 
-  def validate_minimum_total(changeset) do
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
+  def validate_total(changeset) do
     curr = fetch_field!(changeset, :currency)
     min = Payments.minimum_release_amount() |> Payments.convert_money(curr)
+    max = Payments.maximum_release_amount() |> Payments.convert_money(curr)
 
     changeset
     |> validate_change(:options, fn _, opts ->
-      total =
+      opts = opts |> Enum.filter(&(&1.action in [:update, :insert]))
+
+      base_total =
         opts
-        |> Enum.filter(&(&1.action in [:update, :insert]))
         |> Enum.reduce(Money.new(0, curr), fn opt, acc ->
           if opt.valid? && get_field(opt, :default) && get_field(opt, :price) do
             Money.add(acc, fetch_field!(opt, :price))
@@ -139,13 +142,28 @@ defmodule Banchan.Offerings.Offering do
           end
         end)
 
-      if Payments.cmp_money(total, min) in [:gt, :eq] do
-        []
-      else
-        [
-          {:options,
-           "You must have enough 'Always Included' options to add up to at least #{Payments.print_money(min)}."}
-        ]
+      any_overflow? =
+        opts
+        |> Enum.any?(fn opt ->
+          opt.valid? && !get_field(opt, :default) && get_field(opt, :price) &&
+            Payments.cmp_money(Money.add(fetch_field!(opt, :price), base_total), max) in [:gt]
+        end)
+
+      cond do
+        Payments.cmp_money(base_total, max) in [:gt] || any_overflow? ->
+          [
+            {:options,
+             "The maximum billable amount for commissions is #{Payments.print_money(max)}."}
+          ]
+
+        Payments.cmp_money(base_total, min) in [:lt] ->
+          [
+            {:options,
+             "You must have enough 'Always Included' options to add up to at least #{Payments.print_money(min)}."}
+          ]
+
+        true ->
+          []
       end
     end)
   end

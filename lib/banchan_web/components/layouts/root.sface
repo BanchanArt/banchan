@@ -3,6 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    {#if Application.get_env(:banchan, :git_tag)}
+      <meta name="banchan-git-tag" content={Application.get_env(:banchan, :git_tag)}>
+      <meta
+        name="banchan-release-notes"
+        content={"https://github.com/BanchanArt/banchan/releases/tag/" <> Application.get_env(:banchan, :git_tag)}
+      />
+    {/if}
     <meta name="banchan-git-rev" content={Application.get_env(:banchan, :git_rev)}>
     <meta name="robots" content="noai">
     <.live_title prefix={"Banchan Art |" <> " "}>
@@ -72,7 +79,7 @@
       </script>
     {/if}
   </head>
-  <body class="h-full bg-base-200">
+  <body class="h-full overflow-hidden bg-base-200">
     {@inner_content}
   </body>
 </html>

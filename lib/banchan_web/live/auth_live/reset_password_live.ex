@@ -31,7 +31,7 @@ defmodule BanchanWeb.ResetPasswordLive do
   def render(assigns) do
     ~F"""
     <AuthLayout flashes={@flash}>
-      <Form class="flex flex-col gap-4" for={@changeset} change="change" submit="submit">
+      <Form class="reset flex flex-col gap-4" for={@changeset} change="change" submit="submit">
         <h1 class="text-2xl">Reset Password</h1>
         <TextInput
           name={:password}

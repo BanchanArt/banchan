@@ -254,6 +254,14 @@ defmodule Banchan.Payments do
   end
 
   @doc """
+  Gets the maximum amount that can be released from a commission.
+  """
+  def maximum_release_amount do
+    {amt, curr} = Application.fetch_env!(:banchan, :maximum_release_amount)
+    Money.new(amt, curr)
+  end
+
+  @doc """
   Stripe's minimum transaction amount.
   """
   def minimum_transaction_amount do
@@ -996,7 +1004,7 @@ defmodule Banchan.Payments do
           )
 
         # Start the Doomsday Clock.
-        purge_on = DateTime.utc_now() |> DateTime.add(max_payment_age(country))
+        purge_on = available_on |> DateTime.add(max_payment_age(country))
         {:ok, _job} = ExpiredInvoicePurger.schedule_purge(invoice, purge_on)
 
         warn_on = purge_on |> DateTime.add(-1 * 60 * 60 * 72)

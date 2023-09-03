@@ -85,6 +85,7 @@ defmodule Banchan.Payments.Invoice do
     |> validate_money(:tip)
     |> validate_money(:amount)
     |> validate_min_amount()
+    |> validate_max_amount()
     |> validate_final_amount()
   end
 
@@ -92,10 +93,11 @@ defmodule Banchan.Payments.Invoice do
     payment
     |> cast(attrs, [:amount, :required, :deposited])
     |> cast_embed(:line_items, with: &line_item_changeset/2, required: true)
+    |> validate_required([:amount, :deposited])
     |> validate_money(:amount, remaining)
     |> validate_money(:deposited)
-    |> validate_required([:amount, :deposited])
     |> validate_min_amount()
+    |> validate_max_amount()
     |> validate_final_amount()
   end
 
@@ -112,6 +114,29 @@ defmodule Banchan.Payments.Invoice do
         [
           {:amount,
            "must be at least #{Payments.convert_money(min, amount.currency) |> Payments.print_money()}"}
+        ]
+      end
+    end)
+  end
+
+  defp validate_max_amount(changeset) do
+    max = Payments.maximum_release_amount()
+
+    changeset
+    |> validate_change(:amount, fn _, amount ->
+      deposited =
+        if get_field(changeset, :deposited) do
+          fetch_field!(changeset, :deposited)
+        else
+          Money.new(0, amount.currency)
+        end
+
+      if Payments.cmp_money(max, Money.add(amount, deposited)) in [:gt, :eq] do
+        []
+      else
+        [
+          {:amount,
+           "total commission amount must be less than #{Payments.convert_money(max, amount.currency) |> Payments.print_money()}"}
         ]
       end
     end)

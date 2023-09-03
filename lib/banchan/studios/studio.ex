@@ -105,7 +105,7 @@ defmodule Banchan.Studios.Studio do
     |> validate_required([:default_currency, :payment_currencies])
     |> validate_markdown(:default_terms)
     |> validate_markdown(:default_template)
-    |> validate_length(:default_terms, max: 1500)
+    |> validate_length(:default_terms, max: 10_000)
     |> validate_length(:default_template, max: 1500)
     |> validate_default_currency(:default_currency, :payment_currencies)
   end

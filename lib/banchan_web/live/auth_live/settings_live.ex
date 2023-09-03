@@ -12,7 +12,7 @@ defmodule BanchanWeb.SettingsLive do
   alias Banchan.Notifications.UserNotificationSettings
 
   alias BanchanWeb.AuthLive.Components.SettingsLayout
-  alias BanchanWeb.Components.{Button, Collapse, Icon}
+  alias BanchanWeb.Components.{Button, Collapse}
   alias BanchanWeb.Components.Form.{Checkbox, EmailInput, Submit, TextArea, TextInput}
   alias BanchanWeb.Endpoint
 
@@ -26,7 +26,6 @@ defmodule BanchanWeb.SettingsLive do
       if socket.assigns.current_user.oauth_only do
         {:ok,
          assign(socket,
-           theme: nil,
            new_email_changeset: User.email_changeset(socket.assigns.current_user, %{}),
            handle_changeset: User.handle_changeset(socket.assigns.current_user, %{}),
            notification_settings: settings,
@@ -38,7 +37,6 @@ defmodule BanchanWeb.SettingsLive do
       else
         {:ok,
          assign(socket,
-           theme: nil,
            handle_changeset: User.handle_changeset(socket.assigns.current_user, %{}),
            email_changeset: User.email_changeset(socket.assigns.current_user, %{}),
            password_changeset: User.password_changeset(socket.assigns.current_user, %{}),
@@ -52,25 +50,6 @@ defmodule BanchanWeb.SettingsLive do
     else
       {:ok, socket}
     end
-  end
-
-  @impl true
-  def handle_event("toggle_theme", val, socket) do
-    {:noreply,
-     socket
-     |> push_event("set_theme", %{
-       theme:
-         if val["value"] do
-           "dark"
-         else
-           "light"
-         end
-     })}
-  end
-
-  @impl true
-  def handle_event("theme_changed", %{"theme" => theme}, socket) do
-    {:noreply, socket |> assign(theme: theme)}
   end
 
   def handle_event("change_handle", val, socket) do
@@ -416,29 +395,6 @@ defmodule BanchanWeb.SettingsLive do
     ~F"""
     <SettingsLayout flashes={@flash}>
       <h1 class="mb-2 text-xl font-semibold">Account Settings</h1>
-      <div class="divider" />
-      <h2 class="mb-2 text-xl font-semibold">Appearance</h2>
-      <div class="flex flex-row items-center gap-4 py-2">
-        <label class="cursor-pointer label grow">
-          <span>Color Mode</span>
-          <label class="swap">
-            <input
-              :hook="Theme"
-              id="toggle_theme"
-              checked={@theme == "dark"}
-              :on-click="toggle_theme"
-              type="checkbox"
-              class={"hidden", loading: !@theme}
-            />
-            <div class="swap-off">
-              <Icon name="sun" size="6" label="light-mode" />
-            </div>
-            <div class="swap-on">
-              <Icon name="moon-star" size="6" label="dark-mode" />
-            </div>
-          </label>
-        </label>
-      </div>
       <div class="divider" />
       <h2 class="mb-2 text-xl font-semibold">
         Notifications

@@ -6,6 +6,7 @@ defmodule BanchanWeb.CommissionLive.Components.AddonPicker do
 
   alias Banchan.Commissions
   alias Banchan.Commissions.LineItem
+  alias Banchan.Payments
   alias Banchan.Utils
 
   alias BanchanWeb.CommissionLive.Components.AddonList
@@ -60,6 +61,17 @@ defmodule BanchanWeb.CommissionLive.Components.AddonPicker do
       |> case do
         {:ok, {_comm, _events}} ->
           {:noreply, socket}
+
+        {:error, :too_expensive} ->
+          {:noreply,
+           socket
+           |> put_flash(
+             :error,
+             "Cannot add item: total commission amount must be less than #{Payments.convert_money(Payments.maximum_release_amount(), Commissions.commission_currency(commission)) |> Payments.print_money()}"
+           )
+           |> redirect(
+             to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+           )}
 
         {:error, :blocked} ->
           {:noreply,
@@ -129,11 +141,22 @@ defmodule BanchanWeb.CommissionLive.Components.AddonPicker do
              custom_changeset: %LineItem{} |> LineItem.custom_changeset(%{})
            )}
 
+        {:error, :too_expensive} ->
+          {:noreply,
+           socket
+           |> put_flash(
+             :error,
+             "Cannot add item: total commission amount must be less than #{Payments.convert_money(Payments.maximum_release_amount(), Commissions.commission_currency(commission)) |> Payments.print_money()}"
+           )
+           |> redirect(
+             to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
+           )}
+
         {:error, :blocked} ->
           {:noreply,
            socket
            |> put_flash(:error, "You are blocked from further interaction with this studio.")
-           |> push_navigate(
+           |> redirect(
              to: Routes.commission_path(Endpoint, :show, socket.assigns.commission.public_id)
            )}
       end

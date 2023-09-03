@@ -16,7 +16,7 @@ defmodule BanchanWeb.ForgotPasswordLive do
   def render(assigns) do
     ~F"""
     <AuthLayout flashes={@flash}>
-      <Form class="flex flex-col gap-4" for={%{}} as={:user} submit="submit">
+      <Form class="reset flex flex-col gap-4" for={%{}} as={:user} submit="submit">
         <h1 class="text-2xl">Forgot your password?</h1>
         <p>If you have an account, instructions for password reset will be sent to it.</p>
         <EmailInput
