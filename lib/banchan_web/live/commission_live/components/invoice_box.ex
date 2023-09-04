@@ -357,7 +357,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
             {#match :expired}
               <div class="stat-title text-warning">Payment session expired.</div>
               <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
-              <div class="stat-desc">You'll need to start a new invoice.</div>
+              <div class="stat-desc">You'll need to submit a new invoice.</div>
             {#match :succeeded}
               <div class="stat-title">Payment Succeeded</div>
               <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
