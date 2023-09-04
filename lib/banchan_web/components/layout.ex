@@ -104,7 +104,8 @@ defmodule BanchanWeb.Components.Layout do
               <LiveRedirect to={Routes.static_about_us_path(Endpoint, :show)} class="link link-hover">About Us</LiveRedirect>
               <LiveRedirect to={Routes.static_membership_path(Endpoint, :show)} class="link link-hover">Membership</LiveRedirect>
               <LiveRedirect to={Routes.static_contact_path(Endpoint, :show)} class="link link-hover">Contact</LiveRedirect>
-              <LiveRedirect to={~p"/feedback"}>Feedback and Support</LiveRedirect>
+              <LiveRedirect to={~p"/feedback"}>Feedback & Support</LiveRedirect>
+              <LiveRedirect to={~p"/knowledge-base"} class="link link-hover">Knowledge Base & FAQs</LiveRedirect>
             </div>
             <div>
               <span class="opacity-100 footer-title text-primary">Legal</span>
