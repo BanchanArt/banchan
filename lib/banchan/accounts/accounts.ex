@@ -324,7 +324,7 @@ defmodule Banchan.Accounts do
   @doc """
   The same as above, but used for testing purposes only!
 
-  This is used so that MFA settings and confirmed_at can be set instantly.
+  This is used so that 2FA settings and confirmed_at can be set instantly.
   """
   def register_user_test(attrs) do
     %User{}

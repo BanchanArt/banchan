@@ -125,7 +125,7 @@ defmodule Banchan.MixProject do
       {:phoenix_live_reload, "~> 1.4.1", only: :dev},
       {:sobelow, "~> 0.12.2", only: [:dev, :test], runtime: false},
       {:surface_formatter, "~> 0.7.5", only: :dev},
-      {:versioce, "~> 2.0.0", only: :dev}
+      {:versioce, "~> 2.0.0", only: [:dev, :test]}
       | if System.get_env("MIX_ENV") == "prod" do
           [{:oban_web, "~> 2.10.0-rc.1", repo: "oban", only: :prod}]
         else

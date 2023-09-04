@@ -15,14 +15,14 @@ defmodule BanchanWeb.UserSessionController do
          ) do
       if user.totp_activated == true && !NimbleTOTP.valid?(user.totp_secret, mfa_token) do
         conn
-        |> put_flash(:error, "Invalid email/handle, password, or MFA token")
+        |> put_flash(:error, "Invalid email/handle, password, or 2FA token")
         |> redirect(to: Routes.login_path(Endpoint, :new))
       else
         UserAuth.log_in_user(conn, user, user_params)
       end
     else
       conn
-      |> put_flash(:error, "Invalid email/handle, password, or MFA token")
+      |> put_flash(:error, "Invalid email/handle, password, or 2FA token")
       |> redirect(to: Routes.login_path(Endpoint, :new))
     end
   end
