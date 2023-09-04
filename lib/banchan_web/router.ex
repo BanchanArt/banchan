@@ -196,6 +196,7 @@ defmodule BanchanWeb.Router do
       pipe_through([:basic_authed, :browser, :ensure_enabled])
 
       get("/feedback", Redirect, external: "https://help.banchan.art")
+      get("/knowledge-base", Redirect, external: "https://help.banchan.art/support/solutions")
 
       live("/people/:handle", PeopleLive.Show, :show)
       live("/people/:handle/following", PeopleLive.Show, :following)
