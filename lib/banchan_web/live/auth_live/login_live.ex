@@ -45,7 +45,7 @@ defmodule BanchanWeb.LoginLive do
           opts={required: true, type: :password, placeholder: "your_secure_password"}
         />
         <TextInput
-          label="MFA Token"
+          label="2FA Token"
           name={:mfa_token}
           icon="smartphone"
           opts={maxlength: 6, placeholder: "optional"}

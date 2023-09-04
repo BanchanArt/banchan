@@ -106,7 +106,7 @@ defmodule Banchan.Accounts.User do
   @doc """
   The same as above, but used for testing purposes only!
 
-  This is used so that MFA settings can be set instantly.
+  This is used so that 2FA settings can be set instantly.
   """
   def registration_test_changeset(user, attrs, opts \\ []) do
     user

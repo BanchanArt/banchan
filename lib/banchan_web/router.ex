@@ -81,7 +81,7 @@ defmodule BanchanWeb.Router do
       live("/commissions/:commission_id", CommissionLive, :show)
 
       live("/settings", SettingsLive, :edit)
-      live("/mfa_setup", SetupMfaLive, :edit)
+      live("/2fa_setup", SetupMfaLive, :edit)
 
       get(
         "/commissions/:commission_id/attachment/:upload_id",
