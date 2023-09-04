@@ -864,7 +864,7 @@ defmodule Banchan.Offerings do
         |> where(
           [o, related_to: related_to],
           fragment(
-            "to_tsquery('banchan_fts', array_to_string(tsvector_to_array(?), ' | ')) @@ ?",
+            "websearch_to_tsquery('banchan_fts', array_to_string(tsvector_to_array(?), ' OR ')) @@ ?",
             related_to.search_vector,
             o.search_vector
           )
