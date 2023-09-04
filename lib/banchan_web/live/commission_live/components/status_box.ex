@@ -6,6 +6,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
 
   alias Banchan.Commissions
   alias Banchan.Payments
+  alias Banchan.Repo
 
   alias Surface.Components.Form
 
@@ -21,19 +22,14 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   prop(current_user_member?, :boolean, from_context: :current_user_member?)
   prop(commission, :struct, from_context: :commission)
 
-  data(invoices_paid?, :boolean)
+  data(existing_open, :struct)
   data(statuses, :list)
   data(status_state, :map)
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
 
-    invoices = Payments.list_invoices(commission: socket.assigns.commission)
-
-    invoices_paid? =
-      !Enum.empty?(invoices) &&
-        Enum.all?(invoices, &Payments.invoice_finished?(&1)) &&
-        Enum.any?(invoices, &Payments.invoice_paid?(&1))
+    existing_open = Payments.open_invoice(socket.assigns.commission) |> Repo.preload(:event)
 
     statuses =
       Commissions.Common.status_values()
@@ -51,7 +47,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
     {:ok,
      socket
      |> assign(
-       invoices_paid?: invoices_paid?,
+       existing_open: existing_open,
        status_state:
          to_form(%{
            "status" => "#{Enum.find_index(statuses, &(&1 == socket.assigns.commission.status))}"
@@ -126,6 +122,9 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
       <div class="text-sm">
         {Commissions.Common.status_description(@commission.status)}
       </div>
+      {#if @existing_open}
+        <p class="text-sm">There's a <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> awaiting payment.</p>
+      {/if}
 
       <Modal id={@id <> "-reject-modal"} class="reject-modal">
         <:title>Confirm Rejection</:title>
