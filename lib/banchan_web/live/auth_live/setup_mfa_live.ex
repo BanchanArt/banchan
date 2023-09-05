@@ -126,31 +126,42 @@ defmodule BanchanWeb.SetupMfaLive do
     ~F"""
     <AuthLayout flashes={@flash}>
       {#if @qrcode_svg && !@totp_activated}
-        <h1 class="text-2xl">Your QR Code</h1>
-        <br>
-        {raw(@qrcode_svg)}
-        <br>
-        No QR code reader? Input the following value in your 2FA app:
-        <br>
-        {@secret}
-        <div class="divider" />
-        <h1 class="text-2xl">Confirm 2FA 6-digit OTP</h1>
-        <Form class="flex flex-col gap-4" for={%{}} as={:user} submit="confirm_mfa">
-          <TextInput name={:token} label="One Time Password" opts={required: true} />
-          <Submit class="w-full" label="Activate" />
-        </Form>
+        <div class="grid grid-cols-1 gap-2">
+          <h1 class="text-2xl">Your QR Code</h1>
+          <span class="text-sm opacity-75">Scan the QR code below with your 2FA app.</span>
+          <div class="py-4">{raw(@qrcode_svg)}</div>
+          <span>No QR code reader?</span>
+          <span class="text-sm opacity-75">
+            Input the following value in your 2FA app:
+          </span>
+          <div class="flex flex-row items-center input">
+            <span class="font-mono tracking-wide">
+              {@secret}
+            </span>
+          </div>
+          <div class="divider" />
+          <h1 class="text-2xl">Confirm 2FA 6-digit OTP</h1>
+          <Form class="flex flex-col gap-4" for={%{}} as={:user} submit="confirm_mfa">
+            <TextInput name={:token} label="One Time Password" opts={required: true} />
+            <Submit class="w-full" label="Activate" />
+          </Form>
+        </div>
       {#elseif @qrcode_svg && @totp_activated}
-        <h1 class="text-2xl">You have 2FA enabled</h1>
-        <Form for={%{}} as={:user} submit="deactivate_mfa">
-          <TextInput name={:password} label="Current Password" opts={required: true, type: "password"} />
-          <Submit class="w-full btn-error" label="Deactivate 2FA" />
-        </Form>
+        <div class="grid grid-cols-1 gap-2">
+          <h1 class="text-2xl">You have 2FA enabled</h1>
+          <Form for={%{}} as={:user} submit="deactivate_mfa">
+            <TextInput name={:password} label="Current Password" opts={required: true, type: "password"} />
+            <Submit class="w-full btn-error" label="Deactivate 2FA" />
+          </Form>
+        </div>
       {#else}
-        <h1 class="text-2xl">2FA Setup</h1>
-        <Form for={%{}} as={:user} submit="setup_mfa">
-          You do not have 2FA enabled.
-          <Submit class="w-full" label="Set up 2FA" />
-        </Form>
+        <div class="grid grid-cols-1 gap-2">
+          <h1 class="text-2xl">2FA Setup</h1>
+          <Form for={%{}} as={:user} submit="setup_mfa" class="grid grid-cols-1 gap-2">
+            <span class="opacity-75">Set up 2FA to protect your account and add an extra layer of security.</span>
+            <Submit class="w-full" label="Set up 2FA" />
+          </Form>
+        </div>
       {/if}
     </AuthLayout>
     """

@@ -452,37 +452,35 @@ defmodule BanchanWeb.CommissionLive do
                 </Submit>
               </Field>
               <Collapse id="filter-options" class="rounded-box">
-                <h2 class="pt-4 text-xl">
-                  Additional Filters
-                </h2>
-                {#unless is_nil(@studio)}
-                  <TextInput name={:client} />
-                {/unless}
-                {#if is_nil(@studio)}
-                  <TextInput name={:studio} />
-                {/if}
-                <MultipleSelect name={:statuses} options={@status_options} />
-                <Select
-                  name={:sort_by}
-                  class="select select-bordered shrink"
-                  selected={@order_by}
-                  options={
-                    "Recently Updated": :recently_updated,
-                    "Earliest Updated": :oldest_updated,
-                    Status: :status
-                  }
-                />
-                <div class="py-2">
+                <div class="grid grid-cols-1 gap-4">
+                  <h2 class="pt-4 text-xl">
+                    Additional Filters
+                  </h2>
+                  {#unless is_nil(@studio)}
+                    <TextInput name={:client} />
+                  {/unless}
+                  {#if is_nil(@studio)}
+                    <TextInput name={:studio} />
+                  {/if}
+                  <MultipleSelect name={:statuses} options={@status_options} />
+                  <Select
+                    name={:sort_by}
+                    class="select select-bordered shrink"
+                    selected={@order_by}
+                    options={
+                      "Recently Updated": :recently_updated,
+                      "Earliest Updated": :oldest_updated,
+                      Status: :status
+                    }
+                  />
                   <Checkbox label="Show Archived" name={:show_archived} />
-                </div>
-                {#if :admin in @current_user.roles || :mod in @current_user.roles}
-                  <div class="py-2">
+                  {#if :admin in @current_user.roles || :mod in @current_user.roles}
                     <Checkbox label="Admin: Show All" name={:admin_show_all} />
+                  {/if}
+                  <div class="flex flex-row items-center justify-between gap-4">
+                    <button type="button" :on-click="reset" class="max-w-xs grow basis-0 btn btn-square btn-ghost">Reset</button>
+                    <Submit label="Apply" class="max-w-xs grow basis-0 btn btn-square btn-primary" />
                   </div>
-                {/if}
-                <div class="grid grid-cols-3 gap-2">
-                  <Submit label="Apply" class="w-full col-span-2 btn btn-square btn-primary" />
-                  <button type="button" :on-click="reset" class="w-full btn-btn-square btn-link">Reset</button>
                 </div>
               </Collapse>
             </Form>

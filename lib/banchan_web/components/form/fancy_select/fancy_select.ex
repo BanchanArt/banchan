@@ -54,7 +54,7 @@ defmodule BanchanWeb.Components.Form.FancySelect do
   def render(assigns) do
     ~F"""
     <bc-fancy-select id={@id} :hook="FancySelect">
-      <Field class="field" name={@name}>
+      <Field class="grid grid-cols-1 gap-2 field" name={@name}>
         <Label class="sr-only" opts={id: @id <> "-label"}>
           {@selected.label}
         </Label>
@@ -89,7 +89,7 @@ defmodule BanchanWeb.Components.Form.FancySelect do
                 id={@id <> "-option-" <> "#{idx}"}
                 role="option"
               >
-                <div class="flex flex-col">
+                <div class="grid grid-cols-1 gap-2">
                   <div class="flex justify-between">
                     <p class={"font-semibold": idx == @selected_idx, "font-normal": idx != @selected_idx}>{item.label}</p>
                     <span :if={@selected_idx == idx}>

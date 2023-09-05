@@ -8,10 +8,11 @@ defmodule BanchanWeb.HomeLive do
   alias Banchan.Studios
 
   alias Surface.Components.{Form, LiveRedirect}
-  alias Surface.Components.Form.{Field, Submit}
-  alias Surface.Components.Form.TextInput
+  alias Surface.Components.Form.Submit
 
   alias BanchanWeb.Components.{Carousel, Icon, Layout, StudioCard, Tag}
+  alias BanchanWeb.Components.Form.TextInput
+
   alias BanchanWeb.StudioLive.Components.OfferingCard
 
   @impl true
@@ -104,14 +105,15 @@ defmodule BanchanWeb.HomeLive do
         <div class="flex flex-col gap-4">
           <Form for={%{}} as={:search} submit="search" class="w-full" opts={role: "search"}>
             <div class="flex flex-row w-full max-w-xl gap-2 mx-auto flex-nowrap md:w-content">
-              <Field name={:query} class="w-full">
-                <TextInput
-                  name={:query}
-                  class="w-full input input-bordered"
-                  opts={placeholder: "Search for offerings...", "aria-label": "Search for offerings"}
-                />
-              </Field>
-              <Submit class="btn btn-round" opts={"aria-label": "Search"}>
+              <TextInput
+                class="w-full"
+                wrapper_class="w-full grow"
+                name={:query}
+                show_label={false}
+                opts={placeholder: "Search for offerings...", "aria-label": "Search for offerings"}
+              >
+              </TextInput>
+              <Submit class="btn btn-round btn-primary" opts={"aria-label": "Search"}>
                 <Icon name="search" size="4" />
               </Submit>
             </div>

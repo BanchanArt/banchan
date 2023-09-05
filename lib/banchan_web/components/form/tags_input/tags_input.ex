@@ -16,6 +16,7 @@ defmodule BanchanWeb.Components.Form.TagsInput do
   prop label, :string
   prop show_label, :boolean, default: true
   prop info, :string
+  prop caption, :string
   prop form, :form, from_context: {Form, :form}
 
   data tags, :list, default: []
@@ -134,9 +135,9 @@ defmodule BanchanWeb.Components.Form.TagsInput do
   def render(assigns) do
     ~F"""
     <div id={@id <> "-wrapper"} :hook="TagsInput">
-      <Field class="field" name={@name}>
+      <Field class="grid grid-cols-1 gap-1 field" name={@name}>
         {#if @show_label}
-          <label for={Phoenix.HTML.Form.input_id(@form, @name) <> "_input"} class="label">
+          <label for={Phoenix.HTML.Form.input_id(@form, @name) <> "_input"} class="p-0 label">
             <span class="flex flex-row items-center gap-1 label-text">
               {@label || Phoenix.Naming.humanize(@name)}
               {#if @info}
@@ -152,7 +153,12 @@ defmodule BanchanWeb.Components.Form.TagsInput do
             </span>
           </label>
         {/if}
-        <div class="flex flex-col">
+        {#if @caption}
+          <div class="text-sm text-opacity-50 help text-base-content">
+            {@caption}
+          </div>
+        {/if}
+        <div class="grid grid-cols-1 gap-2">
           <ul class={
             "tags-list flex flex-row flex-wrap p-2 gap-2 border focus-within:ring ring-primary border-base-content border-opacity-20 bg-base-100 rounded-btn cursor-text",
             "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))

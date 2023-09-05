@@ -18,6 +18,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
   prop(show_label, :boolean, default: true)
   prop(class, :css_class)
   prop(info, :string)
+  prop(caption, :string)
   prop(upload, :struct)
   prop(cancel_upload, :event)
 
@@ -49,12 +50,15 @@ defmodule BanchanWeb.Components.Form.QuillInput do
       /* TODO: Try and get this to work? idk why the variable isn't getting defined.
       min-height: s-bind("@height")
       */
+      @apply prose max-w-none p-0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
       min-height: 224px;
       }
       .control :global(.ql-toolbar):global(.ql-snow) {
       @apply rounded-t-xl;
       --tw-border-opacity: 0.2;
       border: 1px solid hsl(var(--bc) / var(--tw-border-opacity));
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
       }
       .control :global(.ql-container) {
       @apply rounded-t-none textarea textarea-bordered;
@@ -78,18 +82,20 @@ defmodule BanchanWeb.Components.Form.QuillInput do
       .control :global(.ql-picker-label) {
       color: hsl(var(--n));
       }
+      /*
       .control :global(.ql-editor) :global(p) {
       @apply py-2;
       }
+      */
       /*
       .control :global(.ql-picker) :global(.ql-picker-options) {
       @apply menu rounded-box
       }
       */
     </style>
-    <Field class="field" name={@name}>
+    <Field class="grid grid-cols-1 gap-1 field" name={@name}>
       {#if @show_label}
-        <Label class="label">
+        <Label class="p-0 label">
           <span class="flex flex-row items-center gap-1 label-text">
             {@label || Phoenix.Naming.humanize(@name)}
             {#if @info}
@@ -105,6 +111,11 @@ defmodule BanchanWeb.Components.Form.QuillInput do
           </span>
         </Label>
       {/if}
+      {#if @caption}
+        <div class="text-sm text-opacity-50 help text-base-content">
+          {@caption}
+        </div>
+      {/if}
       <div class="control">
         <div class={"relative", "has-upload": !is_nil(@upload)}>
           <TextArea form={@form} field={@name} class="hidden input-textarea" opts={@opts} />
@@ -119,7 +130,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
           </div>
           {#if @upload}
             <LiveFileInput
-              class="w-full rounded-t-none file-input file-input-xs file-input-bordered"
+              class="w-full text-sm rounded-t-none file-input file-input-bordered"
               upload={@upload}
             />
             {#if @dragging}

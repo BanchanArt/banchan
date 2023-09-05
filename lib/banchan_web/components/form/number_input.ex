@@ -14,35 +14,51 @@ defmodule BanchanWeb.Components.Form.NumberInput do
   prop class, :css_class
   prop label, :string
   prop show_label, :boolean, default: true
+  prop focus_label_first, :boolean, default: true
   prop info, :string
+  prop caption, :string
   prop icon, :string
   prop form, :form, from_context: {Form, :form}
 
+  slot label_end
+  slot left
+  slot right
+  slot caption_end
+
   def render(assigns) do
     ~F"""
-    <Field class="field" name={@name}>
+    <Field class="relative grid grid-cols-1 gap-2 field" name={@name}>
       {#if @show_label}
-        <Label class="label">
-          <span class="flex flex-row items-center gap-1 label-text">
-            {@label || Phoenix.Naming.humanize(@name)}
-            {#if @info}
-              <div class="tooltip tooltip-right" data-tip={@info}>
-                <Icon
-                  name="info"
-                  size="4"
-                  label="tooltip"
-                  class="opacity-50 hover:opacity-100 active:opacity-100"
-                />
-              </div>
-            {/if}
-          </span>
-        </Label>
+        <div class={
+          "flex flex-row items-center gap-4",
+          "justify-between": slot_assigned?(:label_end) && @focus_label_first
+        }>
+          <Label class="p-0 label">
+            <span class="flex flex-row items-center gap-1 label-text">
+              {@label || Phoenix.Naming.humanize(@name)}
+              {#if @info}
+                <div class="tooltip tooltip-right" data-tip={@info}>
+                  <Icon
+                    name="info"
+                    size="4"
+                    label="tooltip"
+                    class="opacity-50 hover:opacity-100 active:opacity-100"
+                  />
+                </div>
+              {/if}
+            </span>
+          </Label>
+          {#if slot_assigned?(:label_end) && @focus_label_first}
+            <#slot {@label_end} />
+          {/if}
+        </div>
       {/if}
-      <div class="flex flex-col">
+      <div class="grid grid-cols-1 gap-2">
         <div class={
           "flex flex-row w-full gap-2 control input input-bordered focus-within:ring ring-primary",
           "input-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
         }>
+          <#slot {@left} />
           {#if @icon}
             <Icon name={"#{@icon}"} size="4" />
           {/if}
@@ -53,8 +69,20 @@ defmodule BanchanWeb.Components.Form.NumberInput do
             }
             opts={[{:phx_debounce, "200"} | @opts]}
           />
+          <#slot {@right} />
         </div>
         <ErrorTag class="help text-error" />
+        {#if @caption}
+          <div class="text-sm text-opacity-50 help text-base-content">
+            {@caption}
+          </div>
+        {/if}
+        <#slot {@caption_end} />
+        {#if slot_assigned?(:label_end) && !@focus_label_first}
+          <div class="absolute top-0 right-0 h-fit">
+            <#slot {@label_end} />
+          </div>
+        {/if}
       </div>
     </Field>
     """

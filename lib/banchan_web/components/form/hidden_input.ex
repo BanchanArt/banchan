@@ -12,7 +12,7 @@ defmodule BanchanWeb.Components.Form.HiddenInput do
 
   def render(assigns) do
     ~F"""
-    <Field class="field" name={@name}>
+    <Field class="grid grid-cols-1 gap-2 field" name={@name}>
       <HiddenInput value={@value} opts={@opts} />
     </Field>
     """
