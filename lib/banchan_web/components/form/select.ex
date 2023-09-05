@@ -58,18 +58,16 @@ defmodule BanchanWeb.Components.Form.Select do
         </div>
       {/if}
       <div class="grid grid-cols-1 gap-2">
-        <div class={
-          "flex flex-row w-full gap-4 control select select-bordered focus-within:ring ring-primary",
-          "select-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
-        }>
+        <div class="flex flex-row w-full gap-4 control">
           <#slot {@left} />
           {#if @icon}
             <Icon name={"#{@icon}"} size="4" />
           {/if}
           <Select
             class={
-              "w-full bg-transparent p-0 ring-0 outline-none border-none focus:ring-0",
-              @class
+              "w-full bg-p-0 select select-bordered focus:ring focus:ring-primary",
+              @class,
+              "select-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
             }
             prompt={@prompt}
             selected={@selected}
