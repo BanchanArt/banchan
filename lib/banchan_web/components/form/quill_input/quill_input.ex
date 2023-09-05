@@ -18,6 +18,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
   prop(show_label, :boolean, default: true)
   prop(class, :css_class)
   prop(info, :string)
+  prop(caption, :string)
   prop(upload, :struct)
   prop(cancel_upload, :event)
 
@@ -92,7 +93,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
       }
       */
     </style>
-    <Field class="grid grid-cols-1 gap-2 field" name={@name}>
+    <Field class="grid grid-cols-1 gap-1 field" name={@name}>
       {#if @show_label}
         <Label class="p-0 label">
           <span class="flex flex-row items-center gap-1 label-text">
@@ -109,6 +110,11 @@ defmodule BanchanWeb.Components.Form.QuillInput do
             {/if}
           </span>
         </Label>
+      {/if}
+      {#if @caption}
+        <div class="text-sm text-opacity-50 help text-base-content">
+          {@caption}
+        </div>
       {/if}
       <div class="control">
         <div class={"relative", "has-upload": !is_nil(@upload)}>

@@ -383,43 +383,43 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
       change="change"
       opts={autocomplete: "off", "phx-target": @myself}
     >
-      <div class="flex flex-col gap-2">
+      <div class="flex flex-col gap-4">
         <TextInput
           name={:name}
-          info="Name of the offering, as it should appear in the offering card."
+          caption="Name of the offering, as it should appear in the offering card."
           opts={required: true, phx_debounce: "200"}
         />
         <TextInput
           name={:type}
-          info="Lowercase, no-spaces, limited characters. This is what will show up in the url and must be unique."
+          caption="This is what will show up in the url and must be unique. Lowercase, no-spaces, limited characters."
           opts={required: true}
         />
         <QuillInput
           id={@id <> "-description-input"}
           name={:description}
-          info="Description of the offering, as it should appear when the offering is expanded."
+          caption="Description of the offering, as it should appear when the offering is expanded."
           opts={required: true}
         />
         <TagsInput
           id={@id <> "-tags"}
-          info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
+          caption="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
           name={:tags}
         />
         <Checkbox
           name={:open}
           label="Open"
-          info="Open up this offering for new proposals. The offering will remain visible if closed."
+          caption="Open up this offering for new proposals. The offering will remain visible if closed."
         />
         <Checkbox
           name={:hidden}
-          label="Hide"
-          info="Hide this offering from the shop, search, and listings. You will still be able to link people to it."
+          label="Hidden"
+          caption="Hide this offering from the shop, search, and listings. You will still be able to link people to it."
         />
         {#if Application.get_env(:banchan, :mature_content_enabled?)}
           <Checkbox
             name={:mature}
             label="Mature"
-            info="Mark this offering as mature content. Note: if you plan on doing mature/NSFW commissions through this offering, this MUST be checked."
+            caption="Mark this offering as mature content. Note: if you plan on doing mature/NSFW commissions through this offering, this MUST be checked."
           />
         {/if}
         <div class="divider" />

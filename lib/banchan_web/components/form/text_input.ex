@@ -28,7 +28,7 @@ defmodule BanchanWeb.Components.Form.TextInput do
 
   def render(assigns) do
     ~F"""
-    <Field class={"relative grid grid-cols-1 gap-2 field", @wrapper_class} name={@name}>
+    <Field class={"relative grid grid-cols-1 gap-1 field", @wrapper_class} name={@name}>
       {#if @show_label}
         <div class={
           "flex flex-row items-center gap-4",
@@ -54,6 +54,12 @@ defmodule BanchanWeb.Components.Form.TextInput do
           {/if}
         </div>
       {/if}
+      {#if @caption}
+        <div class="text-sm text-opacity-50 help text-base-content">
+          {@caption}
+        </div>
+      {/if}
+      <#slot {@caption_end} />
       <div class="grid grid-cols-1 gap-2">
         <div class={
           "flex flex-row w-full gap-4 control input input-bordered focus-within:ring ring-primary",
@@ -73,12 +79,6 @@ defmodule BanchanWeb.Components.Form.TextInput do
           <#slot {@right} />
         </div>
         <ErrorTag class="help text-error" />
-        {#if @caption}
-          <div class="text-sm text-opacity-50 help text-base-content">
-            {@caption}
-          </div>
-        {/if}
-        <#slot {@caption_end} />
       </div>
       {#if slot_assigned?(:label_end) && !@focus_label_first}
         <div class="absolute top-0 right-0 h-fit">

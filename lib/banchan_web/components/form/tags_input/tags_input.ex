@@ -135,9 +135,9 @@ defmodule BanchanWeb.Components.Form.TagsInput do
   def render(assigns) do
     ~F"""
     <div id={@id <> "-wrapper"} :hook="TagsInput">
-      <Field class="grid grid-cols-1 gap-2 field" name={@name}>
+      <Field class="grid grid-cols-1 gap-1 field" name={@name}>
         {#if @show_label}
-          <label for={Phoenix.HTML.Form.input_id(@form, @name) <> "_input"} class="label">
+          <label for={Phoenix.HTML.Form.input_id(@form, @name) <> "_input"} class="p-0 label">
             <span class="flex flex-row items-center gap-1 label-text">
               {@label || Phoenix.Naming.humanize(@name)}
               {#if @info}
@@ -152,6 +152,11 @@ defmodule BanchanWeb.Components.Form.TagsInput do
               {/if}
             </span>
           </label>
+        {/if}
+        {#if @caption}
+          <div class="text-sm text-opacity-50 help text-base-content">
+            {@caption}
+          </div>
         {/if}
         <div class="grid grid-cols-1 gap-2">
           <ul class={
@@ -208,11 +213,6 @@ defmodule BanchanWeb.Components.Form.TagsInput do
             </li>
           </ul>
           <ErrorTag class="help text-error" />
-          {#if @caption}
-            <div class="text-sm text-opacity-50 help text-base-content">
-              {@caption}
-            </div>
-          {/if}
         </div>
       </Field>
     </div>

@@ -24,7 +24,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   def render(assigns) do
     ~F"""
     <Field class="form-control" name={@name}>
-      <Label class={"label gap-2 justify-start cursor-pointer", @wrapper_class}>
+      <Label class={"label gap-2 items-start justify-start cursor-pointer p-0", @wrapper_class}>
         <Checkbox
           value={@value}
           class={
@@ -36,7 +36,12 @@ defmodule BanchanWeb.Components.Form.Checkbox do
           opts={@opts}
         />
         <div class="flex flex-row items-center gap-1 px-2 label-text">
-          <#slot>{@label}</#slot>
+          <#slot>
+            <div class="grid w-full grid-cols-1 gap-1">
+              <span>{@label}</span>
+              <span class="text-sm opacity-50">{@caption}</span>
+            </div>
+          </#slot>
           {#if @info}
             <div class="tooltip tooltip-right" data-tip={@info}>
               <Icon
@@ -50,11 +55,6 @@ defmodule BanchanWeb.Components.Form.Checkbox do
         </div>
       </Label>
       <ErrorTag class="help text-error" />
-      {#if @caption}
-        <div class="text-sm text-opacity-50 help text-base-content">
-          {@caption}
-        </div>
-      {/if}
     </Field>
     """
   end

@@ -12,8 +12,12 @@ defmodule BanchanWeb.Components.StatusBadge do
     ~F"""
     <p class={
       "bg-opacity-20 rounded-md whitespace-nowrap mt-0.5 px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset",
-      "bg-#{@status}",
-      @class
+      @class,
+      "bg-error ring-error": @status == :error,
+      "bg-warning ring-warning": @status == :warning,
+      "bg-success ring-success": @status == :success,
+      "bg-info ring-info": @status == :info,
+      "bg-neutral ring-neutral": @status == :neutral
     }>
       {@label}
     </p>

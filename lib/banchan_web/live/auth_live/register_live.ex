@@ -63,26 +63,26 @@ defmodule BanchanWeb.RegisterLive do
           <h1 class="text-2xl">Register</h1>
           <TextInput
             name={:handle}
-            caption="Your unique @handle that can be used to refer to you."
+            info="Your unique @handle that can be used to refer to you."
             icon="at-sign"
             opts={required: true, placeholder: "example123"}
           />
           <EmailInput
             name={:email}
-            caption="A valid email address. You'll need to confirm this."
+            info="A valid email address. You'll need to confirm this."
             icon="mail"
             opts={required: true, placeholder: "youremail@example.com"}
           />
           <TextInput
             name={:password}
-            caption="Your new password. Must be between 12 and 80 characters."
+            info="Your new password. Must be between 12 and 80 characters."
             icon="lock"
             opts={required: true, type: :password, placeholder: "your_new_secure_password"}
           />
           <TextInput
             name={:password_confirmation}
             label="Confirm Password"
-            caption="Must match your password above!"
+            info="Must match your password above!"
             icon="lock"
             opts={required: true, type: :password, placeholder: "your_new_secure_password"}
           />

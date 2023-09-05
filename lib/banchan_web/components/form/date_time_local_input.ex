@@ -28,7 +28,7 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
 
   def render(assigns) do
     ~F"""
-    <Field class="relative grid grid-cols-1 gap-2 field" name={@name}>
+    <Field class="relative grid grid-cols-1 gap-1 field" name={@name}>
       {#if @show_label}
         <div class={
           "flex flex-row items-center gap-4",
@@ -54,6 +54,12 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
           {/if}
         </div>
       {/if}
+      {#if @caption}
+        <div class="text-sm text-opacity-50 help text-base-content">
+          {@caption}
+        </div>
+      {/if}
+      <#slot {@caption_end} />
       <div class="grid grid-cols-1 gap-2">
         <div class={
           "flex flex-row gap-4 w-full control input input-bordered focus-within:ring ring-primary",
@@ -74,12 +80,6 @@ defmodule BanchanWeb.Components.Form.DateTimeLocalInput do
           <#slot {@right} />
         </div>
         <ErrorTag class="help text-error" />
-        {#if @caption}
-          <div class="text-sm text-opacity-50 help text-base-content">
-            {@caption}
-          </div>
-        {/if}
-        <#slot {@caption_end} />
       </div>
       {#if slot_assigned?(:label_end) && !@focus_label_first}
         <div class="absolute top-0 right-0 h-fit">
