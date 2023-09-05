@@ -4,7 +4,7 @@ defmodule Banchan.MixProject do
   def project do
     [
       app: :banchan,
-      version: "1.0.0",
+      version: "1.1.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: [warnings_as_errors: true],
