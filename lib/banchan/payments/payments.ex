@@ -810,6 +810,11 @@ defmodule Banchan.Payments do
         platform_fee: Money.new(0, invoice.amount.currency),
         status: :succeeded
       })
+      |> Ecto.Changeset.put_change(:total_charged, Money.new(0, invoice.amount.currency))
+      |> Ecto.Changeset.put_change(:total_transferred, Money.new(0, invoice.amount.currency))
+      |> Ecto.Changeset.put_change(:tax, Money.new(0, invoice.amount.currency))
+      |> Ecto.Changeset.put_change(:discounts, Money.new(0, invoice.amount.currency))
+      |> Ecto.Changeset.put_change(:shipping, Money.new(0, invoice.amount.currency))
     end)
     |> Ecto.Multi.run(:finalize, fn _, %{updated_invoice: invoice} ->
       client = Repo.reload!(%User{id: invoice.client_id})
@@ -962,16 +967,30 @@ defmodule Banchan.Payments do
   Webhook handler for when a payment has been successfully processed by Stripe.
   """
   def process_payment_succeeded!(session) do
-    {:ok,
-     %{charges: %{data: [%{id: charge_id, balance_transaction: txn_id, transfer: transfer}]}}} =
-      stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, [])
+    %{
+      total_details: %{
+        amount_tax: tax_amt,
+        amount_discount: discount_amt,
+        amount_shipping: shipping_amt
+      },
+      amount_total: amt
+    } = session
 
-    {:ok, %{created: paid_on, available_on: available_on, amount: amt, currency: curr}} =
+    {:ok,
+     %{
+       currency: curr,
+       charges: %{data: [%{id: charge_id, balance_transaction: txn_id, transfer: transfer}]}
+     }} = stripe_mod().retrieve_payment_intent(session.payment_intent, %{}, [])
+
+    {:ok, %{created: paid_on, available_on: available_on}} =
       stripe_mod().retrieve_balance_transaction(txn_id, [])
 
     {:ok, transfer} = stripe_mod().retrieve_transfer(transfer)
 
     total_charged = Money.new(amt, String.to_atom(String.upcase(curr)))
+    tax = Money.new(tax_amt, String.to_atom(String.upcase(curr)))
+    discounts = Money.new(discount_amt, String.to_atom(String.upcase(curr)))
+    shipping = Money.new(shipping_amt, String.to_atom(String.upcase(curr)))
     final_transfer_txn = transfer.destination_payment.balance_transaction
 
     total_transferred =
@@ -999,6 +1018,9 @@ defmodule Banchan.Payments do
               paid_on: paid_on,
               total_charged: total_charged,
               total_transferred: total_transferred,
+              tax: tax,
+              discounts: discounts,
+              shipping: shipping,
               stripe_charge_id: charge_id
             ]
           )

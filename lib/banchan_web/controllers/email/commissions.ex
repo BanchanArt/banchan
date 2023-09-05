@@ -35,12 +35,20 @@ defmodule BanchanWeb.Email.Commissions do
         </tr>
       {/for}
       <tr>
-        <td colspan="2">Total Invoiced</td>
+        <td colspan="2">Subtotal</td>
         <td>{Payments.print_money(estimate)}</td>
       </tr>
       <tr>
         <td colspan="2">Additional Tip</td>
         <td>{Payments.print_money(tipped)}</td>
+      </tr>
+      <tr>
+        <td colspan="2">Tax/VAT</td>
+        <td>{Payments.print_money(@taxes)}</td>
+      </tr>
+      <tr>
+        <td colspan="2">Total</td>
+        <td>{Payments.print_money(@charged)}</td>
       </tr>
     </table>
     """
@@ -72,8 +80,11 @@ defmodule BanchanWeb.Email.Commissions do
       end} - #{Payments.print_money(Money.multiply(item.amount, item.count))}
         #{item.description}
       """ end)}
-    Total Invoiced: #{Payments.print_money(estimate)}
+    Subtotal: #{Payments.print_money(estimate)}
     Additional Tip: #{Payments.print_money(tipped)}
+    Tax/VAT: #{Payments.print_money(assigns.taxes)}
+    ----------------------------
+    Total: #{Payments.print_money(assigns.charged)}
     """
   end
 end

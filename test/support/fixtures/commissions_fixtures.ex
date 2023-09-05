@@ -98,7 +98,13 @@ defmodule Banchan.CommissionsFixtures do
     sess = %Stripe.Session{
       id: sess_id,
       url: checkout_uri,
-      payment_intent: "stripe-mock-payment-intent-id#{System.unique_integer()}"
+      payment_intent: "stripe-mock-payment-intent-id#{System.unique_integer()}",
+      total_details: %{
+        amount_tax: 0,
+        amount_discount: 0,
+        amount_shipping: 0
+      },
+      amount_total: invoice.amount.amount + tip.amount
     }
 
     Banchan.StripeAPI.Mock
@@ -126,7 +132,10 @@ defmodule Banchan.CommissionsFixtures do
     Banchan.StripeAPI.Mock
     |> expect(:retrieve_payment_intent, fn _, _, _ ->
       {:ok,
-       %{charges: %{data: [%{id: charge_id, balance_transaction: txn_id, transfer: trans_id}]}}}
+       %{
+         currency: invoice.amount.currency |> to_string() |> String.downcase(),
+         charges: %{data: [%{id: charge_id, balance_transaction: txn_id, transfer: trans_id}]}
+       }}
     end)
     |> expect(:retrieve_balance_transaction, fn _, _ ->
       {:ok,
