@@ -1,6 +1,6 @@
 defmodule BanchanWeb.SetupMfaLive do
   @moduledoc """
-  Account Setup MFA
+  Account Setup 2FA
   """
   use BanchanWeb, :live_view
 
@@ -38,7 +38,7 @@ defmodule BanchanWeb.SetupMfaLive do
       socket =
         socket
         |> put_flash(:info, "TOTP already activated")
-        |> redirect(to: Routes.setup_mfa_path(socket, :edit))
+        |> redirect(to: ~p"/2fa_setup")
 
       {:noreply, socket}
     end
@@ -47,8 +47,8 @@ defmodule BanchanWeb.SetupMfaLive do
       {:ok, _} ->
         socket =
           socket
-          |> put_flash(:info, "MFA token generated successfully")
-          |> redirect(to: Routes.setup_mfa_path(socket, :edit))
+          |> put_flash(:info, "2FA token generated successfully")
+          |> redirect(to: ~p"/2fa_setup")
 
         {:noreply, socket}
     end
@@ -63,8 +63,8 @@ defmodule BanchanWeb.SetupMfaLive do
         {:ok, _} ->
           socket =
             socket
-            |> put_flash(:info, "MFA token deactivated")
-            |> push_navigate(to: Routes.setup_mfa_path(socket, :edit))
+            |> put_flash(:info, "2FA token deactivated")
+            |> push_navigate(to: ~p"/2fa_setup")
 
           {:noreply, socket}
 
@@ -72,7 +72,7 @@ defmodule BanchanWeb.SetupMfaLive do
           socket =
             socket
             |> put_flash(:error, "Invalid password")
-            |> push_navigate(to: Routes.setup_mfa_path(socket, :edit))
+            |> push_navigate(to: ~p"/2fa_setup")
 
           {:noreply, socket}
       end
@@ -80,7 +80,7 @@ defmodule BanchanWeb.SetupMfaLive do
       socket =
         socket
         |> put_flash(:error, "TOTP not activated")
-        |> redirect(to: Routes.setup_mfa_path(socket, :edit))
+        |> redirect(to: ~p"/2fa_setup")
 
       {:noreply, socket}
     end
@@ -94,7 +94,7 @@ defmodule BanchanWeb.SetupMfaLive do
       socket =
         socket
         |> put_flash(:info, "TOTP already activated")
-        |> redirect(to: Routes.setup_mfa_path(socket, :edit))
+        |> redirect(to: ~p"/2fa_setup")
 
       {:noreply, socket}
     end
@@ -106,16 +106,16 @@ defmodule BanchanWeb.SetupMfaLive do
       {:ok, _} ->
         socket =
           socket
-          |> put_flash(:info, "MFA token activated")
-          |> redirect(to: Routes.setup_mfa_path(socket, :edit))
+          |> put_flash(:info, "2FA token activated")
+          |> redirect(to: ~p"/2fa_setup")
 
         {:noreply, socket}
 
       {:error, :invalid_token} ->
         socket =
           socket
-          |> put_flash(:error, "Invalid MFA token")
-          |> redirect(to: Routes.setup_mfa_path(socket, :edit))
+          |> put_flash(:error, "Invalid 2FA token")
+          |> redirect(to: ~p"/2fa_setup")
 
         {:noreply, socket}
     end
@@ -128,11 +128,11 @@ defmodule BanchanWeb.SetupMfaLive do
       {#if @qrcode_svg && !@totp_activated}
         <div class="grid grid-cols-1 gap-2">
           <h1 class="text-2xl">Your QR Code</h1>
-          <span class="text-sm opacity-75">Scan the QR code below with your MFA app.</span>
+          <span class="text-sm opacity-75">Scan the QR code below with your 2FA app.</span>
           <div class="py-4">{raw(@qrcode_svg)}</div>
           <span>No QR code reader?</span>
           <span class="text-sm opacity-75">
-            Input the following value in your MFA app:
+            Input the following value in your 2FA app:
           </span>
           <div class="flex flex-row items-center input">
             <span class="font-mono tracking-wide">
@@ -140,7 +140,7 @@ defmodule BanchanWeb.SetupMfaLive do
             </span>
           </div>
           <div class="divider" />
-          <h1 class="text-2xl">Confirm MFA 6-digit OTP</h1>
+          <h1 class="text-2xl">Confirm 2FA 6-digit OTP</h1>
           <Form class="flex flex-col gap-4" for={%{}} as={:user} submit="confirm_mfa">
             <TextInput name={:token} label="One Time Password" opts={required: true} />
             <Submit class="w-full" label="Activate" />
@@ -148,18 +148,18 @@ defmodule BanchanWeb.SetupMfaLive do
         </div>
       {#elseif @qrcode_svg && @totp_activated}
         <div class="grid grid-cols-1 gap-2">
-          <h1 class="text-2xl">You have MFA enabled</h1>
+          <h1 class="text-2xl">You have 2FA enabled</h1>
           <Form for={%{}} as={:user} submit="deactivate_mfa">
             <TextInput name={:password} label="Current Password" opts={required: true, type: "password"} />
-            <Submit class="w-full btn-error" label="Deactivate MFA" />
+            <Submit class="w-full btn-error" label="Deactivate 2FA" />
           </Form>
         </div>
       {#else}
         <div class="grid grid-cols-1 gap-2">
-          <h1 class="text-2xl">MFA Setup</h1>
+          <h1 class="text-2xl">2FA Setup</h1>
           <Form for={%{}} as={:user} submit="setup_mfa" class="grid grid-cols-1 gap-2">
-            <span class="opacity-75">Set up MFA to protect your account and add an extra layer of security.</span>
-            <Submit class="w-full" label="Set up MFA" />
+            <span class="opacity-75">Set up 2FA to protect your account and add an extra layer of security.</span>
+            <Submit class="w-full" label="Set up 2FA" />
           </Form>
         </div>
       {/if}

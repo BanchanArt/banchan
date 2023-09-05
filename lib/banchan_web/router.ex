@@ -81,7 +81,7 @@ defmodule BanchanWeb.Router do
       live("/commissions/:commission_id", CommissionLive, :show)
 
       live("/settings", SettingsLive, :edit)
-      live("/mfa_setup", SetupMfaLive, :edit)
+      live("/2fa_setup", SetupMfaLive, :edit)
 
       get(
         "/commissions/:commission_id/attachment/:upload_id",
@@ -196,6 +196,7 @@ defmodule BanchanWeb.Router do
       pipe_through([:basic_authed, :browser, :ensure_enabled])
 
       get("/feedback", Redirect, external: "https://help.banchan.art")
+      get("/knowledge-base", Redirect, external: "https://help.banchan.art/support/solutions")
 
       live("/people/:handle", PeopleLive.Show, :show)
       live("/people/:handle/following", PeopleLive.Show, :following)

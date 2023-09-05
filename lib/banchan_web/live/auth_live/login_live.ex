@@ -56,7 +56,7 @@ defmodule BanchanWeb.LoginLive do
             </:label_end>
           </TextInput>
           <TextInput
-            label="MFA Token"
+            label="2FA Token"
             name={:mfa_token}
             icon="smartphone"
             opts={maxlength: 6, placeholder: "optional"}

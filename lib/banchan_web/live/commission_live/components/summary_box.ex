@@ -486,6 +486,9 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
                   |> Payments.print_money()}.
                 </p>
               {/if}
+              {#if @existing_open && @deposited.amount > 0}
+                <p>You can't release any deposits until the <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> is paid.</p>
+              {/if}
             {/if}
           {/if}
           {#if @current_user_member?}
@@ -495,7 +498,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
               <div>Only open and accepted commissions can be invoiced. Accept the commission by changing the status to "Accepted" below to continue.</div>
             {#elseif @existing_open}
               <div>
-                You can't take any further invoice actions until the <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> is handled.
+                You can't take any further invoice actions until the <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> is paid.
               </div>
             {/if}
           {/if}

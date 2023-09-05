@@ -7,6 +7,8 @@ on:
 env:
   BANCHAN_DEPLOY_ENV: prod
   BANCHAN_HOST: banchan.art
+  OBAN_KEY_FINGERPRINT: ${{ secrets.OBAN_KEY_FINGERPRINT }}
+  OBAN_LICENSE_KEY: ${{ secrets.OBAN_LICENSE_KEY }}
 
 jobs:
   deploy:
@@ -60,4 +62,4 @@ jobs:
 
       - run: mix deploy.prod --remote-only
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_DEV_DEPLOY_API_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_PROD_DEPLOY_API_TOKEN }}

@@ -469,7 +469,7 @@ defmodule BanchanWeb.SettingsLive do
         <div class="flex flex-col max-w-xl gap-4">
           <h3 class="mb-2 text-xl font-semibold">Two-factor Authentication</h3>
           <p class="py-2">2FA helps secure your account by requiring an additional device to log in. Banchan supports any standard OTP application, such as Google Authenticator, Authy, or 1Password.</p>
-          <LiveRedirect class="w-fit btn btn-primary" to={Routes.setup_mfa_path(Endpoint, :edit)}>Manage 2FA</LiveRedirect>
+          <LiveRedirect class="w-fit btn btn-primary" to={~p"/2fa_setup"}>Manage 2FA</LiveRedirect>
         </div>
         <div class="divider" />
         <Form

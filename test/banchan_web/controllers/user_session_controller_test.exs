@@ -69,7 +69,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
       assert response =~ "log-out"
     end
 
-    test "logs the user in with MFA", %{conn: conn, user_mfa: user} do
+    test "logs the user in with 2FA", %{conn: conn, user_mfa: user} do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
           "user" => %{
@@ -136,10 +136,10 @@ defmodule BanchanWeb.UserSessionControllerTest do
       {"location", loc} = Enum.find(conn.resp_headers, fn {k, _} -> k == "location" end)
       {:ok, _, html} = live(conn, loc)
       assert html =~ "Log in</h1>"
-      assert html =~ "Invalid email/handle, password, or MFA token"
+      assert html =~ "Invalid email/handle, password, or 2FA token"
     end
 
-    test "emits error message with valid credentials no MFA", %{conn: conn, user_mfa: user} do
+    test "emits error message with valid credentials no 2FA", %{conn: conn, user_mfa: user} do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
           "user" => %{
@@ -155,10 +155,10 @@ defmodule BanchanWeb.UserSessionControllerTest do
       {"location", loc} = Enum.find(conn.resp_headers, fn {k, _} -> k == "location" end)
       {:ok, _, html} = live(conn, loc)
       assert html =~ "Log in</h1>"
-      assert html =~ "Invalid email/handle, password, or MFA token"
+      assert html =~ "Invalid email/handle, password, or 2FA token"
     end
 
-    test "emits error message with valid credentials wrong MFA", %{conn: conn, user_mfa: user} do
+    test "emits error message with valid credentials wrong 2FA", %{conn: conn, user_mfa: user} do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
           "user" => %{
@@ -174,7 +174,7 @@ defmodule BanchanWeb.UserSessionControllerTest do
       {"location", loc} = Enum.find(conn.resp_headers, fn {k, _} -> k == "location" end)
       {:ok, _, html} = live(conn, loc)
       assert html =~ "Log in</h1>"
-      assert html =~ "Invalid email/handle, password, or MFA token"
+      assert html =~ "Invalid email/handle, password, or 2FA token"
     end
   end
 
