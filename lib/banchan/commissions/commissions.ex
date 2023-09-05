@@ -497,6 +497,109 @@ defmodule Banchan.Commissions do
   end
 
   @doc """
+  Calculates total taxes so far for a commission.
+  """
+  def taxed_amount(
+        %User{id: user_id, roles: roles} = actor,
+        %Commission{client_id: client_id} = comm,
+        current_user_member?
+      )
+      when user_id != client_id and current_user_member? == false do
+    if :admin in roles || :mod in roles do
+      taxed_amount(actor, comm, true)
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  def taxed_amount(_, %Commission{} = commission, _) do
+    currency = commission_currency(commission)
+
+    if Ecto.assoc_loaded?(commission.events) &&
+         Enum.all?(commission.events, &Ecto.assoc_loaded?(&1.invoice)) do
+      Enum.reduce(
+        commission.events,
+        Money.new(0, currency),
+        fn event, acc ->
+          if event.invoice && event.invoice.status in [:succeeded, :released] do
+            Money.add(acc, event.invoice.tax || Money.new(0, currency))
+          else
+            acc
+          end
+        end
+      )
+    else
+      taxes =
+        from(
+          i in Invoice,
+          where:
+            i.commission_id == ^commission.id and
+              i.status in [:succeeded, :released],
+          select: i.tax
+        )
+        |> Repo.all()
+
+      taxes
+      |> Enum.filter(&(!is_nil(&1)))
+      |> Enum.reduce(
+        Money.new(0, currency),
+        &Money.add/2
+      )
+    end
+  end
+
+  @doc """
+  Calculates total charged amount so far for a commission.
+  """
+  def charged_amount(
+        %User{id: user_id, roles: roles} = actor,
+        %Commission{client_id: client_id} = comm,
+        current_user_member?
+      )
+      when user_id != client_id and current_user_member? == false do
+    if :admin in roles || :mod in roles do
+      charged_amount(actor, comm, true)
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  def charged_amount(_, %Commission{} = commission, _) do
+    currency = commission_currency(commission)
+
+    if Ecto.assoc_loaded?(commission.events) &&
+         Enum.all?(commission.events, &Ecto.assoc_loaded?(&1.invoice)) do
+      Enum.reduce(
+        commission.events,
+        Money.new(0, currency),
+        fn event, acc ->
+          if event.invoice && event.invoice.status in [:succeeded, :released] do
+            Money.add(acc, event.invoice.total_charged)
+          else
+            acc
+          end
+        end
+      )
+    else
+      charged =
+        from(
+          i in Invoice,
+          where:
+            i.commission_id == ^commission.id and
+              i.status in [:succeeded, :released],
+          select: i.total_charged
+        )
+        |> Repo.all()
+
+      Enum.reduce(
+        charged,
+        Money.new(0, currency),
+        &Money.add/2
+      )
+    end
+  end
+
+  @doc """
   Gets the currency used for the commission, taking into account legacy
   commissions before the currency field existed.
   """

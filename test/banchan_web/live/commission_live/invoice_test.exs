@@ -257,6 +257,7 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         {:ok,
          %Stripe.PaymentIntent{
            id: id,
+           currency: "usd",
            charges: %{data: [%{id: charge_id, balance_transaction: txn_id, transfer: trans_id}]}
          }}
       end)
@@ -290,7 +291,13 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
       Oban.Testing.with_testing_mode(:manual, fn ->
         Payments.process_payment_succeeded!(%Stripe.Session{
           id: stripe_sess_id,
-          payment_intent: intent_id
+          payment_intent: intent_id,
+          total_details: %{
+            amount_tax: 0,
+            amount_discount: 0,
+            amount_shipping: 0
+          },
+          amount_total: amount.amount
         })
       end)
 

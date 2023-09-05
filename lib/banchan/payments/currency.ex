@@ -265,10 +265,16 @@ defmodule Banchan.Payments.Currency do
   """
   def print_money(%Money{} = money, symbol \\ true) do
     if symbol do
+      {amt, prefix} =
+        case Money.to_string(money, symbol: false) do
+          "-" <> amt -> {amt, "-"}
+          other -> {other, ""}
+        end
+
       case Money.Currency.symbol(money) do
-        "$" -> currency_symbol(money.currency) <> Money.to_string(money, symbol: false)
-        "" -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
-        " " -> currency_symbol(money.currency) <> " " <> Money.to_string(money, symbol: false)
+        "$" -> prefix <> currency_symbol(money.currency) <> amt
+        "" -> prefix <> currency_symbol(money.currency) <> " " <> amt
+        " " -> prefix <> currency_symbol(money.currency) <> " " <> amt
         _ -> Money.to_string(money, symbol: true)
       end
     else

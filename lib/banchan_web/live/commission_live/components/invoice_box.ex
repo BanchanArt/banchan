@@ -266,11 +266,14 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
       {!-- # NOTE: Older invoices don't have these fields, so we need to check for them here. --}
       {#if @event.invoice.line_items && @event.invoice.deposited}
         <Summary line_items={@event.invoice.line_items} />
+        <div class="divider" />
         <BalanceBox
           id={@id <> "-balance-box"}
           line_items={@event.invoice.line_items}
           deposited={@event.invoice.deposited}
           invoiced={@event.invoice.amount}
+          tax={@event.invoice.tax}
+          total={@event.invoice.total_charged}
           tipped={@event.invoice.final && @event.invoice.tip}
         />
         <div class="divider" />
@@ -319,7 +322,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               {#else}
                 <div class="stat-title">Payment Requested</div>
                 <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
-                <div class="stat-desc">Waiting for Payment</div>
+                <div class="stat-desc">Waiting for Payment (Subtotal)</div>
                 {#if @current_user_member?}
                   <div class="stat-actions">
                     <Button
@@ -360,7 +363,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-desc">You'll need to submit a new invoice.</div>
             {#match :succeeded}
               <div class="stat-title">Payment Succeeded</div>
-              <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
+              <div class="stat-value">{Payments.print_money(@event.invoice.total_charged)}</div>
               {#if @event.invoice.tip.amount > 0}
                 <div class="stat-desc">Tip: +{Payments.print_money(@event.invoice.tip)}
                   ({estimate = Commissions.line_item_estimate(@commission.line_items)
@@ -386,7 +389,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               </div>
             {#match :released}
               <div class="stat-title">Payment Released to Studio</div>
-              <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
+              <div class="stat-value">{Payments.print_money(@event.invoice.total_charged)}</div>
               {#if @event.invoice.tip.amount > 0}
                 <div class="stat-desc">Tip: +{Payments.print_money(@event.invoice.tip)}
                   ({estimate = Commissions.line_item_estimate(@commission.line_items)

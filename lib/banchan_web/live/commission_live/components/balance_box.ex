@@ -12,6 +12,8 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
   prop deposited, :struct
   prop invoiced, :struct
   prop tipped, :struct
+  prop tax, :struct
+  prop total, :struct
 
   data estimate_amt, :list
   data deposited_amt, :list
@@ -44,11 +46,19 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
             </div>
           </div>
           <div class="flex flex-row items-center">
-            <div class="font-medium grow">Deposited:</div>
+            <div class="font-medium grow">Previously Deposited:</div>
             <div class="font-medium">
-              {Payments.print_money(@deposited_amt)}
+              {Payments.print_money(@deposited_amt |> Money.multiply(-1))}
             </div>
           </div>
+          {#if @tax}
+            <div class="flex flex-row items-center">
+              <div class="font-medium grow">Tax:</div>
+              <div class="font-medium">
+                {Payments.print_money(@tax)}
+              </div>
+            </div>
+          {/if}
           {#if @tipped}
             <div class="flex flex-row items-center">
               <div class="font-medium grow">Tipped:</div>
@@ -67,12 +77,21 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
             </div>
             <div class={
               "font-bold",
-              "text-primary": @remaining_amt.amount > 0,
-              "text-error": @remaining_amt.amount < 0
+              "text-primary": !@total && @remaining_amt.amount > 0,
+              "text-error": !@total && @remaining_amt.amount < 0
             }>
               {Payments.print_money(@remaining_amt)}
             </div>
           </div>
+          {#if @total}
+            <div class="divider" />
+            <div class="flex flex-row items-center">
+              <div class="font-bold grow">Total Paid:</div>
+              <div class="font-bold text-primary">
+                {Payments.print_money(@total)}
+              </div>
+            </div>
+          {/if}
         </div>
       {#else}
         <div class="flex flex-row">
