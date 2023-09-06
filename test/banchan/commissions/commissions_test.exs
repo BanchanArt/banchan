@@ -176,7 +176,7 @@ defmodule Banchan.CommissionsTest do
       assert commission.client_id == invoice.client_id
       assert amount == invoice.amount
       assert amount == invoice.event.amount
-      assert "Please pay me?" == invoice.event.text
+      assert "<p>\nPlease pay me?</p>\n" == invoice.event.text
       assert :comment == invoice.event.type
     end
 

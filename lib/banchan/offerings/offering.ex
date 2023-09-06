@@ -19,13 +19,13 @@ defmodule Banchan.Offerings.Offering do
     field :type, :string
     field :index, :integer
     field :name, :string
-    field :description, :string
+    field :description, Banchan.Ecto.RichText
     field :open, :boolean, default: true
     field :slots, :integer
     field :max_proposals, :integer
     field :hidden, :boolean, default: false
-    field :terms, :string
-    field :template, :string
+    field :terms, Banchan.Ecto.RichText
+    field :template, Banchan.Ecto.RichText
     field :archived_at, :naive_datetime
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
@@ -88,14 +88,11 @@ defmodule Banchan.Offerings.Offering do
     )
     |> validate_number(:slots, greater_than: 0)
     |> validate_number(:max_proposals, greater_than: 0)
-    |> validate_markdown(:description)
-    |> validate_markdown(:terms)
-    |> validate_markdown(:template)
     |> validate_length(:type, min: 4, max: 32)
     |> validate_length(:name, min: 4, max: 50)
-    |> validate_length(:description, max: 500)
-    |> validate_length(:terms, max: 10_000)
-    |> validate_length(:template, max: 1500)
+    |> validate_rich_text_length(:description, max: 500)
+    |> validate_rich_text_length(:terms, max: 10_000)
+    |> validate_rich_text_length(:template, max: 1500)
     |> validate_option_currencies()
     |> validate_total()
     |> validate_tags()

@@ -34,7 +34,7 @@ defmodule Banchan.AccountsTest.Settings do
       assert {:ok,
               %User{
                 id: ^user_id,
-                moderation_notes: "did a bad",
+                moderation_notes: "<p>\ndid a bad</p>\n",
                 roles: [:artist]
               }} =
                Accounts.update_admin_fields(admin, user, %{
@@ -92,8 +92,7 @@ defmodule Banchan.AccountsTest.Settings do
 
       assert %{
                moderation_notes: [
-                 "Disallowed HTML detected. Some tags, like <script>, are not allowed.",
-                 "should be at most 500 character(s)"
+                 "Must be 500 characters or less."
                ],
                roles: ["is invalid"]
              } = errors_on(changeset)

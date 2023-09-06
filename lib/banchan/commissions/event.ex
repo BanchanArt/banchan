@@ -16,7 +16,7 @@ defmodule Banchan.Commissions.Event do
     field :public_id, :string, autogenerate: {Common, :gen_public_id, []}
 
     field :type, Ecto.Enum, values: Common.event_types()
-    field :text, :string
+    field :text, Banchan.Ecto.RichText
     field :amount, Money.Ecto.Composite.Type
 
     field :status, Ecto.Enum,
@@ -94,7 +94,6 @@ defmodule Banchan.Commissions.Event do
 
   defp validate_text(changeset) do
     changeset
-    |> validate_markdown(:text)
-    |> validate_length(:text, max: 1500)
+    |> validate_rich_text_length(:text, max: 1500)
   end
 end

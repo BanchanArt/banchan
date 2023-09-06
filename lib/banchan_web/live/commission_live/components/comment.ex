@@ -10,7 +10,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   alias Surface.Components.Form
 
-  alias BanchanWeb.Components.{Button, Icon, Markdown, ReportModal, UserHandle}
+  alias BanchanWeb.Components.{Button, Icon, ReportModal, RichText, UserHandle}
   alias BanchanWeb.Components.Form.{QuillInput, Submit}
   alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox}
 
@@ -189,7 +189,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
                             Original Text:
                           </div>
                           <div>
-                            <Markdown content={history.text} class="text-sm max-w-none" />
+                            <RichText content={history.text} class="text-sm max-w-none" />
                           </div>
                         {/if}
                       </div>
@@ -246,7 +246,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             </div>
           </Form>
         {#else}
-          <Markdown content={@event.text} class="text-sm max-w-none" />
+          <RichText content={@event.text} class="text-sm max-w-none" />
         {/if}
       </div>
 
