@@ -15,7 +15,7 @@ defmodule BanchanWeb.OfferingLive.Request do
 
   alias BanchanWeb.CommissionLive.Components.{AddonList, BalanceBox, OfferingBox, Summary}
   alias BanchanWeb.Components.Form.{Checkbox, QuillInput, Submit, TextInput, UploadInput}
-  alias BanchanWeb.Components.{Layout, Markdown}
+  alias BanchanWeb.Components.{Layout, RichText}
   alias BanchanWeb.Endpoint
 
   @impl true
@@ -451,7 +451,7 @@ defmodule BanchanWeb.OfferingLive.Request do
                     <h3 class="py-4 text-sm font-medium opacity-75">Commission Terms and Conditions</h3>
                     <div class="grid grid-cols-1 gap-4">
                       <div class="p-4 overflow-auto border rounded-lg bg-base-100 border-base-content border-opacity-10 max-h-60">
-                        <Markdown content={@terms} />
+                        <RichText content={@terms} />
                       </div>
                       <Checkbox name={:tos_ok} opts={required: true}>
                         I have read and agreed to these Terms.

@@ -9,7 +9,7 @@ defmodule BanchanWeb.ReportLive.Show do
 
   alias Surface.Components.{Form, LiveRedirect}
 
-  alias BanchanWeb.Components.{Avatar, Button, Icon, Layout, Markdown, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Button, Icon, Layout, RichText, UserHandle}
   alias BanchanWeb.Components.Form.{QuillInput, Select, Submit}
 
   @impl true
@@ -161,7 +161,7 @@ defmodule BanchanWeb.ReportLive.Show do
             <h2 class="text-xl font-semibold">
               Report
             </h2>
-            <Markdown content={@report.message} class="pt-4" />
+            <RichText content={@report.message} class="pt-4" />
             <div class="divider" />
             <Form for={@changeset} change="change" submit="submit">
               <Select

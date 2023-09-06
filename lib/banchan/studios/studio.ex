@@ -14,8 +14,8 @@ defmodule Banchan.Studios.Studio do
     field :name, :string
     field :handle, :string
     field :about, :string
-    field :default_terms, :string
-    field :default_template, :string
+    field :default_terms, Banchan.Ecto.RichText
+    field :default_template, Banchan.Ecto.RichText
     field :country, Ecto.Enum, values: Currency.supported_countries() |> Keyword.values()
     field :default_currency, Ecto.Enum, values: Currency.supported_currencies()
     field :payment_currencies, {:array, Ecto.Enum}, values: Currency.supported_currencies()
@@ -103,10 +103,8 @@ defmodule Banchan.Studios.Studio do
       :default_template
     ])
     |> validate_required([:default_currency, :payment_currencies])
-    |> validate_markdown(:default_terms)
-    |> validate_markdown(:default_template)
-    |> validate_length(:default_terms, max: 10_000)
-    |> validate_length(:default_template, max: 1500)
+    |> validate_rich_text_length(:default_terms, max: 10_000)
+    |> validate_rich_text_length(:default_template, max: 1500)
     |> validate_default_currency(:default_currency, :payment_currencies)
   end
 
@@ -155,7 +153,7 @@ defmodule Banchan.Studios.Studio do
     studio
     |> cast(attrs, [:platform_fee, :moderation_notes])
     |> validate_number(:platform_fee, less_than: 1)
-    |> validate_markdown(:moderation_notes)
+    |> validate_rich_text_length(:moderation_notes, max: 2000)
   end
 
   def archive_changeset(studio) do

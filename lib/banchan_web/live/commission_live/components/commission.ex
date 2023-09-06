@@ -10,7 +10,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
   alias Banchan.Commissions.{Commission, Notifications}
   alias Banchan.Payments
 
-  alias BanchanWeb.Components.{Button, Collapse, Icon, Markdown, ReportModal}
+  alias BanchanWeb.Components.{Button, Collapse, Icon, ReportModal, RichText}
   alias BanchanWeb.Components.Form.{Submit, TextInput}
 
   alias BanchanWeb.CommissionLive.Components.{
@@ -244,7 +244,7 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
               <div class="p-4 rounded-lg bg-base-200">
                 <Collapse id="terms-collapse">
                   <:header>Commission Terms</:header>
-                  <Markdown content={@commission.terms} />
+                  <RichText content={@commission.terms} />
                 </Collapse>
               </div>
             {/if}

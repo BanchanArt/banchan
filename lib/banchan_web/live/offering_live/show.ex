@@ -21,10 +21,10 @@ defmodule BanchanWeb.OfferingLive.Show do
     Icon,
     Layout,
     Lightbox,
-    Markdown,
     MasonryGallery,
     OfferingCardImg,
     ReportModal,
+    RichText,
     Tag
   }
 
@@ -253,7 +253,7 @@ defmodule BanchanWeb.OfferingLive.Show do
               </div>
             </div>
             <div class="grid grid-cols-1 gap-4">
-              <Markdown content={@offering.description} />
+              <RichText content={@offering.description} />
               {#if !Enum.empty?(@offering.tags)}
                 <div class="flex flex-row flex-wrap gap-1">
                   {#for tag <- @offering.tags}
@@ -315,7 +315,7 @@ defmodule BanchanWeb.OfferingLive.Show do
             {#if @terms}
               <Collapse id="terms-collapse">
                 <:header><span class="text-sm font-medium opacity-75">Commission Terms</span></:header>
-                <Markdown content={@terms} />
+                <RichText content={@terms} />
               </Collapse>
             {/if}
           </div>

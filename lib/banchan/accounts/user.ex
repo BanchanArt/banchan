@@ -31,7 +31,7 @@ defmodule Banchan.Accounts.User do
 
     # Roles and moderation
     field :roles, {:array, Ecto.Enum}, values: [:system, :admin, :mod, :artist], default: []
-    field :moderation_notes, :string
+    field :moderation_notes, Banchan.Ecto.RichText
     has_one :disable_info, DisableHistory, where: [lifted_at: nil]
     has_many :disable_history, DisableHistory, preload_order: [desc: :disabled_at]
 
@@ -217,8 +217,7 @@ defmodule Banchan.Accounts.User do
       :moderation_notes
     ])
     |> validate_roles(actor, user)
-    |> validate_length(:moderation_notes, max: 500)
-    |> validate_markdown(:moderation_notes)
+    |> validate_rich_text_length(:moderation_notes, max: 500)
   end
 
   @doc """

@@ -7,7 +7,7 @@ defmodule BanchanWeb.Email.Commissions do
   alias Banchan.Commissions
   alias Banchan.Payments
 
-  alias BanchanWeb.Components.Markdown
+  alias BanchanWeb.Components.RichText
 
   def render("receipt.html", assigns) do
     estimate = Commissions.line_item_estimate(assigns.invoice.line_items)
@@ -19,7 +19,7 @@ defmodule BanchanWeb.Email.Commissions do
     ~F"""
     <h2>Banchan Art Payment Receipt</h2>
     <h3>{@commission.title}</h3>
-    <p><Markdown content={@invoice.event.text} /></p>
+    <p><RichText content={@invoice.event.text} /></p>
     <table>
       <tr>
         <th>Item</th>

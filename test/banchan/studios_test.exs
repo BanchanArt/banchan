@@ -117,8 +117,8 @@ defmodule Banchan.StudiosTest do
           attrs
         )
 
-      assert studio.default_terms == "new terms"
-      assert studio.default_template == "new template"
+      assert "<p>\nnew terms</p>\n" == studio.default_terms
+      assert "<p>\nnew template</p>\n" == studio.default_template
 
       from_db = Repo.get!(Studio, studio.id) |> Repo.preload(:artists)
       assert studio.default_terms == from_db.default_terms

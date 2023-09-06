@@ -67,6 +67,18 @@ defmodule Banchan.Validators do
     end)
   end
 
+  def validate_rich_text_length(changeset, field, opts \\ []) do
+    validate_change(changeset, field, fn _, data ->
+      max = Keyword.get(opts, :max)
+
+      if is_nil(max) || data |> HtmlSanitizeEx.strip_tags() |> String.length() <= max do
+        []
+      else
+        [{field, "Must be #{max} characters or less."}]
+      end
+    end)
+  end
+
   # :tags is hardcoded because the trigger expects the column to be called :tags
   def validate_tags(changeset) do
     changeset

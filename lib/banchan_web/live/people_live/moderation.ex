@@ -17,7 +17,7 @@ defmodule BanchanWeb.PeopleLive.Moderation do
     Submit
   }
 
-  alias BanchanWeb.Components.{Avatar, Layout, Markdown, UserHandle}
+  alias BanchanWeb.Components.{Avatar, Layout, RichText, UserHandle}
 
   @impl true
   def mount(%{"handle" => handle}, _session, socket) do
@@ -206,7 +206,7 @@ defmodule BanchanWeb.PeopleLive.Moderation do
                       By <Avatar class="w-4" user={item.disabled_by} /> <UserHandle user={item.disabled_by} />
                     </div>
                   </td>
-                  <td><Markdown content={item.disabled_reason} /></td>
+                  <td><RichText content={item.disabled_reason} /></td>
                   <td title={item.lifted_at && item.lifted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>
                     {item.lifted_at && item.lifted_at |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}
                     {#if item.lifted_by}
@@ -215,7 +215,7 @@ defmodule BanchanWeb.PeopleLive.Moderation do
                       </div>
                     {/if}
                   </td>
-                  <td><Markdown content={item.lifted_reason} /></td>
+                  <td><RichText content={item.lifted_reason} /></td>
                 </tr>
               {/for}
             </table>

@@ -6,7 +6,7 @@ defmodule BanchanWeb.AccountDisabledLive do
 
   alias Banchan.Repo
 
-  alias BanchanWeb.Components.{Layout, Markdown}
+  alias BanchanWeb.Components.{Layout, RichText}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -39,7 +39,7 @@ defmodule BanchanWeb.AccountDisabledLive do
             <div class="text-xl">
               Reason
             </div>
-            <Markdown content={@current_user.disable_info.disabled_reason} />
+            <RichText content={@current_user.disable_info.disabled_reason} />
           </div>
         </div>
       </div>
