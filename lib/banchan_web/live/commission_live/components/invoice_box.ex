@@ -338,9 +338,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-title">Payment in Process</div>
               <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Payments.print_money(@event.invoice.tip)}
-                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
-                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
+                <div class="stat-desc">Thanks for the tip!</div>
               {/if}
               <div class="stat-actions">
                 <div class="flex flex-col gap-2">
@@ -365,9 +363,7 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-title">Payment Succeeded</div>
               <div class="stat-value">{Payments.print_money(@event.invoice.total_charged)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Payments.print_money(@event.invoice.tip)}
-                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
-                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
+                <div class="stat-desc">Thanks for the tip!</div>
               {/if}
               <div class="stat-actions">
                 <div class="flex flex-col gap-2">
@@ -391,18 +387,11 @@ defmodule BanchanWeb.CommissionLive.Components.InvoiceBox do
               <div class="stat-title">Payment Released to Studio</div>
               <div class="stat-value">{Payments.print_money(@event.invoice.total_charged)}</div>
               {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Payments.print_money(@event.invoice.tip)}
-                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
-                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
+                <div class="stat-desc">Thanks for the tip!</div>
               {/if}
             {#match :refunded}
               <div class="stat-title text-warning">Payment Refunded</div>
               <div class="stat-value">{Payments.print_money(@event.invoice.amount)}</div>
-              {#if @event.invoice.tip.amount > 0}
-                <div class="stat-desc">Tip: +{Payments.print_money(@event.invoice.tip)}
-                  ({estimate = Commissions.line_item_estimate(@commission.line_items)
-                  Float.round(@event.invoice.tip.amount / estimate.amount * 100)}%)</div>
-              {/if}
               <div class="stat-desc">Payment has been refunded to the client.</div>
             {#match nil}
               {!-- NOTE: This state happens for a very brief window of time

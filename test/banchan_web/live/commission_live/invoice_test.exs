@@ -424,7 +424,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "Payment has been refunded to the client"
 
       refute artist_page_live
@@ -436,7 +435,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "Payment has been refunded to the client"
 
       refute client_page_live
@@ -517,7 +515,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       # Request errors don't change invoice box state.
       refute invoice_box =~ "Refund failed"
 
@@ -527,7 +524,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       refute invoice_box =~ "Refund failed"
     end
 
@@ -579,7 +575,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "A refund is pending"
 
       invoice_box =
@@ -588,7 +583,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "A refund is pending"
 
       Payments.process_refund_updated(
@@ -610,7 +604,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "Payment has been refunded to the client"
 
       invoice_box =
@@ -619,7 +612,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "Payment has been refunded to the client"
     end
 
@@ -674,7 +666,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "A refund was submitted but was canceled"
 
       invoice_box =
@@ -683,7 +674,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "A refund was submitted but was canceled"
     end
 
@@ -738,7 +728,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "A refund was submitted but requires further action."
       refute invoice_box =~ "Please check your email"
 
@@ -748,7 +737,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "A refund was submitted but requires further action."
       assert invoice_box =~ "Please check your email"
     end
@@ -808,7 +796,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "Refund failed"
       assert invoice_box =~ "due to a lost or stolen card."
 
@@ -818,7 +805,6 @@ defmodule BanchanWeb.CommissionLive.InvoiceTest do
         |> render()
 
       assert invoice_box =~ "$420.00"
-      assert invoice_box =~ "$69.00"
       assert invoice_box =~ "Refund failed"
       assert invoice_box =~ "due to a lost or stolen card."
     end
