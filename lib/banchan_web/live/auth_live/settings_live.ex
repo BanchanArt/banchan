@@ -211,15 +211,7 @@ defmodule BanchanWeb.SettingsLive do
             "Password updated successfully"
           )
 
-        {:noreply,
-         redirect(socket,
-           to:
-             Routes.user_session_path(
-               Endpoint,
-               :refresh_session,
-               Routes.settings_path(Endpoint, :edit)
-             )
-         )}
+        {:noreply, redirect(socket, to: ~p"/settings/refresh_session//settings")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, password_changeset: changeset)}
