@@ -31,7 +31,7 @@ defmodule BanchanWeb.Components.OfferingCard do
       <div class="rounded-t-lg stack-custom">
         <div class="px-2 py-1 text-sm text-right rounded-tl-lg h-fit w-fit availability-status whitespace-nowrap bg-base-300">
           {#if @open? && !is_nil(@total_slots) && !is_nil(@available_slots)}
-            {@available_slots}/{@total_slots} Slots
+            {@available_slots}/{@total_slots} Slots Remaining
           {#elseif @open?}
             Open
           {#else}
