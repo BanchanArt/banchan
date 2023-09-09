@@ -458,27 +458,34 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
               {/if}
             {/if}
             {#if @current_user.id == @commission.client_id}
-              {#if @existing_open || !Commissions.commission_active?(@commission) || !@can_release ||
-                  @deposited.amount == 0}
-                <Button disabled class="w-full btn-sm" label="Release Deposits" />
-              {#else}
-                <Collapse
-                  id={@id <> "-release-confirmation"}
-                  show_arrow={false}
-                  class="my-2 rounded-lg grow bg-base-200"
-                >
-                  <:header>
-                    <button type="button" class="w-full btn btn-primary btn-sm">
-                      Release Deposits
-                    </button>
-                  </:header>
-                  <p class="py-2">Are you sure?</p>
-                  <Button click="release_deposits" class="w-full btn-sm" label="Confirm" />
-                </Collapse>
-                <p>
-                  Upon release, all completed deposits will be <b class="font-bold">taken out of escrow</b> and sent to the studio. You won't be able to ask for a refund from the studio afterwards.
-                </p>
-              {/if}
+              <div class="flex flex-row items-center w-full gap-4">
+                {#if @existing_open}
+                  <a class="grow btn btn-sm btn-primary" href={"#event-#{@existing_open.event.public_id}"}>Pay Invoice</a>
+                {#else}
+                  <Button disabled class="grow btn-sm" label="Pay Invoice" />
+                {/if}
+                {#if @existing_open || !Commissions.commission_active?(@commission) || !@can_release ||
+                    @deposited.amount == 0}
+                  <Button disabled class="grow btn-sm" label="Release Deposits" />
+                {#else}
+                  <Collapse
+                    id={@id <> "-release-confirmation"}
+                    show_arrow={false}
+                    class="my-2 rounded-lg grow bg-base-200"
+                  >
+                    <:header>
+                      <button type="button" class="w-full btn btn-primary btn-sm">
+                        Release Deposits
+                      </button>
+                    </:header>
+                    <p class="py-2">Are you sure?</p>
+                    <Button click="release_deposits" class="grow btn-sm" label="Confirm" />
+                  </Collapse>
+                  <p>
+                    Upon release, all completed deposits will be <b class="font-bold">taken out of escrow</b> and sent to the studio. You won't be able to ask for a refund from the studio afterwards.
+                  </p>
+                {/if}
+              </div>
               {#if !@can_release && @deposited.amount > 0}
                 <p>
                   You can't release any deposits until the total released deposits would
@@ -488,6 +495,9 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
               {/if}
               {#if @existing_open && @deposited.amount > 0}
                 <p>You can't release any deposits until the <a class="link link-primary" href={"#event-#{@existing_open.event.public_id}"}>pending invoice</a> is paid.</p>
+              {/if}
+              {#if !@existing_open}
+                <p>The studio needs to post an invoice before you can pay.</p>
               {/if}
             {/if}
           {/if}
