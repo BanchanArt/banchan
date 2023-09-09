@@ -182,7 +182,7 @@ defmodule Banchan.Commissions.Notifications do
               |> replace_fragment(event)
 
             body = new_event_notification_body(event)
-            {:safe, safe_body} = Phoenix.HTML.html_escape(body)
+            safe_body = HtmlSanitizeEx.basic_html(body)
             {:safe, safe_url} = Phoenix.HTML.html_escape(url)
 
             Notifications.notify_subscribers!(
