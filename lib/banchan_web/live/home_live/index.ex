@@ -17,23 +17,28 @@ defmodule BanchanWeb.HomeLive do
 
   @impl true
   def mount(_params, _session, socket) do
+    order_seed = get_connect_params(socket)["order_seed"] || Prime.generate(16)
+
     offerings =
       Offerings.list_offerings(
         current_user: socket.assigns.current_user,
         page_size: 16,
-        order_by: :featured
+        order_by: :featured,
+        order_seed: order_seed
       )
 
     featured_studios =
       Studios.list_studios(
         page_size: 10,
-        order_by: :featured
+        order_by: :featured,
+        order_seed: order_seed
       )
 
     studios =
       Studios.list_studios(
         page_size: 6,
-        order_by: :homepage
+        order_by: :homepage,
+        order_seed: order_seed
       )
 
     categories = [
@@ -52,7 +57,8 @@ defmodule BanchanWeb.HomeLive do
        offerings: offerings,
        studios: studios,
        featured_studios: featured_studios,
-       categories: categories
+       categories: categories,
+       order_seed: order_seed
      )}
   end
 
@@ -102,7 +108,7 @@ defmodule BanchanWeb.HomeLive do
             </Carousel>
           </div>
         </:hero>
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-4" data-order-seed={@order_seed}>
           <Form for={%{}} as={:search} submit="search" class="w-full" opts={role: "search"}>
             <div class="flex flex-row w-full max-w-xl gap-2 mx-auto flex-nowrap md:w-content">
               <TextInput

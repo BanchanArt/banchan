@@ -17,6 +17,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
   prop page_size, :integer, default: 24
   prop infinite, :boolean, default: true
   prop suggest_studios, :boolean, default: false
+  prop order_seed, :number
 
   data offerings, :list
 
@@ -41,7 +42,8 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
       order_by: socket.assigns.order_by || :featured,
       query: socket.assigns.query,
       page_size: socket.assigns.page_size,
-      page: page
+      page: page,
+      order_seed: socket.assigns.order_seed
     )
   end
 

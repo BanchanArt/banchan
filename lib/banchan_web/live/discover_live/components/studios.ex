@@ -10,17 +10,19 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
 
   alias BanchanWeb.Components.{InfiniteScroll, StudioCard}
 
-  prop current_user, :struct, from_context: :current_user
-  prop query, :string
-  prop order_by, :atom, default: :homepage
-  prop page_size, :integer, default: 24
-  prop infinite, :boolean, default: true
-  prop suggest_offerings, :boolean, default: false
+  prop(current_user, :struct, from_context: :current_user)
+  prop(query, :string)
+  prop(order_by, :atom, default: :homepage)
+  prop(order_seed, :number)
+  prop(page_size, :integer, default: 24)
+  prop(infinite, :boolean, default: true)
+  prop(suggest_offerings, :boolean, default: false)
 
-  data studios, :list
+  data(studios, :list)
 
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
+
     {:ok, socket |> assign(studios: list_studios(socket))}
   end
 
@@ -41,7 +43,8 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
       include_pending?: false,
       query: socket.assigns.query,
       page_size: socket.assigns.page_size,
-      page: page
+      page: page,
+      order_seed: socket.assigns.order_seed
     )
   end
 
@@ -67,7 +70,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
       end
 
     ~F"""
-    <discover-studios class="flex flex-col items-center w-full">
+    <discover-studios class="flex flex-col items-center w-full" data-order-seed={@order_seed}>
       {#if Enum.empty?(@studios)}
         <div class="flex flex-col items-center w-full gap-2 py-16">
           <div class="text-2xl">No Results</div>

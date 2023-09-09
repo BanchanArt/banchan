@@ -10,6 +10,11 @@ defmodule BanchanWeb.DiscoverLive.Index do
   alias BanchanWeb.Components.{Icon, Layout}
   alias BanchanWeb.DiscoverLive.Components.{Offerings, Studios}
 
+  def mount(_params, _session, socket) do
+    {:ok,
+     assign(socket, order_seed: get_connect_params(socket)["order_seed"] || Prime.generate(16))}
+  end
+
   @impl true
   def handle_params(params, _uri, socket) do
     socket = param_filters(socket, params)
@@ -118,7 +123,10 @@ defmodule BanchanWeb.DiscoverLive.Index do
 
     ~F"""
     <Layout flashes={@flash}>
-      <div class="flex flex-col items-start w-full gap-0 mx-auto max-w-7xl">
+      <div
+        data-order-seed={@order_seed}
+        class="flex flex-col items-start w-full gap-0 mx-auto max-w-7xl"
+      >
         <div class="flex flex-col items-start w-full gap-4">
           <div class="flex flex-col items-start justify-between w-full gap-4 md:items-center md:flex-row">
             <h1 class="text-3xl">Discover</h1>
@@ -196,6 +204,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
             current_user={@current_user}
             query={@query}
             order_by={@order_by}
+            order_seed={@order_seed}
           />
         {#elseif @type == "offerings"}
           <Offerings
@@ -204,6 +213,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
             current_user={@current_user}
             query={@query}
             order_by={@order_by}
+            order_seed={@order_seed}
           />
         {/if}
       </div>

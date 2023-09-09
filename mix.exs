@@ -95,6 +95,7 @@ defmodule Banchan.MixProject do
       {:phoenix_view, "~> 2.0"},
       {:plug_cowboy, "~> 2.6.1"},
       {:postgrex, "~> 0.17.1"},
+      {:prime, "~> 0.1.1"},
       {:scrivener_ecto, "~> 2.7.0"},
       {:sentry, "~> 8.0.6"},
       {:slugify, "~> 1.3.1"},
