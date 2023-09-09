@@ -61,7 +61,9 @@ defmodule BanchanWeb.CommissionLive.Components.BalanceBox do
           {/if}
           {#if @tipped}
             <div class="flex flex-row items-center">
-              <div class="font-medium grow">Tipped{#if @deposited}{" (+#{Float.round(@tipped.amount / (if(@invoiced, do: @invoiced.amount, else: 0) + @deposited.amount) * 100)}%)"}{/if}:</div>
+              <div class="font-medium grow">Tipped (+{Float.round(
+                  @tipped.amount / (if(@invoiced, do: @invoiced.amount, else: 0) + @deposited.amount) * 100
+                )}%):</div>
               <div class="font-medium">
                 {Payments.print_money(@tipped)}
               </div>
