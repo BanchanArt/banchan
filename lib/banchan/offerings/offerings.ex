@@ -809,8 +809,14 @@ defmodule Banchan.Offerings do
         |> order_by([o], [fragment("CASE WHEN ? IS NULL THEN 1 ELSE 0 END", o.index), o.index])
 
       {:ok, :featured} ->
+        order_seed = Keyword.get(opts, :order_seed, 77)
+
         q
-        |> order_by([o, studio: s], [{:desc, o.inserted_at}, {:desc, s.inserted_at}])
+        # TODO: make a function index to make this performant. It's probably fine for our current small sizes.
+        |> order_by([o], [
+          {:desc, fragment("extract(epoch from ?)::bigint % ?", o.inserted_at, ^order_seed)},
+          {:asc, o.inserted_at}
+        ])
         |> where([o], not is_nil(o.description) and o.description != "")
         |> where([o], not is_nil(o.card_img_id))
         |> where(

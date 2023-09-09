@@ -489,14 +489,24 @@ defmodule Banchan.Studios do
         |> order_by([followers: followers], desc: followers.followers)
 
       {:ok, :homepage} ->
+        order_seed = Keyword.get(opts, :order_seed, 77)
+
         q
-        |> order_by([s], desc: s.inserted_at)
+        |> order_by([s], [
+          {:desc, fragment("extract(epoch from ?)::bigint % ?", s.inserted_at, ^order_seed)},
+          {:asc, s.inserted_at}
+        ])
         |> where([s], not is_nil(s.about) and s.about != "")
         |> where([s], not is_nil(s.card_img_id))
 
       {:ok, :featured} ->
+        order_seed = Keyword.get(opts, :order_seed, 77)
+
         q
-        |> order_by([s], desc: s.inserted_at)
+        |> order_by([s], [
+          {:desc, fragment("extract(epoch from ?)::bigint % ?", s.inserted_at, ^order_seed)},
+          {:asc, s.inserted_at}
+        ])
         |> where([s], s.featured == true)
         |> where([s], not is_nil(s.header_img_id) or not is_nil(s.card_img_id))
 

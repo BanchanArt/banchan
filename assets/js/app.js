@@ -6,9 +6,11 @@ import { LiveSocket } from "phoenix_live_view"
 import { replaceIcons } from "./_hooks/BanchanWeb.Components.Icon.hooks"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+const orderSeed = document.querySelector("[data-order-seed]")?.dataset.orderSeed
 const liveSocket = new LiveSocket('/live', Socket, {
   params: {
-    _csrf_token: csrfToken
+    _csrf_token: csrfToken,
+    order_seed: orderSeed == null ? null :parseInt(orderSeed)
   },
   hooks: Hooks
 })
