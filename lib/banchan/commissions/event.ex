@@ -16,7 +16,7 @@ defmodule Banchan.Commissions.Event do
     field :public_id, :string, autogenerate: {Common, :gen_public_id, []}
 
     field :type, Ecto.Enum, values: Common.event_types()
-    field :text, Banchan.Ecto.RichText
+    field :text, :string
     field :amount, Money.Ecto.Composite.Type
 
     field :status, Ecto.Enum,
