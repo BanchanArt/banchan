@@ -232,7 +232,7 @@ defmodule BanchanWeb.PeopleLive.Show do
                 {/if}
               </div>
             </div>
-            <div class="flex flex-col w-full m-4 mx-8 md:hidden">
+            <div class="flex flex-col w-full p-4 px-8 md:hidden">
               {#if !@user.disable_info}
                 <h1 class="text-xl font-bold">
                   {@user.name}
@@ -241,21 +241,21 @@ defmodule BanchanWeb.PeopleLive.Show do
               <UserHandle link={false} user={@user} />
             </div>
             {#if !@user.disable_info && @user.bio}
-              <div class="w-full mx-6 my-4">
+              <div class="w-full px-6 my-4">
                 {@user.bio}
               </div>
             {/if}
             {#if !@user.disable_info && !Enum.empty?(@user.tags)}
-              <div class="flex flex-row flex-wrap w-full gap-1 mx-6 my-4">
+              <div class="flex flex-row flex-wrap w-full gap-1 px-6 my-4">
                 {#for tag <- @user.tags}
                   <Tag tag={tag} />
                 {/for}
               </div>
             {/if}
             {#if Utils.has_socials?(@user)}
-              <Socials entity={@user} class="my-4 mx-6" />
+              <Socials entity={@user} class="my-4 px-6" />
             {/if}
-            <div class="flex flex-row gap-4 mx-6 my-4">
+            <div class="flex flex-row gap-4 px-6 my-4">
               <LivePatch class="hover:link" to={~p"/people/#{@user.handle}/following"}>
                 <span class="font-bold">
                   {#if @following > 9999}
