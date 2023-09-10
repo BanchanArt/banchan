@@ -98,3 +98,4 @@ The undersigned have all agreed to this CLA:
 * Ryan Shipp (@rshipp)
 * Serra Allgood (@serra-allgood)
 * Rajath R (@rjt-rockx)
+* Alex Savage (@alexsavage)
