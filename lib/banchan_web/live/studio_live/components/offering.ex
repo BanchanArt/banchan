@@ -163,8 +163,25 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     changeset = %OfferingOption{} |> OfferingOption.changeset(%{})
     options = Ecto.Changeset.fetch_field!(socket.assigns.changeset, :options) ++ [changeset]
 
+    changeset =
+      if is_nil(socket.assigns.offering) do
+        %Offering{}
+        |> Offerings.change_offering(
+          socket.assigns.changeset.changes
+          |> Map.delete(:options)
+        )
+        |> Map.put(:action, :insert)
+      else
+        socket.assigns.offering
+        |> Offerings.change_offering(
+          socket.assigns.changeset.changes
+          |> Map.delete(:options)
+        )
+        |> Map.put(:action, :update)
+      end
+
     offering_changeset =
-      socket.assigns.changeset
+      changeset
       |> Ecto.Changeset.put_assoc(:options, options)
 
     {:noreply, assign(socket, changeset: offering_changeset)}
@@ -176,8 +193,25 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     options = Ecto.Changeset.fetch_field!(socket.assigns.changeset, :options)
     options = List.delete_at(options, index)
 
+    changeset =
+      if is_nil(socket.assigns.offering) do
+        %Offering{}
+        |> Offerings.change_offering(
+          socket.assigns.changeset.changes
+          |> Map.delete(:options)
+        )
+        |> Map.put(:action, :insert)
+      else
+        socket.assigns.offering
+        |> Offerings.change_offering(
+          socket.assigns.changeset.changes
+          |> Map.delete(:options)
+        )
+        |> Map.put(:action, :update)
+      end
+
     offering_changeset =
-      socket.assigns.changeset
+      changeset
       |> Ecto.Changeset.put_assoc(:options, options)
 
     {:noreply, assign(socket, changeset: offering_changeset)}
