@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "*": ["./assets/node_modules/*"]
+    },
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false
+  }
+}

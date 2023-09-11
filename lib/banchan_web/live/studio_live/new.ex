@@ -13,7 +13,8 @@ defmodule BanchanWeb.StudioLive.New do
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
-    MultipleSelect,
+    LitSelect,
+    # MultipleSelect,
     Select,
     Submit,
     TextArea,
@@ -140,7 +141,8 @@ defmodule BanchanWeb.StudioLive.New do
               options={@currencies}
               opts={required: true}
             />
-            <MultipleSelect
+            <LitSelect
+              id="payment_currencies"
               name={:payment_currencies}
               info="Currencies you want to invoice with. Note that people from other countries can still pay you even if their local currency isn't listed here, so you can just pick based on what will look right for your clients."
               options={@currencies}
