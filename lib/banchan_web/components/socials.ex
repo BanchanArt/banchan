@@ -133,7 +133,7 @@ defmodule BanchanWeb.Components.Socials do
         rel="noopener noreferrer"
         href={"https://picarto.tv/#{@entity.picarto_channel}"}
       >
-        <img width="16" src={Routes.static_path(Endpoint, "/images/picarto-favicon.svg")}><div class="font-medium text-sm hover:link">{@entity.pixiv_handle}</div>
+        <img width="16" src={Routes.static_path(Endpoint, "/images/picarto-favicon.svg")}><div class="font-medium text-sm hover:link">{@entity.picarto_channel}</div>
       </a>
       <a
         :if={@entity.tiktok_handle}

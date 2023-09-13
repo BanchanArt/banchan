@@ -137,7 +137,7 @@ defmodule Banchan.Validators do
     |> validate_format(:twitter_handle, ~r/^[a-zA-Z0-9_]+$/,
       message: "must be a valid Twitter handle, without the @ sign."
     )
-    |> validate_format(:instagram_handle, ~r/^[a-zA-Z0-9_]+$/,
+    |> validate_format(:instagram_handle, ~r/^[a-zA-Z0-9_.]+$/,
       message: "must be a valid Instagram handle, without the @ sign."
     )
     |> validate_format(:facebook_url, ~r/^https:\/\/(www\.)?facebook\.com\/.+$/,
