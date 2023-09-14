@@ -142,7 +142,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                   <LiveRedirect
                     label="Edit Profile"
                     to={Routes.studio_edit_path(Endpoint, :edit, @studio.handle)}
-                    class="px-2 py-0 my-2 rounded-full btn btn-sm btn-primary grow-0"
+                    class="px-4 py-2 my-2 rounded-full btn btn-sm btn-primary grow-0"
                   />
                 {/if}
               </div>
