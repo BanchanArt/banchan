@@ -156,7 +156,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
                     options={
                       "For You": :homepage,
                       Newest: :newest,
-                      Earliest: :oldest,
+                      Oldest: :oldest,
                       Followers: :followers
                     }
                   />
@@ -168,7 +168,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
                     options={
                       "For You": :featured,
                       Newest: :newest,
-                      Earliest: :oldest,
+                      Oldest: :oldest,
                       Cheapest: :price_low,
                       Fanciest: :price_high
                     }
