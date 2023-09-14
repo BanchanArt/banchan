@@ -63,14 +63,15 @@ defmodule BanchanWeb.Components.Form.LitSelect do
           {#if @icon}
             <Icon name={"#{@icon}"} size="4" />
           {/if}
-          <bc-lit-select
-            class="w-full"
-            id={@id <> "-hook"}
-            :hook="LitSelect"
-            phx-update="ignore"
-          >
-            <option value="foo" />
-          </bc-lit-select>
+          {#if @options && !Enum.empty?(@options)}
+            <bc-lit-select class="w-full" id={@id <> "-hook"} :hook="LitSelect" phx-update="ignore">
+              {#for {label, value} <- @options}
+                <option class="hidden" value={value}>{label}</option>
+              {/for}
+            </bc-lit-select>
+          {#else}
+            <bc-lit-select class="w-full" id={@id <> "-hook"} :hook="LitSelect" phx-update="ignore" />
+          {/if}
           <TextInput class="hidden value-input" value={@selected} opts={@opts} />
           <#slot {@right} />
         </div>

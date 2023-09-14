@@ -1,4 +1,4 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, adoptStyles, html, css } from "lit";
 import {
   customElement,
   property,
@@ -23,6 +23,18 @@ export const LitSelect = makeHook(LitSelectHook);
 
 @customElement("bc-lit-select")
 export class LitSelectElement extends LitElement {
+  static styles = css`
+    ::slotted(*) {
+      display: none;
+    }
+  `;
+
+  connectedCallback() {
+    super.connectedCallback();
+    // This is so we can use Tailwind styles.
+    adoptStyles(this.shadowRoot, [LitSelectElement.styles, (window as any).STYLES]);
+  }
+
   @property()
   hook?: LitSelectHook;
 
@@ -34,11 +46,6 @@ export class LitSelectElement extends LitElement {
 
   @queryAssignedElements({ selector: "option" })
   options!: HTMLElement[];
-
-  protected createRenderRoot(): Element | ShadowRoot {
-    // Disable shadow DOM so we use global Tailwind styles
-    return this;
-  }
 
   // Render the UI as a function of component state
   render() {
@@ -92,19 +99,19 @@ export class LitSelectElement extends LitElement {
       -->
               <li
                 class="relative cursor-default select-none py-2 pl-3 pr-9 text-base-content"
-                id="option-0"
+                id="option-${index}"
                 role="option"
                 tabindex="-1"
               >
                 <!-- Selected: "font-semibold" -->
-                <span class="block truncate">Leslie Alexander</span>
+                <span class="block truncate">${option.innerText}</span>
 
                 <!--
           Checkmark, only display for selected option.
 
           Active: "text-white", Not Active: "text-indigo-600"
         -->
-                
+
                 <span
                   class="absolute inset-y-0 right-0 flex items-center pr-4 text-primary"
                 >

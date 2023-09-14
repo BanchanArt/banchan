@@ -1,3 +1,4 @@
+import "./styles.js"
 import "phoenix_html"
 import { Socket, LongPoll } from "phoenix"
 import topbar from "topbar"
@@ -10,7 +11,7 @@ const orderSeed = document.querySelector("[data-order-seed]")?.dataset.orderSeed
 const liveSocket = new LiveSocket('/live', Socket, {
   params: {
     _csrf_token: csrfToken,
-    order_seed: orderSeed == null ? null :parseInt(orderSeed)
+    order_seed: orderSeed == null ? null : parseInt(orderSeed)
   },
   hooks: Hooks
 })
