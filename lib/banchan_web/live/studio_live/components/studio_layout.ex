@@ -129,7 +129,7 @@ defmodule BanchanWeb.StudioLive.Components.StudioLayout do
                   </div>
                 {/if}
                 {#if @current_user && !@current_user_member?}
-                  <Button click="toggle_follow" class="px-2 py-0 my-2 ml-auto rounded-full btn-sm btn-primary">
+                  <Button click="toggle_follow" class="px-4 py-2 my-2 ml-auto rounded-full btn-sm btn-primary">
                     {if @user_following? do
                       "Unfollow"
                     else
