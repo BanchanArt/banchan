@@ -227,7 +227,7 @@ defmodule BanchanWeb.PeopleLive.Show do
                   <LiveRedirect
                     label="Edit Profile"
                     to={~p"/people/#{@user.handle}/edit"}
-                    class="px-2 py-0 m-2 rounded-full btn btn-sm btn-primary grow-0"
+                    class="px-4 py-2 m-2 rounded-full btn btn-sm btn-primary grow-0"
                   />
                 {/if}
               </div>
