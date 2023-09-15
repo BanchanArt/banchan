@@ -18,9 +18,8 @@ import { customElement, property, state } from "lit/decorators.js";
 // export const LitSelect = makeHook(LitSelectHook);
 
 // TODO:
-// * Incremental search
+// * Incremental search (String#includes() is probably good enough here)
 // * Show pills for current selections in input box, like Tags does.
-// * Keyboard navigation
 // * Transitions
 // * Make sure mobile doesn't zoom on focus? Maybe? Should probably leave this
 //   alone.
@@ -87,7 +86,7 @@ export class LitSelectElement extends LitElement {
     this.selected = new Set(this.selected);
   }
 
-  _handleItemClick(index: number) {
+  _select(index: number) {
     const wasSelected = this.selected.has(index);
     // Trigger a render.
     if (this.multi) {
@@ -119,9 +118,47 @@ export class LitSelectElement extends LitElement {
     );
   }
 
+  _handleKeydown(e: KeyboardEvent) {
+    switch (e.key) {
+      case "Enter":
+        e.stopPropagation();
+        if (this.highlighted != null) {
+          this._select(this.highlighted);
+        }
+        break;
+      case "ArrowDown":
+        this._down();
+        break;
+      case "ArrowUp":
+        this._up();
+        break;
+    }
+    e.preventDefault();
+  }
+
+  _down() {
+    if (this.highlighted == null) {
+      this.highlighted = 0;
+      return;
+    }
+    const items = this.querySelectorAll("option");
+    const max = items.length - 1;
+    this.highlighted = this.highlighted === max ? 0 : this.highlighted + 1;
+  }
+
+  _up() {
+    const items = this.querySelectorAll("option");
+    const max = items.length - 1;
+    if (this.highlighted == null) {
+      this.highlighted = max;
+      return;
+    }
+    this.highlighted = this.highlighted === 0 ? max : this.highlighted - 1;
+  }
+
   // Render the UI as a function of component state
   render() {
-    return html`<div>
+    return html`<div @keydown=${this._handleKeydown}>
       <div class="relative mt-2">
         <input
           id="combobox"
@@ -184,7 +221,7 @@ export class LitSelectElement extends LitElement {
                 @mouseenter=${() => {
                   this.highlighted = index;
                 }}
-                @click=${() => this._handleItemClick(index)}
+                @click=${() => this._select(index)}
               >
                 <span
                   class="truncate ${classMap({
