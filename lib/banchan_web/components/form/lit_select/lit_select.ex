@@ -2,32 +2,33 @@ defmodule BanchanWeb.Components.Form.LitSelect do
   @moduledoc """
   Lit-based, mostly-client-side <select> component.
   """
-  use BanchanWeb, :live_component
+  use BanchanWeb, :component
 
   alias BanchanWeb.Components.Icon
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Field, Label, TextInput}
+  alias Surface.Components.Form.{ErrorTag, Field, Label, MultipleSelect, Select}
 
-  prop name, :any, required: true
-  prop opts, :keyword, default: []
-  prop class, :css_class
-  prop wrapper_class, :css_class
-  prop label, :string
-  prop show_label, :boolean, default: true
-  prop focus_label_first, :boolean, default: true
-  prop icon, :string
-  prop caption, :string
-  prop info, :string
-  prop prompt, :string
-  prop selected, :any
-  prop options, :any, default: []
-  prop form, :form, from_context: {Form, :form}
+  prop(name, :any, required: true)
+  prop(opts, :keyword, default: [])
+  prop(class, :css_class)
+  prop(wrapper_class, :css_class)
+  prop(label, :string)
+  prop(show_label, :boolean, default: true)
+  prop(focus_label_first, :boolean, default: true)
+  prop(icon, :string)
+  prop(caption, :string)
+  prop(info, :string)
+  prop(prompt, :string)
+  prop(selected, :any)
+  prop(options, :any, default: [])
+  prop(multiple, :boolean, default: false)
+  prop(form, :form, from_context: {Form, :form})
 
-  slot label_end
-  slot left
-  slot right
-  slot caption_end
+  slot(label_end)
+  slot(left)
+  slot(right)
+  slot(caption_end)
 
   def render(assigns) do
     ~F"""
@@ -63,16 +64,15 @@ defmodule BanchanWeb.Components.Form.LitSelect do
           {#if @icon}
             <Icon name={"#{@icon}"} size="4" />
           {/if}
-          {#if @options && !Enum.empty?(@options)}
-            <bc-lit-select class="w-full" id={@id <> "-hook"} :hook="LitSelect" phx-update="ignore">
-              {#for {label, value} <- @options}
-                <option class="hidden" value={value}>{label}</option>
-              {/for}
+          {#if @multiple}
+            <bc-lit-select class="w-full" multi>
+              <MultipleSelect class="hidden" selected={@selected} options={@options} opts={@opts} />
             </bc-lit-select>
           {#else}
-            <bc-lit-select class="w-full" id={@id <> "-hook"} :hook="LitSelect" phx-update="ignore" />
+            <bc-lit-select class="w-full">
+              <Select class="hidden" selected={@selected} options={@options} opts={@opts} />
+            </bc-lit-select>
           {/if}
-          <TextInput class="hidden value-input" value={@selected} opts={@opts} />
           <#slot {@right} />
         </div>
         <ErrorTag class="help text-error" />
