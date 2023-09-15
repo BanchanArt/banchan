@@ -122,18 +122,24 @@ export class LitSelectElement extends LitElement {
     switch (e.key) {
       case "Enter":
         e.stopPropagation();
-        if (this.highlighted != null) {
+        if (e.ctrlKey) {
+          this.querySelector("select")?.form?.dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+          );
+        } else if (this.highlighted != null) {
           this._select(this.highlighted);
         }
+        e.preventDefault();
         break;
       case "ArrowDown":
         this._down();
+        e.preventDefault();
         break;
       case "ArrowUp":
         this._up();
+        e.preventDefault();
         break;
     }
-    e.preventDefault();
   }
 
   _down() {
