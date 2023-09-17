@@ -18,8 +18,10 @@ import { customElement, property, state } from "lit/decorators.js";
 // export const LitSelect = makeHook(LitSelectHook);
 
 // TODO:
-// * Incremental search (String#includes() is probably good enough here)
+// * highlight multiple things, incl. Shift+arrow management
 // * Show pills for current selections in input box, like Tags does.
+// * Allow combo vs dropdown modes.
+// * slot-based custom styling for option bodies.
 // * Transitions
 // * Make sure mobile doesn't zoom on focus? Maybe? Should probably leave this
 //   alone.
@@ -47,6 +49,9 @@ export class LitSelectElement extends LitElement {
   @state()
   highlighted?: number;
 
+  @state()
+  filter?: string;
+
   connectedCallback() {
     super.connectedCallback();
     // This is so we can use Tailwind styles.
@@ -65,6 +70,20 @@ export class LitSelectElement extends LitElement {
     super.disconnectedCallback();
   }
 
+  _getOptions() {
+    return Array.from(this.querySelectorAll("option"))
+      .map((option, index) => ({ option, index }))
+      .filter(({ option }) => {
+        if (this.filter) {
+          return option.innerText
+            .toUpperCase()
+            .includes(this.filter.toUpperCase());
+        } else {
+          return true;
+        }
+      });
+  }
+
   _handleDocKeydown = (event: KeyboardEvent) => {
     if (event.key === "Escape") {
       this.open = false;
@@ -78,7 +97,7 @@ export class LitSelectElement extends LitElement {
   };
 
   _updateSelected() {
-    this.querySelectorAll("option").forEach((option, index) => {
+    this._getOptions().forEach(({ option, index }) => {
       if (option.hasAttribute("selected")) {
         this.selected.add(index);
       }
@@ -121,15 +140,18 @@ export class LitSelectElement extends LitElement {
   _handleKeydown(e: KeyboardEvent) {
     switch (e.key) {
       case "Enter":
-        e.stopPropagation();
         if (e.ctrlKey) {
+          e.stopPropagation();
+          e.preventDefault();
           this.querySelector("select")?.form?.dispatchEvent(
             new Event("submit", { bubbles: true, cancelable: true })
           );
-        } else if (this.highlighted != null) {
+        }
+        break;
+      case "Space":
+        if (this.highlighted != null) {
           this._select(this.highlighted);
         }
-        e.preventDefault();
         break;
       case "ArrowDown":
         this._down();
@@ -147,14 +169,14 @@ export class LitSelectElement extends LitElement {
       this.highlighted = 0;
       return;
     }
-    const items = this.querySelectorAll("option");
-    const max = items.length - 1;
+    const items = this._getOptions();
+    const max = items[items.length - 1].index;
     this.highlighted = this.highlighted === max ? 0 : this.highlighted + 1;
   }
 
   _up() {
-    const items = this.querySelectorAll("option");
-    const max = items.length - 1;
+    const items = this._getOptions();
+    const max = items[items.length - 1].index;
     if (this.highlighted == null) {
       this.highlighted = max;
       return;
@@ -179,6 +201,9 @@ export class LitSelectElement extends LitElement {
           }}
           @click=${() => {
             this.open = true;
+          }}
+          @input=${(e) => {
+            this.filter = (e.target as HTMLInputElement).value;
           }}
         />
         <button
@@ -210,7 +235,7 @@ export class LitSelectElement extends LitElement {
           id="options"
           role="listbox"
         >
-          ${Array.from(this.querySelectorAll("option")).map((option, index) => {
+          ${this._getOptions().map(({ option, index }) => {
             let selected = this.selected?.has(index) ?? false;
             let highlighted = this.highlighted === index;
             return html`
@@ -224,6 +249,9 @@ export class LitSelectElement extends LitElement {
                 id="option-${index}"
                 role="option"
                 tabindex="-1"
+                aria-selected="${highlighted}"
+                aria-checked="${selected}"
+                aria-label=${option.innerText}
                 @mouseenter=${() => {
                   this.highlighted = index;
                 }}
