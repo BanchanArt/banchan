@@ -11,8 +11,8 @@ defmodule BanchanWeb.PeopleLive.Moderation do
   alias Banchan.Repo
 
   alias BanchanWeb.Components.Form.{
+    ComboBox,
     DateTimeLocalInput,
-    MultipleSelect,
     QuillInput,
     Submit
   }
@@ -150,7 +150,8 @@ defmodule BanchanWeb.PeopleLive.Moderation do
             <div class="text-xl">
               Manage User @{@user.handle}
             </div>
-            <MultipleSelect
+            <ComboBox
+              multiple
               info="User roles to apply to this user. Can select multiple items."
               name={:roles}
               options={@roles}

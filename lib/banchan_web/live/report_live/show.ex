@@ -10,7 +10,7 @@ defmodule BanchanWeb.ReportLive.Show do
   alias Surface.Components.{Form, LiveRedirect}
 
   alias BanchanWeb.Components.{Avatar, Button, Icon, Layout, RichText, UserHandle}
-  alias BanchanWeb.Components.Form.{QuillInput, Select, Submit}
+  alias BanchanWeb.Components.Form.{ComboBox, QuillInput, Submit}
 
   @impl true
   def handle_params(%{"id" => report_id}, _uri, socket) do
@@ -164,7 +164,7 @@ defmodule BanchanWeb.ReportLive.Show do
             <RichText content={@report.message} class="pt-4" />
             <div class="divider" />
             <Form for={@changeset} change="change" submit="submit">
-              <Select
+              <ComboBox
                 name={:status}
                 options={
                   New: :new,

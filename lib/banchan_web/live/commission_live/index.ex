@@ -15,7 +15,7 @@ defmodule BanchanWeb.CommissionLive do
 
   alias BanchanWeb.CommissionLive.Components.CommissionRow
   alias BanchanWeb.Components.{Collapse, Icon, InfiniteScroll, Layout}
-  alias BanchanWeb.Components.Form.{Checkbox, MultipleSelect, Select, TextInput}
+  alias BanchanWeb.Components.Form.{Checkbox, ComboBox, TextInput}
 
   alias BanchanWeb.CommissionLive.Components.Commission
 
@@ -462,8 +462,8 @@ defmodule BanchanWeb.CommissionLive do
                   {#if is_nil(@studio)}
                     <TextInput name={:studio} />
                   {/if}
-                  <MultipleSelect name={:statuses} options={@status_options} />
-                  <Select
+                  <ComboBox multiple name={:statuses} options={@status_options} />
+                  <ComboBox
                     name={:sort_by}
                     class="select select-bordered shrink"
                     selected={@order_by}

@@ -12,7 +12,7 @@ defmodule BanchanWeb.ReportLive.Index do
   alias Surface.Components.Form.TextInput, as: SurfaceTextInput
 
   alias BanchanWeb.Components.{Avatar, Collapse, Icon, InfiniteScroll, Layout, UserHandle}
-  alias BanchanWeb.Components.Form.{MultipleSelect, Select, TextInput}
+  alias BanchanWeb.Components.Form.{ComboBox, TextInput}
 
   @status_options [
     {"Any", nil},
@@ -231,8 +231,8 @@ defmodule BanchanWeb.ReportLive.Index do
             <div class="divider" />
             <TextInput name={:reporter} />
             <TextInput name={:investigator} />
-            <MultipleSelect name={:statuses} options={@status_options} />
-            <Select
+            <ComboBox multiple name={:statuses} options={@status_options} />
+            <ComboBox
               name={:order_by}
               class="select select-bordered shrink"
               options={
