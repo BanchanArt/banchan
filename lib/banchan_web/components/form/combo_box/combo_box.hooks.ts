@@ -184,19 +184,19 @@ export class ComboBoxElement extends LitElement {
   }
 
   render() {
-    return html`<div class="relative w-full bg-p-0">
+    return html`<div
+      class="relative w-full bg-p-0"
+      @focusout=${(e: FocusEvent) => {
+        this.open = (e.currentTarget as HTMLElement).contains(
+          e.relatedTarget as HTMLElement
+        );
+      }}
+    >
       <ul
         class="flex flex-row flex-wrap px-2 gap-2 border focus-within:ring ring-primary border-base-content border-opacity-20 bg-base-100 rounded-btn cursor-text items-center input input-bordered"
         role="combobox"
         aria-controls="options"
         aria-expanded="${this.open}"
-        @focus=${() => {
-          this.open = true;
-        }}
-        @click=${() => {
-          this.open = true;
-          this.shadowRoot?.querySelector("input")?.focus();
-        }}
       >
         ${this.multi
           ? this._getOptions(true)
@@ -231,6 +231,13 @@ export class ComboBoxElement extends LitElement {
               this.filter = (e.target as HTMLInputElement).value;
             }}
             @keydown=${this._handleKeydown}
+            @focus=${() => {
+              this.open = true;
+            }}
+            @click=${() => {
+              this.open = true;
+              this.shadowRoot?.querySelector("input")?.focus();
+            }}
           />
         </li>
       </ul>
