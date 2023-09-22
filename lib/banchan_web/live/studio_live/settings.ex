@@ -16,9 +16,8 @@ defmodule BanchanWeb.StudioLive.Settings do
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
-    MultipleSelect,
+    ComboBox,
     QuillInput,
-    Select,
     Submit,
     TextInput
   }
@@ -38,7 +37,7 @@ defmodule BanchanWeb.StudioLive.Settings do
     {:ok,
      assign(socket,
        changeset: Studio.settings_changeset(socket.assigns.studio, %{}),
-       currencies: [{:"Currencies...", nil} | currencies],
+       currencies: currencies,
        subscribed?:
          Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.studio)
      )}
@@ -224,13 +223,14 @@ defmodule BanchanWeb.StudioLive.Settings do
                 info="Mark this studio as exclusively for mature content. You can still make indiviual mature offerings if this is unchecked."
               />
             {/if}
-            <Select
+            <ComboBox
               name={:default_currency}
               info="Default currency to display in currencies dropdown when entering invoice amounts."
               options={@currencies}
               opts={required: true}
             />
-            <MultipleSelect
+            <ComboBox
+              multiple
               name={:payment_currencies}
               info="Available currencies for invoicing purposes."
               options={@currencies}
