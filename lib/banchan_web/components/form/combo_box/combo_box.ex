@@ -1,6 +1,6 @@
-defmodule BanchanWeb.Components.Form.LitSelect do
+defmodule BanchanWeb.Components.Form.ComboBox do
   @moduledoc """
-  Lit-based, mostly-client-side <select> component.
+  Lit-based, mostly-client-side <select> combo box component.
   """
   use BanchanWeb, :component
 
@@ -65,13 +65,13 @@ defmodule BanchanWeb.Components.Form.LitSelect do
             <Icon name={"#{@icon}"} size="4" />
           {/if}
           {#if @multiple}
-            <bc-lit-select class="w-full" multi>
+            <bc-combo-box class="w-full" multi>
               <MultipleSelect class="hidden" selected={@selected} options={@options} opts={@opts} />
-            </bc-lit-select>
+            </bc-combo-box>
           {#else}
-            <bc-lit-select class="w-full">
+            <bc-combo-box class="w-full">
               <Select class="hidden" selected={@selected} options={@options} opts={@opts} />
-            </bc-lit-select>
+            </bc-combo-box>
           {/if}
           <#slot {@right} />
         </div>

@@ -1,32 +1,15 @@
 import { LitElement, adoptStyles, html, css } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { customElement, property, state } from "lit/decorators.js";
-// import { Hook, makeHook } from "phoenix_typed_hook";
-
-// class LitSelectHook extends Hook {
-//   el: LitSelectElement;
-
-//   mounted() {
-//     this.el.hook = this;
-//   }
-
-//   destroyed() {
-//     this.el.hook = null;
-//   }
-// }
-
-// export const LitSelect = makeHook(LitSelectHook);
 
 // TODO:
 // * highlight multiple things, incl. Shift+arrow management
 // * Allow combo vs dropdown modes.
 // * slot-based custom styling for option bodies.
 // * Transitions
-// * Make sure mobile doesn't zoom on focus? Maybe? Should probably leave this
-//   alone.
 
-@customElement("bc-lit-select")
-export class LitSelectElement extends LitElement {
+@customElement("bc-combo-box")
+export class ComboBoxElement extends LitElement {
   static styles = css`
     ::slotted(*) {
       display: none;
@@ -55,7 +38,7 @@ export class LitSelectElement extends LitElement {
     super.connectedCallback();
     // This is so we can use Tailwind styles.
     adoptStyles(this.shadowRoot, [
-      LitSelectElement.styles,
+      ComboBoxElement.styles,
       (window as any).STYLES,
     ]);
     document.addEventListener("keydown", this._handleDocKeydown);
@@ -200,7 +183,6 @@ export class LitSelectElement extends LitElement {
         : items.findLast(({ index }) => index < this.highlighted)?.index ?? 0;
   }
 
-  // Render the UI as a function of component state
   render() {
     return html`<div class="relative w-full bg-p-0">
       <ul
@@ -216,26 +198,31 @@ export class LitSelectElement extends LitElement {
           this.shadowRoot?.querySelector("input")?.focus();
         }}
       >
-        ${this._getOptions(true)
-          .filter(({ index }) => this.selected.has(index))
-          .map(({ option, index }) => {
-            return html`
-              <li
-                class="flex flex-row items-center max-w-full gap-1 px-2 py-1 text-xs font-semibold text-opacity-75 no-underline uppercase rounded-full cursor-default bg-opacity-10 h-fit w-fit hover:bg-opacity-20 active:bg-opacity-20 border-base-content border-opacity-10 hover:text-opacity-100 active:text-opacity-100 bg-base-content"
-              >
-                <span class="tracking-wide">${option.innerText}</span>
-                <button
-                  type="button"
-                  class="text-xs opacity-50 cursor-pointer hover:opacity-100 active:opacity-100"
-                  aria-controls="options"
-                  aria-label="Remove ${option.innerText}"
-                  @click=${() => this._select(index)}
-                >
-                  ✕
-                </button>
-              </li>
-            `;
-          })}
+        ${this.multi
+          ? this._getOptions(true)
+              .filter(({ index }) => this.selected.has(index))
+              .map(({ option, index }) => {
+                return html`
+                  <li
+                    class="flex flex-row items-center max-w-full gap-1 px-2 py-1 text-xs font-semibold text-opacity-75 no-underline uppercase rounded-full cursor-default bg-opacity-10 h-fit w-fit hover:bg-opacity-20 active:bg-opacity-20 border-base-content border-opacity-10 hover:text-opacity-100 active:text-opacity-100 bg-base-content"
+                  >
+                    <span class="tracking-wide">${option.innerText}</span>
+                    <button
+                      type="button"
+                      class="text-xs opacity-50 cursor-pointer hover:opacity-100 active:opacity-100"
+                      aria-controls="options"
+                      aria-label="Remove ${option.innerText}"
+                      @click=${() => this._select(index)}
+                    >
+                      ✕
+                    </button>
+                  </li>
+                `;
+              })
+          : html`<li>
+              ${this._getOptions(true).find((o) => this.selected.has(o.index))
+                ?.option.innerText ?? ""}
+            </li>`}
         <li>
           <input
             type="text"
