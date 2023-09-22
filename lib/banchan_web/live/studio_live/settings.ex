@@ -37,7 +37,7 @@ defmodule BanchanWeb.StudioLive.Settings do
     {:ok,
      assign(socket,
        changeset: Studio.settings_changeset(socket.assigns.studio, %{}),
-       currencies: [{:"Currencies...", nil} | currencies],
+       currencies: currencies,
        subscribed?:
          Notifications.user_subscribed?(socket.assigns.current_user, socket.assigns.studio)
      )}

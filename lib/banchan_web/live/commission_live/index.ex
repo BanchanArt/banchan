@@ -19,11 +19,7 @@ defmodule BanchanWeb.CommissionLive do
 
   alias BanchanWeb.CommissionLive.Components.Commission
 
-  @status_options [
-    {"Any", nil}
-    | Commissions.Common.status_values()
-      |> Enum.map(&{Commissions.Common.humanize_status(&1), &1})
-  ]
+  @status_options Commissions.Common.status_values() |> Enum.map(&{Commissions.Common.humanize_status(&1), &1})
 
   @impl true
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity

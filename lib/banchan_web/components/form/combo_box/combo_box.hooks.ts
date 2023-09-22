@@ -197,6 +197,13 @@ export class ComboBoxElement extends LitElement {
         role="combobox"
         aria-controls="options"
         aria-expanded="${this.open}"
+        @focus=${() => {
+          this.open = true;
+        }}
+        @click=${() => {
+          this.open = true;
+          this.shadowRoot?.querySelector("input")?.focus();
+        }}
       >
         ${this.multi
           ? this._getOptions(true)
@@ -212,7 +219,12 @@ export class ComboBoxElement extends LitElement {
                       class="text-xs opacity-50 cursor-pointer hover:opacity-100 active:opacity-100"
                       aria-controls="options"
                       aria-label="Remove ${option.innerText}"
-                      @click=${() => this._select(index)}
+                      @focusout=${(e) => e.stopPropagation()}
+                      @click=${(e) => {
+                        e.stopPropagation();
+                        this._select(index);
+                      }}
+                      @focus=${(e) => e.stopPropagation()}
                     >
                       ✕
                     </button>
@@ -231,13 +243,6 @@ export class ComboBoxElement extends LitElement {
               this.filter = (e.target as HTMLInputElement).value;
             }}
             @keydown=${this._handleKeydown}
-            @focus=${() => {
-              this.open = true;
-            }}
-            @click=${() => {
-              this.open = true;
-              this.shadowRoot?.querySelector("input")?.focus();
-            }}
           />
         </li>
       </ul>

@@ -15,7 +15,6 @@ defmodule BanchanWeb.ReportLive.Index do
   alias BanchanWeb.Components.Form.{ComboBox, TextInput}
 
   @status_options [
-    {"Any", nil},
     {"New", :new},
     {"Investigating", :investigating},
     {"Resolved", :resolved}
