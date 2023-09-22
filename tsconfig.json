@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["es2017", "dom"],
+    "lib": ["es2023", "dom"],
     "baseUrl": ".",
     "paths": {
       "*": ["./assets/node_modules/*"]
