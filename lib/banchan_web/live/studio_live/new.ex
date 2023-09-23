@@ -13,7 +13,8 @@ defmodule BanchanWeb.StudioLive.New do
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
-    ComboBox,
+    MultipleSelect,
+    Select,
     Submit,
     TextArea,
     TextInput
@@ -124,14 +125,14 @@ defmodule BanchanWeb.StudioLive.New do
               label="Mature"
               info="Mark this studio as exclusively for mature content. You can still make indiviual mature offerings if this is unchecked."
             />
-            <ComboBox
+            <Select
               name={:country}
               info="Country where you are based. This must be the same country where your bank is, and it's the only reason we collect this information."
               options={@countries}
               selected={:US}
               opts={required: true}
             />
-            <ComboBox
+            <Select
               name={:default_currency}
               info="Currency that will appear by default in your currency drop down (if you choose more than one currency)."
               prompt="Pick a currency..."
@@ -139,9 +140,8 @@ defmodule BanchanWeb.StudioLive.New do
               options={@currencies}
               opts={required: true}
             />
-            <ComboBox
+            <MultipleSelect
               name={:payment_currencies}
-              multiple
               info="Currencies you want to invoice with. Note that people from other countries can still pay you even if their local currency isn't listed here, so you can just pick based on what will look right for your clients."
               options={@currencies}
               selected={@platform_currency}

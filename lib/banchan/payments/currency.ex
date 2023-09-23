@@ -330,13 +330,13 @@ defmodule Banchan.Payments.Currency do
   defp blank_prefix(_), do: ""
 
   def currency_name(%Money{currency: currency}) do
-    currency_name(currency)
+    currency_symbol(currency)
   end
 
   def currency_name(currency) when is_atom(currency) do
     case currency do
       :VNĐ -> "Vietnamese Dong"
-      other -> Money.Currency.name(other)
+      other -> other
     end
   end
 end

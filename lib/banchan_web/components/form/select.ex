@@ -1,34 +1,33 @@
-defmodule BanchanWeb.Components.Form.ComboBox do
+defmodule BanchanWeb.Components.Form.Select do
   @moduledoc """
-  Lit-based, mostly-client-side <select> combo box component.
+  Banchan-specific TextInput.
   """
   use BanchanWeb, :component
 
   alias BanchanWeb.Components.Icon
 
   alias Surface.Components.Form
-  alias Surface.Components.Form.{ErrorTag, Field, Label, MultipleSelect, Select}
+  alias Surface.Components.Form.{ErrorTag, Field, Label, Select}
 
-  prop(name, :any, required: true)
-  prop(opts, :keyword, default: [])
-  prop(class, :css_class)
-  prop(wrapper_class, :css_class)
-  prop(label, :string)
-  prop(show_label, :boolean, default: true)
-  prop(focus_label_first, :boolean, default: true)
-  prop(icon, :string)
-  prop(caption, :string)
-  prop(info, :string)
-  prop(prompt, :string)
-  prop(selected, :any)
-  prop(options, :any, default: [])
-  prop(multiple, :boolean, default: false)
-  prop(form, :form, from_context: {Form, :form})
+  prop name, :any, required: true
+  prop opts, :keyword, default: []
+  prop class, :css_class
+  prop wrapper_class, :css_class
+  prop label, :string
+  prop show_label, :boolean, default: true
+  prop focus_label_first, :boolean, default: true
+  prop icon, :string
+  prop caption, :string
+  prop info, :string
+  prop prompt, :string
+  prop selected, :any
+  prop options, :any, default: []
+  prop form, :form, from_context: {Form, :form}
 
-  slot(label_end)
-  slot(left)
-  slot(right)
-  slot(caption_end)
+  slot label_end
+  slot left
+  slot right
+  slot caption_end
 
   def render(assigns) do
     ~F"""
@@ -64,15 +63,17 @@ defmodule BanchanWeb.Components.Form.ComboBox do
           {#if @icon}
             <Icon name={"#{@icon}"} size="4" />
           {/if}
-          {#if @multiple}
-            <bc-combo-box class="w-full" multi>
-              <MultipleSelect class="hidden" selected={@selected} options={@options} opts={@opts} />
-            </bc-combo-box>
-          {#else}
-            <bc-combo-box class="w-full">
-              <Select class="hidden" selected={@selected} options={@options} opts={@opts} />
-            </bc-combo-box>
-          {/if}
+          <Select
+            class={
+              "w-full bg-p-0 select select-bordered focus:ring focus:ring-primary",
+              @class,
+              "select-error": !Enum.empty?(Keyword.get_values(@form.errors, @name))
+            }
+            prompt={@prompt}
+            selected={@selected}
+            opts={@opts}
+            options={@options}
+          />
           <#slot {@right} />
         </div>
         <ErrorTag class="help text-error" />
