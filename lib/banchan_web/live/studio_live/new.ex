@@ -13,8 +13,7 @@ defmodule BanchanWeb.StudioLive.New do
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
-    MultipleSelect,
-    Select,
+    ComboBox,
     Submit,
     TextArea,
     TextInput
@@ -27,7 +26,7 @@ defmodule BanchanWeb.StudioLive.New do
   def mount(_params, _session, socket) do
     currencies =
       Payments.supported_currencies()
-      |> Enum.map(&{"#{Payments.currency_name(&1)} (#{Payments.currency_symbol(&1)})", &1})
+      |> Enum.map(&{"#{Payments.currency_symbol(&1)} #{Payments.currency_name(&1)} ", &1})
 
     socket =
       socket
@@ -125,14 +124,14 @@ defmodule BanchanWeb.StudioLive.New do
               label="Mature"
               caption="Mark this studio as exclusively for mature content. You can still make indiviual mature offerings if this is unchecked."
             />
-            <Select
+            <ComboBox
               name={:country}
               caption="Country where you are based. This must be the same country where your bank is, and it's the only reason we collect this information."
               options={@countries}
               selected={:US}
               opts={required: true}
             />
-            <Select
+            <ComboBox
               name={:default_currency}
               caption="Currency that will appear by default in your currency drop down (if you choose more than one currency)."
               prompt="Pick a currency..."
@@ -140,8 +139,9 @@ defmodule BanchanWeb.StudioLive.New do
               options={@currencies}
               opts={required: true}
             />
-            <MultipleSelect
+            <ComboBox
               name={:payment_currencies}
+              multiple
               caption="Currencies you want to invoice with. Note that people from other countries can still pay you even if their local currency isn't listed here, so you can just pick based on what will look right for your clients."
               options={@currencies}
               selected={@platform_currency}

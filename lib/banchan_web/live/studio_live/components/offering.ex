@@ -19,9 +19,9 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
+    ComboBox,
     HiddenInput,
     QuillInput,
-    Select,
     Submit,
     TagsInput,
     TextArea,
@@ -608,7 +608,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           </ul>
         </Context>
         <ErrorTag class="help text-error" field={:options} />
-        <Select
+        <ComboBox
           name={:currency}
           label="Option Currency"
           caption="Currency to use for all options. Only one currency is allowed per offering."

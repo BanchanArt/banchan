@@ -2,7 +2,7 @@
 <html lang="en" data-theme="">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     {#if Application.get_env(:banchan, :git_tag)}
       <meta name="banchan-git-tag" content={Application.get_env(:banchan, :git_tag)}>
       <meta
@@ -78,8 +78,16 @@
           };
       </script>
     {/if}
+    <style>
+      body {
+      min-height: -webkit-fill-available;
+      }
+      html {
+      min-height: -webkit-fill-available;
+      }
+    </style>
   </head>
-  <body class="h-full overflow-hidden bg-base-200">
+  <body class="h-screen overflow-hidden bg-base-200">
     {@inner_content}
   </body>
 </html>
