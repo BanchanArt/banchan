@@ -1632,6 +1632,13 @@ defmodule Banchan.Payments do
           end)
         end)
 
+      {:ok, response} ->
+        Logger.error(
+          "Failed to update exchange rates for #{base_currency} (#{response.status_code}): #{response.body}"
+        )
+
+        {:error, response}
+
       {:error, error} ->
         Logger.error("Failed to update exchange rates for #{base_currency}: #{inspect(error)}")
         {:error, error}
