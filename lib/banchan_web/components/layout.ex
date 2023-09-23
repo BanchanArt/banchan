@@ -218,9 +218,9 @@ defmodule BanchanWeb.Components.Layout do
                   <UserHandle class="text-sm" link={false} user={@current_user} />
                 </Link>
                 <Link to={Routes.user_session_path(Endpoint, :delete)} method={:delete}>
-                  <div class="tooltip" data-tip="Log out">
-                    <Icon name="log-out" size="4" label="log out" class="z-50" />
-                  </div>
+                  {!-- <div class="tooltip" data-tip="Log out"> --}
+                  <Icon name="log-out" size="4" label="log out" class="z-50" />
+                  {!-- </div> --}
                 </Link>
               </div>
             {/if}

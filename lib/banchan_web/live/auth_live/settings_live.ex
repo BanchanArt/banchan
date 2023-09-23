@@ -555,7 +555,7 @@ defmodule BanchanWeb.SettingsLive do
       >
         <h3 class="mb-2 text-xl font-semibold">Muted Words</h3>
         <p>Words here will be used to filter out content that appears in the homepage and in discovery searches.</p>
-        <TextArea name={:muted} info="Enter your desired muted words" label="Muted Words" />
+        <TextArea name={:muted} label="Muted Words" />
         <Submit class="w-fit" changeset={@muted_changeset} label="Save" />
       </Form>
       <div class="divider" />
@@ -571,12 +571,12 @@ defmodule BanchanWeb.SettingsLive do
           <p>By choosing to display mature content on the site, you assert that you are legally an adult in your country and able to view this content.</p>
           <Checkbox
             name={:mature_ok}
-            info="Whether to show mature content items (studios, offerings, etc) at all."
+            caption="Whether to show mature content items (studios, offerings, etc) at all."
             label="List Mature Content"
           />
           <Checkbox
             name={:uncensored_mature}
-            info="Whether to show mature content uncensored. By default, you need to click through to view mature content you come aross."
+            caption="Whether to show mature content uncensored. By default, you need to click through to view mature content you come across."
             label="Uncensor Mature Content by Default"
           />
           <Submit class="w-fit" changeset={@maturity_changeset} label="Save" />

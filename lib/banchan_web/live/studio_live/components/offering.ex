@@ -453,7 +453,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           <Checkbox
             name={:mature}
             label="Mature"
-            caption="Mark this offering as mature content. Note: if you plan on doing mature/NSFW commissions through this offering, this MUST be checked."
+            caption="Mark this offering as mature content. Mandatory if you plan to do mature/NSFW commissions through this."
           />
         {/if}
         <div class="divider" />
@@ -463,12 +463,9 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <div>Leave Max Proposals blank to make it unlimited.</div>
         <TextInput
           name={:max_proposals}
-          info="Max proposals. Unlike slots, these are used as soon as someone makes a proposal. Use this setting to prevent your inbox from getting flooded with too many proposals. Leave blank for unlimited proposals."
+          caption="Used when someone proposes a commission, regardless of being accepted or not."
         />
-        <TextInput
-          name={:slots}
-          info="Max slots available. Slots are used up as you accept commissions. Leave blank for unlimited slots."
-        />
+        <TextInput name={:slots} caption="Used when you accept commissions." />
         <div class="divider" />
         <h2 class="text-2xl">Card Image</h2>
         <div>You must have a card image in order for the offering to be listed on site search. Otherwise, you will only be able to link directly to it.</div>
@@ -579,24 +576,24 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
                         end}
                     </h3>
                   </:header>
-                  <TextInput name={:name} info="Name of the option." opts={required: true} />
-                  <TextArea name={:description} info="Description for the option." opts={required: true} />
+                  <TextInput name={:name} opts={required: true} />
+                  <TextArea name={:description} opts={required: true} />
                   <div class="flex flex-row items-center gap-2 py-2">
                     <div class="flex flex-basis-1/4">
                       {Payments.currency_symbol(Ecto.Changeset.fetch_field!(@changeset, :currency))}
                     </div>
                     <div class="grow">
-                      <TextInput name={:price} info="Quoted price for adding this option." show_label={false} />
+                      <TextInput name={:price} caption="Quoted price for adding this option." show_label={false} />
                     </div>
                   </div>
                   <Checkbox
                     name={:default}
-                    info="Whether this option is always included as part of the commission."
+                    caption="Always include this as part of the commission."
                     label="Always Included"
                   />
                   <Checkbox
                     name={:multiple}
-                    info="Allow multiple instances of this option at the same time."
+                    caption="Allow multiple instances of this option at the same time."
                     label="Allow Multiple"
                   />
                   <Button class="w-full btn-sm btn-error" value={index} click="remove_option">Remove</Button>
@@ -614,7 +611,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         <Select
           name={:currency}
           label="Option Currency"
-          info="Currency to use for all options. Only one currency is allowed per offering."
+          caption="Currency to use for all options. Only one currency is allowed per offering."
           options={@studio.payment_currencies
           |> Enum.map(&{"#{Payments.currency_name(&1)} (#{Payments.currency_symbol(&1)})", &1})}
           opts={required: true}
@@ -627,12 +624,12 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           <QuillInput
             id={@id <> "-tos"}
             name={:terms}
-            info="Terms of service specific to this offering. Leave blank to use your studio's default terms."
+            caption="Terms of service specific to this offering. Leave blank to use your studio's default terms."
           />
           <QuillInput
             id={@id <> "-template"}
             name={:template}
-            info="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
+            caption="Template that clients will see when they start filling out the commission request. Leave blank to use your studio's default template."
           />
         </Collapse>
         <div class="flex flex-row pt-4">

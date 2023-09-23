@@ -165,18 +165,18 @@ defmodule BanchanWeb.StudioLive.Moderation do
     ~F"""
     <Layout flashes={@flash} studio={@studio} padding={0} context={:admin}>
       <div class="w-full bg-base-200">
-        <div class="w-full max-w-7xl p-4 mx-auto">
+        <div class="w-full p-4 mx-auto max-w-7xl">
           <Form as={:studio} for={@changeset} change="change" submit="submit">
             <div class="text-xl">
               Manage {@studio.name}
             </div>
             <TextInput
               name={:platform_fee}
-              info="Multiplier to use when calculating the platform fee paid by this studio for transactions."
+              caption="Multiplier to use when calculating the platform fee paid by this studio for transactions."
             />
             <QuillInput
               id="moderation_notes"
-              info="These are internal notes for admins and moderators about this user. They are not displayed to the user or anyone else."
+              caption="These are internal notes for admins and moderators about this user. They are not displayed to the user or anyone else."
               name={:moderation_notes}
             />
             <Submit class="mt-2" label="Save" changeset={@changeset} />

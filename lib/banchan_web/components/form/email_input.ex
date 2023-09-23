@@ -37,6 +37,7 @@ defmodule BanchanWeb.Components.Form.EmailInput do
           <Label class="p-0 label">
             <span class="flex flex-row items-center gap-1 label-text">
               {@label || Phoenix.Naming.humanize(@name)}
+              {!--
               {#if @info}
                 <div class="tooltip tooltip-right" data-tip={@info}>
                   <Icon
@@ -46,7 +47,7 @@ defmodule BanchanWeb.Components.Form.EmailInput do
                     class="opacity-50 hover:opacity-100 active:opacity-100"
                   />
                 </div>
-              {/if}
+              {/if} --}
             </span>
           </Label>
           {#if slot_assigned?(:label_end) && @focus_label_first}

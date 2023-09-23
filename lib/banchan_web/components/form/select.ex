@@ -40,6 +40,7 @@ defmodule BanchanWeb.Components.Form.Select do
           <Label class="p-0 label">
             <span class="flex flex-row items-center gap-1 label-text">
               {@label || Phoenix.Naming.humanize(@name)}
+              {!--
               {#if @info}
                 <div class="tooltip tooltip-right" data-tip={@info}>
                   <Icon
@@ -49,7 +50,7 @@ defmodule BanchanWeb.Components.Form.Select do
                     class="opacity-50 hover:opacity-100 active:opacity-100"
                   />
                 </div>
-              {/if}
+              {/if} --}
             </span>
           </Label>
           {#if slot_assigned?(:label_end) && @focus_label_first}
@@ -57,6 +58,12 @@ defmodule BanchanWeb.Components.Form.Select do
           {/if}
         </div>
       {/if}
+      {#if @caption}
+        <div class="text-sm text-opacity-50 help text-base-content">
+          {@caption}
+        </div>
+      {/if}
+      <#slot {@caption_end} />
       <div class="grid grid-cols-1 gap-2">
         <div class="flex flex-row w-full gap-4 control">
           <#slot {@left} />
@@ -77,12 +84,6 @@ defmodule BanchanWeb.Components.Form.Select do
           <#slot {@right} />
         </div>
         <ErrorTag class="help text-error" />
-        {#if @caption}
-          <div class="text-sm text-opacity-50 help text-base-content">
-            {@caption}
-          </div>
-        {/if}
-        <#slot {@caption_end} />
         {#if slot_assigned?(:label_end) && !@focus_label_first}
           <div class="absolute top-0 right-0 h-fit">
             <#slot {@label_end} />

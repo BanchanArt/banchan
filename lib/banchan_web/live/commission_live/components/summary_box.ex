@@ -338,7 +338,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
               id={@id <> "-markdown-input"}
               name={:text}
               label="Invoice Text"
-              info="Brief summary of what this invoice is meant to cover, for the record."
+              caption="Brief summary of what this invoice is meant to cover, for the record."
               class="w-full"
             />
             <div class="flex flex-row justify-end gap-2 pt-2">
@@ -388,7 +388,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
               id={@id <> "-markdown-input"}
               name={:text}
               label="Invoice Text"
-              info="Brief summary of what this invoice is meant to cover, for the record."
+              caption="Brief summary of what this invoice is meant to cover, for the record."
               class="w-full"
             />
             <div class="flex flex-row justify-end gap-2 pt-2">

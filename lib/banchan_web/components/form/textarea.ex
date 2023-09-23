@@ -4,7 +4,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
   """
   use BanchanWeb, :component
 
-  alias BanchanWeb.Components.Icon
+  # alias BanchanWeb.Components.Icon
 
   alias Surface.Components.Form
   alias Surface.Components.Form.{ErrorTag, Field, Label, TextArea}
@@ -38,6 +38,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
           <Label class="p-0 label">
             <span class="flex flex-row items-center gap-1 label-text">
               {@label || Phoenix.Naming.humanize(@name)}
+              {!--
               {#if @info}
                 <div class="tooltip tooltip-right" data-tip={@info}>
                   <Icon
@@ -47,7 +48,7 @@ defmodule BanchanWeb.Components.Form.TextArea do
                     class="opacity-50 hover:opacity-100 active:opacity-100"
                   />
                 </div>
-              {/if}
+              {/if} --}
             </span>
             {#if slot_assigned?(:label_end) && @focus_label_first}
               <#slot {@label_end} />
@@ -55,6 +56,12 @@ defmodule BanchanWeb.Components.Form.TextArea do
           </Label>
         </div>
       {/if}
+      {#if @caption}
+        <div class="text-sm text-opacity-50 help text-base-content">
+          {@caption}
+        </div>
+      {/if}
+      <#slot {@caption_end} />
       <div class="grid grid-cols-1 gap-2">
         <div class="flex flex-row gap-2">
           <div class={"control w-full", @wrapper_class}>
@@ -75,12 +82,6 @@ defmodule BanchanWeb.Components.Form.TextArea do
           </div>
         </div>
         <ErrorTag class="help text-error" />
-        {#if @caption}
-          <div class="text-sm text-opacity-50 help text-base-content">
-            {@caption}
-          </div>
-        {/if}
-        <#slot {@caption_end} />
       </div>
       {#if slot_assigned?(:label_end) && !@focus_label_first}
         <div class="absolute top-0 right-0 h-fit">

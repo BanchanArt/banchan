@@ -21,20 +21,20 @@ defmodule BanchanWeb.Components.UserHandle do
         <span class={"inline-flex items-center gap-1", @class}>
           <strong title={@user.name} class="font-semibold hover:underline">{@user.handle}</strong>
           {#if :admin in @user.roles}
-            <div class="tooltip tooltip-right" data-tip="Admin">
-              <Icon name="shield-check" size="4" class="text-error">
-              </Icon>
-            </div>
+            {!-- <div class="tooltip tooltip-right" data-tip="Admin"> --}
+            <Icon name="shield-check" size="4" class="text-error">
+            </Icon>
+            {!-- </div> --}
           {#elseif :mod in @user.roles}
-            <div class="tooltip tooltip-right" data-tip="Moderator">
-              <Icon name="gavel" size="4" class="text-warning">
-              </Icon>
-            </div>
+            {!-- <div class="tooltip tooltip-right" data-tip="Moderator"> --}
+            <Icon name="gavel" size="4" class="text-warning">
+            </Icon>
+            {!-- </div> --}
           {#elseif :system in @user.roles}
-            <div class="tooltip tooltip-right" data-tip="System">
-              <Icon name="bot" size="4" class="text-primary">
-              </Icon>
-            </div>
+            {!-- <div class="tooltip tooltip-right" data-tip="System"> --}
+            <Icon name="bot" size="4" class="text-primary">
+            </Icon>
+            {!-- </div> --}
           {/if}
         </span>
       </LiveRedirect>
@@ -44,28 +44,28 @@ defmodule BanchanWeb.Components.UserHandle do
           {@user.handle}
         </strong>
         {#if :admin in @user.roles}
-          <div class="tooltip tooltip-right" data-tip="Admin">
-            <Icon name="shield-check" size="4" class="text-error">
-            </Icon>
-          </div>
+          {!-- <div class="tooltip tooltip-right" data-tip="Admin"> --}
+          <Icon name="shield-check" size="4" class="text-error">
+          </Icon>
+          {!-- </div> --}
         {#elseif :mod in @user.roles}
-          <div class="tooltip tooltip-right" data-tip="Moderator">
-            <Icon name="gavel" size="4" class="text-warning">
-            </Icon>
-          </div>
+          {!-- <div class="tooltip tooltip-right" data-tip="Moderator"> --}
+          <Icon name="gavel" size="4" class="text-warning">
+          </Icon>
+          {!-- </div> --}
         {#elseif :system in @user.roles}
-          <div class="tooltip tooltip-right" data-tip="System">
-            <Icon name="bot" size="4" class="text-primary">
-            </Icon>
-          </div>
+          {!-- <div class="tooltip tooltip-right" data-tip="System"> --}
+          <Icon name="bot" size="4" class="text-primary">
+          </Icon>
+          {!-- </div> --}
         {/if}
       </span>
     {#else}
       <strong title="User deactivated their account" class="font-semibold">
-        <div class="tooltip tooltip-right" data-tip="Deactivated">
-          <Icon name="circle-slash" size="4" class="text-primary">
-          </Icon>
-        </div>
+        {!-- <div class="tooltip tooltip-right" data-tip="Deactivated"> --}
+        <Icon name="circle-slash" size="4" class="text-primary">
+        </Icon>
+        {!-- </div> --}
       </strong>
     {/if}
     """
