@@ -3,9 +3,9 @@ const colors = require('tailwindcss/colors');
 
 module.exports = {
   mode: "jit",
-  purge: ["./js/**/*.js", "../lib/*_web/**/*.*ex"],
+  purge: ["./js/**/*.{js,ts}", "../lib/*_web/**/*.*ex"],
   content:
-    ["./js/**/*.js", "../lib/*_web.ex", "../lib/*_web/**/*.*ex"],
+    ["./js/**/*.{js,ts}", "../lib/*_web.ex", "../lib/*_web/**/*.*ex"],
   plugins: [
     require('@tailwindcss/aspect-ratio'),
     require('@tailwindcss/forms'),
