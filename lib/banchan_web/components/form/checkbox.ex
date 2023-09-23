@@ -4,7 +4,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
   """
   use BanchanWeb, :component
 
-  alias BanchanWeb.Components.Icon
+  # alias BanchanWeb.Components.Icon
 
   alias Surface.Components.Form
   alias Surface.Components.Form.{Checkbox, ErrorTag, Field, Label}
@@ -42,6 +42,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
               <span class="text-sm opacity-50">{@caption}</span>
             </div>
           </#slot>
+          {!--
           {#if @info}
             <div class="tooltip tooltip-right" data-tip={@info}>
               <Icon
@@ -52,6 +53,7 @@ defmodule BanchanWeb.Components.Form.Checkbox do
               />
             </div>
           {/if}
+          --}
         </div>
       </Label>
       <ErrorTag class="help text-error" />

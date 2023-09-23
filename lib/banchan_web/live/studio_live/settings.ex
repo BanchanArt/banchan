@@ -189,7 +189,7 @@ defmodule BanchanWeb.StudioLive.Settings do
     ~F"""
     <Layout flashes={@flash} studio={@studio} padding={0} context={:studio}>
       <div class="w-full bg-base-200">
-        <div class="w-full max-w-7xl p-4 mx-auto">
+        <div class="w-full p-4 mx-auto max-w-7xl">
           <h2 class="py-6 text-xl">Notifications</h2>
           <div class="pb-6">Manage default notification settings for this studio. For example, whether to receive notifications for new commission requests.</div>
           <Button click="toggle_subscribed">
@@ -221,29 +221,29 @@ defmodule BanchanWeb.StudioLive.Settings do
               <Checkbox
                 name={:mature}
                 label="Mature"
-                info="Mark this studio as exclusively for mature content. You can still make indiviual mature offerings if this is unchecked."
+                caption="Mark this studio as exclusively for mature content. You can still make indiviual mature offerings if this is unchecked."
               />
             {/if}
             <Select
               name={:default_currency}
-              info="Default currency to display in currencies dropdown when entering invoice amounts."
+              caption="Default currency to display in currencies dropdown when entering invoice amounts."
               options={@currencies}
               opts={required: true}
             />
             <MultipleSelect
               name={:payment_currencies}
-              info="Available currencies for invoicing purposes."
+              caption="Available currencies for invoicing purposes."
               options={@currencies}
               opts={required: true}
             />
             <QuillInput
               id="default-terms"
-              info="Default Terms of Service to display to users, when an offering hasn't configured its own."
+              caption="Default Terms of Service to display to users, when an offering hasn't configured its own."
               name={:default_terms}
             />
             <QuillInput
               id="default-template"
-              info="Default commission submission template, when an offering hasn't configured its own."
+              caption="Default commission submission template, when an offering hasn't configured its own."
               name={:default_template}
             />
             <Submit label="Save" />

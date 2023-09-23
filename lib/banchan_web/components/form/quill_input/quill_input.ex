@@ -98,6 +98,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
         <Label class="p-0 label">
           <span class="flex flex-row items-center gap-1 label-text">
             {@label || Phoenix.Naming.humanize(@name)}
+            {!--
             {#if @info}
               <div class="tooltip tooltip-right" data-tip={@info}>
                 <Icon
@@ -108,6 +109,7 @@ defmodule BanchanWeb.Components.Form.QuillInput do
                 />
               </div>
             {/if}
+            --}
           </span>
         </Label>
       {/if}

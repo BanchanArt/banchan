@@ -140,10 +140,10 @@ defmodule BanchanWeb.StudioLive.Edit do
     ~F"""
     <Layout flashes={@flash} studio={@studio} padding={0} context={:studio}>
       <div class="w-full bg-base-200">
-        <div class="w-full max-w-7xl p-4 mx-auto">
+        <div class="w-full p-4 mx-auto max-w-7xl">
           <h2 class="py-6 text-xl">Edit Studio Profile</h2>
           <Form class="flex flex-col gap-2" for={@changeset} change="change" submit="submit">
-            <TextInput name={:name} info="Display name for studio" icon="user" opts={required: true} />
+            <TextInput name={:name} icon="user" opts={required: true} />
             <TextInput name={:handle} icon="at-sign" opts={required: true} />
             <div class="relative">
               {#if Enum.empty?(@uploads.card_image.entries) && (@remove_card || !(@studio && @studio.card_img_id))}
@@ -218,15 +218,8 @@ defmodule BanchanWeb.StudioLive.Edit do
               upload={@uploads.header_image}
               cancel="cancel_header_upload"
             />
-            <TextArea
-              info="Displayed in the 'About' page. The first few dozen characters will also be displayed as the description in studio cards."
-              name={:about}
-            />
-            <TagsInput
-              id="studio_tags"
-              info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
-              name={:tags}
-            />
+            <TextArea name={:about} />
+            <TagsInput id="studio_tags" name={:tags} />
             <Collapse id="socials" class="my-4">
               <:header>
                 Links and Social Media

@@ -145,19 +145,19 @@ defmodule BanchanWeb.PeopleLive.Moderation do
     ~F"""
     <Layout flashes={@flash} padding={0} context={:admin}>
       <div class="w-full bg-base-200">
-        <div class="w-full max-w-7xl p-4 mx-auto">
+        <div class="w-full p-4 mx-auto max-w-7xl">
           <Form as={:user} for={@changeset} change="change" submit="submit">
             <div class="text-xl">
               Manage User @{@user.handle}
             </div>
             <MultipleSelect
-              info="User roles to apply to this user. Can select multiple items."
+              caption="User roles to apply to this user. Can select multiple items."
               name={:roles}
               options={@roles}
             />
             <QuillInput
               id="moderation_notes"
-              info="These are internal notes for admins and moderators about this user. They are not displayed to the user or anyone else."
+              caption="These are internal notes for admins and moderators about this user. They are not displayed to the user or anyone else."
               name={:moderation_notes}
             />
             <Submit label="Save" changeset={@changeset} />

@@ -244,12 +244,7 @@ defmodule BanchanWeb.PeopleLive.Edit do
               />
               <TextInput name={:name} icon="user" opts={required: true, placeholder: "My Cool Name"} />
               <TextArea name={:bio} opts={placeholder: "Tell us a little bit about yourself!"} />
-              <TagsInput
-                id="user_tags"
-                label="Interests"
-                info="Type to search for existing tags. Press Enter or Tab to add the tag. You can make it whatever you want as long as it's 100 characters or shorter."
-                name={:tags}
-              />
+              <TagsInput id="user_tags" label="Interests" name={:tags} />
               <Collapse id="socials" class="my-4">
                 <:header>
                   Links and Social Media
