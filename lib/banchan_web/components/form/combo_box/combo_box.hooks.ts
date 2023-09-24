@@ -66,13 +66,13 @@ export class ComboBoxElement extends LitElement {
 
   _handleDocKeydown = (event: KeyboardEvent) => {
     if (event.key === "Escape") {
-      this.open = false;
+      this._setOpen(false);
     }
   };
 
   _handleDocClick = (event: MouseEvent) => {
     if (!this.contains(event.target as HTMLElement)) {
-      this.open = false;
+      this._setOpen(false);
     }
   };
 
@@ -120,6 +120,7 @@ export class ComboBoxElement extends LitElement {
   }
 
   _handleKeydown(e: KeyboardEvent) {
+    this._setOpen(true);
     switch (e.key) {
       case "Enter":
         if (e.ctrlKey) {
@@ -146,8 +147,9 @@ export class ComboBoxElement extends LitElement {
   }
 
   _down() {
+    this._setOpen(true);
     if (this.highlighted == null) {
-      this.highlighted = 0;
+      this._highlight(0);
       return;
     }
     const items = this._getOptions();
@@ -156,13 +158,16 @@ export class ComboBoxElement extends LitElement {
       this.highlighted = null;
       return;
     }
-    this.highlighted =
+    this._highlight(
       this.highlighted === max
         ? items[0]?.index
-        : items.find(({ index }) => index > this.highlighted)?.index ?? 0;
+        : items.find(({ index }) => index > this.highlighted)?.index ?? 0,
+      true
+    );
   }
 
   _up() {
+    this._setOpen(true);
     const items = this._getOptions();
     const max = items[items.length - 1]?.index;
     if (max == null) {
@@ -170,22 +175,59 @@ export class ComboBoxElement extends LitElement {
       return;
     }
     if (this.highlighted == null) {
-      this.highlighted = max;
+      this._highlight(max);
       return;
     }
-    this.highlighted =
+    this._highlight(
       this.highlighted === items[0]?.index
         ? max
-        : items.findLast(({ index }) => index < this.highlighted)?.index ?? 0;
+        : items.findLast(({ index }) => index < this.highlighted)?.index ?? 0
+    );
+  }
+
+  _highlight(index: number, down: boolean = false) {
+    this.highlighted = index;
+    const el = this.shadowRoot.querySelector(`#option-${index}`) as HTMLElement;
+    if (el) {
+      const container = this.shadowRoot.querySelector(
+        "#options"
+      ) as HTMLElement;
+      if (!isScrolledIntoView(el, container)) {
+        container.scroll({
+          top: down
+            ? el.offsetTop -
+              container.offsetTop -
+              container.offsetHeight +
+              el.offsetHeight
+            : el.offsetTop - container.offsetTop,
+          left: 0,
+          behavior: "smooth",
+        });
+      }
+    }
+  }
+
+  _setOpen(open: boolean) {
+    if (open && !isScrolledIntoView(this, document.querySelector("body"))) {
+      this.updateComplete.then(() => {
+        this.scrollIntoView();
+      });
+    }
+    this.open = open;
   }
 
   render() {
     return html`<div
       class="w-full bg-p-0"
       @focusout=${(e: FocusEvent) => {
-        this.open = (e.currentTarget as HTMLElement).contains(
-          e.relatedTarget as HTMLElement
+        this._setOpen(
+          (e.currentTarget as HTMLElement).contains(
+            e.relatedTarget as HTMLElement
+          )
         );
+      }}
+      @focusin=${() => {
+        this._setOpen(true);
       }}
     >
       <ul
@@ -194,10 +236,10 @@ export class ComboBoxElement extends LitElement {
         aria-controls="options"
         aria-expanded="${this.open}"
         @focus=${() => {
-          this.open = true;
+          this._setOpen(true);
         }}
         @click=${() => {
-          this.open = true;
+          this._setOpen(true);
           this.shadowRoot?.querySelector("input")?.focus();
         }}
       >
@@ -271,7 +313,10 @@ export class ComboBoxElement extends LitElement {
               @mouseenter=${() => {
                 this.highlighted = index;
               }}
-              @click=${() => this._select(index)}
+              @click=${() => {
+                this._select(index);
+                this.highlighted = index;
+              }}
             >
               <span
                 class="flex-1 ${classMap({
@@ -301,4 +346,14 @@ export class ComboBoxElement extends LitElement {
       </ul>
     </div> `;
   }
+}
+
+function isScrolledIntoView(el: HTMLElement, container: HTMLElement) {
+  const elRect = el.getBoundingClientRect();
+  const contRect = container.getBoundingClientRect();
+
+  const isVisible =
+    elRect.top >= contRect.top && elRect.bottom <= contRect.bottom;
+
+  return isVisible;
 }
