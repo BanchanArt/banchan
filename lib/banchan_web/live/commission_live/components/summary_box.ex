@@ -50,6 +50,16 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
   data(can_release, :boolean, default: false)
   data(can_finalize, :boolean, default: false)
 
+  def mount(socket) do
+    {:ok,
+     socket
+     |> allow_upload(:attachments,
+       accept: :any,
+       max_entries: 10,
+       max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
+     )}
+  end
+
   def update(assigns, socket) do
     socket = socket |> assign(assigns)
 
@@ -92,11 +102,6 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
            socket.assigns.minimum_release_amount,
            Money.add(socket.assigns.released_amount, socket.assigns.escrowed_amount)
          ) in [:lt, :eq]
-     )
-     |> allow_upload(:attachments,
-       accept: :any,
-       max_entries: 10,
-       max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
      )}
   end
 

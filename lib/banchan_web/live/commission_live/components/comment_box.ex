@@ -26,6 +26,16 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
   data uploads, :map
   data studio, :struct
 
+  def mount(socket) do
+    {:ok,
+     socket
+     |> allow_upload(:attachment,
+       accept: :any,
+       max_entries: 10,
+       max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
+     )}
+  end
+
   def update(assigns, socket) do
     studio =
       if socket.assigns[:studio] && socket.assigns[:studio].id == assigns[:commission].studio_id do
@@ -38,12 +48,7 @@ defmodule BanchanWeb.CommissionLive.Components.CommentBox do
      socket
      |> assign(assigns)
      |> assign(studio: studio)
-     |> assign(changeset: socket.assigns[:changeset] || Event.comment_changeset(%Event{}, %{}))
-     |> allow_upload(:attachment,
-       accept: :any,
-       max_entries: 10,
-       max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
-     )}
+     |> assign(changeset: socket.assigns[:changeset] || Event.comment_changeset(%Event{}, %{}))}
   end
 
   def handle_event(

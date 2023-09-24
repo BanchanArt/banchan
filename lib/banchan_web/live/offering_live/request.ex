@@ -18,6 +18,16 @@ defmodule BanchanWeb.OfferingLive.Request do
   alias BanchanWeb.Components.{Layout, RichText}
   alias BanchanWeb.Endpoint
 
+  def mount(_params, _session, socket) do
+    {:ok,
+     socket
+     |> allow_upload(:attachment,
+       accept: :any,
+       max_entries: 10,
+       max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
+     )}
+  end
+
   @impl true
   def handle_params(%{"offering_type" => offering_type} = params, _uri, socket) do
     socket = assign_studio_defaults(params, socket, false, true)
@@ -83,11 +93,6 @@ defmodule BanchanWeb.OfferingLive.Request do
            available_slots: available_slots,
            template: template,
            terms: terms
-         )
-         |> allow_upload(:attachment,
-           accept: :any,
-           max_entries: 10,
-           max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
          )}
 
       true ->
