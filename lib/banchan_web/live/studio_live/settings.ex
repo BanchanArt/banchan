@@ -229,13 +229,6 @@ defmodule BanchanWeb.StudioLive.Settings do
               options={@currencies}
               opts={required: true}
             />
-            <ComboBox
-              multiple
-              name={:payment_currencies}
-              caption="Available currencies for invoicing purposes."
-              options={@currencies}
-              opts={required: true}
-            />
             <QuillInput
               id="default-terms"
               caption="Default Terms of Service to display to users, when an offering hasn't configured its own."

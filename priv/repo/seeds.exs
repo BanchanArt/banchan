@@ -44,8 +44,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
         handle: "kitteh_studio",
         name: "Kitteh Studio",
         country: "US",
-        default_currency: "USD",
-        payment_currencies: ["USD", "EUR"]
+        default_currency: "USD"
       }
     )
 
@@ -124,8 +123,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
         handle: "kitteh_japan",
         name: "Kitteh Studio in Japan",
         country: "JP",
-        default_currency: "JPY",
-        payment_currencies: ["JPY", "USD", "KRW"]
+        default_currency: "JPY"
       }
     )
 

@@ -18,7 +18,6 @@ defmodule Banchan.Studios.Studio do
     field :default_template, Banchan.Ecto.RichText
     field :country, Ecto.Enum, values: Currency.supported_countries() |> Keyword.values()
     field :default_currency, Ecto.Enum, values: Currency.supported_currencies()
-    field :payment_currencies, {:array, Ecto.Enum}, values: Currency.supported_currencies()
     field :featured, :boolean, default: false
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
@@ -70,6 +69,14 @@ defmodule Banchan.Studios.Studio do
     field :tiktok_handle, :string
     field :artfight_handle, :string
 
+    # DEPRECATED: Previously, studios had to configure a subset of currencies
+    # that they would be able to pick from in offerings. This was removed
+    # after https://github.com/BanchanArt/banchan/issues/725. Kept around to
+    # avoid migrations. It's a NOT NULL field, hence default.
+    field :payment_currencies, {:array, Ecto.Enum},
+      values: Currency.supported_currencies(),
+      default: []
+
     timestamps()
   end
 
@@ -82,14 +89,12 @@ defmodule Banchan.Studios.Studio do
       :about,
       :mature,
       :country,
-      :default_currency,
-      :payment_currencies
+      :default_currency
     ])
-    |> validate_required([:name, :handle, :country, :default_currency, :payment_currencies])
+    |> validate_required([:name, :handle, :country, :default_currency])
     |> validate_length(:name, min: 4, max: 32)
     |> validate_length(:handle, min: 4, max: 16)
     |> validate_length(:about, max: 500)
-    |> validate_default_currency(:default_currency, :payment_currencies)
     |> validate_handle(:handle)
   end
 
@@ -98,14 +103,12 @@ defmodule Banchan.Studios.Studio do
     |> cast(attrs, [
       :mature,
       :default_currency,
-      :payment_currencies,
       :default_terms,
       :default_template
     ])
-    |> validate_required([:default_currency, :payment_currencies])
+    |> validate_required([:default_currency])
     |> validate_rich_text_length(:default_terms, max: 10_000)
     |> validate_rich_text_length(:default_template, max: 1500)
-    |> validate_default_currency(:default_currency, :payment_currencies)
   end
 
   @doc false
@@ -169,23 +172,5 @@ defmodule Banchan.Studios.Studio do
   """
   def deletion_changeset(studio) do
     change(studio, deleted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
-  end
-
-  defp validate_default_currency(changeset, default_field, currencies_field)
-
-  defp validate_default_currency(changeset, default_field, currencies_field) do
-    validate_change(changeset, default_field, fn _, value ->
-      case fetch_field(changeset, currencies_field) do
-        {:changes, currencies} when is_list(currencies) ->
-          if value in currencies do
-            []
-          else
-            [{default_field, "Must be one of the selected payment currencies."}]
-          end
-
-        _ ->
-          []
-      end
-    end)
   end
 end

@@ -20,8 +20,7 @@ defmodule Banchan.StudiosFixtures do
       name: unique_studio_name(),
       handle: unique_studio_handle(),
       country: "US",
-      default_currency: "USD",
-      payment_currencies: ["USD", "EUR", "JPY"]
+      default_currency: "USD"
     })
   end
 

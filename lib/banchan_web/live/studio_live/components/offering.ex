@@ -40,6 +40,12 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   data(uploads, :map)
   data(remove_card, :boolean, default: false)
 
+  data(currency_options, :keyword,
+    default:
+      Payments.supported_currencies()
+      |> Enum.map(&{"#{Payments.currency_symbol(&1)} #{Payments.currency_name(&1)} ", &1})
+  )
+
   def mount(socket) do
     {:ok,
      socket
@@ -612,8 +618,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           name={:currency}
           label="Option Currency"
           caption="Currency to use for all options. Only one currency is allowed per offering."
-          options={@studio.payment_currencies
-          |> Enum.map(&{"#{Payments.currency_name(&1)} (#{Payments.currency_symbol(&1)})", &1})}
+          options={@currency_options}
           opts={required: true}
         />
         <div class="divider" />

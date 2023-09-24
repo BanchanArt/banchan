@@ -139,14 +139,6 @@ defmodule BanchanWeb.StudioLive.New do
               options={@currencies}
               opts={required: true}
             />
-            <ComboBox
-              name={:payment_currencies}
-              multiple
-              caption="Currencies you want to invoice with. Note that people from other countries can still pay you even if their local currency isn't listed here, so you can just pick based on what will look right for your clients."
-              options={@currencies}
-              selected={@platform_currency}
-              opts={required: true}
-            />
             <Submit changeset={@changeset} label="Save" />
           </Form>
         </div>
