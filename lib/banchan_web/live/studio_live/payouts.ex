@@ -100,7 +100,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
          socket
          |> put_flash(
            :info,
-           "Payouts sent! They should be in your account(s) starting #{payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}."
+           "Payouts sent! They should be in your account(s) starting #{payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{ISOdate}")}."
          )}
 
       {:ok, [payout | _]} ->
@@ -108,7 +108,7 @@ defmodule BanchanWeb.StudioLive.Payouts do
          socket
          |> put_flash(
            :info,
-           "Payout sent! It should be in your account #{payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{relative}", :relative)}."
+           "Payout sent! It should be in your account on #{payout.arrival_date |> Timex.to_datetime() |> Timex.format!("{ISOdate}")}."
          )}
 
       {:error, %Stripe.Error{user_message: user_message}} ->
