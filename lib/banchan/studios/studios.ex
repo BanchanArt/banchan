@@ -391,18 +391,15 @@ defmodule Banchan.Studios do
         q
         |> join(:inner, [], user in User, on: user.id == ^current_user.id, as: :current_user)
         |> where(
-          [s, current_user: current_user, artist: artist],
+          [s, current_user: current_user],
           s.mature != true or
             (s.mature == true and
                ^mature_content_enabled? == true and
-               (current_user.mature_ok == true or :admin in current_user.roles or
-                  :mod in current_user.roles or artist.id == current_user.id))
+               current_user.mature_ok == true)
         )
         |> where(
           [studio: s, current_user: current_user, artist: artist],
           is_nil(s.archived_at) or
-            :admin in current_user.roles or
-            :mod in current_user.roles or
             (^include_own_archived? and artist.id == current_user.id)
         )
         |> where(
