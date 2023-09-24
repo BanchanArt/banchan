@@ -751,25 +751,19 @@ defmodule Banchan.Offerings do
       {:ok, %User{} = current_user} ->
         q
         |> join(:inner, [], user in User, on: user.id == ^current_user.id, as: :current_user)
-        |> join(:left, [studio: studio, current_user: current_user], us in "users_studios",
-          as: :current_user_member?,
-          on: us.studio_id == studio.id and current_user.id == us.user_id
-        )
         |> where(
           [
             studio: s,
             offering: o,
-            current_user: current_user,
-            current_user_member?: current_user_member?
+            current_user: current_user
           ],
-          not is_nil(current_user_member?) or
-            o.mature != true or
+          o.mature != true or
             ((s.mature == true or o.mature == true) and ^mature_content_enabled? == true and
                current_user.mature_ok == true)
         )
         |> where(
-          [offering: o, current_user_member?: current_user_member?],
-          not is_nil(current_user_member?) or o.hidden == false
+          [offering: o],
+          o.hidden == false
         )
         |> join(:left, [offering: o, current_user: current_user], sub in OfferingSubscription,
           on:
