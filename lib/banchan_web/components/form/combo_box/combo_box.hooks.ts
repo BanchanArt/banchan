@@ -208,9 +208,15 @@ export class ComboBoxElement extends LitElement {
   }
 
   _setOpen(open: boolean) {
-    if (open && !isScrolledIntoView(this, document.querySelector("body"))) {
+    if (open) {
       this.updateComplete.then(() => {
-        this.scrollIntoView();
+        if (!isScrolledIntoView(this, document.querySelector("body"))) {
+          this.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
+          });
+        }
       });
     }
     this.open = open;
