@@ -78,7 +78,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Offerings do
           {/if}
         </div>
       {#else}
-        <div class="grid grid-cols-1 offering-list sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
+        <div class="grid grid-cols-1 offering-list gap-2 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
           {#for {offering, idx} <- Enum.with_index(@offerings)}
             <OfferingCard
               id={"offering-#{idx}"}
