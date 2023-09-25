@@ -88,10 +88,10 @@ $fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
   .max-h-screen {
     height: 100dvh;
   }
-}
 
-.drawer-toggle ~ .drawer-side {
-  max-height: 100dvh;
+  .drawer-toggle ~ .drawer-side {
+    max-height: 100dvh;
+  }
 }
 
 body {
