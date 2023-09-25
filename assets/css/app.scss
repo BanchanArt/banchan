@@ -86,7 +86,7 @@ $fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
 
 @supports (max-height: 100dvh) {
   .max-h-screen {
-    height: 100dvh;
+    max-height: 100dvh;
   }
 
   .drawer-toggle ~ .drawer-side {
