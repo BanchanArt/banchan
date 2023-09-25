@@ -289,6 +289,7 @@ defmodule Banchan.Payments.Currency do
   def currency_symbol(currency) when is_atom(currency) do
     case Money.Currency.symbol(currency) do
       "$" -> dollar_prefix(currency) <> "$"
+      "£" -> pound_symbol(currency)
       "¥" when currency == :CNY -> "RMB"
       "kr" when currency == :NOK -> "NKr"
       _ when currency == :KMF -> "FC"
@@ -321,6 +322,14 @@ defmodule Banchan.Payments.Currency do
   defp dollar_prefix(:SRD), do: "Sr"
   defp dollar_prefix(_), do: ""
 
+  defp pound_symbol(:GBP), do: "£"
+  defp pound_symbol(:EGP), do: "E£"
+  defp pound_symbol(:LBP), do: "LL"
+  defp pound_symbol(:FKP), do: "FI£"
+  defp pound_symbol(:GIP), do: "G£"
+  defp pound_symbol(:SHP), do: "SH£"
+  defp pound_symbol(_), do: "£"
+
   defp blank_prefix(:XOF), do: "F.CFA"
   defp blank_prefix(:XPF), do: "F.CFP"
   defp blank_prefix(:HTG), do: "G"
@@ -335,7 +344,9 @@ defmodule Banchan.Payments.Currency do
 
   def currency_name(currency) when is_atom(currency) do
     case currency do
-      :VNĐ -> "Vietnamese Dong"
+      :VND -> "Vietnamese Dong"
+      :GBP -> "British Pound Sterling"
+      :LBP -> "Lebanese Pound/Lira"
       other -> Money.Currency.name(other)
     end
   end
