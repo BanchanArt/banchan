@@ -58,22 +58,42 @@ $fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
 .stack-custom {
   @apply inline-grid place-items-end items-end;
 
-  &>* {
+  & > * {
     @apply col-start-1 row-start-1;
   }
 
-  &>* {
+  & > * {
     z-index: 1;
     transform: translateY(5%);
   }
 
-  &>*:nth-child(2) {
+  & > *:nth-child(2) {
     z-index: 2;
     transform: translateY(0%);
   }
 
-  &>*:nth-child(1) {
+  & > *:nth-child(1) {
     z-index: 3;
     transform: translateY(0);
   }
+}
+
+@supports (height: 100dvh) {
+  .h-screen {
+    height: 100dvh;
+  }
+}
+
+@supports (max-height: 100dvh) {
+  .max-h-screen {
+    max-height: 100dvh;
+  }
+
+  .drawer-toggle ~ .drawer-side {
+    max-height: 100dvh;
+  }
+}
+
+body {
+  min-height: -webkit-fill-available;
 }
