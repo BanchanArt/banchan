@@ -56,15 +56,16 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
     Sandbox.allow(Banchan.Repo, self(), forex)
 
     Banchan.Http.Mock
-    |> expect(:get, 1, fn "https://api.exchangerate.host/latest?base=USD" ->
+    |> expect(:get, 1, fn "http://api.exchangerate.host/live?source=USD&access_key=" ->
       {:ok,
        %HTTPoison.Response{
          status_code: 200,
          body:
            Jason.encode!(%{
-             "rates" => %{
-               "EUR" => 0.913,
-               "JPY" => 142.833
+             "success" => true,
+             "quotes" => %{
+               "USDEUR" => 0.913,
+               "USDJPY" => 142.833
              }
            })
        }}
@@ -73,15 +74,16 @@ defmodule BanchanWeb.StudioLive.PayoutsTest do
     Sandbox.allow(Banchan.Repo, self(), forex)
 
     Banchan.Http.Mock
-    |> expect(:get, 1, fn "https://api.exchangerate.host/latest?base=JPY" ->
+    |> expect(:get, 1, fn "http://api.exchangerate.host/live?source=JPY&access_key=" ->
       {:ok,
        %HTTPoison.Response{
          status_code: 200,
          body:
            Jason.encode!(%{
-             "rates" => %{
-               "EUR" => 0.913,
-               "JPY" => 142.833
+             "success" => true,
+             "quotes" => %{
+               "JPYEUR" => 0.913,
+               "JPYJPY" => 142.833
              }
            })
        }}

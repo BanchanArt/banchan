@@ -16,7 +16,9 @@ config :banchan, Banchan.Repo,
 #   github_access_token: "",
 #   You only need these if you plan on deploying
 #   oban_key_fingerprint: "",
-#   oban_license_key: ""
+#   oban_license_key: "",
+#   Needed for currency conversions to work.
+#   exchange_rate_api_key: ""
 
 # Sentry configuration
 # config :logger,

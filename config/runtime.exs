@@ -124,6 +124,16 @@ if config_env() == :prod do
     access_key_id: aws_access_key_id,
     secret_access_key: aws_secret_access_key
 
+  exchange_rate_api_key =
+    System.get_env("EXCHANGE_RATE_API_KEY") ||
+      raise """
+      environment variable EXCHANGE_RATE_API_KEY is missing.
+      You can generate one by going to https://exchangerate.host/dashboard.
+      """
+
+  config :banchan,
+    exchange_rate_api_key: exchange_rate_api_key
+
   sendgrid_api_key =
     System.get_env("SENDGRID_API_KEY") ||
       raise """

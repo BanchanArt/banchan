@@ -1609,28 +1609,36 @@ defmodule Banchan.Payments do
   database, returning the latest values as a Map.
   """
   def update_exchange_rates(base_currency) when is_atom(base_currency) do
+    api_key = Application.get_env(:banchan, :exchange_rate_api_key)
     # This is a nice, free API and we don't really hit it very often at all.
-    case http_mod().get("https://api.exchangerate.host/latest?base=#{base_currency}") do
+    case http_mod().get(
+           "http://api.exchangerate.host/live?source=#{base_currency}&access_key=#{api_key}"
+         ) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         currency_names = supported_currencies() |> Enum.map(&to_string/1)
 
-        Repo.transaction(fn ->
-          body
-          |> Jason.decode!()
-          |> Map.get("rates")
-          |> Enum.filter(fn {currency, _} ->
-            currency in currency_names
-          end)
-          |> Map.new(fn {currency, rate} ->
-            {String.to_existing_atom(currency),
-             Repo.insert!(
-               Forex.changeset(%Forex{from: base_currency}, %{to: currency, rate: rate}),
-               returning: true,
-               on_conflict: {:replace_all_except, [:id, :inserted_at]},
-               conflict_target: [:from, :to]
-             )}
-          end)
-        end)
+        case body |> Jason.decode!() do
+          %{"success" => true, "quotes" => quotes} ->
+            Repo.transaction(fn ->
+              quotes
+              |> Enum.filter(fn {currency, _} ->
+                String.slice(currency, 3..5) in currency_names
+              end)
+              |> Map.new(fn {currency, rate} ->
+                currency = String.slice(currency, 3..5)
+                {String.to_existing_atom(currency),
+                 Repo.insert!(
+                   Forex.changeset(%Forex{from: base_currency}, %{to: currency, rate: rate}),
+                   returning: true,
+                   on_conflict: {:replace_all_except, [:id, :inserted_at]},
+                   conflict_target: [:from, :to]
+                 )}
+              end)
+            end)
+
+          _ ->
+            raise "Failed to update exchange rates for #{base_currency}: #{inspect(body)}"
+        end
 
       {:ok, response} ->
         Logger.error(
