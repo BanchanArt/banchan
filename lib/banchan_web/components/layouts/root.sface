@@ -11,7 +11,6 @@
       />
     {/if}
     <meta name="banchan-git-rev" content={Application.get_env(:banchan, :git_rev)}>
-    <meta name="robots" content="noai">
     <.live_title prefix={"Banchan Art |" <> " "}>
       {assigns[:page_title] || "The Co-operative Commissions Platform"}
     </.live_title>
@@ -38,6 +37,12 @@
       <meta name="twitter:card" content="summary_large_image">
     {/if}
     <meta name="twitter:site" content="@BanchanArt">
+
+    {!-- The Common Crawl dataset. Used by GPT-3 (and GPT-3.5) and available for others. --}
+    <meta name="CCBot" content="nofollow">
+
+    {!-- Used by DeviantArt, ArtStation, etc. based on opt-in or opt-out --}
+    <meta name="robots" content="noai, noimageai">
 
     {!-- Icons and favicons --}
     <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon.png">
