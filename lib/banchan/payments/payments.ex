@@ -1626,6 +1626,7 @@ defmodule Banchan.Payments do
               end)
               |> Map.new(fn {currency, rate} ->
                 currency = String.slice(currency, 3..5)
+
                 {String.to_existing_atom(currency),
                  Repo.insert!(
                    Forex.changeset(%Forex{from: base_currency}, %{to: currency, rate: rate}),
