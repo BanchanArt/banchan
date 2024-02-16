@@ -1,20 +1,19 @@
-import "./styles.js"
-import "phoenix_html"
-import { Socket, LongPoll } from "phoenix"
-import topbar from "topbar"
-import Hooks from "./_hooks"
-import { LiveSocket } from "phoenix_live_view"
-import { replaceIcons } from "./_hooks/BanchanWeb.Components.Icon.hooks"
+import "phoenix_html";
+import { Socket, LongPoll } from "phoenix";
+import topbar from "topbar";
+import Hooks from "./_hooks";
+import { LiveSocket } from "phoenix_live_view";
+import { replaceIcons } from "./_hooks/BanchanWeb.Components.Icon.hooks";
 
-const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-const orderSeed = document.querySelector("[data-order-seed]")?.dataset.orderSeed
+const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
+const orderSeed = document.querySelector("[data-order-seed]")?.dataset.orderSeed;
 const liveSocket = new LiveSocket('/live', Socket, {
   params: {
     _csrf_token: csrfToken,
     order_seed: orderSeed == null ? null : parseInt(orderSeed)
   },
   hooks: Hooks
-})
+});
 
 // liveSocket.socket.onError((_error, transport, establishedConnections) => {
 //   liveSocket.socket.connect();
@@ -30,7 +29,7 @@ const liveSocket = new LiveSocket('/live', Socket, {
 // things feel faster.
 //
 // See: https://fly.io/phoenix-files/make-your-liveview-feel-faster/#solution
-topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
+topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" });
 
 let topBarScheduled = undefined;
 window.addEventListener("phx:page-loading-start", () => {
@@ -45,13 +44,15 @@ window.addEventListener("phx:page-loading-stop", () => {
 });
 
 // connect if there are any LiveViews on the page
-liveSocket.connect()
-
-replaceIcons();
+liveSocket.connect();
 
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
-window.liveSocket = liveSocket
+window.liveSocket = liveSocket;
 
+replaceIcons();
+
+// We do this later because problems with this shouldn't crash the entire page.
+import('./styles.js').then(() => { }, console.error);
