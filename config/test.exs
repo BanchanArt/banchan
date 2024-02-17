@@ -38,7 +38,9 @@ end
 
 config :banchan, Banchan.Mailer, adapter: Bamboo.TestAdapter
 
-config :banchan, Oban, testing: :inline
+config :banchan, Oban,
+  testing: :inline,
+  notifier: Oban.Notifiers.PG
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
