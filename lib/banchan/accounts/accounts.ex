@@ -530,10 +530,8 @@ defmodule Banchan.Accounts do
 
       resp = HTTPoison.get!(url <> "?size=1024")
       File.write!(tmp_file, resp.body)
-      %{format: format} = Mogrify.identify(tmp_file)
 
-      header =
-        make_header_image!(user, user, tmp_file, "image/#{format}", Path.basename(tmp_file))
+      header = make_header_image!(user, user, tmp_file, "image/png", Path.basename(tmp_file))
 
       File.rm!(tmp_file)
 
@@ -593,7 +591,7 @@ defmodule Banchan.Accounts do
 
     resp = HTTPoison.get!(url <> "?size=160")
     File.write!(tmp_file, resp.body)
-    %{format: format} = Mogrify.identify(tmp_file)
+    "." <> format = Path.extname(url)
 
     {pfp, thumb} =
       make_pfp_images!(user, user, tmp_file, "image/#{format}", Path.basename(tmp_file))

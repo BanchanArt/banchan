@@ -70,11 +70,11 @@ defmodule Banchan.MixProject do
       {:html_sanitize_ex, "~> 1.4.2"},
       # TODO: Can't bump this one to ~>2 because of tentacat
       {:httpoison, "~> 1.8.1"},
+      {:image, "~> 0.37"},
       {:jason, "~> 1.4.0"},
       {:libcluster, "~> 3.3"},
       {:makeup_elixir, ">= 0.0.0"},
       {:makeup_erlang, ">= 0.0.0"},
-      {:mogrify, "~> 0.9.3"},
       {:money, "~> 1.12.2"},
       {:nimble_publisher, "~> 1.0.0"},
       {:nimble_totp, "~> 1.0.0"},
