@@ -751,19 +751,22 @@ defmodule Banchan.Offerings do
       {:ok, %User{} = current_user} ->
         q
         |> join(:inner, [], user in User, on: user.id == ^current_user.id, as: :current_user)
+        |> join(:left, [studio: studio], artist in assoc(studio, :artists), as: :artist)
         |> where(
           [
             studio: s,
             offering: o,
-            current_user: current_user
+            current_user: current_user,
+            artist: artist
           ],
-          o.mature != true or
+          current_user == artist or
+            o.mature != true or
             ((s.mature == true or o.mature == true) and ^mature_content_enabled? == true and
                current_user.mature_ok == true)
         )
         |> where(
-          [offering: o],
-          o.hidden == false
+          [offering: o, current_user: current_user, artist: artist],
+          artist == current_user or o.hidden == false
         )
         |> join(:left, [offering: o, current_user: current_user], sub in OfferingSubscription,
           on:
@@ -772,14 +775,15 @@ defmodule Banchan.Offerings do
           as: :subscription
         )
         |> where(
-          [o, current_user: current_user],
-          is_nil(current_user.muted) or
+          [o, current_user: current_user, artist: artist],
+          artist == current_user or is_nil(current_user.muted) or
             not fragment("(?).muted_filter_query @@ (?).search_vector", current_user, o)
         )
         |> join(:left, [studio: s], block in assoc(s, :blocklist), as: :blocklist)
         |> where(
-          [blocklist: block, current_user: u],
-          :admin in u.roles or :mod in u.roles or is_nil(block) or block.user_id != u.id
+          [blocklist: block, current_user: u, artist: artist],
+          artist == u or :admin in u.roles or :mod in u.roles or is_nil(block) or
+            block.user_id != u.id
         )
         |> select_merge([o, subscription: sub], %{
           user_subscribed?: not is_nil(sub.id)
