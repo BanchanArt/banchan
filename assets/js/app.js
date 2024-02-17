@@ -1,3 +1,4 @@
+import './styles.js';
 import "phoenix_html";
 import { Socket, LongPoll } from "phoenix";
 import topbar from "topbar";
@@ -53,6 +54,3 @@ liveSocket.connect();
 window.liveSocket = liveSocket;
 
 replaceIcons();
-
-// We do this later because problems with this shouldn't crash the entire page.
-import('./styles.js').then(() => { }, console.error);
