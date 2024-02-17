@@ -8,16 +8,15 @@ defmodule Banchan.Uploads do
   alias Banchan.Repo
   alias Banchan.Uploads.Upload
 
-  # image/heic needs additional support for Ubuntu. See https://askubuntu.com/questions/1131996/problems-with-compiling-imagemagick-with-heic
+  # Supported image formats for prebuilt libvips binaries:
+  # https://github.com/akash-akya/vix?tab=readme-ov-file#pre-compiled-nif-and-libvips
   @image_formats ~w(
-    image/bmp image/gif image/png image/jpeg image/jpg
-    image/psd image/vnd.adobe.photoshop image/x-icon
-    image/vnd.microsoft.icon image/tiff image/webp
-    image/svg+xml image/x-xcf
+    image/gif image/png image/jpeg image/jpg
+    image/tiff image/webp image/svg+xml
   )
 
   @image_format_extensions ~w(
-    .bmp .gif .png .jpeg .jpg .psd .ico .tiff .webp .svg
+    .gif .png .jpeg .jpg .tiff .webp .svg
   )
 
   @video_formats ~w(
