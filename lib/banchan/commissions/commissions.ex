@@ -1111,12 +1111,7 @@ defmodule Banchan.Commissions do
               Thumbnailer.thumbnail(
                 upload,
                 target_size: "5kb",
-                dimensions: "128x128",
-                callback: [
-                  Notifications,
-                  :commission_event_updated,
-                  [event.commission_id, event.id]
-                ]
+                dimensions: "128x128"
               )
             else
               {:ok, nil}
@@ -1127,12 +1122,7 @@ defmodule Banchan.Commissions do
               Thumbnailer.thumbnail(
                 upload,
                 dimensions: "1200",
-                name: "preview.jpg",
-                callback: [
-                  Notifications,
-                  :commission_event_updated,
-                  [event.commission_id, event.id]
-                ]
+                name: "preview.jpg"
               )
             else
               {:ok, nil}
@@ -1147,6 +1137,8 @@ defmodule Banchan.Commissions do
           |> Repo.insert!()
         end)
       end)
+
+    Notifications.commission_event_updated(event.commission_id, event.id)
 
     :ok
   end

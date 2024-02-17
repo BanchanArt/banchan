@@ -162,8 +162,15 @@ defmodule Banchan.Offerings do
       end
     end)
     |> case do
-      {:ok, ret} -> ret
-      {:error, error} -> {:error, error}
+      {:ok, {:ok, offering}} ->
+        __MODULE__.Notifications.notify_images_updated(offering)
+        {:ok, offering}
+
+      {:ok, {:error, error}} ->
+        {:error, error}
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 
@@ -282,8 +289,7 @@ defmodule Banchan.Offerings do
       Thumbnailer.thumbnail(
         upload,
         dimensions: "1200",
-        name: "card_image.jpg",
-        callback: [__MODULE__.Notifications, :notify_images_updated]
+        name: "card_image.jpg"
       )
 
     card
@@ -298,8 +304,7 @@ defmodule Banchan.Offerings do
       Thumbnailer.thumbnail(
         upload,
         dimensions: "1200",
-        name: "gallery_image.jpg",
-        callback: [__MODULE__.Notifications, :notify_images_updated]
+        name: "gallery_image.jpg"
       )
 
     image

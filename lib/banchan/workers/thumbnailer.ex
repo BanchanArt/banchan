@@ -18,13 +18,14 @@ defmodule Banchan.Workers.Thumbnailer do
 
   @impl Oban.Worker
   def perform(%_{
+        id: job_id,
         args: %{
           "src" => src_id,
           "dest" => dest_id,
           "opts" => opts
         }
       }) do
-    process(src_id, dest_id, opts)
+    process(job_id, src_id, dest_id, opts)
   end
 
   def thumbnail(upload, opts \\ [])
@@ -35,43 +36,60 @@ defmodule Banchan.Workers.Thumbnailer do
   end
 
   def thumbnail(%Upload{} = upload, opts) do
-    if !Uploads.image?(upload) && !Uploads.video?(upload) do
-      {:error, :unsupported_input}
-    else
-      Ecto.Multi.new()
-      |> Ecto.Multi.insert(
-        :pending,
-        Uploads.gen_pending(
-          %User{id: upload.uploader_id},
-          upload,
-          "image/jpeg",
-          Keyword.get(opts, :name, "thumbnail.jpg")
+    Task.async(fn ->
+      if !Uploads.image?(upload) && !Uploads.video?(upload) do
+        {:error, :unsupported_input}
+      else
+        :ok = Oban.Notifier.listen([:thumbnail_jobs])
+
+        Ecto.Multi.new()
+        |> Ecto.Multi.insert(
+          :pending,
+          Uploads.gen_pending(
+            %User{id: upload.uploader_id},
+            upload,
+            "image/jpeg",
+            Keyword.get(opts, :name, "thumbnail.jpg")
+          )
         )
-      )
-      |> Ecto.Multi.run(:job, fn _repo, %{pending: pending} ->
-        Oban.insert(
-          __MODULE__.new(%{
-            src: upload.id,
-            dest: pending.id,
-            opts: %{
-              target_size: Keyword.get(opts, :target_size),
-              format: Keyword.get(opts, :format, "jpeg"),
-              dimensions: Keyword.get(opts, :dimensions),
-              callback: Keyword.get(opts, :callback)
-            }
-          })
-        )
-      end)
-      |> Repo.transaction()
-      |> case do
-        {:ok, %{pending: pending}} -> {:ok, pending}
-        {:error, _, error, _} -> {:error, error}
+        |> Ecto.Multi.run(:job, fn _repo, %{pending: pending} ->
+          Oban.insert(
+            __MODULE__.new(%{
+              src: upload.id,
+              dest: pending.id,
+              opts: %{
+                target_size: Keyword.get(opts, :target_size),
+                format: Keyword.get(opts, :format, "jpeg"),
+                dimensions: Keyword.get(opts, :dimensions)
+              }
+            })
+          )
+        end)
+        |> Repo.transaction()
+        |> case do
+          {:ok, %{pending: pending, job: %{id: job_id}}} ->
+            receive do
+              {:notification, :thumbnail_jobs, %{"complete" => ^job_id, "result" => "ok"}} ->
+                {:ok, Uploads.get_by_id!(pending.id)}
+
+              {:notification, :thumbnail_jobs,
+               %{"complete" => ^job_id, "result" => {"error", err}}} ->
+                {:error, String.to_existing_atom(err)}
+            after
+              Keyword.get(opts, :timeout) || 300_000 ->
+                {:error, :timeout}
+            end
+
+          {:error, _, error, _} ->
+            {:error, error}
+        end
       end
-    end
+    end)
+    |> Task.await(Keyword.get(opts, :timeout) || 300_000)
   end
 
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  defp process(src_id, dest_id, opts) do
+  defp process(job_id, src_id, dest_id, opts) do
     Repo.transaction(fn ->
       src = Uploads.get_by_id!(src_id)
       dest = Uploads.get_by_id!(dest_id)
@@ -166,26 +184,7 @@ defmodule Banchan.Workers.Thumbnailer do
       {:ok, dest}
     end)
     |> case do
-      {:ok, {:ok, dest}} ->
-        case opts["callback"] do
-          [module, name, args] ->
-            apply(
-              String.to_existing_atom(module),
-              String.to_existing_atom(name),
-              args
-            )
-
-          [module, name] ->
-            apply(
-              String.to_existing_atom(module),
-              String.to_existing_atom(name),
-              [dest]
-            )
-
-          _ ->
-            nil
-        end
-
+      {:ok, {:ok, _}} ->
         {:ok, dest_id}
 
       {:ok, {:error, error}} ->
@@ -193,6 +192,15 @@ defmodule Banchan.Workers.Thumbnailer do
 
       {:error, _} ->
         {:error, :processing_failed}
+    end
+    |> case do
+      {:ok, dest_id} ->
+        Oban.Notifier.notify(:thumbnail_jobs, %{complete: job_id, result: :ok})
+        {:ok, dest_id}
+
+      {:error, err} ->
+        Oban.Notifier.notify(:thumbnail_jobs, %{complete: job_id, result: {:error, err}})
+        {:error, err}
     end
   end
 end
