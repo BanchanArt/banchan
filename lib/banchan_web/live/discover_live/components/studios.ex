@@ -70,7 +70,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Studios do
       end
 
     ~F"""
-    <discover-studios class="flex flex-col items-center w-full" data-order-seed={@order_seed}>
+    <discover-studios class="flex flex-col items-center w-full">
       {#if Enum.empty?(@studios)}
         <div class="flex flex-col items-center w-full gap-2 py-16">
           <div class="text-2xl">No Results</div>

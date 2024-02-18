@@ -1,11 +1,12 @@
 module.exports = {
-  syntax: 'postcss-scss',
   plugins: {
-    'postcss-dart-sass': {},
+    'postcss-import': {},
+    'cssnano': { preset: 'default' },
+    'tailwindcss/nesting': {},
     tailwindcss: {},
     autoprefixer: {},
     'postcss-url': {
       url: 'inline',
     }
   }
-}
+};

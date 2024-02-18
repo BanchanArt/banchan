@@ -56,6 +56,18 @@ defmodule Banchan.Uploads do
   end
 
   @doc """
+  Returns true if an upload (or a given string type) is a visual media type.
+  """
+  def media?(type), do: image?(type) || video?(type)
+
+  @doc """
+  Maximum upload size.
+  """
+  def max_upload_size do
+    Application.fetch_env!(:banchan, :max_attachment_size)
+  end
+
+  @doc """
   Convert an error atom to a human-readable error message.
   """
   def error_to_string(:too_large), do: "Too large"
@@ -148,6 +160,53 @@ defmodule Banchan.Uploads do
     end
   end
 
+  def prune_uploads do
+    {:ok, {count, _}} =
+      Repo.transaction(fn ->
+        columns =
+          from(
+            tc in "table_constraints",
+            prefix: "information_schema",
+            join: kcu in "key_column_usage",
+            prefix: "information_schema",
+            on: tc.constraint_name == kcu.constraint_name,
+            join: ccu in "constraint_column_usage",
+            prefix: "information_schema",
+            on: ccu.constraint_name == tc.constraint_name,
+            where: tc.constraint_type == "FOREIGN KEY",
+            where: ccu.table_name == "uploads",
+            select: %{column: kcu.column_name, table: tc.table_name}
+          )
+          |> Repo.all()
+
+        sq =
+          Enum.reduce(columns, nil, fn %{column: column, table: table}, acc ->
+            q =
+              from(
+                u in Upload,
+                join: t in ^table,
+                on: field(t, ^String.to_atom(column)) == u.id,
+                select: u.id
+              )
+
+            if is_nil(acc) do
+              q
+            else
+              acc
+              |> union(^q)
+            end
+          end)
+
+        from(
+          u in Upload,
+          where: u.id not in subquery(sq)
+        )
+        |> Repo.delete_all()
+      end)
+
+    {:ok, count}
+  end
+
   ## Creation
 
   @doc """
@@ -214,6 +273,43 @@ defmodule Banchan.Uploads do
     }
   end
 
+  @doc """
+  Clones an Uploads, duplicating its storage, but reusing metadata fields.
+  """
+  def clone_upload!(%User{} = user, %Upload{} = original) do
+    bucket = get_bucket() || "default-uploads-bucket"
+    key = gen_key()
+
+    copy_file!(original, bucket, key)
+
+    %Upload{
+      uploader_id: user.id,
+      original_id: original.id,
+      name: original.name,
+      key: key,
+      bucket: bucket,
+      type: original.type,
+      size: original.size,
+      pending: false
+    }
+    |> Repo.insert!()
+  end
+
+  defp copy_file!(%Upload{} = upload, dest_bucket, dest_key) do
+    if Application.fetch_env!(:banchan, :env) == :prod ||
+         !is_nil(Application.get_env(:ex_aws, :region)) do
+      ExAws.S3.put_object_copy(dest_bucket, dest_key, upload.bucket, upload.key)
+      |> ExAws.request!()
+    else
+      src = Path.join([local_upload_dir(), upload.bucket, upload.key])
+      dest = Path.join([local_upload_dir(), dest_bucket, dest_key])
+      File.mkdir_p!(Path.dirname(dest))
+      File.cp!(src, dest)
+    end
+
+    :ok
+  end
+
   ## Editing
 
   @doc """
@@ -228,20 +324,22 @@ defmodule Banchan.Uploads do
   ## Deletion
 
   @doc """
-  Deletes an upload and its stored data.
+  Deleted an Upload. Its data will be scheduled for deletion asynchronously.
   """
   def delete_upload(%Upload{} = upload) do
+    Repo.delete(upload)
+  end
+
+  @doc """
+  Deletes an upload's stored data.
+  """
+  def delete_data!(%Upload{} = upload) do
     if Application.fetch_env!(:banchan, :env) == :prod ||
          !is_nil(Application.get_env(:ex_aws, :region)) do
-      ExAws.S3.delete_object(upload.bucket, upload.key) |> ExAws.request()
+      ExAws.S3.delete_object(upload.bucket, upload.key) |> ExAws.request!()
     else
       local = Path.join([local_upload_dir(), upload.bucket, upload.key])
-      File.rm(local)
-    end
-    |> case do
-      :ok -> Repo.delete(upload)
-      {:ok, _} -> Repo.delete(upload)
-      {:error, error} -> {:error, error}
+      File.rm!(local)
     end
   end
 

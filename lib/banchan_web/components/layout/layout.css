@@ -1,0 +1,8 @@
+:global(details) {
+  & > :global(summary) {
+    list-style: none;
+  }
+  & > :global(summary::-webkit-details-marker) {
+    display: none;
+  }
+}

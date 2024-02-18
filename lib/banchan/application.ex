@@ -29,7 +29,10 @@ defmodule Banchan.Application do
       # {Banchan.Worker, arg}
       # GenServer for managing foreign exchange rate fetching.
       {Banchan.Payments.Forex,
-       name: Banchan.Payments.Forex, base_currency: Banchan.Payments.platform_currency()}
+       name: Banchan.Payments.Forex, base_currency: Banchan.Payments.platform_currency()},
+      # GenServer that listens to Uploads getting deleted and queues deleting
+      # their data.
+      Banchan.Uploads.UploadDeleteListener
     ]
 
     :ok = Oban.Telemetry.attach_default_logger()

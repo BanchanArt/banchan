@@ -36,7 +36,7 @@ defmodule BanchanWeb.Components.Collapse do
 
   def render(assigns) do
     ~F"""
-    <div class={"flex flex-col gap-2", @class}>
+    <bc-collapse class={"flex flex-col gap-2", @class}>
       {#if slot_assigned?(:header)}
         <div class="flex flex-row items-center cursor-pointer" :on-click="toggle">
           <div class="py-2 grow">
@@ -52,7 +52,7 @@ defmodule BanchanWeb.Components.Collapse do
       <div class={hidden: !@open}>
         <#slot />
       </div>
-    </div>
+    </bc-collapse>
     """
   end
 end

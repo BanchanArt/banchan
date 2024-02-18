@@ -42,57 +42,6 @@ defmodule BanchanWeb.Components.Form.QuillInput do
 
   def render(assigns) do
     ~F"""
-    <style>
-      .field {
-      @apply max-h-full;
-      }
-      .control :global(.ql-editor) {
-      /* TODO: Try and get this to work? idk why the variable isn't getting defined.
-      min-height: s-bind("@height")
-      */
-      @apply prose max-w-none p-0;
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-      min-height: 224px;
-      }
-      .control :global(.ql-toolbar):global(.ql-snow) {
-      @apply rounded-t-xl;
-      --tw-border-opacity: 0.2;
-      border: 1px solid hsl(var(--bc) / var(--tw-border-opacity));
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-      }
-      .control :global(.ql-container) {
-      @apply rounded-t-none textarea textarea-bordered;
-      }
-      .control .has-upload :global(.ql-container) {
-      @apply rounded-b-none;
-      }
-      .control :global(.ql-stroke) {
-      --tw-text-opacity: 1;
-      stroke: hsl(var(--n) / var(--tw-text-opacity));
-      }
-      .control :global(.ql-fill) {
-      --tw-text-opacity: 0.8;
-      fill: hsl(var(--n) / var(--tw-text-opacity));
-      }
-      .control :global(.ql-picker):global(.ql-expanded) :global(.ql-picker-label) {
-      @apply rounded-md;
-      --tw-border-opacity: 0.2;
-      border: 1px solid hsl(var(--b) / var(--tw-border-opacity));
-      }
-      .control :global(.ql-picker-label) {
-      color: hsl(var(--n));
-      }
-      /*
-      .control :global(.ql-editor) :global(p) {
-      @apply py-2;
-      }
-      */
-      /*
-      .control :global(.ql-picker) :global(.ql-picker-options) {
-      @apply menu rounded-box
-      }
-      */
-    </style>
     <Field class="grid grid-cols-1 gap-1 field" name={@name}>
       {#if @show_label}
         <Label class="p-0 label">

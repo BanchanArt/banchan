@@ -92,7 +92,7 @@ defmodule BanchanWeb.CommissionLive.Components.StatusBox do
   end
 
   def render(assigns) do
-    has_transitions? = !Enum.empty?(assigns.statuses)
+    has_transitions? = Enum.count(assigns.statuses) > 1
 
     ~F"""
     <div class="flex flex-col w-full gap-4">

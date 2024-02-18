@@ -1,6 +1,9 @@
 defmodule Banchan.Offerings.GalleryImage do
   @moduledoc """
   Schema for gallery images associated with offerings.
+
+  DEPRECATED: This is no longer used, but is kept around for data migration
+  purposes.
   """
   use Ecto.Schema
 

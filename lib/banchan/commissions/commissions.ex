@@ -29,8 +29,7 @@ defmodule Banchan.Commissions do
   alias Banchan.Studios
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
-  alias Banchan.Uploads.Upload
-  alias Banchan.Workers.{Thumbnailer, UploadDeleter}
+  alias Banchan.Workers.Thumbnailer
 
   ## Events
 
@@ -306,7 +305,8 @@ defmodule Banchan.Commissions do
           :studio,
           events: [invoice: [], attachments: [:upload, :thumbnail, :preview]],
           line_items: [:option],
-          offering: [:options, :studio]
+          offering: [:options, :studio],
+          work: []
         ]
     )
   end
@@ -713,7 +713,7 @@ defmodule Banchan.Commissions do
 
     if close do
       {:ok, offering} =
-        Offerings.update_offering(Accounts.system_user(), offering, %{open: false}, nil)
+        Offerings.update_offering(Accounts.system_user(), offering, %{open: false})
 
       offering
     else
@@ -928,7 +928,7 @@ defmodule Banchan.Commissions do
 
               if close do
                 {:ok, _} =
-                  Offerings.update_offering(Accounts.system_user(), offering, %{open: false}, nil)
+                  Offerings.update_offering(Accounts.system_user(), offering, %{open: false})
               end
             end
 
@@ -1342,34 +1342,7 @@ defmodule Banchan.Commissions do
         %Event{} = event,
         %EventAttachment{} = event_attachment
       ) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.run(:delete_upload, fn _, _ ->
-      if event_attachment.upload_id do
-        UploadDeleter.schedule_deletion(%Upload{id: event_attachment.upload_id})
-      else
-        {:ok, nil}
-      end
-    end)
-    |> Ecto.Multi.run(:delete_preview, fn _, _ ->
-      if event_attachment.preview_id do
-        UploadDeleter.schedule_deletion(%Upload{id: event_attachment.preview_id},
-          keep_original: true
-        )
-      else
-        {:ok, nil}
-      end
-    end)
-    |> Ecto.Multi.run(:delete_thumbnail, fn _, _ ->
-      if event_attachment.thumbnail_id do
-        UploadDeleter.schedule_deletion(%Upload{id: event_attachment.thumbnail_id},
-          keep_original: true
-        )
-      else
-        {:ok, nil}
-      end
-    end)
-    |> Ecto.Multi.delete(:delete_event_attachment, event_attachment)
-    |> Repo.transaction()
+    Repo.delete(event_attachment)
     |> case do
       {:ok, _} ->
         new_attachments = Enum.reject(event.attachments, &(&1.id == event_attachment.id))
@@ -1382,7 +1355,7 @@ defmodule Banchan.Commissions do
 
         {:ok, event_attachment}
 
-      {:error, _, error, _} ->
+      {:error, error} ->
         {:error, error}
     end
   end
