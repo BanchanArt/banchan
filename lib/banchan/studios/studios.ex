@@ -969,7 +969,7 @@ defmodule Banchan.Studios do
   be unable to further interact with commissions associated with this Studio,
   request new commissions, or even view the Studio profile.
   """
-  def block_user(%User{} = actor, %Studio{} = studio, %User{} = user, attrs) do
+  def block_user(%User{} = actor, %Studio{} = studio, %User{} = user, attrs \\ %{}) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
       check_studio_member(studio, actor, [])

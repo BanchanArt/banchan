@@ -14,6 +14,7 @@ defmodule Banchan.Offerings.Offering do
   alias Banchan.Repo
   alias Banchan.Studios.Studio
   alias Banchan.Uploads.Upload
+  alias Banchan.Works.Work
 
   schema "offerings" do
     field :type, :string
@@ -48,6 +49,7 @@ defmodule Banchan.Offerings.Offering do
       preload_order: [asc: :index]
 
     has_many :commissions, Commission
+    has_many :works, Work
     has_many :options, OfferingOption, on_replace: :delete_if_exists
 
     timestamps()

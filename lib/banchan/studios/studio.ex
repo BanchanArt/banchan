@@ -52,6 +52,8 @@ defmodule Banchan.Studios.Studio do
 
     has_many :offerings, Banchan.Offerings.Offering, preload_order: [:asc, :index]
 
+    has_many :works, Banchan.Works.Work
+
     field :website_url, :string
     field :twitter_handle, :string
     field :instagram_handle, :string
