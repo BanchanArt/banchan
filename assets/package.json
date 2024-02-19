@@ -31,7 +31,7 @@
     "@splidejs/splide": "^4.0.7",
     "autoprefixer": "^10.4.2",
     "cross-env": "^7.0.3",
-    "postcss": "^8.4.5",
+    "postcss": "^8.4.31",
     "postcss-cli": "^9.0.1",
     "postcss-scss": "^4.0.1",
     "postcss-url": "^10.1.3",
