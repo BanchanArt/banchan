@@ -163,7 +163,7 @@ defmodule Banchan.Offerings do
     end)
     |> case do
       {:ok, {:ok, offering}} ->
-        __MODULE__.Notifications.notify_images_updated(offering)
+        __MODULE__.Notifications.notify_images_updated(offering |> Repo.preload(:studio))
         {:ok, offering}
 
       {:ok, {:error, error}} ->
