@@ -28,11 +28,11 @@ defmodule BanchanWeb.Components.Card do
   def render(assigns) do
     ~F"""
     <div class={
-      "bg-base-200 card card-compact flex flex-col grow rounded-none group focus:outline-none focus:ring-0",
+      "bg-base-200 card card-compact flex flex-col grow rounded-none",
       @class
     }>
       {#if slot_assigned?(:image)}
-        <figure class={@image_class, "rounded-none group-focus:ring-1 group-focus:ring-primary"}>
+        <figure class={@image_class, "rounded-none"}>
           <#slot {@image} />
         </figure>
       {/if}
