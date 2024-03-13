@@ -2,7 +2,7 @@ let styleText = "";
 
 for (let i = 0; i < document.styleSheets.length; i++) {
   const styleSheet = document.styleSheets[i];
-  if (new URL(styleSheet.href).hostname !== window.location.hostname) {
+  if (styleSheet.href && new URL(styleSheet.href).hostname !== window.location.hostname) {
     // We can't access cross-origin stylesheets, which are often injected by
     // extensions.
     continue;
