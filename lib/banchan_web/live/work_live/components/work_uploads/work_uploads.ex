@@ -115,8 +115,8 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
                   />
                 </Lightbox.Item>
               {#elseif type == :existing}
-                <Icon name="file-up" class="non-media-file" size={32} label={wupload.name}>
-                  <span class="upload-name">{wupload.name}</span>
+                <Icon name="file-up" class="non-media-file" size={32} label={wupload.upload.name}>
+                  <span class="upload-name">{wupload.upload.name}</span>
                 </Icon>
               {#elseif type == :live && Uploads.media?(wupload.client_type)}
                 <Lightbox.Item>

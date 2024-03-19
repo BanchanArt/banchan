@@ -12,16 +12,7 @@ defmodule BanchanWeb.WorkLive.Work do
   alias Banchan.Repo
   alias Banchan.Uploads
   alias Banchan.Works
-  alias Banchan.Works.Work
-
-  alias BanchanWeb.Components.{
-    Icon,
-    Layout,
-    RichText,
-    Tag
-  }
-
-  alias BanchanWeb.WorkLive.Components.WorkUploads
+  alias Banchan.Works.{Work, WorkUpload}
 
   alias Surface.Components.{
     Form,
@@ -30,14 +21,24 @@ defmodule BanchanWeb.WorkLive.Work do
     LiveRedirect
   }
 
+  alias Surface.Components.Form.{Field, ErrorTag}
+
+  alias BanchanWeb.Components.{
+    Icon,
+    Layout,
+    RichText,
+    Tag
+  }
+
   alias BanchanWeb.Components.Form.{
     Checkbox,
-    HiddenInput,
     QuillInput,
     Submit,
     TagsInput,
     TextInput
   }
+
+  alias BanchanWeb.WorkLive.Components.WorkUploads
 
   @impl true
   def mount(_params, _session, socket) do
@@ -46,11 +47,7 @@ defmodule BanchanWeb.WorkLive.Work do
      |> allow_upload(:uploads,
        accept: :any,
        max_entries: 10,
-       max_file_size: Uploads.max_upload_size(),
-       progress: fn :uploads, entry, socket ->
-         dbg(entry)
-         {:noreply, socket}
-       end
+       max_file_size: Uploads.max_upload_size()
      )}
   end
 
@@ -118,8 +115,21 @@ defmodule BanchanWeb.WorkLive.Work do
 
   @impl true
   def handle_event("change", %{"work" => work}, socket) do
+    uploads =
+      socket.assigns.work_uploads
+      |> Enum.with_index()
+      |> Enum.map(fn {{ty, data}, index} ->
+        if ty == :live do
+          %WorkUpload{}
+          |> WorkUpload.changeset(%{"index" => index, "ref" => data.ref, "comment" => ""})
+        else
+          data
+          |> WorkUpload.changeset(%{"index" => index})
+        end
+      end)
+
     changeset =
-      Work.changeset(socket.assigns.work, work)
+      Work.changeset(socket.assigns.work, Map.put(work, "uploads", uploads))
       |> Map.put(:action, if(is_nil(socket.assigns.work.id), do: :insert, else: :update))
 
     {:noreply, assign(socket, changeset: changeset)}
@@ -130,19 +140,29 @@ defmodule BanchanWeb.WorkLive.Work do
     uploads =
       consume_uploaded_entries(socket, :uploads, fn %{path: path}, entry ->
         {:ok,
-         Uploads.save_file!(
-           socket.assigns.current_user,
-           path,
-           entry.client_type,
-           entry.client_name
-         )}
+         {entry.ref,
+          Uploads.save_file!(
+            socket.assigns.current_user,
+            path,
+            entry.client_type,
+            entry.client_name
+          )}}
       end)
 
     Works.new_work(
       socket.assigns.current_user,
       socket.assigns.studio,
       work,
-      uploads,
+      socket.assigns.work_uploads
+      |> Enum.map(fn {ty, data} ->
+        if ty == :live do
+          Enum.find_value(uploads, fn {ref, upload} ->
+            if ref == data.ref, do: upload
+          end)
+        else
+          data.upload
+        end
+      end),
       commission: socket.assigns.commission,
       offering: socket.assigns.offering
     )
@@ -171,10 +191,23 @@ defmodule BanchanWeb.WorkLive.Work do
   end
 
   def handle_info({:updated_uploads, _, uploads}, socket) do
+    uploads_param =
+      uploads
+      |> Enum.with_index()
+      |> Enum.map(fn {{ty, data}, index} ->
+        if ty == :live do
+          %WorkUpload{}
+          |> WorkUpload.changeset(%{"index" => index, "ref" => data.ref, "comment" => ""})
+        else
+          data
+          |> WorkUpload.changeset(%{"index" => index})
+        end
+      end)
+
     changeset =
       Work.changeset(
         socket.assigns.work,
-        socket.assigns.changeset.params |> Map.put("upload_count", Enum.count(uploads))
+        socket.assigns.changeset.params |> Map.put("uploads", uploads_param)
       )
       |> Map.put(:action, if(is_nil(socket.assigns.work.id), do: :insert, else: :update))
 
@@ -342,6 +375,9 @@ defmodule BanchanWeb.WorkLive.Work do
                 </div>
                 <LiveFileInput upload={@uploads.uploads} />
               </div>
+              <Field name={:uploads}>
+                <ErrorTag class="help text-error" />
+              </Field>
             {/if}
           </div>
           {#if is_nil(@changeset)}
@@ -370,7 +406,6 @@ defmodule BanchanWeb.WorkLive.Work do
             {/if}
           {#else}
             <div class="work-form">
-              <HiddenInput name={:upload_count} value={Enum.count(@work_uploads)} />
               <QuillInput id="work-description" label="Description" name={:description} />
               <TagsInput id="work-tags" label="Tags" name={:tags} />
               <div class="flags-form">
@@ -409,6 +444,9 @@ defmodule BanchanWeb.WorkLive.Work do
               </div>
               <LiveFileInput upload={@uploads.uploads} />
             </div>
+            <Field name={:uploads}>
+              <ErrorTag class="help text-error" />
+            </Field>
           {/if}
         </div>
       </Form>

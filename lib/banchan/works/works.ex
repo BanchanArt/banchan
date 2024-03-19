@@ -38,9 +38,7 @@ defmodule Banchan.Works do
   def new_work(%User{} = actor, %Studio{} = studio, attrs, uploads, opts \\ []) do
     {:ok, ret} =
       Repo.transaction(fn ->
-        with {:ok, uploads} <-
-               if(Enum.empty?(uploads), do: {:error, :uploads_required}, else: {:ok, uploads}),
-             {:ok, _actor} <- Studios.check_studio_member(studio, actor) do
+        with {:ok, _actor} <- Studios.check_studio_member(studio, actor) do
           work_uploads =
             uploads
             |> Enum.with_index()
@@ -52,11 +50,11 @@ defmodule Banchan.Works do
                 end
 
               %WorkUpload{
-                index: index,
                 comment: "",
                 upload_id: upload.id,
                 preview_id: preview_id
               }
+              |> WorkUpload.changeset(%{"index" => index})
             end)
 
           commission = Keyword.get(opts, :commission)
@@ -73,10 +71,9 @@ defmodule Banchan.Works do
             studio_id: studio.id,
             commission_id: commission && commission.id,
             client_id: client_id,
-            offering_id: offering_id,
-            uploads: work_uploads
+            offering_id: offering_id
           }
-          |> Work.changeset(attrs)
+          |> Work.changeset(Map.put(attrs, "uploads", work_uploads))
           |> Repo.insert()
         end
       end)
@@ -373,6 +370,7 @@ defmodule Banchan.Works do
   Fetches a `WorkUpload`, but only if the given `User` is allowed access.
   """
   def get_work_upload_if_allowed!(work, upload_id, actor)
+
   def get_work_upload_if_allowed!(%Work{} = work, upload_id, nil) do
     from(
       work_upload in WorkUpload,

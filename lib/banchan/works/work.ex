@@ -16,7 +16,6 @@ defmodule Banchan.Works.Work do
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
     field :private, :boolean, default: false
-    field :upload_count, :integer, virtual: true
     belongs_to :studio, Banchan.Studios.Studio
     belongs_to :client, Banchan.Accounts.User, on_replace: :nilify
     belongs_to :offering, Banchan.Offerings.Offering, on_replace: :nilify
@@ -38,17 +37,14 @@ defmodule Banchan.Works.Work do
       end
 
     work
-    |> cast(attrs, [:title, :description, :tags, :upload_count, :private, :mature])
-    |> validate_required([:title, :upload_count])
+    |> cast(attrs, [:title, :description, :tags, :private, :mature])
+    |> validate_required([:title])
     |> validate_length(:title, min: 3, max: 50)
-    |> validate_number(:upload_count,
-      greater_than_or_equal_to: 1,
-      less_than_or_equal_to: 10,
-      message: "must include between 1 and 10 uploads"
-    )
     |> validate_rich_text_length(:description, max: 500)
     |> validate_tags()
     |> validate_length(:tags, max: 5)
+    |> put_assoc(:uploads, attrs["uploads"], required: true)
+    |> validate_length(:uploads, min: 1, max: 10)
   end
 
   def rand_id() do
