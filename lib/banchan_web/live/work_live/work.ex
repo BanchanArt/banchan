@@ -80,7 +80,7 @@ defmodule BanchanWeb.WorkLive.Work do
   def handle_params(params, _url, socket) do
     socket = assign_studio_defaults(params, socket, true, true)
 
-    work = %Work{} |> Repo.preload([:uploads, :studio])
+    work = %Work{} |> Repo.preload([:studio, uploads: [:upload]])
 
     changeset = Work.changeset(work, %{})
 
@@ -177,9 +177,33 @@ defmodule BanchanWeb.WorkLive.Work do
   end
 
   def handle_event("submit", %{"work" => work}, socket) do
-    changeset = Work.changeset(socket.assigns.work, work)
+    uploads =
+      consume_uploaded_entries(socket, :uploads, fn %{path: path}, entry ->
+        {:ok,
+         {entry.ref,
+          Uploads.save_file!(
+            socket.assigns.current_user,
+            path,
+            entry.client_type,
+            entry.client_name
+          )}}
+      end)
 
-    Works.update_work(changeset)
+    Works.update_work(
+      socket.assigns.current_user,
+      socket.assigns.work,
+      work,
+      socket.assigns.work_uploads
+      |> Enum.map(fn {ty, data} ->
+        if ty == :live do
+          Enum.find_value(uploads, fn {ref, upload} ->
+            if ref == data.ref, do: upload
+          end)
+        else
+          data.upload
+        end
+      end)
+    )
     |> case do
       {:ok, work} ->
         {:noreply,
@@ -233,15 +257,11 @@ defmodule BanchanWeb.WorkLive.Work do
       }
 
       .preview-column {
-      @apply flex-col gap-4;
+      @apply flex flex-col gap-4 md:col-span-2 md:row-span-2;
       }
 
-      .preview-column-desktop {
-      @apply hidden md:flex col-span-2 order-2;
-      }
-
-      .preview-column-mobile {
-      @apply flex md:hidden;
+      .work-details {
+      @apply md:row-span-2 flex flex-col gap-2;
       }
 
       .title-wrapper {
@@ -346,89 +366,21 @@ defmodule BanchanWeb.WorkLive.Work do
           </div>
           <div class="source-info text-base grow">
             {#if !is_nil(@work.offering_id)}
-              <LiveRedirect to={~p"/studios/#{@work.studio.handle}/offerings/#{@work.offering.type}"}>{@work.offering.name}</LiveRedirect>
+              <LiveRedirect to={~p"/studios/#{@studio.handle}/offerings/#{@work.offering.type}"}>{@work.offering.name}</LiveRedirect>
             {/if}
             <span>
               by
             </span>
-            <LiveRedirect to={~p"/studios/#{@work.studio.handle}"}>{@work.studio.name}</LiveRedirect>
+            <LiveRedirect to={~p"/studios/#{@studio.handle}"}>{@studio.name}</LiveRedirect>
           </div>
           <div class="flags-show">
             <span :if={@work.mature} title="Mature">M</span>
             <span :if={@work.private} title="Private">Private</span>
           </div>
-          <div class="preview-column preview-column-mobile">
-            <WorkUploads
-              id="work-uploads-mobile"
-              send_updates_to={self()}
-              studio={@studio}
-              work={@work}
-              live_entries={@uploads.uploads.entries}
-              work_uploads={@work_uploads}
-              can_download?={@can_download?}
-            />
-            {#if !is_nil(@changeset)}
-              <div class="upload-input" phx-drop-target={@uploads.uploads.ref}>
-                <div>
-                  <span>Drop a file or click here to upload attachments</span>
-                  <Icon name="file-up" size="8" label="Upload attachment" />
-                </div>
-                <LiveFileInput upload={@uploads.uploads} />
-              </div>
-              <Field name={:uploads}>
-                <ErrorTag class="help text-error" />
-              </Field>
-            {/if}
-          </div>
-          {#if is_nil(@changeset)}
-            <h3 class="info-header">About This Work</h3>
-            <RichText class="work-description info-field" content={@work.description} />
-            {#if !Enum.empty?(@work.tags)}
-              <div class="work-tags">
-                {#for tag <- @work.tags}
-                  <Tag tag={tag} />
-                {/for}
-              </div>
-            {/if}
-            {#if !is_nil(@work.commission_id) && !is_nil(@current_user) &&
-                (@current_user_member? || @current_user.id == @work.client)}
-              <h3 class="info-header">Source Commission</h3>
-              <LiveRedirect
-                class="commission-link"
-                to={~p"/studios/#{@work.studio.handle}/commissions/#{@work.commission.public_id}"}
-              >{@work.commission.title}</LiveRedirect>
-            {/if}
-            {#if @current_user_member?}
-              <LivePatch
-                class="btn btn-success"
-                to={~p"/studios/#{@work.studio.handle}/works/#{@work.public_id}/edit"}
-              >Edit Work</LivePatch>
-            {/if}
-          {#else}
-            <div class="work-form">
-              <QuillInput id="work-description" label="Description" name={:description} />
-              <TagsInput id="work-tags" label="Tags" name={:tags} />
-              <div class="flags-form">
-                <Checkbox label="Mature" name={:mature} />
-                <Checkbox label="Private" name={:private} />
-              </div>
-              {#if is_nil(@work.id)}
-                <Submit label="Create Work" changeset={@changeset} />
-              {#else}
-                <div class="edit-buttons">
-                  <Submit label="Save" changeset={@changeset} />
-                  <LivePatch
-                    class="btn btn-error"
-                    to={~p"/studios/#{@work.studio.handle}/works/#{@work.public_id}"}
-                  >Cancel</LivePatch>
-                </div>
-              {/if}
-            </div>
-          {/if}
         </div>
-        <div class="preview-column preview-column-desktop">
+        <div class="preview-column">
           <WorkUploads
-            id="work-uploads-desktop"
+            id="work-uploads"
             send_updates_to={self()}
             studio={@studio}
             work={@work}
@@ -447,6 +399,50 @@ defmodule BanchanWeb.WorkLive.Work do
             <Field name={:uploads}>
               <ErrorTag class="help text-error" />
             </Field>
+          {/if}
+        </div>
+        <div class="work-details">
+          {#if is_nil(@changeset)}
+            <h3 class="info-header">About This Work</h3>
+            <RichText class="work-description info-field" content={@work.description} />
+            {#if !Enum.empty?(@work.tags)}
+              <div class="work-tags">
+                {#for tag <- @work.tags}
+                  <Tag tag={tag} />
+                {/for}
+              </div>
+            {/if}
+            {#if !is_nil(@work.commission_id) && !is_nil(@current_user) &&
+                (@current_user_member? || @current_user.id == @work.client)}
+              <h3 class="info-header">Source Commission</h3>
+              <LiveRedirect
+                class="commission-link"
+                to={~p"/studios/#{@studio.handle}/commissions/#{@work.commission.public_id}"}
+              >{@work.commission.title}</LiveRedirect>
+            {/if}
+            {#if @current_user_member?}
+              <LivePatch
+                class="btn btn-success"
+                to={~p"/studios/#{@studio.handle}/works/#{@work.public_id}/edit"}
+              >Edit Work</LivePatch>
+            {/if}
+          {#else}
+            <div class="work-form">
+              <QuillInput id="work-description" label="Description" name={:description} />
+              <TagsInput id="work-tags" label="Tags" name={:tags} />
+              <div class="flags-form">
+                <Checkbox label="Mature" name={:mature} />
+                <Checkbox label="Private" name={:private} />
+              </div>
+              {#if is_nil(@work.id)}
+                <Submit label="Create Work" changeset={@changeset} />
+              {#else}
+                <div class="edit-buttons">
+                  <Submit label="Save" changeset={@changeset} />
+                  <LivePatch class="btn btn-error" to={~p"/studios/#{@studio.handle}/works/#{@work.public_id}"}>Cancel</LivePatch>
+                </div>
+              {/if}
+            </div>
           {/if}
         </div>
       </Form>

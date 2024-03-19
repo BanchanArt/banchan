@@ -308,7 +308,7 @@ defmodule Banchan.Works do
       ** (Ecto.NoResultsError)
 
   """
-  def get_work!(id), do: Repo.get!(Work, id) |> Repo.preload(:uploads)
+  def get_work!(id), do: Repo.get!(Work, id) |> Repo.preload(uploads: [:upload])
 
   @doc """
   Gets a single work by its `public_id`. You may pass in a padded `public_id`
@@ -338,7 +338,7 @@ defmodule Banchan.Works do
       select: work
     )
     |> Repo.one!()
-    |> Repo.preload([:uploads, :studio, :offering, :commission, :client])
+    |> Repo.preload([:studio, :offering, :commission, :client, uploads: [:upload]])
   end
 
   def get_work_by_public_id_if_allowed!(
@@ -363,7 +363,7 @@ defmodule Banchan.Works do
       select: work
     )
     |> Repo.one!()
-    |> Repo.preload([:uploads, :studio, :offering, :commission, :client])
+    |> Repo.preload([:studio, :offering, :commission, :client, uploads: [:upload]])
   end
 
   @doc """
@@ -425,8 +425,35 @@ defmodule Banchan.Works do
 
   ## Updating
 
-  def update_work(%Ecto.Changeset{} = changeset) do
-    Repo.update(changeset)
+  def update_work(%User{} = actor, %Work{} = work, attrs, uploads) do
+    {:ok, ret} =
+      Repo.transaction(fn ->
+        with {:ok, _actor} <- Studios.check_studio_member(work.studio, actor) do
+          work_uploads =
+            uploads
+            |> Enum.with_index()
+            |> Enum.map(fn {%Upload{} = upload, index} ->
+              preview_id =
+                if Uploads.media?(upload) do
+                  {:ok, %Upload{id: preview_id}} = Thumbnailer.thumbnail(upload)
+                  preview_id
+                end
+
+              %WorkUpload{
+                comment: "",
+                upload_id: upload.id,
+                preview_id: preview_id
+              }
+              |> WorkUpload.changeset(%{"index" => index})
+            end)
+
+          work
+          |> Work.changeset(Map.put(attrs, "uploads", work_uploads))
+          |> Repo.update()
+        end
+      end)
+
+    ret
   end
 
   ## TODO
