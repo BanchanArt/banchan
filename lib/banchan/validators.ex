@@ -146,7 +146,7 @@ defmodule Banchan.Validators do
     |> validate_format(:furaffinity_handle, ~r/^[a-zA-Z0-9_-]+$/,
       message: "must be a valid Furaffinity handle."
     )
-    |> validate_format(:discord_handle, ~r/^[a-zA-Z0-9_-]+(#\d{4})?$/,
+    |> validate_format(:discord_handle, ~r/^[a-zA-Z0-9_.-]+(#\d{4})?$/,
       message: "must be a valid Discord handle."
     )
     |> validate_format(:artstation_handle, ~r/^[a-zA-Z0-9_]+$/,

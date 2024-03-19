@@ -392,14 +392,14 @@ defmodule Banchan.Accounts do
 
         nil ->
           create_user_from_discord(auth)
-          |> add_oauth_pfp(auth)
-          |> add_discord_oauth_banner(auth)
       end
     end)
     |> Repo.transaction()
     |> case do
       {:ok, %{updated_user: user}} ->
-        {:ok, user}
+        user
+        |> add_oauth_pfp(auth)
+        |> add_discord_oauth_banner(auth)
 
       {:error, _, error, _} ->
         {:error, error}
@@ -416,13 +416,13 @@ defmodule Banchan.Accounts do
 
         nil ->
           create_user_from_google(auth)
-          |> add_oauth_pfp(auth)
       end
     end)
     |> Repo.transaction()
     |> case do
       {:ok, %{updated_user: user}} ->
-        {:ok, user}
+        user
+        |> add_oauth_pfp(auth)
 
       {:error, _, error, _} ->
         {:error, error}
@@ -582,19 +582,19 @@ defmodule Banchan.Accounts do
     end
   end
 
-  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{info: %{image: url}}) when is_binary(url) do
+  defp add_oauth_pfp(%User{} = user, %Auth{info: %{image: url}}) when is_binary(url) do
     tmp_file =
       Path.join([
         System.tmp_dir!(),
-        "oauth-pfp-#{:rand.uniform(100_000_000)}" <> Path.extname(url)
+        "oauth-pfp-#{:rand.uniform(100_000_000)}.jpg"
       ])
 
     resp = HTTPoison.get!(url <> "?size=160")
-    File.write!(tmp_file, resp.body)
-    "." <> format = Path.extname(url)
 
-    {pfp, thumb} =
-      make_pfp_images!(user, user, tmp_file, "image/#{format}", Path.basename(tmp_file))
+    Image.from_binary!(resp.body)
+    |> Image.write!(tmp_file, minimize_file_size: true)
+
+    {pfp, thumb} = make_pfp_images!(user, user, tmp_file, "image/jpg", Path.basename(tmp_file))
 
     File.rm!(tmp_file)
 
@@ -604,12 +604,8 @@ defmodule Banchan.Accounts do
     })
   end
 
-  defp add_oauth_pfp({:ok, %User{} = user}, %Auth{}) do
+  defp add_oauth_pfp(%User{} = user, %Auth{}) do
     {:ok, user}
-  end
-
-  defp add_oauth_pfp({:error, error}, _) do
-    {:error, error}
   end
 
   defp random_password do
@@ -861,7 +857,9 @@ defmodule Banchan.Accounts do
   end
 
   @doc """
-  Saves a profile picture and schedules generation of corresponding thumbnails.
+  Saves a profile picture and schedules generation of corresponding
+  thumbnails. DO NOT CALL THIS INSIDE A TRANSACTION (the freshly-created
+  Upload won't be available for the Thumbnailer).
   """
   def make_pfp_images!(%User{} = actor, %User{} = user, src, type, name) do
     if can_modify_user?(actor, user) do
