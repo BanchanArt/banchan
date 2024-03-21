@@ -21,7 +21,7 @@ defmodule BanchanWeb.WorkLive.Work do
     LiveRedirect
   }
 
-  alias Surface.Components.Form.{Field, ErrorTag}
+  alias Surface.Components.Form.{ErrorTag, Field}
 
   alias BanchanWeb.Components.{
     Icon,

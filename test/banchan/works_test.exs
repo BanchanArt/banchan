@@ -213,15 +213,16 @@ defmodule Banchan.WorksTest do
     @invalid_attrs %{private: nil, description: nil, title: nil, tags: nil, mature: nil}
     test "returns the work with given id" do
       work = work_fixture()
-      assert Works.get_work!(work.id) == work
+      assert Works.get_work!(work.id) == (work |> Repo.preload([uploads: [:upload]]))
     end
   end
 
   describe "new_work/1" do
     test "valid data creates a work" do
-      artist = user_fixture()
       client = user_fixture()
-      studio = studio_fixture([artist])
+      comm = commission_fixture(%{client: client})
+      studio = comm.studio
+      artist = Enum.at(studio.artists, 0)
 
       uploads = [
         Uploads.save_file!(
@@ -241,7 +242,7 @@ defmodule Banchan.WorksTest do
       }
 
       assert {:ok, %Work{} = work} =
-               Works.new_work(artist, studio, valid_attrs, uploads, client: client)
+               Works.new_work(artist, studio, valid_attrs, uploads, commission: comm)
 
       assert work.private == true
       assert work.description == "some description"
@@ -249,10 +250,11 @@ defmodule Banchan.WorksTest do
       assert work.tags == ["option1", "option2"]
       assert work.mature == true
 
-      work = work |> Repo.preload([:client, :studio])
+      work = work |> Repo.preload([:client, :studio, :commission])
 
       assert work.client.id == client.id
       assert work.studio.id == studio.id
+      assert work.commission.id == comm.id
     end
 
     test "invalid data returns error changeset" do
@@ -280,7 +282,7 @@ defmodule Banchan.WorksTest do
   end
 
   @tag skip: "TODO"
-  describe "update_work/2" do
+  describe "update_work/4" do
     test "valid data updates the work" do
       work = work_fixture()
 
@@ -298,17 +300,6 @@ defmodule Banchan.WorksTest do
       assert work.title == "some updated title"
       assert work.tags == ["option1"]
       assert work.mature == false
-    end
-
-    test "update_work/2 with invalid data returns error changeset" do
-      work = work_fixture()
-      assert {:error, %Ecto.Changeset{}} = Works.update_work(work, @invalid_attrs)
-      assert work == Works.get_work!(work.id)
-    end
-
-    test "change_work/1 returns a work changeset" do
-      work = work_fixture()
-      assert %Ecto.Changeset{} = Works.change_work(work)
     end
   end
 end

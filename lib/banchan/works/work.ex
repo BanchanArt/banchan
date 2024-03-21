@@ -47,7 +47,7 @@ defmodule Banchan.Works.Work do
     |> validate_length(:uploads, min: 1, max: 10)
   end
 
-  def rand_id() do
+  def rand_id do
     :crypto.strong_rand_bytes(10) |> Base.url_encode64(padding: false)
   end
 end

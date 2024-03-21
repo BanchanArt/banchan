@@ -45,7 +45,8 @@ defmodule Banchan.WorksFixtures do
           title: "some title",
           tags: ["option1", "option2"],
           mature: false
-        }),
+        })
+        |> Map.new(fn {k, v} -> {to_string(k), v} end),
         uploads,
         client: Map.get(attrs, :client),
         commission: Map.get(attrs, :commission),

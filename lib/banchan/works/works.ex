@@ -62,7 +62,8 @@ defmodule Banchan.Works do
 
           offering_id =
             if is_nil(commission) do
-              Keyword.get(opts, :offering)
+              off = Keyword.get(opts, :offering)
+              if(!is_nil(off), do: off.id)
             else
               commission.offering_id
             end
@@ -73,7 +74,11 @@ defmodule Banchan.Works do
             client_id: client_id,
             offering_id: offering_id
           }
-          |> Work.changeset(Map.put(attrs, "uploads", work_uploads))
+          |> Work.changeset(
+            attrs
+            |> Map.new(fn {k, v} -> {to_string(k), v} end)
+            |> Map.put("uploads", work_uploads)
+          )
           |> Repo.insert()
         end
       end)
@@ -425,30 +430,37 @@ defmodule Banchan.Works do
 
   ## Updating
 
-  def update_work(%User{} = actor, %Work{} = work, attrs, uploads) do
+  def update_work(%User{} = actor, %Work{} = work, attrs, uploads \\ nil) do
     {:ok, ret} =
       Repo.transaction(fn ->
         with {:ok, _actor} <- Studios.check_studio_member(work.studio, actor) do
-          work_uploads =
-            uploads
-            |> Enum.with_index()
-            |> Enum.map(fn {%Upload{} = upload, index} ->
-              preview_id =
-                if Uploads.media?(upload) do
-                  {:ok, %Upload{id: preview_id}} = Thumbnailer.thumbnail(upload)
-                  preview_id
-                end
+          attrs =
+            if is_nil(uploads) do
+              attrs
+            else
+              work_uploads =
+                uploads
+                |> Enum.with_index()
+                |> Enum.map(fn {%Upload{} = upload, index} ->
+                  preview_id =
+                    if Uploads.media?(upload) do
+                      {:ok, %Upload{id: preview_id}} = Thumbnailer.thumbnail(upload)
+                      preview_id
+                    end
 
-              %WorkUpload{
-                comment: "",
-                upload_id: upload.id,
-                preview_id: preview_id
-              }
-              |> WorkUpload.changeset(%{"index" => index})
-            end)
+                  %WorkUpload{
+                    comment: "",
+                    upload_id: upload.id,
+                    preview_id: preview_id
+                  }
+                  |> WorkUpload.changeset(%{"index" => index})
+                end)
+
+              Map.put(attrs, "uploads", work_uploads)
+            end
 
           work
-          |> Work.changeset(Map.put(attrs, "uploads", work_uploads))
+          |> Work.changeset(attrs)
           |> Repo.update()
         end
       end)
