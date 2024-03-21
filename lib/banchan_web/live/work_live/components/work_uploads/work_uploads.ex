@@ -56,13 +56,32 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
   def handle_event("reposition", params, socket) do
     old = params["old"]
     new = params["new"]
-    new_uploads = if old > new do
-      List.insert_at(socket.assigns.work_uploads, new, Enum.at(socket.assigns.work_uploads, old))
-      |> List.delete_at(old + 1)
-    else
-      List.insert_at(socket.assigns.work_uploads, new, Enum.at(socket.assigns.work_uploads, old))
-      |> List.delete_at(old)
-    end
+
+    new_uploads =
+      if old > new do
+        List.insert_at(
+          socket.assigns.work_uploads,
+          new,
+          Enum.at(socket.assigns.work_uploads, old)
+        )
+        |> List.delete_at(old + 1)
+      else
+        List.insert_at(
+          socket.assigns.work_uploads,
+          new,
+          Enum.at(socket.assigns.work_uploads, old)
+        )
+        |> List.delete_at(old)
+      end
+
+    notify_changed(new_uploads, socket)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("remove_upload", params, socket) do
+    {idx, ""} = params["idx"] |> Integer.parse()
+    new_uploads = List.delete_at(socket.assigns.work_uploads, idx)
 
     notify_changed(new_uploads, socket)
 
@@ -89,7 +108,7 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
       }
 
       .preview-item {
-      @apply bg-base-100 mx-auto my-auto w-full h-full flex flex-col justify-center items-center cursor-pointer;
+      @apply relative bg-base-100 mx-auto my-auto w-full h-full flex flex-col justify-center items-center cursor-pointer;
       }
 
       .preview-item:first-child:nth-last-child(1) {
@@ -115,15 +134,15 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
       .upload-name {
       @apply text-pretty break-words m-2;
       }
+
+      .remove-upload {
+      @apply absolute z-20 btn btn-sm btn-circle left-2 top-2;
+      }
     </style>
     <bc-work-uploads id={@id} class={@class} :hook="SortableHook">
       <Lightbox id={@id <> "-preview-lightbox"}>
-        <div
-          id={@id <> "-items"}
-          class="preview-items"
-          data-list_id={@id <> "-list"}
-        >
-          {#for {type, wupload} <- @work_uploads}
+        <div id={@id <> "-items"} class="preview-items" data-list_id={@id <> "-list"}>
+          {#for {{type, wupload}, idx} <- @work_uploads |> Enum.with_index()}
             <div
               class="preview-item"
               data-id={if type == :existing do
@@ -132,6 +151,9 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
                 wupload.ref
               end}
             >
+              {#if @editing}
+                <button type="button" class="remove-upload" phx-value-idx={idx} :on-click="remove_upload">✕</button>
+              {/if}
               {#if type == :existing && !is_nil(wupload.preview_id)}
                 {#if @editing}
                   <img
