@@ -53,6 +53,22 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
     {:ok, socket}
   end
 
+  def handle_event("reposition", params, socket) do
+    old = params["old"]
+    new = params["new"]
+    new_uploads = if old > new do
+      List.insert_at(socket.assigns.work_uploads, new, Enum.at(socket.assigns.work_uploads, old))
+      |> List.delete_at(old + 1)
+    else
+      List.insert_at(socket.assigns.work_uploads, new, Enum.at(socket.assigns.work_uploads, old))
+      |> List.delete_at(old)
+    end
+
+    notify_changed(new_uploads, socket)
+
+    {:noreply, socket}
+  end
+
   defp notify_changed(_, %{assigns: %{send_updates_to: nil}}) do
     nil
   end
@@ -69,11 +85,11 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
     ~F"""
     <style>
       .preview-items {
-      @apply grid grid-cols-1 md:grid-cols-6 gap-1 justify-items-stretch w-full;
+      @apply grid grid-cols-1 md:grid-cols-6 gap-1 justify-items-stretch w-full auto-rows-fr;
       }
 
       .preview-item {
-      @apply bg-base-100 mx-auto my-auto w-full h-full flex flex-col justify-center items-center;
+      @apply bg-base-100 mx-auto my-auto w-full h-full flex flex-col justify-center items-center cursor-pointer;
       }
 
       .preview-item:first-child:nth-last-child(1) {
@@ -100,28 +116,50 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
       @apply text-pretty break-words m-2;
       }
     </style>
-    <bc-work-uploads id={@id} class={@class}>
+    <bc-work-uploads id={@id} class={@class} :hook="SortableHook">
       <Lightbox id={@id <> "-preview-lightbox"}>
-        <div class="preview-items">
+        <div
+          id={@id <> "-items"}
+          class="preview-items"
+          data-list_id={@id <> "-list"}
+        >
           {#for {type, wupload} <- @work_uploads}
-            <div class="preview-item">
+            <div
+              class="preview-item"
+              data-id={if type == :existing do
+                wupload.upload.id
+              else
+                wupload.ref
+              end}
+            >
               {#if type == :existing && !is_nil(wupload.preview_id)}
-                <Lightbox.Item download={if @can_download? do
-                  ~p"/studios/#{@studio.handle}/works/#{@work.public_id}/upload/#{wupload.upload_id}"
-                end}>
+                {#if @editing}
                   <img
                     class="preview-image"
                     src={~p"/studios/#{@studio.handle}/works/#{@work.public_id}/upload/#{wupload.upload_id}/preview"}
                   />
-                </Lightbox.Item>
+                {#else}
+                  <Lightbox.Item download={if @can_download? do
+                    ~p"/studios/#{@studio.handle}/works/#{@work.public_id}/upload/#{wupload.upload_id}"
+                  end}>
+                    <img
+                      class="preview-image"
+                      src={~p"/studios/#{@studio.handle}/works/#{@work.public_id}/upload/#{wupload.upload_id}/preview"}
+                    />
+                  </Lightbox.Item>
+                {/if}
               {#elseif type == :existing}
                 <Icon name="file-up" class="non-media-file" size={32} label={wupload.upload.name}>
                   <span class="upload-name">{wupload.upload.name}</span>
                 </Icon>
               {#elseif type == :live && Uploads.media?(wupload.client_type)}
-                <Lightbox.Item>
+                {#if @editing}
                   <.live_img_preview entry={wupload} class="preview-image" />
-                </Lightbox.Item>
+                {#else}
+                  <Lightbox.Item>
+                    <.live_img_preview entry={wupload} class="preview-image" />
+                  </Lightbox.Item>
+                {/if}
               {#else}
                 <Icon name="file-up" class="non-media-file" size={32} label={wupload.client_name}>
                   <span class="upload-name">{wupload.client_name}</span>

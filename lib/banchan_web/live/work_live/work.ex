@@ -384,6 +384,7 @@ defmodule BanchanWeb.WorkLive.Work do
             send_updates_to={self()}
             studio={@studio}
             work={@work}
+            editing={!is_nil(@changeset)}
             live_entries={@uploads.uploads.entries}
             work_uploads={@work_uploads}
             can_download?={@can_download?}
