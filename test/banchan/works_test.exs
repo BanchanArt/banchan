@@ -62,9 +62,10 @@ defmodule Banchan.WorksTest do
     end
 
     test "supports filtering by client" do
-      client = user_fixture()
+      comm = commission_fixture()
+      client = comm.client
 
-      work1 = work_fixture(%{client: client})
+      work1 = work_fixture(%{commission: comm})
       work2 = work_fixture()
 
       listing = Works.list_works(client: client, page_size: 200).entries
@@ -163,15 +164,16 @@ defmodule Banchan.WorksTest do
 
     test "does not list private works unless there's a current user who's either an artist for the studio, or the client" do
       user = user_fixture()
-      client = user_fixture()
-      artist = user_fixture()
-      studio = studio_fixture([artist])
+      comm = commission_fixture()
+      client = comm.client
+      studio = comm.studio
+      artist = studio.artists |> Enum.at(0)
 
       private_work =
         work_fixture(%{
           artist: artist,
           studio: studio,
-          client: client,
+          commission: comm,
           private: true
         })
 
@@ -213,7 +215,7 @@ defmodule Banchan.WorksTest do
     @invalid_attrs %{private: nil, description: nil, title: nil, tags: nil, mature: nil}
     test "returns the work with given id" do
       work = work_fixture()
-      assert Works.get_work!(work.id) == (work |> Repo.preload([uploads: [:upload]]))
+      assert Works.get_work!(work.id) == work |> Repo.preload(uploads: [:upload])
     end
   end
 
@@ -277,29 +279,33 @@ defmodule Banchan.WorksTest do
       artist = user_fixture()
       studio = studio_fixture([artist])
       uploads = []
-      assert {:error, :uploads_required} = Works.new_work(artist, studio, @invalid_attrs, uploads)
+      assert {:error, changeset} = Works.new_work(artist, studio, @invalid_attrs, uploads)
+
+      assert %{
+               uploads: ["should have at least 1 item(s)"]
+             } = errors_on(changeset)
     end
   end
 
   @tag skip: "TODO"
   describe "update_work/4" do
     test "valid data updates the work" do
-      work = work_fixture()
+      # work = work_fixture()
 
-      update_attrs = %{
-        private: false,
-        description: "some updated description",
-        title: "some updated title",
-        tags: ["option1"],
-        mature: false
-      }
+      # update_attrs = %{
+      #   private: false,
+      #   description: "some updated description",
+      #   title: "some updated title",
+      #   tags: ["option1"],
+      #   mature: false
+      # }
 
-      assert {:ok, %Work{} = work} = Works.update_work(work, update_attrs)
-      assert work.private == false
-      assert work.description == "some updated description"
-      assert work.title == "some updated title"
-      assert work.tags == ["option1"]
-      assert work.mature == false
+      # assert {:ok, %Work{} = work} = Works.update_work(work, update_attrs)
+      # assert work.private == false
+      # assert work.description == "some updated description"
+      # assert work.title == "some updated title"
+      # assert work.tags == ["option1"]
+      # assert work.mature == false
     end
   end
 end

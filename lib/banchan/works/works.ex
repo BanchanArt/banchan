@@ -228,7 +228,7 @@ defmodule Banchan.Works do
         )
         |> where(
           [work: w, current_user: current_user, artist: artist],
-          artist == current_user or w.client_id == current_user.id or w.private == false
+          artist.id == current_user.id or w.client_id == current_user.id or w.private == false
         )
         |> where(
           [work: w, current_user: current_user, artist: artist],

@@ -48,7 +48,6 @@ defmodule Banchan.WorksFixtures do
         })
         |> Map.new(fn {k, v} -> {to_string(k), v} end),
         uploads,
-        client: Map.get(attrs, :client),
         commission: Map.get(attrs, :commission),
         offering: Map.get(attrs, :offering)
       )
