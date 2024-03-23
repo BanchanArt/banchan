@@ -113,7 +113,9 @@ defmodule BanchanWeb.WorkLive.Work do
        changeset: changeset,
        work_uploads: work.uploads,
        commission: commission || nil,
-       offering: offering || nil
+       offering: offering || nil,
+       page_title: "Create new Work",
+       page_description: "Create a new Work to showcase your art."
      )}
   end
 
