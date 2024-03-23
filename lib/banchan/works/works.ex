@@ -123,7 +123,8 @@ defmodule Banchan.Works do
   def list_works(opts \\ []) do
     from(
       work in Work,
-      as: :work
+      as: :work,
+      preload: [:studio, uploads: [:upload]]
     )
     |> filter_query(opts)
     |> filter_current_user(opts)
