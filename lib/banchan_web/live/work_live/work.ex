@@ -73,7 +73,11 @@ defmodule BanchanWeb.WorkLive.Work do
        changeset: changeset,
        work: work,
        can_download?: Works.can_download_uploads?(socket.assigns.current_user, work),
-       work_uploads: work.uploads |> Enum.map(&{:existing, &1})
+       work_uploads: work.uploads |> Enum.map(&{:existing, &1}),
+       page_title: work.title,
+       page_description: HtmlSanitizeEx.strip_tags(work.description),
+       page_image:
+         ~p"/studios/#{work.studio.handle}/works/#{work.public_id}/upload/#{Enum.at(work.uploads, 0).upload_id}/preview"
      )}
   end
 
