@@ -16,7 +16,7 @@ defmodule Banchan.Works.Work do
     field :tags, {:array, :string}
     field :mature, :boolean, default: false
     field :private, :boolean, default: false
-    field :offering_idx, :string, virtual: true
+    field :offering_type, :string, virtual: true
     belongs_to :studio, Banchan.Studios.Studio
     belongs_to :client, Banchan.Accounts.User, on_replace: :nilify
     belongs_to :offering, Banchan.Offerings.Offering, on_replace: :nilify
@@ -38,7 +38,7 @@ defmodule Banchan.Works.Work do
       end
 
     work
-    |> cast(attrs, [:title, :description, :tags, :private, :mature, :offering_idx])
+    |> cast(attrs, [:title, :description, :tags, :private, :mature, :offering_type])
     |> validate_required([:title])
     |> validate_length(:title, min: 3, max: 50)
     |> validate_rich_text_length(:description, max: 500)

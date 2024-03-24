@@ -32,7 +32,7 @@ defmodule BanchanWeb.WorkLive.Work do
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
-    FancySelect,
+    ComboBox,
     QuillInput,
     Submit,
     TagsInput,
@@ -66,10 +66,16 @@ defmodule BanchanWeb.WorkLive.Work do
     socket =
       if socket.assigns.live_action == :edit do
         studio = socket.assigns.studio |> Repo.preload(:offerings)
-        work = %{work | offering_idx: case Enum.find_index(studio.offerings, &(&1.id == work.offering_id)) do
-          nil -> nil
-          idx -> to_string(idx + 1)
-        end}
+
+        work = %{
+          work
+          | offering_type:
+              case Enum.find(studio.offerings, &(&1.id == work.offering_id)) do
+                nil -> nil
+                offering -> offering.type
+              end
+        }
+
         assign(socket, studio: studio, work: work)
       else
         assign(socket, work: work)
@@ -136,8 +142,7 @@ defmodule BanchanWeb.WorkLive.Work do
   end
 
   @impl true
-  def handle_event("change", %{"work" => work} = all, socket) do
-    IO.inspect(all)
+  def handle_event("change", %{"work" => work}, socket) do
     uploads =
       socket.assigns.work_uploads
       |> Enum.with_index()
@@ -172,31 +177,27 @@ defmodule BanchanWeb.WorkLive.Work do
           )}}
       end)
 
-    idx = if !is_nil(work["offering_idx"]) do
-      {idx, ""} = Integer.parse(work["offering_idx"])
-      idx
-    end
-
-    offering = if !is_nil(idx) && idx > 0 do
-      Enum.at(socket.assigns.studio.offerings, idx - 1)
-    else
-      socket.assigns.work.offering
-    end
+    offering =
+      case work["offering_type"] do
+        nil -> nil
+        ty -> Enum.find(socket.assigns.studio.offerings, &(&1.type == ty))
+      end
 
     Works.new_work(
       socket.assigns.current_user,
       socket.assigns.studio,
       work,
-      uploads: socket.assigns.work_uploads
-      |> Enum.map(fn {ty, data} ->
-        if ty == :live do
-          Enum.find_value(uploads, fn {ref, upload} ->
-            if ref == data.ref, do: upload
-          end)
-        else
-          data.upload
-        end
-      end),
+      uploads:
+        socket.assigns.work_uploads
+        |> Enum.map(fn {ty, data} ->
+          if ty == :live do
+            Enum.find_value(uploads, fn {ref, upload} ->
+              if ref == data.ref, do: upload
+            end)
+          else
+            data.upload
+          end
+        end),
       commission: socket.assigns.commission,
       offering: offering
     )
@@ -210,7 +211,7 @@ defmodule BanchanWeb.WorkLive.Work do
     end
   end
 
-  def handle_event("submit", %{"work" => work, "offering_idx" => offering_idx}, socket) do
+  def handle_event("submit", %{"work" => work}, socket) do
     uploads =
       consume_uploaded_entries(socket, :uploads, fn %{path: path}, entry ->
         {:ok,
@@ -223,30 +224,27 @@ defmodule BanchanWeb.WorkLive.Work do
           )}}
       end)
 
-    idx = if !is_nil(offering_idx) do
-      {idx, ""} = Integer.parse(offering_idx)
-      idx
-    end
-
-    offering = if !is_nil(idx) && idx > 0 do
-      Enum.at(socket.assigns.studio.offerings, idx - 1)
-    end
+    offering =
+      case work["offering_type"] do
+        nil -> nil
+        ty -> Enum.find(socket.assigns.studio.offerings, &(&1.type == ty))
+      end
 
     Works.update_work(
       socket.assigns.current_user,
       socket.assigns.work,
       work,
       uploads:
-      socket.assigns.work_uploads
-      |> Enum.map(fn {ty, data} ->
-        if ty == :live do
-          Enum.find_value(uploads, fn {ref, upload} ->
-            if ref == data.ref, do: upload
-          end)
-        else
-          data.upload
-        end
-      end),
+        socket.assigns.work_uploads
+        |> Enum.map(fn {ty, data} ->
+          if ty == :live do
+            Enum.find_value(uploads, fn {ref, upload} ->
+              if ref == data.ref, do: upload
+            end)
+          else
+            data.upload
+          end
+        end),
       offering: offering
     )
     |> case do
@@ -401,7 +399,7 @@ defmodule BanchanWeb.WorkLive.Work do
       }
 
       :root :deep(.offering-selector) :deep(.button-label) {
-        @apply grow text-left;
+      @apply grow text-left;
       }
     </style>
 
@@ -488,17 +486,14 @@ defmodule BanchanWeb.WorkLive.Work do
                 <Checkbox label="Mature" name={:mature} />
                 <Checkbox label="Private" name={:private} />
               </div>
-              <FancySelect
-                id="offering-selector"
-                name={:offering_idx}
+              <ComboBox
+                name={:offering_type}
                 label="Offering"
                 show_label
                 class="offering-selector"
-                items={[%{label: "None", value: nil, description: nil}] ++
+                options={[{"None", nil}] ++
                   (@studio.offerings
-                   |> Enum.map(
-                     &%{label: &1.name, value: &1.type, description: HtmlSanitizeEx.strip_tags(&1.description)}
-                   ))}
+                   |> Enum.map(&{&1.name <> " - " <> HtmlSanitizeEx.strip_tags(&1.description), &1.type}))}
               />
               {#if is_nil(@work.id)}
                 <Submit label="Create Work" changeset={@changeset} />

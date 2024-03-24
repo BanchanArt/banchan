@@ -433,7 +433,8 @@ defmodule Banchan.Works do
 
   def update_work(%User{} = actor, %Work{} = work, attrs, opts \\ []) do
     uploads = Keyword.get(opts, :uploads)
-    offering = Keyword.get(opts, :offering)
+    offering = Keyword.get(opts, :offering, :none)
+
     {:ok, ret} =
       Repo.transaction(fn ->
         with {:ok, _actor} <- Studios.check_studio_member(work.studio, actor) do
@@ -462,10 +463,14 @@ defmodule Banchan.Works do
               Map.put(attrs, "uploads", work_uploads)
             end
 
-          changeset = work
-          |> Work.changeset(attrs)
+          changeset =
+            work
+            |> Work.changeset(attrs)
 
-          changeset = if is_nil(offering), do: changeset, else: changeset |> Ecto.Changeset.put_assoc(:offering, offering)
+          changeset =
+            if offering == :none,
+              do: changeset,
+              else: changeset |> Ecto.Changeset.put_assoc(:offering, offering)
 
           changeset
           |> Repo.update()
