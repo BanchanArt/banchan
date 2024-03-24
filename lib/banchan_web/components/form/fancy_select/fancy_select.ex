@@ -24,7 +24,7 @@ defmodule BanchanWeb.Components.Form.FancySelect do
   prop(name, :any, required: true)
   prop(label, :string)
   prop(class, :css_class)
-  prop(show_label, :boolean, default: true)
+  prop(show_label, :boolean, default: false)
   prop(show_chevron, :boolean, default: true)
   prop(disabled, :boolean, default: false)
   prop(form, :form, from_context: {Form, :form})
@@ -55,8 +55,8 @@ defmodule BanchanWeb.Components.Form.FancySelect do
     ~F"""
     <bc-fancy-select id={@id} :hook="FancySelect">
       <Field class="grid grid-cols-1 gap-2 field" name={@name}>
-        <Label class="sr-only" opts={id: @id <> "-label"}>
-          {@selected.label}
+        <Label class={"sr-only": !@show_label} opts={id: @id <> "-label"}>
+          {@label}
         </Label>
         <HiddenInput name={@name} />
         <div class="relative">
@@ -69,7 +69,7 @@ defmodule BanchanWeb.Components.Form.FancySelect do
             aria-expanded="true"
             aria-labelledby={@id <> "-label"}
           >
-            <p class="text-sm font-semibold text-primary-content">{@selected.label}</p>
+            <p class="button-label text-sm font-semibold text-primary-content">{@selected.label}</p>
             {#if @show_chevron}
               <Icon name="chevron-down" />
             {/if}
