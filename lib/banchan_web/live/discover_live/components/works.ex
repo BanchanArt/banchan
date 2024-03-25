@@ -4,11 +4,11 @@ defmodule BanchanWeb.DiscoverLive.Components.Works do
   """
   use BanchanWeb, :live_component
 
-  alias Surface.Components.LivePatch
+  alias Surface.Components.{LivePatch, LiveRedirect}
 
   alias Banchan.Works
 
-  alias BanchanWeb.Components.{InfiniteScroll, WorkCard}
+  alias BanchanWeb.Components.InfiniteScroll
 
   prop(current_user, :struct, from_context: :current_user)
   prop(query, :string)
@@ -81,11 +81,20 @@ defmodule BanchanWeb.DiscoverLive.Components.Works do
           {/if}
         </div>
       {#else}
-        <div class="has-results">
+        <ul class="has-results">
           {#for work <- @works}
-            <WorkCard work={work} />
+            {#if !is_nil(Works.first_previewable_upload(work))}
+              <li>
+                <LiveRedirect to={~p"/studios/#{work.studio.handle}/works/#{work.public_id}"}>
+                  <img
+                    src={~p"/studios/#{work.studio.handle}/works/#{work.public_id}/upload/#{Works.first_previewable_upload(work).upload_id}/preview"}
+                    alt={work.title}
+                  />
+                </LiveRedirect>
+              </li>
+            {/if}
           {/for}
-        </div>
+        </ul>
         {#if @infinite}
           <InfiniteScroll id="studios-infinite-scroll" page={@works.page_number} load_more="load_more" />
         {/if}
