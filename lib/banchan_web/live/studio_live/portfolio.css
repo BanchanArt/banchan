@@ -1,18 +1,6 @@
 .portfolio-container {
   @apply flex flex-col p-3;
 
-  & ul {
-    @apply gap-0 sm:gap-1 columns-2 sm:columns-3 md:columns-4;
-
-    & > li {
-      @apply my-0 sm:mb-1 relative sm:hover:scale-105 sm:hover:z-10 cursor-pointer transition-all w-full;
-    }
-
-    & img {
-      @apply m-auto object-scale-down;
-    }
-  }
-
   & :deep(bc-card) {
     @apply h-full transition-all border-2 border-dashed rounded-lg opacity-50 hover:opacity-100 hover:bg-base-200;
 
@@ -26,14 +14,6 @@
       :global(&) > :deep(span:nth-child(2)) {
         @apply text-sm text-center;
       }
-    }
-  }
-
-  & :deep(bc-icon) {
-    @apply flex flex-col items-center justify-center h-full;
-
-    & :deep(span) {
-      @apply text-pretty break-words m-2;
     }
   }
 }

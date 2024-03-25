@@ -1,0 +1,19 @@
+ul {
+  @apply gap-0 sm:gap-1 columns-2 sm:columns-3 md:columns-4;
+
+  & > li {
+    @apply my-0 sm:mb-1 relative sm:hover:scale-105 sm:hover:z-10 cursor-pointer transition-all w-full;
+  }
+
+  & img {
+    @apply m-auto object-scale-down;
+  }
+
+  & :deep(bc-icon) {
+    @apply flex flex-col items-center justify-center h-full;
+
+    :global(&) :deep(span) {
+      @apply text-pretty break-words m-2;
+    }
+  }
+}

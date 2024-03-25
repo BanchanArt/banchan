@@ -12,7 +12,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
 
   alias BanchanWeb.StudioLive.Components.StudioLayout
 
-  alias BanchanWeb.Components.{Card, Icon, InfiniteScroll}
+  alias BanchanWeb.Components.{Card, InfiniteScroll, WorkGallery}
 
   @impl true
   def mount(params, _session, socket) do
@@ -77,36 +77,16 @@ defmodule BanchanWeb.StudioLive.Portfolio do
     ~F"""
     <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:portfolio}>
       <div class="portfolio-container" data-order-seed={@order_seed}>
-        <ul>
+        <WorkGallery works={@works} show_non_media>
           {#if @current_user_member?}
-            <li>
-              <LiveRedirect to={~p"/studios/#{@studio.handle}/works/new"}>
-                <Card>
-                  <span>New Work</span>
-                  <span>Create a new custom work for your portfolio.</span>
-                </Card>
-              </LiveRedirect>
-            </li>
+            <LiveRedirect to={~p"/studios/#{@studio.handle}/works/new"}>
+              <Card>
+                <span>New Work</span>
+                <span>Create a new custom work for your portfolio.</span>
+              </Card>
+            </LiveRedirect>
           {/if}
-          {#for work <- @works}
-            <li>
-              <LiveRedirect to={~p"/studios/#{@studio.handle}/works/#{work.public_id}"}>
-                {#if Works.first_previewable_upload(work)}
-                  <img
-                    src={~p"/studios/#{@studio.handle}/works/#{work.public_id}/upload/#{Works.first_previewable_upload(work).upload_id}/preview"}
-                    alt={work.title}
-                  />
-                {#else}
-                  <Icon name="file-up" size={32} label={Enum.at(work.uploads, 0).upload.name}>
-                    <span>{Enum.at(work.uploads, 0).upload.name}</span>
-                  </Icon>
-                {/if}
-              </LiveRedirect>
-            </li>
-          {#else}
-            Nothing to see here
-          {/for}
-        </ul>
+        </WorkGallery>
         <InfiniteScroll id="works-infinite-scroll" page={@works.page_number} load_more="load_more" />
       </div>
     </StudioLayout>

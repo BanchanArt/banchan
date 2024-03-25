@@ -10,6 +10,7 @@ defmodule BanchanWeb.OfferingLive.Show do
   alias Banchan.Commissions.LineItem
   alias Banchan.Offerings
   alias Banchan.Offerings.Notifications
+  alias Banchan.Works
 
   alias Surface.Components.LiveRedirect
 
@@ -21,7 +22,6 @@ defmodule BanchanWeb.OfferingLive.Show do
     Icon,
     Layout,
     Lightbox,
-    MasonryGallery,
     OfferingCardImg,
     ReportModal,
     RichText,
@@ -52,9 +52,7 @@ defmodule BanchanWeb.OfferingLive.Show do
 
     Notifications.subscribe_to_offering_updates(offering)
 
-    gallery_images =
-      offering.gallery_uploads
-      |> Enum.map(&{:existing, &1})
+    gallery_images = Works.list_works(offering: offering).entries
 
     line_items =
       offering.options
@@ -153,9 +151,7 @@ defmodule BanchanWeb.OfferingLive.Show do
         socket.assigns.offering.type
       )
 
-    gallery_images =
-      offering.gallery_uploads
-      |> Enum.map(&{:existing, &1})
+    gallery_images = Works.list_works(offering: offering).entries
 
     {:noreply, socket |> assign(offering: offering, gallery_images: gallery_images)}
   end
@@ -337,11 +333,6 @@ defmodule BanchanWeb.OfferingLive.Show do
               <div class="grid grid-cols-1 gap-4 rounded-lg bg-base-200">
                 <div class="text-2xl">Gallery</div>
                 <div class="m-0 h-fit divider" />
-                <MasonryGallery
-                  id="masonry-gallery"
-                  upload_type={:offering_gallery_img}
-                  images={@gallery_images}
-                />
               </div>
             {/if}
           </div>
