@@ -36,7 +36,8 @@ defmodule BanchanWeb.WorkLive.Work do
     QuillInput,
     Submit,
     TagsInput,
-    TextInput
+    TextInput,
+    UploadInput
   }
 
   alias BanchanWeb.WorkLive.Components.WorkUploads
@@ -142,6 +143,26 @@ defmodule BanchanWeb.WorkLive.Work do
   end
 
   @impl true
+  def handle_event("change", %{"_target" => ["uploads"]}, socket) do
+    uploads = socket.assigns.uploads
+
+    {:noreply,
+     Enum.reduce(uploads.uploads.entries, socket, fn entry, socket ->
+       case upload_errors(uploads.uploads, entry) do
+         [f | _] ->
+           socket
+           |> cancel_upload(:uploads, entry.ref)
+           |> put_flash(
+             :error,
+             "File `#{entry.client_name}` upload failed: #{UploadInput.error_to_string(f)}"
+           )
+
+         [] ->
+           socket
+       end
+     end)}
+  end
+
   def handle_event("change", %{"work" => work}, socket) do
     uploads =
       socket.assigns.work_uploads
