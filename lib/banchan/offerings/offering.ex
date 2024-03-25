@@ -8,7 +8,7 @@ defmodule Banchan.Offerings.Offering do
   import Banchan.Validators
 
   alias Banchan.Commissions.Commission
-  alias Banchan.Offerings.{GalleryImage, OfferingOption}
+  alias Banchan.Offerings.OfferingOption
   alias Banchan.Payments
   alias Banchan.Payments.Currency
   alias Banchan.Repo
@@ -37,16 +37,9 @@ defmodule Banchan.Offerings.Offering do
     field :has_addons, :boolean, virtual: true
     field :used_slots, :integer, virtual: true
     field :user_subscribed?, :boolean, virtual: true
-    field :gallery_uploads, {:array, Upload}, virtual: true
 
     belongs_to :studio, Studio
     belongs_to :card_img, Upload, on_replace: :nilify, type: :binary_id
-
-    field :gallery_imgs_changed, :boolean, virtual: true, default: false
-
-    has_many :gallery_imgs, GalleryImage,
-      on_replace: :delete_if_exists,
-      preload_order: [asc: :index]
 
     has_many :commissions, Commission
     has_many :works, Work
@@ -80,8 +73,7 @@ defmodule Banchan.Offerings.Offering do
       :tags,
       :mature,
       :card_img_id,
-      :studio_id,
-      :gallery_imgs_changed
+      :studio_id
     ])
     |> cast_assoc(:options)
     |> validate_required([:type, :name, :description, :currency])

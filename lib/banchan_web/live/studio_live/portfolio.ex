@@ -77,7 +77,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
     ~F"""
     <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:portfolio}>
       <div class="portfolio-container" data-order-seed={@order_seed}>
-        <WorkGallery works={@works} show_non_media>
+        <WorkGallery works={@works}>
           {#if @current_user_member?}
             <LiveRedirect to={~p"/studios/#{@studio.handle}/works/new"}>
               <Card>

@@ -713,7 +713,7 @@ defmodule Banchan.Commissions do
 
     if close do
       {:ok, offering} =
-        Offerings.update_offering(Accounts.system_user(), offering, %{open: false}, nil)
+        Offerings.update_offering(Accounts.system_user(), offering, %{open: false})
 
       offering
     else
@@ -928,7 +928,7 @@ defmodule Banchan.Commissions do
 
               if close do
                 {:ok, _} =
-                  Offerings.update_offering(Accounts.system_user(), offering, %{open: false}, nil)
+                  Offerings.update_offering(Accounts.system_user(), offering, %{open: false})
               end
             end
 

@@ -25,7 +25,8 @@ defmodule BanchanWeb.OfferingLive.Show do
     OfferingCardImg,
     ReportModal,
     RichText,
-    Tag
+    Tag,
+    WorkGallery
   }
 
   alias BanchanWeb.StudioLive.Components.OfferingCard
@@ -37,7 +38,9 @@ defmodule BanchanWeb.OfferingLive.Show do
       Notifications.unsubscribe_from_offering_updates(socket.assigns.offering)
     end
 
-    socket = assign_studio_defaults(params, socket, false, true)
+    socket =
+      assign_studio_defaults(params, socket, false, true)
+      |> assign(order_seed: get_connect_params(socket)["order_seed"] || Prime.generate(16))
 
     offering =
       Offerings.get_offering_by_type!(
@@ -52,7 +55,12 @@ defmodule BanchanWeb.OfferingLive.Show do
 
     Notifications.subscribe_to_offering_updates(offering)
 
-    gallery_images = Works.list_works(offering: offering).entries
+    works =
+      Works.list_works(
+        offering: offering,
+        current_user: socket.assigns.current_user,
+        order_seed: socket.assigns.order_seed
+      ).entries
 
     line_items =
       offering.options
@@ -114,7 +122,7 @@ defmodule BanchanWeb.OfferingLive.Show do
          socket
          |> assign(
            offering: offering,
-           gallery_images: gallery_images,
+           works: works,
            line_items: line_items,
            available_slots: available_slots,
            related: related,
@@ -151,9 +159,14 @@ defmodule BanchanWeb.OfferingLive.Show do
         socket.assigns.offering.type
       )
 
-    gallery_images = Works.list_works(offering: offering).entries
+    works =
+      Works.list_works(
+        offering: offering,
+        current_user: socket.assigns.current_user,
+        order_seed: socket.assigns.order_seed
+      ).entries
 
-    {:noreply, socket |> assign(offering: offering, gallery_images: gallery_images)}
+    {:noreply, socket |> assign(offering: offering, works: works)}
   end
 
   @impl true
@@ -307,8 +320,8 @@ defmodule BanchanWeb.OfferingLive.Show do
                 <Button class="btn-info grow" click="unnotify_me">Unsubscribe</Button>
               {/if}
             </div>
-            <div class="m-0 h-fit divider" />
             {#if @terms}
+              <div class="m-0 h-fit divider" />
               <Collapse id="terms-collapse">
                 <:header><span class="text-sm font-medium opacity-75">Commission Terms</span></:header>
                 <RichText content={@terms} />
@@ -329,10 +342,11 @@ defmodule BanchanWeb.OfferingLive.Show do
                 <div class="w-full h-full aspect-video bg-base-300" />
               {/if}
             </Lightbox>
-            {#if !Enum.empty?(@gallery_images)}
+            {#if !Enum.empty?(@works)}
               <div class="grid grid-cols-1 gap-4 rounded-lg bg-base-200">
                 <div class="text-2xl">Gallery</div>
                 <div class="m-0 h-fit divider" />
+                <WorkGallery works={@works} />
               </div>
             {/if}
           </div>

@@ -15,7 +15,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   alias Banchan.Uploads
   alias Banchan.Utils
 
-  alias BanchanWeb.Components.{Button, Collapse, MasonryGallery, OfferingCard}
+  alias BanchanWeb.Components.{Button, Collapse, OfferingCard}
 
   alias BanchanWeb.Components.Form.{
     Checkbox,
@@ -33,7 +33,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   prop(current_user_member?, :boolean, required: true)
   prop(studio, :struct, required: true)
   prop(offering, :struct)
-  prop(gallery_images, :any)
   prop(form, :form, from_context: {Form, :form})
 
   data(changeset, :struct)
@@ -52,11 +51,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
      |> allow_upload(:card_image,
        accept: Uploads.supported_image_format_extensions(),
        max_entries: 1,
-       max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
-     )
-     |> allow_upload(:gallery_images,
-       accept: Uploads.supported_image_format_extensions(),
-       max_entries: 10,
        max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
      )}
   end
@@ -93,39 +87,7 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
             )
       )
 
-    socket =
-      if is_nil(assigns[:gallery_images]) &&
-           old_assigns[:gallery_images] == assigns[:gallery_images] do
-        socket
-      else
-        # Cancel any live items that got removed.
-        old_assigns[:gallery_images]
-        |> Enum.filter(fn {type, data} ->
-          type == :live &&
-            !Enum.find(assigns[:gallery_images], fn {t, d} ->
-              t == :live && data.ref == d.ref
-            end)
-        end)
-        |> Enum.reduce(socket, fn {:live, entry}, socket ->
-          socket |> cancel_upload(:gallery_images, entry.ref)
-        end)
-        |> assign(
-          changeset:
-            socket.assigns.changeset |> Ecto.Changeset.put_change(:gallery_imgs_changed, true)
-        )
-      end
-
-    {:ok,
-     socket
-     |> assign(
-       gallery_images:
-         if socket.assigns.offering && is_nil(assigns[:gallery_images]) do
-           Offerings.offering_gallery_uploads(socket.assigns.offering)
-           |> Enum.map(&{:existing, &1})
-         else
-           assigns[:gallery_images] || []
-         end
-     )}
+    {:ok, socket}
   end
 
   @impl true
@@ -232,13 +194,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
         offering
       end
 
-    offering =
-      if target == ["offering", "gallery_images"] do
-        %{offering | "gallery_imgs_changed" => true}
-      else
-        offering
-      end
-
     offering = moneyfy_offering(offering)
 
     changeset =
@@ -266,11 +221,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
   @impl true
   def handle_event("cancel_card_upload", %{"ref" => ref}, socket) do
     {:noreply, socket |> cancel_upload(:card_image, ref)}
-  end
-
-  @impl true
-  def handle_event("cancel_gallery_upload", %{"ref" => ref}, socket) do
-    {:noreply, socket |> cancel_upload(:gallery_images, ref)}
   end
 
   @impl true
@@ -316,40 +266,12 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
       end)
       |> Enum.at(0)
 
-    new_gallery_uploads =
-      consume_uploaded_entries(socket, :gallery_images, fn %{path: path}, entry ->
-        {:ok,
-         {entry.ref,
-          Offerings.make_gallery_image!(
-            socket.assigns.current_user,
-            socket.assigns.studio,
-            path,
-            entry.client_type,
-            entry.client_name
-          )}}
-      end)
-
-    gallery_images =
-      socket.assigns.gallery_images
-      |> Enum.map(fn {type, data} ->
-        if type == :existing do
-          data
-        else
-          Enum.find_value(new_gallery_uploads, fn {ref, upload} ->
-            if ref == data.ref do
-              upload
-            end
-          end)
-        end
-      end)
-
     case submit_offering(
            socket.assigns.current_user,
            socket.assigns.offering,
            Enum.into(offering, %{
              "card_img_id" => (card_image && card_image.id) || offering["card_image_id"]
            }),
-           gallery_images,
            socket.assigns.studio
          ) do
       {:ok, offering} ->
@@ -363,23 +285,21 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
     end
   end
 
-  defp submit_offering(actor, offering, attrs, gallery_images, studio)
+  defp submit_offering(actor, offering, attrs, studio)
        when is_nil(offering) do
     Offerings.new_offering(
       actor,
       studio,
-      attrs,
-      gallery_images
+      attrs
     )
   end
 
-  defp submit_offering(actor, offering, attrs, gallery_images, _studio)
+  defp submit_offering(actor, offering, attrs, _studio)
        when not is_nil(offering) do
     Offerings.update_offering(
       actor,
       offering,
-      attrs,
-      gallery_images
+      attrs
     )
   end
 
@@ -534,24 +454,6 @@ defmodule BanchanWeb.StudioLive.Components.Offering do
           label="Upload Card Image"
           upload={@uploads.card_image}
           cancel="cancel_card_upload"
-          hide_list
-        />
-        <div class="divider" />
-        <h3 class="text-2xl">Gallery Images</h3>
-        <div>Gallery images will be shown on the offering's page, as example works. You can drag and drop them to reorder them.</div>
-        <MasonryGallery
-          id={@id <> "-gallery-preview"}
-          class="py-2 rounded-lg"
-          send_updates_to={self()}
-          images={@gallery_images}
-          editable
-          upload_type={:offering_gallery_img}
-          entries={@uploads.gallery_images.entries}
-        />
-        <UploadInput
-          label="Upload Gallery Images"
-          upload={@uploads.gallery_images}
-          cancel="cancel_gallery_upload"
           hide_list
         />
         <div class="divider" />
