@@ -112,7 +112,7 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
       }
 
       .preview-item:first-child:nth-last-child(1) {
-      @apply md:col-span-1 w-full;
+      @apply md:col-span-6 w-full;
       }
 
       .preview-item:nth-child(-n + 2) {
