@@ -75,38 +75,6 @@ defmodule BanchanWeb.StudioLive.Portfolio do
     #   end
 
     ~F"""
-    <style>
-      .portfolio-container {
-      @apply flex flex-col p-4;
-      }
-      .portfolio-container ul {
-      @apply gap-0 sm:gap-1 columns-2 sm:columns-3 md:columns-4;
-      }
-      .portfolio-container ul > li {
-      @apply my-0 sm:mb-2 relative sm:hover:scale-105 sm:hover:z-10 cursor-pointer transition-all w-full;
-      }
-      .portfolio-container ul img {
-      @apply w-full h-full object-cover;
-      }
-      .portfolio-container :deep(bc-card) {
-      @apply h-full transition-all border-2 border-dashed rounded-lg opacity-50 hover:opacity-100 hover:bg-base-200;
-      }
-      .portfolio-container :deep(bc-card) :deep(.default-slot) {
-      @apply items-center w-full gap-2 p-4 my-auto h-fit;
-      }
-      .portfolio-container :deep(bc-card) :deep(.default-slot) :deep(:nth-child(1)) {
-      @apply text-3xl;
-      }
-      .portfolio-container :deep(bc-card) :deep(.default-slot) :deep(:nth-child(2)) {
-      @apply text-sm text-center;
-      }
-      .portfolio-container :deep(bc-icon) {
-      @apply flex flex-col items-center justify-center h-full;
-      }
-      .portfolio-container :deep(bc-icon) :deep(span) {
-      @apply text-pretty break-words m-2;
-      }
-    </style>
     <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:portfolio}>
       <div class="portfolio-container" data-order-seed={@order_seed}>
         <ul>

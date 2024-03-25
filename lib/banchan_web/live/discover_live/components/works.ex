@@ -69,23 +69,6 @@ defmodule BanchanWeb.DiscoverLive.Components.Works do
       end
 
     ~F"""
-    <style>
-      discover-works {
-      @apply flex flex-col items-center w-full;
-      }
-      .no-results {
-      @apply flex flex-col items-center w-full gap-2 py-16;
-      }
-      .no-results > span {
-      @apply text-2xl;
-      }
-      :deep(.suggestion-link) {
-      @apply link;
-      }
-      .has-results {
-      @apply grid grid-cols-1 sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr;
-      }
-    </style>
     <discover-works data-order-seed={@order_seed}>
       {#if Enum.empty?(@works)}
         <div class="no-results">

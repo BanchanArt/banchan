@@ -1,0 +1,19 @@
+:deep(bc-card) {
+  @apply h-full border rounded-lg border-base-content border-opacity-10 hover:outline hover:outline-primary-focus hover:outline-offset-0 hover:border-primary-focus transition-all;
+}
+:deep(.image-wrapper) {
+  @apply relative w-full h-full;
+}
+:deep(img) {
+  @apply rounded-t-lg aspect-video w-full h-full;
+  object-fit: contain;
+}
+:deep(h3) {
+  @apply text-lg font-bold;
+}
+:deep(.tags) {
+  @apply flex flex-row flex-wrap items-center gap-1 px-4 my-2;
+}
+:deep(.extra-tags) {
+  @apply px-1 text-sm text-base-content;
+}

@@ -16,11 +16,6 @@ defmodule BanchanWeb.Components.Icon do
 
   def render(assigns) do
     ~F"""
-    <style>
-      bc-icon {
-      @apply flex flex-row items-center;
-      }
-    </style>
     <bc-icon class={"gap-#{@gap}", @class}>
       <i
         id={for _ <- 1..10,
