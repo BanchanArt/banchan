@@ -102,43 +102,6 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
 
   def render(assigns) do
     ~F"""
-    <style>
-      .preview-items {
-      @apply grid grid-cols-1 md:grid-cols-6 gap-1 justify-items-stretch w-full auto-rows-fr;
-      }
-
-      .preview-item {
-      @apply relative bg-base-100 mx-auto my-auto w-full h-full flex flex-col justify-center items-center cursor-pointer;
-      }
-
-      .preview-item:first-child:nth-last-child(1) {
-      @apply md:col-span-6 w-full;
-      }
-
-      .preview-item:nth-child(-n + 2) {
-      @apply md:col-span-3;
-      }
-
-      .preview-item:nth-child(2) ~ .preview-item {
-      @apply md:col-span-2;
-      }
-
-      .preview-item :deep(.non-media-file) {
-      @apply flex flex-col items-center justify-center h-full;
-      }
-
-      .preview-image {
-      @apply mx-auto my-auto;
-      }
-
-      .upload-name {
-      @apply text-pretty break-words m-2;
-      }
-
-      .remove-upload {
-      @apply absolute z-20 btn btn-sm btn-circle left-2 top-2;
-      }
-    </style>
     <bc-work-uploads id={@id} class={@class} :hook="SortableHook">
       <Lightbox id={@id <> "-preview-lightbox"}>
         <div id={@id <> "-items"} class="preview-items" data-list_id={@id <> "-list"}>

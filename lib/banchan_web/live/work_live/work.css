@@ -1,0 +1,108 @@
+:global(.work-container) {
+  @apply w-full p-4 mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-4;
+}
+
+.work-title,
+.title-input-wrapper {
+  @apply w-full;
+}
+
+.work-title {
+  @apply text-3xl font-bold;
+}
+
+.preview-column {
+  @apply flex flex-col gap-4 md:col-span-2 md:row-span-2;
+}
+
+.work-details {
+  @apply md:row-span-2 flex flex-col gap-2;
+}
+
+.title-wrapper {
+  @apply flex flex-row items-center w-full;
+}
+
+.title-inputs {
+  @apply flex flex-row items-center w-full gap-2;
+}
+
+.title-input-wrapper {
+  @apply grow;
+}
+
+.title-input {
+  @apply w-full text-3xl;
+}
+
+.work-form {
+  @apply flex flex-col gap-2;
+
+  & > .edit-buttons {
+    @apply flex flex-row gap-2;
+
+    & :deep(div) {
+      @apply flex grow;
+    }
+  }
+
+  & :deep(.btn) {
+    @apply grow;
+  }
+}
+
+.work-info {
+  @apply grid-cols-1 flex flex-col gap-2;
+}
+
+.info-header {
+  @apply text-sm font-medium opacity-75;
+}
+
+.info-field {
+  @apply p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100;
+}
+
+.work-tags {
+  @apply flex flex-row gap-2;
+}
+
+.flags-form {
+  @apply flex flex-row gap-8;
+}
+
+.flags-show {
+  @apply flex flex-row items-center gap-2;
+}
+
+.flags-show > span {
+  @apply flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-error text-error-content border-base-content border-opacity-10 cursor-pointer;
+}
+.source-info {
+  @apply text-base grow;
+
+  & > span {
+    @apply opacity-75;
+  }
+}
+
+.source-info > :deep(a),
+.commission-link {
+  @apply font-medium hover:link;
+}
+
+.upload-input {
+  @apply relative flex flex-row items-center justify-center p-4 border-2 border-dashed rounded-lg cursor-pointer border-primary h-16;
+
+  & > div:first-child {
+    @apply flex flex-row items-center justify-center gap-2 font-normal cursor-pointer w-full grow;
+
+    & > span {
+      @apply cursor-pointer;
+    }
+  }
+
+  & > :deep(input) {
+    @apply absolute w-full h-full opacity-0 cursor-pointer;
+  }
+}

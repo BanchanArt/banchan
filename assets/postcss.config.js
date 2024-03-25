@@ -1,7 +1,7 @@
 module.exports = {
-  syntax: 'postcss-scss',
   plugins: {
-    'postcss-dart-sass': {},
+    'postcss-import': {},
+    'tailwindcss/nesting': {},
     tailwindcss: {},
     autoprefixer: {},
     'postcss-url': {
