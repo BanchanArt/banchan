@@ -39,7 +39,7 @@ defmodule Banchan.Works.Work do
 
     work
     |> cast(attrs, [:title, :description, :tags, :private, :mature, :offering_type])
-    |> validate_required([:title])
+    |> validate_required([:title, :description])
     |> validate_length(:title, min: 3, max: 50)
     |> validate_rich_text_length(:description, max: 500)
     |> validate_tags()

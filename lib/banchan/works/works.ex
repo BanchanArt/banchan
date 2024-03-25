@@ -35,10 +35,12 @@ defmodule Banchan.Works do
       ignored if a given `:commission` has an existing `offering_id`, in which
       case that offering is used instead.
   """
-  def new_work(%User{} = actor, %Studio{} = studio, attrs, uploads, opts \\ []) do
+  def new_work(%User{} = actor, %Studio{} = studio, attrs, opts \\ []) do
     {:ok, ret} =
       Repo.transaction(fn ->
         with {:ok, _actor} <- Studios.check_studio_member(studio, actor) do
+          uploads = Keyword.get(opts, :uploads)
+
           work_uploads =
             uploads
             |> Enum.with_index()
@@ -427,6 +429,11 @@ defmodule Banchan.Works do
   def can_download_uploads?(%User{} = user, %Work{studio_id: studio_id}) do
     user = Repo.reload(user)
     Accounts.mod?(user) || Studios.is_user_in_studio?(user, %Studio{id: studio_id})
+  end
+
+  def first_previewable_upload(%Work{} = work) do
+    work.uploads
+    |> Enum.find(&(!is_nil(&1.preview_id)))
   end
 
   ## Updating

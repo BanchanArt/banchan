@@ -4,16 +4,15 @@ defmodule BanchanWeb.StudioLive.Portfolio do
   """
   use BanchanWeb, :live_view
 
+  alias Banchan.Works
+
+  alias Surface.Components.LiveRedirect
+
   import BanchanWeb.StudioLive.Helpers
 
-  alias Banchan.Studios
-  alias Banchan.Uploads
-
-  alias Surface.Components.Form
-
-  alias BanchanWeb.Components.Form.{Submit, UploadInput}
-  alias BanchanWeb.Components.MasonryGallery
   alias BanchanWeb.StudioLive.Components.StudioLayout
+
+  alias BanchanWeb.Components.{Card, Icon, InfiniteScroll}
 
   @impl true
   def mount(params, _session, socket) do
@@ -22,120 +21,126 @@ defmodule BanchanWeb.StudioLive.Portfolio do
     socket =
       socket
       |> assign(
-        :portfolio_images,
-        Studios.studio_portfolio_uploads(socket.assigns.studio) |> Enum.map(&{:existing, &1})
+        page_size: 24,
+        order_by: :featured,
+        query: nil,
+        infinite: true,
+        order_seed: get_connect_params(socket)["order_seed"] || Prime.generate(16)
       )
-      |> assign(
-        :changeset,
-        Studios.Studio.profile_changeset(socket.assigns.studio, %{})
-      )
 
-    socket =
-      if socket.assigns.current_user_member? do
-        socket
-        |> allow_upload(:portfolio_images,
-          accept: Uploads.supported_image_format_extensions(),
-          max_entries: 40,
-          max_file_size: Application.fetch_env!(:banchan, :max_attachment_size)
-        )
-      else
-        socket
-      end
-
-    {:ok, socket}
-  end
-
-  def handle_info({:updated_gallery_images, _, images}, socket) do
-    {:noreply,
-     socket
-     |> assign(portfolio_images: images)}
+    {:ok, socket |> assign(works: list_works(socket))}
   end
 
   @impl true
-  def handle_event("cancel_portfolio_upload", %{"ref" => ref}, socket) do
-    {:noreply, socket |> cancel_upload(:portfolio_images, ref)}
-  end
-
-  @impl true
-  def handle_event("change", _, socket) do
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("submit", _, socket) do
-    new_portfolio_uploads =
-      consume_uploaded_entries(socket, :portfolio_images, fn %{path: path}, entry ->
-        {:ok,
-         {entry.ref,
-          Studios.make_portfolio_image!(
-            socket.assigns.current_user,
-            path,
-            socket.assigns.current_user_member?,
-            entry.client_type,
-            entry.client_name
-          )}}
-      end)
-
-    portfolio_images =
-      socket.assigns.portfolio_images
-      |> Enum.map(fn {type, data} ->
-        if type == :existing do
-          data
-        else
-          Enum.find_value(new_portfolio_uploads, fn {ref, upload} ->
-            if ref == data.ref do
-              upload
-            end
-          end)
-        end
-      end)
-
-    case Studios.update_portfolio(
-           socket.assigns.current_user,
-           socket.assigns.studio,
-           portfolio_images
-         ) do
-      {:ok, _} ->
-        {:noreply,
-         socket
-         |> assign(
-           :portfolio_images,
-           portfolio_images |> Enum.map(&{:existing, &1})
-         )}
-
-      {:error, _} ->
-        {:noreply, socket |> put_flash(:error, "Could not update portfolio")}
+  def handle_event("load_more", _, socket) do
+    if socket.assigns.works.total_entries >
+         socket.assigns.works.page_number * socket.assigns.works.page_size do
+      {:noreply, fetch_results(socket.assigns.works.page_number + 1, socket)}
+    else
+      {:noreply, socket}
     end
+  end
+
+  defp list_works(socket, page \\ 1) do
+    Works.list_works(
+      current_user: socket.assigns.current_user,
+      order_by: socket.assigns.order_by || :featured,
+      query: socket.assigns.query,
+      studio: socket.assigns.studio,
+      page_size: socket.assigns.page_size,
+      page: page,
+      order_seed: socket.assigns.order_seed
+    )
+  end
+
+  defp fetch_results(page, %{assigns: %{works: works}} = socket) do
+    socket
+    |> assign(
+      :works,
+      %{
+        works
+        | page_number: page,
+          entries: works.entries ++ list_works(socket, page).entries
+      }
+    )
   end
 
   @impl true
   def render(assigns) do
+    # params =
+    #   if assigns.query && assigns.query != "" do
+    #     %{q: assigns.query}
+    #   else
+    #     %{}
+    #   end
+
     ~F"""
+    <style>
+      .portfolio-container {
+      @apply flex flex-col p-4;
+      }
+      .portfolio-container ul {
+      @apply gap-0 sm:gap-1 columns-2 sm:columns-3 md:columns-4;
+      }
+      .portfolio-container ul > li {
+      @apply my-0 sm:mb-2 relative sm:hover:scale-105 sm:hover:z-10 cursor-pointer transition-all w-full;
+      }
+      .portfolio-container ul img {
+      @apply w-full h-full object-cover;
+      }
+      .portfolio-container :deep(bc-card) {
+      @apply h-full transition-all border-2 border-dashed rounded-lg opacity-50 hover:opacity-100 hover:bg-base-200;
+      }
+      .portfolio-container :deep(bc-card) :deep(.default-slot) {
+      @apply items-center w-full gap-2 p-4 my-auto h-fit;
+      }
+      .portfolio-container :deep(bc-card) :deep(.default-slot) :deep(:nth-child(1)) {
+      @apply text-3xl;
+      }
+      .portfolio-container :deep(bc-card) :deep(.default-slot) :deep(:nth-child(2)) {
+      @apply text-sm text-center;
+      }
+      .portfolio-container :deep(bc-icon) {
+      @apply flex flex-col items-center justify-center h-full;
+      }
+      .portfolio-container :deep(bc-icon) :deep(span) {
+      @apply text-pretty break-words m-2;
+      }
+    </style>
     <StudioLayout flashes={@flash} id="studio-layout" studio={@studio} tab={:portfolio}>
-      {#if @current_user_member?}
-        <div class="mx-auto py-2">
-          <Form for={%{}} as={:portfolio} change="change" submit="submit">
-            <div class="flex flex-row">
-              <UploadInput
-                label="Portfolio Images"
-                upload={@uploads.portfolio_images}
-                cancel="cancel_portfolio_upload"
-                hide_list
-              />
-              <Submit label="Save" />
-            </div>
-          </Form>
-        </div>
-      {/if}
-      <MasonryGallery
-        id="portfolio-preview"
-        class="py-2 rounded-lg w-full"
-        send_updates_to={self()}
-        images={@portfolio_images}
-        editable={@current_user_member?}
-        upload_type={:studio_portfolio_img}
-        entries={(@current_user_member? && @uploads.portfolio_images.entries) || []}
-      />
+      <div class="portfolio-container" data-order-seed={@order_seed}>
+        <ul>
+          {#if @current_user_member?}
+            <li>
+              <LiveRedirect to={~p"/studios/#{@studio.handle}/works/new"}>
+                <Card>
+                  <span>New Work</span>
+                  <span>Create a new custom work for your portfolio.</span>
+                </Card>
+              </LiveRedirect>
+            </li>
+          {/if}
+          {#for work <- @works}
+            <li>
+              <LiveRedirect to={~p"/studios/#{@studio.handle}/works/#{work.public_id}"}>
+                {#if Works.first_previewable_upload(work)}
+                  <img
+                    src={~p"/studios/#{@studio.handle}/works/#{work.public_id}/upload/#{Works.first_previewable_upload(work).upload_id}/preview"}
+                    alt={work.title}
+                  />
+                {#else}
+                  <Icon name="file-up" size={32} label={Enum.at(work.uploads, 0).upload.name}>
+                    <span>{Enum.at(work.uploads, 0).upload.name}</span>
+                  </Icon>
+                {/if}
+              </LiveRedirect>
+            </li>
+          {#else}
+            Nothing to see here
+          {/for}
+        </ul>
+        <InfiniteScroll id="works-infinite-scroll" page={@works.page_number} load_more="load_more" />
+      </div>
     </StudioLayout>
     """
   end

@@ -125,7 +125,7 @@ defmodule BanchanWeb.WorkLive.Work do
           )
       end
 
-    socket = assign(socket, studio: socket.assigns.studio |> Repo.reload([:offerings]))
+    socket = assign(socket, studio: socket.assigns.studio |> Repo.preload([:offerings]))
 
     {:noreply,
      socket

@@ -12,7 +12,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Works do
 
   prop(current_user, :struct, from_context: :current_user)
   prop(query, :string)
-  prop(order_by, :atom, default: :homepage)
+  prop(order_by, :atom, default: :featured)
   prop(order_seed, :number)
   prop(page_size, :integer, default: 24)
   prop(infinite, :boolean, default: true)
