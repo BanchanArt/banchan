@@ -21,7 +21,7 @@ discover-works {
     }
 
     & img {
-      @apply w-full h-full object-cover;
+      @apply m-auto object-scale-down;
     }
   }
 }
