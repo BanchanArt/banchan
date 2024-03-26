@@ -27,7 +27,8 @@ defmodule BanchanWeb.WorkLive.Work do
     Icon,
     Layout,
     RichText,
-    Tag
+    Tag,
+    WorkGallery
   }
 
   alias BanchanWeb.Components.Form.{
@@ -89,16 +90,32 @@ defmodule BanchanWeb.WorkLive.Work do
         Work.changeset(work, %{})
       end
 
+    socket =
+      if Works.first_previewable_upload(work) do
+        socket
+        |> assign(
+          page_image:
+            ~p"/studios/#{work.studio.handle}/works/#{work.public_id}/upload/#{Works.first_previewable_upload(work).upload_id}/preview"
+        )
+      else
+        socket
+      end
+
     {:noreply,
      socket
      |> assign(
        changeset: changeset,
        can_download?: Works.can_download_uploads?(socket.assigns.current_user, work),
        work_uploads: work.uploads |> Enum.map(&{:existing, &1}),
+       related:
+         Works.list_works(
+           current_user: socket.assigns.current_user,
+           order_by: :featured,
+           related_to: work,
+           page_size: 6
+         ),
        page_title: work.title,
-       page_description: HtmlSanitizeEx.strip_tags(work.description),
-       page_image:
-         ~p"/studios/#{work.studio.handle}/works/#{work.public_id}/upload/#{Enum.at(work.uploads, 0).upload_id}/preview"
+       page_description: HtmlSanitizeEx.strip_tags(work.description)
      )}
   end
 
@@ -137,6 +154,7 @@ defmodule BanchanWeb.WorkLive.Work do
        work_uploads: work.uploads,
        commission: commission || nil,
        offering: offering || nil,
+       related: [],
        page_title: "Create new Work",
        page_description: "Create a new Work to showcase your art."
      )}
@@ -362,20 +380,38 @@ defmodule BanchanWeb.WorkLive.Work do
             <h3 class="info-header">About This Work</h3>
             <RichText class="work-description info-field" content={@work.description} />
             {#if !Enum.empty?(@work.tags)}
-              <div class="work-tags">
+              <ul class="work-tags">
                 {#for tag <- @work.tags}
-                  <Tag tag={tag} />
+                  <li><Tag tag={tag} /></li>
                 {/for}
-              </div>
+              </ul>
             {/if}
+            <p class="created-at">
+              Created on
+              <time datetime={@work.inserted_at |> Timex.to_datetime() |> Timex.format!("{RFC822}")}>
+                {@work.inserted_at |> Timex.to_datetime() |> Timex.format!("{ISOdate}")}
+                at
+                {@work.inserted_at |> Timex.to_datetime() |> Timex.format!("{ISOtime}")}.
+              </time>
+            </p>
             {#if !is_nil(@work.commission_id) && !is_nil(@current_user) &&
                 (@current_user_member? || @current_user.id == @work.client)}
               <h3 class="info-header">Source Commission</h3>
               <LiveRedirect
                 class="commission-link"
-                to={~p"/studios/#{@studio.handle}/commissions/#{@work.commission.public_id}"}
+                to={~p"/studios/#{@work.studio.handle}/commissions/#{@work.commission.public_id}"}
               >{@work.commission.title}</LiveRedirect>
             {/if}
+            <LiveRedirect
+              class="btn btn-success"
+              to={if is_nil(@work.offering_id) do
+                ~p"/studios/#{@work.studio.handle}"
+              else
+                ~p"/studios/#{@work.studio.handle}/offerings/#{@work.offering.type}"
+              end}
+            >
+              Get Your Own!
+            </LiveRedirect>
             {#if @current_user_member?}
               <LivePatch
                 class="btn btn-success"
@@ -416,6 +452,13 @@ defmodule BanchanWeb.WorkLive.Work do
           {/if}
         </div>
       </Form>
+      {#if !Enum.empty?(@related)}
+        <div class="related">
+          <h2 class="related-header">Related Works</h2>
+          <div class="divider" />
+          <WorkGallery works={@related} />
+        </div>
+      {/if}
     </Layout>
     """
   end

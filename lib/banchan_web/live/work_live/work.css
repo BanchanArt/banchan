@@ -55,7 +55,11 @@
   @apply grid-cols-1 flex flex-col gap-2;
 }
 
-.info-header {
+.work-description {
+  @apply grow;
+}
+
+.info-header, .created-at {
   @apply text-sm font-medium opacity-75;
 }
 
@@ -105,4 +109,13 @@
   & > :deep(input) {
     @apply absolute w-full h-full opacity-0 cursor-pointer;
   }
+}
+
+.related-header {
+  @apply text-xl font-semibold;
+}
+
+.related {
+  @apply w-full p-4 mx-auto max-w-7xl;
+
 }

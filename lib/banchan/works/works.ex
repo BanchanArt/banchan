@@ -120,6 +120,8 @@ defmodule Banchan.Works do
       * `:newest` - Show newest works first.
     * `:related_to` - Accepts another `%Work{}` and returns works that are
       related to it. Defaults to nil.
+    * `:has_preview` - Select only works with previewable uploads. Defaults to
+      true.
 
   """
   def list_works(opts \\ []) do
@@ -136,6 +138,7 @@ defmodule Banchan.Works do
     |> filter_commission(opts)
     |> filter_order_by(opts)
     |> filter_related_to(opts)
+    |> filter_has_preview(opts)
     |> Repo.paginate(
       page: Keyword.get(opts, :page, 1),
       page_size: Keyword.get(opts, :page_size, 20)
@@ -310,6 +313,16 @@ defmodule Banchan.Works do
 
       :error ->
         q
+    end
+  end
+
+  defp filter_has_preview(q, opts) do
+    if Keyword.get(opts, :has_preview, true) do
+      q
+      |> join(:inner, [work: w], upload in assoc(w, :uploads), as: :upload)
+      |> where([upload: u], not is_nil(u.preview_id))
+    else
+      q
     end
   end
 
