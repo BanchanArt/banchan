@@ -256,7 +256,7 @@ defmodule Banchan.Works do
 
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp filter_order_by(q, opts) do
-    case Keyword.fetch(opts, :order_by) |> IO.inspect() do
+    case Keyword.fetch(opts, :order_by) do
       {:ok, nil} ->
         q
 
