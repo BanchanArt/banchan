@@ -399,6 +399,11 @@ defmodule BanchanWeb.WorkLive.Work do
                   (@studio.offerings
                    |> Enum.map(&{&1.name <> " - " <> HtmlSanitizeEx.strip_tags(&1.description), &1.type}))}
               />
+              <Checkbox
+                label="Showcase"
+                name={:showcase}
+                caption="Showcased works will be shown first in your studio portfolio and offering galleries. Think of it as pinning!"
+              />
               {#if is_nil(@work.id)}
                 <Submit label="Create Work" changeset={@changeset} />
               {#else}

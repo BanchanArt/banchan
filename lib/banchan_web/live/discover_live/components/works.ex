@@ -69,7 +69,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Works do
       end
 
     ~F"""
-    <discover-works data-order-seed={@order_seed}>
+    <discover-works>
       {#if Enum.empty?(@works)}
         <div class="no-results">
           <span>No Results</span>
@@ -83,7 +83,7 @@ defmodule BanchanWeb.DiscoverLive.Components.Works do
       {#else}
         <WorkGallery works={@works} />
         {#if @infinite}
-          <InfiniteScroll id="studios-infinite-scroll" page={@works.page_number} load_more="load_more" />
+          <InfiniteScroll id="works-infinite-scroll" page={@works.page_number} load_more="load_more" />
         {/if}
       {/if}
     </discover-works>

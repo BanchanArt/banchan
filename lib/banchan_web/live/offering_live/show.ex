@@ -49,18 +49,13 @@ defmodule BanchanWeb.OfferingLive.Show do
         offering_type
       )
 
-    socket = assign_offering_card_props(socket, offering)
+    socket =
+      assign_offering_card_props(socket, offering)
+      |> assign(offering: offering)
 
     terms = offering.terms || socket.assigns.studio.default_terms
 
     Notifications.subscribe_to_offering_updates(offering)
-
-    works =
-      Works.list_works(
-        offering: offering,
-        current_user: socket.assigns.current_user,
-        order_seed: socket.assigns.order_seed
-      ).entries
 
     line_items =
       offering.options
@@ -121,8 +116,7 @@ defmodule BanchanWeb.OfferingLive.Show do
         {:noreply,
          socket
          |> assign(
-           offering: offering,
-           works: works,
+           works: list_works(socket),
            line_items: line_items,
            available_slots: available_slots,
            related: related,
@@ -152,21 +146,18 @@ defmodule BanchanWeb.OfferingLive.Show do
   end
 
   def handle_info(%{event: "images_updated"}, socket) do
-    offering =
-      Offerings.get_offering_by_type!(
-        socket.assigns.current_user,
-        socket.assigns.studio,
-        socket.assigns.offering.type
+    socket =
+      socket
+      |> assign(
+        offering:
+          Offerings.get_offering_by_type!(
+            socket.assigns.current_user,
+            socket.assigns.studio,
+            socket.assigns.offering.type
+          )
       )
 
-    works =
-      Works.list_works(
-        offering: offering,
-        current_user: socket.assigns.current_user,
-        order_seed: socket.assigns.order_seed
-      ).entries
-
-    {:noreply, socket |> assign(offering: offering, works: works)}
+    {:noreply, socket |> assign(works: list_works(socket))}
   end
 
   @impl true
@@ -204,6 +195,15 @@ defmodule BanchanWeb.OfferingLive.Show do
     )
 
     {:noreply, socket}
+  end
+
+  defp list_works(socket) do
+    Works.list_works(
+      offering: socket.assigns.offering,
+      current_user: socket.assigns.current_user,
+      order_by: :showcased,
+      order_seed: socket.assigns.order_seed
+    ).entries
   end
 
   @impl true

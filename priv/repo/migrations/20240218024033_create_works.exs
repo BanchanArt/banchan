@@ -9,6 +9,7 @@ defmodule Banchan.Repo.Migrations.CreateWorks do
       add :tags, {:array, :string}, null: false
       add :private, :boolean, default: false, null: false
       add :mature, :boolean, default: false, null: false
+      add :showcase, :boolean, default: false, null: false
       add :studio_id, references(:studios, on_delete: :delete_all), null: false
       add :client_id, references(:users, on_delete: :nilify_all)
       add :offering_id, references(:offerings, on_delete: :nilify_all)

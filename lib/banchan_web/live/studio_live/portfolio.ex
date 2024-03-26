@@ -22,7 +22,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
       socket
       |> assign(
         page_size: 24,
-        order_by: :featured,
+        order_by: :showcased,
         query: nil,
         infinite: true,
         order_seed: get_connect_params(socket)["order_seed"] || Prime.generate(16)
@@ -44,7 +44,7 @@ defmodule BanchanWeb.StudioLive.Portfolio do
   defp list_works(socket, page \\ 1) do
     Works.list_works(
       current_user: socket.assigns.current_user,
-      order_by: socket.assigns.order_by || :featured,
+      order_by: socket.assigns.order_by || :showcased,
       query: socket.assigns.query,
       studio: socket.assigns.studio,
       page_size: socket.assigns.page_size,

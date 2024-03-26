@@ -114,8 +114,8 @@ defmodule Banchan.Works do
       * Remove works from studios that have blocked this user.
     * `:order_by` - The order to sort the offerings by. Some of these will
       also filter some offerings out.
-      * `:featured` - Orders by the newest work/studio pair. Also filters out
-        any works that don't have a decription.
+      * `:showcased` - Prioritizes showcased works.
+      * `:featured` - Orders randomly.
       * `:oldest` - Show oldest works first.
       * `:newest` - Show newest works first.
     * `:related_to` - Accepts another `%Work{}` and returns works that are
@@ -253,9 +253,20 @@ defmodule Banchan.Works do
 
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp filter_order_by(q, opts) do
-    case Keyword.fetch(opts, :order_by) do
+    case Keyword.fetch(opts, :order_by) |> IO.inspect() do
       {:ok, nil} ->
         q
+
+      {:ok, :showcased} ->
+        order_seed = Keyword.get(opts, :order_seed, 77)
+
+        q
+        # TODO: make a function index to make this performant. It's probably fine for our current small sizes.
+        |> order_by([work: w], [
+          {:desc, fragment("CASE WHEN ? THEN 1 ELSE 0 END", w.showcase)},
+          {:desc, fragment("extract(epoch from ?)::bigint % ?", w.inserted_at, ^order_seed)},
+          {:asc, w.inserted_at}
+        ])
 
       {:ok, :featured} ->
         order_seed = Keyword.get(opts, :order_seed, 77)
