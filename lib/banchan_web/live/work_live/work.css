@@ -59,7 +59,8 @@
   @apply grow;
 }
 
-.info-header, .created-at {
+.info-header,
+.created-at {
   @apply text-sm font-medium opacity-75;
 }
 
@@ -117,5 +118,4 @@
 
 .related {
   @apply w-full p-4 mx-auto max-w-7xl;
-
 }
