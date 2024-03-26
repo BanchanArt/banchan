@@ -80,8 +80,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
             price: Money.new(4500, :USD)
           }
         ]
-      },
-      nil
+      }
     )
 
   {:ok, _} =
@@ -112,8 +111,7 @@ if Application.fetch_env!(:banchan, :env) == :dev do
           }
         ],
         terms: "**No NFTs**. But also no derivative works."
-      },
-      nil
+      }
     )
 
   {:ok, studio} =
@@ -159,7 +157,6 @@ if Application.fetch_env!(:banchan, :env) == :dev do
             price: Money.new(4500, :USD)
           }
         ]
-      },
-      nil
+      }
     )
 end
