@@ -60,10 +60,12 @@ config :banchan, BanchanWeb.Endpoint,
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
       ~r"priv/posts/*/.*(md)$",
-      ~r"lib/banchan_web/(live|views|components)/.*(ex|js|ts|css)$",
+      ~r"lib/banchan_web/(live|views|components)/.*(ex|js|ts)$",
       ~r"lib/banchan_web/templates/.*(eex)$",
-      ~r"lib/banchan_web/live/.*(sface)$",
       ~r"priv/catalogue/.*(ex)$"
+    ],
+    notify: [
+      ~r"lib/banchan_web/(live|views|components)/.*(css|sface)$",
     ]
   ]
 
