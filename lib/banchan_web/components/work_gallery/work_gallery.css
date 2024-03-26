@@ -3,6 +3,8 @@ ul {
 
   & > li {
     @apply my-0 sm:mb-1 relative sm:hover:scale-105 sm:hover:z-10 cursor-pointer transition-all w-full;
+
+    break-inside: avoid-column;
   }
 
   & img {
