@@ -8,7 +8,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
   alias Surface.Components.Form.{Field, Select, Submit, TextInput}
 
   alias BanchanWeb.Components.{Icon, Layout}
-  alias BanchanWeb.DiscoverLive.Components.{Offerings, Studios}
+  alias BanchanWeb.DiscoverLive.Components.{Offerings, Studios, Works}
 
   def mount(_params, _session, socket) do
     {:ok,
@@ -35,6 +35,9 @@ defmodule BanchanWeb.DiscoverLive.Index do
             params
 
           {:featured, "offerings"} ->
+            params
+
+          {:featured, "works"} ->
             params
 
           {nil, _} ->
@@ -88,6 +91,9 @@ defmodule BanchanWeb.DiscoverLive.Index do
         {:featured, "offerings"} ->
           params
 
+        {:featured, "works"} ->
+          params
+
         {nil, _} ->
           params
 
@@ -138,6 +144,12 @@ defmodule BanchanWeb.DiscoverLive.Index do
                 Offerings
               </LivePatch>
               <LivePatch
+                class={"tab py-1 px-4 h-fit flex-1 grow md:grow-0", "tab-active": @type == "works"}
+                to={Routes.discover_index_path(Endpoint, :index, "works", params)}
+              >
+                Works
+              </LivePatch>
+              <LivePatch
                 class={"tab py-1 px-4 h-fit flex-1 grow md:grow-0", "tab-active": @type == "studios"}
                 to={Routes.discover_index_path(Endpoint, :index, "studios", params)}
               >
@@ -173,6 +185,17 @@ defmodule BanchanWeb.DiscoverLive.Index do
                       Fanciest: :price_high
                     }
                   />
+                {#elseif @type == "works"}
+                  <Select
+                    name={:sort_by}
+                    class="select select-bordered"
+                    selected={@order_by}
+                    options={
+                      "For You": :featured,
+                      Newest: :newest,
+                      Oldest: :oldest
+                    }
+                  />
                 {/if}
                 <Field name={:query} class="w-full">
                   <TextInput
@@ -184,6 +207,7 @@ defmodule BanchanWeb.DiscoverLive.Index do
                         case @type do
                           "studios" -> "Search for studios..."
                           "offerings" -> "Search for offerings..."
+                          "works" -> "Search for works..."
                           _ -> "Search for offerings..."
                         end
                     }
@@ -210,6 +234,15 @@ defmodule BanchanWeb.DiscoverLive.Index do
           <Offerings
             id="offerings"
             suggest_studios
+            current_user={@current_user}
+            query={@query}
+            order_by={@order_by}
+            order_seed={@order_seed}
+          />
+        {#elseif @type == "works"}
+          <Works
+            id="works"
+            suggest_offerings
             current_user={@current_user}
             query={@query}
             order_by={@order_by}

@@ -30,6 +30,8 @@ defmodule Banchan.Commissions.Commission do
 
     has_many :events, Banchan.Commissions.Event, preload_order: [asc: :inserted_at, asc: :id]
 
+    has_one :work, Banchan.Works.Work
+
     belongs_to :offering, Banchan.Offerings.Offering
     belongs_to :studio, Banchan.Studios.Studio
     belongs_to :client, Banchan.Accounts.User

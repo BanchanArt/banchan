@@ -311,8 +311,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
     ~F"""
     <div id={@id} class="flex flex-col gap-4">
       {#if @open_final_invoice}
-        <div class="pb-2 text-lg font-medium opacity-100">Final Invoice</div>
-        <div class="text-sm">Attachments will be released on payment. All deposits will be immediately released, along with this payment, and the commission will be closed.</div>
+        <div class="text-sm font-medium opacity-75">Final Invoice</div>
         <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
           <Summary line_items={@commission.line_items} />
           <div class="m-0 divider h-fit" />
@@ -332,19 +331,20 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           opts={"phx-target": @myself}
         >
           <div class="grid grid-cols-1 gap-4">
-            <div class="text-base font-medium">Attachments</div>
+            <div class="text-sm font-medium opacity-75">Invoice Text</div>
+            <QuillInput
+              id={@id <> "-markdown-input"}
+              name={:text}
+              label=""
+              caption="Brief summary of what this invoice is meant to cover, for the record."
+              class="w-full"
+            />
+            <div class="text-sm font-medium opacity-75">Final Attachments</div>
+            <div class="text-xs opacity-75">Attachments will be released once final payment is made.</div>
             <Attachments
               id={@id <> "-attachments"}
               upload={@uploads.attachments}
               cancel_upload="cancel_upload"
-            />
-            <div class="m-0 divider h-fit" />
-            <QuillInput
-              id={@id <> "-markdown-input"}
-              name={:text}
-              label="Invoice Text"
-              caption="Brief summary of what this invoice is meant to cover, for the record."
-              class="w-full"
             />
             <div class="flex flex-row justify-end gap-2 pt-2">
               <Button click="cancel" class="btn-error" label="Cancel" />
@@ -353,8 +353,7 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
           </div>
         </Form>
       {#elseif @open_deposit_requested}
-        <div class="pb-2 text-lg font-medium opacity-100">Partial Deposit</div>
-        <div class="text-sm">Attachments will be released on payment. Deposit will be held until final invoice is submitted, or deposit is released early. by client.</div>
+        <div class="text-sm font-medium opacity-75">Partial Deposit</div>
         <div class="grid grid-cols-1 gap-4 p-4 border rounded-lg border-base-content border-opacity-10 bg-base-100">
           <Summary line_items={@commission.line_items} />
           <div class="m-0 divider h-fit" />
@@ -381,20 +380,20 @@ defmodule BanchanWeb.CommissionLive.Components.SummaryBox do
               </div>
             </div>
             <div class="text-xs opacity-75">Deposits will be held until final invoice is submitted, or unless they are released early by the client.</div>
-            <div class="m-0 divider h-fit" />
-            <div class="text-base font-medium">Attachments</div>
+            <div class="text-sm font-medium opacity-75">Invoice Text</div>
+            <QuillInput
+              id={@id <> "-markdown-input"}
+              name={:text}
+              label=""
+              caption="Brief summary of what this invoice is meant to cover, for the record."
+              class="w-full"
+            />
+            <div class="text-sm font-medium opacity-75">Draft Attachments</div>
+            <div class="text-xs opacity-75">Attachments will become available once a deposit is made.</div>
             <Attachments
               id={@id <> "-attachments"}
               upload={@uploads.attachments}
               cancel_upload="cancel_upload"
-            />
-            <div class="m-0 divider h-fit" />
-            <QuillInput
-              id={@id <> "-markdown-input"}
-              name={:text}
-              label="Invoice Text"
-              caption="Brief summary of what this invoice is meant to cover, for the record."
-              class="w-full"
             />
             <div class="flex flex-row justify-end gap-2 pt-2">
               <Button click="cancel" class="btn-error" label="Cancel" />

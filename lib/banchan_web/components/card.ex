@@ -27,7 +27,7 @@ defmodule BanchanWeb.Components.Card do
 
   def render(assigns) do
     ~F"""
-    <div class={
+    <bc-card class={
       "bg-base-200 card card-compact flex flex-col grow rounded-none group focus:outline-none focus:ring-0",
       @class
     }>
@@ -47,7 +47,7 @@ defmodule BanchanWeb.Components.Card do
             {/if}
           </header>
         {/if}
-        <div class="flex flex-col grow">
+        <div class="flex flex-col grow default-slot">
           <#slot />
         </div>
         {#if slot_assigned?(:footer)}
@@ -56,7 +56,7 @@ defmodule BanchanWeb.Components.Card do
           </footer>
         {/if}
       </div>
-    </div>
+    </bc-card>
     """
   end
 end

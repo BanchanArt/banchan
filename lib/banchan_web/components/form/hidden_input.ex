@@ -4,7 +4,7 @@ defmodule BanchanWeb.Components.Form.HiddenInput do
   """
   use BanchanWeb, :component
 
-  alias Surface.Components.Form.{Field, HiddenInput}
+  alias Surface.Components.Form.{ErrorTag, Field, HiddenInput}
 
   prop name, :any
   prop value, :any
@@ -14,6 +14,7 @@ defmodule BanchanWeb.Components.Form.HiddenInput do
     ~F"""
     <Field class="grid grid-cols-1 gap-2 field" name={@name}>
       <HiddenInput value={@value} opts={@opts} />
+      <ErrorTag class="help text-error" />
     </Field>
     """
   end

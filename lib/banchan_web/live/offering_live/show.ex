@@ -10,6 +10,7 @@ defmodule BanchanWeb.OfferingLive.Show do
   alias Banchan.Commissions.LineItem
   alias Banchan.Offerings
   alias Banchan.Offerings.Notifications
+  alias Banchan.Works
 
   alias Surface.Components.LiveRedirect
 
@@ -21,11 +22,11 @@ defmodule BanchanWeb.OfferingLive.Show do
     Icon,
     Layout,
     Lightbox,
-    MasonryGallery,
     OfferingCardImg,
     ReportModal,
     RichText,
-    Tag
+    Tag,
+    WorkGallery
   }
 
   alias BanchanWeb.StudioLive.Components.OfferingCard
@@ -37,7 +38,9 @@ defmodule BanchanWeb.OfferingLive.Show do
       Notifications.unsubscribe_from_offering_updates(socket.assigns.offering)
     end
 
-    socket = assign_studio_defaults(params, socket, false, true)
+    socket =
+      assign_studio_defaults(params, socket, false, true)
+      |> assign(order_seed: get_connect_params(socket)["order_seed"] || Prime.generate(16))
 
     offering =
       Offerings.get_offering_by_type!(
@@ -46,15 +49,13 @@ defmodule BanchanWeb.OfferingLive.Show do
         offering_type
       )
 
-    socket = assign_offering_card_props(socket, offering)
+    socket =
+      assign_offering_card_props(socket, offering)
+      |> assign(offering: offering)
 
     terms = offering.terms || socket.assigns.studio.default_terms
 
     Notifications.subscribe_to_offering_updates(offering)
-
-    gallery_images =
-      offering.gallery_uploads
-      |> Enum.map(&{:existing, &1})
 
     line_items =
       offering.options
@@ -115,8 +116,7 @@ defmodule BanchanWeb.OfferingLive.Show do
         {:noreply,
          socket
          |> assign(
-           offering: offering,
-           gallery_images: gallery_images,
+           works: list_works(socket),
            line_items: line_items,
            available_slots: available_slots,
            related: related,
@@ -146,18 +146,18 @@ defmodule BanchanWeb.OfferingLive.Show do
   end
 
   def handle_info(%{event: "images_updated"}, socket) do
-    offering =
-      Offerings.get_offering_by_type!(
-        socket.assigns.current_user,
-        socket.assigns.studio,
-        socket.assigns.offering.type
+    socket =
+      socket
+      |> assign(
+        offering:
+          Offerings.get_offering_by_type!(
+            socket.assigns.current_user,
+            socket.assigns.studio,
+            socket.assigns.offering.type
+          )
       )
 
-    gallery_images =
-      offering.gallery_uploads
-      |> Enum.map(&{:existing, &1})
-
-    {:noreply, socket |> assign(offering: offering, gallery_images: gallery_images)}
+    {:noreply, socket |> assign(works: list_works(socket))}
   end
 
   @impl true
@@ -195,6 +195,15 @@ defmodule BanchanWeb.OfferingLive.Show do
     )
 
     {:noreply, socket}
+  end
+
+  defp list_works(socket) do
+    Works.list_works(
+      offering: socket.assigns.offering,
+      current_user: socket.assigns.current_user,
+      order_by: :showcased,
+      order_seed: socket.assigns.order_seed
+    ).entries
   end
 
   @impl true
@@ -311,8 +320,8 @@ defmodule BanchanWeb.OfferingLive.Show do
                 <Button class="btn-info grow" click="unnotify_me">Unsubscribe</Button>
               {/if}
             </div>
-            <div class="m-0 h-fit divider" />
             {#if @terms}
+              <div class="m-0 h-fit divider" />
               <Collapse id="terms-collapse">
                 <:header><span class="text-sm font-medium opacity-75">Commission Terms</span></:header>
                 <RichText content={@terms} />
@@ -333,15 +342,11 @@ defmodule BanchanWeb.OfferingLive.Show do
                 <div class="w-full h-full aspect-video bg-base-300" />
               {/if}
             </Lightbox>
-            {#if !Enum.empty?(@gallery_images)}
+            {#if !Enum.empty?(@works)}
               <div class="grid grid-cols-1 gap-4 rounded-lg bg-base-200">
                 <div class="text-2xl">Gallery</div>
                 <div class="m-0 h-fit divider" />
-                <MasonryGallery
-                  id="masonry-gallery"
-                  upload_type={:offering_gallery_img}
-                  images={@gallery_images}
-                />
+                <WorkGallery works={@works} />
               </div>
             {/if}
           </div>

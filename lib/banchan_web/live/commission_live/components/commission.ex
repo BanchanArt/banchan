@@ -219,9 +219,9 @@ defmodule BanchanWeb.CommissionLive.Components.Commission do
       <div class="py-6">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div class="flex flex-col gap-4 md:order-2">
-            <SummaryBox id={@id <> "-summary-box"} />
-            <div class="m-0 divider h-fit" />
             <StatusBox id={@id <> "-status-box"} />
+            <div class="m-0 divider h-fit" />
+            <SummaryBox id={@id <> "-summary-box"} />
             <div class="m-0 divider h-fit" />
             <UploadsBox id={@id <> "-uploads-box"} />
             <div class="m-0 divider h-fit" />

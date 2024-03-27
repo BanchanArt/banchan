@@ -8,9 +8,9 @@ defmodule Banchan.Offerings do
 
   alias Banchan.Accounts.User
   alias Banchan.Commissions.Commission
+  alias Banchan.Works.Work
 
   alias Banchan.Offerings.{
-    GalleryImage,
     Notifications,
     Offering,
     OfferingOption,
@@ -29,7 +29,7 @@ defmodule Banchan.Offerings do
   @doc """
   Creates a new offering.
   """
-  def new_offering(%User{} = actor, %Studio{} = studio, attrs, gallery_images) do
+  def new_offering(%User{} = actor, %Studio{} = studio, attrs) do
     {:ok, ret} =
       Repo.transaction(fn ->
         with {:ok, _actor} <- Studios.check_studio_member(studio, actor) do
@@ -41,19 +41,8 @@ defmodule Banchan.Offerings do
             |> Repo.one!() ||
               0
 
-          gallery_images =
-            (gallery_images || [])
-            |> Enum.with_index()
-            |> Enum.map(fn {%Upload{} = upload, index} ->
-              %GalleryImage{
-                index: index,
-                upload_id: upload.id
-              }
-            end)
-
           %Offering{
             studio_id: studio.id,
-            gallery_imgs: gallery_images,
             index: max_idx + 1
           }
           |> Offering.changeset(attrs)
@@ -77,10 +66,10 @@ defmodule Banchan.Offerings do
   Updates offering details.
   """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  def update_offering(%User{} = actor, %Offering{} = offering, attrs, gallery_images) do
+  def update_offering(%User{} = actor, %Offering{} = offering, attrs) do
     Repo.transaction(fn ->
       with {:ok, _actor} <- Studios.check_studio_member(%Studio{id: offering.studio_id}, actor) do
-        offering = Repo.reload(offering) |> Repo.preload([:options, :gallery_imgs])
+        offering = Repo.reload(offering) |> Repo.preload([:options])
 
         open_before? = Repo.one(from(o in Offering, where: o.id == ^offering.id, select: o.open))
         proposal_count = offering_proposal_count(offering)
@@ -89,23 +78,6 @@ defmodule Banchan.Offerings do
         changeset =
           offering
           |> change_offering(attrs)
-
-        changeset =
-          if is_nil(gallery_images) do
-            changeset
-          else
-            gallery_images =
-              (gallery_images || [])
-              |> Enum.with_index()
-              |> Enum.map(fn {%Upload{} = upload, index} ->
-                %GalleryImage{
-                  index: index,
-                  upload_id: upload.id
-                }
-              end)
-
-            changeset |> Ecto.Changeset.put_assoc(:gallery_imgs, gallery_images)
-          end
 
         slots = Ecto.Changeset.get_field(changeset, :slots)
         max_proposals = Ecto.Changeset.get_field(changeset, :max_proposals)
@@ -120,21 +92,6 @@ defmodule Banchan.Offerings do
             changeset
           end
 
-        old_uploads = offering.gallery_imgs |> Enum.map(& &1.upload_id)
-
-        new_uploads =
-          changeset |> Ecto.Changeset.get_field(:gallery_imgs, []) |> Enum.map(& &1.upload_id)
-
-        drop_uploads =
-          old_uploads
-          |> Enum.filter(&(!Enum.member?(new_uploads, &1)))
-          |> Enum.reduce_while({:ok, []}, fn upload_id, {:ok, acc} ->
-            case UploadDeleter.schedule_deletion(%Upload{id: upload_id}) do
-              {:ok, job} -> {:cont, {:ok, [job | acc]}}
-              {:error, error} -> {:halt, {:error, error}}
-            end
-          end)
-
         drop_old_card_img =
           if offering.card_img_id &&
                offering.card_img_id != Ecto.Changeset.get_field(changeset, :card_img_id) do
@@ -144,8 +101,7 @@ defmodule Banchan.Offerings do
           end
 
         with {:ok, changed} <- changeset |> Repo.update(returning: true),
-             {:ok, _} <- drop_old_card_img,
-             {:ok, _jobs} <- drop_uploads do
+             {:ok, _} <- drop_old_card_img do
           if !open_before? && changed.open do
             Notifications.offering_opened(changed)
           end
@@ -163,7 +119,6 @@ defmodule Banchan.Offerings do
     end)
     |> case do
       {:ok, {:ok, offering}} ->
-        __MODULE__.Notifications.notify_images_updated(offering |> Repo.preload(:studio))
         {:ok, offering}
 
       {:ok, {:error, error}} ->
@@ -295,26 +250,10 @@ defmodule Banchan.Offerings do
     card
   end
 
-  def make_gallery_image!(%User{} = user, %Studio{} = studio, src, type, name) do
-    {:ok, user} = Studios.check_studio_member(studio, user)
-
-    upload = Uploads.save_file!(user, src, type, name)
-
-    {:ok, image} =
-      Thumbnailer.thumbnail(
-        upload,
-        dimensions: "1200",
-        name: "gallery_image.jpg"
-      )
-
-    image
-  end
-
   ## Getting/Listing
 
   @doc """
-  Gets a Studio's offering by its type name. Includes preloaded gallery
-  uploads ad number of used slots.
+  Gets a Studio's offering by its type name. Includes number of used slots.
 
   If an actor is provided, it will be used to check whether the actor is a
   studio member and is able to see hidden offerings.
@@ -327,16 +266,6 @@ defmodule Banchan.Offerings do
         join: s in assoc(o, :studio),
         as: :studio,
         where: is_nil(s.deleted_at) and is_nil(s.archived_at),
-        left_lateral_join:
-          gallery_uploads in subquery(
-            from i in GalleryImage,
-              where: i.offering_id == parent_as(:offering).id,
-              join: u in assoc(i, :upload),
-              group_by: [i.offering_id],
-              select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
-          ),
-        as: :gallery_uploads,
-        on: true,
         left_lateral_join:
           used_slots in subquery(
             from c in Commission,
@@ -351,15 +280,7 @@ defmodule Banchan.Offerings do
         where: o.studio_id == ^studio.id and o.type == ^type,
         select:
           merge(o, %{
-            used_slots: coalesce(used_slots.used_slots, 0),
-            gallery_uploads:
-              type(
-                coalesce(
-                  gallery_uploads.uploads,
-                  fragment("ARRAY[]::json[]")
-                ),
-                {:array, Upload}
-              )
+            used_slots: coalesce(used_slots.used_slots, 0)
           })
 
     q =
@@ -516,20 +437,6 @@ defmodule Banchan.Offerings do
   end
 
   @doc """
-  Lists images for an offering's samples gallery, in the order they've been
-  sorted into. Returns the Uploads themselves.
-  """
-  def offering_gallery_uploads(%Offering{} = offering) do
-    from(i in GalleryImage,
-      join: u in assoc(i, :upload),
-      where: i.offering_id == ^offering.id,
-      order_by: [asc: i.index],
-      select: u
-    )
-    |> Repo.all()
-  end
-
-  @doc """
   Finds an offering card image's Upload.
   """
   def offering_card_img!(upload_id) do
@@ -549,20 +456,6 @@ defmodule Banchan.Offerings do
     from(
       o in Offering,
       join: u in assoc(o, :header_img),
-      where: u.id == ^upload_id and is_nil(o.deleted_at),
-      select: u
-    )
-    |> Repo.one!()
-  end
-
-  @doc """
-  Finds an offering gallery image's Upload.
-  """
-  def offering_gallery_img!(upload_id) do
-    from(
-      i in GalleryImage,
-      join: o in assoc(i, :offering),
-      join: u in assoc(i, :upload),
       where: u.id == ^upload_id and is_nil(o.deleted_at),
       select: u
     )
@@ -597,8 +490,7 @@ defmodule Banchan.Offerings do
       also filter some offerings out.
       * `:index` - Sort by the offering's index in its Studio shop.
       * `:featured` - Orders by the newest offerings/studio pair. Also filters
-        out any offerings that don't have all of: a decription, card image,
-        and gallery images.
+        out any offerings that don't have all of: a decription, and card images.
       * `:oldest` - Show oldest offerings first.
       * `:newest` - Show newest offerings first.
       * `:price_high` - Show highest-priced offerings first.
@@ -648,23 +540,25 @@ defmodule Banchan.Offerings do
       as: :price_info,
       on: true,
       left_lateral_join:
-        gallery_uploads in subquery(
-          from i in GalleryImage,
-            where: i.offering_id == parent_as(:offering).id,
-            join: u in assoc(i, :upload),
-            group_by: [i.offering_id],
+        works in subquery(
+          from w in Work,
+            where: w.offering_id == parent_as(:offering).id,
+            join: wu in assoc(w, :uploads),
+            join: u in assoc(wu, :upload),
+            where: not is_nil(wu.preview_id),
+            group_by: [w.offering_id],
             select: %{uploads: fragment("array_agg(row_to_json(?))", u)}
         ),
-      as: :gallery_uploads,
+      as: :works,
       on: true,
       select:
         merge(o, %{
           studio: s,
           used_slots: coalesce(used_slots.used_slots, 0),
-          gallery_uploads:
+          works:
             type(
               coalesce(
-                gallery_uploads.uploads,
+                works.uploads,
                 fragment("ARRAY[]::json[]")
               ),
               {:array, Upload}
@@ -823,9 +717,9 @@ defmodule Banchan.Offerings do
         |> where([o], not is_nil(o.description) and o.description != "")
         |> where([o], not is_nil(o.card_img_id))
         |> where(
-          [gallery_uploads: gallery_uploads],
-          not is_nil(gallery_uploads.uploads) and
-            fragment("array_length(?, 1) > 0", gallery_uploads.uploads)
+          [works: works],
+          not is_nil(works.uploads) and
+            fragment("array_length(?, 1) > 0", works.uploads)
         )
 
       {:ok, :oldest} ->
@@ -898,7 +792,6 @@ defmodule Banchan.Offerings do
              # care of updating offering order indices. It's a hack but hey it
              # does the job.
              {:ok, offering} <- archive_offering(actor, offering),
-             {:ok, _} <- delete_gallery_imgs(offering),
              {:ok, _} <- delete_card_img(offering) do
           offering
           |> Offering.deletion_changeset()
@@ -907,21 +800,6 @@ defmodule Banchan.Offerings do
       end)
 
     ret
-  end
-
-  defp delete_gallery_imgs(%Offering{} = offering) do
-    offering = offering |> Repo.preload(:gallery_imgs)
-
-    offering.gallery_imgs
-    |> Enum.reduce_while({:ok, []}, fn %GalleryImage{upload_id: upload_id}, {:ok, acc} ->
-      case UploadDeleter.schedule_deletion(%Upload{id: upload_id}) do
-        {:ok, _} ->
-          {:cont, {:ok, [upload_id | acc]}}
-
-        {:error, error} ->
-          {:halt, {:error, error}}
-      end
-    end)
   end
 
   defp delete_card_img(%Offering{card_img_id: upload_id}) do
@@ -951,16 +829,6 @@ defmodule Banchan.Offerings do
       |> Enum.reduce(0, fn off, acc ->
         # NB(@zkat): We hard match on `{:ok, _}` here because scheduling
         # deletions should really never fail.
-
-        gallery_imgs = Ecto.assoc(off, :gallery_imgs) |> Repo.all()
-
-        if gallery_imgs do
-          gallery_imgs
-          # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-          |> Enum.each(fn %GalleryImage{upload_id: upload_id} ->
-            {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: upload_id})
-          end)
-        end
 
         if off.card_img_id do
           {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: off.card_img_id})

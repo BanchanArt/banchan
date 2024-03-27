@@ -56,6 +56,18 @@ defmodule Banchan.Uploads do
   end
 
   @doc """
+  Returns true if an upload (or a given string type) is a visual media type.
+  """
+  def media?(type), do: image?(type) || video?(type)
+
+  @doc """
+  Maximum upload size.
+  """
+  def max_upload_size do
+    Application.fetch_env!(:banchan, :max_attachment_size)
+  end
+
+  @doc """
   Convert an error atom to a human-readable error message.
   """
   def error_to_string(:too_large), do: "Too large"

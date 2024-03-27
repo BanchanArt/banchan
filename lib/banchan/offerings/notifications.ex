@@ -9,7 +9,6 @@ defmodule Banchan.Offerings.Notifications do
   alias Banchan.Repo
   alias Banchan.Offerings.{Offering, OfferingSubscription}
   alias Banchan.Studios.{StudioFollower, StudioSubscription}
-  alias Banchan.Uploads.Upload
 
   # Unfortunate, but needed for crafting URLs for notifications
   use BanchanWeb, :verified_routes
@@ -154,34 +153,5 @@ defmodule Banchan.Offerings.Notifications do
   def unsubscribe_from_offering_updates(%Offering{} = offering) do
     topic = "offering:#{offering.studio.handle}:#{offering.type}"
     Phoenix.PubSub.unsubscribe(@pubsub, topic)
-  end
-
-  def notify_images_updated(%Offering{} = offering) do
-    Notifications.with_task(fn ->
-      topic = "offering:#{offering.studio.handle}:#{offering.type}"
-
-      Phoenix.PubSub.broadcast!(
-        @pubsub,
-        topic,
-        %Phoenix.Socket.Broadcast{
-          topic: topic,
-          event: "images_updated",
-          payload: nil
-        }
-      )
-    end)
-  end
-
-  def notify_images_updated(%Upload{} = upload) do
-    from(
-      o in Offering,
-      left_join: gi in assoc(o, :gallery_imgs),
-      where: gi.upload_id == ^upload.id or o.card_img_id == ^upload.id,
-      limit: 1,
-      select: o
-    )
-    |> Repo.one!()
-    |> Repo.preload(:studio)
-    |> notify_images_updated()
   end
 end

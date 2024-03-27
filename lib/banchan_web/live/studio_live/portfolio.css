@@ -1,0 +1,19 @@
+.portfolio-container {
+  @apply flex flex-col p-3;
+
+  & :deep(bc-card) {
+    @apply h-full transition-all border-2 border-dashed rounded-lg opacity-50 hover:opacity-100 hover:bg-base-200;
+
+    :global(&) :deep(.default-slot) {
+      @apply items-center w-full gap-2 p-4 my-auto h-fit;
+
+      :global(&) > :deep(span:nth-child(1)) {
+        @apply text-3xl font-semibold;
+      }
+
+      :global(&) > :deep(span:nth-child(2)) {
+        @apply text-sm text-center;
+      }
+    }
+  }
+}
