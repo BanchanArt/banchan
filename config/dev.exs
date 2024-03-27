@@ -65,7 +65,7 @@ config :banchan, BanchanWeb.Endpoint,
       ~r"priv/catalogue/.*(ex)$"
     ],
     notify: [
-      ~r"lib/banchan_web/(live|views|components)/.*(css|sface)$",
+      ~r"lib/banchan_web/(live|views|components)/.*(css|sface)$"
     ]
   ]
 
