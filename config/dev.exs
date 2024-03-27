@@ -59,7 +59,7 @@ config :banchan, BanchanWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"priv/posts/*/.*(md)$",
+      ~r"priv/posts/.*(md)$",
       ~r"lib/banchan_web/(live|views|components)/.*(ex|js|ts)$",
       ~r"lib/banchan_web/templates/.*(eex)$",
       ~r"priv/catalogue/.*(ex)$"
