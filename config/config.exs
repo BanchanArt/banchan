@@ -35,6 +35,7 @@ config :banchan,
   mature_content_enabled?: true,
   git_rev: hash,
   git_tag: tag,
+  ops_email: "ops@banchan.art",
   oban_key_fingerprint: System.get_env("OBAN_KEY_FINGERPRINT"),
   oban_license_key: System.get_env("OBAN_LICENSE_KEY")
 
