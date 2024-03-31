@@ -17,6 +17,8 @@ defmodule Banchan.Workers.FlyBackup do
 
   require Logger
 
+  alias Banchan.Workers.Mailer
+
   @impl Oban.Worker
   def perform(%_{args: _}) do
     run_backup()
@@ -119,9 +121,11 @@ defmodule Banchan.Workers.FlyBackup do
     end
     |> case do
       {:error, error} ->
+        notify_completed("Backup operation errored", "N/A", error)
         {:error, error}
 
       {output, 0} ->
+        notify_completed("Backup operation succeeded", 0, output)
         Logger.info("Backup succeeded: #{output}")
         :ok
 
@@ -131,11 +135,25 @@ defmodule Banchan.Workers.FlyBackup do
           # For some reason, the backup command over fly ssh complains about
           # the handle being invalid, *after* already succeeding.
           # It only seems to happen when I test this on Windows, though.
+          notify_completed("Backup operation succeeded suspiciously?", code, output)
           Logger.warning("Backup succeeded with bad error code #{code}: #{output}")
           :ok
         else
+          notify_completed("Backup operation failed", code, output)
           {:error, "Backup failed with code #{code}: #{output}"}
         end
     end
+  end
+
+  defp notify_completed(title, code, output) do
+    Mailer.new_email(
+      Application.get_env(:banchan, :ops_email, "ops@banchan.art"),
+      title,
+      BanchanWeb.Email.Ops,
+      :backup_completed,
+      code: code,
+      output: output
+    )
+    |> Mailer.deliver()
   end
 end
