@@ -211,6 +211,22 @@ defmodule BanchanWeb.Router do
       live("/studios/:handle/portfolio", StudioLive.Portfolio, :show)
       live("/studios/:handle/disabled", StudioLive.Disabled, :show)
 
+      live("/studios/:handle/works/new", WorkLive.Work, :new)
+      live("/studios/:handle/works/:work_id", WorkLive.Work, :show)
+      live("/studios/:handle/works/:work_id/edit", WorkLive.Work, :edit)
+
+      get(
+        "/studios/:handle/works/:work_id/upload/:upload_id",
+        WorkUploadsController,
+        :show
+      )
+
+      get(
+        "/studios/:handle/works/:work_id/upload/:upload_id/preview",
+        WorkUploadsController,
+        :preview
+      )
+
       live("/confirm", ConfirmationLive, :show)
 
       live("/reset_password", ForgotPasswordLive, :edit)

@@ -7,7 +7,7 @@ defmodule Banchan.Studios.Studio do
   import Banchan.Validators
 
   alias Banchan.Payments.Currency
-  alias Banchan.Studios.{PortfolioImage, StudioBlock, StudioDisableHistory}
+  alias Banchan.Studios.{StudioBlock, StudioDisableHistory}
   alias Banchan.Uploads.Upload
 
   schema "studios" do
@@ -40,17 +40,15 @@ defmodule Banchan.Studios.Studio do
     belongs_to :header_img, Upload, type: :binary_id
     belongs_to :card_img, Upload, type: :binary_id
 
-    has_many :portfolio_imgs, PortfolioImage,
-      on_replace: :delete_if_exists,
-      preload_order: [asc: :index]
-
     many_to_many :artists, Banchan.Accounts.User,
       join_through: "users_studios",
       where: [deactivated_at: nil]
 
     many_to_many :followers, Banchan.Accounts.User, join_through: "studio_followers"
 
-    has_many :offerings, Banchan.Offerings.Offering, preload_order: [:asc, :index]
+    has_many :offerings, Banchan.Offerings.Offering, preload_order: [asc: :index]
+
+    has_many :works, Banchan.Works.Work
 
     field :website_url, :string
     field :twitter_handle, :string

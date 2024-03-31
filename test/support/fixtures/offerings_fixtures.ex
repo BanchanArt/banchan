@@ -27,8 +27,7 @@ defmodule Banchan.OfferingsFixtures do
             open: true
           },
           attrs
-        ),
-        nil
+        )
       )
 
     offering

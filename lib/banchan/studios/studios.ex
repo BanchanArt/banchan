@@ -28,7 +28,7 @@ defmodule Banchan.Studios do
 
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
-  alias Banchan.Workers.{EnableStudio, Thumbnailer, UploadDeleter}
+  alias Banchan.Workers.{EnableStudio, Thumbnailer}
 
   use BanchanWeb, :verified_routes
 
@@ -682,20 +682,6 @@ defmodule Banchan.Studios do
       end,
       returning: true
     )
-    |> Ecto.Multi.run(:remove_old_card_img, fn _, %{updated_studio: updated, studio: old} ->
-      if old.card_img_id && old.card_img_id != updated.card_img_id do
-        UploadDeleter.schedule_deletion(%Upload{id: old.card_img_id})
-      else
-        {:ok, nil}
-      end
-    end)
-    |> Ecto.Multi.run(:remove_old_header_img, fn _, %{updated_studio: updated, studio: old} ->
-      if old.header_img_id && old.header_img_id != updated.header_img_id do
-        UploadDeleter.schedule_deletion(%Upload{id: old.header_img_id})
-      else
-        {:ok, nil}
-      end
-    end)
     |> Repo.transaction()
     |> case do
       {:ok, %{updated_studio: studio}} ->
@@ -969,7 +955,7 @@ defmodule Banchan.Studios do
   be unable to further interact with commissions associated with this Studio,
   request new commissions, or even view the Studio profile.
   """
-  def block_user(%User{} = actor, %Studio{} = studio, %User{} = user, attrs) do
+  def block_user(%User{} = actor, %Studio{} = studio, %User{} = user, attrs \\ %{}) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:checked_actor, fn _repo, _changes ->
       check_studio_member(studio, actor, [])
@@ -1155,44 +1141,17 @@ defmodule Banchan.Studios do
   def prune_studios do
     now = NaiveDateTime.utc_now()
 
-    Repo.transaction(fn ->
-      from(
-        s in Studio,
-        where: not is_nil(s.deleted_at),
-        where: s.deleted_at < datetime_add(^now, -30, "day")
-      )
-      |> Repo.stream()
-      |> Enum.reduce(0, fn studio, acc ->
-        # NB(@zkat): We hard match on `{:ok, _}` here because scheduling
-        # deletions should really never fail.
-        if studio.card_img_id do
-          {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: studio.card_img_id})
-        end
-
-        if studio.header_img_id do
-          {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: studio.header_img_id})
-        end
-
-        portfolio_imgs = Ecto.assoc(studio, :portfolio_imgs) |> Repo.all()
-
-        if portfolio_imgs do
-          portfolio_imgs
-          # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-          |> Enum.each(fn %PortfolioImage{upload_id: upload_id} ->
-            {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: upload_id})
-          end)
-        end
-
-        case Repo.delete(studio) do
-          {:ok, _} ->
-            acc + 1
-
-          {:error, error} ->
-            Logger.error("Failed to prune studio #{studio.handle}: #{inspect(error)}")
-            acc
-        end
+    {:ok, {count, _}} =
+      Repo.transaction(fn ->
+        from(
+          s in Studio,
+          where: not is_nil(s.deleted_at),
+          where: s.deleted_at < datetime_add(^now, -30, "day")
+        )
+        |> Repo.delete_all()
       end)
-    end)
+
+    {:ok, count}
   end
 
   ## Misc utilities

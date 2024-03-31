@@ -74,10 +74,6 @@ defmodule BanchanWeb.PublicImageController do
     Offerings.offering_header_img!(id)
   end
 
-  defp get_by_type!("offering_gallery_img", id) do
-    Offerings.offering_gallery_img!(id)
-  end
-
   defp get_by_type!("studio_card_img", id) do
     Studios.studio_card_img!(id)
   end

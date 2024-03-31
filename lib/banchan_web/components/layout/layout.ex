@@ -59,14 +59,6 @@ defmodule BanchanWeb.Components.Layout do
 
   def render(assigns) do
     ~F"""
-    <style>
-      :global(details) > :global(summary) {
-      list-style: none;
-      }
-      :global(details) > :global(summary::-webkit-details-marker) {
-      display: none;
-      }
-    </style>
     <div class="w-full h-screen drawer drawer-mobile">
       <input
         type="checkbox"

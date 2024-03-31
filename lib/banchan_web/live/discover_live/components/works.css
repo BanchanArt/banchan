@@ -1,0 +1,27 @@
+discover-works {
+  @apply flex flex-col items-center w-full;
+
+  :deep(.suggestion-link) {
+    @apply link;
+  }
+
+  & .no-results {
+    @apply flex flex-col items-center w-full gap-2 py-16;
+
+    & span {
+      @apply text-2xl;
+    }
+  }
+
+  & ul.has-results {
+    @apply gap-0 sm:gap-1 columns-2 sm:columns-3 md:columns-4;
+
+    & li {
+      @apply sm:mb-1 relative sm:hover:scale-105 sm:hover:z-10 cursor-pointer transition-all w-full;
+    }
+
+    & img {
+      @apply m-auto object-scale-down;
+    }
+  }
+}

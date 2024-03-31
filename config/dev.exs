@@ -21,7 +21,7 @@ config :banchan, BanchanWeb.Endpoint,
     esbuild: {Esbuild, :install_and_run, [:catalogue, ~w(--sourcemap=inline --watch)]},
     node: [
       "node_modules/postcss-cli/index.js",
-      "css/app.scss",
+      "css/app.css",
       "--output=../priv/static/assets/app.css",
       "--watch",
       cd: Path.expand("../assets", __DIR__)
@@ -59,11 +59,15 @@ config :banchan, BanchanWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"priv/posts/*/.*(md)$",
-      ~r"lib/banchan_web/(live|views|components)/.*(ex|js)$",
+      ~r"priv/posts/.*(md)$",
+      ~r"lib/banchan_web/(live|views|components)/.*(ex|js|ts)$",
       ~r"lib/banchan_web/templates/.*(eex)$",
-      ~r"lib/banchan_web/live/.*(sface)$",
       ~r"priv/catalogue/.*(ex)$"
+    ],
+    notify: [
+      live_view: [
+        ~r"lib/banchan_web/(live|views|components)/.*(css|sface)$"
+      ]
     ]
   ]
 

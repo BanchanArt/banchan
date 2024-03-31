@@ -12,7 +12,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   alias BanchanWeb.Components.{Button, Icon, ReportModal, RichText, UserHandle}
   alias BanchanWeb.Components.Form.{QuillInput, Submit}
-  alias BanchanWeb.CommissionLive.Components.{AttachmentBox, InvoiceBox}
+  alias BanchanWeb.CommissionLive.Components.{AttachmentBox, CommissionWork, InvoiceBox}
 
   prop actor, :struct, required: true
   prop current_user, :struct, from_context: :current_user
@@ -148,7 +148,7 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
 
   def render(assigns) do
     ~F"""
-    <div class="overflow-hidden border rounded-lg bg-base-100 border-base-content border-opacity-10">
+    <div class="overflow-hidden border rounded-lg bg-base-100 border-base-content border-opacity-10 flex flex-col">
       <div class="flex flex-row items-center justify-between p-2 text-sm bg-opacity-75 border-b border-base-content border-opacity-10 bg-base-100">
         <div class="flex flex-row flex-wrap items-center gap-1 px-2 grow">
           <UserHandle user={@actor} />
@@ -269,6 +269,9 @@ defmodule BanchanWeb.CommissionLive.Components.Comment do
             pending_payment={@event.invoice && @event.invoice.required && !Payments.invoice_paid?(@event.invoice)}
           />
         </div>
+        {#if @event.invoice && @event.invoice.final && @event.attachments && !Enum.empty?(@event.attachments)}
+          <CommissionWork id={@id <> "-work"} attachments={@event.attachments} invoice={@event.invoice} />
+        {/if}
       {/if}
     </div>
     """

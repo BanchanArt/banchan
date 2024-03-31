@@ -10,6 +10,7 @@ defmodule Banchan.Accounts.User do
   alias Banchan.Notifications.{UserNotification, UserNotificationSettings}
   alias Banchan.Studios.Studio
   alias Banchan.Uploads.Upload
+  alias Banchan.Works.Work
 
   @derive {Inspect, except: [:password]}
   schema "users" do
@@ -67,6 +68,8 @@ defmodule Banchan.Accounts.User do
 
     has_many :notifications, UserNotification
 
+    has_many :works, Work, foreign_key: :client_id
+
     many_to_many :studios, Studio, join_through: "users_studios"
 
     timestamps()
@@ -117,7 +120,9 @@ defmodule Banchan.Accounts.User do
       :roles,
       :confirmed_at,
       :totp_secret,
-      :totp_activated
+      :totp_activated,
+      :mature_ok,
+      :muted
     ])
     |> validate_handle(:handle)
     |> validate_required([:email])

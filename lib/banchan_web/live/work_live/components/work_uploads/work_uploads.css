@@ -1,0 +1,35 @@
+.preview-items {
+  @apply grid grid-cols-1 md:grid-cols-6 gap-1 justify-items-stretch w-full auto-rows-fr;
+}
+
+.preview-item {
+  @apply relative bg-base-100 mx-auto my-auto w-full h-full flex flex-col justify-center items-center cursor-pointer;
+
+  &:first-child:nth-last-child(1) {
+    @apply md:col-span-6 w-full;
+  }
+
+  &:nth-child(-n + 2) {
+    @apply md:col-span-3;
+  }
+
+  &:nth-child(2) ~ .preview-item {
+    @apply md:col-span-2;
+  }
+
+  & :deep(.non-media-file) {
+    @apply flex flex-col items-center justify-center h-full;
+  }
+}
+
+.preview-image {
+  @apply mx-auto my-auto;
+}
+
+.upload-name {
+  @apply text-pretty break-words m-2;
+}
+
+.remove-upload {
+  @apply absolute z-20 btn btn-sm btn-circle left-2 top-2;
+}

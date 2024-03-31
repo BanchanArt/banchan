@@ -1,6 +1,9 @@
 defmodule Banchan.Studios.PortfolioImage do
   @moduledoc """
   Schema for portfolio images associated with studios.
+
+  DEPRECATED: This is no longer used, but is kept around for data migration
+  purposes.
   """
   use Ecto.Schema
 

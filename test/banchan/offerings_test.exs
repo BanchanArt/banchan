@@ -37,8 +37,8 @@ defmodule Banchan.OfferingsTest do
       Notifications.mark_all_as_read(client)
       Notifications.mark_all_as_read(artist)
 
-      Offerings.update_offering(artist, offering |> Repo.reload(), %{open: false}, nil)
-      Offerings.update_offering(artist, offering |> Repo.reload(), %{open: true}, nil)
+      Offerings.update_offering(artist, offering |> Repo.reload(), %{open: false})
+      Offerings.update_offering(artist, offering |> Repo.reload(), %{open: true})
 
       Notifications.wait_for_notifications()
 
@@ -248,8 +248,7 @@ defmodule Banchan.OfferingsTest do
                Offerings.update_offering(
                  artist,
                  offering |> Repo.reload(),
-                 %{open: true},
-                 nil
+                 %{open: true}
                )
 
       # Now we can make comms again!
@@ -430,8 +429,7 @@ defmodule Banchan.OfferingsTest do
                Offerings.update_offering(
                  artist,
                  offering |> Repo.reload(),
-                 %{open: true, max_proposals: 4},
-                 nil
+                 %{open: true, max_proposals: 4}
                )
 
       # Now we can start making comms again!

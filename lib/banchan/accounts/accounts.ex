@@ -20,8 +20,7 @@ defmodule Banchan.Accounts do
 
   alias Banchan.Repo
   alias Banchan.Uploads
-  alias Banchan.Uploads.Upload
-  alias Banchan.Workers.{EnableUser, Thumbnailer, UploadDeleter}
+  alias Banchan.Workers.{EnableUser, Thumbnailer}
 
   alias BanchanWeb.UserAuth
 
@@ -825,27 +824,6 @@ defmodule Banchan.Accounts do
       end,
       returning: true
     )
-    |> Ecto.Multi.run(:remove_old_pfp_img, fn _, %{updated_user: updated, user: old} ->
-      if old.pfp_img_id && old.pfp_img_id != updated.pfp_img_id do
-        UploadDeleter.schedule_deletion(%Upload{id: old.pfp_img_id})
-      else
-        {:ok, nil}
-      end
-    end)
-    |> Ecto.Multi.run(:remove_old_pfp_thumb, fn _, %{updated_user: updated, user: old} ->
-      if old.pfp_thumb_id && old.pfp_thumb_id != updated.pfp_thumb_id do
-        UploadDeleter.schedule_deletion(%Upload{id: old.pfp_thumb_id})
-      else
-        {:ok, nil}
-      end
-    end)
-    |> Ecto.Multi.run(:remove_old_header_img, fn _, %{updated_user: updated, user: old} ->
-      if old.header_img_id && old.header_img_id != updated.header_img_id do
-        UploadDeleter.schedule_deletion(%Upload{id: old.header_img_id})
-      else
-        {:ok, nil}
-      end
-    end)
     |> Repo.transaction()
     |> case do
       {:ok, %{updated_user: user}} ->
@@ -1788,38 +1766,17 @@ defmodule Banchan.Accounts do
   def prune_users do
     now = NaiveDateTime.utc_now()
 
-    Repo.transaction(fn ->
-      from(
-        u in User,
-        where: not is_nil(u.deactivated_at),
-        where: u.deactivated_at < datetime_add(^now, -30, "day")
-      )
-      |> Repo.stream()
-      |> Enum.reduce(0, fn user, acc ->
-        # NB(@zkat): We hard match on `{:ok, _}` here because scheduling
-        # deletions should really never fail.
-        if user.pfp_img_id do
-          {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: user.pfp_img_id})
-        end
-
-        if user.pfp_thumb_id do
-          {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: user.pfp_thumb_id})
-        end
-
-        if user.header_img_id do
-          {:ok, _} = UploadDeleter.schedule_deletion(%Upload{id: user.header_img_id})
-        end
-
-        case Repo.delete(user) do
-          {:ok, _} ->
-            acc + 1
-
-          {:error, error} ->
-            Logger.error("Failed to prune user #{user.handle}: #{inspect(error)}")
-            acc
-        end
+    {:ok, {count, _}} =
+      Repo.transaction(fn ->
+        from(
+          u in User,
+          where: not is_nil(u.deactivated_at),
+          where: u.deactivated_at < datetime_add(^now, -30, "day")
+        )
+        |> Repo.delete_all()
       end)
-    end)
+
+    {:ok, count}
   end
 
   @doc """

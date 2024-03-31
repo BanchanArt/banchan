@@ -3,39 +3,28 @@ defmodule Banchan.Workers.UploadDeleter do
   Worker responsible for deleting uploads and cleaning up their associated backing data.
   """
   use Oban.Worker,
-    queue: :upload_cleanup,
+    queue: :pruning,
     unique: [period: 60],
-    tags: ["media", "cleanup", "uploads"]
+    max_attempts: 3,
+    tags: ["media", "pruning", "uploads"]
 
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
 
   @impl Oban.Worker
-  def perform(%_{args: %{"id" => id, "keep_original" => keep_original}}) do
-    upload = Uploads.get_by_id(id)
-
-    if is_nil(upload) do
-      :ok
-    else
-      refreshed_upload =
-        if keep_original || !upload.original_id do
-          {:ok, upload}
-        else
-          with {:ok, _} <- Uploads.delete_upload(Uploads.get_by_id(upload.original_id)) do
-            {:ok, Uploads.get_by_id(id)}
-          end
-        end
-
-      with {:ok, %Upload{} = upload} <- refreshed_upload do
-        Uploads.delete_upload(upload)
-      end
+  def perform(%_{args: %{"id" => id, "bucket" => bucket, "key" => key}}) do
+    if is_nil(Uploads.get_by_id(id)) do
+      Uploads.delete_data!(%Upload{id: id, bucket: bucket, key: key})
     end
+
+    :ok
   end
 
-  def schedule_deletion(%Upload{} = upload, opts \\ []) do
+  def queue_data_deletion(%Upload{} = upload) do
     __MODULE__.new(%{
       "id" => upload.id,
-      "keep_original" => Keyword.get(opts, :keep_original, false)
+      "bucket" => upload.bucket,
+      "key" => upload.key
     })
     |> Oban.insert()
   end

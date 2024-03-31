@@ -131,7 +131,7 @@ defmodule Banchan.Workers.Thumbnailer do
 
       File.mkdir_p!(Path.dirname(tmp_dest))
 
-      Image.thumbnail!(tmp_src, opts["dimensions"] || "512",
+      Image.thumbnail!(tmp_src, opts["dimensions"] || "256",
         resize:
           if opts["upscale"] do
             :both

@@ -1,24 +1,16 @@
-$fa-font-path: "../node_modules/@fortawesome/fontawesome-free/webfonts/";
+@import "../node_modules/tailwindcss/base.css";
+@import "../node_modules/tailwindcss/components.css";
+@import "../node_modules/tailwindcss/utilities.css";
 
-@import "../node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss";
-@import "../node_modules/@fortawesome/fontawesome-free/scss/regular.scss";
-@import "../node_modules/@fortawesome/fontawesome-free/scss/solid.scss";
-@import "../node_modules/@fortawesome/fontawesome-free/scss/brands.scss";
-@import "../node_modules/@fortawesome/fontawesome-free/scss/v4-shims.scss";
+@import "../node_modules/quill/dist/quill.snow.css";
 
-@import "../node_modules/tailwindcss/base";
-@import "../node_modules/tailwindcss/components";
-@import "../node_modules/tailwindcss/utilities";
+@import "../node_modules/@splidejs/splide/dist/css/themes/splide-default.min.css";
 
-@import "../node_modules/quill/dist/quill.snow";
+@import "../node_modules/cropperjs/dist/cropper.css";
 
-@import "../node_modules/@splidejs/splide/src/css/themes/default/index";
+@import "./spotlight.css";
 
-@import "../node_modules/cropperjs/dist/cropper";
-
-@import "./spotlight";
-
-@import "_components";
+@import "_components.css";
 
 :root {
   --rounded-box: 1rem; /* border-radius for cards and other big elements */

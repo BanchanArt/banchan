@@ -1,0 +1,18 @@
+:deep(form) {
+  @apply flex flex-col gap-4;
+
+  :global(&) .flags-form {
+    @apply flex flex-row gap-8;
+  }
+  :global(&) > .edit-buttons {
+    @apply flex flex-row gap-2;
+
+    :global(&) :deep(div) {
+      @apply flex grow;
+    }
+  }
+
+  :global(&) :deep(.btn) {
+    @apply grow;
+  }
+}
