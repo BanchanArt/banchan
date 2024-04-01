@@ -72,6 +72,25 @@ defmodule Banchan.Studios.Notifications do
   end
 
   @doc """
+  Stream of studio followers. Intended for notification use.
+  """
+  def stream_followers(%Studio{} = studio) do
+    from(u in User,
+      as: :user,
+      join: f in StudioFollower,
+      on: f.user_id == u.id and f.studio_id == ^studio.id,
+      left_join: settings in assoc(u, :notification_settings),
+      where: is_nil(u.deactivated_at),
+      select: %User{
+        id: u.id,
+        email: u.email,
+        notification_settings: settings
+      }
+    )
+    |> Repo.stream()
+  end
+
+  @doc """
   Adds a user to the given studio's followers.
   """
   def follow_studio!(%Studio{} = studio, %User{} = user) do

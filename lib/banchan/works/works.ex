@@ -15,7 +15,7 @@ defmodule Banchan.Works do
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
   alias Banchan.Workers.Thumbnailer
-  alias Banchan.Works.{Work, WorkUpload}
+  alias Banchan.Works.{Notifications, Work, WorkUpload}
 
   @public_id_size Work.rand_id() |> byte_size()
 
@@ -86,6 +86,14 @@ defmodule Banchan.Works do
       end)
 
     ret
+    |> case do
+      {:ok, work} ->
+        Notifications.work_created(work, actor)
+        {:ok, work}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 
   ## Getting/Listing
