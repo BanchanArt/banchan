@@ -26,13 +26,14 @@ defmodule BanchanWeb.Components.WorkGallery do
         {/if}
         {#for work <- @works}
           {#if Works.first_previewable_upload(work) || @show_non_media}
-            <li>
+            <li class={mature: work.mature}>
               <LiveRedirect to={~p"/studios/#{work.studio.handle}/works/#{work.public_id}"}>
                 {#if Works.first_previewable_upload(work)}
                   <img
                     src={~p"/studios/#{work.studio.handle}/works/#{work.public_id}/upload/#{Works.first_previewable_upload(work).upload_id}/preview"}
                     alt={work.title}
                   />
+                  <span :if={work.mature} title="Mature">M</span>
                 {#else}
                   <div>
                     <Icon name="file-up" size={32} label={Enum.at(work.uploads, 0).upload.name}>
