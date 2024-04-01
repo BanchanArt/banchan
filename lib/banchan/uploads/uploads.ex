@@ -98,18 +98,17 @@ defmodule Banchan.Uploads do
 
   """
   def get_data!(upload) do
-    local = Path.join([local_upload_dir(), upload.bucket, upload.key])
-
     if upload.pending do
       raise "Tried to get data for a pending upload"
     end
 
-    if File.exists?(local) do
-      File.read!(local)
-    else
+    if use_s3?() do
       ExAws.S3.get_object(upload.bucket, upload.key)
       |> ExAws.request!()
       |> Map.get(:body)
+    else
+      local = Path.join([local_upload_dir(), upload.bucket, upload.key])
+      File.read!(local)
     end
   end
 
@@ -123,17 +122,16 @@ defmodule Banchan.Uploads do
 
   """
   def stream_data!(upload) do
-    local = Path.join([local_upload_dir(), upload.bucket, upload.key])
-
     if upload.pending do
       raise "Tried to get data for a pending upload"
     end
 
-    if File.exists?(local) do
-      File.stream!(local, [], 32_768)
-    else
+    if use_s3?() do
       ExAws.S3.download_file(upload.bucket, upload.key, :memory)
       |> ExAws.stream!()
+    else
+      local = Path.join([local_upload_dir(), upload.bucket, upload.key])
+      File.stream!(local, [], 32_768)
     end
   end
 
@@ -152,11 +150,11 @@ defmodule Banchan.Uploads do
       raise "Tried to get data for a pending upload"
     end
 
-    if File.exists?(local) do
-      File.cp!(local, dest)
-    else
+    if use_s3?() do
       ExAws.S3.download_file(upload.bucket, upload.key, dest)
       |> ExAws.request!()
+    else
+      File.cp!(local, dest)
     end
   end
 
@@ -237,8 +235,7 @@ defmodule Banchan.Uploads do
   Uploads data from `src` to Upload's storage. Does not otherwise modify the Upload.
   """
   def upload_file!(%Upload{} = upload, src) do
-    if Application.fetch_env!(:banchan, :env) == :prod ||
-         !is_nil(Application.get_env(:ex_aws, :region)) do
+    if use_s3?() do
       src
       |> ExAws.S3.Upload.stream_file()
       |> ExAws.S3.upload(upload.bucket, upload.key)
@@ -296,8 +293,7 @@ defmodule Banchan.Uploads do
   end
 
   defp copy_file!(%Upload{} = upload, dest_bucket, dest_key) do
-    if Application.fetch_env!(:banchan, :env) == :prod ||
-         !is_nil(Application.get_env(:ex_aws, :region)) do
+    if use_s3?() do
       ExAws.S3.put_object_copy(dest_bucket, dest_key, upload.bucket, upload.key)
       |> ExAws.request!()
     else
@@ -308,6 +304,11 @@ defmodule Banchan.Uploads do
     end
 
     :ok
+  end
+
+  defp use_s3? do
+    Application.fetch_env!(:banchan, :env) == :prod ||
+      !is_nil(Application.get_env(:ex_aws, :region))
   end
 
   ## Editing
@@ -334,8 +335,7 @@ defmodule Banchan.Uploads do
   Deletes an upload's stored data.
   """
   def delete_data!(%Upload{} = upload) do
-    if Application.fetch_env!(:banchan, :env) == :prod ||
-         !is_nil(Application.get_env(:ex_aws, :region)) do
+    if use_s3?() do
       ExAws.S3.delete_object(upload.bucket, upload.key) |> ExAws.request!()
     else
       local = Path.join([local_upload_dir(), upload.bucket, upload.key])
