@@ -2,13 +2,23 @@ ul {
   @apply gap-0 sm:gap-1 columns-2 sm:columns-3 md:columns-4;
 
   & > li {
-    @apply my-0 sm:mb-1 relative sm:hover:scale-105 sm:hover:z-10 cursor-pointer transition-all w-full;
+    @apply my-0 sm:mb-1 relative sm:hover:scale-105 sm:hover:z-10 cursor-pointer transition-all w-full overflow-hidden;
 
     break-inside: avoid-column;
-  }
 
-  & img {
-    @apply m-auto object-scale-down;
+    & img {
+      @apply m-auto object-scale-down;
+    }
+
+    &.mature {
+      & span {
+        @apply absolute top-2 left-2 flex flex-row items-center px-1 py-px text-xs font-bold bg-opacity-75 border rounded-md bg-error text-error-content border-base-100 border-opacity-10 cursor-pointer;
+      }
+
+      & img {
+        @apply blur-lg;
+      }
+    }
   }
 
   & :deep(bc-icon) {
