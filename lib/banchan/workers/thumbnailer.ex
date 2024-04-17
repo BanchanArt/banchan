@@ -48,8 +48,8 @@ defmodule Banchan.Workers.Thumbnailer do
           Uploads.gen_pending(
             %User{id: upload.uploader_id},
             upload,
-            "image/jpeg",
-            Keyword.get(opts, :name, "thumbnail.jpg")
+            "image/png",
+            Keyword.get(opts, :name, "thumbnail.png")
           )
         )
         |> Ecto.Multi.run(:job, fn _repo, %{pending: pending} ->
@@ -58,9 +58,8 @@ defmodule Banchan.Workers.Thumbnailer do
               src: upload.id,
               dest: pending.id,
               opts: %{
-                target_size: Keyword.get(opts, :target_size),
-                format: Keyword.get(opts, :format, "jpeg"),
-                dimensions: Keyword.get(opts, :dimensions)
+                dimensions: Keyword.get(opts, :dimensions),
+                upscale: Keyword.get(opts, :upscale)
               }
             })
           )
@@ -106,7 +105,7 @@ defmodule Banchan.Workers.Thumbnailer do
       if Uploads.video?(src) do
         duration = FFprobe.duration(tmp_src)
 
-        output_src = Path.join([System.tmp_dir!(), src.key <> ".jpeg"])
+        output_src = Path.join([System.tmp_dir!(), src.key <> ".png"])
 
         command =
           FFmpex.new_command()
@@ -114,7 +113,7 @@ defmodule Banchan.Workers.Thumbnailer do
           |> add_input_file(tmp_src)
           |> add_output_file(output_src)
           |> add_file_option(option_f("image2"))
-          |> add_file_option(option_filter("scale=128:128"))
+          |> add_file_option(option_filter("scale=512:512"))
           |> add_file_option(option_ss(round(duration / 2)))
           |> add_file_option(option_vframes(1))
 
