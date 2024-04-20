@@ -316,29 +316,33 @@ defmodule BanchanWeb.WorkLive.Work do
   end
 
   def handle_info({:updated_uploads, _, uploads}, socket) do
-    uploads_param =
-      uploads
-      |> Enum.with_index()
-      |> Enum.map(fn {{ty, data}, index} ->
-        if ty == :live do
-          %WorkUpload{}
-          |> WorkUpload.changeset(%{"index" => index, "ref" => data.ref, "comment" => ""})
-        else
-          data
-          |> WorkUpload.changeset(%{"index" => index})
-        end
-      end)
+    if is_nil(socket.assigns.changeset) do
+      {:noreply, socket}
+    else
+      uploads_param =
+        uploads
+        |> Enum.with_index()
+        |> Enum.map(fn {{ty, data}, index} ->
+          if ty == :live do
+            %WorkUpload{}
+            |> WorkUpload.changeset(%{"index" => index, "ref" => data.ref, "comment" => ""})
+          else
+            data
+            |> WorkUpload.changeset(%{"index" => index})
+          end
+        end)
 
-    changeset =
-      Work.changeset(
-        socket.assigns.work,
-        socket.assigns.changeset.params |> Map.put("uploads", uploads_param)
-      )
-      |> Map.put(:action, if(is_nil(socket.assigns.work.id), do: :insert, else: :update))
+      changeset =
+        Work.changeset(
+          socket.assigns.work,
+          socket.assigns.changeset.params |> Map.put("uploads", uploads_param)
+        )
+        |> Map.put(:action, if(is_nil(socket.assigns.work.id), do: :insert, else: :update))
 
-    {:noreply,
-     socket
-     |> assign(work_uploads: uploads, changeset: changeset)}
+      {:noreply,
+       socket
+       |> assign(work_uploads: uploads, changeset: changeset)}
+    end
   end
 
   @impl true
