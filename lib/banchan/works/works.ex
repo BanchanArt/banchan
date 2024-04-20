@@ -47,7 +47,7 @@ defmodule Banchan.Works do
             |> Enum.map(fn {%Upload{} = upload, index} ->
               preview_id =
                 if Uploads.media?(upload) do
-                  {:ok, %Upload{id: preview_id}} = Thumbnailer.thumbnail(upload)
+                  {:ok, %Upload{id: preview_id}} = Thumbnailer.thumbnail(upload, dimensions: 1024)
                   preview_id
                 end
 
@@ -487,7 +487,9 @@ defmodule Banchan.Works do
                 |> Enum.map(fn {%Upload{} = upload, index} ->
                   preview_id =
                     if Uploads.media?(upload) do
-                      {:ok, %Upload{id: preview_id}} = Thumbnailer.thumbnail(upload)
+                      {:ok, %Upload{id: preview_id}} =
+                        Thumbnailer.thumbnail(upload, dimensions: 1024)
+
                       preview_id
                     end
 
