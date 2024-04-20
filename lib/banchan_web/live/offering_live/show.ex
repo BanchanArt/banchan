@@ -32,15 +32,21 @@ defmodule BanchanWeb.OfferingLive.Show do
   alias BanchanWeb.StudioLive.Components.OfferingCard
 
   @impl true
+  def mount(_params, _sess, socket) do
+    socket =
+      assign(socket, order_seed: get_connect_params(socket)["order_seed"] || Prime.generate(16))
+
+    {:ok, socket}
+  end
+
+  @impl true
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_params(%{"offering_type" => offering_type} = params, _uri, socket) do
     if socket.assigns[:offering] do
       Notifications.unsubscribe_from_offering_updates(socket.assigns.offering)
     end
 
-    socket =
-      assign_studio_defaults(params, socket, false, true)
-      |> assign(order_seed: get_connect_params(socket)["order_seed"] || Prime.generate(16))
+    socket = assign_studio_defaults(params, socket, false, true)
 
     offering =
       Offerings.get_offering_by_type!(
