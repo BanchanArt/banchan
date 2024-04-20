@@ -81,9 +81,17 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
 
   def handle_event("remove_upload", params, socket) do
     {idx, ""} = params["idx"] |> Integer.parse()
+    to_remove = Enum.at(socket.assigns.work_uploads, idx)
     new_uploads = List.delete_at(socket.assigns.work_uploads, idx)
-
     notify_changed(new_uploads, socket)
+
+    case to_remove do
+      {:live, entry} ->
+        notify_canceled(entry.ref, socket)
+
+      _ ->
+        nil
+    end
 
     {:noreply, socket}
   end
@@ -98,6 +106,14 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
 
   defp notify_changed(_, _) do
     nil
+  end
+
+  defp notify_canceled(_, %{assigns: %{send_updates_to: nil}}) do
+    nil
+  end
+
+  defp notify_canceled(ref, %{assigns: %{id: id, send_updates_to: pid}}) do
+    send(pid, {:canceled_upload, id, ref})
   end
 
   def render(assigns) do

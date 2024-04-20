@@ -311,6 +311,10 @@ defmodule BanchanWeb.WorkLive.Work do
     end
   end
 
+  def handle_info({:canceled_upload, _, ref}, socket) do
+    {:noreply, cancel_upload(socket, :uploads, ref)}
+  end
+
   def handle_info({:updated_uploads, _, uploads}, socket) do
     uploads_param =
       uploads
