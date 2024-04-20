@@ -56,7 +56,7 @@
 }
 
 .work-description {
-  @apply grow;
+  @apply min-h-40;
 }
 
 .info-header,
