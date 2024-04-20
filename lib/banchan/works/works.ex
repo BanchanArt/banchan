@@ -327,8 +327,15 @@ defmodule Banchan.Works do
   defp filter_has_preview(q, opts) do
     if Keyword.get(opts, :has_preview, true) do
       q
-      |> join(:inner, [work: w], upload in assoc(w, :uploads), as: :upload)
-      |> where([upload: u], not is_nil(u.preview_id))
+      |> where(
+        [],
+        subquery(
+          from u in WorkUpload,
+            where: u.work_id == parent_as(:work).id,
+            where: not is_nil(u.preview_id),
+            select: count(u.id)
+        ) > 0
+      )
     else
       q
     end
