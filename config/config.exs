@@ -106,7 +106,7 @@ config :banchan, Oban,
     invoice_purge: 10,
     upload_cleanup: 10,
     backup: 1,
-    migration: 5
+    migration: 1
   ]
 
 config :sentry,
