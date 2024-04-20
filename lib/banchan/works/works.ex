@@ -14,6 +14,7 @@ defmodule Banchan.Works do
   alias Banchan.Studios.Studio
   alias Banchan.Uploads
   alias Banchan.Uploads.Upload
+  alias Banchan.Workers
   alias Banchan.Workers.Thumbnailer
   alias Banchan.Works.{Notifications, Work, WorkUpload}
 
@@ -535,5 +536,16 @@ defmodule Banchan.Works do
   """
   def delete_work(%Work{} = work) do
     Repo.delete(work)
+  end
+
+  ## Data Migration
+
+  @doc """
+  If site was made pre-Works, this needs to be run to bring over all the
+  legacy gallery/portfolio images.
+  """
+  def migrate_from_legacy(%User{} = actor) do
+    :ok = Workers.MigratePortfolioImages.queue_migration(actor)
+    :ok = Workers.MigrateGalleryImages.queue_migration(actor)
   end
 end
