@@ -116,6 +116,12 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
     send(pid, {:canceled_upload, id, ref})
   end
 
+  defp get_upload_entry(entries, wupload) do
+    Enum.find(entries, fn entry ->
+      entry.ref == wupload.ref
+    end)
+  end
+
   def render(assigns) do
     ~F"""
     <bc-work-uploads id={@id} class={@class} :hook="SortableHook">
@@ -130,6 +136,12 @@ defmodule BanchanWeb.WorkLive.Components.WorkUploads do
                 wupload.ref
               end}
             >
+              {#if type == :live}
+                <div
+                  class="upload-progress"
+                  style={"--value:#{get_upload_entry(@live_entries, wupload).progress}"}
+                >{get_upload_entry(@live_entries, wupload).progress}%</div>
+              {/if}
               {#if @editing}
                 <button type="button" class="remove-upload" phx-value-idx={idx} :on-click="remove_upload">✕</button>
               {/if}

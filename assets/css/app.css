@@ -36,7 +36,7 @@
   &.phx-keyup-loading,
   &.phx-keydown-loading,
   &.phx-loading {
-    @apply loading;
+    @apply loading btn-disabled;
   }
 }
 

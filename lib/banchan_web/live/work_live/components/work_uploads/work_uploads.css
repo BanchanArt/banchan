@@ -3,7 +3,7 @@
 }
 
 .preview-item {
-  @apply relative bg-base-100 mx-auto my-auto w-full h-full flex flex-col justify-center items-center cursor-pointer;
+  @apply relative bg-base-100 mx-auto my-auto w-full h-full flex flex-col justify-center items-center cursor-pointer min-h-40;
 
   &:first-child:nth-last-child(1) {
     @apply md:col-span-6 w-full;
@@ -32,4 +32,8 @@
 
 .remove-upload {
   @apply absolute z-20 btn btn-sm btn-circle left-2 top-2;
+}
+
+.upload-progress {
+  @apply absolute z-10 radial-progress text-primary bg-primary-content opacity-80;
 }
